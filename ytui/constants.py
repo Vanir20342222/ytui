@@ -160,6 +160,8 @@ COMMANDS = {
     "/pauseall": "Pause all active downloads",
     "/resumeall": "Resume all paused downloads",
     "/stopall": "Cancel all active & queued downloads",
+    "/import": "Import queue from JSON/text file",
+    "/export": "Export queue to JSON file",
 }
 
 # URL patterns

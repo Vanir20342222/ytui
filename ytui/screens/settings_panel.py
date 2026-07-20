@@ -168,12 +168,18 @@ class SettingsPanel(BasePanel):
                     )
                     yield self._make_select(
                         "Browser Cookies",
-                        "network.browser_cookies",
-                        self.settings.network.browser_cookies,
+                        "network.cookies_from_browser",
+                        self.settings.network.cookies_from_browser or self.settings.network.browser_cookies,
                         [
                             ("(none)", ""), ("Chrome", "chrome"),
                             ("Firefox", "firefox"), ("Edge", "edge"), ("Safari", "safari"),
+                            ("Brave", "brave"), ("Vivaldi", "vivaldi"), ("Opera", "opera"),
                         ],
+                    )
+                    yield self._make_input(
+                        "Cookie File Path",
+                        "network.cookies_file",
+                        self.settings.network.cookies_file or self.settings.network.cookie_file,
                     )
 
             with TabPane("Subtitles", id="tab-subtitles"):
@@ -225,15 +231,15 @@ class SettingsPanel(BasePanel):
                         "Theme",
                         "appearance.theme",
                         self.settings.appearance.theme,
-[
-                                ("Default (Dark)", "default"),
-                                ("Midnight", "midnight"),
-                                ("Light", "light"),
-                                ("Nord", "nord"),
-                                ("Solarized Dark", "solarized-dark"),
-                                ("Dracula", "dracula"),
-                                ("Gruvbox", "gruvbox"),
-                            ],
+                        [
+                            ("Default (Dark)", "default"),
+                            ("Midnight", "midnight"),
+                            ("Light", "light"),
+                            ("Nord", "nord"),
+                            ("Solarized Dark", "solarized-dark"),
+                            ("Dracula", "dracula"),
+                            ("Gruvbox", "gruvbox"),
+                        ],
                     )
                     yield self._make_switch(
                         "Show Thumbnails",
@@ -252,6 +258,34 @@ class SettingsPanel(BasePanel):
                         "SponsorBlock",
                         "advanced.sponsor_block",
                         self.settings.advanced.sponsor_block,
+                    )
+                    yield self._make_select(
+                        "SponsorBlock Action",
+                        "advanced.sponsor_block_action",
+                        self.settings.advanced.sponsor_block_action,
+                        [("Mark as chapters", "mark"), ("Remove / Skip segments", "skip")],
+                    )
+                    yield self._make_input(
+                        "SponsorBlock Categories",
+                        "advanced.sponsor_block_categories",
+                        ",".join(self.settings.advanced.sponsor_block_categories)
+                        if isinstance(self.settings.advanced.sponsor_block_categories, list)
+                        else str(self.settings.advanced.sponsor_block_categories),
+                    )
+                    yield self._make_input(
+                        "SponsorBlock API URL",
+                        "advanced.sponsor_block_api",
+                        self.settings.advanced.sponsor_block_api,
+                    )
+                    yield self._make_switch(
+                        "Enable Post-DL Script",
+                        "advanced.enable_custom_script",
+                        self.settings.advanced.enable_custom_script,
+                    )
+                    yield self._make_input(
+                        "Post-DL Script Path",
+                        "advanced.custom_script",
+                        self.settings.advanced.custom_script,
                     )
                     yield self._make_switch(
                         "Split Chapters",
@@ -329,9 +363,9 @@ class SettingsPanel(BasePanel):
                     logger.warning(f"Unknown setting path: {path}")
                     continue
                 value = widget.value
-                # Subtitle languages are stored as a comma-separated list.
-                if tuple(path) == ("subtitles", "languages"):
-                    value = [lang.strip() for lang in value.split(",") if lang.strip()]
+                # List settings stored as comma-separated input values
+                if tuple(path) in (("subtitles", "languages"), ("advanced", "sponsor_block_categories")):
+                    value = [item.strip() for item in value.split(",") if item.strip()]
                 elif tuple(path) in _int_fields:
                     try:
                         value = int(value) if value.strip() else 0

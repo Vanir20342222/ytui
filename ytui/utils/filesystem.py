@@ -110,3 +110,45 @@ def get_available_space(path: str | Path) -> int:
 def find_executable(name: str) -> str | None:
     """Find an executable on the system PATH."""
     return shutil.which(name)
+
+
+def launch_media_player(path: str | Path) -> tuple[bool, str]:
+    """Launch a media file in mpv, vlc, or system default handler (xdg-open/open/os.startfile).
+
+    Returns (success: bool, info_or_error_message: str).
+    """
+    file_path = Path(path).resolve()
+    if not file_path.exists():
+        return False, f"File not found: {file_path}"
+
+    path_str = str(file_path)
+
+    # Try dedicated media players first
+    for player in ("mpv", "vlc"):
+        executable = find_executable(player)
+        if executable:
+            try:
+                subprocess.Popen([executable, path_str])  # noqa: S603
+                return True, player
+            except Exception as e:
+                pass
+
+    # Fallback to OS default handler
+    system = platform.system()
+    try:
+        if system == "Darwin":
+            subprocess.Popen(["open", path_str])  # noqa: S603
+            return True, "open"
+        elif system == "Windows":
+            os.startfile(path_str)  # type: ignore[attr-defined] # noqa: S606
+            return True, "default player"
+        else:  # Linux / BSD
+            xdg = find_executable("xdg-open")
+            if xdg:
+                subprocess.Popen([xdg, path_str])  # noqa: S603
+                return True, "xdg-open"
+            else:
+                return False, "No media player (mpv, vlc, xdg-open) found on system"
+    except Exception as e:
+        return False, f"Failed to launch player: {e}"
+

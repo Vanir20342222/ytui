@@ -7,6 +7,7 @@ converting, merging, done, paused, error.
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.events import Key
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
@@ -34,6 +35,8 @@ _STATE_ICONS = {
 class QueueItemWidget(Widget):
     """Visual representation of a queue item."""
 
+    can_focus = True
+
     DEFAULT_CSS = """
     QueueItemWidget {
         height: auto;
@@ -44,6 +47,9 @@ class QueueItemWidget(Widget):
     }
     QueueItemWidget:hover {
         background: $surface;
+    }
+    QueueItemWidget:focus {
+        background: $surface-lighten-1;
     }
     QueueItemWidget #qi-row1 {
         height: auto;
@@ -112,6 +118,11 @@ class QueueItemWidget(Widget):
             self.item_id = item_id
 
     class DetailsClicked(Message):
+        def __init__(self, item_id: str) -> None:
+            super().__init__()
+            self.item_id = item_id
+
+    class OpenClicked(Message):
         def __init__(self, item_id: str) -> None:
             super().__init__()
             self.item_id = item_id
@@ -272,3 +283,10 @@ class QueueItemWidget(Widget):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "qi-retry-btn":
             self.post_message(self.RetryClicked(self._item.id))
+
+    def on_key(self, event: Key) -> None:
+        if event.key in ("enter", "o"):
+            self.post_message(self.OpenClicked(self._item.id))
+            event.prevent_default()
+            event.stop()
+

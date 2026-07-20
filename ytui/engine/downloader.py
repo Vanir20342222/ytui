@@ -167,28 +167,62 @@ class DownloadEngine:
 
         # SponsorBlock
         if s.advanced.sponsor_block:
-            opts["postprocessors"].append({
-                "key": "SponsorBlock",
-                "categories": ["sponsor", "intro", "outro", "selfpromo"],
-            })
-            if s.advanced.sponsor_block_action == "skip":
-                opts["sponsorblock_remove"] = ["sponsor", "intro", "outro"]
+            raw_cats = s.advanced.sponsor_block_categories or ["sponsor", "intro", "outro", "selfpromo"]
+            if isinstance(raw_cats, str):
+                cats = [c.strip() for c in raw_cats.split(",") if c.strip()]
+            elif isinstance(raw_cats, (list, tuple, set)):
+                cats = [str(c).strip() for c in raw_cats if str(c).strip()]
+            else:
+                cats = ["sponsor", "intro", "outro", "selfpromo"]
 
-        # Bandwidth limiting
-        if s.network.per_download_bandwidth_limit > 0:
-            opts["ratelimit"] = s.network.per_download_bandwidth_limit * 1024
-        elif s.network.global_bandwidth_limit > 0:
-            # Divide global limit among concurrent downloads
+            action = (s.advanced.sponsor_block_action or "mark").lower()
+
+            sb_pp = {
+                "key": "SponsorBlock",
+                "categories": cats,
+            }
+            if s.advanced.sponsor_block_api:
+                sb_pp["api"] = s.advanced.sponsor_block_api
+                opts["sponsorblock_api"] = s.advanced.sponsor_block_api
+
+            opts["postprocessors"].append(sb_pp)
+
+            if action in ("skip", "remove"):
+                opts["sponsorblock_remove"] = cats
+                opts["postprocessors"].append({
+                    "key": "ModifyChapters",
+                    "remove_sponsor_segments": cats,
+                })
+            else:
+                opts["sponsorblock_mark"] = cats
+
+        # Bandwidth limiting (KB/s -> Bytes/s)
+        per_limit = s.network.per_download_bandwidth_limit
+        global_limit = s.network.global_bandwidth_limit
+        limits = []
+        if per_limit > 0:
+            limits.append(per_limit * 1024)
+        if global_limit > 0:
             concurrent = max(s.network.max_concurrent_downloads, 1)
-            opts["ratelimit"] = (s.network.global_bandwidth_limit * 1024) // concurrent
+            limits.append((global_limit * 1024) // concurrent)
+        if limits:
+            opts["ratelimit"] = int(min(limits))
 
         # Proxy
         if s.network.proxy_url:
             opts["proxy"] = s.network.proxy_url
 
-        # Browser cookies
-        if s.network.browser_cookies:
-            opts["cookiesfrombrowser"] = (s.network.browser_cookies,)
+        # Browser cookies & cookies file
+        cookies_browser = s.network.cookies_from_browser or s.network.browser_cookies
+        if cookies_browser:
+            if isinstance(cookies_browser, tuple):
+                opts["cookiesfrombrowser"] = cookies_browser
+            elif isinstance(cookies_browser, str):
+                opts["cookiesfrombrowser"] = tuple(cookies_browser.split(":"))
+
+        cookies_file = s.network.cookies_file or s.network.cookie_file
+        if cookies_file and os.path.exists(os.path.expanduser(cookies_file)):
+            opts["cookiefile"] = os.path.expanduser(cookies_file)
 
         # Callbacks
         def _progress_wrapper(d: dict) -> None:
@@ -236,9 +270,17 @@ class DownloadEngine:
         if self.settings.network.proxy_url:
             opts["proxy"] = self.settings.network.proxy_url
 
-        # Browser cookies for auth
-        if self.settings.network.browser_cookies:
-            opts["cookiesfrombrowser"] = (self.settings.network.browser_cookies,)
+        # Browser cookies & cookies file for auth
+        cookies_browser = self.settings.network.cookies_from_browser or self.settings.network.browser_cookies
+        if cookies_browser:
+            if isinstance(cookies_browser, tuple):
+                opts["cookiesfrombrowser"] = cookies_browser
+            elif isinstance(cookies_browser, str):
+                opts["cookiesfrombrowser"] = tuple(cookies_browser.split(":"))
+
+        cookies_file = self.settings.network.cookies_file or self.settings.network.cookie_file
+        if cookies_file and os.path.exists(os.path.expanduser(cookies_file)):
+            opts["cookiefile"] = os.path.expanduser(cookies_file)
 
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:
@@ -321,6 +363,20 @@ class DownloadEngine:
             "skip_download": True,
             "noplaylist": True,
         }
+
+        if self.settings.network.proxy_url:
+            opts["proxy"] = self.settings.network.proxy_url
+
+        cookies_browser = self.settings.network.cookies_from_browser or self.settings.network.browser_cookies
+        if cookies_browser:
+            if isinstance(cookies_browser, tuple):
+                opts["cookiesfrombrowser"] = cookies_browser
+            elif isinstance(cookies_browser, str):
+                opts["cookiesfrombrowser"] = tuple(cookies_browser.split(":"))
+
+        cookies_file = self.settings.network.cookies_file or self.settings.network.cookie_file
+        if cookies_file and os.path.exists(os.path.expanduser(cookies_file)):
+            opts["cookiefile"] = os.path.expanduser(cookies_file)
 
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:

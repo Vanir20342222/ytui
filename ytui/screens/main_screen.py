@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 from textual.app import ComposeResult
 from textual.screen import Screen
@@ -165,6 +166,22 @@ class MainScreen(Screen):
                 self.app.notify("Usage: /search <query>", severity="warning")
             return
 
+        # Import / Export commands
+        if cmd == "/import":
+            parts = message.command.split(maxsplit=1)
+            filepath = parts[1].strip() if len(parts) > 1 else ""
+            if not filepath:
+                self.app.notify("Usage: /import <path>", severity="warning")
+            else:
+                asyncio.create_task(self._do_import(filepath))
+            return
+
+        if cmd == "/export":
+            parts = message.command.split(maxsplit=1)
+            filepath = parts[1].strip() if len(parts) > 1 else ""
+            self._do_export(filepath)
+            return
+
         # Unknown command.
         self.app.push_screen(GenericPanel(cmd, desc))
 
@@ -181,6 +198,14 @@ class MainScreen(Screen):
         if self.app.queue_manager:
             self.app.queue_manager.retry_item(message.item_id)
             self.app.notify("Retrying download...")
+
+    def on_queue_item_widget_open_clicked(self, message: QueueItemWidget.OpenClicked) -> None:
+        """Handle opening/launching media for a completed queue item."""
+        if not self.app.queue_manager:
+            return
+        item = self.app.queue_manager._find_item(message.item_id)
+        if item:
+            self._launch_item_media(item)
 
     # ------------------------------------------------------------------ helpers
 
@@ -234,3 +259,41 @@ class MainScreen(Screen):
                 self.app.queue_manager.db.remove_queue_item(item.id)
                 removed += 1
         self.app.notify(f"Cleared {removed} finished item(s)")
+
+    async def _do_import(self, path_str: str) -> None:
+        if not self.app.queue_manager:
+            self.app.notify("Queue manager not ready", severity="warning")
+            return
+        try:
+            count = await self.app.queue_manager.import_queue(path_str)
+            self.app.notify(f"Imported {count} item(s) to queue", severity="information")
+        except Exception as e:
+            self.app.notify(f"Import failed: {e}", severity="error")
+
+    def _do_export(self, path_str: str) -> None:
+        if not self.app.queue_manager:
+            self.app.notify("Queue manager not ready", severity="warning")
+            return
+        try:
+            out_path = self.app.queue_manager.export_queue(path_str if path_str else None)
+            self.app.notify(f"Queue exported to {out_path}", severity="information")
+        except Exception as e:
+            self.app.notify(f"Export failed: {e}", severity="error")
+
+    def _launch_item_media(self, item) -> None:
+        from ytui.utils.filesystem import launch_media_player
+        from ytui.queue.models import ItemState
+
+        if item.state != ItemState.DONE and not (item.output_path and Path(item.output_path).exists()):
+            self.app.notify(f"Item is not completed ({item.state.value})", severity="warning")
+            return
+
+        if not item.output_path:
+            self.app.notify("Output path not recorded for item", severity="error")
+            return
+
+        success, player_or_err = launch_media_player(item.output_path)
+        if success:
+            self.app.notify(f"Launching {player_or_err} for: {item.display_title}")
+        else:
+            self.app.notify(player_or_err, severity="error")

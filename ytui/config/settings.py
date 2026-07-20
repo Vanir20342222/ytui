@@ -66,7 +66,21 @@ class NetworkSettings:
     per_download_bandwidth_limit: int = 0
     proxy_url: str = ""
     proxy_type: str = ""  # http, socks5
-    browser_cookies: str = ""  # Browser name for cookie import
+    browser_cookies: str = ""  # Browser name for cookie import (alias for cookies_from_browser)
+    cookies_from_browser: str = ""  # Browser name for cookie import
+    cookies_file: str = ""  # Path to cookies.txt file
+    cookie_file: str = ""  # Path to cookies.txt file (alias for cookies_file)
+
+    def __post_init__(self):
+        if not self.cookies_from_browser and self.browser_cookies:
+            self.cookies_from_browser = self.browser_cookies
+        elif self.cookies_from_browser and not self.browser_cookies:
+            self.browser_cookies = self.cookies_from_browser
+
+        if not self.cookies_file and self.cookie_file:
+            self.cookies_file = self.cookie_file
+        elif self.cookies_file and not self.cookie_file:
+            self.cookie_file = self.cookies_file
 
 
 @dataclass
@@ -117,7 +131,13 @@ class AdvancedSettings:
     retry_delay_seconds: int = 5
     skip_duplicates: bool = True
     sponsor_block: bool = False
-    sponsor_block_action: str = "mark"  # mark, skip
+    sponsor_block_action: str = "mark"  # mark, skip, remove
+    sponsor_block_categories: list[str] = field(
+        default_factory=lambda: ["sponsor", "intro", "outro", "selfpromo"]
+    )
+    sponsor_block_api: str = ""  # Custom SponsorBlock API URL
+    custom_script: str = ""  # Path to post-download executable script
+    enable_custom_script: bool = False
     chapter_split: bool = False
     first_run_done: bool = False
 

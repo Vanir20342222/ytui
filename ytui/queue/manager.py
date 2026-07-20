@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 from pathlib import Path
@@ -459,6 +460,9 @@ class QueueManager:
                     )
                     self.db.add_history(result, item.url)
 
+                    # Execute post-download custom script if configured
+                    self._run_post_download_script(item, output)
+
                     # Update playlist group
                     if item.parent_group_id and item.parent_group_id in self.playlist_groups:
                         self.playlist_groups[item.parent_group_id].completed_items += 1
@@ -622,3 +626,128 @@ class QueueManager:
             if item.id == item_id:
                 return item
         return None
+
+    def export_queue(self, path: str | Path | None = None) -> Path:
+        """Export current queue items to a JSON file.
+
+        If path is not specified, exports to default file path in settings data path.
+        Returns the absolute Path of the exported file.
+        """
+        if not path:
+            export_path = Settings.data_path() / "queue_export.json"
+        else:
+            export_path = Path(path).resolve()
+
+        export_path.parent.mkdir(parents=True, exist_ok=True)
+
+        data = []
+        for item in self.items:
+            data.append({
+                "id": item.id,
+                "url": item.url,
+                "state": item.state.value,
+                "download_mode": item.download_mode,
+                "quality_override": item.quality_override,
+                "priority": item.priority,
+                "created_at": item.created_at,
+                "output_path": item.output_path,
+                "error_message": item.error_message,
+                "info": {
+                    "video_id": item.info.video_id,
+                    "title": item.info.title,
+                    "uploader": item.info.uploader,
+                    "duration": item.info.duration,
+                    "resolution": item.info.resolution,
+                },
+            })
+
+        with open(export_path, "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "count": len(data), "items": data}, f, indent=2)
+
+        return export_path
+
+    async def import_queue(self, path: str | Path) -> int:
+        """Import queue items from a JSON export file or text file containing URLs.
+
+        Returns the number of imported items.
+        """
+        import_path = Path(path).resolve()
+        if not import_path.exists():
+            raise FileNotFoundError(f"File not found: {import_path}")
+
+        count = 0
+        with open(import_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Try parsing as JSON first
+        try:
+            data = json.loads(content)
+            items_data = []
+            if isinstance(data, dict) and "items" in data:
+                items_data = data["items"]
+            elif isinstance(data, list):
+                items_data = data
+
+            for entry in items_data:
+                if isinstance(entry, dict) and "url" in entry:
+                    url = entry["url"]
+                    mode = entry.get("download_mode")
+                    if url:
+                        res = await self.add_url(url, mode=mode)
+                        count += len(res) if isinstance(res, list) else 1
+                elif isinstance(entry, str) and entry.strip():
+                    res = await self.add_url(entry.strip())
+                    count += len(res) if isinstance(res, list) else 1
+            return count
+        except json.JSONDecodeError:
+            pass
+
+        # Fallback to line-by-line text format
+        lines = content.splitlines()
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                res = await self.add_url(line)
+                count += len(res) if isinstance(res, list) else 1
+
+        return count
+
+
+    def _run_post_download_script(self, item: QueueItem, output_path: str) -> None:
+        """Execute post-download custom script if enabled in settings."""
+        if not self.settings.advanced.enable_custom_script or not self.settings.advanced.custom_script:
+            return
+
+        script_path = Path(self.settings.advanced.custom_script).expanduser()
+        if not script_path.exists():
+            logger.warning(f"Post-download script not found: {script_path}")
+            return
+
+        def _execute():
+            import os
+            import subprocess
+            try:
+                env = os.environ.copy()
+                env.update({
+                    "YTUI_OUTPUT_PATH": output_path,
+                    "YTUI_ITEM_ID": item.id,
+                    "YTUI_VIDEO_ID": getattr(item.info, "video_id", ""),
+                    "YTUI_TITLE": getattr(item.info, "title", ""),
+                    "YTUI_URL": item.url,
+                    "YTUI_DOWNLOAD_MODE": item.download_mode,
+                })
+                cmd = [str(script_path), output_path]
+                res = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=120)
+                if res.returncode != 0:
+                    logger.warning(f"Post-download script returned exit code {res.returncode}: {res.stderr}")
+                else:
+                    logger.info(f"Post-download script executed successfully for {output_path}")
+            except Exception as exc:
+                logger.error(f"Failed to execute post-download script {script_path}: {exc}")
+
+        try:
+            loop = asyncio.get_running_loop()
+            loop.run_in_executor(None, _execute)
+        except RuntimeError:
+            _execute()
+
