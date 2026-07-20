@@ -569,16 +569,28 @@ class QueueManager:
         return cancelled
 
     def retry_item(self, item_id: str) -> None:
-        """Retry a failed download."""
+        """Retry a failed download or metadata resolution."""
         item = self._find_item(item_id)
         if item and item.state == ItemState.ERROR:
-            item.state = ItemState.QUEUED
             item.error_message = ""
             item.retry_count += 1
             # Clear stale cancellation so the retry isn't immediately re-cancelled.
             self.engine._cancelled_items.discard(item.id)
-            self.db.save_queue_item(item)
-            self._dispatch_callback(self.on_item_updated, item)
+
+            # If metadata resolution previously failed, re-run metadata extraction.
+            if not item.info or not item.info.video_id or item.info.title == item.url:
+                item.state = ItemState.PENDING
+                self.db.save_queue_item(item)
+                self._dispatch_callback(self.on_item_updated, item)
+                try:
+                    loop = asyncio.get_running_loop()
+                    asyncio.create_task(self._resolve_metadata(item))
+                except RuntimeError:
+                    pass
+            else:
+                item.state = ItemState.QUEUED
+                self.db.save_queue_item(item)
+                self._dispatch_callback(self.on_item_updated, item)
 
     def move_item(self, item_id: str, direction: int) -> None:
         """Move an item up or down in the queue."""
