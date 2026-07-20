@@ -85,7 +85,7 @@ if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
 fi
 
 echo -e "\n${GREEN}=====================================================${NC}"
-echo -e "${GREEN}  ytui successfully installed! 🎉${NC}"
+echo -e "${GREEN}  ytui successfully installed!${NC}"
 echo -e "${GREEN}=====================================================${NC}"
 echo -e "Run the app anywhere with just one command:\n"
 echo -e "    ${CYAN}ytui${NC}\n"

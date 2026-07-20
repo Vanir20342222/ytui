@@ -18,31 +18,31 @@
 
 ---
 
-## ✨ Features
+## [ Features ]
 
-- ⚡ **High-Performance Concurrent Downloads**: Parallel downloading engine with dynamic concurrency throttling.
-- 🎨 **Modern Centered TUI**: Built with Textual, featuring responsive dark/midnight themes, status badges, and interactive command bars.
-- 🔒 **Official Proton VPN Integration**: Dedicated `/vpn` manager panel with server selection (DE, US, Fastest Free Server), real-time connection status monitoring, and account verification.
-- 🎵 **FFmpeg Conversion Engine**: Built-in support for converting local or downloaded files into high-quality MP3, AAC, FLAC, M4A, or MP4 formats.
-- 🔍 **Interactive YouTube Search**: Type plain text search queries or use `/search <query>` to resolve video metadata before queuing.
-- 📋 **Clipboard Autopolling**: Automatically detect copied YouTube URLs and submit them to your queue.
-- 💾 **SQLite Persistence & Recovery**: Interrupted or pending downloads automatically recover and resume across app restarts.
-- ⌨️ **Vim-Inspired Shortcuts & Slash Commands**: Intuitive `/` command prompt with real-time autocompletion suggestions.
+- **High-Performance Concurrent Downloads**: Parallel downloading engine with dynamic concurrency throttling.
+- **Modern Centered TUI**: Built with Textual, featuring responsive dark/midnight themes, status badges, and interactive command bars.
+- **Official Proton VPN Integration**: Dedicated `/vpn` manager panel with server selection (DE, US, Fastest Free Server), real-time connection status monitoring, and account verification.
+- **FFmpeg Conversion Engine**: Built-in support for converting local or downloaded files into high-quality MP3, AAC, FLAC, M4A, or MP4 formats.
+- **Interactive YouTube Search**: Type plain text search queries or use `/search <query>` to resolve video metadata before queuing.
+- **Clipboard Autopolling**: Automatically detect copied YouTube URLs and submit them to your queue.
+- **SQLite Persistence & Recovery**: Interrupted or pending downloads automatically recover and resume across app restarts.
+- **Vim-Inspired Shortcuts & Slash Commands**: Intuitive `/` command prompt with real-time autocompletion suggestions.
 
 ---
 
-## 🚀 Quick Start (1-Command Installation)
+## [ Quick Start ] (1-Command Installation)
 
 You can install `ytui` with a single shell command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/vanir/ytui/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Vanir20342222/ytui/main/install.sh | bash
 ```
 
 Alternatively, clone the repository locally and run the installer:
 
 ```bash
-git clone https://github.com/vanir/ytui.git
+git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ```
@@ -55,7 +55,7 @@ ytui
 
 ---
 
-## 📦 Manual Installation
+## [ Manual Installation ]
 
 ### Requirements
 
@@ -75,13 +75,13 @@ ytui
 ### Via `pipx` (Recommended)
 
 ```bash
-pipx install git+https://github.com/vanir/ytui.git
+pipx install git+https://github.com/Vanir20342222/ytui.git
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/vanir/ytui.git
+git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 python3 -m venv venv
 source venv/bin/activate
@@ -91,7 +91,7 @@ ytui
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## [ Keyboard Shortcuts ]
 
 | Shortcut | Action |
 | :--- | :--- |
@@ -106,7 +106,7 @@ ytui
 
 ---
 
-## 💬 Slash Commands Reference
+## [ Slash Commands Reference ]
 
 Type `/` in the command input bar to access interactive commands with autocompletion:
 
@@ -130,16 +130,16 @@ Type `/` in the command input bar to access interactive commands with autocomple
 
 ---
 
-## 🛡️ Proton VPN Integration
+## [ Proton VPN Integration ]
 
 `ytui` includes a dedicated Proton VPN manager. Simply type `/vpn` or press `p` to open the panel:
 
 - **Server Selection**: Choose between *Fastest Free Server (Auto)*, *Germany (DE)*, *United States (US)*, or custom locations.
 - **Smart Free Plan Fallback**: Automatically falls back to available free servers if a country selection requires a Plus subscription.
-- **Account Verification**: Displays live login status (`✓ Logged In (user@proton.me)`).
+- **Account Verification**: Displays live login status (`Logged In (user@proton.me)`).
 
 ---
 
-## 📄 License
+## [ License ]
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
