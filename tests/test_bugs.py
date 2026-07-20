@@ -348,3 +348,19 @@ def test_downloader_sponsorblock_cookies_ratelimit(tmp_path):
     assert "sponsorblock_remove" not in opts_mark
 
 
+def test_string_bandwidth_limit_no_crash():
+    """Verify that storing bandwidth limits as strings does not crash comparisons."""
+    s = Settings()
+    s.network.per_download_bandwidth_limit = "500"  # str type input
+    s.network.global_bandwidth_limit = "2000"  # str type input
+    s.network.max_concurrent_downloads = "3"  # str type input
+
+    engine = DownloadEngine(s)
+    item = QueueItem(id="str_test_1", url="https://youtube.com/watch?v=12345678901")
+
+    # _build_opts should safely convert str limits to int without TypeError
+    opts = engine._build_opts(item)
+    assert opts["ratelimit"] == 500 * 1024
+
+
+

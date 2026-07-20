@@ -390,7 +390,10 @@ class SettingsPanel(BasePanel):
             if getattr(app, "queue_manager", None) is not None:
                 app.queue_manager.settings = self.settings
                 # Re-size the concurrency semaphore if max_concurrent changed.
-                new_max = max(self.settings.network.max_concurrent_downloads, 1)
+                try:
+                    new_max = max(int(self.settings.network.max_concurrent_downloads or 1), 1)
+                except (ValueError, TypeError):
+                    new_max = 1
                 if hasattr(app.queue_manager._semaphore, "resize"):
                     app.queue_manager._semaphore.resize(new_max)
                 else:

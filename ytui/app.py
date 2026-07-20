@@ -313,10 +313,19 @@ class YtuiApp(App):
             # Bandwidth cap indicator
             if self.settings:
                 net = self.settings.network
-                if net.per_download_bandwidth_limit > 0:
-                    header.bandwidth_cap = f"{net.per_download_bandwidth_limit} KB/s"
-                elif net.global_bandwidth_limit > 0:
-                    header.bandwidth_cap = f"{net.global_bandwidth_limit} KB/s"
+                try:
+                    per_limit = int(net.per_download_bandwidth_limit or 0)
+                except (ValueError, TypeError):
+                    per_limit = 0
+                try:
+                    global_limit = int(net.global_bandwidth_limit or 0)
+                except (ValueError, TypeError):
+                    global_limit = 0
+
+                if per_limit > 0:
+                    header.bandwidth_cap = f"{per_limit} KB/s"
+                elif global_limit > 0:
+                    header.bandwidth_cap = f"{global_limit} KB/s"
                 else:
                     header.bandwidth_cap = ""
 

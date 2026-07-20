@@ -72,6 +72,21 @@ class NetworkSettings:
     cookie_file: str = ""  # Path to cookies.txt file (alias for cookies_file)
 
     def __post_init__(self):
+        try:
+            self.max_concurrent_downloads = int(self.max_concurrent_downloads or 3)
+        except (ValueError, TypeError):
+            self.max_concurrent_downloads = 3
+
+        try:
+            self.global_bandwidth_limit = int(self.global_bandwidth_limit or 0)
+        except (ValueError, TypeError):
+            self.global_bandwidth_limit = 0
+
+        try:
+            self.per_download_bandwidth_limit = int(self.per_download_bandwidth_limit or 0)
+        except (ValueError, TypeError):
+            self.per_download_bandwidth_limit = 0
+
         if not self.cookies_from_browser and self.browser_cookies:
             self.cookies_from_browser = self.browser_cookies
         elif self.cookies_from_browser and not self.browser_cookies:

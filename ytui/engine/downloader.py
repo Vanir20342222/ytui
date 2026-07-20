@@ -197,13 +197,24 @@ class DownloadEngine:
                 opts["sponsorblock_mark"] = cats
 
         # Bandwidth limiting (KB/s -> Bytes/s)
-        per_limit = s.network.per_download_bandwidth_limit
-        global_limit = s.network.global_bandwidth_limit
+        try:
+            per_limit = int(s.network.per_download_bandwidth_limit or 0)
+        except (ValueError, TypeError):
+            per_limit = 0
+
+        try:
+            global_limit = int(s.network.global_bandwidth_limit or 0)
+        except (ValueError, TypeError):
+            global_limit = 0
+
         limits = []
         if per_limit > 0:
             limits.append(per_limit * 1024)
         if global_limit > 0:
-            concurrent = max(s.network.max_concurrent_downloads, 1)
+            try:
+                concurrent = max(int(s.network.max_concurrent_downloads or 1), 1)
+            except (ValueError, TypeError):
+                concurrent = 1
             limits.append((global_limit * 1024) // concurrent)
         if limits:
             opts["ratelimit"] = int(min(limits))
