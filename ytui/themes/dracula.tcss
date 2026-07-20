@@ -1,0 +1,116 @@
+/* ytui Dracula Theme — Lila-Nebel, Neon-Akzente */
+
+$bg: #282a36;
+$surface: #44475a;
+$panel-bg: #343746;
+$border: #44475a;
+$border-focus: #bd93f9;
+$text: #f8f8f2;
+$text-muted: #bac5de;
+$text-dim: #6272a4;
+$accent: #bd93f9;
+$accent-dim: #7c3aed;
+$success: #50fa7b;
+$warning: #f1fa8c;
+$error: #ff5555;
+$info: #8be9fd;
+
+Screen {
+    background: $bg;
+    color: $text;
+}
+
+#header-bar {
+    dock: top;
+    height: 1;
+    background: $surface;
+    color: $text-muted;
+    padding: 0 1;
+}
+
+#queue-panel {
+    height: 1fr;
+    padding: 0 1;
+    background: $bg;
+}
+
+#queue-scroll {
+    scrollbar-color: $border;
+    scrollbar-color-hover: $accent-dim;
+}
+
+.queue-item {
+    height: auto;
+    min-height: 2;
+    padding: 0 1;
+}
+
+.queue-item--downloading {
+    background: $surface;
+    border-left: tall $accent;
+}
+
+.queue-item--done #qi-icon {
+    color: $success;
+}
+
+.queue-item--error {
+    border-left: tall $error;
+}
+
+#main-input {
+    border: round $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+#main-input:focus {
+    border: round $border-focus;
+}
+
+#cmd-suggestions {
+    background: $surface;
+    border: round $border;
+}
+
+.cmd-row--selected {
+    background: $accent;
+    color: $bg;
+}
+
+#panel-dialog {
+    background: $surface;
+    border: round $border;
+}
+
+Button {
+    background: $panel-bg;
+    border: tall $border;
+}
+
+Button:hover {
+    background: $accent;
+    border: tall $accent;
+    color: $bg;
+}
+
+Button.-primary {
+    background: $accent;
+    border: tall $accent;
+    color: $bg;
+}
+
+Input {
+    border: tall $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+Input:focus {
+    border: tall $border-focus;
+}
+
+ProgressBar > .bar--bar {
+    color: $accent;
+    background: $border;
+}

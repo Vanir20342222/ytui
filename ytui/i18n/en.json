@@ -1,0 +1,109 @@
+{
+  "app": {
+    "title": "ytui",
+    "subtitle": "Terminal YouTube & Audio Downloader",
+    "version": "v0.1.0"
+  },
+  "input": {
+    "placeholder": "Paste a link, type a search, or / for commands",
+    "searching": "Searching...",
+    "fetching": "Fetching metadata..."
+  },
+  "queue": {
+    "title": "QUEUE",
+    "empty": "Queue is empty — paste a YouTube link to get started",
+    "items": "items",
+    "paused": "paused",
+    "done": "done",
+    "queued": "queued",
+    "downloading": "downloading",
+    "converting": "converting",
+    "merging": "merging video+audio",
+    "error": "error"
+  },
+  "header": {
+    "vpn": "VPN",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "bandwidth": "BW",
+    "unlimited": "unlimited"
+  },
+  "quality": {
+    "title": "Quality & Format",
+    "video_quality": "Video Quality Ceiling",
+    "audio_quality": "Audio Quality Ceiling",
+    "video_container": "Video Container",
+    "audio_container": "Audio Container",
+    "prefer_hfr": "Prefer High Frame Rate",
+    "download_mode": "Default Download Mode"
+  },
+  "directory": {
+    "title": "Target Directory",
+    "video_dir": "Video Download Directory",
+    "audio_dir": "Audio Download Directory",
+    "recent": "Recent Locations",
+    "open_after": "Open in File Manager After Download"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "performance": "Performance",
+    "network": "Network",
+    "appearance": "Appearance",
+    "advanced": "Advanced"
+  },
+  "vpn": {
+    "title": "VPN",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "status": "Status",
+    "server": "Server",
+    "kill_switch": "Kill Switch",
+    "kill_switch_desc": "Pause downloads if VPN drops"
+  },
+  "search": {
+    "title": "YouTube Search",
+    "placeholder": "Search YouTube...",
+    "no_results": "No results found",
+    "queue_selected": "Queue Selected"
+  },
+  "history": {
+    "title": "Download History",
+    "search": "Search history...",
+    "redownload": "Re-download",
+    "open_folder": "Open Folder",
+    "no_history": "No download history yet"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "apply": "Apply",
+    "reset": "Reset",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "retry": "Retry",
+    "details": "Details",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "first_run": {
+    "title": "Welcome to ytui",
+    "notice": "This tool uses yt-dlp to download publicly available content from YouTube. It does not circumvent DRM (Widevine-protected, rental, or premium-only streams are not supported). Please only download content you have the rights to use offline.",
+    "accept": "I Understand"
+  },
+  "errors": {
+    "invalid_url": "Invalid URL — only HTTP/HTTPS URLs are supported",
+    "private_video": "This video is private",
+    "age_restricted": "Age-restricted — needs browser cookies for login",
+    "unavailable": "Video is unavailable",
+    "copyright": "Blocked due to copyright claim",
+    "removed": "Video has been removed",
+    "no_ffmpeg": "ffmpeg not found — required for format conversion",
+    "no_ytdlp": "yt-dlp not installed"
+  }
+}

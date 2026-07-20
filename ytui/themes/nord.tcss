@@ -1,0 +1,116 @@
+/* ytui Nord Theme — Arctic, Blauer Nord-Kontrast */
+
+$bg: #2e3440;
+$surface: #3b4252;
+$panel-bg: #434c5e;
+$border: #4c566a;
+$border-focus: #88c0d0;
+$text: #eceff4;
+$text-muted: #d8dee9;
+$text-dim: #81a1c1;
+$accent: #88c0d0;
+$accent-dim: #5e81ac;
+$success: #a3be8c;
+$warning: #ebcb8b;
+$error: #bf616a;
+$info: #81a1c1;
+
+Screen {
+    background: $bg;
+    color: $text;
+}
+
+#header-bar {
+    dock: top;
+    height: 1;
+    background: $surface;
+    color: $text-muted;
+    padding: 0 1;
+}
+
+#queue-panel {
+    height: 1fr;
+    padding: 0 1;
+    background: $bg;
+}
+
+#queue-scroll {
+    scrollbar-color: $border;
+    scrollbar-color-hover: $accent-dim;
+}
+
+.queue-item {
+    height: auto;
+    min-height: 2;
+    padding: 0 1;
+}
+
+.queue-item--downloading {
+    background: $surface;
+    border-left: tall $accent;
+}
+
+.queue-item--done #qi-icon {
+    color: $success;
+}
+
+.queue-item--error {
+    border-left: tall $error;
+}
+
+#main-input {
+    border: round $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+#main-input:focus {
+    border: round $border-focus;
+}
+
+#cmd-suggestions {
+    background: $surface;
+    border: round $border;
+}
+
+.cmd-row--selected {
+    background: $accent-dim;
+    color: $bg;
+}
+
+#panel-dialog {
+    background: $surface;
+    border: round $border;
+}
+
+Button {
+    background: $panel-bg;
+    border: tall $border;
+}
+
+Button:hover {
+    background: $accent-dim;
+    border: tall $accent;
+    color: $bg;
+}
+
+Button.-primary {
+    background: $accent;
+    border: tall $accent;
+    color: $bg;
+}
+
+Input {
+    border: tall $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+Input:focus {
+    border: tall $border-focus;
+}
+
+ProgressBar > .bar--bar {
+    color: $accent;
+    background: $border;
+}

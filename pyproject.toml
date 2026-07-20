@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ytui"
+version = "0.1.0"
+description = "Terminal YouTube & Audio Downloader"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "ytui contributors" },
+]
+keywords = ["youtube", "download", "tui", "terminal", "yt-dlp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+    "textual>=3.0.0",
+    "yt-dlp>=2024.0.0",
+    "platformdirs>=4.0",
+    "keyring>=25.0",
+    "rich>=13.0",
+    "pyperclip>=1.8",
+    "mutagen>=1.47",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "mypy>=1.8",
+    "ruff>=0.2",
+]
+
+[project.scripts]
+ytui = "ytui.app:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

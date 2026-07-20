@@ -1,0 +1,116 @@
+/* ytui Solarized Dark Theme — Warm, gedämpft, kontrastarm */
+
+$bg: #002b36;
+$surface: #073642;
+$panel-bg: #0a4252;
+$border: #586e75;
+$border-focus: #268bd2;
+$text: #93a1a1;
+$text-muted: #657b83;
+$text-dim: #586e75;
+$accent: #268bd2;
+$accent-dim: #1a6a9f;
+$success: #859900;
+$warning: #b58900;
+$error: #dc322f;
+$info: #2aa198;
+
+Screen {
+    background: $bg;
+    color: $text;
+}
+
+#header-bar {
+    dock: top;
+    height: 1;
+    background: $surface;
+    color: $text-muted;
+    padding: 0 1;
+}
+
+#queue-panel {
+    height: 1fr;
+    padding: 0 1;
+    background: $bg;
+}
+
+#queue-scroll {
+    scrollbar-color: $border;
+    scrollbar-color-hover: $accent-dim;
+}
+
+.queue-item {
+    height: auto;
+    min-height: 2;
+    padding: 0 1;
+}
+
+.queue-item--downloading {
+    background: $surface;
+    border-left: tall $accent;
+}
+
+.queue-item--done #qi-icon {
+    color: $success;
+}
+
+.queue-item--error {
+    border-left: tall $error;
+}
+
+#main-input {
+    border: round $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+#main-input:focus {
+    border: round $border-focus;
+}
+
+#cmd-suggestions {
+    background: $surface;
+    border: round $border;
+}
+
+.cmd-row--selected {
+    background: $accent;
+    color: $bg;
+}
+
+#panel-dialog {
+    background: $surface;
+    border: round $border;
+}
+
+Button {
+    background: $panel-bg;
+    border: tall $border;
+}
+
+Button:hover {
+    background: $accent;
+    border: tall $accent;
+    color: $bg;
+}
+
+Button.-primary {
+    background: $accent;
+    border: tall $accent;
+    color: $bg;
+}
+
+Input {
+    border: tall $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+Input:focus {
+    border: tall $border-focus;
+}
+
+ProgressBar > .bar--bar {
+    color: $accent;
+    background: $border;
+}

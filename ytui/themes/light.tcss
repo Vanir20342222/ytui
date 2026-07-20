@@ -1,0 +1,246 @@
+/* ytui Light Theme — Clean light appearance */
+
+$bg: #fafbfc;
+$surface: #ffffff;
+$panel-bg: #f3f4f6;
+$border: #d1d5db;
+$border-focus: #4f46e5;
+$text: #1f2937;
+$text-muted: #6b7280;
+$text-dim: #9ca3af;
+$accent: #4f46e5;
+$accent-dim: #6366f1;
+$success: #059669;
+$warning: #d97706;
+$error: #dc2626;
+$info: #2563eb;
+
+Screen {
+    background: $bg;
+    color: $text;
+}
+
+#header-bar {
+    dock: top;
+    height: 1;
+    background: $surface;
+    color: $text-muted;
+    padding: 0 1;
+}
+
+#queue-panel {
+    height: 1fr;
+    padding: 0 1;
+    background: $bg;
+}
+
+#queue-scroll {
+    scrollbar-color: $border;
+    scrollbar-color-hover: $accent-dim;
+}
+
+.queue-item {
+    height: auto;
+    min-height: 2;
+    padding: 0 1;
+}
+
+.queue-item--downloading {
+    background: $panel-bg;
+    border-left: tall $accent;
+}
+
+.queue-item--done #qi-icon {
+    color: $success;
+}
+
+.queue-item--error {
+    border-left: tall $error;
+}
+
+#main-input {
+    border: round $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+#main-input:focus {
+    border: round $border-focus;
+}
+
+#cmd-suggestions {
+    background: $surface;
+    border: round $border;
+}
+
+.cmd-row--selected {
+    background: $accent;
+    color: white;
+}
+
+#panel-dialog {
+    background: $surface;
+    border: round $border;
+}
+
+Button {
+    background: $panel-bg;
+    color: $text;
+    border: tall $border;
+}
+
+Button:hover {
+    background: $accent;
+    color: white;
+    border: tall $accent;
+}
+
+Button.-primary {
+    background: $accent;
+    color: white;
+}
+
+Input {
+    border: tall $border;
+    background: $panel-bg;
+    color: $text;
+}
+
+Input:focus {
+    border: tall $border-focus;
+}
+
+ProgressBar > .bar--bar {
+    color: $accent;
+    background: $border;
+}
+
+/* ─── Select (light) ─── */
+
+Select {
+    color: $text;
+}
+
+SelectCurrent {
+    border: tall $border;
+    background: $panel-bg;
+    color: $text;
+    padding: 0 1;
+}
+
+SelectCurrent:focus {
+    border: tall $border-focus;
+}
+
+SelectCurrent.-has-value #label {
+    color: $text;
+}
+
+SelectCurrent #label {
+    color: $text-muted;
+}
+
+OptionList {
+    background: $surface;
+    border: round $border;
+}
+
+OptionList > .option-list--option-highlighted {
+    background: $accent;
+    color: white;
+}
+
+/* ─── Switch (light) ─── */
+
+Switch > .switch--slider {
+    background: $border;
+    color: $text-muted;
+}
+
+Switch.-on > .switch--slider {
+    background: $accent 60%;
+    color: $success;
+}
+
+Switch:focus > .switch--slider {
+    background: $accent;
+}
+
+/* ─── Tabs (light) ─── */
+
+Tabs {
+    background: $surface;
+}
+
+Tab {
+    color: $text-muted;
+    padding: 0 1;
+    background: transparent;
+}
+
+Tab.-active {
+    color: $text;
+    background: $surface;
+    text-style: bold;
+}
+
+Tab:hover {
+    color: $text;
+    background: $accent-dim;
+}
+
+Tab.-active:hover {
+    color: $text;
+    background: $accent-dim;
+    text-style: bold;
+}
+
+Tab:focus {
+    color: $text;
+    background: $accent-dim;
+}
+
+Underline {
+    color: $accent;
+}
+
+/* ─── Boot checks (light) ─── */
+
+BootScreen {
+    background: $bg;
+}
+
+#boot-logo {
+    color: $accent;
+}
+
+.check--ok {
+    color: $success;
+}
+
+.check--fail {
+    color: $error;
+}
+
+.check--pending {
+    color: $text-dim;
+}
+
+/* ─── Toast (light) ─── */
+
+Toast {
+    background: $surface;
+    border: round $border;
+    color: $text;
+}
+
+/* ─── Queue item states (light) ─── */
+
+.queue-item--paused {
+    border-left: tall $warning;
+    color: $text-muted;
+}
+
+.queue-item--pending {
+    color: $text-dim;
+}
