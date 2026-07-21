@@ -369,7 +369,10 @@ class QueueManager:
         except Exception as e:
             if item.state == ItemState.PENDING:
                 item.state = ItemState.ERROR
-                item.error_message = str(e)[:150]
+                msg = str(e)
+                if msg.startswith("RuntimeError:"):
+                    msg = msg[len("RuntimeError:"):].strip()
+                item.error_message = msg[:150] or "Failed to fetch metadata"
                 logger.error(f"Metadata resolution failed for {item.url}: {e}")
 
         self.db.save_queue_item(item)

@@ -363,4 +363,13 @@ def test_string_bandwidth_limit_no_crash():
     assert opts["ratelimit"] == 500 * 1024
 
 
+def test_unavailable_video_error_formatting():
+    """Verify that extract_info raises a clean RuntimeError with 'Video unavailable' for unavailable videos."""
+    s = Settings()
+    engine = DownloadEngine(s)
+    with pytest.raises(RuntimeError) as exc_info:
+        engine.extract_info("https://www.youtube.com/watch?v=vq0kkVl1hUE")
+    assert "Video unavailable" in str(exc_info.value)
+
+
 

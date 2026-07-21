@@ -272,7 +272,7 @@ class DownloadEngine:
             "quiet": True,
             "no_warnings": True,
             "skip_download": True,
-            "ignoreerrors": True,
+            "ignoreerrors": False,
         }
         if flat:
             opts["extract_flat"] = True
@@ -299,7 +299,22 @@ class DownloadEngine:
                 if info:
                     return ydl.sanitize_info(info)
         except Exception as e:
-            logger.error(f"Metadata extraction failed for {url}: {e}")
+            import re
+            msg = str(e)
+            if "unavailable" in msg.lower():
+                err_text = "Video unavailable"
+            elif "private" in msg.lower():
+                err_text = "This video is private"
+            elif "age" in msg.lower() and "restrict" in msg.lower():
+                err_text = "Age-restricted — browser cookies required"
+            elif "copyright" in msg.lower():
+                err_text = "Blocked due to copyright claim"
+            elif "removed" in msg.lower():
+                err_text = "Video has been removed"
+            else:
+                err_text = re.sub(r"^ERROR:\s*(\[\w+\]\s*[\w-]+:\s*)?", "", msg).strip()[:150]
+            logger.error(f"Metadata extraction failed for {url}: {err_text}")
+            raise RuntimeError(err_text or "Failed to fetch metadata")
         return None
 
     def download(
