@@ -11,7 +11,7 @@ from textual.events import Key
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, Static
+from textual.widgets import Static
 
 from ytui.constants import ICON_SETS
 from ytui.queue.models import ItemState, QueueItem as QueueItemModel
@@ -278,10 +278,6 @@ class QueueItemWidget(Widget):
 
     def on_click(self, event) -> None:
         if event.widget.id == "qi-retry-btn":
-            self.post_message(self.RetryClicked(self._item.id))
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "qi-retry-btn":
             self.post_message(self.RetryClicked(self._item.id))
 
     def on_key(self, event: Key) -> None:

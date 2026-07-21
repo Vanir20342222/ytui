@@ -77,7 +77,8 @@ class QueueDatabase:
                 total_items INTEGER DEFAULT 0,
                 completed_items INTEGER DEFAULT 0,
                 item_ids_json TEXT DEFAULT '[]',
-                selected_indices_json TEXT DEFAULT NULL
+                selected_indices_json TEXT DEFAULT NULL,
+                expanded INTEGER DEFAULT 0
             );
 
             CREATE TABLE IF NOT EXISTS download_history (
@@ -105,6 +106,10 @@ class QueueDatabase:
             CREATE INDEX IF NOT EXISTS idx_history_video_id ON download_history(video_id);
             CREATE INDEX IF NOT EXISTS idx_history_completed ON download_history(completed_at);
         """)
+        try:
+            conn.execute("ALTER TABLE playlist_groups ADD COLUMN expanded INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Already exists
         conn.commit()
 
     def save_queue_item(self, item: QueueItem) -> None:
@@ -287,13 +292,14 @@ class QueueDatabase:
         conn.execute("""
             INSERT OR REPLACE INTO playlist_groups
             (id, playlist_id, title, url, total_items, completed_items,
-             item_ids_json, selected_indices_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             item_ids_json, selected_indices_json, expanded)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             group.id, group.playlist_id, group.title, group.url,
             group.total_items, group.completed_items,
             json.dumps(group.item_ids),
             json.dumps(group.selected_indices) if group.selected_indices is not None else None,
+            1 if group.expanded else 0,
         ))
         conn.commit()
 
@@ -306,6 +312,7 @@ class QueueDatabase:
                 selected_indices = row["selected_indices_json"]
                 if selected_indices is not None:
                     selected_indices = json.loads(selected_indices)
+                expanded_val = bool(row["expanded"]) if "expanded" in row.keys() else False
                 group = PlaylistGroup(
                     id=row["id"],
                     playlist_id=row["playlist_id"],
@@ -315,6 +322,7 @@ class QueueDatabase:
                     completed_items=row["completed_items"] or 0,
                     item_ids=json.loads(row["item_ids_json"] or "[]"),
                     selected_indices=selected_indices,
+                    expanded=expanded_val,
                 )
                 groups.append(group)
             except Exception as e:

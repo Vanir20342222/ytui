@@ -254,9 +254,7 @@ class MainScreen(Screen):
         removed = 0
         for item in list(self.app.queue_manager.items):
             if item.state.value in ("done", "error", "cancelled"):
-                self.app.queue_manager.on_item_removed(item)
-                self.app.queue_manager.items.remove(item)
-                self.app.queue_manager.db.remove_queue_item(item.id)
+                self.app.queue_manager.remove_item(item.id)
                 removed += 1
         self.app.notify(f"Cleared {removed} finished item(s)")
 

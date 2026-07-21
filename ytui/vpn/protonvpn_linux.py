@@ -34,6 +34,7 @@ class ProtonVPNLinux(VPNProvider):
             return 1, "", "protonvpn CLI not found"
         
         cmd = [self._cli_path, *args]
+        proc = None
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,

@@ -44,7 +44,8 @@ def get_ffmpeg_version() -> str | None:
         if len(parts) >= 3:
             return parts[2]
         return first_line
-    except Exception:
+    except Exception as e:
+        logger.error(f"Failed to check ffmpeg version: {e}")
         return None
 
 

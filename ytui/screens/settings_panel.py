@@ -72,7 +72,24 @@ class SettingsPanel(BasePanel):
         for sel_id, value in self._pending_select_values.items():
             try:
                 sel = self.query_one(f"#{sel_id}", Select)
-                if value in {v for _, v in sel._options}:
+                sel_options = getattr(sel, "options", None)
+                if sel_options is None:
+                    sel_options = getattr(sel, "_options", [])
+                
+                valid_values = set()
+                for opt in sel_options:
+                    if isinstance(opt, tuple):
+                        valid_values.add(opt[1])
+                    elif hasattr(opt, "value"):
+                        valid_values.add(opt.value)
+                    elif hasattr(opt, "_value"):
+                        valid_values.add(opt._value)
+                    elif isinstance(opt, list) and len(opt) > 1:
+                        valid_values.add(opt[1])
+                    else:
+                        valid_values.add(opt)
+
+                if value in valid_values:
                     sel.value = value
             except Exception:
                 pass

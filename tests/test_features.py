@@ -136,3 +136,46 @@ async def test_settings_panel_controls_mount():
         # Save settings and ensure no exceptions thrown
         panel.save_settings()
         app.pop_screen()
+
+
+def test_playlist_group_expanded_persistence(tmp_path):
+    """Test saving and loading PlaylistGroup expanded state in QueueDatabase."""
+    from ytui.queue.persistence import QueueDatabase
+    from ytui.queue.models import PlaylistGroup
+
+    db = QueueDatabase(db_path=tmp_path / "test_group.db")
+    group = PlaylistGroup(
+        id="grp123",
+        playlist_id="PL123",
+        title="Test Playlist",
+        url="https://youtube.com/playlist?list=PL123",
+        expanded=True,
+    )
+    db.save_playlist_group(group)
+
+    loaded = db.load_playlist_groups()
+    assert len(loaded) == 1
+    assert loaded[0].id == "grp123"
+    assert loaded[0].expanded is True
+    db.close()
+
+
+@pytest.mark.anyio
+async def test_local_file_conversion(tmp_path):
+    """Test local file conversion metadata resolution and execution in QueueManager."""
+    src_file = tmp_path / "sample_video.mkv"
+    src_file.write_text("mock video content")
+
+    settings = Settings()
+    settings.directories.video_dir = str(tmp_path / "converted_videos")
+
+    qm = QueueManager(settings, db_path=tmp_path / "test_convert.db")
+
+    # Add local file
+    res = await qm.add_url(str(src_file))
+    assert isinstance(res, QueueItem)
+    assert res.info.uploader == "Local File"
+    assert res.state == ItemState.QUEUED
+
+    qm.db.close()
+

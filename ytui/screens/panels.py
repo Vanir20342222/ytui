@@ -468,9 +468,7 @@ class QueuePanelModal(BasePanel):
             removed = 0
             for item in list(qm.items):
                 if item.state.value in ("done", "error", "cancelled"):
-                    qm.on_item_removed(item)
-                    qm.items.remove(item)
-                    qm.db.remove_queue_item(item.id)
+                    qm.remove_item(item.id)
                     removed += 1
             self.app.notify(f"Cleared {removed} finished item(s)")
         if bid.startswith("qm-"):
@@ -485,7 +483,7 @@ class VpnPanel(BasePanel):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(title="Proton VPN Manager", subtitle="Official Proton VPN Linux CLI", **kwargs)
-        self._status = ProtonVpnManager.get_status() if not asyncio.get_event_loop().is_running() else VpnStatus(connected=False, details="Checking...")
+        self._status = VpnStatus(connected=False, details="Checking...")
         self._logged_in = False
         self._account = "Checking..."
 
@@ -710,8 +708,11 @@ class SearchPanel(BasePanel):
             from textual.widgets import SelectionList
             slist = self.query_one("#search-selection-list", SelectionList)
             added = 0
-            for opt in slist._options:
-                url = opt.value
+            slist_options = getattr(slist, "options", None)
+            if slist_options is None:
+                slist_options = getattr(slist, "_options", [])
+            for opt in slist_options:
+                url = getattr(opt, "value", opt)
                 if url:
                     self.app.queue_manager_add(url)
                     added += 1

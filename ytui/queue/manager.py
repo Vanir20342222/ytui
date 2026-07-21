@@ -313,6 +313,26 @@ class QueueManager:
 
     async def _resolve_metadata(self, item: QueueItem) -> None:
         """Resolve full metadata for a queue item with timeout protection."""
+        from pathlib import Path
+        try:
+            p = Path(item.url)
+            is_local = p.exists() and p.is_file()
+        except Exception:
+            is_local = False
+
+        if is_local:
+            from ytui.queue.models import VideoInfo
+            item.info = VideoInfo(
+                video_id=f"local_{item.id}",
+                title=p.name,
+                duration=0,
+                uploader="Local File",
+            )
+            item.state = ItemState.QUEUED
+            self.db.save_queue_item(item)
+            self._dispatch_callback(self.on_item_updated, item)
+            return
+
         try:
             loop = asyncio.get_running_loop()
             info = await asyncio.wait_for(
@@ -423,19 +443,66 @@ class QueueManager:
                 self.db.save_queue_item(item)
                 self._dispatch_callback(self.on_item_updated, item)
 
-                future = asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: self.engine.download(item, on_progress, on_postprocessor),
-                )
+                from pathlib import Path
                 try:
-                    output = await asyncio.shield(future)
-                except asyncio.CancelledError:
-                    self.engine.cancel(item.id)
+                    p = Path(item.url)
+                    is_local = p.exists() and p.is_file()
+                except Exception:
+                    is_local = False
+
+                if is_local:
+                    from ytui.engine.ffmpeg import convert_file
+                    if item.download_mode == "audio":
+                        out_dir = Path(self.settings.directories.audio_dir or (Path.home() / "Music" / "ytui"))
+                        ext = self.settings.quality.audio_container or "mp3"
+                        bitrate_map = {"best": "320k", "lossless": "320k", "320": "320k", "256": "256k", "192": "192k", "128": "128k"}
+                        bitrate = bitrate_map.get(self.settings.quality.audio_quality, "320k")
+                        codec_map = {"mp3": "libmp3lame", "m4a": "aac", "flac": "flac", "wav": "pcm_s16le", "opus": "libopus"}
+                        codec = codec_map.get(ext, "libmp3lame")
+                        extra_args = ["-vn"]
+                    else:
+                        out_dir = Path(self.settings.directories.video_dir or (Path.home() / "Videos" / "ytui"))
+                        ext = self.settings.quality.video_container or "mp4"
+                        codec = "libx264"
+                        bitrate = None
+                        extra_args = []
+
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    out_path = out_dir / f"{p.stem}_converted.{ext}"
+
+                    item.state = ItemState.CONVERTING
+                    self._dispatch_callback(self.on_item_updated, item)
+
+                    future = asyncio.get_event_loop().run_in_executor(
+                        None,
+                        lambda: convert_file(
+                            input_path=str(p),
+                            output_path=str(out_path),
+                            codec=codec,
+                            bitrate=bitrate,
+                            extra_args=extra_args,
+                        ),
+                    )
                     try:
-                        await future
-                    except Exception:
-                        pass
-                    raise
+                        success = await asyncio.shield(future)
+                        output = str(out_path) if success else None
+                    except Exception as e:
+                        logger.error(f"Local conversion error: {e}")
+                        output = None
+                else:
+                    future = asyncio.get_event_loop().run_in_executor(
+                        None,
+                        lambda: self.engine.download(item, on_progress, on_postprocessor),
+                    )
+                    try:
+                        output = await asyncio.shield(future)
+                    except asyncio.CancelledError:
+                        self.engine.cancel(item.id)
+                        try:
+                            await future
+                        except Exception:
+                            pass
+                        raise
 
                 if output:
                     item.state = ItemState.DONE
@@ -486,6 +553,10 @@ class QueueManager:
                         item.state = ItemState.ERROR
                         self._dispatch_callback(self.on_item_error, item)
 
+        except asyncio.CancelledError:
+            if item.state != ItemState.CANCELLED:
+                item.state = ItemState.PAUSED
+            raise
         except Exception as exc:
             import yt_dlp
             if isinstance(exc, yt_dlp.utils.DownloadCancelled):
@@ -497,10 +568,6 @@ class QueueManager:
                 item.state = ItemState.ERROR
                 item.error_message = str(exc)[:150]
                 self._dispatch_callback(self.on_item_error, item)
-        except asyncio.CancelledError:
-            if item.state != ItemState.CANCELLED:
-                item.state = ItemState.PAUSED
-            raise
         finally:
             if item.state != ItemState.CANCELLED and any(i.id == item.id for i in self.items):
                 self.db.save_queue_item(item)
