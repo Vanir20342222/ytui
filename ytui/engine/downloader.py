@@ -348,6 +348,18 @@ class DownloadEngine:
                     return ydl.prepare_filename(info)
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
+            if "Requested format is not available" in error_msg:
+                logger.warning(f"Requested format not available for {url}, attempting fallback format 'best'...")
+                opts["format"] = "bestvideo+bestaudio/best" if item.download_mode == "video" else "bestaudio/best"
+                try:
+                    with yt_dlp.YoutubeDL(opts) as ydl:
+                        self._active_ydls[item.id] = ydl
+                        info = ydl.extract_info(url, download=True)
+                        if info:
+                            return ydl.prepare_filename(info)
+                except Exception as fallback_err:
+                    error_msg = str(fallback_err)
+
             # Provide user-friendly error messages
             if "Private video" in error_msg:
                 item.error_message = "This video is private"
@@ -360,7 +372,9 @@ class DownloadEngine:
             elif "removed" in error_msg.lower():
                 item.error_message = "Video has been removed"
             else:
-                item.error_message = error_msg[:150]
+                import re
+                clean = re.sub(r"^ERROR:\s*(\[\w+\]\s*[\w-]+:\s*)?", "", error_msg).strip()
+                item.error_message = clean[:150] or error_msg[:150]
             logger.error(f"Download failed for {url}: {error_msg}")
         except yt_dlp.utils.DownloadCancelled:
             # User-initiated cancel via engine.cancel() — propagate so the caller
