@@ -227,14 +227,21 @@ class MainScreen(Screen):
         self.app.notify(f"Switched to {label} mode")
 
     async def _do_update(self) -> None:
-        """Check for and apply a yt-dlp update."""
-        from ytui.engine.updater import check_for_update, update_ytdlp
-        self.app.notify("Checking for yt-dlp updates...")
-        current, latest, available = await check_for_update()
-        if not available:
-            self.app.notify(f"yt-dlp is up to date ({current})")
+        """Check for and prompt for ytui / yt-dlp updates."""
+        from ytui.engine.updater import check_ytui_update, check_for_update, update_ytdlp
+        self.app.notify("Checking GitHub for ytui updates...")
+        current, latest, available, notes = await check_ytui_update()
+        if available:
+            from ytui.screens.panels import UpdateModal
+            self.app.push_screen(UpdateModal(current, latest, notes))
             return
-        self.app.notify(f"Updating yt-dlp {current} -> {latest}...")
+
+        self.app.notify(f"ytui v{current} is up to date! Checking yt-dlp engine...")
+        c_ytdlp, l_ytdlp, av_ytdlp = await check_for_update()
+        if not av_ytdlp:
+            self.app.notify(f"Everything is up to date (ytui v{current}, yt-dlp {c_ytdlp})")
+            return
+        self.app.notify(f"Updating yt-dlp engine {c_ytdlp} -> {l_ytdlp}...")
         success, msg = await asyncio.to_thread(update_ytdlp)
         self.app.notify(msg, severity="information" if success else "error")
 

@@ -94,6 +94,18 @@ class YtuiApp(App):
         if self.settings and self.settings.advanced.clipboard_watcher:
             self.start_clipboard_watcher()
 
+        # Check GitHub for app updates in the background
+        asyncio.create_task(self._check_for_app_updates())
+
+    async def _check_for_app_updates(self) -> None:
+        """Check GitHub repository in the background for new ytui releases."""
+        await asyncio.sleep(2.0)
+        from ytui.engine.updater import check_ytui_update
+        current, latest, available, notes = await check_ytui_update()
+        if available:
+            from ytui.screens.panels import UpdateModal
+            self.push_screen(UpdateModal(current, latest, notes))
+
     def start_clipboard_watcher(self) -> None:
         """Start watching the clipboard for YouTube URLs (if not already)."""
         if self._clipboard_watcher is not None:

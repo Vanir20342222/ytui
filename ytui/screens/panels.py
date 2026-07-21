@@ -720,3 +720,68 @@ class SearchPanel(BasePanel):
                 self.app.notify(f"Added all {added} video(s) to download queue", severity="information")
             self.dismiss()
         # For close-btn (and any other button): let the MRO reach BasePanel.
+
+
+class UpdateModal(BasePanel):
+    """Popup modal when a new ytui version is available on GitHub."""
+
+    def __init__(self, current_ver: str, new_ver: str, notes: str = "", **kwargs) -> None:
+        super().__init__(
+            title="Update Available!",
+            subtitle="A new version of ytui is ready on GitHub",
+            **kwargs,
+        )
+        self.current_ver = current_ver
+        self.new_ver = new_ver
+        self.notes = notes
+
+    def compose_content(self) -> ComposeResult:
+        yield Static(
+            f"[bold green]New Version Available:[/bold green] {self.new_ver}\n"
+            f"[dim]Currently installed:[/dim] v{self.current_ver}\n",
+            classes="panel-label",
+        )
+        if self.notes:
+            yield Static(f"[italic]{self.notes}[/italic]\n", classes="panel-subtitle")
+        yield Static("Would you like to download and install the update now?", classes="panel-label")
+        yield Button("Update Now", id="btn-update-now", variant="primary")
+        yield Button("Remind Me Later", id="btn-update-later", variant="default")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        bid = event.button.id or ""
+        if bid == "btn-update-later":
+            self.dismiss()
+            event.prevent_default()
+        elif bid == "btn-update-now":
+            btn = self.query_one("#btn-update-now", Button)
+            btn.disabled = True
+            btn.label = "Downloading update..."
+            self._run_update()
+            event.prevent_default()
+
+    def _run_update(self) -> None:
+        from ytui.engine.updater import update_ytui
+
+        async def _do():
+            loop = asyncio.get_running_loop()
+            success, msg = await loop.run_in_executor(None, update_ytui)
+            if success:
+                self.app.notify("ytui updated! Please restart the app.", severity="information", timeout=10)
+                try:
+                    labels = self.query(".panel-label")
+                    if labels:
+                        labels[0].update(f"[bold green]Success![/bold green]\n\n{msg}")
+                    btn = self.query_one("#btn-update-now", Button)
+                    btn.label = "Update Complete"
+                except Exception:
+                    pass
+            else:
+                self.app.notify(f"Update failed: {msg}", severity="error")
+                try:
+                    btn = self.query_one("#btn-update-now", Button)
+                    btn.disabled = False
+                    btn.label = "Retry Update"
+                except Exception:
+                    pass
+
+        asyncio.create_task(_do())

@@ -180,3 +180,21 @@ async def test_local_file_conversion(tmp_path):
 
     qm.db.close()
 
+
+@pytest.mark.anyio
+async def test_update_modal_mount():
+    """Verify UpdateModal screen mounts and handles button actions."""
+    from ytui.app import YtuiApp
+    from ytui.screens.panels import UpdateModal
+
+    app = YtuiApp()
+    async with app.run_test(size=(100, 40)) as pilot:
+        modal = UpdateModal("0.1.0", "0.2.0", "Release notes for v0.2.0")
+        app.push_screen(modal)
+        await pilot.pause()
+
+        # Dismiss modal via Remind Me Later button
+        await pilot.click("#btn-update-later")
+        await pilot.pause()
+        assert modal not in app.screen_stack
+
