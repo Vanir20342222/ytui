@@ -173,6 +173,7 @@ async def test_local_file_conversion(tmp_path):
 
     # Add local file
     res = await qm.add_url(str(src_file))
+    await asyncio.sleep(0.1)
     assert isinstance(res, QueueItem)
     assert res.info.uploader == "Local File"
     assert res.state == ItemState.QUEUED
