@@ -355,11 +355,11 @@ class DownloadEngine:
             error_msg = str(e)
             if "Requested format is not available" in error_msg:
                 logger.warning(f"Requested format not available for {url}, attempting fallback formats...")
-                fallbacks = [
-                    "bestvideo+bestaudio/best" if item.download_mode == "video" else "bestaudio/best",
-                    "bv*+ba/b",
-                    "b/best",
-                ]
+                if item.download_mode == "audio":
+                    fallbacks = ["bestaudio/best", "ba/b", "best", "b"]
+                else:
+                    fallbacks = ["bestvideo+bestaudio/best", "bv*+ba/b", "bestvideo/best", "b/best"]
+
                 for fb_fmt in fallbacks:
                     opts["format"] = fb_fmt
                     try:
@@ -367,11 +367,10 @@ class DownloadEngine:
                             self._active_ydls[item.id] = ydl
                             info = ydl.extract_info(url, download=True)
                             if info:
+                                item.error_message = ""
                                 return ydl.prepare_filename(info)
                     except Exception as fallback_err:
                         error_msg = str(fallback_err)
-                    else:
-                        break
 
             # Provide user-friendly error messages
             if "Private video" in error_msg:
