@@ -93,6 +93,7 @@ class DownloadEngine:
             "retries": s.advanced.auto_retry_count,
             "fragment_retries": 10,
             "socket_timeout": 30,
+            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
         }
 
         # Video container
@@ -273,6 +274,7 @@ class DownloadEngine:
             "no_warnings": True,
             "skip_download": True,
             "ignoreerrors": False,
+            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
         }
         if flat:
             opts["extract_flat"] = True
@@ -313,7 +315,7 @@ class DownloadEngine:
             elif "removed" in msg.lower():
                 err_text = "Video has been removed"
             elif "reload" in msg.lower():
-                err_text = "YouTube blocked playlist request — video URL normalized"
+                err_text = "YouTube anti-bot block — try browser cookies"
             else:
                 err_text = re.sub(r"^ERROR:\s*(\[\w+\]\s*[\w-]+:\s*)?", "", msg).strip()[:150]
             logger.error(f"Metadata extraction failed for {url}: {err_text}")

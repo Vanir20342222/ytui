@@ -32,12 +32,13 @@ def is_youtube_url(url: str) -> bool:
 
 
 def normalize_url(url: str) -> str:
-    """Normalize a URL by adding https:// if missing and stripping radio mix params from video URLs."""
+    """Normalize a URL by adding https:// if missing, converting music.youtube to www.youtube, and stripping radio mix params."""
     url = url.strip()
     if url.startswith("ytsearch") or url.startswith("/") or url.startswith("."):
         return url
     if not url.startswith(("http://", "https://")):
         url = f"https://{url}"
+    url = url.replace("music.youtube.com/", "www.youtube.com/")
     if extract_video_id(url) and (is_radio_mix(url) or not is_playlist_url(url)):
         url = strip_playlist_param(url)
     return url

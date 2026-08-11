@@ -205,8 +205,9 @@ def test_radio_mix_url_normalization():
 
     raw_url = "https://music.youtube.com/watch?v=ic8j13piAhQ&list=RDCLAK5uy_nmS3YoxSwVVQk9lEQJ0UX4ZCjXsW_psU8"
     normalized = normalize_url(raw_url)
-    assert normalized == "https://music.youtube.com/watch?v=ic8j13piAhQ"
+    assert normalized == "https://www.youtube.com/watch?v=ic8j13piAhQ"
     assert "list=" not in normalized
+    assert "music.youtube" not in normalized
 
 
 def test_remove_item_and_clear_queue(tmp_path):
