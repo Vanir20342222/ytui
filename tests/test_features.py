@@ -198,3 +198,13 @@ async def test_update_modal_mount():
         await pilot.pause()
         assert modal not in app.screen_stack
 
+
+def test_radio_mix_url_normalization():
+    """Verify that URLs with video IDs and radio mix list parameters are normalized cleanly."""
+    from ytui.utils.urls import normalize_url
+
+    raw_url = "https://music.youtube.com/watch?v=ic8j13piAhQ&list=RDCLAK5uy_nmS3YoxSwVVQk9lEQJ0UX4ZCjXsW_psU8"
+    normalized = normalize_url(raw_url)
+    assert normalized == "https://music.youtube.com/watch?v=ic8j13piAhQ"
+    assert "list=" not in normalized
+

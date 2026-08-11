@@ -298,6 +298,7 @@ class DownloadEngine:
                 info = ydl.extract_info(url, download=False)
                 if info:
                     return ydl.sanitize_info(info)
+                raise RuntimeError("Video unavailable")
         except Exception as e:
             import re
             msg = str(e)
@@ -311,11 +312,13 @@ class DownloadEngine:
                 err_text = "Blocked due to copyright claim"
             elif "removed" in msg.lower():
                 err_text = "Video has been removed"
+            elif "reload" in msg.lower():
+                err_text = "YouTube blocked playlist request — video URL normalized"
             else:
                 err_text = re.sub(r"^ERROR:\s*(\[\w+\]\s*[\w-]+:\s*)?", "", msg).strip()[:150]
             logger.error(f"Metadata extraction failed for {url}: {err_text}")
-            raise RuntimeError(err_text or "Failed to fetch metadata")
-        return None
+            raise RuntimeError(err_text or "Video unavailable")
+        raise RuntimeError("Video unavailable")
 
     def download(
         self,
@@ -349,16 +352,24 @@ class DownloadEngine:
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
             if "Requested format is not available" in error_msg:
-                logger.warning(f"Requested format not available for {url}, attempting fallback format 'best'...")
-                opts["format"] = "bestvideo+bestaudio/best" if item.download_mode == "video" else "bestaudio/best"
-                try:
-                    with yt_dlp.YoutubeDL(opts) as ydl:
-                        self._active_ydls[item.id] = ydl
-                        info = ydl.extract_info(url, download=True)
-                        if info:
-                            return ydl.prepare_filename(info)
-                except Exception as fallback_err:
-                    error_msg = str(fallback_err)
+                logger.warning(f"Requested format not available for {url}, attempting fallback formats...")
+                fallbacks = [
+                    "bestvideo+bestaudio/best" if item.download_mode == "video" else "bestaudio/best",
+                    "bv*+ba/b",
+                    "b/best",
+                ]
+                for fb_fmt in fallbacks:
+                    opts["format"] = fb_fmt
+                    try:
+                        with yt_dlp.YoutubeDL(opts) as ydl:
+                            self._active_ydls[item.id] = ydl
+                            info = ydl.extract_info(url, download=True)
+                            if info:
+                                return ydl.prepare_filename(info)
+                    except Exception as fallback_err:
+                        error_msg = str(fallback_err)
+                    else:
+                        break
 
             # Provide user-friendly error messages
             if "Private video" in error_msg:
