@@ -208,3 +208,27 @@ def test_radio_mix_url_normalization():
     assert normalized == "https://music.youtube.com/watch?v=ic8j13piAhQ"
     assert "list=" not in normalized
 
+
+def test_remove_item_and_clear_queue(tmp_path):
+    """Verify QueueManager.remove_item removes items from memory and database."""
+    from ytui.config.settings import Settings
+    from ytui.queue.manager import QueueManager
+    from ytui.queue.models import QueueItem, ItemState
+
+    s = Settings()
+    qm = QueueManager(s, db_path=tmp_path / "test_remove.db")
+    item1 = QueueItem(id="r1", url="https://youtube.com/watch?v=11111111111", state=ItemState.DONE)
+    item2 = QueueItem(id="r2", url="https://youtube.com/watch?v=22222222222", state=ItemState.ERROR)
+    qm.items.extend([item1, item2])
+    qm.db.save_queue_item(item1)
+    qm.db.save_queue_item(item2)
+
+    qm.remove_item("r1")
+    assert len(qm.items) == 1
+    assert qm._find_item("r1") is None
+    assert qm.db.get_queue_item("r1") is None
+
+    qm.remove_item("r2")
+    assert len(qm.items) == 0
+    qm.db.close()
+

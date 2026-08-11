@@ -602,20 +602,27 @@ class QueueManager:
             self.db.save_queue_item(item)
             self._dispatch_callback(self.on_item_updated, item)
 
-    def cancel_item(self, item_id: str) -> None:
-        """Cancel and remove a download."""
+    def remove_item(self, item_id: str) -> None:
+        """Remove an item from the queue and database."""
         item = self._find_item(item_id)
         if item:
             task = self._workers.get(item_id)
             if task:
                 task.cancel()
             self.engine.cancel(item_id)
-            item.state = ItemState.CANCELLED
-            self.items.remove(item)
+            if item in self.items:
+                self.items.remove(item)
             self.db.remove_queue_item(item_id)
             self._workers.pop(item_id, None)
             # Notify the UI to remove the row (not just update it).
             self._dispatch_callback(self.on_item_removed, item)
+
+    def cancel_item(self, item_id: str) -> None:
+        """Cancel and remove a download."""
+        item = self._find_item(item_id)
+        if item:
+            item.state = ItemState.CANCELLED
+        self.remove_item(item_id)
 
     def pause_all(self) -> None:
         """Pause all active and queued/pending downloads."""
