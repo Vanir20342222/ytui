@@ -217,8 +217,8 @@ def test_remove_item_and_clear_queue(tmp_path):
 
     s = Settings()
     qm = QueueManager(s, db_path=tmp_path / "test_remove.db")
-    item1 = QueueItem(id="r1", url="https://youtube.com/watch?v=11111111111", state=ItemState.DONE)
-    item2 = QueueItem(id="r2", url="https://youtube.com/watch?v=22222222222", state=ItemState.ERROR)
+    item1 = QueueItem(id="r1", url="https://youtube.com/watch?v=11111111111", state=ItemState.QUEUED)
+    item2 = QueueItem(id="r2", url="https://youtube.com/watch?v=22222222222", state=ItemState.QUEUED)
     qm.items.extend([item1, item2])
     qm.db.save_queue_item(item1)
     qm.db.save_queue_item(item2)
@@ -226,7 +226,8 @@ def test_remove_item_and_clear_queue(tmp_path):
     qm.remove_item("r1")
     assert len(qm.items) == 1
     assert qm._find_item("r1") is None
-    assert qm.db.get_queue_item("r1") is None
+    loaded_ids = [i.id for i in qm.db.load_queue_items()]
+    assert "r1" not in loaded_ids
 
     qm.remove_item("r2")
     assert len(qm.items) == 0
