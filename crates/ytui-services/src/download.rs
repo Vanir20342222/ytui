@@ -118,14 +118,9 @@ pub fn args(job: &Job, config: &Config, cookie_file: Option<&Path>) -> Result<Ve
             o.sponsorblock.join(","),
         ]);
     }
-    let rate = match (o.bandwidth_kib, o.global_bandwidth_kib) {
-        (0, 0) => 0,
-        (a, 0) => a,
-        (0, g) => g / config.concurrency as u64,
-        (a, g) => a.min(g / config.concurrency as u64),
-    };
+    let rate = schedule::rate_bytes(o.bandwidth_kib, o.global_bandwidth_kib, config.concurrency);
     if rate > 0 {
-        args.extend(["--limit-rate".into(), format!("{rate}K")]);
+        args.extend(["--limit-rate".into(), rate.to_string()]);
     }
     if o.skip_duplicates {
         args.push("--no-overwrites".into());
@@ -351,16 +346,13 @@ async fn execute_inner(
         let error = match result {
             Ok(result) if result.success => {
                 let mut outputs = Vec::new();
+                let mut resolved_media = job.media.clone();
                 for line in &result.lines {
                     if let Some(json) = line.strip_prefix("YTUI_META:")
                         && let Ok(value) = serde_json::from_str::<Value>(json)
                     {
-                        send(
-                            tx,
-                            job,
-                            JobUpdate::Metadata(metadata(&value, &job.media.url)),
-                        )
-                        .await;
+                        resolved_media = metadata(&value, &job.media.url);
+                        send(tx, job, JobUpdate::Metadata(resolved_media.clone())).await;
                     }
                     if let Some(json) = line.strip_prefix("YTUI_OUTPUT:") {
                         let path: std::path::PathBuf = serde_json::from_str::<String>(json)
@@ -379,22 +371,7 @@ async fn execute_inner(
                 );
                 for output in &outputs {
                     send(tx, job, JobUpdate::Output(output.clone())).await;
-                    if let Some(hook) = &job.options.post_download_hook {
-                        let result = process::run(
-                            ProcessSpec::new(
-                                hook.to_string_lossy(),
-                                vec![output.to_string_lossy().into()],
-                                120,
-                            ),
-                            cancel.clone(),
-                            |_| {},
-                        )
-                        .await?;
-                        ensure!(
-                            result.success,
-                            "Post-download hook failed; downloaded media was preserved"
-                        );
-                    }
+                    run_hook(job, &resolved_media, output, cancel.clone()).await?;
                 }
                 return Ok(());
             }
@@ -421,6 +398,38 @@ async fn execute_inner(
         tokio::select! {_=cancel.cancelled()=>bail!("Operation cancelled"),_=tokio::time::sleep(Duration::from_secs(delay))=>{}}
     }
     bail!("Download retry budget exhausted")
+}
+
+async fn run_hook(
+    job: &Job,
+    media: &Media,
+    output: &Path,
+    cancel: CancellationToken,
+) -> Result<()> {
+    if let Some(hook) = &job.options.post_download_hook {
+        let mut spec = ProcessSpec::new(
+            hook.to_string_lossy(),
+            vec![output.to_string_lossy().into()],
+            120,
+        );
+        spec.env = vec![
+            ("YTUI_OUTPUT_PATH".into(), output.to_string_lossy().into()),
+            ("YTUI_ITEM_ID".into(), job.id.to_string()),
+            ("YTUI_VIDEO_ID".into(), media.id.clone()),
+            ("YTUI_TITLE".into(), media.title.clone()),
+            ("YTUI_URL".into(), job.media.url.clone()),
+            (
+                "YTUI_DOWNLOAD_MODE".into(),
+                if job.options.audio { "audio" } else { "video" }.into(),
+            ),
+        ];
+        let result = process::run(spec, cancel, |_| {}).await?;
+        ensure!(
+            result.success,
+            "Post-download hook failed; downloaded media was preserved"
+        );
+    }
+    Ok(())
 }
 
 async fn convert_local(
@@ -464,7 +473,7 @@ async fn convert_local(
     send(tx, job, JobUpdate::Phase(JobState::Converting)).await;
     let result = process::run(
         ProcessSpec::new(&config.ffmpeg, args, 24 * 60 * 60),
-        cancel,
+        cancel.clone(),
         |_| {},
     )
     .await?;
@@ -477,7 +486,8 @@ async fn convert_local(
     // hard_link atomically refuses to overwrite an unrelated file created concurrently.
     std::fs::hard_link(&partial, &target)?;
     std::fs::remove_file(partial)?;
-    send(tx, job, JobUpdate::Output(target)).await;
+    send(tx, job, JobUpdate::Output(target.clone())).await;
+    run_hook(job, &job.media, &target, cancel).await?;
     Ok(())
 }
 
@@ -497,6 +507,14 @@ mod tests {
         assert!(a.contains(&"--ignore-config".into()));
         assert!(a.windows(2).any(|w| w == ["--retries", "0"]));
         assert!(a.iter().any(|v| v.starts_with("after_move:")));
+        let mut job = job;
+        job.options.global_bandwidth_kib = 1;
+        let c = Config {
+            concurrency: 16,
+            ..Default::default()
+        };
+        let a = args(&job, &c, None).unwrap();
+        assert!(a.windows(2).any(|w| w == ["--limit-rate", "64"]));
     }
     #[test]
     fn progress_handles_unknown_totals_and_permanent_errors() {

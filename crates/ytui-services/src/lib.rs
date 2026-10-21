@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod browse;
+pub mod desktop;
 pub mod download;
 pub mod images;
 pub mod migration;
@@ -7,9 +8,12 @@ pub mod native;
 pub mod paths;
 pub mod player;
 pub mod process;
+pub mod profiles;
+pub mod queue_import;
 pub mod radio;
 pub mod store;
 pub mod theme;
+pub mod vpn;
 
 pub fn http_client(proxy: Option<&str>) -> anyhow::Result<reqwest::Client> {
     let mut builder = reqwest::Client::builder()

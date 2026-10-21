@@ -16,12 +16,15 @@ yt_dlp = "yt-dlp"
 ffmpeg = "ffmpeg"
 mpv = "mpv"
 cliamp = "cliamp"
+nmcli = "nmcli"
 auth_store = "keyring"
 account_index = 0
 radio_servers = []
+radio_pinned_countries = []
 custom_stations = []
 clipboard_watcher = false
 notifications = true
+notification_sound = false
 
 [download]
 audio = false
@@ -44,5 +47,11 @@ sponsorblock = []
 sponsorblock_remove = false
 split_chapters = false
 skip_duplicates = true
+
+# Daily windows use local system time. Omit to disable; midnight spans work.
+[schedule]
+# download_window = "22:30-06:00"
+# bandwidth_window = "09:00-18:00"
+window_bandwidth_kib = 0
 
 [keybindings]

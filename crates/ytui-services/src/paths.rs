@@ -8,6 +8,7 @@ use ytui_core::Config;
 #[derive(Clone, Debug)]
 pub struct Paths {
     pub config_override: Option<PathBuf>,
+    pub xdg_state: PathBuf,
     pub config: PathBuf,
     pub state: PathBuf,
     pub cache: PathBuf,
@@ -19,6 +20,7 @@ impl Paths {
         let dirs = directories::BaseDirs::new().context("Cannot find home directory")?;
         Ok(Self {
             config_override: None,
+            xdg_state: dirs.state_dir().unwrap_or(dirs.data_local_dir()).into(),
             config: dirs.config_dir().join("ytui"),
             state: dirs
                 .state_dir()

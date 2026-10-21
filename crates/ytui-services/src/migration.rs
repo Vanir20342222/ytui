@@ -32,6 +32,7 @@ pub fn import(
     let settings = paths.config.join("settings.json");
     if settings.exists() {
         let data: Value = serde_json::from_str(&std::fs::read_to_string(&settings)?)?;
+        config.legacy_settings = Some(serde_json::to_string(&data)?);
         map_settings(&data, config);
         if apply {
             let backup = paths.state.join("legacy-settings.json");
@@ -39,7 +40,7 @@ pub fn import(
                 crate::paths::atomic_write(&backup, &std::fs::read(&settings)?)?;
             }
         }
-        report.notes.push("Mapped quality, directories, subtitles, metadata, proxy/bandwidth, SponsorBlock, hooks and appearance. Unmapped settings remain in the backup.".into());
+        report.notes.push("Mapped quality, directories, subtitles, metadata, proxy/bandwidth schedule, clipboard, notifications, SponsorBlock, hooks and appearance. Unmapped settings are retained verbatim in legacy_settings and backups.".into());
     }
     let old = paths.legacy_data.join("queue.db");
     if old.exists() {
@@ -103,6 +104,7 @@ pub fn import(
             }
             let mut job = Job::new(media, options);
             job.id = uuid;
+            job.created_at = None;
             job.state = match state.as_str() {
                 "paused" => JobState::Paused,
                 "done" => JobState::Done,
@@ -124,7 +126,7 @@ pub fn import(
             for row in rows {let(id,item,video,title,output,url,mode)=row?;report.history_items+=1;
                 if snapshot.downloads.jobs.iter().any(|j|j.id==legacy_id(&format!("queue:{item}"))||j.outputs.iter().any(|p|p==Path::new(&output))){continue;}
                 let uuid=legacy_id(&format!("history:{id}"));if snapshot.downloads.jobs.iter().any(|j|j.id==uuid){continue;}
-                let mut options=config.download.clone();options.audio=mode=="audio";let mut job=Job::new(Media{id:video,title,url,..Default::default()},options);job.id=uuid;job.state=JobState::Done;if !output.is_empty(){job.outputs.push(output.into());}snapshot.downloads.jobs.push(job);report.imported+=1;
+                let mut options=config.download.clone();options.audio=mode=="audio";let mut job=Job::new(Media{id:video,title,url,..Default::default()},options);job.id=uuid;job.created_at=None;job.state=JobState::Done;if !output.is_empty(){job.outputs.push(output.into());}snapshot.downloads.jobs.push(job);report.imported+=1;
             }
         }
     } else {
@@ -142,8 +144,12 @@ pub fn import(
         let old_keys = paths.config.join("keybindings.json");
         if old_keys.exists() {
             let raw = std::fs::read(&old_keys)?;
-            crate::paths::atomic_write(&paths.state.join("legacy-keybindings.json"), &raw)?;
+            let backup = paths.state.join("legacy-keybindings.json");
+            if !backup.exists() {
+                crate::paths::atomic_write(&backup, &raw)?;
+            }
             let keys: std::collections::BTreeMap<String, String> = serde_json::from_slice(&raw)?;
+            config.legacy_keybindings = keys.clone();
             for (action, key) in keys {
                 let mapped = match action.as_str() {
                     "focus_input" | "open_search" => "search",
@@ -182,7 +188,15 @@ pub fn import(
                     let raw = std::fs::read_to_string(&p)?;
                     let value: Value = serde_json::from_str(&raw)?;
                     let mut c = config.clone();
+                    c.legacy_settings = Some(serde_json::to_string(&value)?);
                     map_settings(&value, &mut c);
+                    let backup = paths
+                        .state
+                        .join("legacy-profiles")
+                        .join(p.file_name().context("Profile has no filename")?);
+                    if !backup.exists() {
+                        crate::paths::atomic_write(&backup, raw.as_bytes())?;
+                    }
                     let dest = target
                         .join(p.file_stem().context("Profile has no name")?)
                         .with_extension("toml");
@@ -194,7 +208,7 @@ pub fn import(
         }
         paths.save_config(config)?;
     }
-    report.notes.push("VPN control, scheduling, clipboard polling and old slash-command aliases remain available in Python; the Rust installer does not replace it. See docs/PARITY.md.".into());
+    report.notes.push("Original settings, profiles and keybindings are preserved, including unmapped values. VPN control and some legacy commands still require parity review; the Rust installer does not replace Python. See docs/PARITY.md.".into());
     Ok(report)
 }
 fn legacy_id(value: &str) -> uuid::Uuid {
@@ -210,6 +224,37 @@ fn map_settings(v: &Value, c: &mut Config) {
             .filter(|s| !s.is_empty())
             .map(str::to_owned)
     };
+    for (path, target) in [
+        ("/advanced/clipboard_watcher", &mut c.clipboard_watcher),
+        ("/advanced/desktop_notifications", &mut c.notifications),
+        ("/advanced/notification_sound", &mut c.notification_sound),
+        ("/advanced/skip_duplicates", &mut c.download.skip_duplicates),
+        ("/advanced/chapter_split", &mut c.download.split_chapters),
+    ] {
+        if let Some(value) = v.pointer(path).and_then(Value::as_bool) {
+            *target = value;
+        }
+    }
+    if v.pointer("/bandwidth_schedule/enabled")
+        .and_then(Value::as_bool)
+        == Some(true)
+    {
+        let start = v
+            .pointer("/bandwidth_schedule/start_hour")
+            .and_then(Value::as_u64)
+            .unwrap_or(9);
+        let end = v
+            .pointer("/bandwidth_schedule/end_hour")
+            .and_then(Value::as_u64)
+            .unwrap_or(18);
+        if start < 24 && end < 24 && start != end {
+            c.schedule.bandwidth_window = Some(format!("{start:02}:00-{end:02}:00"));
+            c.schedule.window_bandwidth_kib = v
+                .pointer("/bandwidth_schedule/limit_kbps")
+                .and_then(Value::as_u64)
+                .unwrap_or(500);
+        }
+    }
     if let Some(s) = string("/quality/video_quality") {
         c.download.quality = s;
     }
@@ -332,6 +377,7 @@ mod tests {
         let t = tempfile::tempdir().unwrap();
         let paths = Paths {
             config_override: None,
+            xdg_state: t.path().join("state"),
             config: t.path().join("config"),
             state: t.path().join("state"),
             cache: t.path().join("cache"),
@@ -350,5 +396,57 @@ mod tests {
         assert_eq!(import(&paths, &mut c, &mut s, false).unwrap().imported, 0);
         assert_eq!(s.downloads.jobs[0].state, JobState::Paused);
         assert!(paths.legacy_data.join("queue.db").exists());
+    }
+    #[test]
+    fn migration_maps_desktop_schedule_and_profiles_without_losing_unknown_values() {
+        let t = tempfile::tempdir().unwrap();
+        let paths = Paths {
+            config_override: None,
+            xdg_state: t.path().join("state"),
+            config: t.path().join("config"),
+            state: t.path().join("state/ytui"),
+            cache: t.path().join("cache"),
+            legacy_data: t.path().join("data"),
+            home: t.path().into(),
+        };
+        paths.create().unwrap();
+        std::fs::create_dir_all(paths.config.join("profiles")).unwrap();
+        let raw = r#"{"advanced":{"clipboard_watcher":true,"desktop_notifications":false,"notification_sound":true,"future_switch":42},"bandwidth_schedule":{"enabled":true,"start_hour":22,"end_hour":6,"limit_kbps":123},"future_group":{"value":"keep"}}"#;
+        std::fs::write(paths.config.join("settings.json"), raw).unwrap();
+        std::fs::write(paths.config.join("profiles/Music.json"), raw).unwrap();
+        std::fs::write(
+            paths.config.join("keybindings.json"),
+            r#"{"open_help":"f8","future_action":"f9"}"#,
+        )
+        .unwrap();
+        let mut config = Config::default();
+        paths.fill_directories(&mut config);
+        let mut snapshot = Snapshot::default();
+        import(&paths, &mut config, &mut snapshot, true).unwrap();
+        assert!(config.clipboard_watcher);
+        assert!(!config.notifications);
+        assert!(config.notification_sound);
+        assert_eq!(
+            config.schedule.bandwidth_window.as_deref(),
+            Some("22:00-06:00")
+        );
+        assert_eq!(config.schedule.window_bandwidth_kib, 123);
+        assert_eq!(
+            config.legacy_keybindings.get("future_action").unwrap(),
+            "f9"
+        );
+        let legacy: Value =
+            serde_json::from_str(config.legacy_settings.as_deref().unwrap()).unwrap();
+        assert_eq!(legacy.pointer("/advanced/future_switch").unwrap(), 42);
+        let profile = crate::profiles::load(&paths, "Music").unwrap();
+        assert_eq!(profile.legacy_settings, config.legacy_settings);
+        assert_eq!(
+            std::fs::read_to_string(paths.state.join("legacy-profiles/Music.json")).unwrap(),
+            raw
+        );
+        assert_eq!(
+            std::fs::read_to_string(paths.config.join("settings.json")).unwrap(),
+            raw
+        );
     }
 }

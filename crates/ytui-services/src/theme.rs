@@ -307,11 +307,7 @@ pub async fn resolve(config: &Config, paths: &Paths) -> Result<Palette> {
         }
         return builtin(&config.theme);
     }
-    let state_root = paths
-        .state
-        .parent()
-        .and_then(Path::parent)
-        .context("State directory has no XDG root")?;
+    let state_root = &paths.xdg_state;
     let config_root = paths
         .config
         .parent()
@@ -431,8 +427,9 @@ mod live_tests {
         let t = tempfile::tempdir().unwrap();
         let paths = Paths {
             config_override: None,
+            xdg_state: t.path().join("state"),
             config: t.path().join("config/ytui"),
-            state: t.path().join("state/ytui/rust"),
+            state: t.path().join("isolated-app-state"),
             cache: t.path().join("cache"),
             legacy_data: t.path().join("data"),
             home: t.path().into(),

@@ -7,7 +7,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **29 passed**, zero failures.
+- `cargo test --workspace --locked`: **43 passed**, zero failures.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
 - Installed the release binary as `ytui-rs` into an isolated temporary directory
@@ -15,6 +15,24 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 Coverage includes:
 
+- Daily midnight-window boundaries, small global bandwidth caps, scheduled-state
+  persistence, cancellation/requeue at closure, manual-pause preservation, stale
+  completion rejection and explicit headless `--now` handling.
+- Opt-in clipboard baseline/change and exact-host checks using synthetic text;
+  stale/disabled results cannot open a download. No actual clipboard is read.
+- Native subtitle sidecar transfer from loopback, missing-language errors and
+  overwrite refusal. Real/live subtitle embedding still needs target acceptance.
+- Profile/keymap roundtrip, duplicate-key rejection, verbatim unknown legacy
+  values/profile backups, migrated desktop toggles and bandwidth windows.
+- Filtered/grouped history preserves real queue indices and playlist order;
+  bulk ranges reject invalid bounds; import is atomic/idempotent and does not
+  trust executable hook settings in an export.
+- Literal subprocess environment variables, resolved metadata passed to hooks,
+  output capture limits and headless error propagation.
+- Explicit VPN actions against fake nmcli, escaped profile-name parsing and
+  refusal to operate on non-VPN IDs. No actual VPN command is executed.
+- Notification body escaping is tested; D-Bus delivery/sound remains a desktop
+  acceptance gate. No real notification server is contacted by the suite.
 - Deleted-job metadata cannot recreate a removed row; pause/retry rejects earlier
   generations and completion cannot be followed by stale phase updates.
 - SQLite instance locking, paused-state preservation, interrupted-state recovery,
@@ -36,7 +54,8 @@ Coverage includes:
   muted ten-second preview and no implicit yt-dlp invocation in native mode.
 - Radio source parsing and disk catalog fallback during a synthetic outage.
 - Caelestia/legacy Omarchy parsing, live atomic palette replacement, and retaining
-  the last valid palette through malformed intermediate writes. This test caught
+  the last valid palette through malformed intermediate writes, using a relocated
+  ytui state directory while preserving the separate XDG desktop palette root. This test caught
   and fixed a watch-channel read-lock deadlock during implementation.
 - Unicode input/paste and focus isolation, plus rendering all tabs/forms at
   80×24, 120×40, 180×50 and the minimal 35×12 layout.
@@ -44,7 +63,11 @@ Coverage includes:
 A separate pseudo-terminal smoke check launched the actual demo binary, typed
 `qvds` in the search input without quitting, switched tabs, resized
 120×40 → 80×24 → 120×40, and exited with status 0. Terminal ICANON/ECHO flags
-were restored. These [screenshots](screenshots/youtube.png) are actual terminal
+were restored. The follow-up PTY check also opened statistics, cycled history
+filters, edited `q` in the keybinding form without quitting, scrolled to the final
+help shortcut, and restored terminal flags on exit. The new
+[history](screenshots/history.png) and [keybinding](screenshots/keybindings.png)
+screenshots show those actual demo panels. These [screenshots](screenshots/youtube.png) are actual terminal
 output rendered with a monospaced font; the catalog is explicitly fictional.
 `NO_COLOR` was removed only from that child environment for color capture.
 
@@ -76,7 +99,10 @@ Before replacing the default Python installer/releasing the Rust edition as stab
    reconnection, and returning from the real cliamp program.
 4. Check Ghostty Kitty images and cleanup, Caelestia live palette changes, SSH/tmux
    fallback, and separate real Omarchy/GNOME sessions.
-5. Upgrade a copy of real Python state, review deferred fields in PARITY.md, and
+5. Exercise daily scheduling/rate transitions during long transfers, Wayland
+   clipboard detection/review, notifications/sound, and optional NetworkManager
+   VPN actions on the target desktop.
+6. Upgrade a copy of real Python state, review deferred fields in PARITY.md, and
    exercise the Python rollback path. Resolve the deferred legacy-feature scope
    before switching the default installer.
 

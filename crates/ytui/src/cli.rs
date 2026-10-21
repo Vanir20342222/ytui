@@ -46,6 +46,12 @@ pub enum Command {
         feed: String,
         query: Option<String>,
     },
+    /// Explicit control of existing NetworkManager VPN/WireGuard profiles (never runs at startup).
+    Vpn {
+        #[arg(default_value = "list", value_parser = ["list", "status", "connect", "disconnect"])]
+        action: String,
+        uuid: Option<String>,
+    },
     /// Print cliamp channels or Radio Browser search results.
     Radio {
         query: Option<String>,
@@ -69,12 +75,17 @@ pub enum Command {
         items: Option<String>,
         #[arg(long)]
         backend: Option<String>,
+        /// Explicitly bypass the configured daily download window for this headless job.
+        #[arg(long)]
+        now: bool,
     },
     /// Preview/import Python state without modifying the original files.
     Migrate {
         #[arg(long)]
         apply: bool,
     },
+    /// Add URLs from a Rust/legacy JSON export or newline-separated text file.
+    Import { file: PathBuf },
     /// Import cliamp stations/favorites; preserves the original cliamp files.
     ImportRadio { file: PathBuf },
     #[command(name = "__native-worker", hide = true)]
@@ -169,6 +180,29 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 ),
             }
             println!(
+                "Clipboard watcher: {}",
+                if !config.clipboard_watcher {
+                    "disabled (opt-in)"
+                } else if ytui_services::desktop::clipboard_reader().is_ok() {
+                    "enabled; reader found"
+                } else {
+                    "enabled; install wl-clipboard or xclip/xsel"
+                }
+            );
+            println!(
+                "Download window: {} · bandwidth window: {}",
+                config
+                    .schedule
+                    .download_window
+                    .as_deref()
+                    .unwrap_or("all day"),
+                config
+                    .schedule
+                    .bandwidth_window
+                    .as_deref()
+                    .unwrap_or("none")
+            );
+            println!(
                 "Browser stores were not opened. Use `ytui auth profiles` to list profile paths."
             );
         }
@@ -246,6 +280,21 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 serde_json::to_string_pretty(&browser.fetch(music, &request).await?)?
             );
         }
+        Command::Vpn { action, uuid } => {
+            let cancel = CancellationToken::new();
+            if action == "connect" || action == "disconnect" {
+                let id = uuid.context("Provide a UUID from `ytui vpn list`")?;
+                ytui_services::vpn::change(&config.nmcli, &id, action == "connect", cancel).await?;
+                println!("VPN action completed");
+            } else {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(
+                        &ytui_services::vpn::list(&config.nmcli, cancel).await?
+                    )?
+                );
+            }
+        }
         Command::Radio {
             query,
             country,
@@ -278,7 +327,19 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             playlist,
             items,
             backend,
+            now,
         } => {
+            let policy = config.schedule.policy(
+                ytui_services::desktop::local_minute(),
+                config.download.global_bandwidth_kib,
+                1,
+            );
+            ensure!(
+                policy.allowed || now,
+                "Outside the configured download window; use --now to bypass it explicitly"
+            );
+            config.concurrency = 1; // This command owns exactly one transfer.
+            config.download.global_bandwidth_kib = policy.global_bandwidth_kib;
             let normalized = if std::path::Path::new(&url).is_file() {
                 std::fs::canonicalize(&url)?.to_string_lossy().into_owned()
             } else {
@@ -326,19 +387,33 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 tx,
             ));
             let mut failure = None;
+            let mut interrupted = false;
+            let mut terminal_received = false;
             loop {
                 tokio::select! {
                     event=rx.recv()=>{let Some(event)=event else{break;};let terminal=matches!(event.update,JobUpdate::Finished|JobUpdate::Failed{..});snapshot.downloads.apply(event);
-                        if terminal{let job=snapshot.downloads.jobs.iter().find(|j|j.id==id).context("Download disappeared")?;if job.state==JobState::Done{for p in &job.outputs{println!("Saved {}",p.display());}}else{failure=job.error.clone();}break;}
+                        if terminal{terminal_received=true;let job=snapshot.downloads.jobs.iter().find(|j|j.id==id).context("Download disappeared")?;if job.state==JobState::Done{for p in &job.outputs{println!("Saved {}",p.display());}}else{failure=job.error.clone();}break;}
                     },
-                    _=tokio::signal::ctrl_c()=>{cancel.cancel();if let Some(j)=snapshot.downloads.jobs.iter_mut().find(|j|j.id==id){j.invalidate(JobState::Paused);}break;}
+                    _=tokio::signal::ctrl_c()=>{interrupted=true;cancel.cancel();if let Some(j)=snapshot.downloads.jobs.iter_mut().find(|j|j.id==id){j.invalidate(JobState::Paused);}break;}
                 }
             }
             rx.close();
             cancel.cancel();
-            let _ = worker.await;
+            let joined = worker.await;
+            if !interrupted && (!terminal_received || joined.is_err()) {
+                failure = Some(
+                    "Download worker exited without a terminal result; retry the saved job".into(),
+                );
+                if let Some(job) = snapshot.downloads.jobs.iter_mut().find(|j| j.id == id) {
+                    job.invalidate(JobState::Error);
+                    job.error = failure.clone();
+                }
+            }
             store.save(snapshot).await?;
             store.close().await?;
+            if interrupted {
+                anyhow::bail!("Download interrupted; paused job saved");
+            }
             if let Some(error) = failure {
                 anyhow::bail!("{error}");
             }
@@ -361,6 +436,18 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             }
             store.close().await?;
             println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Command::Import { file } => {
+            let c = config.clone();
+            let jobs =
+                tokio::task::spawn_blocking(move || ytui_services::queue_import::read(&file, &c))
+                    .await??;
+            let store = Store::open(&paths.state)?;
+            let mut snapshot = store.load().await?;
+            let count = ytui_services::queue_import::append(&mut snapshot.downloads, jobs);
+            store.save(snapshot).await?;
+            store.close().await?;
+            println!("Imported {count} queued items; start the TUI to run them");
         }
         Command::ImportRadio { file } => {
             let raw = std::fs::read_to_string(file)?;

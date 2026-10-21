@@ -547,6 +547,7 @@ mod tests {
         std::fs::set_permissions(&fake, std::fs::Permissions::from_mode(0o755)).unwrap();
         let paths = Paths {
             config_override: None,
+            xdg_state: temp.path().join("state"),
             config: temp.path().join("config"),
             state: temp.path().join("state"),
             cache: temp.path().join("cache"),

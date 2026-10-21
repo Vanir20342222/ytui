@@ -1,10 +1,11 @@
 # ytui Rust rewrite plan
 
-Status: Rust alpha implementation on `rewrite/rust`; target-machine release gates remain open. Updated: 2026-10-21.
+Status: Rust alpha merged in PR #2; parity follow-up on `rewrite/parity`; target-machine release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
-Implementation lives on `rewrite/rust`; see docs/RUST.md, docs/PARITY.md and
+The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
+on `rewrite/parity`; see docs/RUST.md, docs/PARITY.md and
 docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
 ## Goal and confirmed decisions
@@ -339,15 +340,35 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 29 offline tests, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 43 offline tests, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
 Python yt-dlp: native YouTube coverage, playlist support and cross-process resume
-are limited. Native subtitle/SponsorBlock/chapter/rate controls currently require
-an explicit fallback. The user's native-default preference changes the original
+are limited. Native subtitles now use upstream APIs; SponsorBlock/chapter/rate
+controls still require an explicit fallback. The user's native-default preference changes the original
 resume/reliability gate; do not present unsupported native behavior as completed.
 See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
+
+### Parity follow-up (M1/M2/M6/M7/M8)
+
+- Added daily local-time download/rate windows, persistent delayed jobs and a
+  conservative byte-based cap. Window closure invalidates/cancels active work;
+  manual pauses remain intact. CLI window bypass is explicit (`--now`).
+- Added opt-in Wayland/X11 clipboard detection with review, native desktop
+  notifications/sound hints, profile/key editors, searchable history/statistics,
+  group expansion, loaded-page bulk ranges, and safe JSON/text queue import.
+- Native subtitle sidecars/embedding use pinned upstream APIs, isolated staging
+  and no-clobber publication. Missing/unsupported features remain explicit errors.
+- Migration preserves unmapped JSON/keymaps/profile backups and maps desktop and
+  bandwidth toggles. Hooks receive resolved metadata via legacy YTUI_* variables.
+- Added radio country pins and explicit NetworkManager VPN/WireGuard actions.
+  Tests use fake nmcli only; standalone Proton/raw wg-quick parity is still open.
+- Fixed small global caps rounding to unlimited, headless worker exit handling,
+  bounded single-line process output, ANSI download-state colors, and desktop
+  palette discovery when app state is relocated with `--state-dir`.
+- Offline checks and target-machine limitations are recorded in VALIDATION.md.
+  These changes do not close live account/device or stable packaging gates.
 
 ### Agent handoff and completion evidence
 

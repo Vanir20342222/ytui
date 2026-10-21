@@ -1,6 +1,8 @@
 pub mod config;
+pub mod history;
 pub mod media;
 pub mod queue;
+pub mod schedule;
 pub mod shortcuts;
 pub use config::*;
 pub use media::*;
