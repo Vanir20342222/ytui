@@ -15,6 +15,8 @@ pub struct ProcessSpec {
     pub program: String,
     pub args: Vec<String>,
     pub deadline: Duration,
+    pub env: Vec<(String, String)>,
+    pub max_output_bytes: usize,
 }
 impl ProcessSpec {
     pub fn new(program: impl Into<String>, args: Vec<String>, seconds: u64) -> Self {
@@ -22,16 +24,20 @@ impl ProcessSpec {
             program: program.into(),
             args,
             deadline: Duration::from_secs(seconds),
+            env: Vec::new(),
+            max_output_bytes: 16 * 1024 * 1024,
         }
     }
 }
 enum PipeEvent {
     Line(bool, String),
     Closed,
+    Overflow,
 }
 async fn drain(
     mut pipe: impl tokio::io::AsyncRead + Unpin,
     stderr: bool,
+    max_line_bytes: usize,
     tx: mpsc::Sender<PipeEvent>,
 ) {
     let mut buffer = [0u8; 8192];
@@ -49,8 +55,11 @@ async fn drain(
                                 return;
                             }
                         }
-                    } else if line.len() < 8 * 1024 * 1024 {
+                    } else if line.len() < max_line_bytes {
                         line.push(*b);
+                    } else {
+                        let _ = tx.send(PipeEvent::Overflow).await;
+                        return;
                     }
                 }
             }
@@ -81,6 +90,7 @@ pub async fn run(
     let mut command = Command::new(&spec.program);
     command
         .args(&spec.args)
+        .envs(spec.env)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -98,11 +108,13 @@ pub async fn run(
     let stdout = tokio::spawn(drain(
         child.stdout.take().context("Missing stdout")?,
         false,
+        spec.max_output_bytes.min(8 * 1024 * 1024),
         tx.clone(),
     ));
     let stderr = tokio::spawn(drain(
         child.stderr.take().context("Missing stderr")?,
         true,
+        spec.max_output_bytes.min(8 * 1024 * 1024),
         tx.clone(),
     ));
     drop(tx);
@@ -132,10 +144,11 @@ pub async fn run(
                         on_line(&line);
                         if line.starts_with("YTUI_PROGRESS:") || line.starts_with("YTUI_POST:") { continue; }
                         bytes+=line.len();
-                        if bytes>16*1024*1024 {overflow=true;break;}
+                        if bytes>spec.max_output_bytes {overflow=true;break;}
                         lines.push(line);
                     }
                 }
+                Some(PipeEvent::Overflow)=>{overflow=true;break;},
                 Some(PipeEvent::Closed)=>{}, None=>break,
             }
         }
@@ -159,7 +172,7 @@ pub async fn run(
             bail!("Operation cancelled");
         }
         if overflow {
-            bail!("Tool output exceeded the 16 MiB limit");
+            bail!("Tool output exceeded the capture limit");
         }
         bail!("Operation timed out");
     }
@@ -267,5 +280,48 @@ mod ownership_tests {
         .unwrap();
         assert!(result.success);
         assert_eq!(result.lines, vec!["published"]);
+    }
+}
+
+#[cfg(test)]
+mod boundary_tests {
+    use super::*;
+    #[tokio::test]
+    async fn environment_is_literal_and_oversized_single_lines_fail() {
+        let mut spec = ProcessSpec::new(
+            "sh",
+            vec!["-c".into(), "printf '%s' \"$YTUI_TITLE\"".into()],
+            2,
+        );
+        spec.env
+            .push(("YTUI_TITLE".into(), "a `literal` $(title) 日本語".into()));
+        let result = run(spec, CancellationToken::new(), |_| {}).await.unwrap();
+        assert_eq!(result.lines, vec!["a `literal` $(title) 日本語"]);
+        let mut spec = ProcessSpec::new(
+            "sh",
+            vec!["-c".into(), "printf '01234567890123456789'".into()],
+            2,
+        );
+        spec.max_output_bytes = 8;
+        assert!(
+            run(spec, CancellationToken::new(), |_| {})
+                .await
+                .unwrap_err()
+                .to_string()
+                .contains("capture limit")
+        );
+        let mut spec = ProcessSpec::new(
+            "sh",
+            vec!["-c".into(), "printf '%s\\n' 0123 4567 8901".into()],
+            2,
+        );
+        spec.max_output_bytes = 8;
+        assert!(
+            run(spec, CancellationToken::new(), |_| {})
+                .await
+                .unwrap_err()
+                .to_string()
+                .contains("capture limit")
+        );
     }
 }

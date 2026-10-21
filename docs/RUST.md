@@ -14,7 +14,7 @@ headers. On CachyOS/Arch:
 ```sh
 sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg
 rustup default stable
-git clone --branch rewrite/rust https://github.com/Vanir20342222/ytui.git
+git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 cargo run --release --locked -p ytui -- doctor
 cargo run --release --locked -p ytui
@@ -69,8 +69,12 @@ jobs retain any explicit backend override.
 
 Native download support includes direct HTTP media, the upstream HTML5/YouTube
 subset, separate-stream merging, audio conversion, remuxing and metadata tagging.
-Native SponsorBlock, chapter splitting, bandwidth caps and subtitle controls are
-currently rejected with an actionable fallback message; they are not silently
+Native subtitle selection, sidecar downloads and FFmpeg embedding now use the
+upstream Rust APIs. Language selectors support literal codes, `all` and exclusions;
+regex selectors still require explicit fallback. Sidecars are retained alongside
+media, including when embedded. Unavailable languages or unsupported embedding
+produce visible errors and preserve existing files. Native SponsorBlock, chapter
+splitting and bandwidth caps are currently rejected with an actionable fallback message; they are not silently
 ignored. The fallback implements these download controls. Native template syntax
 is narrower than yt-dlp's; the shipped template works on both backends.
 
@@ -149,7 +153,10 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 
 Forms use `↑/↓` or `Tab` to change fields, `Space` for toggles, `Enter` to submit,
 and `Esc` to cancel. Unicode editing and bracketed paste are supported. Typing in
-an input never triggers the global letter shortcuts. Help reflects remappings.
+an input never triggers the global letter shortcuts. Help reflects remappings and
+scrolls with arrows/Page Up/Page Down. `:keys` edits bindings, including several
+keys per action separated by spaces; duplicate assignments are rejected. Ctrl+C
+remains the emergency quit key.
 
 ```toml
 [keybindings]
@@ -223,6 +230,105 @@ they can touch the queue or persistence. A single-writer lock protects the state
 DB, and a dedicated DB thread owns its connection. Normal shutdown reaps owned
 process groups before closing the database.
 
+## Scheduling, clipboard and notifications
+
+Settings expose daily download and bandwidth windows in local system time:
+
+```toml
+[schedule]
+download_window = "22:30-06:00"   # blank field / omitted key means all day
+bandwidth_window = "09:00-18:00"
+window_bandwidth_kib = 512       # total cap during this window; 0 = unlimited
+```
+
+The normal total cap is `download.global_bandwidth_kib`. The window rate replaces
+that cap while its window is active; a per-job cap can lower it further. The total
+cap is divided conservatively over configured concurrency, in bytes, including
+small limits. These caps currently require **explicitly selecting yt-dlp** because
+the pinned native downloader has no rate-limit adapter.
+
+Closing the daily window stops/reaps active jobs and leaves them queued. Opening
+it resumes eligible jobs; manual pauses remain paused. Changing the active total
+cap restarts transfers so the new cap takes effect. Native transfers restart from
+the beginning; fallback continuation follows yt-dlp's normal partial-file support.
+No downloads run after ytui quits: keep the TUI running for scheduling.
+
+`:schedule 30m URL`, `:schedule 2h URL` or `:schedule 90s URL` creates a persistent
+delayed job. It also respects the daily window. Headless `download` refuses to
+start outside that window unless `--now` is explicitly supplied; it snapshots the
+rate at launch rather than running the TUI scheduler during a long transfer.
+Recurring channel/playlist watch subscriptions are not implemented.
+
+Clipboard watching is disabled by default. Enable it in Settings or with
+`:clipboard on`; disable with `:clipboard off`. It polls the regular clipboard
+at two-second intervals using `wl-paste` on Wayland or `xclip`/`xsel` on X11.
+Install `wl-clipboard` on CachyOS/Wayland. The first read establishes a baseline;
+subsequent new YouTube URLs offer `:clipboard` to review download options. It
+never automatically starts a download, reads the primary selection, or saves
+arbitrary clipboard text. Unavailable readers back off for 30 seconds.
+
+Desktop completion/failure notifications use the native freedesktop D-Bus API.
+`notifications` controls them; `notification_sound` defaults to false. Sounds use
+the notification server's sound hints and depend on that server's configuration.
+Notification failure never changes download success. No notification tools or
+Python modules are required. Actual desktop/sound acceptance is still pending.
+
+## History, groups, profiles and import
+
+`:downloads completed QUERY` searches completed titles/creators/URLs;
+`:downloads failed`, `:downloads audio`, `:downloads video`, or `:stats` opens the
+filtered history/statistics panel. `f` cycles filters, `Enter` jumps to the actual
+queue row, and `g` expands its group. Statistics use recorded progress and paths;
+they do not claim to measure current disk usage. `:history` in Downloads opens
+completed downloads; in YouTube/Music it keeps its personal-feed meaning.
+
+Open a collection and use `:download-page 1,3:7` or `:download-page all` to queue
+individual entries from the **loaded page**, using the current download defaults.
+This does not silently fetch or download unseen pages. `:groups` expands these
+batches or migrated playlist groups while preserving entry order.
+
+```text
+:profiles
+:profile save Music
+:profile load Music
+:profile delete Music
+:import /path/to/queue.json
+:export /path/to/queue.json
+```
+
+Profiles retain the complete native configuration and keymap. Loading goes through
+normal validation/account-switch handling. Legacy profile JSON, unsupported values,
+and original shortcuts are retained in migration backups and `legacy_settings` /
+`legacy_keybindings`; preservation does not make unsupported fields active.
+
+Queue import accepts Rust snapshots, legacy `items` JSON, URL arrays or one URL
+per text line. It imports URL, mode, quality and title into **new queued jobs**;
+other defaults come from your current config. It never imports executable hooks,
+credentials or arbitrary output paths from an export. Invalid imports add nothing;
+repeat imports skip duplicates. Headless `ytui-rs import FILE` saves the queue for
+the next TUI session. `:clear`/removal delete records, never media files.
+
+Legacy slash commands are also accepted when pasted/entered into the input
+(e.g. `/history`, `/queue`, `/audio`, `/pauseall`, `/stopall`, `/profile`). Their
+colon equivalents are available; `/history` always means download history.
+`/update` and `/log` do not have native equivalents yet. Update the pinned Rust
+application through a new build; no extractor is downloaded or replaced silently.
+
+## Optional VPN control
+
+`:vpn list` lists existing NetworkManager VPN/WireGuard profiles with UUIDs.
+`:vpn connect UUID` and `:vpn disconnect UUID` explicitly operate on one listed
+profile. The same actions are available as `ytui-rs vpn list/connect/disconnect`.
+NetworkManager handles authentication and permissions; ytui neither escalates
+privileges nor reads/imports WireGuard private keys. It never probes or changes
+VPN connections at startup and never disconnects on quit. `nmcli` must be installed;
+its path can be set with `nmcli = "/path/to/nmcli"`.
+
+This supports Proton configurations already imported into NetworkManager. It does
+not implement the standalone Proton CLI login/server selector, raw wg-quick config
+management, or Windows/macOS VPN helpers. Those legacy scope items remain visible
+in PARITY.md. Automated tests invoke only a synthetic nmcli executable.
+
 ## Radio and cliamp
 
 The radio tab fetches live cliamp channel metadata from its service. `Enter` opens
@@ -253,7 +359,9 @@ ytui-rs import-radio "$HOME/.config/cliamp/radio_favorites.toml"
 suspended. This is not a full reimplementation of cliamp's unrelated providers.
 Catalogs are cached to disk and used with a visible notice when the service is
 unavailable. Existing loaded pages and saved favorites remain usable while
-refreshing. Station-country pinning and location suggestions remain in the backlog.
+refreshing. `:pin-country DE`, `:unpin-country DE` and `:countries` manage saved
+country shortcuts; browse one with `:country DE`. Location-based suggestions are
+not implemented; no location lookup is made.
 
 ## Themes and terminal images
 
@@ -277,7 +385,10 @@ not modified. Manual theme selection overrides automatic following.
 `image_protocol` supports `auto`, `kitty`, `sixel`, `iterm2`, `halfblocks`, `none`.
 Auto detection queries the terminal; half-block rendering is the fallback. Ghostty
 uses the Kitty graphics protocol. For tmux/SSH, set an explicit protocol if
-capability reporting is unreliable. Image decoding/encoding runs outside the
+capability reporting is unreliable. Explicit protocol changes apply immediately;
+switching back to `auto` uses half-blocks until the next startup capability query.
+Moving app state with `--state-dir` does not relocate the desktop palette files.
+Image decoding/encoding runs outside the
 render loop, with request/size limits and a bounded disk cache.
 
 ## State, migration and rollback
@@ -293,7 +404,8 @@ ytui-rs migrate --apply     # back up and import supported fields
 ```
 
 Migration imports queue/history order, paused state, group IDs, paths, supported
-settings/shortcuts and profiles. Repeated imports do not duplicate jobs. An online
+settings/shortcuts and profiles, including bandwidth schedules and desktop toggles.
+Repeated imports do not duplicate jobs. An online
 SQLite backup retains the source groups/schema/fields not represented by Rust's
 current UI. Backups also preserve Python settings/shortcuts and existing Rust
 configuration. Review [PARITY.md](PARITY.md) for deferred features and data fields.

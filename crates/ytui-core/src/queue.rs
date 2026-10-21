@@ -51,6 +51,12 @@ pub struct Job {
     pub attempt: u32,
     #[serde(default)]
     pub group_id: Option<String>,
+    #[serde(default)]
+    pub not_before: Option<u64>,
+    #[serde(default)]
+    pub created_at: Option<u64>,
+    #[serde(default)]
+    pub completed_at: Option<u64>,
 }
 impl Job {
     pub fn new(media: Media, options: DownloadOptions) -> Self {
@@ -65,7 +71,13 @@ impl Job {
             error: None,
             attempt: 0,
             group_id: None,
+            not_before: None,
+            created_at: Some(crate::schedule::unix_now()),
+            completed_at: None,
         }
+    }
+    pub fn ready(&self, now: u64) -> bool {
+        self.state == JobState::Queued && self.not_before.is_none_or(|at| now >= at)
     }
     pub fn invalidate(&mut self, state: JobState) {
         self.generation += 1;
@@ -138,6 +150,7 @@ impl DownloadQueue {
             }
             JobUpdate::Finished => {
                 job.state = JobState::Done;
+                job.completed_at = Some(crate::schedule::unix_now());
                 job.error = None;
             }
             JobUpdate::Failed { message, .. } => {

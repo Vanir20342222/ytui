@@ -167,7 +167,7 @@ async fn interface(
                 Some(Err(e))=>return Err(e.into()),None=>app.quit=true,_=>{}
             },
             Some(event)=job_rx.recv()=>{
-                if app.snapshot.downloads.apply(event){app.dirty=true;app.redraw=true;}
+                app.job_event(event);
             },
             Some(result)=app.tasks.join_next(),if !app.tasks.is_empty()=>match result{Ok(event)=>app.apply(event),Err(e)if !e.is_cancelled()=>{app.status="A background operation stopped unexpectedly; refresh or retry".into();app.redraw=true;},_=>{}},
             Some(event)=player.events.recv()=>match event{
@@ -211,6 +211,7 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let paths = Paths {
             config_override: None,
+            xdg_state: temp.path().join("state"),
             config: temp.path().join("config/ytui"),
             state: temp.path().join("state/ytui/rust"),
             cache: temp.path().join("cache"),
@@ -265,17 +266,92 @@ mod tests {
                 terminal.draw(|f| ui::render(f, &mut a)).unwrap();
             }
             for modal in [
-                app::Modal::Help,
+                app::Modal::Help(0),
                 app::Modal::Themes(0),
                 app::Modal::Form(Box::new(forms::Form::settings(a.config.clone()))),
                 app::Modal::Form(Box::new(forms::Form::auth())),
                 app::Modal::Queue(0),
+                app::Modal::History(Default::default()),
+                app::Modal::Groups(0),
+                app::Modal::Text {
+                    title: "VPN connections".into(),
+                    lines: vec!["Fixture".into()],
+                    offset: 0,
+                },
+                app::Modal::Form(Box::new(forms::Form::keys(a.config.clone()))),
             ] {
                 a.modal = Some(modal);
                 terminal.draw(|f| ui::render(f, &mut a)).unwrap();
                 a.modal = None;
             }
         }
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn schedule_closure_cancels_work_preserves_manual_pause_and_rejects_late_finish() {
+        use tokio_util::sync::CancellationToken;
+        use ytui_core::{JobEvent, JobState, JobUpdate};
+        let (mut a, _rx, _temp) = fixture().await;
+        a.demo = false;
+        a.config.notifications = false;
+        let minute = (ytui_services::desktop::local_minute() + 20) % 1440;
+        let end = (minute + 1) % 1440;
+        a.config.schedule.download_window = Some(format!(
+            "{:02}:{:02}-{:02}:{:02}",
+            minute / 60,
+            minute % 60,
+            end / 60,
+            end % 60
+        ));
+        a.snapshot.downloads.jobs[0].state = JobState::Downloading;
+        a.snapshot.downloads.jobs[1].state = JobState::Paused;
+        let id = a.snapshot.downloads.jobs[0].id;
+        let cancel = CancellationToken::new();
+        let token = cancel.clone();
+        let task = tokio::spawn(async move {
+            token.cancelled().await;
+        });
+        a.running.insert(
+            id,
+            app::Running {
+                cancel: cancel.clone(),
+                task,
+            },
+        );
+        let tasks_before = a.tasks.len();
+        a.tick().await;
+        assert!(cancel.is_cancelled());
+        assert_eq!(a.snapshot.downloads.jobs[0].state, JobState::Queued);
+        assert_eq!(a.snapshot.downloads.jobs[1].state, JobState::Paused);
+        assert_eq!(a.tasks.len(), tasks_before); // Opt-out does not start a clipboard reader.
+        a.job_event(JobEvent {
+            id,
+            generation: 0,
+            update: JobUpdate::Finished,
+        });
+        assert_eq!(a.snapshot.downloads.jobs[0].state, JobState::Queued);
+        a.snapshot.downloads.jobs[0].not_before = Some(ytui_core::schedule::unix_now() + 3600);
+        a.config.schedule.download_window = None;
+        tokio::task::yield_now().await;
+        a.tick().await;
+        assert!(a.running.is_empty());
+        assert_eq!(a.snapshot.downloads.jobs[1].state, JobState::Paused);
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn stale_clipboard_results_and_slash_commands_do_not_trigger_downloads() {
+        let (mut a, _rx, _temp) = fixture().await;
+        a.config.clipboard_watcher = false;
+        a.apply(app::UiEvent::Clipboard {
+            generation: 0,
+            result: Ok("https://youtu.be/abcdefghijk".into()),
+        });
+        assert!(a.clipboard_url.is_none());
+        a.command("/history").unwrap();
+        assert!(matches!(a.modal, Some(app::Modal::History(_))));
+        a.command("/keys").unwrap();
+        assert!(matches!(a.modal, Some(app::Modal::Form(_))));
+        assert_eq!(a.snapshot.downloads.jobs.len(), 2);
         a.shutdown().await;
     }
 }

@@ -46,10 +46,17 @@ pub struct TabView {
     pub history: Vec<(BrowseRequest, Page, usize)>,
 }
 pub enum Modal {
-    Help,
+    Help(usize),
     Themes(usize),
     Form(Box<Form>),
     Queue(usize),
+    History(history::View),
+    Groups(usize),
+    Text {
+        title: String,
+        lines: Vec<String>,
+        offset: usize,
+    },
 }
 pub struct Input {
     pub command: bool,
@@ -74,6 +81,16 @@ pub enum UiEvent {
     Auth(Result<Session>),
     Disconnected(Result<()>),
     Status(String),
+    Clipboard {
+        generation: u64,
+        result: Result<String>,
+    },
+    Notification(Result<()>),
+    Import(Result<Vec<Job>>),
+    Text {
+        title: String,
+        result: Result<Vec<String>>,
+    },
 }
 pub struct RuntimeHandles {
     pub player: mpsc::Sender<PlayerCommand>,
@@ -119,6 +136,17 @@ pub struct App {
     image_due: Instant,
     pub image_error: Option<String>,
     images: ImageCache,
+    policy: Option<schedule::Policy>,
+    desktop_cancel: CancellationToken,
+    clipboard_cancel: CancellationToken,
+    clipboard_monitor: ytui_services::desktop::ClipboardMonitor,
+    clipboard_generation: u64,
+    clipboard_pending: bool,
+    clipboard_due: Instant,
+    pub clipboard_url: Option<String>,
+    clipboard_warned: bool,
+    notification_pending: usize,
+    notification_warned: bool,
 }
 impl App {
     pub fn new(
@@ -184,6 +212,17 @@ impl App {
             image_due: Instant::now(),
             image_error: None,
             images,
+            policy: None,
+            desktop_cancel: CancellationToken::new(),
+            clipboard_cancel: CancellationToken::new(),
+            clipboard_monitor: Default::default(),
+            clipboard_generation: 0,
+            clipboard_pending: false,
+            clipboard_due: Instant::now(),
+            clipboard_url: None,
+            clipboard_warned: false,
+            notification_pending: 0,
+            notification_warned: false,
         };
         if demo {
             app.load_demo();
@@ -338,7 +377,28 @@ impl App {
                 Err(e) => self.status = format!("Could not save settings: {e}"),
                 Ok(()) => {
                     let account_changed = self.config.account_index != config.account_index;
+                    let clipboard_changed =
+                        self.config.clipboard_watcher != config.clipboard_watcher;
+                    let images_changed = self.config.image_protocol != config.image_protocol;
                     self.config = *config;
+                    if clipboard_changed {
+                        self.clipboard_cancel.cancel();
+                        self.clipboard_cancel = CancellationToken::new();
+                        self.clipboard_generation += 1;
+                        self.clipboard_monitor = Default::default();
+                        self.clipboard_url = None;
+                        self.clipboard_warned = false;
+                    }
+                    if images_changed {
+                        use ratatui_image::picker::ProtocolType;
+                        self.picker
+                            .set_protocol_type(match self.config.image_protocol.as_str() {
+                                "kitty" => ProtocolType::Kitty,
+                                "sixel" => ProtocolType::Sixel,
+                                "iterm2" => ProtocolType::Iterm2,
+                                _ => ProtocolType::Halfblocks,
+                            });
+                    }
                     if let Some(account) = account {
                         self.session = Some(Arc::new(account));
                     }
@@ -395,6 +455,57 @@ impl App {
                 }
                 Err(e) => self.status = e.to_string(),
             },
+            UiEvent::Clipboard { generation, result } => {
+                self.clipboard_pending = false;
+                if generation != self.clipboard_generation || !self.config.clipboard_watcher {
+                    return;
+                }
+                match result {
+                    Ok(text) => {
+                        if let Some(url) = self.clipboard_monitor.observe(&text) {
+                            self.clipboard_url = Some(url);
+                            self.status =
+                                "YouTube URL detected · :clipboard reviews download options".into();
+                        }
+                        self.clipboard_due = Instant::now() + Duration::from_secs(2);
+                    }
+                    Err(_) => {
+                        if !self.clipboard_warned {
+                            self.status = "Clipboard watcher unavailable · install wl-clipboard or xclip/xsel; retrying in 30s".into();
+                            self.clipboard_warned = true;
+                        }
+                        self.clipboard_due = Instant::now() + Duration::from_secs(30);
+                    }
+                }
+            }
+            UiEvent::Import(result) => match result {
+                Ok(jobs) => {
+                    let count =
+                        ytui_services::queue_import::append(&mut self.snapshot.downloads, jobs);
+                    self.status = format!("Imported {count} queued items");
+                    self.dirty = true;
+                }
+                Err(e) => self.status = ytui_services::process::diagnostic(&e.to_string()),
+            },
+            UiEvent::Text { title, result } => match result {
+                Ok(lines) => {
+                    self.modal = Some(Modal::Text {
+                        title,
+                        lines,
+                        offset: 0,
+                    })
+                }
+                Err(e) => self.status = ytui_services::process::diagnostic(&e.to_string()),
+            },
+            UiEvent::Notification(result) => {
+                self.notification_pending = self.notification_pending.saturating_sub(1);
+                if result.is_err() && !self.notification_warned {
+                    self.notification_warned = true;
+                    self.status =
+                        "Desktop notifications unavailable · download result is saved in Downloads"
+                            .into();
+                }
+            }
             UiEvent::Status(message) => {
                 if !message.is_empty() {
                     self.status = message;
@@ -485,7 +596,7 @@ impl App {
                 KeyCode::Esc => {}
                 KeyCode::Enter => {
                     let text = input.editor.text.trim().to_owned();
-                    if input.command {
+                    if input.command || text.starts_with('/') {
                         if let Err(e) = self.command(&text) {
                             self.status = e.to_string();
                         }
@@ -537,7 +648,88 @@ impl App {
             return;
         }
         match &mut modal {
-            Modal::Help => {
+            Modal::Text { lines, offset, .. } => {
+                match key.code {
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *offset = (*offset + 1).min(lines.len().saturating_sub(1))
+                    }
+                    KeyCode::Up | KeyCode::Char('k') => *offset = offset.saturating_sub(1),
+                    KeyCode::PageDown => {
+                        *offset = (*offset + 10).min(lines.len().saturating_sub(1))
+                    }
+                    KeyCode::PageUp => *offset = offset.saturating_sub(10),
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::Help(offset) => {
+                match key.code {
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *offset = (*offset + 1).min(REGISTRY.len())
+                    }
+                    KeyCode::Up | KeyCode::Char('k') => *offset = offset.saturating_sub(1),
+                    KeyCode::PageDown => *offset = (*offset + 10).min(REGISTRY.len()),
+                    KeyCode::PageUp => *offset = offset.saturating_sub(10),
+                    KeyCode::Home => *offset = 0,
+                    KeyCode::End => *offset = REGISTRY.len(),
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::History(view) => {
+                let rows = view.rows(&self.snapshot.downloads.jobs);
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => {
+                        view.selected = view.selected.saturating_sub(1)
+                    }
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        view.selected = (view.selected + 1).min(rows.len().saturating_sub(1))
+                    }
+                    KeyCode::Char('f') => {
+                        view.filter = view.filter.next();
+                        view.selected = 0;
+                    }
+                    KeyCode::Enter => {
+                        if let Some((index, _)) = rows.get(view.selected) {
+                            self.tab = 0;
+                            self.download_selected = *index;
+                            self.selection_changed();
+                        }
+                        return;
+                    }
+                    KeyCode::Char('g') => {
+                        if let Some((_, job)) = rows.get(view.selected)
+                            && let Some(group) = &job.group_id
+                        {
+                            self.modal = Some(Modal::History(history::View {
+                                group: Some(group.clone()),
+                                ..Default::default()
+                            }));
+                            return;
+                        }
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::Groups(index) => {
+                let groups = self.download_groups();
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *index = index.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *index = (*index + 1).min(groups.len().saturating_sub(1))
+                    }
+                    KeyCode::Enter => {
+                        if let Some((id, _, _)) = groups.get(*index) {
+                            self.modal = Some(Modal::History(history::View {
+                                group: Some(id.clone()),
+                                ..Default::default()
+                            }));
+                        }
+                        return;
+                    }
+                    _ => {}
+                }
                 self.modal = Some(modal);
             }
             Modal::Themes(index) => match key.code {
@@ -593,6 +785,7 @@ impl App {
                             FormKind::Download(_, _) => form.download_values().map(|(m, o)| {
                                 self.enqueue_download(m, o);
                             }),
+                            FormKind::Keys(_) => form.key_values().map(|c| self.save_config(c)),
                             FormKind::Settings(_) => {
                                 form.config_values().map(|c| self.save_config(c))
                             }
@@ -756,7 +949,7 @@ impl App {
                 }
             }
             Action::Quit => self.quit = true,
-            Action::Help => self.modal = Some(Modal::Help),
+            Action::Help => self.modal = Some(Modal::Help(0)),
             Action::Search => {
                 self.input = Some(Input {
                     command: false,
@@ -1086,15 +1279,44 @@ impl App {
             }
         }
         if !self.demo {
+            let policy = self.config.schedule.policy(
+                ytui_services::desktop::local_minute(),
+                self.config.download.global_bandwidth_kib,
+                self.config.concurrency,
+            );
+            if self.policy.is_some_and(|old| old != policy) || !policy.allowed {
+                for job in &mut self.snapshot.downloads.jobs {
+                    if job.state.active() {
+                        if let Some(task) = self.running.get(&job.id) {
+                            task.cancel.cancel();
+                        }
+                        job.invalidate(JobState::Queued);
+                        self.dirty = true;
+                    }
+                }
+                if self.policy != Some(policy) {
+                    self.status = if policy.allowed {
+                        "Download schedule/rate changed · resuming eligible jobs"
+                    } else {
+                        "Outside download window · queue waits; manual pauses are preserved"
+                    }
+                    .into();
+                    self.redraw = true;
+                }
+            }
+            self.policy = Some(policy);
+            let now = schedule::unix_now();
             for job in &mut self.snapshot.downloads.jobs {
                 if self.running.len() >= self.config.concurrency {
                     break;
                 }
-                if job.state == JobState::Queued && !self.running.contains_key(&job.id) {
+                if policy.allowed && job.ready(now) && !self.running.contains_key(&job.id) {
                     job.state = JobState::Resolving;
                     let cancel = CancellationToken::new();
+                    let mut transfer = job.clone();
+                    transfer.options.global_bandwidth_kib = policy.global_bandwidth_kib;
                     let task = tokio::spawn(download::execute(
-                        job.clone(),
+                        transfer,
                         self.config.clone(),
                         self.paths.clone(),
                         self.session.clone(),
@@ -1107,13 +1329,73 @@ impl App {
                 }
             }
         }
+        if !self.demo
+            && self.config.clipboard_watcher
+            && !self.clipboard_pending
+            && Instant::now() >= self.clipboard_due
+        {
+            self.clipboard_pending = true;
+            let generation = self.clipboard_generation;
+            let cancel = self.clipboard_cancel.child_token();
+            self.tasks.spawn(async move {
+                UiEvent::Clipboard {
+                    generation,
+                    result: ytui_services::desktop::read_clipboard(cancel).await,
+                }
+            });
+        }
         if self.theme_rx.has_changed().unwrap_or(false) {
             self.palette = self.theme_rx.borrow_and_update().clone();
             self.redraw = true;
         }
         self.refresh_image();
     }
+    pub fn download_groups(&self) -> Vec<(String, String, usize)> {
+        let mut groups: Vec<(String, String, usize)> = Vec::new();
+        for job in &self.snapshot.downloads.jobs {
+            if let Some(id) = &job.group_id {
+                if let Some(group) = groups.iter_mut().find(|g| &g.0 == id) {
+                    group.2 += 1;
+                } else {
+                    groups.push((id.clone(), job.media.title.clone(), 1));
+                }
+            }
+        }
+        groups
+    }
+    pub fn job_event(&mut self, event: JobEvent) {
+        let terminal = matches!(event.update, JobUpdate::Finished | JobUpdate::Failed { .. });
+        let id = event.id;
+        if !self.snapshot.downloads.apply(event) {
+            return;
+        }
+        self.dirty = true;
+        self.redraw = true;
+        if terminal
+            && !self.demo
+            && self.config.notifications
+            && self.notification_pending < 16
+            && let Some(job) = self.snapshot.downloads.jobs.iter().find(|j| j.id == id)
+        {
+            let failed = job.state == JobState::Error;
+            let title = if failed {
+                "Download failed"
+            } else {
+                "Download complete"
+            };
+            let text = job.media.title.clone();
+            let sound = self.config.notification_sound;
+            self.notification_pending += 1;
+            self.tasks.spawn(async move {
+                UiEvent::Notification(
+                    ytui_services::desktop::notify(title, &text, failed, sound).await,
+                )
+            });
+        }
+    }
     pub async fn shutdown(&mut self) {
+        self.desktop_cancel.cancel();
+        self.clipboard_cancel.cancel();
         self.theme_cancel.cancel();
         self.image_cancel.cancel();
         for tab in &self.tabs {
@@ -1125,6 +1407,11 @@ impl App {
         for (_, task) in self.running.drain() {
             let _ = task.task.await;
         }
+        // Give cancelled supervised desktop processes time to reap before aborting network tasks.
+        let _ = tokio::time::timeout(Duration::from_secs(2), async {
+            while self.tasks.join_next().await.is_some() {}
+        })
+        .await;
         self.tasks.shutdown().await;
         for job in &mut self.snapshot.downloads.jobs {
             if job.state.active() {
@@ -1177,11 +1464,208 @@ impl App {
         let Some(cmd) = parts.first().map(String::as_str) else {
             return Ok(());
         };
+        let slash = cmd.starts_with('/');
+        let cmd = cmd.trim_start_matches('/');
+        let cmd = if slash && cmd == "history" {
+            "downloads"
+        } else {
+            cmd
+        };
         let value = parts.iter().skip(1).cloned().collect::<Vec<_>>().join(" ");
         let browse_tab = if self.tab == 0 { 1 } else { self.tab };
-        match cmd.trim_start_matches('/') {
+        match cmd {
             "quit" | "q" => self.quit = true,
-            "help" => self.modal = Some(Modal::Help),
+            "help" | "?" => self.modal = Some(Modal::Help(0)),
+            "keys" => self.modal = Some(Modal::Form(Box::new(Form::keys(self.config.clone())))),
+            "downloads" | "stats" => {
+                let mut words = value.split_whitespace();
+                let filter = words.next().and_then(history::Filter::parse);
+                let query = if filter.is_some() {
+                    words.collect::<Vec<_>>().join(" ")
+                } else {
+                    value
+                };
+                self.modal = Some(Modal::History(history::View {
+                    filter: filter.unwrap_or_default(),
+                    query,
+                    ..Default::default()
+                }));
+            }
+            "queue" => self.change_tab(0),
+            "groups" => self.modal = Some(Modal::Groups(0)),
+            "download-page" => {
+                ensure!(
+                    self.tab == 1 || self.tab == 2,
+                    "Open a YouTube/Music collection first"
+                );
+                ensure!(!self.demo, "Downloads are disabled in demo mode");
+                let page = &self.tabs[self.tab].page;
+                let indices = history::selection_indices(&value, page.items.len())?;
+                let media = indices
+                    .into_iter()
+                    .map(|i| page.items[i].clone())
+                    .collect::<Vec<_>>();
+                ensure!(
+                    media
+                        .iter()
+                        .all(|m| !m.collection() && http_url(&m.url).is_ok()),
+                    "Select individual videos/songs only; open collections first"
+                );
+                let group = uuid::Uuid::new_v4().to_string();
+                let mut added = 0;
+                for media in media {
+                    let before = self.snapshot.downloads.jobs.len();
+                    let mut options = self.config.download.clone();
+                    options.audio = self.tab == 2;
+                    self.enqueue_download(media, options);
+                    if self.snapshot.downloads.jobs.len() > before {
+                        self.snapshot.downloads.jobs.last_mut().unwrap().group_id =
+                            Some(group.clone());
+                        added += 1;
+                    }
+                }
+                self.status =
+                    format!("Added {added} items from the loaded page · :groups expands the group");
+            }
+            "audio" | "video" | "audio-playlist" | "video-playlist" => {
+                let mut config = self.config.clone();
+                config.download.audio = cmd.starts_with("audio");
+                config.download.playlist = cmd.ends_with("playlist");
+                self.save_config(config);
+            }
+            "bandwidth" | "limit" | "proxy" | "subs" | "subtitles" | "metadata" | "hooks" => {
+                self.modal = Some(Modal::Form(Box::new(Form::settings(self.config.clone()))));
+            }
+            "vpn" => {
+                ensure!(!self.demo, "VPN access is disabled in demo mode");
+                let action = parts.get(1).map(String::as_str).unwrap_or("list");
+                ensure!(
+                    ["list", "status", "connect", "disconnect"].contains(&action),
+                    "Use :vpn list/status/connect/disconnect UUID"
+                );
+                let program = self.config.nmcli.clone();
+                let cancel = self.desktop_cancel.child_token();
+                if action == "connect" || action == "disconnect" {
+                    let id = parts
+                        .get(2)
+                        .context("Provide a UUID from :vpn list")?
+                        .clone();
+                    uuid::Uuid::parse_str(&id)?;
+                    let connect = action == "connect";
+                    self.tasks.spawn(async move {
+                        let result =
+                            ytui_services::vpn::change(&program, &id, connect, cancel).await;
+                        UiEvent::Status(match result {
+                            Ok(()) => "VPN action completed".into(),
+                            Err(e) => ytui_services::process::diagnostic(&e.to_string()),
+                        })
+                    });
+                } else {
+                    self.tasks.spawn(async move {
+                        let result =
+                            ytui_services::vpn::list(&program, cancel)
+                                .await
+                                .map(|connections| {
+                                    let mut lines = vec![
+                                        "Existing NetworkManager VPN/WireGuard profiles".into(),
+                                        ":vpn connect UUID · :vpn disconnect UUID".into(),
+                                        String::new(),
+                                    ];
+                                    for c in connections {
+                                        lines.push(format!(
+                                            "{} · {} · {}",
+                                            c.name,
+                                            c.kind,
+                                            if c.active { "active" } else { "inactive" }
+                                        ));
+                                        lines.push(c.uuid);
+                                        lines.push(String::new());
+                                    }
+                                    lines
+                                });
+                        UiEvent::Text {
+                            title: "VPN connections".into(),
+                            result,
+                        }
+                    });
+                }
+                self.status = "VPN operation running…".into();
+            }
+            "clipboard" if value == "on" || value == "off" => {
+                let mut config = self.config.clone();
+                config.clipboard_watcher = value == "on";
+                self.save_config(config);
+            }
+            "clipboard" => {
+                ensure!(
+                    self.config.clipboard_watcher,
+                    "Enable Clipboard watcher in :settings first"
+                );
+                let url = self
+                    .clipboard_url
+                    .clone()
+                    .context("No new YouTube URL detected yet")?;
+                self.modal = Some(Modal::Form(Box::new(Form::download(
+                    Media {
+                        title: "From clipboard".into(),
+                        url,
+                        ..Default::default()
+                    },
+                    self.config.download.clone(),
+                ))));
+            }
+            "schedule" if value.is_empty() => {
+                self.modal = Some(Modal::Form(Box::new(Form::settings(self.config.clone()))))
+            }
+            "schedule" => {
+                let delay = schedule::delay_seconds(
+                    parts
+                        .get(1)
+                        .context("Use :schedule 30m URL (or 2h / 90s)")?,
+                )?;
+                let url = normalize_media_url(parts.get(2).context("Provide a media URL")?)?;
+                ensure!(!self.demo, "Scheduling is disabled in demo mode");
+                let mut job = Job::new(
+                    Media {
+                        title: "Scheduled media".into(),
+                        url,
+                        ..Default::default()
+                    },
+                    self.config.download.clone(),
+                );
+                job.not_before = Some(schedule::unix_now().saturating_add(delay));
+                self.snapshot.downloads.jobs.push(job);
+                self.dirty = true;
+                self.status = format!(
+                    "Download scheduled in {delay}s · waits for the daily window if configured"
+                );
+            }
+            "profiles" => {
+                let names = ytui_services::profiles::list(&self.paths)?;
+                self.status = if names.is_empty() {
+                    "No saved profiles · :profile save NAME".into()
+                } else {
+                    format!("Profiles: {} · :profile load NAME", names.join(", "))
+                };
+            }
+            "profile" if value.is_empty() => self.command("profiles")?,
+            "profile" => {
+                let action = parts.get(1).context("Use :profile save/load/delete NAME")?;
+                let name = parts.iter().skip(2).cloned().collect::<Vec<_>>().join(" ");
+                ensure!(!self.demo, "Profiles are disabled in demo mode");
+                match action.as_str() {
+                    "save" => {
+                        ytui_services::profiles::save(&self.paths, &name, &self.config)?;
+                        self.status = format!("Saved profile {name}");
+                    }
+                    "load" => self.save_config(ytui_services::profiles::load(&self.paths, &name)?),
+                    "delete" => {
+                        ytui_services::profiles::delete(&self.paths, &name)?;
+                        self.status = format!("Deleted profile {name}");
+                    }
+                    _ => anyhow::bail!("Use :profile save/load/delete NAME"),
+                }
+            }
             "settings" => {
                 self.modal = Some(Modal::Form(Box::new(Form::settings(self.config.clone()))))
             }
@@ -1197,6 +1681,7 @@ impl App {
                     self.save_config(c);
                 }
             }
+            "history" if self.tab == 0 => self.command(&format!("downloads completed {value}"))?,
             "home" | "subscriptions" | "later" | "liked" | "library" | "history" => {
                 ensure!(browse_tab != 3, "Choose YouTube or Music for this feed");
                 self.tab = browse_tab;
@@ -1295,6 +1780,35 @@ impl App {
                 self.change_tab(3);
                 self.navigate(3, BrowseRequest::Cliamp, false);
             }
+            "pin-country" | "unpin-country" => {
+                let code = value.to_uppercase();
+                ensure!(
+                    code.len() == 2 && code.bytes().all(|b| b.is_ascii_alphabetic()),
+                    "Use a two-letter country code, e.g. DE"
+                );
+                let mut config = self.config.clone();
+                config
+                    .radio_pinned_countries
+                    .retain(|c| c.to_uppercase() != code);
+                if cmd == "pin-country" {
+                    config.radio_pinned_countries.push(code);
+                }
+                self.save_config(config);
+            }
+            "countries" => {
+                let mut lines = vec![
+                    "Pinned countries · :country CODE browses stations".into(),
+                    String::new(),
+                ];
+                lines.extend(self.config.radio_pinned_countries.iter().cloned());
+                lines.push(String::new());
+                lines.push(":pin-country DE · :unpin-country DE".into());
+                self.modal = Some(Modal::Text {
+                    title: "Radio countries".into(),
+                    lines,
+                    offset: 0,
+                });
+            }
             "radio" | "country" | "tag" => {
                 self.change_tab(3);
                 self.navigate(
@@ -1343,6 +1857,17 @@ impl App {
                     )
                 });
             }
+            "stopall" => {
+                for j in &mut self.snapshot.downloads.jobs {
+                    if j.state.active() || matches!(j.state, JobState::Queued | JobState::Paused) {
+                        if let Some(t) = self.running.get(&j.id) {
+                            t.cancel.cancel();
+                        }
+                        j.invalidate(JobState::Cancelled);
+                    }
+                }
+                self.dirty = true;
+            }
             "pauseall" => {
                 for j in &mut self.snapshot.downloads.jobs {
                     if j.state.active() || j.state == JobState::Queued {
@@ -1369,6 +1894,21 @@ impl App {
                     .retain(|j| j.state != JobState::Done);
                 self.dirty = true;
             }
+            "import" => {
+                ensure!(!self.demo, "Queue import is disabled in demo mode");
+                ensure!(!value.is_empty(), "Provide an import path");
+                let config = self.config.clone();
+                self.tasks.spawn(async move {
+                    UiEvent::Import(
+                        tokio::task::spawn_blocking(move || {
+                            ytui_services::queue_import::read(&PathBuf::from(value), &config)
+                        })
+                        .await
+                        .map_err(anyhow::Error::from)
+                        .and_then(|r| r),
+                    )
+                });
+            }
             "export" => {
                 ensure!(!value.is_empty(), "Provide an export path");
                 let data = serde_json::to_vec_pretty(&self.snapshot)?;
@@ -1378,10 +1918,11 @@ impl App {
             "open" => {
                 let media = self.selected().context("Select an item")?;
                 ytui_core::http_url(&media.url)?;
+                let cancel = self.desktop_cancel.child_token();
                 self.tasks.spawn(async move {
                     let result = ytui_services::process::run(
                         ytui_services::process::ProcessSpec::new("xdg-open", vec![media.url], 10),
-                        CancellationToken::new(),
+                        cancel,
                         |_| {},
                     )
                     .await;

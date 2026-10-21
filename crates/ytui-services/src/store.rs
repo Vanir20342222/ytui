@@ -154,6 +154,7 @@ mod tests {
         let mut s = Snapshot::default();
         let mut a = Job::new(Media::default(), DownloadOptions::default());
         a.state = JobState::Downloading;
+        a.not_before = Some(12345678900);
         let mut b = a.clone();
         b.id = uuid::Uuid::new_v4();
         b.state = JobState::Paused;
@@ -163,6 +164,7 @@ mod tests {
         let store = Store::open(d.path()).unwrap();
         let loaded = store.load().await.unwrap();
         assert_eq!(loaded.downloads.jobs[0].state, JobState::Queued);
+        assert_eq!(loaded.downloads.jobs[0].not_before, Some(12345678900));
         assert_eq!(loaded.downloads.jobs[1].state, JobState::Paused);
         store.close().await.unwrap();
     }

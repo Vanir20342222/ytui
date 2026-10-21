@@ -192,3 +192,66 @@ fn local_conversion_changes_extension_and_preserves_input() {
     );
     assert!(String::from_utf8_lossy(&output.stdout).contains("source_converted.mp3"));
 }
+
+#[cfg(unix)]
+#[test]
+fn hooks_receive_resolved_metadata_and_daily_window_requires_explicit_override() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let script = temp.path().join("fake-extractor");
+    let hook = temp.path().join("hook");
+    let final_file = temp.path().join("final.mp4");
+    let environment_file = temp.path().join("hook-env");
+    // Fixed test scripts with path data passed by arguments/environment, never evaluated as shell source.
+    std::fs::write(&script, "#!/bin/sh\nprintf '%s' media > \"$FIXTURE_OUTPUT\"\nprintf '%s\\n' 'YTUI_META:{\"id\":\"fixture\",\"title\":\"日本語 title\",\"webpage_url\":\"https://example.test/video\"}'\nprintf 'YTUI_OUTPUT:\"%s\"\\n' \"$FIXTURE_OUTPUT\"\n").unwrap();
+    std::fs::write(&hook, "#!/bin/sh\nprintf '%s\\n' \"$YTUI_OUTPUT_PATH\" \"$YTUI_VIDEO_ID\" \"$YTUI_TITLE\" \"$YTUI_URL\" \"$YTUI_DOWNLOAD_MODE\" > \"$FIXTURE_ENV\"\n").unwrap();
+    for path in [&script, &hook] {
+        std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let mut config = Config {
+        auth_store: "file".into(),
+        yt_dlp: script.to_string_lossy().into(),
+        ..Default::default()
+    };
+    config.download.post_download_hook = Some(hook);
+    let minute = (ytui_services::desktop::local_minute() + 20) % 1440;
+    let end = (minute + 1) % 1440;
+    config.schedule.download_window = Some(format!(
+        "{:02}:{:02}-{:02}:{:02}",
+        minute / 60,
+        minute % 60,
+        end / 60,
+        end % 60
+    ));
+    let path = temp.path().join("rust.toml");
+    std::fs::write(&path, toml::to_string(&config).unwrap()).unwrap();
+    let mut command = Command::new(env!("CARGO_BIN_EXE_ytui"));
+    command
+        .args([
+            "--config",
+            path.to_str().unwrap(),
+            "--state-dir",
+            temp.path().join("state").to_str().unwrap(),
+            "download",
+            "https://example.test/video",
+            "--backend",
+            "yt-dlp",
+            "--directory",
+            temp.path().join("media").to_str().unwrap(),
+        ])
+        .env("FIXTURE_OUTPUT", &final_file)
+        .env("FIXTURE_ENV", &environment_file);
+    let blocked = command.output().unwrap();
+    assert!(!blocked.status.success());
+    assert!(!final_file.exists());
+    assert!(String::from_utf8_lossy(&blocked.stderr).contains("--now"));
+    let output = command.arg("--now").output().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let environment = std::fs::read_to_string(environment_file).unwrap();
+    assert!(environment.contains("fixture\n日本語 title\nhttps://example.test/video\nvideo\n"));
+    assert!(environment.contains(final_file.to_str().unwrap()));
+}

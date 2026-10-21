@@ -22,6 +22,8 @@ pub struct Config {
     pub ffmpeg: String,
     pub mpv: String,
     pub cliamp: String,
+    pub nmcli: String,
+    pub radio_pinned_countries: Vec<String>,
     pub auth_store: String,
     pub account_index: u32,
     pub keybindings: BTreeMap<String, String>,
@@ -29,6 +31,10 @@ pub struct Config {
     pub custom_stations: Vec<crate::Media>,
     pub clipboard_watcher: bool,
     pub notifications: bool,
+    pub notification_sound: bool,
+    pub schedule: crate::schedule::Schedule,
+    pub legacy_settings: Option<String>,
+    pub legacy_keybindings: BTreeMap<String, String>,
 }
 impl Default for Config {
     fn default() -> Self {
@@ -50,6 +56,8 @@ impl Default for Config {
             ffmpeg: "ffmpeg".into(),
             mpv: "mpv".into(),
             cliamp: "cliamp".into(),
+            nmcli: "nmcli".into(),
+            radio_pinned_countries: Vec::new(),
             auth_store: "keyring".into(),
             account_index: 0,
             keybindings: BTreeMap::new(),
@@ -57,6 +65,10 @@ impl Default for Config {
             custom_stations: Vec::new(),
             clipboard_watcher: false,
             notifications: true,
+            notification_sound: false,
+            schedule: Default::default(),
+            legacy_settings: None,
+            legacy_keybindings: BTreeMap::new(),
         }
     }
 }
@@ -82,6 +94,10 @@ impl Config {
         );
         for (key, action) in &self.keybindings {
             ensure!(
+                key != "ctrl+c" || action == "quit",
+                "Ctrl+C is reserved for emergency quit"
+            );
+            ensure!(
                 crate::shortcuts::valid_key(key)
                     && crate::shortcuts::Action::parse(action).is_some(),
                 "Invalid keybinding {key}: {action}"
@@ -101,6 +117,13 @@ impl Config {
                 .contains(&self.image_protocol.as_str()),
             "Unknown image protocol"
         );
+        ensure!(
+            self.radio_pinned_countries
+                .iter()
+                .all(|c| c.len() == 2 && c.bytes().all(|b| b.is_ascii_alphabetic())),
+            "Pinned radio countries must use two-letter codes"
+        );
+        self.schedule.validate()?;
         self.download.validate()
     }
 }

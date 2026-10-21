@@ -468,6 +468,7 @@ mod discovery_tests {
         let t = tempfile::tempdir().unwrap();
         let p = Paths {
             config_override: None,
+            xdg_state: t.path().join("state"),
             config: t.path().join("config/ytui"),
             state: t.path().join("state"),
             cache: t.path().join("cache"),

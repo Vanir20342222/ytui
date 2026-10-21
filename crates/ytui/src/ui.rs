@@ -233,7 +233,15 @@ fn downloads(f: &mut Frame, app: &App, area: Rect) {
         return;
     }
     let rows = app.snapshot.downloads.jobs.iter().map(|j| {
-        let state = format!("{:?}", j.state);
+        let state = if j
+            .not_before
+            .is_some_and(|at| at > ytui_core::schedule::unix_now())
+            && j.state == JobState::Queued
+        {
+            "Scheduled".into()
+        } else {
+            format!("{:?}", j.state)
+        };
         let state_color = if j.state == JobState::Error {
             app.palette.error
         } else if j.state == JobState::Done {
@@ -269,7 +277,10 @@ fn downloads(f: &mut Frame, app: &App, area: Rect) {
                 )
             });
         Row::new(vec![
-            Cell::from(Line::styled(state, Style::default().fg(rgb(state_color)))),
+            Cell::from(Line::styled(
+                state,
+                Style::default().fg(themed(app, state_color)),
+            )),
             Cell::from(Text::from(vec![
                 Line::from(title),
                 Line::styled(
@@ -571,15 +582,36 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
         return;
     };
     let size = match modal {
-        Modal::Help => (90, 35),
+        Modal::Help(_) => (90, 35),
         Modal::Themes(_) => (52, 20),
         Modal::Form(form) => (86, form.fields.len() as u16 + 8),
         Modal::Queue(_) => (85, 25),
+        Modal::History(_) => (105, 32),
+        Modal::Groups(_) => (85, 25),
+        Modal::Text { .. } => (90, 28),
     };
     let rect = centered(area, size.0, size.1);
     f.render_widget(Clear, rect);
     match modal {
-        Modal::Help => {
+        Modal::Text {
+            title,
+            lines,
+            offset,
+        } => {
+            f.render_widget(
+                Paragraph::new(
+                    lines
+                        .iter()
+                        .map(|s| Line::from(s.as_str()))
+                        .collect::<Vec<_>>(),
+                )
+                .scroll((*offset as u16, 0))
+                .wrap(Wrap { trim: true })
+                .block(panel(format!(" {title} · ↑/↓ scroll · Esc closes "), app)),
+                rect,
+            );
+        }
+        Modal::Help(offset) => {
             let mut lines = vec![
                 Line::styled(
                     "Make yourself at home",
@@ -587,11 +619,10 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
                         .fg(themed(app, app.palette.accent))
                         .add_modifier(Modifier::BOLD),
                 ),
-                Line::from("1–4 tabs · arrows or j/k navigate · Esc closes this help"),
+                Line::from("↑/↓ or PgUp/PgDn scroll · Esc closes · :keys edits shortcuts"),
                 Line::from(""),
             ];
-            let available = (rect.height.saturating_sub(12)) as usize;
-            for (key, _, action, description) in REGISTRY.iter().take(available) {
+            for (key, _, action, description) in REGISTRY {
                 let mapped = app
                     .config
                     .keybindings
@@ -606,10 +637,12 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
                 Line::from(":home :subscriptions :later :liked :library :history"),
                 Line::from(":radio name :country DE :tag jazz :favorites :cliamp"),
                 Line::from(":auth :settings :details :songs QUERY :albums :artists"),
-                Line::from("All shortcuts are listed in docs/RUST.md and can be remapped."),
+                Line::from(":downloads completed QUERY :stats :groups :download-page 1,3:7"),
+                Line::from(":schedule 30m URL :clipboard :profiles :profile load NAME"),
             ]);
             f.render_widget(
                 Paragraph::new(lines)
+                    .scroll((*offset as u16, 0))
                     .block(panel(" Keyboard & commands ", app))
                     .wrap(Wrap { trim: true }),
                 rect,
@@ -627,6 +660,91 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
                 .highlight_symbol("▸ ");
             let mut state = ListState::default().with_selected(Some(*selected));
             f.render_stateful_widget(list, rect, &mut state);
+        }
+        Modal::History(view) => {
+            let rows = view.rows(&app.snapshot.downloads.jobs);
+            let stats = ytui_core::history::Statistics::from_jobs(rows.iter().map(|(_, j)| *j));
+            let block = panel(
+                format!(
+                    " Downloads · {}{} · {} matches ",
+                    view.filter.name(),
+                    if view.group.is_some() {
+                        " · group"
+                    } else {
+                        ""
+                    },
+                    rows.len()
+                ),
+                app,
+            );
+            let inner = block.inner(rect);
+            f.render_widget(block, rect);
+            let chunks = Layout::vertical([
+                Constraint::Length(3),
+                Constraint::Min(1),
+                Constraint::Length(2),
+            ])
+            .split(inner);
+            f.render_widget(Paragraph::new(format!(" {} complete · {} failed · {} audio · {} output paths · {:.1}h completed media\n {:.1} MiB recorded transfer bytes · search: {}", stats.completed, stats.failed, stats.audio, stats.outputs, stats.media_seconds as f64 / 3600.0, stats.recorded_bytes as f64 / 1048576.0, if view.query.is_empty() { "—" } else { &view.query })).style(Style::default().fg(themed(app, app.palette.muted))), chunks[0]);
+            let items = rows
+                .iter()
+                .map(|(_, job)| {
+                    ListItem::new(vec![
+                        Line::from(format!(
+                            "{:?} · {}{}",
+                            job.state,
+                            job.media.title,
+                            if job.group_id.is_some() {
+                                " · [group]"
+                            } else {
+                                ""
+                            }
+                        )),
+                        Line::styled(
+                            job.outputs
+                                .last()
+                                .map(|p| p.display().to_string())
+                                .or_else(|| job.error.clone())
+                                .unwrap_or_else(|| job.media.creator.clone()),
+                            Style::default().fg(themed(app, app.palette.muted)),
+                        ),
+                    ])
+                })
+                .collect::<Vec<_>>();
+            let mut state = ListState::default()
+                .with_selected(Some(view.selected.min(rows.len().saturating_sub(1))));
+            f.render_stateful_widget(
+                List::new(items)
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                chunks[1],
+                &mut state,
+            );
+            f.render_widget(Paragraph::new(" ↑/↓ navigate · f filter · Enter shows queue item · g expands group\n :downloads completed QUERY · :stats failed · Esc closes").style(Style::default().fg(themed(app, app.palette.accent))), chunks[2]);
+        }
+        Modal::Groups(selected) => {
+            let groups = app.download_groups();
+            let items = groups
+                .iter()
+                .map(|(id, title, count)| {
+                    ListItem::new(vec![
+                        Line::from(format!("{title} · {count} items")),
+                        Line::styled(
+                            id.clone(),
+                            Style::default().fg(themed(app, app.palette.muted)),
+                        ),
+                    ])
+                })
+                .collect::<Vec<_>>();
+            let mut state = ListState::default().with_selected(Some(*selected));
+            f.render_stateful_widget(
+                List::new(items)
+                    .block(panel(" Download groups · Enter expands · Esc closes ", app))
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                rect,
+                &mut state,
+            );
         }
         Modal::Queue(selected) => {
             let items = app
@@ -729,10 +847,12 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
                     ))),
                 Rect::new(inner.x + 1, bottom, inner.width.saturating_sub(2), 2),
             );
-            let hint = if matches!(form.kind, crate::forms::FormKind::Auth) {
+            let hint = if matches!(form.kind, crate::forms::FormKind::Keys(_)) {
+                "Names: enter, space, ctrl+r, f8 · Separate multiple keys with spaces"
+            } else if matches!(form.kind, crate::forms::FormKind::Auth) {
                 "Only the selected profile is read. Sign in to YouTube there first."
             } else if matches!(form.kind, crate::forms::FormKind::Settings(_)) {
-                ":theme lists themes · providers: auto / caelestia / omarchy / portal"
+                "Windows: HH:MM-HH:MM (local time); blank=off · rates in total KiB/s"
             } else {
                 "Playlist indices: 1,3:7 · Quality: best or height (e.g. 1080)"
             };
