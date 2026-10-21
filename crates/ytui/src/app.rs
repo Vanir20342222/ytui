@@ -46,6 +46,7 @@ pub struct TabView {
     pub history: Vec<(BrowseRequest, Page, usize)>,
 }
 pub enum Modal {
+    Feeds(usize),
     Help(usize),
     Themes(usize),
     Form(Box<Form>),
@@ -158,6 +159,106 @@ pub struct App {
     watch_pending: HashMap<uuid::Uuid, (u64, CancellationToken)>,
 }
 impl App {
+    pub fn feed_choices(&self) -> &'static [(&'static str, &'static str, &'static str)] {
+        if self.offline {
+            return &[
+                (
+                    "Downloaded videos",
+                    "Completed videos on this device",
+                    "offline video",
+                ),
+                (
+                    "Downloaded music",
+                    "Completed audio on this device",
+                    "offline audio",
+                ),
+                (
+                    "Continue watching",
+                    "Your locally saved playback positions",
+                    "resume",
+                ),
+                (
+                    "Collection watches",
+                    "Manage watches; polling waits for online mode",
+                    "watches",
+                ),
+            ];
+        }
+        match self.tab {
+            0 => &[
+                (
+                    "Completed downloads",
+                    "Search and filter your download history",
+                    "downloads completed",
+                ),
+                (
+                    "Offline library",
+                    "Play media already on this device",
+                    "offline",
+                ),
+                (
+                    "Continue watching",
+                    "Resume a locally saved position",
+                    "resume",
+                ),
+                (
+                    "Collection watches",
+                    "Manage automatic collection checks",
+                    "watches",
+                ),
+                ("Statistics", "Completed media and transfer totals", "stats"),
+            ],
+            2 => &[
+                ("Music home", "Recommendations from YouTube Music", "home"),
+                ("Your library", "Saved albums and playlists", "library"),
+                ("Saved albums", "Albums in your Music library", "albums"),
+                ("Artists", "Artists in your Music library", "artists"),
+                ("Liked music", "Your liked songs", "liked"),
+                ("Recently played", "Your YouTube Music history", "history"),
+                (
+                    "Downloaded music",
+                    "Completed audio on this device",
+                    "offline audio",
+                ),
+                (
+                    "Continue listening",
+                    "Resume a locally saved position",
+                    "resume",
+                ),
+            ],
+            3 => &[
+                ("Cliamp channels", "Streams and track libraries", "cliamp"),
+                ("Discover stations", "Explore Radio Browser", "radio"),
+                (
+                    "Favorite stations",
+                    "Stations you saved in ytui",
+                    "favorites",
+                ),
+            ],
+            _ => &[
+                ("For you", "Your YouTube home feed", "home"),
+                (
+                    "Subscriptions",
+                    "Latest from channels you follow",
+                    "subscriptions",
+                ),
+                ("Watch later", "Videos saved for another time", "later"),
+                ("Liked videos", "Your liked videos", "liked"),
+                ("Your library", "Playlists and collections", "library"),
+                ("Watch history", "Your YouTube watch history", "history"),
+                (
+                    "Offline library",
+                    "Completed media on this device",
+                    "offline",
+                ),
+                (
+                    "Continue watching",
+                    "Resume a locally saved position",
+                    "resume",
+                ),
+            ],
+        }
+    }
     pub fn new(
         config: Config,
         paths: Paths,
@@ -758,6 +859,25 @@ impl App {
             return;
         }
         match &mut modal {
+            Modal::Feeds(index) => {
+                let choices = self.feed_choices();
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *index = index.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *index = (*index + 1).min(choices.len().saturating_sub(1))
+                    }
+                    KeyCode::Enter => {
+                        if let Some((_, _, command)) = choices.get(*index)
+                            && let Err(error) = self.command(command)
+                        {
+                            self.status = error.to_string();
+                        }
+                        return;
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
             Modal::Text { lines, offset, .. } => {
                 match key.code {
                     KeyCode::Down | KeyCode::Char('j') => {
@@ -1088,6 +1208,7 @@ impl App {
     }
     pub fn action(&mut self, action: Action) {
         match action {
+            Action::Feeds => self.modal = Some(Modal::Feeds(0)),
             Action::Resume => {
                 if let Some(media) = self.selected_for_resume()
                     && let Some(position) = self.snapshot.positions.for_media(&media).cloned()
@@ -1845,6 +1966,7 @@ impl App {
         let browse_tab = if self.tab == 0 { 1 } else { self.tab };
         match cmd {
             "quit" | "q" => self.quit = true,
+            "feeds" => self.modal = Some(Modal::Feeds(0)),
             "watch" | "watches" if value.is_empty() || value == "list" => {
                 self.modal = Some(Modal::Watches(0))
             }

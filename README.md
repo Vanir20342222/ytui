@@ -17,6 +17,9 @@ This is an alpha; signed-in and desktop acceptance checks are still required.
 Native yt-dlp-rs has incomplete YouTube coverage. `Y` explicitly selects the
 Python yt-dlp fallback; it is never used automatically.
 
+Press `b` for feeds and libraries, `/` to search, and `?` for shortcuts. Wide
+windows show selected-item details; compact windows keep browsing space usable.
+
 ![Rust terminal demo with fictional content](docs/screenshots/youtube.png)
 
 ---

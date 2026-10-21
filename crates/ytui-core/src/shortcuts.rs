@@ -37,6 +37,7 @@ pub enum Action {
     MoveDown,
     Fallback,
     Resume,
+    Feeds,
 }
 impl Action {
     pub fn name(self) -> &'static str {
@@ -54,6 +55,7 @@ impl Action {
     }
 }
 pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
+    ("b", Action::Feeds, "feeds", "Browse feeds & library"),
     (
         "u",
         Action::Resume,

@@ -156,6 +156,7 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 | `1`–`4`, `Tab`, `Shift+Tab` | Switch tabs |
 | Arrows or `j` / `k` | Select an item |
 | `/` | Search, or paste a URL to open download options |
+| `b` | Open the feed/library picker for the current tab |
 | `:` | Run a command/feed action |
 | `Enter` | Open collection / play selected media |
 | `v` | Muted ten-second mpv video preview |
@@ -174,6 +175,19 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 | `t`, `,`, `?` | Themes, settings, contextual help |
 | `C` | Suspend ytui and run installed cliamp |
 | `q`, `Ctrl+c` | Clean shutdown |
+
+Press `b` (or run `:feeds`) to choose YouTube feeds, your Music library, radio
+sources, completed downloads or saved playback positions. The picker changes
+with the current tab; offline mode offers local actions only. Nothing starts
+playing or downloading when you move through the picker.
+
+The workspace adapts to terminal size: wide layouts show selected-item details
+and thumbnails, narrow layouts give the catalog the full width, and short windows
+use a single-line player. Downloads show separate active/queued/paused/failed/
+complete counts and a selected-item panel with progress, ETA, destination and
+errors when space permits. Footer and selected-item shortcuts follow remapped
+bindings. Dialogs hide thumbnail graphics while open; resume and watch dialogs
+size to their contents and explain empty states.
 
 Forms use `↑/↓` or `Tab` to change fields, `Space` for toggles, `Enter` to submit,
 and `Esc` to cancel. Unicode editing and bracketed paste are supported. Typing in

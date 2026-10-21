@@ -6,7 +6,7 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 
 | Area | Rust implementation | Remaining release work |
 | --- | --- | --- |
-| Four-tab shell, Unicode input, focus, help, back navigation | Implemented; size/input tests | Ghostty/tmux graphical inspection |
+| Four-tab shell, Unicode input, focus, help, back navigation | Adaptive catalog/details, tab-specific feed picker, remapped hints, compact player/dialogs and size/input tests | Ghostty/tmux graphical inspection |
 | Download queue, pause/cancel/remove/retry/reorder | Implemented; generations reject stale results | Long real-media and disk-full tests on CachyOS |
 | Native download/playback extraction | Pinned yt-dlp-rs, isolated worker; default | Many YouTube videos/playlists/live/resume unsupported upstream; explicit fallback retained |
 | yt-dlp fallback | Explicit per-job/action/CLI/global selection | Real YouTube challenge/version checks |

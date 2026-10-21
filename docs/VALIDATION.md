@@ -7,7 +7,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **61 passed**, zero failures; one real-media test is explicitly ignored in this command.
+- `cargo test --workspace --locked`: **64 passed**, zero failures; one real-media test is explicitly ignored in this command.
 - `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
@@ -78,6 +78,11 @@ Coverage includes:
   and fixed a watch-channel read-lock deadlock during implementation.
 - Unicode input/paste and focus isolation, plus rendering all tabs/forms at
   80×24, 120×40, 180×50 and the minimal 35×12 layout.
+- Feed-picker remapping, navigation without playback, and local-only offline
+  choices. Selection stays visible through scrolling/resize, loaded content and
+  errors coexist, remapped footer hints stay current, and thumbnails do not draw
+  through overlays. Download counts/progress and playback timing are checked in
+  dark, light and terminal ANSI palettes, including long titles at 35×12.
 
 A separate pseudo-terminal smoke check launched the actual demo binary, typed
 `qvds` in the search input without quitting, switched tabs, resized
@@ -96,6 +101,16 @@ search and resize/clean-exit checks passed without account loading or online
 provider requests. [Offline](screenshots/offline.png), [resume](screenshots/resume.png)
 and [watch](screenshots/watches.png) captures show fictional fixture data; no media
 was played by that screen check.
+
+The UI-polish PTY run exercised the real demo binary at 120×40 → 80×24 → 35×12
+→ 120×40, opened the feed picker, edited `qvds` without firing global actions,
+switched all four tabs and applied the light theme. Exit status was zero and
+ICANON/ECHO were restored. The current [YouTube](screenshots/youtube.png),
+[Downloads](screenshots/downloads.png), [feed picker](screenshots/feeds.png),
+[compact](screenshots/compact.png) and [light theme](screenshots/light.png) captures
+show this actual terminal output with fictional content. No account/network
+provider or media device was used. The offline catalog/resume/watch PTY check
+also passed again with the new layout.
 
 ## Live checks and boundaries
 
