@@ -28,6 +28,7 @@ pub struct Media {
     pub browse_id: Option<String>,
     pub tracks_url: Option<String>,
     pub live: bool,
+    pub chapters: Vec<crate::Chapter>,
 }
 impl Media {
     pub fn collection(&self) -> bool {
@@ -77,6 +78,7 @@ pub enum BrowseRequest {
     RadioCountry(String),
     RadioTag(String),
     Favorites,
+    OfflineLibrary { query: String, audio: Option<bool> },
 }
 
 pub fn http_url(raw: &str) -> anyhow::Result<Url> {

@@ -108,6 +108,7 @@ pub fn args(job: &Job, config: &Config, cookie_file: Option<&Path>) -> Result<Ve
         args.push("--split-chapters".into());
     }
     if !o.sponsorblock.is_empty() {
+        args.extend(["--sponsorblock-api".into(), o.sponsorblock_api.clone()]);
         args.extend([
             if o.sponsorblock_remove {
                 "--sponsorblock-remove"
@@ -204,17 +205,24 @@ pub fn transient(error: &str) -> bool {
         "http error 429",
         "temporary failure",
         "network is unreachable",
+        "error sending request",
+        "http 5",
+        "server error (5",
+        "http 429",
     ]
     .iter()
     .any(|s| e.contains(s))
         && ![
             "private video",
-            "unavailable",
+            "video unavailable",
+            "video is unavailable",
+            "content is unavailable",
             "no space left",
             "permission denied",
             "sign in",
             "cookies",
             "requested format",
+            "postprocessing failed",
         ]
         .iter()
         .any(|s| e.contains(s))
@@ -329,6 +337,7 @@ async fn execute_inner(
                     config: config.clone(),
                     cookies: cookies.as_ref().map(|f| f.path().to_owned()),
                     resolve: false,
+                    staging: None,
                 },
                 &paths.state.join("auth/transient"),
                 cancel.clone(),
@@ -460,12 +469,11 @@ async fn convert_local(
         .options
         .output_directory()
         .join(format!(".{stem}_{}.part.{extension}", job.id));
-    let mut args = vec![
-        "-nostdin".into(),
-        "-y".into(),
-        "-i".into(),
-        input.to_string_lossy().into(),
-    ];
+    let mut args = vec!["-nostdin".into()];
+    if config.offline {
+        args.extend(["-protocol_whitelist".into(), "file,pipe".into()]);
+    }
+    args.extend(["-y".into(), "-i".into(), input.to_string_lossy().into()]);
     if job.options.audio {
         args.push("-vn".into());
     }
@@ -527,5 +535,9 @@ mod tests {
         assert_eq!(p.fraction(), None);
         assert!(!transient("Private video; connection closed"));
         assert!(transient("Connection timed out"));
+        assert!(transient("HTTP 503 Service Unavailable"));
+        assert!(!transient(
+            "Native postprocessing failed: connection closed"
+        ));
     }
 }

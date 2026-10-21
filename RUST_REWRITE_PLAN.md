@@ -1,11 +1,11 @@
 # ytui Rust rewrite plan
 
-Status: Rust alpha merged in PR #2; parity follow-up on `rewrite/parity`; target-machine release gates remain open. Updated: 2026-10-21.
+Status: Rust alpha merged in PR #2; media/reliability follow-up on `rewrite/media-library`; target-machine release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
-on `rewrite/parity`; see docs/RUST.md, docs/PARITY.md and
+on `rewrite/media-library` (the parity work in PR #3 is merged); see docs/RUST.md, docs/PARITY.md and
 docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
 ## Goal and confirmed decisions
@@ -340,13 +340,13 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 43 offline tests, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 61 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
 Python yt-dlp: native YouTube coverage, playlist support and cross-process resume
-are limited. Native subtitles now use upstream APIs; SponsorBlock/chapter/rate
-controls still require an explicit fallback. The user's native-default preference changes the original
+are limited. Native subtitles, pacing, SponsorBlock and chapter adapters now exist;
+unsupported codec/caption combinations still require an explicit fallback. The user's native-default preference changes the original
 resume/reliability gate; do not present unsupported native behavior as completed.
 See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 
@@ -369,6 +369,25 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
   palette discovery when app state is relocated with `--state-dir`.
 - Offline checks and target-machine limitations are recorded in VALIDATION.md.
   These changes do not close live account/device or stable packaging gates.
+
+### Media/reliability follow-up (M1/M2/M3/M4/M5/M8)
+
+- Native media/caption pacing with cancellable worker ownership; native chapter
+  metadata/splitting and SponsorBlock mark/removal. Real FFmpeg/ffprobe fixtures
+  verify markers, reduced duration, chapter outputs and unchanged originals.
+- Native outputs stage privately and publish without clobbering existing files.
+  A later postprocessor failure reports a recoverable source directory. Fixed
+  HTTP 503 retry classification and audio-toggle destination selection.
+- Explicit local resume on `u` / `:resume`, bounded private positions, offline
+  catalog and startup mode, and early-window-close handling. The user selected
+  local resume actions, no automatic playback or YouTube history write-back.
+- Recurring collection watches with a complete initial baseline, duplicate checks,
+  persistence, resource limits/backoff and account/generation invalidation.
+- State format 2 adds a SQLite version-1 backup before upgrade; stale owned
+  credential exports/manifests are cleaned only while holding the instance lock.
+- Added sanitized diagnostics/update instructions and CI's explicit real-media
+  check. Actual account/Origin/Ghostty/audio tests and stable packaging gates remain
+  open; standalone Proton/raw wg-quick parity remains a separate scope item.
 
 ### Agent handoff and completion evidence
 

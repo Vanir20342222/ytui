@@ -6,6 +6,7 @@ explicit yt-dlp fallback. It targets CachyOS + Caelestia + Ghostty + Brave Origi
 
 ```sh
 cargo run --release --locked -p ytui -- --demo
+cargo run --release --locked -p ytui -- --offline
 cargo run --release --locked -p ytui -- doctor
 ./install-rust.sh   # installs ytui-rs alongside the Python launcher
 ```

@@ -50,6 +50,8 @@ pub enum Modal {
     Themes(usize),
     Form(Box<Form>),
     Queue(usize),
+    Resume(usize),
+    Watches(usize),
     History(history::View),
     Groups(usize),
     Text {
@@ -87,6 +89,11 @@ pub enum UiEvent {
     },
     Notification(Result<()>),
     Import(Result<Vec<Job>>),
+    Watch {
+        id: uuid::Uuid,
+        generation: u64,
+        result: Result<Vec<Media>>,
+    },
     Text {
         title: String,
         result: Result<Vec<String>>,
@@ -114,6 +121,7 @@ pub struct App {
     pub palette: Palette,
     pub player_status: PlayerStatus,
     pub demo: bool,
+    pub offline: bool,
     pub quit: bool,
     pub launch_cliamp: bool,
     pub dirty: bool,
@@ -147,6 +155,7 @@ pub struct App {
     clipboard_warned: bool,
     notification_pending: usize,
     notification_warned: bool,
+    watch_pending: HashMap<uuid::Uuid, (u64, CancellationToken)>,
 }
 impl App {
     pub fn new(
@@ -156,6 +165,7 @@ impl App {
         session: Option<Arc<Session>>,
         handles: RuntimeHandles,
         demo: bool,
+        offline: bool,
     ) -> Result<Self> {
         let RuntimeHandles {
             player,
@@ -182,7 +192,9 @@ impl App {
             download_selected: 0,
             modal: None,
             input: None,
-            status: if session.is_some() {
+            status: if offline {
+                "Offline · :offline searches local media · u resumes saved positions".into()
+            } else if session.is_some() {
                 "Connected · :home :subscriptions :library".into()
             } else {
                 "Anonymous · :auth connects your browser · ? for help".into()
@@ -190,6 +202,7 @@ impl App {
             palette: theme::builtin("ytui-dark")?,
             player_status: PlayerStatus::default(),
             demo,
+            offline,
             quit: false,
             launch_cliamp: false,
             dirty: false,
@@ -223,9 +236,19 @@ impl App {
             clipboard_warned: false,
             notification_pending: 0,
             notification_warned: false,
+            watch_pending: HashMap::new(),
         };
         if demo {
             app.load_demo();
+        } else if offline {
+            app.navigate(
+                1,
+                BrowseRequest::OfflineLibrary {
+                    query: String::new(),
+                    audio: None,
+                },
+                false,
+            );
         } else {
             app.navigate(1, BrowseRequest::Home, false);
         }
@@ -253,6 +276,20 @@ impl App {
         self.snapshot.downloads.jobs = vec![a, b];
         self.status = "DEMO · Fictional catalog · No account data".into();
     }
+    pub fn selected_for_resume(&self) -> Option<Media> {
+        let mut media = self.selected()?;
+        if self.tab == 0
+            && let Some(job) = self.snapshot.downloads.jobs.get(self.download_selected)
+            && job.state == JobState::Done
+            && let Some(path) = job.outputs.first()
+        {
+            media.url = std::fs::canonicalize(path).ok()?.to_string_lossy().into();
+            if job.options.audio {
+                media.kind = MediaKind::Song;
+            }
+        }
+        Some(media)
+    }
     pub fn selected(&self) -> Option<Media> {
         if self.tab == 0 {
             self.snapshot
@@ -270,6 +307,11 @@ impl App {
     }
     pub fn navigate(&mut self, tab: usize, request: BrowseRequest, append: bool) {
         if tab == 0 {
+            return;
+        }
+        if self.offline && !matches!(request, BrowseRequest::OfflineLibrary { .. }) {
+            self.status =
+                "Offline mode · use :offline or restart without --offline for online feeds".into();
             return;
         }
         if self.demo {
@@ -299,6 +341,8 @@ impl App {
         let radio = self.radio.clone();
         let favorites = self.snapshot.favorites.clone();
         let custom = self.config.custom_stations.clone();
+        let downloads = matches!(request, BrowseRequest::OfflineLibrary { .. })
+            .then(|| self.snapshot.downloads.clone());
         let offset = if append {
             view.page
                 .continuation
@@ -310,7 +354,11 @@ impl App {
         };
         self.tasks.spawn(async move {
             let fetch=async move {
-                if tab==3 {
+                if let BrowseRequest::OfflineLibrary { query, audio } = &request {
+                    let queue = downloads.context("Missing offline queue snapshot")?;
+                    let query = query.clone(); let audio = *audio;
+                    tokio::task::spawn_blocking(move || ytui_services::library::catalog(&queue, &query, audio)).await.map_err(anyhow::Error::from)
+                } else if tab==3 {
                     if request==BrowseRequest::Favorites {Ok(Page{title:"Favorite stations".into(),items:favorites,..Default::default()})}
                     else if request==BrowseRequest::Collection("custom".into()){Ok(Page{title:"Custom stations".into(),items:custom,..Default::default()})}
                     else{radio.fetch(&request,offset).await}
@@ -478,6 +526,55 @@ impl App {
                     }
                 }
             }
+            UiEvent::Watch {
+                id,
+                generation,
+                result,
+            } => {
+                if self
+                    .watch_pending
+                    .get(&id)
+                    .is_some_and(|(g, _)| *g == generation)
+                {
+                    self.watch_pending.remove(&id);
+                }
+                let Some(watch) = self
+                    .snapshot
+                    .watches
+                    .iter_mut()
+                    .find(|w| w.id == id && w.generation == generation && w.enabled)
+                else {
+                    return;
+                };
+                let options = watch.options.clone();
+                let baseline = watch.seen.is_none();
+                match result {
+                    Ok(items) => {
+                        let added = watch.observe(items, schedule::unix_now());
+                        let mut count = 0;
+                        for media in added {
+                            let before = self.snapshot.downloads.jobs.len();
+                            self.enqueue_download(media, options.clone());
+                            if self.snapshot.downloads.jobs.len() > before {
+                                self.snapshot.downloads.jobs.last_mut().unwrap().group_id =
+                                    Some(format!("watch:{id}"));
+                                count += 1;
+                            }
+                        }
+                        self.status = if baseline {
+                            "Watch baseline saved · only future additions will download".into()
+                        } else {
+                            format!("Watch checked · {count} new downloads queued")
+                        };
+                    }
+                    Err(e) => {
+                        let message = ytui_services::process::diagnostic(&e.to_string());
+                        watch.failed(message.clone(), schedule::unix_now());
+                        self.status = format!("Watch check failed · {message}");
+                    }
+                }
+                self.dirty = true;
+            }
             UiEvent::Import(result) => match result {
                 Ok(jobs) => {
                     let count =
@@ -538,13 +635,26 @@ impl App {
             .player
             .try_send(PlayerCommand::Session(self.session.clone()));
         self.snapshot.playback = PlaybackQueue::default();
+        self.snapshot.positions.clear_remote();
+        for watch in &mut self.snapshot.watches {
+            watch.enabled = false;
+            watch.generation += 1;
+            watch.seen = None;
+            watch.error =
+                Some("Paused after account change; resume to establish a fresh baseline".into());
+        }
+        for (_, token) in self.watch_pending.values() {
+            token.cancel();
+        }
+        self.watch_pending.clear();
         self.dirty = true;
         self.selection_changed();
         if self.tab == 1 || self.tab == 2 {
             self.navigate(self.tab, BrowseRequest::Home, false);
         }
     }
-    pub fn save_config(&mut self, c: Config) {
+    pub fn save_config(&mut self, mut c: Config) {
+        c.offline = self.offline;
         if self.demo {
             self.config = c;
             if let Ok(p) = theme::builtin(&self.config.theme) {
@@ -748,6 +858,65 @@ impl App {
                 }
                 _ => self.modal = Some(modal),
             },
+            Modal::Watches(index) => {
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *index = index.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *index = (*index + 1).min(self.snapshot.watches.len().saturating_sub(1))
+                    }
+                    KeyCode::Char(' ') => {
+                        if let Some(watch) = self.snapshot.watches.get(*index) {
+                            self.toggle_watch(watch.id, !watch.enabled);
+                        }
+                    }
+                    KeyCode::Delete => {
+                        if let Some(watch) = self.snapshot.watches.get(*index) {
+                            let id = watch.id;
+                            self.toggle_watch(id, false);
+                            self.snapshot.watches.retain(|w| w.id != id);
+                            self.dirty = true;
+                        }
+                    }
+                    KeyCode::Enter => {
+                        if let Some(watch) = self.snapshot.watches.get(*index) {
+                            let tab = if watch.music { 2 } else { 1 };
+                            let request = watch.request.clone();
+                            self.tab = tab;
+                            self.navigate(tab, request, false);
+                        }
+                        return;
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::Resume(index) => {
+                let positions = self.resume_positions();
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *index = index.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *index = (*index + 1).min(positions.len().saturating_sub(1))
+                    }
+                    KeyCode::Enter => {
+                        if let Some(position) = positions.get(*index) {
+                            self.resume_position((*position).clone());
+                        }
+                        return;
+                    }
+                    KeyCode::Delete => {
+                        if let Some(position) = positions.get(*index) {
+                            let url = position.media.url.clone();
+                            self.snapshot
+                                .positions
+                                .entries
+                                .retain(|p| p.media.url != url);
+                            self.dirty = true;
+                        }
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
             Modal::Queue(index) => match key.code {
                 KeyCode::Up | KeyCode::Char('k') => {
                     *index = index.saturating_sub(1);
@@ -872,7 +1041,8 @@ impl App {
         self.image_due = Instant::now() + Duration::from_millis(120);
     }
     pub fn refresh_image(&mut self) {
-        if Instant::now() < self.image_due
+        if self.offline
+            || Instant::now() < self.image_due
             || self.config.image_protocol == "none"
             || !self.config.thumbnails
             || self.modal.is_some()
@@ -918,7 +1088,20 @@ impl App {
     }
     pub fn action(&mut self, action: Action) {
         match action {
+            Action::Resume => {
+                if let Some(media) = self.selected_for_resume()
+                    && let Some(position) = self.snapshot.positions.for_media(&media).cloned()
+                {
+                    self.resume_position(position);
+                } else {
+                    self.modal = Some(Modal::Resume(0));
+                }
+            }
             Action::Fallback => {
+                if self.offline {
+                    self.status = "Explicit extraction fallback requires online mode".into();
+                    return;
+                }
                 if self.demo {
                     self.status = "Fallback playback is disabled in demo mode".into();
                     return;
@@ -991,6 +1174,7 @@ impl App {
                     && !media.collection()
                     && media.kind != MediaKind::Station
                     && !self.demo
+                    && (!self.offline || http_url(&media.url).is_err())
                 {
                     let _ = self.player.try_send(PlayerCommand::Preview(media));
                 }
@@ -1161,7 +1345,13 @@ impl App {
                 self.snapshot.playback.current = None;
                 self.dirty = true;
             }
-            Action::Cliamp => self.launch_cliamp = true,
+            Action::Cliamp => {
+                if self.offline {
+                    self.status = "cliamp radio requires online mode".into();
+                } else {
+                    self.launch_cliamp = true;
+                }
+            }
             Action::MoveUp | Action::MoveDown => {
                 if self.tab == 0 {
                     let direction = if action == Action::MoveUp { -1 } else { 1 };
@@ -1192,6 +1382,10 @@ impl App {
         }
     }
     pub fn enqueue_download(&mut self, mut media: Media, options: DownloadOptions) {
+        if self.offline && http_url(&media.url).is_ok() {
+            self.status = "Remote downloads wait until online mode".into();
+            return;
+        }
         if options.audio {
             media.kind = MediaKind::Song;
         }
@@ -1219,6 +1413,23 @@ impl App {
         if query.is_empty() {
             return;
         }
+        if self.offline {
+            if normalize_media_url(query).is_ok() {
+                self.status = "Remote URLs require online mode".into();
+                return;
+            }
+            let tab = if self.tab == 2 { 2 } else { 1 };
+            self.tab = tab;
+            self.navigate(
+                tab,
+                BrowseRequest::OfflineLibrary {
+                    query: query.into(),
+                    audio: None,
+                },
+                false,
+            );
+            return;
+        }
         if let Ok(url) = normalize_media_url(query) {
             let media = Media {
                 title: query.into(),
@@ -1243,6 +1454,10 @@ impl App {
         }
     }
     pub fn play(&mut self, media: Media) {
+        if self.offline && http_url(&media.url).is_ok() {
+            self.status = "Offline mode can play local media only".into();
+            return;
+        }
         if self.demo {
             self.status = "Playback is disabled for fictional demo content".into();
             return;
@@ -1251,7 +1466,83 @@ impl App {
         self.dirty = true;
         self.play_existing(media);
     }
-    pub fn play_existing(&mut self, media: Media) {
+    pub fn resume_positions(&self) -> Vec<&ytui_core::playback_history::Position> {
+        self.snapshot
+            .positions
+            .resumable()
+            .into_iter()
+            .filter(|p| !self.offline || http_url(&p.media.url).is_err())
+            .collect()
+    }
+    pub fn resume_position(&mut self, position: ytui_core::playback_history::Position) {
+        if self.offline && http_url(&position.media.url).is_ok() {
+            self.status = "Resume this online video after restarting without --offline".into();
+            return;
+        }
+        if self.demo {
+            self.status = "Playback is disabled in demo mode".into();
+            return;
+        }
+        let audio = position.media.kind == MediaKind::Song;
+        let command = PlayerCommand::PlayAt {
+            media: position.media.clone(),
+            audio,
+            seconds: position.seconds,
+        };
+        if self.player.try_send(command).is_err() {
+            self.status = "Player is busy; try resume again".into();
+            return;
+        }
+        self.snapshot.playback.play(position.media);
+        self.dirty = true;
+        self.status = format!(
+            "Resuming at {}:{:02}",
+            position.seconds as u64 / 60,
+            position.seconds as u64 % 60
+        );
+    }
+    pub fn player_update(&mut self, status: PlayerStatus) {
+        if !self.demo
+            && self.config.playback_history
+            && status.active
+            && !status.preview
+            && !status.buffering
+            && let Some(media) = &status.media
+        {
+            self.dirty |=
+                self.snapshot
+                    .positions
+                    .record(media, status.position, status.duration, false);
+        }
+        self.player_status = status;
+        self.redraw = true;
+    }
+    pub fn playback_ended(&mut self, media: &Media) {
+        if self.config.playback_history && !self.demo {
+            self.snapshot.positions.record(
+                media,
+                self.player_status
+                    .duration
+                    .unwrap_or(self.player_status.position),
+                self.player_status.duration,
+                true,
+            );
+        }
+        if let Some(media) = self.snapshot.playback.advance(true) {
+            self.play_existing(media);
+        }
+        self.dirty = true;
+    }
+    pub fn play_existing(&mut self, mut media: Media) {
+        if self.offline && http_url(&media.url).is_ok() {
+            self.status = "Queued online media waits for online mode".into();
+            return;
+        }
+        if http_url(&media.url).is_err()
+            && let Ok(path) = std::fs::canonicalize(&media.url)
+        {
+            media.url = path.to_string_lossy().into();
+        }
         let audio =
             media.kind == MediaKind::Song || media.kind == MediaKind::Station || self.tab == 2;
         let _ = self.player.try_send(PlayerCommand::Play { media, audio });
@@ -1276,6 +1567,7 @@ impl App {
                 job.state = JobState::Error;
                 job.error = Some("Download worker exited unexpectedly".into());
                 self.dirty = true;
+                self.redraw = true;
             }
         }
         if !self.demo {
@@ -1310,7 +1602,11 @@ impl App {
                 if self.running.len() >= self.config.concurrency {
                     break;
                 }
-                if policy.allowed && job.ready(now) && !self.running.contains_key(&job.id) {
+                if policy.allowed
+                    && job.ready(now)
+                    && (!self.offline || http_url(&job.media.url).is_err())
+                    && !self.running.contains_key(&job.id)
+                {
                     job.state = JobState::Resolving;
                     let cancel = CancellationToken::new();
                     let mut transfer = job.clone();
@@ -1326,6 +1622,38 @@ impl App {
                     self.running.insert(job.id, Running { cancel, task });
                     self.dirty = true;
                     self.redraw = true;
+                }
+            }
+        }
+        if !self.demo && !self.offline {
+            let owner = self.watch_owner();
+            let now = schedule::unix_now();
+            for watch in &mut self.snapshot.watches {
+                if watch.enabled && watch.owner != owner {
+                    watch.enabled = false;
+                    watch.generation += 1;
+                    watch.error =
+                        Some("Account changed; resume explicitly to reset the baseline".into());
+                    self.dirty = true;
+                }
+                if watch.enabled
+                    && self.watch_pending.len() < 2
+                    && watch.next_check <= now
+                    && !self.watch_pending.contains_key(&watch.id)
+                {
+                    let cancel = self.desktop_cancel.child_token();
+                    let id = watch.id;
+                    let generation = watch.generation;
+                    self.watch_pending.insert(id, (generation, cancel.clone()));
+                    let watch = watch.clone();
+                    let browser = self.browser.clone();
+                    self.tasks.spawn(async move {
+                        UiEvent::Watch {
+                            id,
+                            generation,
+                            result: ytui_services::watch::collect(browser, watch, cancel).await,
+                        }
+                    });
                 }
             }
         }
@@ -1350,6 +1678,28 @@ impl App {
         }
         self.refresh_image();
     }
+    fn watch_owner(&self) -> String {
+        self.session
+            .as_ref()
+            .map(|s| format!("{}:{}", s.account, self.config.account_index))
+            .unwrap_or_else(|| "anonymous".into())
+    }
+    fn toggle_watch(&mut self, id: uuid::Uuid, enabled: bool) {
+        let owner = self.watch_owner();
+        if let Some((_, token)) = self.watch_pending.remove(&id) {
+            token.cancel();
+        }
+        if let Some(watch) = self.snapshot.watches.iter_mut().find(|w| w.id == id) {
+            watch.generation += 1;
+            watch.enabled = enabled;
+            watch.next_check = schedule::unix_now();
+            if enabled && watch.owner != owner {
+                watch.owner = owner;
+                watch.seen = None;
+            }
+            self.dirty = true;
+        }
+    }
     pub fn download_groups(&self) -> Vec<(String, String, usize)> {
         let mut groups: Vec<(String, String, usize)> = Vec::new();
         for job in &self.snapshot.downloads.jobs {
@@ -1364,10 +1714,26 @@ impl App {
         groups
     }
     pub fn job_event(&mut self, event: JobEvent) {
+        let selected_history_id = if let Some(Modal::History(view)) = &self.modal {
+            view.rows(&self.snapshot.downloads.jobs)
+                .get(view.selected)
+                .map(|(_, j)| j.id)
+        } else {
+            None
+        };
         let terminal = matches!(event.update, JobUpdate::Finished | JobUpdate::Failed { .. });
         let id = event.id;
         if !self.snapshot.downloads.apply(event) {
             return;
+        }
+        if let Some(id) = selected_history_id
+            && let Some(Modal::History(view)) = &mut self.modal
+            && let Some(index) = view
+                .rows(&self.snapshot.downloads.jobs)
+                .iter()
+                .position(|(_, j)| j.id == id)
+        {
+            view.selected = index;
         }
         self.dirty = true;
         self.redraw = true;
@@ -1420,6 +1786,10 @@ impl App {
         }
     }
     fn import_auth(&mut self, browser: String, profile: String, file: String) {
+        if self.offline {
+            self.status = "Account validation requires online mode".into();
+            return;
+        }
         if self.demo {
             self.status = "Account access is disabled in demo mode".into();
             return;
@@ -1475,6 +1845,162 @@ impl App {
         let browse_tab = if self.tab == 0 { 1 } else { self.tab };
         match cmd {
             "quit" | "q" => self.quit = true,
+            "watch" | "watches" if value.is_empty() || value == "list" => {
+                self.modal = Some(Modal::Watches(0))
+            }
+            "watch" if parts.get(1).is_some_and(|p| p == "add") => {
+                ensure!(!self.demo, "Collection watches are disabled in demo mode");
+                ensure!(
+                    self.tab == 1 || self.tab == 2,
+                    "Open a YouTube/Music collection first"
+                );
+                let interval = schedule::delay_seconds(
+                    parts
+                        .get(2)
+                        .context("Use :watch add 30m while viewing a collection")?,
+                )?;
+                let request = self.tabs[self.tab]
+                    .request
+                    .clone()
+                    .context("Open a collection first")?;
+                let watch = ytui_core::watch::CollectionWatch {
+                    id: uuid::Uuid::new_v4(),
+                    title: self.tabs[self.tab].page.title.clone(),
+                    request,
+                    music: self.tab == 2,
+                    options: self.config.download.clone(),
+                    interval_seconds: interval,
+                    next_check: 0,
+                    enabled: true,
+                    generation: 0,
+                    owner: self.watch_owner(),
+                    seen: None,
+                    failures: 0,
+                    error: None,
+                };
+                watch.validate()?;
+                ensure!(
+                    !self
+                        .snapshot
+                        .watches
+                        .iter()
+                        .any(|w| w.request == watch.request
+                            && w.music == watch.music
+                            && w.owner == watch.owner),
+                    "This collection already has a watch"
+                );
+                let mut watch = watch;
+                watch.options.audio = self.tab == 2;
+                self.snapshot.watches.push(watch);
+                self.dirty = true;
+                self.status =
+                    "Watch added · establishing a baseline; existing entries will not download"
+                        .into();
+            }
+            "watch" => {
+                let action = parts.get(1).context("Use :watch add/pause/resume/remove")?;
+                let id = uuid::Uuid::parse_str(
+                    parts.get(2).context("Provide a watch UUID from :watches")?,
+                )?;
+                ensure!(
+                    self.snapshot.watches.iter().any(|w| w.id == id),
+                    "Watch not found"
+                );
+                ensure!(
+                    ["pause", "resume", "remove"].contains(&action.as_str()),
+                    "Use :watch pause/resume/remove UUID"
+                );
+                self.toggle_watch(id, action == "resume");
+                if action == "remove" {
+                    self.snapshot.watches.retain(|w| w.id != id);
+                }
+                self.dirty = true;
+            }
+            "offline" => {
+                let mut words = value.split_whitespace();
+                let audio = match words.next() {
+                    Some("audio") => Some(true),
+                    Some("video") => Some(false),
+                    _ => None,
+                };
+                let query = if audio.is_some() {
+                    words.collect::<Vec<_>>().join(" ")
+                } else {
+                    value
+                };
+                let tab = if audio == Some(true) || self.tab == 2 {
+                    2
+                } else {
+                    1
+                };
+                self.tab = tab;
+                self.navigate(tab, BrowseRequest::OfflineLibrary { query, audio }, false);
+            }
+            "resume" if value == "clear" => {
+                self.snapshot.positions.entries.clear();
+                self.dirty = true;
+                self.status = "Local playback positions cleared".into();
+            }
+            "resume" if value == "selected" => {
+                let media = self.selected_for_resume().context("Select an item first")?;
+                let position = self
+                    .snapshot
+                    .positions
+                    .for_media(&media)
+                    .cloned()
+                    .context("No saved position for this media")?;
+                self.resume_position(position);
+            }
+            "resume" => self.modal = Some(Modal::Resume(0)),
+            "log" | "diagnostics" => {
+                let mut lines = vec![
+                    format!(
+                        "ytui {} · backend {}",
+                        env!("CARGO_PKG_VERSION"),
+                        self.config.download_backend
+                    ),
+                    format!("Theme: {} · {}", self.palette.name, self.palette.source),
+                    "Browser credentials and signed URLs are never included.".into(),
+                    String::new(),
+                ];
+                lines.extend(
+                    self.snapshot
+                        .downloads
+                        .jobs
+                        .iter()
+                        .rev()
+                        .filter_map(|j| {
+                            j.error.as_ref().map(|e| {
+                                format!("{} · {}", j.id, ytui_services::process::diagnostic(e))
+                            })
+                        })
+                        .take(30),
+                );
+                if let Some(error) = &self.player_status.error {
+                    lines.push(ytui_services::process::diagnostic(error));
+                }
+                self.modal = Some(Modal::Text {
+                    title: "Diagnostics".into(),
+                    lines,
+                    offset: 0,
+                });
+            }
+            "update" => {
+                self.modal = Some(Modal::Text {
+                    title: "Update ytui".into(),
+                    lines: vec![
+                        "Native extraction is compiled into the Rust application.".into(),
+                        "Update the checkout, review changes, then run ./install-rust.sh.".into(),
+                        "Pinned native dependencies are updated with reviewed source changes."
+                            .into(),
+                        "The optional Python yt-dlp fallback is managed by your package manager."
+                            .into(),
+                        "No executable or dependency was downloaded/replaced by this command."
+                            .into(),
+                    ],
+                    offset: 0,
+                });
+            }
             "help" | "?" => self.modal = Some(Modal::Help(0)),
             "keys" => self.modal = Some(Modal::Form(Box::new(Form::keys(self.config.clone())))),
             "downloads" | "stats" => {
@@ -1916,6 +2442,7 @@ impl App {
                 self.status = "Queue/history exported".into();
             }
             "open" => {
+                ensure!(!self.offline, "Browser navigation requires online mode");
                 let media = self.selected().context("Select an item")?;
                 ytui_core::http_url(&media.url)?;
                 let cancel = self.desktop_cancel.child_token();

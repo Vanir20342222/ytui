@@ -19,6 +19,9 @@ struct Server {
 }
 impl Server {
     fn start() -> Self {
+        Self::with_payload(b"synthetic-media-fixture".to_vec())
+    }
+    fn with_payload(payload: Vec<u8>) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         listener.set_nonblocking(true).unwrap();
         let addr = listener.local_addr().unwrap();
@@ -33,13 +36,12 @@ impl Server {
                             .unwrap();
                         let mut request = [0u8; 4096];
                         let _ = stream.read(&mut request);
-                        let payload = b"synthetic-media-fixture";
                         let headers = format!(
                             "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nETag: \"fixture-v1\"\r\nConnection: close\r\n\r\n",
                             payload.len()
                         );
                         let _ = stream.write_all(headers.as_bytes());
-                        let _ = stream.write_all(payload);
+                        let _ = stream.write_all(&payload);
                     }
                     Err(_) => thread::sleep(Duration::from_millis(5)),
                 }
@@ -254,4 +256,183 @@ fn hooks_receive_resolved_metadata_and_daily_window_requires_explicit_override()
     let environment = std::fs::read_to_string(environment_file).unwrap();
     assert!(environment.contains("fixture\n日本語 title\nhttps://example.test/video\nvideo\n"));
     assert!(environment.contains(final_file.to_str().unwrap()));
+}
+
+#[test]
+fn native_media_transfer_honors_a_rate_limit_and_cleans_staging() {
+    let temp = tempfile::tempdir().unwrap();
+    let server = Server::with_payload(vec![42; 96 * 1024]);
+    let mut config = Config {
+        auth_store: "file".into(),
+        yt_dlp: "/does/not/exist".into(),
+        ..Default::default()
+    };
+    config.download.metadata = false;
+    config.download.bandwidth_kib = 64;
+    let path = temp.path().join("rust.toml");
+    std::fs::write(&path, toml::to_string(&config).unwrap()).unwrap();
+    let started = std::time::Instant::now();
+    let result = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .args([
+            "--config",
+            path.to_str().unwrap(),
+            "--state-dir",
+            temp.path().join("state").to_str().unwrap(),
+            "download",
+            &server.url,
+            "--directory",
+            temp.path().join("media").to_str().unwrap(),
+        ])
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert!(started.elapsed() >= Duration::from_millis(1400));
+    let files = std::fs::read_dir(temp.path().join("media"))
+        .unwrap()
+        .flatten()
+        .collect::<Vec<_>>();
+    assert_eq!(files.len(), 1);
+    assert_eq!(std::fs::read(files[0].path()).unwrap().len(), 96 * 1024);
+}
+
+#[cfg(unix)]
+#[test]
+fn cancelling_a_throttled_native_worker_is_prompt_and_preserves_pause() {
+    use std::process::Stdio;
+    unsafe extern "C" {
+        fn kill(pid: i32, signal: i32) -> i32;
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let server = Server::with_payload(vec![42; 96 * 1024]);
+    let mut config = Config {
+        auth_store: "file".into(),
+        ..Default::default()
+    };
+    config.download.metadata = false;
+    config.download.bandwidth_kib = 1;
+    let path = temp.path().join("rust.toml");
+    std::fs::write(&path, toml::to_string(&config).unwrap()).unwrap();
+    let mut child = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .args([
+            "--config",
+            path.to_str().unwrap(),
+            "--state-dir",
+            temp.path().join("state").to_str().unwrap(),
+            "download",
+            &server.url,
+            "--directory",
+            temp.path().join("media").to_str().unwrap(),
+        ])
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let ready = std::time::Instant::now();
+    loop {
+        let media = temp.path().join("media");
+        let staging_ready = std::fs::read_dir(&media)
+            .ok()
+            .into_iter()
+            .flatten()
+            .flatten()
+            .any(|entry| entry.path().join("0").is_dir());
+        if staging_ready {
+            break;
+        }
+        if ready.elapsed() > Duration::from_secs(5) {
+            let _ = child.kill();
+            let _ = child.wait();
+            panic!("native worker did not reach media staging");
+        }
+        thread::sleep(Duration::from_millis(20));
+    }
+    thread::sleep(Duration::from_millis(200));
+    assert_eq!(unsafe { kill(child.id() as i32, 2) }, 0);
+    let started = std::time::Instant::now();
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break status;
+        }
+        if started.elapsed() > Duration::from_secs(3) {
+            let _ = child.kill();
+            panic!("throttled worker did not stop promptly");
+        }
+        thread::sleep(Duration::from_millis(20));
+    };
+    assert!(!status.success());
+    if temp.path().join("media").exists() {
+        assert_eq!(
+            std::fs::read_dir(temp.path().join("media"))
+                .unwrap()
+                .count(),
+            0
+        );
+    }
+    tokio::runtime::Runtime::new().unwrap().block_on(async {
+        let store = ytui_services::store::Store::open(&temp.path().join("state")).unwrap();
+        let saved = store.load().await.unwrap();
+        assert_eq!(saved.downloads.jobs[0].state, ytui_core::JobState::Paused);
+        store.close().await.unwrap();
+    });
+}
+
+#[cfg(unix)]
+#[test]
+fn failed_native_tagging_keeps_a_recoverable_source_and_publishes_no_final_file() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let server = Server::start();
+    let ffmpeg = temp.path().join("ffmpeg");
+    std::fs::write(&ffmpeg, "#!/bin/sh\necho 'embedding failed' >&2\nexit 1\n").unwrap();
+    std::fs::set_permissions(&ffmpeg, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let config = Config {
+        auth_store: "file".into(),
+        ffmpeg: ffmpeg.to_string_lossy().into(),
+        ..Default::default()
+    };
+    let path = temp.path().join("rust.toml");
+    std::fs::write(&path, toml::to_string(&config).unwrap()).unwrap();
+    let media = temp.path().join("media");
+    let result = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .args([
+            "--config",
+            path.to_str().unwrap(),
+            "--state-dir",
+            temp.path().join("state").to_str().unwrap(),
+            "download",
+            &server.url,
+            "--directory",
+            media.to_str().unwrap(),
+        ])
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(
+        String::from_utf8_lossy(&result.stderr).contains("Recoverable source kept"),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let entries = std::fs::read_dir(media)
+        .unwrap()
+        .flatten()
+        .collect::<Vec<_>>();
+    assert_eq!(entries.len(), 1);
+    assert!(entries[0].path().is_dir());
+    let sources = std::fs::read_dir(entries[0].path().join("0"))
+        .unwrap()
+        .flatten()
+        .collect::<Vec<_>>();
+    assert_eq!(sources.len(), 1);
+    assert_eq!(
+        std::fs::read(sources[0].path()).unwrap(),
+        b"synthetic-media-fixture"
+    );
+    assert!(!String::from_utf8_lossy(&result.stdout).contains("Saved"));
 }

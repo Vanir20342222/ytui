@@ -24,6 +24,9 @@ pub struct Args {
     pub state_dir: Option<PathBuf>,
     #[arg(long)]
     pub demo: bool,
+    /// Start with local downloads; disable account access, remote playback and background network work.
+    #[arg(long)]
+    pub offline: bool,
     #[command(subcommand)]
     pub command: Option<Command>,
 }
@@ -67,6 +70,8 @@ pub enum Command {
         audio: bool,
         #[arg(long)]
         quality: Option<String>,
+        #[arg(long)]
+        audio_quality: Option<String>,
         #[arg(short = 'o', long)]
         directory: Option<PathBuf>,
         #[arg(long)]
@@ -143,6 +148,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             );
             for (label, tool) in [
                 ("FFmpeg", &config.ffmpeg),
+                ("FFprobe (chapters/SponsorBlock)", &config.ffprobe),
                 ("mpv", &config.mpv),
                 ("yt-dlp (optional fallback)", &config.yt_dlp),
                 ("cliamp (optional)", &config.cliamp),
@@ -323,6 +329,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             url,
             audio,
             quality,
+            audio_quality,
             directory,
             playlist,
             items,
@@ -353,6 +360,9 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             if let Some(q) = quality {
                 options.quality = q;
             }
+            if let Some(q) = audio_quality {
+                options.audio_quality = q;
+            }
             if let Some(dir) = directory {
                 if audio {
                     options.audio_directory = dir;
@@ -361,7 +371,11 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 }
             }
             options.validate()?;
-            let session = load_session(&config, &paths).await;
+            let session = if std::path::Path::new(&normalized).is_file() {
+                None
+            } else {
+                load_session(&config, &paths).await
+            };
             let store = Store::open(&paths.state)?;
             let mut snapshot = store.load().await?;
             let mut job = Job::new(

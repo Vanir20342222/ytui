@@ -256,6 +256,12 @@ impl Browser {
                         .and_then(Value::as_str)
                         .map(clean_text)
                         .unwrap_or_default(),
+                    chapters: ytui_core::chapters::from_description(
+                        details
+                            .get("shortDescription")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default(),
+                    ),
                     description: details
                         .get("shortDescription")
                         .and_then(Value::as_str)

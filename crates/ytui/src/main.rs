@@ -54,15 +54,29 @@ async fn entry() -> Result<()> {
         paths.load_config()?
     };
     paths.fill_directories(&mut config);
+    config.offline = args.offline;
     config.validate()?;
     if let Some(command) = args.command {
+        if args.offline {
+            anyhow::ensure!(
+                !matches!(
+                    &command,
+                    cli::Command::Browse { .. }
+                        | cli::Command::Radio { .. }
+                        | cli::Command::Auth {
+                            command: cli::AuthCommand::Import { .. }
+                        }
+                ) && !matches!(&command, cli::Command::Download { url, .. } if !std::path::Path::new(url).is_file()),
+                "This action requires network access; restart without --offline"
+            );
+        }
         return cli::run(command, config, paths).await;
     }
     anyhow::ensure!(
         io::stdin().is_terminal() && io::stdout().is_terminal(),
         "The interface needs a terminal; use --help for headless commands"
     );
-    let session = if args.demo {
+    let session = if args.demo || args.offline {
         None
     } else {
         let store = SessionStore::new(&paths, &config.auth_store);
@@ -112,6 +126,7 @@ async fn entry() -> Result<()> {
             picker,
         },
         args.demo,
+        args.offline,
     )?;
     let outcome = interface(
         &mut terminal,
@@ -171,12 +186,12 @@ async fn interface(
             },
             Some(result)=app.tasks.join_next(),if !app.tasks.is_empty()=>match result{Ok(event)=>app.apply(event),Err(e)if !e.is_cancelled()=>{app.status="A background operation stopped unexpectedly; refresh or retry".into();app.redraw=true;},_=>{}},
             Some(event)=player.events.recv()=>match event{
-                PlayerEvent::Ended=>{if let Some(media)=app.snapshot.playback.advance(true){app.play_existing(media);}app.dirty=true;},
+                PlayerEvent::Ended(media)=>app.playback_ended(&media),
                 PlayerEvent::Error(message)=>{app.status=message;app.redraw=true;}
             },
             _=tick.tick()=>{
                 app.tick().await;
-                if player.status.has_changed().unwrap_or(false){app.player_status=player.status.borrow_and_update().clone();app.redraw=true;}
+                if player.status.has_changed().unwrap_or(false){app.player_update(player.status.borrow_and_update().clone());}
                 if app.dirty&&last_save.elapsed()>Duration::from_millis(500){if let Some(store)=store{store.save(app.snapshot.clone()).await?;}app.dirty=false;last_save=Instant::now();}
             },
             _=tokio::signal::ctrl_c()=>app.quit=true,
@@ -236,6 +251,7 @@ mod tests {
                 picker: Picker::from_fontsize((8, 16)),
             },
             true,
+            false,
         )
         .unwrap();
         (a, rx, temp)
@@ -273,6 +289,8 @@ mod tests {
                 app::Modal::Queue(0),
                 app::Modal::History(Default::default()),
                 app::Modal::Groups(0),
+                app::Modal::Resume(0),
+                app::Modal::Watches(0),
                 app::Modal::Text {
                     title: "VPN connections".into(),
                     lines: vec!["Fixture".into()],
@@ -352,6 +370,110 @@ mod tests {
         a.command("/keys").unwrap();
         assert!(matches!(a.modal, Some(app::Modal::Form(_))));
         assert_eq!(a.snapshot.downloads.jobs.len(), 2);
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn preview_positions_are_ignored_and_resume_is_explicit() {
+        use ytui_core::{Media, MediaKind};
+        let (mut a, mut rx, _temp) = fixture().await;
+        a.demo = false;
+        let media = Media {
+            id: "abcdefghijk".into(),
+            title: "Saved video".into(),
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            kind: MediaKind::Video,
+            ..Default::default()
+        };
+        let mut status = ytui_services::player::PlayerStatus {
+            media: Some(media.clone()),
+            position: 42.0,
+            duration: Some(200.0),
+            preview: true,
+            active: true,
+            ..Default::default()
+        };
+        a.player_update(status.clone());
+        assert!(a.snapshot.positions.entries.is_empty());
+        status.preview = false;
+        a.player_update(status);
+        assert_eq!(a.snapshot.positions.entries.len(), 1);
+        assert!(rx.try_recv().is_err());
+        a.tabs[1].page.items[0] = media;
+        a.command("resume selected").unwrap();
+        assert!(
+            matches!(rx.recv().await.unwrap(), PlayerCommand::PlayAt { seconds, .. } if seconds == 42.0)
+        );
+        a.command("resume clear").unwrap();
+        assert!(a.snapshot.positions.entries.is_empty());
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn paused_watch_rejects_old_results_and_baseline_never_enqueues() {
+        use ytui_core::{BrowseRequest, Media, watch::CollectionWatch};
+        let (mut a, _rx, _temp) = fixture().await;
+        a.demo = false;
+        let id = uuid::Uuid::new_v4();
+        let watch = CollectionWatch {
+            id,
+            title: "Collection".into(),
+            request: BrowseRequest::Collection("VLfixture".into()),
+            music: false,
+            options: a.config.download.clone(),
+            interval_seconds: 60,
+            next_check: u64::MAX,
+            enabled: true,
+            generation: 0,
+            owner: "anonymous".into(),
+            seen: None,
+            failures: 0,
+            error: None,
+        };
+        a.snapshot.watches.push(watch);
+        let media = Media {
+            id: "abcdefghijk".into(),
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            ..Default::default()
+        };
+        let before = a.snapshot.downloads.jobs.len();
+        a.apply(app::UiEvent::Watch {
+            id,
+            generation: 0,
+            result: Ok(vec![media.clone()]),
+        });
+        assert_eq!(a.snapshot.downloads.jobs.len(), before);
+        a.command(&format!("watch pause {id}")).unwrap();
+        a.apply(app::UiEvent::Watch {
+            id,
+            generation: 0,
+            result: Ok(vec![Media {
+                id: "new".into(),
+                ..media
+            }]),
+        });
+        assert_eq!(a.snapshot.downloads.jobs.len(), before);
+        assert!(!a.snapshot.watches[0].enabled);
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn offline_mode_holds_remote_jobs_and_never_plays_remote_queue_items() {
+        use ytui_core::{JobState, Media};
+        let (mut a, mut rx, _temp) = fixture().await;
+        a.demo = false;
+        a.offline = true;
+        a.snapshot.downloads.jobs[0].state = JobState::Queued;
+        a.snapshot.downloads.jobs[0].media.url =
+            "https://www.youtube.com/watch?v=abcdefghijk".into();
+        let tasks = a.tasks.len();
+        a.tick().await;
+        assert!(a.running.is_empty());
+        assert_eq!(a.snapshot.downloads.jobs[0].state, JobState::Queued);
+        a.play(Media {
+            url: "https://example.test/video".into(),
+            ..Default::default()
+        });
+        assert!(rx.try_recv().is_err());
+        a.navigate(1, ytui_core::BrowseRequest::Home, false);
+        assert_eq!(a.tasks.len(), tasks);
         a.shutdown().await;
     }
 }

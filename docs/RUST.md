@@ -27,6 +27,7 @@ Python installer. Every example below uses `ytui-rs`; with Cargo, replace it wit
 
 ```sh
 ytui-rs --demo                         # fictional catalog, no browser access
+ytui-rs --offline                      # local library; no account loading or online jobs
 ytui-rs init                           # create ~/.config/ytui/rust.toml
 ytui-rs doctor                         # dependencies and desktop integration
 ytui-rs --help
@@ -73,10 +74,32 @@ Native subtitle selection, sidecar downloads and FFmpeg embedding now use the
 upstream Rust APIs. Language selectors support literal codes, `all` and exclusions;
 regex selectors still require explicit fallback. Sidecars are retained alongside
 media, including when embedded. Unavailable languages or unsupported embedding
-produce visible errors and preserve existing files. Native SponsorBlock, chapter
-splitting and bandwidth caps are currently rejected with an actionable fallback message; they are not silently
-ignored. The fallback implements these download controls. Native template syntax
-is narrower than yt-dlp's; the shipped template works on both backends.
+produce visible errors and preserve existing files.
+
+Native transfers now support byte pacing, SponsorBlock marking/removal, chapter
+metadata and chapter splitting. These adapters remain subject to the extractor's
+YouTube coverage limits. SponsorBlock uses only the explicitly selected categories
+and its own HTTP client, without Google cookies. A 404 means no matching segments;
+other failures remain visible. `sponsorblock_api` can select another compatible
+server. FFprobe is required for chapter/SponsorBlock processing.
+
+SponsorBlock removal re-encodes retained audio/video for accurate cuts: H.264
+(CRF 18) for MP4/MKV or VP9 (CRF 18) for WebM, with the requested audio
+format/quality. Resolution is preserved; re-encoding can change file size and
+quality. Removal with requested or embedded subtitles requires explicit fallback
+to avoid publishing captions with incorrect timing. Chapter splitting copies
+streams, so boundaries can round to codec keyframes. Chapters come from existing
+media metadata or timestamp lists in the description; for YouTube, the worker
+also attempts the details provider. Missing/unsupported chapters produce an
+error. Use explicit fallback for unsupported combinations.
+
+Native outputs are staged privately, checked for filename collisions, then
+published without overwriting existing files. Cancellation cleans staging. If a
+later native postprocessor fails after a completed source was produced, the error
+identifies the private `.ytui-job-*` recovery directory. Inspect/recover those
+files before removing that directory manually. No job is marked complete merely
+because the source transferred. Native template syntax is narrower than yt-dlp's;
+the shipped template works on both backends.
 
 ## Your browser and account
 
@@ -136,6 +159,7 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 | `:` | Run a command/feed action |
 | `Enter` | Open collection / play selected media |
 | `v` | Muted ten-second mpv video preview |
+| `u` | Resume selected media's local position, or show resume menu |
 | `Esc` | Close preview/modal or go back |
 | `d` | Download options |
 | `Space` | Pause playback; pause/resume selected job in Downloads |
@@ -244,8 +268,10 @@ window_bandwidth_kib = 512       # total cap during this window; 0 = unlimited
 The normal total cap is `download.global_bandwidth_kib`. The window rate replaces
 that cap while its window is active; a per-job cap can lower it further. The total
 cap is divided conservatively over configured concurrency, in bytes, including
-small limits. These caps currently require **explicitly selecting yt-dlp** because
-the pinned native downloader has no rate-limit adapter.
+small limits. Native media/caption transfers are paced at the upstream read
+boundaries (up to 64 KiB per read); cancellation remains prompt while waiting.
+Metadata/cover requests are excluded from media-byte pacing. Explicit fallback
+uses yt-dlp's own transfer limiter.
 
 Closing the daily window stops/reaps active jobs and leaves them queued. Opening
 it resumes eligible jobs; manual pauses remain paused. Changing the active total
@@ -257,7 +283,7 @@ No downloads run after ytui quits: keep the TUI running for scheduling.
 delayed job. It also respects the daily window. Headless `download` refuses to
 start outside that window unless `--now` is explicitly supplied; it snapshots the
 rate at launch rather than running the TUI scheduler during a long transfer.
-Recurring channel/playlist watch subscriptions are not implemented.
+Recurring collection watches are described below.
 
 Clipboard watching is disabled by default. Enable it in Settings or with
 `:clipboard on`; disable with `:clipboard off`. It polls the regular clipboard
@@ -311,8 +337,46 @@ the next TUI session. `:clear`/removal delete records, never media files.
 Legacy slash commands are also accepted when pasted/entered into the input
 (e.g. `/history`, `/queue`, `/audio`, `/pauseall`, `/stopall`, `/profile`). Their
 colon equivalents are available; `/history` always means download history.
-`/update` and `/log` do not have native equivalents yet. Update the pinned Rust
-application through a new build; no extractor is downloaded or replaced silently.
+`/log` / `:diagnostics` shows sanitized recent download/player errors. `/update`
+shows the source-build update instructions; native extraction is compiled into
+the application and no executable is downloaded/replaced by that command.
+
+## Local resume, offline mode and collection watches
+
+Playback positions stay in ytui's private state database. Press `u` on an item to
+resume its saved position, or run `:resume` for the resume menu. `Enter` starts
+normally from the beginning. In the menu, `Delete` forgets one position;
+`:resume clear` forgets all. `playback_history = false` disables new recording.
+Nothing plays automatically at startup and no watch history is sent to YouTube.
+Previews/live stations are excluded. Signing in/out or changing accounts clears
+online positions; positions for local files remain. Up to 500 entries are kept.
+
+`:offline`, `:offline audio QUERY` or `:offline video QUERY` lists existing completed
+media from the download database, excluding missing files and subtitle/image
+sidecars. This is a catalog of recorded outputs rather than a recursive disk scan.
+Thumbnails are omitted from this page so the catalog itself needs no network.
+
+Start with `ytui-rs --offline` for local-only operation: account loading, initial
+YouTube browsing, watch checks, remote thumbnail fetching, remote playback and
+remote jobs are disabled. `/` searches local downloads. Saved online queue items
+wait until an online session. Local playback/conversion remains available.
+External application actions and configured user hooks retain their own behavior.
+
+While viewing a collection/channel/playlist, run `:watch add 30m` to check it every
+30 minutes (minimum one minute). The first successful **complete** catalog read
+establishes a baseline and queues nothing. Later checks enqueue newly discovered
+entries using the captured download defaults and normal duplicate checks.
+
+`:watches` opens the watch manager: `Space` pauses/resumes, `Delete` removes the
+watch, `Enter` opens its source. Commands `:watch pause UUID`, `:watch resume UUID`
+and `:watch remove UUID` are also available. Watch data and baselines persist.
+Account changes pause watches and reset baselines; resume explicitly afterward.
+Offline mode suspends polling. Keep the TUI running for checks; no daemon is installed.
+
+At most two checks run concurrently. A catalog must finish within 120 seconds,
+32 pages, 2,000 entries and 16 MiB. Incomplete/failed polls update no baseline and
+queue nothing; retries back off. Collections larger than these limits require
+manual browsing/download selection. Live videos are excluded from automatic jobs.
 
 ## Optional VPN control
 
@@ -397,6 +461,13 @@ Rust configuration: `$XDG_CONFIG_HOME/ytui/rust.toml`.
 Rust state: `$XDG_STATE_HOME/ytui/rust/state.db`.
 Thumbnail cache: `$XDG_CACHE_HOME/ytui/rust/images`.
 Use `--config PATH` and `--state-dir PATH` for isolated installations/tests.
+Alpha.2 advances the Rust state format to version 2 for positions/watches. On the
+first version-1 upgrade it creates `state-v1-backup.db` using SQLite's backup API.
+Older Rust alpha.1 refuses version 2; use the newer binary or an isolated copy of
+that backup for Rust rollback. Python's separate state remains unchanged. The
+state directory/database are private on Linux. After acquiring the instance lock,
+ytui removes stale owned cookie exports/native manifests left by a forced exit;
+it does not delete recovery/media directories.
 
 ```sh
 ytui-rs migrate             # report only; no Python state is modified
@@ -420,6 +491,8 @@ separate state lock cannot coordinate another program's download directory.
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
+# Requires installed FFmpeg/ffprobe; uses generated media and a loopback API only:
+NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored
 cargo build --release --locked
 ```
 

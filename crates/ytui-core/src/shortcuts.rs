@@ -36,6 +36,7 @@ pub enum Action {
     MoveUp,
     MoveDown,
     Fallback,
+    Resume,
 }
 impl Action {
     pub fn name(self) -> &'static str {
@@ -53,6 +54,12 @@ impl Action {
     }
 }
 pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
+    (
+        "u",
+        Action::Resume,
+        "resume",
+        "Resume saved playback position",
+    ),
     (
         "Y",
         Action::Fallback,

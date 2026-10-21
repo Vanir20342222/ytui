@@ -58,6 +58,7 @@ impl Form {
                 "Backend (blank=default)",
                 o.backend.clone().unwrap_or_default(),
             ),
+            Field::text("Audio quality / bitrate", &o.audio_quality),
         ];
         Self {
             kind: FormKind::Download(media, options),
@@ -122,6 +123,10 @@ impl Form {
             ),
             Field::text("Retry count", c.max_retries),
             Field::text("Retry delay seconds", c.retry_delay_seconds),
+            Field::flag("Save local playback positions", c.playback_history),
+            Field::text("FFprobe executable", &c.ffprobe),
+            Field::text("SponsorBlock API", &c.download.sponsorblock_api),
+            Field::text("Audio quality / bitrate", &c.download.audio_quality),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -204,6 +209,24 @@ impl Form {
         self.fields[index].value.text.trim()
     }
     pub fn toggle(&mut self) {
+        if self.selected == 0
+            && let FormKind::Download(_, base) = &self.kind
+        {
+            let current = self.value(0) == "yes";
+            let old = if current {
+                &base.audio_directory
+            } else {
+                &base.directory
+            };
+            let new = if current {
+                &base.directory
+            } else {
+                &base.audio_directory
+            };
+            if self.value(4) == old.to_string_lossy() {
+                self.fields[4].value = Editor::new(new.to_string_lossy());
+            }
+        }
         if self.fields[self.selected].toggle {
             let v = self.value(self.selected) != "yes";
             self.fields[self.selected].value = Editor::new(if v { "yes" } else { "no" });
@@ -246,6 +269,7 @@ impl Form {
         } else {
             Some(self.value(12).into())
         };
+        o.audio_quality = self.value(13).into();
         o.validate()?;
         Ok((media.clone(), o))
     }
@@ -310,6 +334,10 @@ impl Form {
         c.download.post_download_hook = (!self.value(31).is_empty()).then(|| self.value(31).into());
         c.max_retries = self.value(32).parse()?;
         c.retry_delay_seconds = self.value(33).parse()?;
+        c.playback_history = self.value(34) == "yes";
+        c.ffprobe = self.value(35).into();
+        c.download.sponsorblock_api = self.value(36).into();
+        c.download.audio_quality = self.value(37).into();
         c.validate()?;
         Ok(c)
     }
@@ -349,5 +377,25 @@ mod tests {
         assert!(saved.clipboard_watcher);
         form.fields[18].value = Editor::new("25:00-08:00");
         assert!(form.config_values().is_err());
+    }
+    #[test]
+    fn switching_audio_mode_uses_its_default_destination_but_preserves_custom_edits() {
+        let options = DownloadOptions {
+            directory: "/video".into(),
+            audio_directory: "/music".into(),
+            ..Default::default()
+        };
+        let mut form = Form::download(Media::default(), options);
+        form.toggle();
+        assert_eq!(
+            form.download_values().unwrap().1.audio_directory.to_str(),
+            Some("/music")
+        );
+        form.fields[4].value = Editor::new("/custom");
+        form.toggle();
+        assert_eq!(
+            form.download_values().unwrap().1.directory.to_str(),
+            Some("/custom")
+        );
     }
 }

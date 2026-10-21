@@ -18,12 +18,14 @@ use yt_dlp_rs::{
 use ytui_core::{Config, Job};
 
 pub const UPSTREAM_REV: &str = "10223c019ef6ec5552627b90251d8e967404e440";
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct WorkerRequest {
     pub job: Job,
     pub config: Config,
     pub cookies: Option<PathBuf>,
     pub resolve: bool,
+    #[serde(default)]
+    pub staging: Option<PathBuf>,
 }
 #[derive(Serialize, Deserialize)]
 pub struct Resolved {
@@ -36,20 +38,12 @@ pub fn worker(path: &Path) -> Result<()> {
     // Do not pretend that upstream supports these features or silently discard options.
     if !request.resolve {
         ensure!(
+            o.sponsorblock.is_empty() || !o.sponsorblock_remove || o.subtitles.is_empty(),
+            "Native SponsorBlock removal with requested captions needs explicit yt-dlp fallback to preserve timing"
+        );
+        ensure!(
             !o.thumbnail || !request.job.media.thumbnail.is_empty(),
             "Native extractor did not supply cover art; choose a browse item with a thumbnail or retry explicitly with yt-dlp"
-        );
-        ensure!(
-            o.sponsorblock.is_empty(),
-            "Native backend does not support SponsorBlock; use an explicit yt-dlp retry"
-        );
-        ensure!(
-            !o.split_chapters,
-            "Native backend does not support chapter splitting; use an explicit yt-dlp retry"
-        );
-        ensure!(
-            o.bandwidth_kib == 0 && o.global_bandwidth_kib == 0,
-            "Native bandwidth limiting is not supported yet; use an explicit yt-dlp retry"
         );
     }
     let cookies = request
@@ -122,7 +116,26 @@ pub fn worker(path: &Path) -> Result<()> {
         std::io::stdout().flush()?;
         return Ok(());
     }
-    for mut info in infos {
+    let owned_stage = if request.staging.is_none() {
+        Some(
+            tempfile::Builder::new()
+                .prefix(".ytui-job-")
+                .tempdir_in(o.output_directory())?,
+        )
+    } else {
+        None
+    };
+    let stage_root = request
+        .staging
+        .as_deref()
+        .or_else(|| owned_stage.as_ref().map(|s| s.path()))
+        .context("Missing native staging directory")?;
+    let mut throttle = crate::throttle::Throttle::new(ytui_core::schedule::rate_bytes(
+        o.bandwidth_kib,
+        o.global_bandwidth_kib,
+        request.config.concurrency,
+    ));
+    for (entry, mut info) in infos.into_iter().enumerate() {
         println!(
             "YTUI_META:{}",
             json!({"id":info.id,"title":info.title,"webpage_url":info.webpage_url,"uploader":request.job.media.creator,"thumbnail":request.job.media.thumbnail})
@@ -137,13 +150,10 @@ pub fn worker(path: &Path) -> Result<()> {
         );
         let destination = o.output_directory().join(filename);
         std::fs::create_dir_all(destination.parent().context("No output parent")?)?;
-        let subtitle_stage = tempfile::Builder::new()
-            .prefix(".ytui-subtitles-")
-            .tempdir_in(destination.parent().context("No output parent")?)?;
-        let staged_media = subtitle_stage
-            .path()
-            .join(destination.file_name().context("No output filename")?);
-        let subtitles = prepare_subtitles(&client, &mut info, &staged_media, o)?;
+        let entry_stage = stage_root.join(entry.to_string());
+        std::fs::create_dir_all(&entry_stage)?;
+        let staged_media = entry_stage.join(destination.file_name().context("No output filename")?);
+        let subtitles = prepare_subtitles(&client, &mut info, &staged_media, o, &mut throttle)?;
         for subtitle in &subtitles {
             let published = destination
                 .with_file_name(subtitle.path.file_name().context("No subtitle filename")?);
@@ -173,12 +183,14 @@ pub fn worker(path: &Path) -> Result<()> {
                 None
             },
         };
+        throttle.new_resource();
         let result = client.download_processed_with_progress(
             &info,
-            &destination,
+            &staged_media,
             DownloadOptions { retries: 0 },
             &processors,
             |progress| {
+                throttle.pace(progress);
                 report(progress);
                 ControlFlow::Continue(())
             },
@@ -188,37 +200,108 @@ pub fn worker(path: &Path) -> Result<()> {
             "Native postprocessing reported unsupported options; media was preserved; retry explicitly with yt-dlp"
         );
         let output = result.path;
+        println!(
+            "YTUI_SOURCE:{}",
+            serde_json::to_string(&output.to_string_lossy())?
+        );
+        std::io::stdout().flush()?;
         ensure!(
             output.is_file(),
             "Native backend did not publish a final file"
         );
+        if o.split_chapters || !o.sponsorblock.is_empty() {
+            println!("YTUI_POST:{{\"postprocessor\":\"NativePost\"}}");
+            std::io::stdout().flush()?;
+        }
+        let mut post = request.clone();
+        post.job.media.id = info.id.clone();
+        if o.split_chapters
+            && post.job.media.chapters.is_empty()
+            && ytui_core::http_url(&request.job.media.url)
+                .is_ok_and(|u| ytui_core::youtube_host(u.host_str().unwrap_or_default()))
+        {
+            let session = request
+                .cookies
+                .as_ref()
+                .and_then(|p| crate::auth::import_netscape(p).ok())
+                .map(Arc::new);
+            let browser = crate::browse::Browser::new(
+                crate::http_client(request.config.proxy.as_deref())?,
+                session,
+                request.config.account_index,
+            );
+            if let Ok(page) = tokio::runtime::Handle::current()
+                .block_on(browser.fetch(false, &ytui_core::BrowseRequest::Details(info.id.clone())))
+                && let Some(media) = page.items.first()
+            {
+                post.job.media.description = media.description.clone();
+                post.job.media.chapters = media.chapters.clone();
+            }
+        }
+        let extra_outputs = crate::native_post::apply(&post, &output)
+            .map_err(|e| anyhow::anyhow!("Native postprocessing failed: {e}"))?;
         if o.metadata || o.thumbnail {
             println!("YTUI_POST:{{\"postprocessor\":\"Metadata\"}}");
             tag(&request, &output, &info.title)?;
         }
-        println!(
-            "YTUI_OUTPUT:{}",
-            serde_json::to_string(&output.to_string_lossy())?
-        );
-        for subtitle in subtitles {
-            let published = destination
-                .with_file_name(subtitle.path.file_name().context("No subtitle filename")?);
-            std::fs::hard_link(&subtitle.path, &published)
-                .context("Cannot publish subtitle; downloaded media was preserved")?;
+        let mut paths = vec![output];
+        paths.extend(extra_outputs);
+        paths.extend(subtitles.into_iter().map(|s| s.path));
+        let published = publish(&paths, destination.parent().context("No output parent")?)?;
+        for path in published {
             println!(
                 "YTUI_OUTPUT:{}",
-                serde_json::to_string(&published.to_string_lossy())?
+                serde_json::to_string(&path.to_string_lossy())?
             );
         }
         std::io::stdout().flush()?;
     }
     Ok(())
 }
+fn publish(paths: &[PathBuf], directory: &Path) -> Result<Vec<PathBuf>> {
+    let mut pairs = Vec::new();
+    for source in paths {
+        let target = directory.join(source.file_name().context("No output filename")?);
+        ensure!(
+            !target.try_exists()?,
+            "Output already exists; existing files were preserved"
+        );
+        ensure!(
+            !pairs.iter().any(|(_, p)| p == &target),
+            "Output filenames collide"
+        );
+        pairs.push((source, target));
+    }
+    let mut created = Vec::new();
+    for (source, target) in &pairs {
+        if let Err(error) = std::fs::hard_link(source, target) {
+            for (source, target) in created {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::MetadataExt;
+                    if let (Ok(a), Ok(b)) =
+                        (std::fs::metadata(source), std::fs::symlink_metadata(target))
+                        && a.ino() == b.ino()
+                        && a.dev() == b.dev()
+                    {
+                        let _ = std::fs::remove_file(target);
+                    }
+                }
+            }
+            return Err(error).context(
+                "Cannot publish outputs; destination is unwritable or another file appeared",
+            );
+        }
+        created.push((source, target));
+    }
+    Ok(pairs.into_iter().map(|(_, target)| target).collect())
+}
 fn prepare_subtitles(
     client: &YoutubeDl,
     info: &mut VideoInfo,
     destination: &Path,
     options: &ytui_core::DownloadOptions,
+    throttle: &mut crate::throttle::Throttle,
 ) -> Result<Vec<SubtitleFile>> {
     if options.subtitles.is_empty() {
         return Ok(Vec::new());
@@ -243,11 +326,16 @@ fn prepare_subtitles(
             !path.try_exists()?,
             "Subtitle destination already exists; choose another output directory"
         );
-        client.download_subtitle_with_options(
+        throttle.new_resource();
+        client.download_subtitle_with_progress(
             info,
             &subtitle,
             &path,
             DownloadOptions { retries: 0 },
+            |progress| {
+                throttle.pace(progress);
+                ControlFlow::Continue(())
+            },
         )?;
         files.push(SubtitleFile {
             path,
@@ -331,24 +419,33 @@ fn tag(request: &WorkerRequest, path: &Path, title: &str) -> Result<()> {
         ]);
     }
     args.push(temp.path().to_string_lossy().into());
-    let output = std::process::Command::new(&request.config.ffmpeg)
-        .args(args)
-        .stdin(std::process::Stdio::null())
-        .output()?;
+    let output = crate::worker_process::run(&request.config.ffmpeg, &args)?;
     ensure!(
-        output.status.success(),
-        "Native metadata/cover embedding failed; the downloaded media was preserved"
+        output.success,
+        "Native metadata/cover embedding failed: {}",
+        output.stderr
     );
     temp.persist(path).map_err(|e| e.error)?;
     Ok(())
 }
 pub async fn run(
-    request: WorkerRequest,
+    mut request: WorkerRequest,
     dir: &Path,
     cancel: CancellationToken,
     on_line: impl FnMut(&str) + Send,
 ) -> Result<ProcessResult> {
     crate::paths::private_dir(dir)?;
+    // Parent ownership ensures ordinary cancellation cleans staging after the helper is reaped.
+    let staging = if request.resolve {
+        None
+    } else {
+        Some(
+            tempfile::Builder::new()
+                .prefix(".ytui-job-")
+                .tempdir_in(request.job.options.output_directory())?,
+        )
+    };
+    request.staging = staging.as_ref().map(|d| d.path().to_owned());
     let mut manifest = tempfile::Builder::new()
         .prefix("native-")
         .suffix(".json")
@@ -356,7 +453,7 @@ pub async fn run(
     manifest.write_all(&serde_json::to_vec(&request)?)?;
     manifest.flush()?;
     let exe = std::env::current_exe()?;
-    process::run(
+    let result = process::run(
         ProcessSpec::new(
             exe.to_string_lossy(),
             vec![
@@ -365,10 +462,28 @@ pub async fn run(
             ],
             if request.resolve { 40 } else { 24 * 60 * 60 },
         ),
-        cancel,
+        cancel.clone(),
         on_line,
     )
-    .await
+    .await;
+    if let Ok(mut output) = result {
+        if !output.success
+            && !cancel.is_cancelled()
+            && output
+                .lines
+                .iter()
+                .any(|line| line.starts_with("YTUI_SOURCE:"))
+            && let Some(staging) = staging
+        {
+            let path = staging.keep();
+            output
+                .stderr
+                .push_str(&format!(" · Recoverable source kept in {}", path.display()));
+        }
+        Ok(output)
+    } else {
+        result
+    }
 }
 pub async fn resolve(
     job: Job,
@@ -383,6 +498,7 @@ pub async fn resolve(
             config,
             cookies,
             resolve: true,
+            staging: None,
         },
         dir,
         cancel,
@@ -453,7 +569,14 @@ mod tests {
             subtitles: vec!["en".into()],
             ..Default::default()
         };
-        let files = prepare_subtitles(&client, &mut info, &destination, &options).unwrap();
+        let files = prepare_subtitles(
+            &client,
+            &mut info,
+            &destination,
+            &options,
+            &mut crate::throttle::Throttle::new(0),
+        )
+        .unwrap();
         server.join().unwrap();
         assert_eq!(files.len(), 1);
         assert!(
@@ -461,11 +584,50 @@ mod tests {
                 .unwrap()
                 .contains("Synthetic captions")
         );
-        assert!(prepare_subtitles(&client, &mut info, &destination, &options).is_err());
+        assert!(
+            prepare_subtitles(
+                &client,
+                &mut info,
+                &destination,
+                &options,
+                &mut crate::throttle::Throttle::new(0)
+            )
+            .is_err()
+        );
         let missing = ytui_core::DownloadOptions {
             subtitles: vec!["zz".into()],
             ..Default::default()
         };
-        assert!(prepare_subtitles(&client, &mut info, &destination, &missing).is_err());
+        assert!(
+            prepare_subtitles(
+                &client,
+                &mut info,
+                &destination,
+                &missing,
+                &mut crate::throttle::Throttle::new(0)
+            )
+            .is_err()
+        );
+    }
+    #[test]
+    fn multi_output_publish_refuses_collisions_before_creating_any_files() {
+        let temp = tempfile::tempdir().unwrap();
+        let stage = temp.path().join("stage");
+        let out = temp.path().join("out");
+        std::fs::create_dir_all(&stage).unwrap();
+        std::fs::create_dir_all(&out).unwrap();
+        let a = stage.join("video.mp4");
+        let b = stage.join("chapter.mp4");
+        std::fs::write(&a, b"video").unwrap();
+        std::fs::write(&b, b"chapter").unwrap();
+        std::fs::write(out.join("chapter.mp4"), b"unrelated").unwrap();
+        assert!(publish(&[a.clone(), b.clone()], &out).is_err());
+        assert!(!out.join("video.mp4").exists());
+        assert_eq!(
+            std::fs::read(out.join("chapter.mp4")).unwrap(),
+            b"unrelated"
+        );
+        std::fs::remove_file(out.join("chapter.mp4")).unwrap();
+        assert_eq!(publish(&[a, b], &out).unwrap().len(), 2);
     }
 }

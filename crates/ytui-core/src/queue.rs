@@ -59,7 +59,10 @@ pub struct Job {
     pub completed_at: Option<u64>,
 }
 impl Job {
-    pub fn new(media: Media, options: DownloadOptions) -> Self {
+    pub fn new(mut media: Media, options: DownloadOptions) -> Self {
+        if options.audio {
+            media.kind = crate::MediaKind::Song;
+        }
         Self {
             id: uuid::Uuid::new_v4(),
             generation: 0,
@@ -133,6 +136,15 @@ impl DownloadQueue {
                 }
                 if media.description.is_empty() {
                     media.description = job.media.description.clone();
+                }
+                if media.chapters.is_empty() {
+                    media.chapters = job.media.chapters.clone();
+                }
+                if media.duration.is_none() {
+                    media.duration = job.media.duration;
+                }
+                if media.id.is_empty() {
+                    media.id = job.media.id.clone();
                 }
                 media.kind = job.media.kind;
                 job.media = media;

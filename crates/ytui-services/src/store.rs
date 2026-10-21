@@ -15,6 +15,8 @@ pub struct Snapshot {
     pub downloads: DownloadQueue,
     pub playback: PlaybackQueue,
     pub favorites: Vec<Media>,
+    pub positions: ytui_core::playback_history::PlaybackHistory,
+    pub watches: Vec<ytui_core::watch::CollectionWatch>,
 }
 enum Request {
     Load(oneshot::Sender<Result<Snapshot>>),
@@ -28,7 +30,7 @@ pub struct Store {
 }
 impl Store {
     pub fn open(dir: &Path) -> Result<Self> {
-        std::fs::create_dir_all(dir)?;
+        crate::paths::private_dir(dir)?;
         let lock = OpenOptions::new()
             .read(true)
             .write(true)
@@ -37,19 +39,35 @@ impl Store {
             .open(dir.join("instance.lock"))?;
         lock.try_lock_exclusive()
             .context("Another ytui Rust instance is using this state directory")?;
+        cleanup_transient(&dir.join("auth/transient"))?;
         let (tx, mut rx) = mpsc::channel::<Request>(16);
         let (ready, ready_rx) = std::sync::mpsc::channel();
         let path = dir.join("state.db");
         let join = std::thread::spawn(move || {
             let opened = (|| -> Result<Connection> {
-                let conn = Connection::open(path)?;
+                let conn = Connection::open(&path)?;
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600))?;
+                }
                 let version: u32 = conn.query_row("PRAGMA user_version", [], |r| r.get(0))?;
                 anyhow::ensure!(
-                    version <= 1,
+                    version <= 2,
                     "State database was created by a newer ytui; use that version or a separate state directory"
                 );
+                if version == 1 {
+                    let parent = path.parent().context("State database has no parent")?;
+                    let backup = parent.join("state-v1-backup.db");
+                    if !backup.exists() {
+                        let temp = tempfile::NamedTempFile::new_in(parent)?;
+                        backup_legacy(&path, temp.path())?;
+                        temp.as_file().sync_all()?;
+                        temp.persist_noclobber(&backup).map_err(|e| e.error)?;
+                    }
+                }
                 conn.busy_timeout(std::time::Duration::from_secs(3))?;
-                conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS app_state(name TEXT PRIMARY KEY,data TEXT NOT NULL); PRAGMA user_version=1;")?;
+                conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS app_state(name TEXT PRIMARY KEY,data TEXT NOT NULL); PRAGMA user_version=2;")?;
                 Ok(conn)
             })();
             let mut conn = match opened {
@@ -109,6 +127,22 @@ impl Store {
         Ok(())
     }
 }
+fn cleanup_transient(directory: &Path) -> Result<()> {
+    if !directory.exists() {
+        return Ok(());
+    }
+    for entry in std::fs::read_dir(directory)? {
+        let entry = entry?;
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        let owned = (name.starts_with("session-") && name.ends_with(".cookies.txt"))
+            || (name.starts_with("native-") && name.ends_with(".json"));
+        if owned && entry.file_type()?.is_file() {
+            std::fs::remove_file(entry.path())?;
+        }
+    }
+    Ok(())
+}
 fn load(conn: &Connection) -> Result<Snapshot> {
     use rusqlite::OptionalExtension;
     let value: Option<String> = conn
@@ -167,5 +201,67 @@ mod tests {
         assert_eq!(loaded.downloads.jobs[0].not_before, Some(12345678900));
         assert_eq!(loaded.downloads.jobs[1].state, JobState::Paused);
         store.close().await.unwrap();
+    }
+    #[tokio::test]
+    async fn stale_private_exports_are_removed_only_after_the_instance_lock_is_acquired() {
+        let temp = tempfile::tempdir().unwrap();
+        let directory = temp.path().join("auth/transient");
+        std::fs::create_dir_all(&directory).unwrap();
+        std::fs::write(directory.join("session-old.cookies.txt"), b"synthetic").unwrap();
+        std::fs::write(directory.join("native-old.json"), b"{}").unwrap();
+        std::fs::write(directory.join("unrelated.json"), b"keep").unwrap();
+        let store = Store::open(temp.path()).unwrap();
+        assert!(!directory.join("session-old.cookies.txt").exists());
+        assert!(!directory.join("native-old.json").exists());
+        std::fs::write(directory.join("session-active.cookies.txt"), b"synthetic").unwrap();
+        assert!(Store::open(temp.path()).is_err());
+        assert!(directory.join("session-active.cookies.txt").exists());
+        assert_eq!(
+            std::fs::read(directory.join("unrelated.json")).unwrap(),
+            b"keep"
+        );
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                std::fs::metadata(temp.path().join("state.db"))
+                    .unwrap()
+                    .permissions()
+                    .mode()
+                    & 0o777,
+                0o600
+            );
+        }
+        store.close().await.unwrap();
+    }
+    #[tokio::test]
+    async fn version_one_upgrade_retains_an_online_backup_before_advancing_the_version() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path().join("state.db");
+        let db = Connection::open(&path).unwrap();
+        db.execute_batch("PRAGMA user_version=1; CREATE TABLE app_state(name TEXT PRIMARY KEY,data TEXT NOT NULL); INSERT INTO app_state VALUES('snapshot','{}');").unwrap();
+        drop(db);
+        let store = Store::open(temp.path()).unwrap();
+        store.load().await.unwrap();
+        store.close().await.unwrap();
+        let backup = Connection::open(temp.path().join("state-v1-backup.db")).unwrap();
+        assert_eq!(
+            backup
+                .query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
+                .unwrap(),
+            1
+        );
+        assert_eq!(
+            backup
+                .query_row("SELECT data FROM app_state", [], |r| r.get::<_, String>(0))
+                .unwrap(),
+            "{}"
+        );
+        let db = Connection::open(path).unwrap();
+        assert_eq!(
+            db.query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
+                .unwrap(),
+            2
+        );
     }
 }

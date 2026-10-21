@@ -21,8 +21,19 @@ use ytui_core::{Config, Media, youtube_host};
 
 #[derive(Clone, Debug)]
 pub enum PlayerCommand {
-    Play { media: Media, audio: bool },
-    PlayFallback { media: Media, audio: bool },
+    Play {
+        media: Media,
+        audio: bool,
+    },
+    PlayAt {
+        media: Media,
+        audio: bool,
+        seconds: f64,
+    },
+    PlayFallback {
+        media: Media,
+        audio: bool,
+    },
     Configure(Box<Config>),
     Preview(Media),
     ClosePreview,
@@ -37,17 +48,19 @@ pub enum PlayerCommand {
 #[derive(Clone, Debug, Default)]
 pub struct PlayerStatus {
     pub title: String,
+    pub media: Option<Media>,
     pub position: f64,
     pub duration: Option<f64>,
     pub volume: f64,
     pub paused: bool,
     pub preview: bool,
     pub buffering: bool,
+    pub active: bool,
     pub error: Option<String>,
 }
 #[derive(Clone, Debug)]
 pub enum PlayerEvent {
-    Ended,
+    Ended(Box<Media>),
     Error(String),
 }
 pub struct Player {
@@ -102,6 +115,7 @@ async fn start(
     media: &Media,
     audio: bool,
     preview: bool,
+    position: Option<f64>,
 ) -> Result<Active> {
     let local = Path::new(&media.url).is_file();
     let youtube = if local {
@@ -130,6 +144,15 @@ async fn start(
         format!("--script-opts=ytdl_hook-ytdl_path={}", config.yt_dlp),
         "--volume=70".into(),
     ];
+    if config.offline {
+        args.extend([
+            "--access-references=no".into(),
+            "--load-unsafe-playlists=no".into(),
+        ]);
+    }
+    if let Some(position) = position.filter(|p| p.is_finite() && *p >= 0.0) {
+        args.push(format!("--start={position:.3}"));
+    }
     if audio {
         args.push("--no-video".into());
     } else {
@@ -156,7 +179,7 @@ async fn start(
     args.push(media.url.clone());
     let cancel = CancellationToken::new();
     let token = cancel.clone();
-    if config.download_backend == "native" && !youtube {
+    if local || (config.download_backend == "native" && !youtube) {
         args.retain(|a| a != "--ytdl=yes" && !a.starts_with("--script-opts="));
         args.insert(0, "--ytdl=no".into());
     }
@@ -169,7 +192,9 @@ async fn start(
         let spec = if youtube && config.download_backend == "native" {
             let mut options = config.download.clone();
             options.audio = audio;
-            options.quality = if preview { "360" } else { "720" }.into();
+            if preview {
+                options.quality = "360".into();
+            }
             let resolved = crate::native::resolve(
                 ytui_core::Job::new(media, options),
                 config,
@@ -255,15 +280,17 @@ impl Actor {
             ..Default::default()
         };
     }
-    async fn play(&mut self, media: Media, audio: bool, fallback: bool) {
+    async fn play(&mut self, media: Media, audio: bool, fallback: bool, position: Option<f64>) {
         self.stop().await;
         self.reconnect_count = 0;
         self.resume_after_preview = false;
         self.playing = Some((media.clone(), audio, fallback));
         self.state = PlayerStatus {
             title: media.title.clone(),
+            media: Some(media.clone()),
             volume: 70.0,
             buffering: true,
+            active: true,
             ..Default::default()
         };
         let mut config = self.config.clone();
@@ -277,6 +304,7 @@ impl Actor {
             &media,
             audio,
             false,
+            position,
         )
         .await
         {
@@ -319,6 +347,7 @@ impl Actor {
             &media,
             false,
             true,
+            None,
         )
         .await
         {
@@ -334,8 +363,15 @@ impl Actor {
     }
     async fn handle(&mut self, command: PlayerCommand) {
         match command {
-            PlayerCommand::Play { media, audio } => self.play(media, audio, false).await,
-            PlayerCommand::PlayFallback { media, audio } => self.play(media, audio, true).await,
+            PlayerCommand::Play { media, audio } => self.play(media, audio, false, None).await,
+            PlayerCommand::PlayAt {
+                media,
+                audio,
+                seconds,
+            } => self.play(media, audio, false, Some(seconds)).await,
+            PlayerCommand::PlayFallback { media, audio } => {
+                self.play(media, audio, true, None).await
+            }
             PlayerCommand::Preview(media) => self.preview(media).await,
             PlayerCommand::ClosePreview => self.close_preview().await,
             PlayerCommand::Configure(config) => self.config = *config,
@@ -385,6 +421,7 @@ impl Actor {
                 Err(_) => "mpv worker exited unexpectedly".into(),
             };
             self.state.buffering = false;
+            self.state.active = false;
             if self.playing.as_ref().is_some_and(|(m, _, _)| m.live) && self.reconnect_count < 3 {
                 self.reconnect_count += 1;
                 self.reconnect_at = Some(
@@ -395,9 +432,16 @@ impl Actor {
                     "Radio disconnected · reconnecting ({}/3)",
                     self.reconnect_count
                 ));
-            } else if success {
-                event = Some(PlayerEvent::Ended);
-            } else {
+            } else if success
+                && self
+                    .state
+                    .duration
+                    .is_none_or(|duration| self.state.position >= duration - 2.0)
+            {
+                if let Some((media, _, _)) = &self.playing {
+                    event = Some(PlayerEvent::Ended(Box::new(media.clone())));
+                }
+            } else if !success {
                 self.state.error = Some(if message.is_empty() {
                     "Playback failed".into()
                 } else {
@@ -419,11 +463,13 @@ impl Actor {
                     media,
                     *audio,
                     false,
+                    None,
                 )
                 .await
                 {
                     Ok(p) => {
                         self.full = Some(p);
+                        self.state.active = true;
                         self.state.error = None;
                     }
                     Err(e) => {
@@ -608,5 +654,109 @@ mod tests {
         actor.stop().await;
         server.abort();
         let _ = server.await;
+    }
+    #[tokio::test]
+    async fn local_resume_passes_start_time_and_disables_extraction() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path().join("local.mp4");
+        std::fs::write(&source, b"fixture").unwrap();
+        let script = temp.path().join("mpv");
+        std::fs::write(&script, "#!/bin/sh\nprintf '%s\\n' \"$@\"\n").unwrap();
+        std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let config = Config {
+            mpv: script.to_string_lossy().into(),
+            download_backend: "yt-dlp".into(),
+            ..Default::default()
+        };
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().join("state"),
+            config: temp.path().join("config"),
+            state: temp.path().join("state/ytui"),
+            cache: temp.path().join("cache"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        let player = start(
+            &config,
+            &paths,
+            None,
+            &Media {
+                url: source.to_string_lossy().into(),
+                ..Default::default()
+            },
+            false,
+            false,
+            Some(42.25),
+        )
+        .await
+        .unwrap();
+        let result = player.task.await.unwrap().unwrap();
+        assert!(result.success);
+        assert!(result.lines.contains(&"--start=42.250".into()));
+        assert!(result.lines.contains(&"--ytdl=no".into()));
+        assert!(
+            !result
+                .lines
+                .iter()
+                .any(|line| line.starts_with("--script-opts="))
+        );
+    }
+    #[tokio::test]
+    async fn closing_a_window_early_does_not_complete_the_track_or_advance_the_queue() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().join("state"),
+            config: temp.path().join("config"),
+            state: temp.path().join("state/ytui"),
+            cache: temp.path().join("cache"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        for (position, should_end) in [(40.0, false), (99.5, true)] {
+            let task = tokio::spawn(async {
+                Ok(ProcessResult {
+                    success: true,
+                    lines: Vec::new(),
+                    stderr: String::new(),
+                })
+            });
+            tokio::task::yield_now().await;
+            let media = Media {
+                title: "Fixture".into(),
+                url: "/tmp/fixture.mp4".into(),
+                ..Default::default()
+            };
+            let mut actor = Actor {
+                config: Config::default(),
+                paths: paths.clone(),
+                session: None,
+                full: Some(Active {
+                    cancel: CancellationToken::new(),
+                    task,
+                    socket: temp.path().join("unused-ipc"),
+                    _dir: tempfile::tempdir().unwrap(),
+                    _cookies: None,
+                }),
+                preview: None,
+                state: PlayerStatus {
+                    title: media.title.clone(),
+                    media: Some(media.clone()),
+                    position,
+                    duration: Some(100.0),
+                    active: true,
+                    ..Default::default()
+                },
+                resume_after_preview: false,
+                playing: Some((media, false, false)),
+                reconnect_count: 0,
+                reconnect_at: None,
+            };
+            let event = actor.tick().await;
+            assert_eq!(matches!(event, Some(PlayerEvent::Ended(_))), should_end);
+            assert!(!actor.state.active);
+        }
     }
 }

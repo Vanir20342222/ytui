@@ -6,11 +6,14 @@ use std::{collections::BTreeMap, path::PathBuf};
 #[serde(default)]
 pub struct Config {
     pub version: u32,
+    #[serde(skip)]
+    pub offline: bool,
     pub theme: String,
     pub theme_provider: String,
     pub image_protocol: String,
     pub thumbnails: bool,
     pub reduced_motion: bool,
+    pub playback_history: bool,
     pub download: DownloadOptions,
     pub concurrency: usize,
     pub max_retries: u32,
@@ -20,6 +23,7 @@ pub struct Config {
     pub native_js_runtime: Option<PathBuf>,
     pub yt_dlp: String,
     pub ffmpeg: String,
+    pub ffprobe: String,
     pub mpv: String,
     pub cliamp: String,
     pub nmcli: String,
@@ -40,11 +44,13 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             version: 1,
+            offline: false,
             theme: "system".into(),
             theme_provider: "auto".into(),
             image_protocol: "auto".into(),
             thumbnails: true,
             reduced_motion: false,
+            playback_history: true,
             download: DownloadOptions::default(),
             concurrency: 3,
             max_retries: 3,
@@ -54,6 +60,7 @@ impl Default for Config {
             native_js_runtime: None,
             yt_dlp: "yt-dlp".into(),
             ffmpeg: "ffmpeg".into(),
+            ffprobe: "ffprobe".into(),
             mpv: "mpv".into(),
             cliamp: "cliamp".into(),
             nmcli: "nmcli".into(),
@@ -149,6 +156,7 @@ pub struct DownloadOptions {
     pub bandwidth_kib: u64,
     pub global_bandwidth_kib: u64,
     pub sponsorblock: Vec<String>,
+    pub sponsorblock_api: String,
     pub sponsorblock_remove: bool,
     pub split_chapters: bool,
     pub skip_duplicates: bool,
@@ -176,6 +184,7 @@ impl Default for DownloadOptions {
             bandwidth_kib: 0,
             global_bandwidth_kib: 0,
             sponsorblock: Vec::new(),
+            sponsorblock_api: "https://sponsor.ajay.app".into(),
             sponsorblock_remove: false,
             split_chapters: false,
             skip_duplicates: true,
@@ -224,6 +233,32 @@ impl DownloadOptions {
         ensure!(
             !self.filename_template.is_empty(),
             "filename_template cannot be empty"
+        );
+        let quality = self
+            .audio_quality
+            .trim_end_matches(['k', 'K'])
+            .parse::<f64>()
+            .map_err(|_| {
+                anyhow::anyhow!("Audio quality must be 0..10 or a bitrate such as 320K")
+            })?;
+        ensure!(
+            quality.is_finite() && (0.0..=1_000_000.0).contains(&quality),
+            "Audio quality must be finite and between 0 and 1000000"
+        );
+        crate::http_url(&self.sponsorblock_api)?;
+        ensure!(
+            self.sponsorblock.iter().all(|s| [
+                "sponsor",
+                "intro",
+                "outro",
+                "selfpromo",
+                "interaction",
+                "preview",
+                "music_offtopic",
+                "filler"
+            ]
+            .contains(&s.as_str())),
+            "Unsupported SponsorBlock category"
         );
         if let Some(items) = &self.playlist_items {
             ensure!(

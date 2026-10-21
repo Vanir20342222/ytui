@@ -7,7 +7,8 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **43 passed**, zero failures.
+- `cargo test --workspace --locked`: **61 passed**, zero failures; one real-media test is explicitly ignored in this command.
+- `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
 - Installed the release binary as `ytui-rs` into an isolated temporary directory
@@ -15,6 +16,23 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 Coverage includes:
 
+- Native rate-cap timing against the actual Rust CLI, cancellation during pacing,
+  no-clobber multi-output preflight, and retention of a completed staged source
+  after failed tagging without publishing/marking a final output.
+- Real native SponsorBlock marking, one-second removal (duration checked with
+  ffprobe), two chapter files, retimed chapter endpoints, and unchanged original
+  fixture bytes. The loopback API verifies that no Cookie header is sent.
+- Local resume excludes preview/live positions, never starts at launch, passes a
+  saved start time to fake mpv, and does not treat an early window close as EOF.
+- Offline catalog skips missing/sidecar files and remote thumbnails; offline mode
+  holds remote jobs and rejects remote playback/provider navigation.
+- Watch baseline/new-item/duplicate behavior, failed-poll backoff, and stale-result
+  rejection after a pause. Live playlist polling still needs target acceptance.
+- Private state permissions, locked-instance-safe cleanup of synthetic stale
+  credential exports/manifests, and a version-1 database backup before version-2
+  upgrade. No real credential contents are read during these checks.
+- Audio-mode destination switching preserves custom paths. HTTP 503 Service
+  Unavailable is transient; postprocessing failures do not redownload automatically.
 - Daily midnight-window boundaries, small global bandwidth caps, scheduled-state
   persistence, cancellation/requeue at closure, manual-pause preservation, stale
   completion rejection and explicit headless `--now` handling.
@@ -71,6 +89,13 @@ help shortcut, and restored terminal flags on exit. The new
 screenshots show those actual demo panels. These [screenshots](screenshots/youtube.png) are actual terminal
 output rendered with a monospaced font; the catalog is explicitly fictional.
 `NO_COLOR` was removed only from that child environment for color capture.
+
+Another PTY check launched the actual `--offline` binary against a synthetic
+version-2 state database. The local catalog, resume menu, watch panel, local
+search and resize/clean-exit checks passed without account loading or online
+provider requests. [Offline](screenshots/offline.png), [resume](screenshots/resume.png)
+and [watch](screenshots/watches.png) captures show fictional fixture data; no media
+was played by that screen check.
 
 ## Live checks and boundaries
 

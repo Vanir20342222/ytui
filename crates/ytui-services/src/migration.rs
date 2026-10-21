@@ -255,6 +255,9 @@ fn map_settings(v: &Value, c: &mut Config) {
                 .unwrap_or(500);
         }
     }
+    if let Some(s) = string("/advanced/sponsor_block_api") {
+        c.download.sponsorblock_api = s;
+    }
     if let Some(s) = string("/quality/video_quality") {
         c.download.quality = s;
     }

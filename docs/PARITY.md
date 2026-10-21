@@ -12,7 +12,7 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | yt-dlp fallback | Explicit per-job/action/CLI/global selection | Real YouTube challenge/version checks |
 | Format/container, conversion, metadata, cover art | Implemented | Broad codec/container fixture coverage |
 | Subtitles | Native literal-language selection, manual/automatic sidecars and embedding; explicit fallback also supported | Live captions and broader codec/container acceptance (real FFmpeg fixture passes) |
-| SponsorBlock, chapter split, bandwidth | Implemented in explicit fallback; native rejects unsupported options | Native adapters remain incomplete upstream/in ytui |
+| SponsorBlock, chapter split, bandwidth | Native pacing, chapter parsing/embedding/splitting and SponsorBlock mark/cut adapters; explicit fallback also supported | Live YouTube/API and broader codec coverage; cuts with subtitles require fallback; chapter copies can round to keyframes |
 | Local conversion | Separate FFmpeg output; input preserved | Broad real-codec checks |
 | Search and personalized YouTube feeds | Rust internal-API adapter; current and legacy renderer parsing | Live signed-in home/subscriptions/Watch Later validation |
 | Music home/search/library/album/artist/playlist | Dedicated WEB_REMIX requests; category commands | Live signed-in response/continuation validation |
@@ -24,13 +24,14 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | Radio Browser | Search/country/tag, country pins, failover, cached catalogs, playlist resolution, reconnect | Real audio acceptance; location suggestions are optional and not implemented |
 | Curated and system themes | Caelestia/Omarchy/portal/GNOME, live updates, manual override, ANSI | GNOME/Omarchy desktop sessions and Ghostty graphics |
 | Persistence/migration/history/export/profiles | Separate DB, group expansion, bulk loaded-page ranges, JSON/text import, complete native profile/keymap roundtrip; raw legacy settings/keys/profiles preserved | Unsupported legacy fields are preserved, not applied; real-data upgrade acceptance |
-| Old slash-command aliases/panels | Queue/history/stats/mode/profiles/settings/pause/stop/import/export aliases, key editor and scrollable help | `/update` and `/log`; full legacy panel presentation |
+| Old slash-command aliases/panels | Queue/history/stats/mode/profiles/settings/pause/stop/import/export aliases, key editor, diagnostics and update instructions | Full legacy panel presentation; native updates use reviewed builds |
 | VPN/Proton/WireGuard | Explicit NetworkManager VPN/WireGuard list/connect/disconnect via supervised nmcli; no startup probing | Standalone Proton CLI/login/server selection, raw wg-quick and non-Linux providers remain open; real NetworkManager acceptance |
-| Scheduling and off-peak bandwidth | Persistent delayed jobs, daily local-time windows, rate windows and safe stop/requeue on boundaries; CLI explicit override | Real long-transfer/timezone/DST acceptance; recurring watch subscriptions absent |
+| Scheduling and off-peak bandwidth | Persistent delayed jobs/windows, rate caps, recurring collection watches with baseline/backoff/account invalidation | Real long-transfer/timezone/DST and live collection acceptance; large watch catalogs have explicit bounds |
 | Clipboard polling | Opt-in bounded Wayland/X11 polling with baseline/change detection and a review action | Actual Ghostty/Caelestia clipboard acceptance |
 | Desktop notifications and sounds | Native D-Bus completion/failure notifications; optional sound hints | Real notification server/sound acceptance (daemon may ignore hints) |
 | Statistics/history filters | Dedicated searchable/filterable panel with recorded transfer/media totals | Broader statistics and physical disk inventory are optional |
-| MPRIS, lyrics, offline library | Optional feature ideas | Not required for this alpha; separate work |
+| Offline library and local resume | Existing completed-media catalog, explicit local resume, private bounded positions and `--offline` mode | Actual mpv/device acceptance and additional codec/filesystem coverage |
+| MPRIS and lyrics | Optional feature ideas | Not required for this alpha; separate work |
 | Packaging/installer | Rust source build + separate ytui-rs installer | Default replacement/release packages only after target acceptance |
 
 `clipboard_watcher`, `notifications` and `notification_sound` now have Rust effects
@@ -39,6 +40,12 @@ download without review. Legacy values without native equivalents remain in both
 the original backups and the profile's verbatim legacy JSON. No real clipboard,
 notification server, VPN or desktop theme is changed/read by automated tests;
 process and auth tests use synthetic tools/data.
+
+Native postprocessing is fixture-tested, including a real FFmpeg mark/cut/split
+journey; it is not evidence of unrestricted native YouTube extraction. Rust state
+version 2 upgrades retain a version-1 backup. Forced exits can leave recoverable
+staging directories; only stale owned credential exports/manifests are cleaned
+automatically after the instance lock is acquired.
 
 Replacing the default installer still requires the plan's parity/scope decision
 and target-machine acceptance. This branch does not remove the Python fallback

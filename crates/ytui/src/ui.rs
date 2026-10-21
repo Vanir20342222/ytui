@@ -86,7 +86,7 @@ pub fn render(f: &mut Frame, app: &mut App) {
         .session
         .as_ref()
         .map(|s| s.account.as_str())
-        .unwrap_or("Anonymous");
+        .unwrap_or(if app.offline { "Offline" } else { "Anonymous" });
     f.render_widget(
         Paragraph::new(Line::from(vec![
             Span::styled(
@@ -171,6 +171,8 @@ pub fn render(f: &mut Frame, app: &mut App) {
     if let Some(input) = &app.input {
         let title = if input.command {
             " Command · Enter to run · Esc to close "
+        } else if app.offline {
+            " Search offline downloads "
         } else if app.tab == 0 {
             " Add URL or search "
         } else {
@@ -517,8 +519,10 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
 }
 fn playback(f: &mut Frame, app: &App, area: Rect) {
     let s = &app.player_status;
-    let active = !s.title.is_empty();
-    let title = if s.preview {
+    let active = s.active;
+    let title = if !s.active && !s.title.is_empty() {
+        " Stopped · u resumes "
+    } else if s.preview {
         " Preview · muted · Esc closes "
     } else if s.paused {
         " Paused "
@@ -586,6 +590,8 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
         Modal::Themes(_) => (52, 20),
         Modal::Form(form) => (86, form.fields.len() as u16 + 8),
         Modal::Queue(_) => (85, 25),
+        Modal::Resume(_) => (90, 25),
+        Modal::Watches(_) => (100, 28),
         Modal::History(_) => (105, 32),
         Modal::Groups(_) => (85, 25),
         Modal::Text { .. } => (90, 28),
@@ -639,6 +645,7 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
                 Line::from(":auth :settings :details :songs QUERY :albums :artists"),
                 Line::from(":downloads completed QUERY :stats :groups :download-page 1,3:7"),
                 Line::from(":schedule 30m URL :clipboard :profiles :profile load NAME"),
+                Line::from(":offline audio QUERY · :resume · :watch add 30m · :watches · :log"),
             ]);
             f.render_widget(
                 Paragraph::new(lines)
@@ -740,6 +747,77 @@ fn modal(f: &mut Frame, app: &App, area: Rect) {
             f.render_stateful_widget(
                 List::new(items)
                     .block(panel(" Download groups · Enter expands · Esc closes ", app))
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                rect,
+                &mut state,
+            );
+        }
+        Modal::Watches(selected) => {
+            let items = app
+                .snapshot
+                .watches
+                .iter()
+                .map(|w| {
+                    ListItem::new(vec![
+                        Line::from(format!(
+                            "{} · {} · every {}m",
+                            w.title,
+                            if !w.enabled {
+                                "Paused"
+                            } else if w.seen.is_none() {
+                                "Baseline pending"
+                            } else {
+                                "Watching"
+                            },
+                            w.interval_seconds / 60
+                        )),
+                        Line::styled(
+                            w.error.clone().unwrap_or_else(|| w.id.to_string()),
+                            Style::default().fg(themed(app, app.palette.muted)),
+                        ),
+                    ])
+                })
+                .collect::<Vec<_>>();
+            let mut state = ListState::default().with_selected(Some(*selected));
+            f.render_stateful_widget(
+                List::new(items)
+                    .block(panel(
+                        " Collection watches · Space pause/resume · Del removes · Enter opens ",
+                        app,
+                    ))
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                rect,
+                &mut state,
+            );
+        }
+        Modal::Resume(selected) => {
+            let items = app
+                .resume_positions()
+                .iter()
+                .map(|p| {
+                    ListItem::new(vec![
+                        Line::from(format!(
+                            "{} · {}:{:02}",
+                            p.media.title,
+                            p.seconds as u64 / 60,
+                            p.seconds as u64 % 60
+                        )),
+                        Line::styled(
+                            p.media.creator.clone(),
+                            Style::default().fg(themed(app, app.palette.muted)),
+                        ),
+                    ])
+                })
+                .collect::<Vec<_>>();
+            let mut state = ListState::default().with_selected(Some(*selected));
+            f.render_stateful_widget(
+                List::new(items)
+                    .block(panel(
+                        " Resume locally · Enter resumes · Del forgets · Esc closes ",
+                        app,
+                    ))
                     .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
                     .highlight_symbol("▸ "),
                 rect,
