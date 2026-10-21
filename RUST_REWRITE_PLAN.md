@@ -1,11 +1,12 @@
 # ytui Rust rewrite plan
 
-Status: Rust alpha merged in PR #2; media/reliability follow-up in PR #4, UI polish on `rewrite/ui-polish` above that branch; target-machine release gates remain open. Updated: 2026-10-21.
+Status: Rust alpha merged in PR #2; PR #5 UI changes merged into the PR #4 media branch; alpha.3 provider fixes on `rewrite/provider-reliability` above it. PR #4 and target-machine release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
-on `rewrite/media-library` (PR #4), with UI follow-up on `rewrite/ui-polish`;
+on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
+the provider follow-up lives on `rewrite/provider-reliability`;
 the parity work in PR #3 is merged. See docs/RUST.md, docs/PARITY.md and
 docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
@@ -341,7 +342,7 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 70 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 77 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
@@ -424,6 +425,29 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 - Full evidence and explicitly unverified live behaviors are in
   docs/FEATURE_AUDIT.md; docs/UI_THEMES.md links the 27 WQHD captures. Real account,
   Origin/keyring, Ghostty, media devices and stable packaging remain release gates.
+
+### Provider failure follow-up (M1/M3/M5/M6/M8)
+
+- User screenshots reproduced alpha.1's hidden radio connection error, Music
+  bootstrap HTTP 302 and empty anonymous Home. The user's installed alpha.1
+  predates the UI branch; PR #4 remains unmerged into main. Reinstall/version
+  instructions now identify the exact branch and executable; version is alpha.3.
+- Added bounded same-origin bootstrap redirects without forwarding browser
+  credentials to another origin. Consent/sign-in redirects give browser/import
+  instructions; no consent choice is made automatically. Public service
+  redirects may change host but never downgrade HTTPS.
+- Empty anonymous Home explains search/sign-in, provider empty-feed messages
+  are preserved, and the central empty/error pane shows the complete explanation.
+- Radio catalogs follow public redirects; server requests run concurrently with
+  eight-second deadlines and retain sanitized failure causes. A saved cliamp
+  catalog is preferred during an outage; otherwise a clearly labelled Radio
+  Browser fallback keeps station browsing available.
+- Added opt-in `doctor --network` public probes without browser-cookie access,
+  cached success masking, VPN changes or network activity in ordinary doctor.
+- Request-level loopback coverage now checks redirects, origin scoping, separate
+  WEB/WEB_REMIX contexts, visitor headers, consent/rate-limit/rejected requests,
+  anonymous empty Home and radio outage fallback. Live endpoint evidence and
+  remaining service/account/device boundaries are recorded in docs/VALIDATION.md.
 
 ### Agent handoff and completion evidence
 

@@ -13,6 +13,7 @@ pub struct Browser {
     account: u32,
     web: Arc<Mutex<Option<Value>>>,
     music: Arc<Mutex<Option<Value>>>,
+    origins: [String; 2],
 }
 impl Browser {
     pub fn new(client: reqwest::Client, session: Option<Arc<Session>>, account: u32) -> Self {
@@ -22,17 +23,17 @@ impl Browser {
             account,
             web: Arc::new(Mutex::new(None)),
             music: Arc::new(Mutex::new(None)),
+            origins: [
+                "https://www.youtube.com".into(),
+                "https://music.youtube.com".into(),
+            ],
         }
     }
     pub fn authenticated(&self) -> bool {
         self.session.is_some()
     }
-    fn origin(music: bool) -> &'static str {
-        if music {
-            "https://music.youtube.com"
-        } else {
-            "https://www.youtube.com"
-        }
+    fn origin(&self, music: bool) -> &str {
+        &self.origins[usize::from(music)]
     }
     fn authorized(
         &self,
@@ -55,17 +56,23 @@ impl Browser {
         if let Some(c) = &*guard {
             return Ok(c.clone());
         }
-        let origin = Self::origin(music);
-        let response = self
-            .authorized(
-                self.client
-                    .get(origin)
-                    .header("Accept-Language", "en-US,en;q=0.9"),
-                origin,
-            )?
-            .send()
-            .await
-            .context("Cannot contact YouTube; check network/proxy")?;
+        let origin = self.origin(music);
+        let mut start = url::Url::parse(origin)?;
+        start.query_pairs_mut().append_pair("hl", "en");
+        let response = crate::http::get(
+            start,
+            |url| {
+                self.authorized(
+                    self.client
+                        .get(url.clone())
+                        .header("Accept-Language", "en-US,en;q=0.9"),
+                    origin,
+                )
+            },
+            crate::http::Redirects::SameOrigin,
+            if music { "YouTube Music" } else { "YouTube" },
+        )
+        .await?;
         ensure!(
             response.status().is_success(),
             "YouTube bootstrap returned HTTP {}. Check connectivity, consent, or browser session.",
@@ -78,7 +85,7 @@ impl Browser {
     }
     async fn post(&self, music: bool, endpoint: &str, mut body: Value) -> Result<Value> {
         let config = self.bootstrap(music).await?;
-        let origin = Self::origin(music);
+        let origin = self.origin(music);
         let mut context = config
             .get("INNERTUBE_CONTEXT")
             .cloned()
@@ -108,7 +115,11 @@ impl Browser {
         if let Some(key) = config.get("INNERTUBE_API_KEY").and_then(Value::as_str) {
             request = request.query(&[("key", key)]);
         }
-        if let Some(visitor) = config.get("VISITOR_DATA").and_then(Value::as_str) {
+        if let Some(visitor) = config
+            .get("VISITOR_DATA")
+            .or_else(|| config.pointer("/INNERTUBE_CONTEXT/client/visitorData"))
+            .and_then(Value::as_str)
+        {
             request = request.header("X-Goog-Visitor-Id", visitor);
         }
         let response = self
@@ -116,7 +127,13 @@ impl Browser {
             .json(&body)
             .send()
             .await
-            .context("YouTube request failed; check network/proxy")?;
+            .map_err(|e| {
+                crate::http::request_error(
+                    "YouTube API",
+                    &url::Url::parse(origin).expect("validated origin"),
+                    e,
+                )
+            })?;
         match response.status().as_u16() {
             401 | 403 => bail!(
                 "YouTube rejected this session/request; re-import the selected browser profile or check service access"
@@ -299,15 +316,21 @@ impl Browser {
         if let Some(token) = page.continuation.take() {
             page.continuation = Some(format!("{endpoint}:{token}"));
         }
-        if page.items.is_empty() {
-            page.notice=Some("No supported items were returned. This may be an empty feed, an unavailable account feature, or a changed YouTube response. Try another feed or refresh your session.".into());
+        if page.items.is_empty() && page.notice.is_none() {
+            page.notice = Some(if matches!(request, BrowseRequest::Home) && self.session.is_none() {
+                "No anonymous Home recommendations were returned. Press / to search, or :auth to import your signed-in browser profile."
+            } else if matches!(request, BrowseRequest::Search(_) | BrowseRequest::MusicSearch { .. }) {
+                "No search results were returned. Try a different query; if this persists, the service response may have changed."
+            } else {
+                "No supported items were returned. This feed may be empty, unavailable for this account, or using a changed YouTube response. Choose another feed or refresh your session."
+            }.into());
         }
         Ok(page)
     }
     fn require_auth(&self) -> Result<()> {
         ensure!(
             self.session.is_some(),
-            "Sign in first: use :auth or `ytui auth import --browser brave --profile PATH`"
+            "Sign in first: use :auth or `ytui-rs auth import --browser brave-origin --profile PATH`"
         );
         Ok(())
     }
@@ -594,6 +617,15 @@ pub fn parse_page(data: &Value, music: bool) -> Page {
                                 .and_then(Value::as_str)
                                 .map(str::to_owned);
                         }
+                    } else if name == "messageRenderer" || name == "backgroundPromoRenderer" {
+                        let message = v
+                            .get("text")
+                            .or_else(|| v.get("bodyText"))
+                            .map(text)
+                            .unwrap_or_default();
+                        if !message.is_empty() {
+                            page.notice = Some(message);
+                        }
                     } else if name != "menu" && name != "trackingParams" {
                         walk(v, music, page, seen);
                     }
@@ -640,5 +672,126 @@ mod modern_tests {
         assert_eq!(page.items[0].title, "A modern card");
         assert_eq!(page.items[0].creator, "Creator");
         assert_eq!(page.continuation.as_deref(), Some("next"));
+    }
+}
+
+#[cfg(test)]
+mod request_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    fn client() -> reqwest::Client {
+        reqwest::Client::builder()
+            .no_proxy()
+            .redirect(reqwest::redirect::Policy::none())
+            .timeout(std::time::Duration::from_secs(2))
+            .build()
+            .unwrap()
+    }
+    #[tokio::test]
+    async fn redirected_bootstrap_search_empty_home_and_music_keep_separate_contexts() {
+        let bootstraps = Arc::new(AtomicUsize::new(0));
+        let count = bootstraps.clone();
+        let (base, task) = crate::test_http::serve_request(move |request| {
+            let (headers, body) = request.split_once("\r\n\r\n").unwrap();
+            let target = headers.lines().next().unwrap().split_whitespace().nth(1).unwrap();
+            let lower = headers.to_ascii_lowercase();
+            assert!(!lower.contains("\ncookie:"));
+            assert!(!lower.contains("\nauthorization:"));
+            let music = target.starts_with("/music");
+            let version = if music {"music-fixture"} else {"web-fixture"};
+            if target.starts_with("/web?") || target.starts_with("/music?") {
+                count.fetch_add(1, Ordering::SeqCst);
+                return (302, format!("Location: /{}-ready\r\n", if music {"music"} else {"web"}), vec![]);
+            }
+            if target.ends_with("-ready") {
+                let config = json!({"INNERTUBE_CONTEXT":{"client":{"clientVersion":version,"visitorData":"synthetic-visitor"}},"INNERTUBE_API_KEY":"synthetic-key"});
+                return (200, String::new(), format!("<script>ytcfg.set({config});</script>").into_bytes());
+            }
+            let body: Value = serde_json::from_str(body).unwrap();
+            assert_eq!(body.pointer("/context/client/clientName").unwrap(), if music {"WEB_REMIX"} else {"WEB"});
+            assert_eq!(body.pointer("/context/client/clientVersion").unwrap(), version);
+            assert!(lower.contains("x-goog-visitor-id: synthetic-visitor"));
+            assert!(lower.contains(&format!("x-youtube-client-name: {}", if music {"67"} else {"1"})));
+            let data = if body.get("continuation").is_some() {
+                assert!(target.contains("/search?"));
+                assert_eq!(body["continuation"], "page2");
+                json!({"contents":[{"videoRenderer":{"videoId":"synthetic-page2","title":{"simpleText":"Next result"}}}]})
+            } else if target.contains("/search?") {
+                assert_eq!(body["query"], "fixture & song");
+                json!({"contents":[{"videoRenderer":{"videoId":"synthetic","title":{"simpleText":"Fixture result"}}}],"continuationCommand":{"token":"page2"}})
+            } else {
+                assert_eq!(body["browseId"], if music {"FEmusic_home"} else {"FEwhat_to_watch"});
+                json!({"contents":[]})
+            };
+            (200, "Content-Type: application/json\r\n".into(), data.to_string().into_bytes())
+        }).await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [format!("{base}/web"), format!("{base}/music")];
+        for music in [false, true] {
+            let home = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert!(home.notice.unwrap().contains(":auth"));
+            let results = browser
+                .fetch(music, &BrowseRequest::Search("fixture & song".into()))
+                .await
+                .unwrap();
+            assert_eq!(results.items.len(), 1);
+            assert_eq!(results.continuation.as_deref(), Some("search:page2"));
+            let next = browser
+                .fetch(
+                    music,
+                    &BrowseRequest::Continue(results.continuation.unwrap()),
+                )
+                .await
+                .unwrap();
+            assert_eq!(next.items[0].id, "synthetic-page2");
+        }
+        assert_eq!(bootstraps.load(Ordering::SeqCst), 2);
+        task.abort();
+        let _ = task.await;
+    }
+    #[tokio::test]
+    async fn consent_rate_limit_and_rejected_requests_have_actionable_errors() {
+        for (status, location, body, expected) in [
+            (
+                302,
+                "Location: https://consent.youtube.com/m?token=synthetic-secret\r\n",
+                "",
+                ":auth",
+            ),
+            (429, "", "", "rate limit"),
+            (403, "", "", "re-import"),
+        ] {
+            let (base, task) = crate::test_http::serve_request(move |request| {
+                if request.starts_with("GET") && status != 302 {
+                    return (
+                        200,
+                        String::new(),
+                        b"ytcfg.set({\"INNERTUBE_CLIENT_VERSION\":\"fixture\"});".to_vec(),
+                    );
+                }
+                (status, location.into(), body.as_bytes().to_vec())
+            })
+            .await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let error = browser
+                .fetch(true, &BrowseRequest::Search("test".into()))
+                .await
+                .unwrap_err()
+                .to_string();
+            assert!(error.contains(expected), "{error}");
+            assert!(!error.contains("synthetic-secret"));
+            task.abort();
+        }
+    }
+    #[test]
+    fn empty_feed_preserves_service_message_without_terminal_controls() {
+        let page = parse_page(
+            &json!({"contents":{"backgroundPromoRenderer":{"bodyText":{"simpleText":"Turn on watch history\u{001b}[31m"}}}}),
+            false,
+        );
+        let message = page.notice.unwrap();
+        assert!(message.contains("Turn on watch history"));
+        assert!(!message.contains('\u{001b}'));
     }
 }

@@ -10,7 +10,7 @@ used, and no networking restrictions were bypassed.
 
 ## Results
 
-- **70 default tests pass**, with one real-media test intentionally excluded.
+- **77 default tests pass**, with one real-media test intentionally excluded.
 - The separate real-FFmpeg/ffprobe mark/cut/split fixture passes.
 - All **13 theme entries** render four workspaces and twelve dialogs at five
   sizes: 35×12, 80×24, 120×40, 180×50 and 212×58. All ten download phases are
@@ -42,7 +42,7 @@ used, and no networking restrictions were bypassed.
 | Chapters | Description parsing/normalization, real embedding/splitting/retiming and unchanged original fixture | Live chapter metadata; stream-copy cuts can round to keyframes |
 | Rate limits and daily windows | Actual rate timing/cancellation; global cap boundaries; midnight windows, state transitions and manual-pause preservation | Long transfers across DST/timezone changes |
 | Collection watches | Complete first baseline queues nothing; deduplication, bounds, failure backoff, account invalidation and stale-result rejection | Actual signed-in collections, large catalog limits and long-running polling |
-| YouTube home/search/subscriptions/later/liked/library/history | Synthetic current/legacy cards, bootstrapping, continuation parsing; command/selection routing | **Live feed and account correctness remains open** |
+| YouTube home/search/subscriptions/later/liked/library/history | Current/legacy cards; complete loopback bootstrap redirects, separate contexts, visitor headers, search/continuation requests, 403/429 and consent instructions; anonymous Home guidance | **Live feed and account correctness remains open**; public probes fail at this environment's proxy tunnel |
 | Channels/playlists/details/related | Provider parsing/contracts, collection navigation and selected details | Live internal-API responses and upstream playlist extraction limitations |
 | YouTube Music home/search/library/albums/artists/playlists | WEB_REMIX adapter and synthetic album/song parsing without duplicates; scoped feed choices | **Live Music account/search/continuation acceptance remains open** |
 | Browser import and credentials | Synthetic cookie scoping/redaction/file permissions, Netscape roundtrip and Origin directory discovery | **Actual Brave Origin decryption/keyring and Google validation remain open** |
@@ -52,15 +52,15 @@ used, and no networking restrictions were bypassed.
 | Playback queue/shuffle/repeat | Repeat Off/All/One, manual vs automatic advancement, previous, removals and nonrepeating shuffle; queue UI | Real device sequencing/reconnect stress |
 | Local resume | Bounded/finite private positions, preview/live exclusions, explicit start argument and no startup playback; actual PTY saved-position panel | Real media/device acceptance |
 | Offline mode/library | Catalog excludes missing/sidecar files; remote work/queue playback held; local search/resume/watch PTY; account loading skipped | Broader codecs/filesystems; user hooks retain their configured behavior |
-| Cliamp channels/track libraries | Parser differentiates streams/libraries; earlier live catalog inspection returned 15 channels | Real track-library playback and external cliamp suspension/return |
-| Radio Browser | Loopback server failover, search/country/tag query paths and pagination; disk-cache outage | Live directory/station availability |
+| Cliamp channels/track libraries | Parser differentiates streams/libraries; current HTTP 503 triggers labelled directory fallback; loopback covers redirect/empty/outage/loop cases | The current catalog outage prevents live cliamp channel/library acceptance; actual playback and external cliamp remain open |
+| Radio Browser | Actual alpha.3 CLI returns 80 public stations; concurrent server failover, query paths, pagination, no Cookie headers and disk-cache outage fixtures | Actual station playback and ongoing directory availability |
 | Station playlists/live radio | Relative M3U and PLS, redirects, HLS pass-through, unsafe schemes and loop bounds | Actual stream metadata, reconnect timing and audio device |
 | Favorites/custom stations/country pins | Controller state and parser validation; existing import/command paths | Real cliamp config variants and station persistence workflow acceptance |
 | Persistence/state upgrade | SQLite locking, paused recovery, version-1 backup before version 2, permissions and transient cleanup | Upgrade a copy of the user's real state; power-loss acceptance |
 | Migration/import/export/profiles/history/statistics | Atomic/idempotent import, group/filter indices, raw legacy preservation, config/keymap/profile roundtrips and actual panels | Real Python-state migration/rollback and deferred legacy fields |
 | Clipboard/notifications | Synthetic clipboard exact-host/baseline/change checks, stale/disabled rejection and notification escaping | Actual Wayland/X11 clipboard, D-Bus delivery and sound |
 | VPN controls | Supervised fake nmcli verifies escaped IDs and only explicit VPN operations | Real NetworkManager; standalone Proton/raw wg-quick are not implemented |
-| Diagnostics/update instructions | Panels open; sanitized errors; update action gives instructions without replacing binaries | Distribution/package update workflows |
+| Diagnostics/update instructions | Opt-in public `doctor --network` probes tested with actual release binary; host/cause retained with queries redacted; executable path/version and explicit branch/reinstall instructions | User's Proton exit and account probes remain open; distribution/package update workflows |
 | Setup/installer/packaging | CLI init creates absolute/relative config paths without overwriting files; doctor, safe repeated station imports and offline guards pass. Separate source-built `ytui-rs` installation/version smoke; Python launcher retained | Default-installer replacement and stable release packaging |
 | MPRIS, lyrics, location suggestions | Inventory reviewed | Optional ideas; not implemented or claimed working |
 

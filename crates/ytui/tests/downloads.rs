@@ -70,7 +70,9 @@ fn headless_setup_station_import_and_offline_guards_preserve_user_files() {
     let doctor = run(&["doctor"]);
     assert!(doctor.status.success());
     assert!(String::from_utf8_lossy(&doctor.stdout).contains("Browser stores were not opened"));
+    assert!(String::from_utf8_lossy(&doctor.stdout).contains("Executable:"));
     for args in [
+        vec!["doctor", "--network"],
         vec!["browse", "home"],
         vec!["download", "https://www.youtube.com/watch?v=abcdefghijk"],
         vec!["auth", "import", "--browser", "brave-origin"],
