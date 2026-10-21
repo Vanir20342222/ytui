@@ -1,0 +1,436 @@
+# ytui Rust rewrite plan
+
+Status: planning; implementation has not started. Updated: 2026-10-21.
+Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
+
+Publication: prepared on `docs/rust-rewrite-plan`. The initial GitHub branch-create
+request and Git push dry-run both returned HTTP 403 on 2026-10-21. Repository
+metadata reports user write access, but the current integration cannot write.
+Publishing this plan and opening its review PR remain blocked on connection access.
+
+## Goal and confirmed decisions
+
+Replace the Python/Textual application with a dependable Rust terminal application
+for browsing YouTube, downloading media, listening to YouTube Music, and radio.
+The primary acceptance environment is **CachyOS + Caelestia + Ghostty**, with
+**Brave Origin** as the user's browser. UI behavior and
+downloads are the user's biggest current frustrations.
+
+Confirmed by the user:
+
+- Keep a terminal UI, inline thumbnails, and mpv video playback.
+- Rust owns the application; external yt-dlp, mpv, and FFmpeg are allowed.
+- Provide Downloads, YouTube, YouTube Music, and Cliamp / Radio tabs.
+- Support browser-cookie sign-in, a configurable video-preview shortcut,
+  attractive themes, and automatic system-theme following.
+- Publish this plan before implementation so other agents can review it.
+- `v`: short muted mpv preview; `Enter`: full playback or open the selected
+  collection; `Esc`: dismiss/back. All actions are remappable.
+- Implement cliamp's radio catalog and Radio Browser discovery inside Rust;
+  optionally launch the installed cliamp program. A full port of cliamp's many
+  unrelated providers is outside this rewrite unless requested.
+
+Default release scope:
+
+- Linux is the first release target; explicitly document macOS/Windows support
+  separately. Discover/select the Brave Origin profile during setup; do not assume
+  it shares the standard Brave profile path or that a generic Brave loader works.
+
+This is a full rewrite delivered in verifiable stages. A search box with empty
+Music/Radio tabs is not feature completion. "All bugs fixed" is not a testable
+promise: track reproduced defects, regression coverage, and remaining limitations.
+
+## Current project audit
+
+The current app is a Python downloader with queue/history persistence, Textual
+panels, conversion, settings/profiles, cookie options, and VPN helpers. Personalized
+YouTube browsing, a dedicated Music tab, a radio tab, and video previews need new
+implementations. Existing cookie options configure extraction; they do not by
+themselves implement an authenticated YouTube home/library client.
+
+### Findings to carry into regression coverage
+
+| ID | Evidence at the baseline | Required Rust behavior |
+| --- | --- | --- |
+| B01 | Reproduced offline: remove an item while `QueueManager._resolve_metadata` is waiting; the late result calls `save_queue_item`, restoring the deleted row while the visible queue stays empty. | Removed jobs stay removed. Every result carries job ID and generation; reject stale results before any state/database mutation. |
+| B02 | `QueueManager` creates metadata tasks without retaining their handles; `stop()` joins download workers and the queue loop, then closes the DB. Metadata tasks and timed-out executor work can outlive that shutdown path. Static lifecycle finding. | Track all work, cancel/join it, reap processes, then close persistence. No late writes after shutdown. |
+| B03 | Importing `engine/downloader.py` globally assigns `subprocess.Popen = TrackedPopen`; process ownership is inferred from thread IDs. Static coupling finding. | Each job owns its child processes and their termination; no global process interception. |
+| B04 | Download success returns `ydl.prepare_filename(info)`, which needs verification after conversion/remuxing changes the extension. Static correctness risk. | Use the final after-move output path; only mark completion when the resulting file exists and postprocessing succeeded. |
+| B05 | Download failure requeues immediately, although `retry_delay_seconds` exists; yt-dlp also has its own retries. Static behavior finding. | One documented retry budget, cancellable backoff, and separate transient/auth/permanent failure classes. |
+| B06 | `QueueDatabase.close()` attempts to close every thread-local SQLite connection from the caller thread and suppresses exceptions. Static resource-ownership risk. | One DB owner or a managed pool with explicit shutdown; test cross-thread work and restart recovery. |
+| B07 | Some existing regression tests use live YouTube and panel tests can initiate background services. | Default CI is deterministic and offline; real service tests are separate and explicitly requested. |
+
+Audit verification on 2026-10-21:
+
+- Installed the baseline in an isolated virtualenv with isolated XDG directories.
+- Ran 17 selected existing tests: **16 passed, 1 failed**. The failing test,
+  `test_unavailable_video_error_formatting`, contacts live YouTube and received
+  a proxy `403 Forbidden`, so this is **not evidence that the tested video is
+  unavailable or that playback works**. No attempt was made to bypass the proxy.
+- Reproduced B01 with synthetic metadata and threading events, without YouTube:
+  `removed_item_reappears_in_database=True`, `visible_queue_length=0`.
+- This was a targeted audit, not a complete UI, download, or live-account test.
+
+## Product behavior
+
+### Shared shell and navigation
+
+- Four always-visible tabs: **Downloads | YouTube | Music | Cliamp / Radio**.
+- Shared now-playing bar, visible focus, contextual shortcuts, search/command
+  palette, consistent back navigation, and persistent per-tab selection/scroll.
+- Arrow and vim navigation, optional mouse support, Unicode-aware clipping,
+  paste handling, and help generated from the actual action/keybinding registry.
+- Typing in search/settings never triggers global playback or destructive actions.
+- Responsive grid on wide terminals; compact list/detail mode on small ones.
+  Loading, empty, offline, unavailable, and expired-session states have distinct
+  messages and retry/sign-in actions. Keep loaded content visible during refresh.
+- Browser discovery, network requests, image decoding, downloads, and process
+  waits never block rendering/input. Render on changes with bounded animation
+  ticks; coalesce progress updates instead of flooding the event queue.
+- Provide a deterministic demo mode with fictional content for UI review,
+  screenshots, and terminal recordings, without exposing an account.
+
+### Downloads
+
+- Add a URL or selection from any browsing tab; choose audio/video, resolution,
+  codec/container, destination, subtitles, and metadata before enqueueing.
+- Playlist selection supports individual entries/ranges and a clear bulk action.
+  Keep single-video URLs with playlist context distinct from explicit playlists.
+- Persistent ordered queue with bounded concurrency; pause/resume, cancel,
+  remove, retry, reorder, completed history, and open/play completed output.
+- Show real phases: resolving, queued, downloading, merging, converting,
+  completed, paused, cancelled, failed. Unknown sizes/ETAs stay unknown.
+- Pause stops and reaps the job's process tree, preserves resumable partials,
+  and resumes through yt-dlp continuation where supported. Cancellation/removal
+  never deletes completed media or unrelated files. Partial cleanup is explicit.
+- Use yt-dlp machine-readable progress and `after_move` output reporting.
+  Drain both output streams, bound diagnostic buffers, tolerate partial/malformed
+  lines, and never infer final success from progress reaching 100%.
+- Cover lost connectivity, unavailable/private videos, missing FFmpeg, disk full,
+  unwritable destinations, duplicate files, Unicode paths, and postprocess errors.
+  Do not retry permanent failures indefinitely or silently lower chosen quality.
+
+### YouTube browsing and watching
+
+- Public search, video details, channels, playlists, related videos, and paginated
+  results; signed-in Home/recommendations, subscriptions, Watch Later, liked videos,
+  personal playlists, and history where the session/API supports them.
+- Cards show thumbnails, title, creator, duration/live badge, and available metadata.
+  Collection navigation and continuation tokens preserve context and avoid repeats.
+- Select a video to watch in mpv, enqueue playback, download, copy URL, or open
+  in the browser. Video details include description and chapters when available.
+- A Rust provider handles authenticated web browsing. yt-dlp handles extraction
+  and downloads; cookies plus `ytsearch` are not a substitute for personalized feeds.
+- Start with read-only account browsing. Likes, subscriptions, playlist edits,
+  comments, and automatic write-back of watch history require separate explicit
+  product decisions; do not add hidden account mutations.
+
+### Thumbnails and video previews
+
+- Use terminal capability detection and a `ratatui-image` adapter for supported
+  Kitty/Sixel/iTerm2-style protocols; provide half-block or text fallback and a
+  user override for tmux/SSH/terminals with incorrect capability reporting.
+- Async thumbnail fetch/decode/resize, bounded memory/disk cache and request
+  concurrency, stale-selection protection, and cleanup on resize/tab switches.
+  Validate image dimensions and sanitize control sequences in remote text.
+- Confirmed preview: remappable `v` opens a muted, low-resolution, approximately
+  10-second mpv preview of the selected video. It is explicitly started, cancellable,
+  and never starts merely because the selection moves. The first release uses
+  an mpv window; in-terminal moving video is a separate optional investigation.
+- Only one preview exists at a time. Define and test full-playback interaction:
+  pause existing playback during preview and restore its prior state on exit;
+  promoting the preview to playback replaces the old item intentionally.
+- Preview extraction has a timeout; missing mpv or unavailable media produces
+  an actionable message and leaves navigation usable. Embedded thumbnails and
+  video playback are separate capabilities.
+
+### YouTube Music
+
+- Dedicated Music home, categorized search (songs/albums/artists/playlists),
+  artist/album detail, personal library, liked songs, and playlists.
+- Audio playback through the shared mpv controller with queue editing,
+  next/previous, seek, volume/mute, shuffle, repeat, and persistent queue.
+- Use a dedicated Music API adapter, evaluating `ytmapi-rs` first against required
+  endpoints. Reuse the selected browser session while keeping Music and YouTube
+  request contexts, parsing, pagination, and account selection separate.
+- Do not label generic YouTube audio search as YouTube Music integration.
+  Add lyrics and track-based radio after core library/playback is reliable.
+
+### Cliamp / Radio
+
+- Native tab with separate sources for **cliamp channels**, **Radio Browser**,
+  favorites, and custom HTTP(S) stations. Fetch cliamp channels dynamically from
+  `https://radio.cliamp.stream/stations`; do not hardcode today's channel list.
+- Preserve the difference between live streams and channels exposing track
+  libraries: live streams play continuously; track collections can be queued
+  and browsed when the upstream service exposes them.
+- Radio Browser supports search, country/tag filtering, pagination, favorites,
+  station metadata, and documented server discovery/failover. Cache catalogs and
+  allow refresh; outages of one source do not break other tabs.
+- Resolve bounded M3U/PLS playlists, reject unsupported URL schemes, show ICY
+  now-playing metadata when available, reconnect with limits, and show buffering.
+- Offer explicit import of cliamp custom stations/favorites into ytui-owned data;
+  do not modify the user's cliamp config. Optional "Open in cliamp" suspends the
+  TUI, stops conflicting playback, launches the installed binary, and restores
+  terminal state on exit. It does not attempt to nest another TUI in a Ratatui pane.
+- cliamp is a Go application, not a Rust UI library. Native radio functionality
+  and a child-process launch action are the confirmed integration boundary.
+
+## Browser sessions
+
+- First-run account setup offers anonymous use, browser/profile selection, and
+  Netscape cookie-file import. Import runs on the user's machine on request;
+  do not request their cookies in chat or place them in the repository.
+- Evaluate the Rust `rookie` crate for scoped cookie extraction, and yt-dlp's
+  existing browser-cookie support for extraction/playback compatibility. Prioritize
+  Brave Origin on CachyOS: verify its installed package/profile locations and
+  keyring backend rather than assuming standard Brave discovery covers it.
+- Test Firefox/Chromium-family profile selection; account for Zen/Librewolf/Brave,
+  containers/custom profile paths, sandboxed installs, locked databases, and a
+  locked or missing desktop keyring. Never require root or disable browser security.
+- Retain only the domains needed by the YouTube/Google authentication flow,
+  preserving domain/path/expiry/security attributes. Bind auth to allowlisted
+  service origins; never send Google cookies to thumbnail CDNs or radio services.
+- Validate a candidate session/account before replacing a working session.
+  Support multiple accounts/brand channels explicitly if discovered; invalidate
+  account-scoped caches and pending requests when switching or disconnecting.
+- Prefer the OS keyring for retained credentials; an explicitly selected file
+  fallback uses a private directory and atomic `0600` file creation on Linux.
+  Child tools receive short-lived private cookie-file paths, not cookie values
+  in arguments. Delete transient exports on completion and clean up stale ones.
+- No cookie values, authorization headers, signed stream URLs, or sensitive
+  query strings in logs/error reports. Disconnect removes ytui's stored session
+  and account caches while leaving the browser profile intact.
+- Session expiry, keyring failure, consent/bot challenges, and unsupported endpoints
+  must be visible failures. Browser cookies do not guarantee access to every
+  YouTube feature. Official Data API OAuth is not a replacement for Home/Music.
+
+## Themes and automatic desktop integration
+
+- Semantic palette roles: background/surface, primary/secondary/muted text,
+  accent, focus, selection, border, success/warning/error. Avoid color-only status
+  indicators and a required patched font. Provide reduced-motion settings.
+- Curated themes: Catppuccin Mocha/Latte, Tokyo Night, Gruvbox dark/light, Nord,
+  Rose Pine, and a restrained ytui dark/light pair. Review complete screens and
+  selected/disabled/error states, not only color swatches. Preserve existing
+  theme names through aliases or a documented migration map.
+- Modes: explicit built-in/custom theme, follow system, and terminal ANSI palette.
+  Allow an explicit system provider override; show the detected provider and
+  fallback reason in settings/diagnostics.
+- **Caelestia, first priority:** read `$XDG_STATE_HOME/caelestia/scheme.json`
+  (default `~/.local/state/caelestia/scheme.json`). Upstream uses `mode` and a
+  `colours` map. Map Material surface/onSurface/primary/error roles into ytui.
+- **Omarchy:** read `$XDG_STATE_HOME/omarchy/current/theme/colors.toml`, with a
+  legacy `$XDG_CONFIG_HOME/omarchy/current/theme/colors.toml` fallback. Support
+  semantic/named colors and legacy ANSI keys, plus `mode`/legacy `light.mode`.
+  Validate against fixtures from both generations rather than assuming one path.
+- **GNOME and other desktops:** use `org.freedesktop.portal.Settings` appearance
+  values and change signals first; use GNOME GSettings as an available fallback.
+  Negotiate portal method/version support. Light/dark and accent hints are not
+  an entire GTK theme palette: choose the matching curated light/dark theme and
+  apply an available accent. This also covers compatible KDE/other portals.
+- In automatic mode, use the active desktop's provider; absent that, use a
+  validated Caelestia/Omarchy palette, portal, then terminal/default fallback.
+  Stale files from an inactive desktop must not override a working active portal.
+- Watch parent directories as well as palette files so atomic replacement and
+  symlink changes work. Debounce updates, keep the last valid palette during
+  partial writes, and fall back without crashing. Respect XDG paths everywhere.
+- Read palette data only; do not execute theme scripts or alter the desktop theme.
+  Generic custom palette files cover other dotfile setups without shell hooks.
+
+## Rust design
+
+Start with a Cargo workspace and three crates, splitting further only when useful:
+
+| Crate | Responsibilities |
+| --- | --- |
+| `ytui-core` | Domain IDs/models, action/event reducer, download state machine, playback queue, configuration and migration contracts. No terminal dependency. |
+| `ytui-services` | YouTube/Music/radio adapters, browser sessions, yt-dlp/FFmpeg process control, mpv JSON IPC, SQLite storage, image cache, desktop-theme providers. |
+| `ytui` | Ratatui/Crossterm binary, input/focus/navigation, layouts, settings/help, CLI and diagnostics. |
+
+Candidate libraries: Tokio, Ratatui/Crossterm, serde/TOML/JSON, reqwest, rusqlite
+with a dedicated DB worker, tracing, clap, directories, notify, zbus/ashpd,
+ratatui-image, keyring/rookie, and ytmapi-rs. Verify APIs, Rust version, dependency
+features, licenses, and CachyOS build requirements during M0; pin dependencies
+and commit `Cargo.lock`. These are candidates, not untested compatibility claims.
+
+Core rules:
+
+1. A single reducer owns visible application state. Workers send typed results
+   through bounded channels; progress is coalesced. No service reaches into widgets.
+2. Results carry request/job generation and account identity. Navigation changes,
+   retry, cancel, remove, and account switching invalidate stale work.
+3. Download state transitions are explicit and persisted transactionally. A task
+   cannot complete, requeue, or restore a removed job. Playback and download queues
+   are separate even when referring to the same media.
+4. A process supervisor owns each child/process group, closes stdin, drains pipes,
+   enforces deadlines, terminates gracefully then kills if needed, and always waits.
+   Preserve required proxy/CA configuration and pass argument arrays without a shell.
+   Use explicit yt-dlp options/config isolation so unrelated global configs cannot
+   silently change output paths or invoke user hooks.
+5. Use supervised mpv JSON IPC on a private Unix socket for full playback and
+   previews. Pass canonical media URLs or resolved streams through a defined
+   resolver boundary; refresh expired URLs. Raw cookie material never goes in IPC.
+6. DB migrations are versioned, backed up, and tested. Enforce single-writer
+   ownership; prevent a second application instance from racing the same queue.
+7. Public metadata, account-specific feeds, cookies, and thumbnail caches have
+   distinct storage lifetimes. Cache identity includes account/provider context.
+8. `ytui doctor` reports dependencies, supported terminal image mode, desktop-theme
+   provider, and sanitized auth status. Missing tools disable affected actions
+   with clear guidance instead of crashing the entire app.
+
+## Migration and compatibility
+
+- Keep the Python application runnable while Rust reaches parity; land Rust on
+  a rewrite branch with staged PRs. Do not remove working code at scaffolding time.
+- Inventory every setting/command and label it retained, replaced, or deferred.
+  Cover quality/container overrides, playlists, conversion, subtitles, metadata,
+  SponsorBlock, profiles, proxy/bandwidth/schedules, duplicates, notifications,
+  optional clipboard watching, export/history/stats, and post-download hooks.
+- Back up and import existing `settings.json`, `keybindings.json`, profile JSON,
+  and `queue.db` into versioned Rust config/state. Preserve queue order, paused
+  intent, groups, paths, and history. Dry-run/report unknown fields; repeated
+  migration must not duplicate jobs. Never overwrite the only copy of old state.
+- Keep user hooks opt-in and run executable paths with argument arrays. Clipboard
+  watching stays opt-in. Preserve proxy configuration. VPN/Proton/WireGuard helpers
+  need an explicit parity decision: do not silently drop them or automatically
+  change network connections during tests/startup.
+- Mark every deferred legacy feature in release notes and obtain a scope decision
+  before replacing the default installer. A smaller first milestone is not the
+  finished rewrite.
+- Replace the installer/package metadata only at the release gate. Document Rust
+  build/install, external tools (including any current yt-dlp JS runtime requirement),
+  Arch/CachyOS packaging, upgrades, and a rollback path to the Python baseline.
+
+## Implementation milestones and review gates
+
+All milestones are **TODO**. Dependencies are deliberate; tasks can be assigned
+to agents after shared contracts land. No task is done merely because it compiles.
+
+| ID | Work / deliverable | Depends on | Acceptance gate |
+| --- | --- | --- | --- |
+| M0 | Audit/legacy parity inventory, dependency/license decisions, fixture formats, Brave Origin profile discovery and Ghostty image support, provider/auth/playback spikes. | Plan | Demonstrate public metadata, scoped session validation, Music library access, mpv control, Caelestia palette parsing and cliamp catalog shape; record live checks blocked by environment. |
+| M1 | Workspace, typed state/events/services, responsive four-tab shell, config/keybinding registry, demo mode, CI. | M0 | Navigate every tab and modal at 80x24/120x40; typing/paste/resize/quit work; no fake feature-complete tabs. Establish task/generation contracts and terminal restoration. |
+| M2 | Supervised yt-dlp/FFmpeg, queue/persistence, retries, conversion, migration. | M1 | URL → successful verified final file; pause/resume/remove/retry/restart and B01–B06 regressions pass, including removal during metadata/postprocess. |
+| M3 | YouTube browse provider, cookie/profile setup, personalized feeds, pagination, thumbnail cache/rendering. | M1; M0 provider spikes | Public and selected-account journeys work; correct account shown; expire/disconnect/switch safe; unsupported features reported honestly; no stale results or image residue. |
+| M4 | Shared mpv playback, preview shortcut and controls, persistent playback queue. | M1, M3 | Selected video plays; preview is muted/bounded/cancellable; restoring prior audio and rapid preview replacement work; no orphan process/socket after quit. |
+| M5 | Music home/search/library/artist/album/playlist UI and shared audio playback. | M3, M4 | Browse the user's Music library and play/queue tracks; shuffle/repeat/seek work; pagination/expired sessions covered. |
+| M6 | Cliamp channels, Radio Browser discovery, favorites/custom station import and optional cliamp launch. | M1, M4; M0 catalog spike | Live and library-backed cliamp channels work where supported; station search/favorites persist; broken streams/reconnect/catalog outages and return from cliamp are handled. |
+| M7 | Curated themes, live Caelestia/Omarchy/portal following, accessibility and UI polish. | M1; may overlap M2–M6 | Change Caelestia theme while app runs; switch light/dark; malformed/atomic file changes and portal absence recover; all tabs readable. |
+| M8 | Full parity review, package/install migration, CachyOS acceptance, release docs/artifacts. | M2–M7 | All required journeys and mandatory checks pass; deferred features explicitly resolved; clean install + old-data upgrade + rollback exercised. |
+
+The next implementation action after this plan is published is M0, then a narrow
+M1/M2 vertical slice with actual downloads. Avoid building all UI first and
+leaving service behavior as stubs.
+
+### Agent handoff and completion evidence
+
+- Read this plan and `AGENTS.md` before changes. Use milestone IDs in PRs and
+  report claimed scope, changed contracts, checks, and remaining limitations.
+- Reserve crate/API contracts before independent work. Suggested work areas:
+  shell/input, download/process/persistence, browse/auth/images, music/playback,
+  radio, themes, and integration/review. This describes ownership boundaries;
+  it does not require spawning agents or changing files concurrently.
+- Keep shared model changes in small prerequisite PRs. Feature workers own
+  adapters and their fixtures; an integrator verifies cross-tab behavior and
+  installer/migration. Do not hide errors behind empty lists or swallow task exits.
+- Append a milestone status/evidence entry here when complete. Checkboxes or
+  tables only change to done with named tests/artifacts or a documented manual
+  acceptance result. Reviewers should distinguish fixtures from live-service tests.
+
+## Validation and release criteria
+
+Default automated checks: `cargo fmt --all -- --check`,
+`cargo clippy --workspace --all-targets -- -D warnings`,
+`cargo test --workspace`, and `cargo build --release --locked`. Feature-specific
+checks must accompany optional dependencies. CI must not need a browser account,
+audio device, desktop bus, internet radio stream, or live YouTube response.
+
+Meaningful tests:
+
+- State-machine sequences and fake child tools: remove during metadata, pause
+  during conversion, retry a cancelled job, out-of-order progress, process crash,
+  pipe backpressure, partial JSON, final path changes, and bounded shutdown.
+- Restart/migration fixtures: interrupted jobs, repeated migration, malformed or
+  older configs, Unicode filenames, playlist order, duplicate detection, and a
+  second process attempting to own the same queue.
+- Sanitized recorded provider fixtures: continuation pages, missing fields,
+  deleted videos, expired sessions, multiple accounts, and account cache isolation.
+  Use synthetic secrets for auth tests; never commit real browser fixtures.
+- TUI reducer/input tests plus a small set of render snapshots for focus, narrow
+  layouts, modals, loading/errors and light/dark themes. PTY smoke tests restore
+  raw mode/alternate screen on normal exit and errors.
+- Theme fixtures for current/legacy Omarchy, Caelestia, portal changes, atomic
+  replacements, missing desktop services, invalid colors and manual overrides.
+- Playback/radio mocks for short previews, queue transitions, live vs finite media,
+  M3U/PLS failures, IPC disconnect and reconnect. Check that secrets never reach
+  captured subprocess arguments or logs.
+
+Manual acceptance on CachyOS + Caelestia must include:
+
+1. Fresh start; anonymous search; thumbnail display/fallback; keyboard-only
+   browsing; resizing during loading; tab switches during active downloads.
+2. Brave Origin browser/profile import, correct account/channel,
+   Home/subscriptions/Watch Later, search → details → preview → play → download.
+3. Video/audio/playlist download, merge/conversion, pause/resume, remove while
+   resolving, cancel while converting, failed network, disk/path errors and restart.
+4. Music library → artist/album → playback queue; next/previous/seek/shuffle/repeat.
+5. Cliamp catalog plus a Radio Browser station; favorites/import; broken stream;
+   return from optional cliamp launch with terminal and playback state intact.
+6. Live Caelestia palette changes, explicit theme override, small terminal and
+   unsupported-image fallback; separately test Omarchy and GNOME environments.
+7. Upgrade a copy of Python state, verify files/history/queue, then roll back.
+
+Initial responsiveness budgets: input feedback within 100 ms in a loaded UI,
+no network wait on the render thread, a visible cancel response within 100 ms,
+and owned child-process termination/reaping within a bounded 5-second deadline
+before any forced cleanup. Measure on documented hardware; slow network media
+startup is shown as loading and is not disguised by these UI targets.
+
+## Risks and decisions to keep visible
+
+- YouTube's internal browsing APIs and stream challenges change. Isolate adapters,
+  retain sanitized fixtures, pin a known-working dependency range, provide clear
+  diagnostic/update guidance, and never promise permanent API compatibility.
+- Personal Home/library access must pass an authenticated spike; do not postpone
+  it until after the UI is built. Live account/media validation cannot be completed
+  in this cloud environment without the user's local browser and desktop.
+- Terminal graphics vary across terminal/tmux/SSH combinations; maintain a useful
+  no-image path. Full moving video in a terminal is not a baseline promise.
+- The user confirmed native radio plus optional cliamp launch and short muted
+  previews on `v`. Verify Ghostty graphics and Brave Origin cookie extraction in
+  the primary acceptance environment before calling either supported.
+- Feature ideas after the core is reliable: MPRIS/playerctl/media keys, SponsorBlock
+  playback controls, local offline library, resume positions, lyrics, and exportable
+  playlists. Preserve existing SponsorBlock download settings in the parity review;
+  new optional features must not delay basic reliability.
+
+## Research and attribution
+
+Primary sources inspected on 2026-10-21; verify upstream revisions before reuse.
+Inspiration is not an instruction to copy a whole application. Retain notices and
+check each dependency or copied component's actual license before incorporation.
+
+- [Current ytui source](https://github.com/Vanir20342222/ytui/tree/4bdee78d463740ed959a3e69da7b8c314be992e6): baseline features and lifecycle findings above.
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp#readme): extraction, browser-cookie options,
+  progress templates, postprocessing and final-output reporting.
+- [youtui / ytmapi-rs](https://github.com/nick42d/youtui) and
+  [ytmapi-rs manifest](https://github.com/nick42d/youtui/blob/main/ytmapi-rs/Cargo.toml):
+  Rust Music API candidate and artist/album navigation inspiration.
+- [ytmusic-tui](https://github.com/WakaTaira/ytmusic-tui): browser-auth setup,
+  shared playback/navigation ideas; its documented flow validates before saving.
+- [rookie](https://github.com/thewh1teagle/rookie): Rust browser-cookie extraction
+  candidate; platform/profile support still needs testing for this app.
+- [youtube-tui](https://github.com/Siriusmart/youtube-tui): terminal browsing and
+  thumbnail UX inspiration, not a personalized-feed implementation guarantee.
+- [cliamp radio documentation](https://github.com/bjarneo/cliamp/blob/main/docs/radio.md)
+  and [Go module](https://github.com/bjarneo/cliamp/blob/main/go.mod): radio sources,
+  live vs track-library channels, and process-integration boundary.
+- [Caelestia Colours.qml](https://github.com/caelestia-dots/shell/blob/main/services/Colours.qml)
+  and [Paths.qml](https://github.com/caelestia-dots/shell/blob/main/utils/Paths.qml):
+  actual scheme file structure, watched file, and XDG state path.
+- [Omarchy theme manual](https://omarchy.org/manual/making-your-own-theme/) and
+  [upstream theming flow](https://github.com/omacom/omarchy/blob/quattro/docs/theming.md):
+  palette schema, mode, staged replacements, current state location and older compatibility.
+- [XDG Settings portal](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Settings.html):
+  desktop appearance hints and change notifications.
