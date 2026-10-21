@@ -1,0 +1,61 @@
+{
+  "source": "Actual Rust executable PTY output; fictional demo/offline data and generated artwork",
+  "binary": "target/release/ytui",
+  "size": [
+    2560,
+    1440
+  ],
+  "terminal": [
+    212,
+    58
+  ],
+  "compact_terminal": [
+    80,
+    24
+  ],
+  "themes": [
+    "system",
+    "catppuccin-mocha",
+    "catppuccin-latte",
+    "tokyo-night",
+    "gruvbox",
+    "gruvbox-light",
+    "nord",
+    "rose-pine",
+    "ytui-dark",
+    "ytui-light",
+    "dracula",
+    "solarized-dark",
+    "terminal"
+  ],
+  "captures": [
+    "auth.png",
+    "compact.png",
+    "downloads.png",
+    "feeds.png",
+    "history.png",
+    "keybindings.png",
+    "light.png",
+    "music.png",
+    "offline.png",
+    "radio.png",
+    "resume.png",
+    "settings.png",
+    "themes/catppuccin-latte.png",
+    "themes/catppuccin-mocha.png",
+    "themes/dracula.png",
+    "themes/gruvbox-light.png",
+    "themes/gruvbox.png",
+    "themes/nord.png",
+    "themes/rose-pine.png",
+    "themes/solarized-dark.png",
+    "themes/system.png",
+    "themes/terminal.png",
+    "themes/tokyo-night.png",
+    "themes/ytui-dark.png",
+    "themes/ytui-light.png",
+    "watches.png",
+    "youtube.png"
+  ],
+  "real_desktop_capture": false
+}

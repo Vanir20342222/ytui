@@ -131,7 +131,10 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 !paths.config_file().exists(),
                 "rust.toml already exists; it was not overwritten"
             );
-            paths.save_config(&config)?;
+            ytui_services::paths::atomic_write_new(
+                &paths.config_file(),
+                toml::to_string_pretty(&config)?.as_bytes(),
+            )?;
             println!("{}", paths.config_file().display());
         }
         Command::Doctor => {

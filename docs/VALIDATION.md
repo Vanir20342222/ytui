@@ -7,7 +7,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **64 passed**, zero failures; one real-media test is explicitly ignored in this command.
+- `cargo test --workspace --locked`: **70 passed**, zero failures; one real-media test is explicitly ignored in this command.
 - `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
@@ -83,6 +83,15 @@ Coverage includes:
   errors coexist, remapped footer hints stay current, and thumbnails do not draw
   through overlays. Download counts/progress and playback timing are checked in
   dark, light and terminal ANSI palettes, including long titles at 35×12.
+- All 13 theme entries now render four workspaces and twelve dialogs across five
+  sizes (1,040 combinations), plus ten queue phases per theme. Text/selection role
+  contrast and ANSI chrome pass; Catppuccin Latte muted/status colors were fixed.
+- Rendered mouse targets, wide feed-pane focus and compact resize behavior pass.
+  Thumbnail PNG decode/cache/byte/dimension tests exposed unnecessary upscaling;
+  relative M3U/PLS, HLS, redirect bounds and Radio Browser failover also pass.
+- Fake mpv IPC additionally checks seek, volume, mute and pause. Repeat/shuffle
+  checks cover nonrepeating advances. CLI init/import/doctor/offline guard tests
+  exposed and fixed initialization at new/relative custom configuration paths.
 
 A separate pseudo-terminal smoke check launched the actual demo binary, typed
 `qvds` in the search input without quitting, switched tabs, resized
@@ -111,6 +120,16 @@ ICANON/ECHO were restored. The current [YouTube](screenshots/youtube.png),
 show this actual terminal output with fictional content. No account/network
 provider or media device was used. The offline catalog/resume/watch PTY check
 also passed again with the new layout.
+
+The latest reproducible capture is `uv run --no-project tools/capture_ui.py`:
+**27 PNGs, each 2560×1440**, including all 13 themes, four workspaces, forms,
+history, offline library, resume, watches and compact mode. It operates actual
+demo/offline binaries at 212×58 → 80×24 → 35×12 → 212×58, waits for generated
+thumbnail fixtures and checks terminal restoration. The artwork is generated in
+Rust; these are rendered terminal captures, not screenshots of a real Ghostty
+desktop. CI also runs `python3 tools/check_screenshots.py` without image libraries.
+See [UI_THEMES.md](UI_THEMES.md) and [FEATURE_AUDIT.md](FEATURE_AUDIT.md) for the
+theme matrix and the complete feature-by-feature coverage/acceptance inventory.
 
 ## Live checks and boundaries
 

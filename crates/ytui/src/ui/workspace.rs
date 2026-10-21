@@ -1,5 +1,6 @@
 //! The main workspace: compact navigation, a readable catalog and selected-item details.
 use super::*;
+use crate::app::HitTarget;
 use ytui_core::{Job, shortcuts::Action};
 
 fn style(app: &App, color: (u8, u8, u8)) -> Style {
@@ -57,6 +58,7 @@ fn inset(area: Rect) -> Rect {
 pub fn render(f: &mut Frame, app: &mut App) {
     let area = f.area();
     app.image_area = Rect::default();
+    app.hit_targets.clear();
     f.render_widget(
         Block::default()
             .style(style(app, app.palette.text).bg(themed(app, app.palette.background))),
@@ -70,10 +72,41 @@ pub fn render(f: &mut Frame, app: &mut App) {
         );
         return;
     }
+    app.sidebar_visible = area.width >= 140 && area.height >= 26;
+    if app.sidebar_visible {
+        wide_workspace(f, app, area);
+    } else {
+        app.feeds_focused = false;
+        compact_workspace(f, app, area);
+    }
+    if app.modal.is_some() {
+        for cell in &mut f.buffer_mut().content {
+            let fade = |color| match color {
+                Color::Rgb(r, g, b) => {
+                    let (br, bg, bb) = app.palette.background;
+                    Color::Rgb(
+                        ((r as u16 * 2 + br as u16 * 3) / 5) as u8,
+                        ((g as u16 * 2 + bg as u16 * 3) / 5) as u8,
+                        ((b as u16 * 2 + bb as u16 * 3) / 5) as u8,
+                    )
+                }
+                _ => Color::DarkGray,
+            };
+            cell.set_fg(fade(cell.fg));
+            cell.set_bg(if app.palette.name == "terminal" {
+                Color::Reset
+            } else {
+                fade(cell.bg)
+            });
+        }
+        modal(f, app, area);
+    }
+}
+fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     let compact = area.height < 22;
     let chunks = Layout::vertical([
         Constraint::Length(1),
-        Constraint::Length(if compact { 2 } else { 3 }),
+        Constraint::Length(2),
         Constraint::Min(3),
         Constraint::Length(if area.height < 18 {
             1
@@ -103,12 +136,8 @@ pub fn render(f: &mut Frame, app: &mut App) {
         } else {
             format!("{}  {name}", index + 1)
         };
-        let tab = Rect::new(
-            tabs[index].x,
-            tabs[index].y + u16::from(!compact),
-            tabs[index].width,
-            tabs[index].height - u16::from(!compact),
-        );
+        let tab = tabs[index];
+        app.hit_targets.push((tab, HitTarget::Tab(index)));
         f.render_widget(
             Paragraph::new(label)
                 .centered()
@@ -121,14 +150,7 @@ pub fn render(f: &mut Frame, app: &mut App) {
                             app.palette.muted
                         },
                     )
-                    .bg(themed(
-                        app,
-                        if active {
-                            app.palette.surface
-                        } else {
-                            app.palette.background
-                        },
-                    ))
+                    .bg(themed(app, app.palette.background))
                     .add_modifier(if active {
                         Modifier::BOLD
                     } else {
@@ -157,27 +179,150 @@ pub fn render(f: &mut Frame, app: &mut App) {
     }
     playback(f, app, chunks[3]);
     footer(f, app, chunks[4]);
-    if app.modal.is_some() {
-        for cell in &mut f.buffer_mut().content {
-            let fade = |color| match color {
-                Color::Rgb(r, g, b) => {
-                    let (br, bg, bb) = app.palette.background;
-                    Color::Rgb(
-                        ((r as u16 * 2 + br as u16 * 3) / 5) as u8,
-                        ((g as u16 * 2 + bg as u16 * 3) / 5) as u8,
-                        ((b as u16 * 2 + bb as u16 * 3) / 5) as u8,
-                    )
-                }
-                _ => Color::DarkGray,
-            };
-            cell.set_fg(fade(cell.fg));
-            cell.set_bg(if app.palette.name == "terminal" {
-                Color::Reset
+}
+fn wide_workspace(f: &mut Frame, app: &mut App, area: Rect) {
+    let rows = Layout::vertical([
+        Constraint::Min(10),
+        Constraint::Length(if app.input.is_some() { 3 } else { 2 }),
+    ])
+    .split(area);
+    let cols = Layout::horizontal([Constraint::Length(34), Constraint::Min(40)]).split(rows[0]);
+    sidebar(f, app, cols[0]);
+    let main = Layout::vertical([
+        Constraint::Min(8),
+        Constraint::Length(if app.player_status.active { 4 } else { 3 }),
+    ])
+    .split(cols[1]);
+    if app.tab == 0 {
+        downloads(f, app, main[0]);
+    } else {
+        browse(f, app, main[0]);
+    }
+    playback(f, app, main[1]);
+    footer(f, app, rows[1]);
+}
+fn sidebar(f: &mut Frame, app: &mut App, area: Rect) {
+    let rows = Layout::vertical([
+        Constraint::Length(5),
+        Constraint::Length(7),
+        Constraint::Min(5),
+    ])
+    .split(area);
+    let block = panel(" ytui · Status ", app);
+    let inner = inset(block.inner(rows[0]));
+    f.render_widget(block, rows[0]);
+    let account = app
+        .session
+        .as_ref()
+        .map(|s| s.account.as_str())
+        .unwrap_or(if app.offline {
+            "Offline"
+        } else if app.demo {
+            "Demo · fictional catalog"
+        } else {
+            "Anonymous"
+        });
+    f.render_widget(
+        Paragraph::new(vec![
+            Line::styled(account.to_owned(), style(app, app.palette.success)),
+            Line::from(format!(
+                "{} · {} jobs",
+                TAB_NAMES[app.tab],
+                app.snapshot.downloads.jobs.len()
+            )),
+            Line::styled(app.palette.name.clone(), style(app, app.palette.muted)),
+        ]),
+        inner,
+    );
+    let block = panel(" Workspaces · 1–4 ", app);
+    let inner = block.inner(rows[1]);
+    f.render_widget(block, rows[1]);
+    for (index, name) in TAB_NAMES.iter().enumerate() {
+        let active = app.tab == index;
+        let row = Rect::new(inner.x, inner.y + index as u16, inner.width, 1);
+        app.hit_targets.push((row, HitTarget::Tab(index)));
+        f.render_widget(
+            Paragraph::new(format!(
+                " {} {}  {name}",
+                if active { "▸" } else { " " },
+                index + 1
+            ))
+            .style(
+                style(
+                    app,
+                    if active {
+                        app.palette.accent
+                    } else {
+                        app.palette.text
+                    },
+                )
+                .bg(themed(
+                    app,
+                    if active {
+                        app.palette.selection
+                    } else {
+                        app.palette.background
+                    },
+                ))
+                .add_modifier(if active {
+                    Modifier::BOLD
+                } else {
+                    Modifier::empty()
+                }),
+            ),
+            row,
+        );
+    }
+    let block = panel(format!(" Feeds · {} ", key(app, Action::Feeds)), app)
+        .border_style(style(
+            app,
+            if app.feeds_focused {
+                app.palette.accent
             } else {
-                fade(cell.bg)
-            });
-        }
-        modal(f, app, area);
+                app.palette.muted
+            },
+        ))
+        .title_bottom(Line::from(if app.feeds_focused {
+            " Enter opens · Esc returns "
+        } else {
+            " Select a source "
+        }));
+    let inner = block.inner(rows[2]);
+    f.render_widget(block, rows[2]);
+    app.hit_targets.push((rows[2], HitTarget::Feeds));
+    let visible = inner.height.saturating_sub(1) as usize;
+    let first = app.feed_selected.saturating_sub(visible.saturating_sub(1));
+    for (index, (label, _, _)) in app
+        .feed_choices()
+        .iter()
+        .enumerate()
+        .skip(first)
+        .take(visible)
+    {
+        let row = Rect::new(inner.x, inner.y + (index - first) as u16, inner.width, 1);
+        let active = app.feeds_focused && app.feed_selected == index;
+        f.render_widget(
+            Paragraph::new(format!(" {} {label}", if active { "▸" } else { " " })).style(
+                style(
+                    app,
+                    if active {
+                        app.palette.accent
+                    } else {
+                        app.palette.text
+                    },
+                )
+                .bg(themed(
+                    app,
+                    if active {
+                        app.palette.selection
+                    } else {
+                        app.palette.background
+                    },
+                )),
+            ),
+            row,
+        );
+        app.hit_targets.push((row, HitTarget::Feed(index)));
     }
 }
 fn header(f: &mut Frame, app: &App, area: Rect) {
@@ -195,23 +340,16 @@ fn header(f: &mut Frame, app: &App, area: Rect) {
     let right_width = (account.width().min(24) as u16 + 4).min(area.width / 3);
     let cols =
         Layout::horizontal([Constraint::Min(10), Constraint::Length(right_width)]).split(area);
-    let mut spans = vec![Span::styled(
-        " ytui ",
-        Style::default()
-            .fg(if app.palette.name == "terminal" {
-                Color::Black
-            } else {
-                themed(app, app.palette.background)
-            })
-            .bg(themed(app, app.palette.accent))
-            .add_modifier(Modifier::BOLD),
-    )];
-    if area.width >= 65 {
-        spans.push(Span::styled(
-            "   Your next good watch.",
+    let spans = vec![
+        Span::styled(
+            " ytui ",
+            style(app, app.palette.accent).add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            format!("· {}", TAB_NAMES[app.tab]),
             style(app, app.palette.muted),
-        ));
-    }
+        ),
+    ];
     f.render_widget(Paragraph::new(Line::from(spans)), cols[0]);
     f.render_widget(
         Paragraph::new(format!(" {account} "))
@@ -247,7 +385,14 @@ fn footer(f: &mut Frame, app: &App, area: Rect) {
         Paragraph::new(format!(" {}", app.status)).style(style(app, app.palette.muted)),
         rows[0],
     );
-    let mut entries = if app.tab == 0 {
+    let mut entries = if app.feeds_focused {
+        vec![
+            (Action::Up, "previous"),
+            (Action::Down, "next"),
+            (Action::Open, "open feed"),
+            (Action::Back, "return"),
+        ]
+    } else if app.tab == 0 {
         vec![
             (Action::Search, "add"),
             (Action::Pause, "pause"),
@@ -324,7 +469,7 @@ fn meter(value: f64, width: usize) -> String {
     let filled = (value * width as f64).round() as usize;
     format!("{}{}", "━".repeat(filled), "─".repeat(width - filled))
 }
-fn downloads(f: &mut Frame, app: &App, area: Rect) {
+fn downloads(f: &mut Frame, app: &mut App, area: Rect) {
     let jobs = &app.snapshot.downloads.jobs;
     let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).split(area);
     let mut summary = Vec::new();
@@ -394,9 +539,18 @@ fn downloads(f: &mut Frame, app: &App, area: Rect) {
         Constraint::Min(0),
     ])
     .split(chunks[1]);
-    let block = panel(" Download queue ", app).title_bottom(
-        Line::from(format!(" {} / {} ", app.download_selected + 1, jobs.len())).right_aligned(),
-    );
+    let block = panel(" Download queue ", app)
+        .border_style(style(
+            app,
+            if app.feeds_focused {
+                app.palette.muted
+            } else {
+                app.palette.accent
+            },
+        ))
+        .title_bottom(
+            Line::from(format!(" {} / {} ", app.download_selected + 1, jobs.len())).right_aligned(),
+        );
     let rows = jobs.iter().map(|job| {
         let (label, color) = job_state(app, job);
         let title = if job.media.title.is_empty() {
@@ -456,8 +610,9 @@ fn downloads(f: &mut Frame, app: &App, area: Rect) {
                 Line::styled(transfer, style(app, app.palette.muted)),
             ])),
         ])
-        .height(if area.height < 14 { 2 } else { 3 })
+        .height(2)
     });
+    let list_inner = block.inner(cols[0]);
     let mut table = Table::new(
         rows,
         [
@@ -479,6 +634,20 @@ fn downloads(f: &mut Frame, app: &App, area: Rect) {
     }
     let mut state = TableState::default().with_selected(Some(app.download_selected));
     f.render_stateful_widget(table, cols[0], &mut state);
+    app.hit_targets.push((cols[0], HitTarget::Catalog));
+    let header_height = if cols[0].height >= 8 { 2 } else { 0 };
+    let visible = list_inner.height.saturating_sub(header_height) / 2;
+    for index in state.offset()..(state.offset() + visible as usize).min(jobs.len()) {
+        app.hit_targets.push((
+            Rect::new(
+                list_inner.x,
+                list_inner.y + header_height + (index - state.offset()) as u16 * 2,
+                list_inner.width,
+                2,
+            ),
+            HitTarget::Item(index),
+        ));
+    }
     if wide && let Some(job) = jobs.get(app.download_selected) {
         download_details(f, app, job, cols[1]);
     }
@@ -625,7 +794,11 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     }
     let wide = area.width >= 100 && area.height >= 17;
     let cols = Layout::horizontal([
-        Constraint::Percentage(if wide { 62 } else { 100 }),
+        Constraint::Percentage(if wide {
+            if app.sidebar_visible { 40 } else { 62 }
+        } else {
+            100
+        }),
         Constraint::Min(0),
     ])
     .split(chunks[1]);
@@ -637,6 +810,14 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         },
         app,
     )
+    .border_style(style(
+        app,
+        if app.feeds_focused {
+            app.palette.muted
+        } else {
+            app.palette.accent
+        },
+    ))
     .title_bottom(
         Line::from(format!(
             " {} / {}{} ",
@@ -652,8 +833,19 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     );
     let list_area = block.inner(cols[0]);
     f.render_widget(block, cols[0]);
-    let height = if list_area.height < 12 { 3u16 } else { 4 };
-    let columns = if list_area.width >= 110 { 2 } else { 1usize };
+    app.hit_targets.push((cols[0], HitTarget::Catalog));
+    let height = if app.sidebar_visible {
+        2
+    } else if list_area.height < 12 {
+        3u16
+    } else {
+        4
+    };
+    let columns = if !app.sidebar_visible && list_area.width >= 110 {
+        2
+    } else {
+        1usize
+    };
     let visible = (list_area.height / height).max(1) as usize;
     let first = (view.selected / columns).saturating_sub(visible - 1) * columns;
     for (index, item) in view
@@ -672,6 +864,7 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
             width,
             height.min(list_area.height),
         );
+        app.hit_targets.push((row, HitTarget::Item(index)));
         let active = index == view.selected;
         let bg = themed(
             app,
@@ -699,7 +892,7 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
             },
             if favorite { " · saved" } else { "" }
         );
-        let lines = if height == 3 {
+        let lines = if height <= 3 {
             vec![
                 Line::styled(
                     item.title.clone(),
@@ -752,13 +945,22 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
         && app.modal.is_none();
     let image_height = if show_image {
         (inner.width * 9 / 32)
-            .min(11)
+            .min(if app.sidebar_visible { 20 } else { 11 })
             .min(inner.height.saturating_sub(8))
     } else {
         0
     };
     let text_y = if image_height > 0 {
-        let rect = Rect::new(inner.x, inner.y, inner.width, image_height);
+        let (font_width, font_height) = app.picker.font_size();
+        let image_width =
+            (image_height as u32 * font_height as u32 * 16 / 9 / font_width.max(1) as u32)
+                .min(inner.width as u32) as u16;
+        let rect = Rect::new(
+            inner.x + (inner.width - image_width) / 2,
+            inner.y,
+            image_width,
+            image_height,
+        );
         app.image_area = rect;
         if let Some(image) = &app.image {
             f.render_widget(Image::new(image), rect);

@@ -181,7 +181,7 @@ impl Radio {
                 .find_map(|line| {
                     if line.starts_with('#') || line.is_empty() {
                         None
-                    } else if line.starts_with("http://") || line.starts_with("https://") {
+                    } else if !path.ends_with(".pls") {
                         Some(line)
                     } else if let Some((key, value)) = line.split_once('=') {
                         if key.to_ascii_lowercase().starts_with("file") {
@@ -335,6 +335,87 @@ pub fn parse_radio_browser(data: &Value) -> Page {
 mod tests {
     use super::*;
     use serde_json::json;
+    #[tokio::test]
+    async fn wrapper_playlists_hls_and_directory_failover_are_bounded_and_scoped() {
+        let (base, server)=crate::test_http::serve(|target| {
+            let (status,headers,body)= match target.split('?').next().unwrap() {
+                "/list.m3u" => (200,"","#EXTM3U\nrelative/live\n".to_owned()),
+                "/wrap.pls" => (200,"","[playlist]\nFile1=../live\n".to_owned()),
+                "/redirect.m3u" => (302,"Location: /list.m3u\r\n",String::new()),
+                "/loop.m3u" => (302,"Location: /loop.m3u\r\n",String::new()),
+                "/bad.m3u" => (200,"","file:///synthetic/unsafe\n".to_owned()),
+                "/hls.m3u8" => (200,"","#EXTM3U\n#EXT-X-TARGETDURATION:10\nsegment.ts\n".to_owned()),
+                "/json/stations/search" => {
+                    let rows=(0..80).map(|n| json!({"stationuuid":n.to_string(),"name":"Fixture radio","url_resolved":"https://example.test/live"})).collect::<Vec<_>>();
+                    (200,"Content-Type: application/json\r\n",serde_json::to_string(&rows).unwrap())
+                },
+                _ => (404,"",String::new()),
+            };
+            (status,headers.into(),body.into_bytes())
+        }).await;
+        let dead = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let unavailable = format!("http://{}", dead.local_addr().unwrap());
+        drop(dead);
+        let radio = Radio::new(
+            reqwest::Client::builder()
+                .no_proxy()
+                .redirect(reqwest::redirect::Policy::none())
+                .build()
+                .unwrap(),
+            vec![unavailable, base.clone()],
+        );
+        assert_eq!(
+            radio
+                .resolve_playlist(&format!("{base}/list.m3u"))
+                .await
+                .unwrap(),
+            format!("{base}/relative/live")
+        );
+        assert_eq!(
+            radio
+                .resolve_playlist(&format!("{base}/wrap.pls"))
+                .await
+                .unwrap(),
+            format!("{base}/live")
+        );
+        assert_eq!(
+            radio
+                .resolve_playlist(&format!("{base}/redirect.m3u"))
+                .await
+                .unwrap(),
+            format!("{base}/relative/live")
+        );
+        assert!(
+            radio
+                .resolve_playlist(&format!("{base}/loop.m3u"))
+                .await
+                .is_err()
+        );
+        assert!(
+            radio
+                .resolve_playlist(&format!("{base}/bad.m3u"))
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            radio
+                .resolve_playlist(&format!("{base}/hls.m3u8"))
+                .await
+                .unwrap(),
+            format!("{base}/hls.m3u8")
+        );
+        for request in [
+            BrowseRequest::RadioSearch("Jazz & blues".into()),
+            BrowseRequest::RadioCountry("de".into()),
+            BrowseRequest::RadioTag("ambient".into()),
+        ] {
+            let page = radio.fetch(&request, 80).await.unwrap();
+            assert_eq!(page.items.len(), 80);
+            assert_eq!(page.continuation.as_deref(), Some("160"));
+        }
+        server.abort();
+        let _ = server.await;
+    }
     #[test]
     fn live_and_library_channels_are_distinct() {
         let p = parse_cliamp(

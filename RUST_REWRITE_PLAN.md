@@ -341,7 +341,7 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 64 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 70 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
@@ -390,7 +390,7 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
   check. Actual account/Origin/Ghostty/audio tests and stable packaging gates remain
   open; standalone Proton/raw wg-quick parity remains a separate scope item.
 
-### UI polish follow-up (M1/M7/M8)
+### UI polish and feature audit follow-up (M1/M2/M6/M7/M8)
 
 - Compact tab/navigation shell, denser catalog rows, selected-item actions and
   adaptive thumbnail/details panels. Removed the empty thumbnail placeholder.
@@ -406,6 +406,24 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 - PTY checks exercise the real binary at 120×40, 80×24 and 35×12, feed selection,
   input isolation and terminal restoration; screenshots are fictional demo data.
   Real Ghostty image-protocol/device acceptance remains open.
+
+- The user requested Lazygit/Lazydocker-style panes and WQHD captures. Wide
+  layouts now have status/workspace/feed panes and a larger detail/thumbnail area;
+  `b` focuses the feed pane. Replaced hard-coded mouse coordinates with rendered
+  targets for workspaces, feeds and scrolled lists. Narrow layouts stay usable.
+- All 13 theme entries render 1,040 tab/dialog/size combinations, plus all ten
+  download phases. Added contrast checks and improved Catppuccin Latte's muted,
+  warning and success roles. Every committed PNG is 2560×1440; CI checks headers.
+- Rust-generated demo artwork and a reproducible PTY capture helper exercise the
+  actual image renderer without provider access. Demo image generation is off
+  the input thread. Text/selection/image geometry and ANSI colors are checked.
+- The feature audit added thumbnail decode/cache/limit checks, radio wrapper/HLS/
+  failover tests, playback-control IPC and shuffle/repeat coverage, command/form
+  checks, and CLI setup/import/offline guards. It found/fixed unnecessary thumbnail
+  upscaling, relative M3U handling and new/relative config initialization errors.
+- Full evidence and explicitly unverified live behaviors are in
+  docs/FEATURE_AUDIT.md; docs/UI_THEMES.md links the 27 WQHD captures. Real account,
+  Origin/keyring, Ghostty, media devices and stable packaging remain release gates.
 
 ### Agent handoff and completion evidence
 

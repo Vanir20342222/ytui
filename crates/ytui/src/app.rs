@@ -3,8 +3,8 @@ use crate::{
     forms::{Form, FormKind},
 };
 use anyhow::{Context, Result, ensure};
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use ratatui::layout::Rect;
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
+use ratatui::layout::{Position, Rect};
 use ratatui_image::{Resize, picker::Picker, protocol::Protocol};
 use std::{
     collections::HashMap,
@@ -34,6 +34,14 @@ use ytui_services::{
 };
 
 pub const TAB_NAMES: [&str; 4] = ["Downloads", "YouTube", "Music", "Cliamp / Radio"];
+#[derive(Clone, Copy)]
+pub enum HitTarget {
+    Tab(usize),
+    Feed(usize),
+    Feeds,
+    Item(usize),
+    Catalog,
+}
 #[derive(Default)]
 pub struct TabView {
     pub page: Page,
@@ -144,6 +152,10 @@ pub struct App {
     image_cancel: CancellationToken,
     image_due: Instant,
     pub image_error: Option<String>,
+    pub sidebar_visible: bool,
+    pub feeds_focused: bool,
+    pub feed_selected: usize,
+    pub hit_targets: Vec<(Rect, HitTarget)>,
     images: ImageCache,
     policy: Option<schedule::Policy>,
     desktop_cancel: CancellationToken,
@@ -325,6 +337,10 @@ impl App {
             image_cancel: CancellationToken::new(),
             image_due: Instant::now(),
             image_error: None,
+            sidebar_visible: false,
+            feeds_focused: false,
+            feed_selected: 0,
+            hit_targets: Vec::new(),
             images,
             policy: None,
             desktop_cancel: CancellationToken::new(),
@@ -362,7 +378,7 @@ impl App {
     }
     fn load_demo(&mut self) {
         for tab in 1..4 {
-            self.tabs[tab].page=Page{title:if tab==3{"cliamp radio"}else if tab==2{"Your music"}else{"For you"}.into(),items:(0..18).map(|i|Media{id:format!("demo-{i}"),title:["A quieter corner of the internet","Late night, soft keys","Building something that lasts","A walk through the northern lights","The art of paying attention","Small discoveries, every day"][i%6].into(),creator:if tab==2{"Studio Sessions"}else if tab==3{"Independent radio"}else{"Everyday Curiosity"}.into(),duration:Some((i as u64+1)*97),description:"Fictional demo content. Press / to explore the interface, t to choose a theme, or ? for shortcuts. No account or network is used for this catalog.".into(),kind:if tab==2{MediaKind::Song}else if tab==3{MediaKind::Station}else{MediaKind::Video},live:tab==3,..Default::default()}).collect(),..Default::default()};
+            self.tabs[tab].page=Page{title:if tab==3{"cliamp radio"}else if tab==2{"Your music"}else{"For you"}.into(),items:(0..18).map(|i|Media{id:format!("demo-{i}"),thumbnail:format!("demo://art/{i}"),title:["A quieter corner of the internet","Late night, soft keys","Building something that lasts","A walk through the northern lights","The art of paying attention","Small discoveries, every day"][i%6].into(),creator:if tab==2{"Studio Sessions"}else if tab==3{"Independent radio"}else{"Everyday Curiosity"}.into(),duration:Some((i as u64+1)*97),description:"Fictional demo content. Press / to explore the interface, t to choose a theme, or ? for shortcuts. No account or network is used for this catalog.".into(),kind:if tab==2{MediaKind::Song}else if tab==3{MediaKind::Station}else{MediaKind::Video},live:tab==3,..Default::default()}).collect(),..Default::default()};
         }
         let mut a = Job::new(
             self.tabs[1].page.items[0].clone(),
@@ -761,6 +777,7 @@ impl App {
             if let Ok(p) = theme::builtin(&self.config.theme) {
                 self.palette = p;
             }
+            self.selection_changed();
             self.status = "Demo theme/settings applied temporarily".into();
             self.redraw = true;
             return;
@@ -1121,6 +1138,8 @@ impl App {
     }
     pub fn change_tab(&mut self, tab: usize) {
         self.tab = tab % 4;
+        self.feeds_focused = false;
+        self.feed_selected = 0;
         self.selection_changed();
         if self.tab > 0 && self.tabs[self.tab].request.is_none() && !self.demo {
             self.navigate(
@@ -1149,6 +1168,52 @@ impl App {
                 .min(view.page.items.len().saturating_sub(1));
         }
         self.selection_changed();
+        self.redraw = true;
+    }
+    pub fn mouse(&mut self, mouse: MouseEvent) {
+        if self.modal.is_some() || self.input.is_some() {
+            return;
+        }
+        let hit = self
+            .hit_targets
+            .iter()
+            .rev()
+            .find(|(rect, _)| rect.contains(Position::new(mouse.column, mouse.row)))
+            .map(|(_, hit)| *hit);
+        match (mouse.kind, hit) {
+            (MouseEventKind::Down(_), Some(HitTarget::Tab(tab))) => self.change_tab(tab),
+            (MouseEventKind::Down(_), Some(HitTarget::Feed(index))) => {
+                self.feed_selected = index;
+                self.feeds_focused = true;
+            }
+            (MouseEventKind::Down(_), Some(HitTarget::Item(index))) => {
+                self.feeds_focused = false;
+                let selected = if self.tab == 0 {
+                    self.download_selected
+                } else {
+                    self.tabs[self.tab].selected
+                };
+                self.move_selection(index as isize - selected as isize);
+            }
+            (MouseEventKind::ScrollDown | MouseEventKind::ScrollUp, Some(target)) => {
+                let delta = if mouse.kind == MouseEventKind::ScrollDown {
+                    1
+                } else {
+                    -1
+                };
+                if matches!(target, HitTarget::Feed(_) | HitTarget::Feeds) {
+                    self.feeds_focused = true;
+                    self.feed_selected = self
+                        .feed_selected
+                        .saturating_add_signed(delta)
+                        .min(self.feed_choices().len().saturating_sub(1));
+                } else if matches!(target, HitTarget::Item(_) | HitTarget::Catalog) {
+                    self.feeds_focused = false;
+                    self.move_selection(delta);
+                }
+            }
+            _ => {}
+        }
         self.redraw = true;
     }
     fn selection_changed(&mut self) {
@@ -1189,12 +1254,15 @@ impl App {
         self.image_generation += 1;
         let generation = self.image_generation;
         let cache = self.images.clone();
+        let demo_fixture = self
+            .demo
+            .then(|| (self.palette.clone(), self.tabs[self.tab].selected));
         let picker = self.picker.clone();
         let area = Rect::new(0, 0, self.image_area.width, self.image_area.height);
         let cancel = self.image_cancel.clone();
         self.tasks.spawn(async move {
             let work = async {
-                let image = cache.load(&media.thumbnail).await?;
+                let image = if let Some((palette,index)) = demo_fixture { tokio::task::spawn_blocking(move || demo_art(&palette,index)).await? } else { cache.load(&media.thumbnail).await? };
                 tokio::task::spawn_blocking(move || {
                     picker.new_protocol(image, area, Resize::Fit(None))
                 })
@@ -1207,8 +1275,42 @@ impl App {
         });
     }
     pub fn action(&mut self, action: Action) {
+        if self.feeds_focused {
+            match action {
+                Action::Up => self.feed_selected = self.feed_selected.saturating_sub(1),
+                Action::Down => {
+                    self.feed_selected =
+                        (self.feed_selected + 1).min(self.feed_choices().len().saturating_sub(1))
+                }
+                Action::Open => {
+                    let command = self
+                        .feed_choices()
+                        .get(self.feed_selected)
+                        .map(|(_, _, command)| *command);
+                    self.feeds_focused = false;
+                    if let Some(command) = command
+                        && let Err(error) = self.command(command)
+                    {
+                        self.status = error.to_string();
+                    }
+                }
+                Action::Back | Action::Feeds => self.feeds_focused = false,
+                _ => {
+                    self.feeds_focused = false;
+                    self.action(action);
+                }
+            }
+            self.redraw = true;
+            return;
+        }
         match action {
-            Action::Feeds => self.modal = Some(Modal::Feeds(0)),
+            Action::Feeds => {
+                if self.sidebar_visible {
+                    self.feeds_focused = true;
+                } else {
+                    self.modal = Some(Modal::Feeds(0));
+                }
+            }
             Action::Resume => {
                 if let Some(media) = self.selected_for_resume()
                     && let Some(position) = self.snapshot.positions.for_media(&media).cloned()
@@ -1795,6 +1897,9 @@ impl App {
         }
         if self.theme_rx.has_changed().unwrap_or(false) {
             self.palette = self.theme_rx.borrow_and_update().clone();
+            if self.demo {
+                self.selection_changed();
+            }
             self.redraw = true;
         }
         self.refresh_image();
@@ -2613,4 +2718,31 @@ pub fn key_name(key: KeyEvent) -> String {
     } else {
         name
     }
+}
+
+/// Fictional artwork for offline UI review; never fetched from a provider.
+fn demo_art(palette: &Palette, index: usize) -> image::DynamicImage {
+    let blend = |a: (u8, u8, u8), b: (u8, u8, u8), ratio: f64| {
+        image::Rgb([
+            (a.0 as f64 * (1.0 - ratio) + b.0 as f64 * ratio) as u8,
+            (a.1 as f64 * (1.0 - ratio) + b.1 as f64 * ratio) as u8,
+            (a.2 as f64 * (1.0 - ratio) + b.2 as f64 * ratio) as u8,
+        ])
+    };
+    let image = image::RgbImage::from_fn(1280, 720, |x, y| {
+        let x = x as f64 / 4.0;
+        let y = y as f64 / 4.0;
+        let phase = index as f64 * 0.7;
+        if (x - 244.0).powi(2) + (y - 44.0).powi(2) < 20.0_f64.powi(2) {
+            return blend(palette.background, palette.warning, 0.85);
+        }
+        if y > 139.0 + (x / 55.0 + phase).sin() * 12.0 {
+            return blend(palette.background, palette.accent, 0.65);
+        }
+        if y > 111.0 + (x / 48.0 + phase).sin() * 25.0 {
+            return blend(palette.background, palette.accent, 0.35);
+        }
+        blend(palette.background, palette.accent, 0.08 + y / 800.0)
+    });
+    image::DynamicImage::ImageRgb8(image)
 }
