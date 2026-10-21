@@ -10,7 +10,7 @@ used, and no networking restrictions were bypassed.
 
 ## Results
 
-- **77 default tests pass**, with one real-media test intentionally excluded.
+- **85 default tests pass**, with one real-media and four live-YouTube tests intentionally excluded.
 - The separate real-FFmpeg/ffprobe mark/cut/split fixture passes.
 - All **13 theme entries** render four workspaces and twelve dialogs at five
   sizes: 35×12, 80×24, 120×40, 180×50 and 212×58. All ten download phases are
@@ -27,6 +27,7 @@ used, and no networking restrictions were bypassed.
 | Feature | What was checked successfully | What remains unverified or unsupported |
 | --- | --- | --- |
 | Four workspaces and pane focus | Every theme/size; `b` focuses the wide feed pane, Enter chooses, Esc returns; compact picker; no playback on navigation | Actual Ghostty/tmux visual acceptance |
+| General settings | Eight sections/50 fields, first/last-field rendering in 1,040 theme/size/selection states; real PTY navigation, keyboard/choice/mouse controls, invalid-save recovery, cancel and actual file persistence | Real account/keyring and desktop effects remain covered by their separate open gates |
 | Keyboard, paste, mouse and resizing | Unicode editors; input isolation; remapping and occupied defaults; selection visibility; rendered mouse targets; clicks cannot pass through dialogs | Real terminal keyboard-layout variations |
 | Theme selection and following | 13 render/capture variants; role contrast; ANSI chrome; synthetic Caelestia/Omarchy parsing and atomic replacement; last-valid recovery | Real GNOME/portal/Omarchy/Caelestia sessions; `system` gallery uses the built-in preview |
 | Main/catalog/details/empty/error UI | Selected content, errors and controls remain visible; no preview action on stations/collections; all dialogs; ten queue phases | Subjective desktop review |
@@ -61,7 +62,7 @@ used, and no networking restrictions were bypassed.
 | Clipboard/notifications | Synthetic clipboard exact-host/baseline/change checks, stale/disabled rejection and notification escaping | Actual Wayland/X11 clipboard, D-Bus delivery and sound |
 | VPN controls | Supervised fake nmcli verifies escaped IDs and only explicit VPN operations | Real NetworkManager; standalone Proton/raw wg-quick are not implemented |
 | Diagnostics/update instructions | Opt-in public `doctor --network` probes tested with actual release binary; host/cause retained with queries redacted; executable path/version and explicit branch/reinstall instructions | User's Proton exit and account probes remain open; distribution/package update workflows |
-| Setup/installer/packaging | CLI init creates absolute/relative config paths without overwriting files; doctor, safe repeated station imports and offline guards pass. Separate source-built `ytui-rs` installation/version smoke; Python launcher retained | Default-installer replacement and stable release packaging |
+| Setup/installer/packaging | Default Rust installer and compatible alias; build failure preserves old launcher; symlinks replaced without touching legacy targets; both installed names report current version. Rust source/capture/PNG tests replace Python packaging/tools | Remote installer branch acceptance, signed binaries and stable release packaging |
 | MPRIS, lyrics, location suggestions | Inventory reviewed | Optional ideas; not implemented or claimed working |
 
 ## Defects found and fixed during this audit
@@ -82,3 +83,8 @@ used, and no networking restrictions were bypassed.
 
 The remaining live checks above prevent an honest claim that every feature is
 working on the target desktop. They are acceptance tasks, not passed tests.
+
+Alpha.4 explicitly ran all four public YouTube smoke checks. Search, Music and
+details failed at proxy tunnel setup; the native test-video download failed on its
+HTTP request. These are recorded failures, not successful live-provider tests.
+The prior Python app was removed only after committing [the gap inventory](REMAINING_WORK.md).

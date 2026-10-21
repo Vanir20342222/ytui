@@ -179,6 +179,7 @@ impl Browser {
                     "songs" => "II",
                     "albums" => "IY",
                     "artists" => "Ig",
+                    "playlists" => "Io",
                     "videos" => "IQ",
                     _ => bail!("Unknown Music search category"),
                 };
@@ -255,6 +256,19 @@ impl Browser {
             _ => bail!("This feed belongs to the radio provider"),
         };
         let data = self.post(music, endpoint, body).await?;
+        if endpoint == "player"
+            && let Some(status) = data
+                .pointer("/playabilityStatus/status")
+                .and_then(Value::as_str)
+            && status != "OK"
+        {
+            let reason = data
+                .pointer("/playabilityStatus/reason")
+                .and_then(Value::as_str)
+                .map(clean_text)
+                .unwrap_or_else(|| "This video cannot be played with the selected session".into());
+            bail!("Video unavailable: {reason}");
+        }
         let mut page = if let Some(details) = data.get("videoDetails") {
             Page {
                 items: vec![Media {
@@ -712,7 +726,10 @@ mod request_tests {
             assert_eq!(body.pointer("/context/client/clientVersion").unwrap(), version);
             assert!(lower.contains("x-goog-visitor-id: synthetic-visitor"));
             assert!(lower.contains(&format!("x-youtube-client-name: {}", if music {"67"} else {"1"})));
-            let data = if body.get("continuation").is_some() {
+            let data = if body.get("videoId").is_some() {
+                if body["videoId"] == "unavailable" {json!({"playabilityStatus":{"status":"ERROR","reason":"Fixture video is private"}})}
+                else {json!({"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"synthetic","title":"Fixture details","lengthSeconds":"20"}})}
+            } else if body.get("continuation").is_some() {
                 assert!(target.contains("/search?"));
                 assert_eq!(body["continuation"], "page2");
                 json!({"contents":[{"videoRenderer":{"videoId":"synthetic-page2","title":{"simpleText":"Next result"}}}]})
@@ -744,6 +761,30 @@ mod request_tests {
                 .await
                 .unwrap();
             assert_eq!(next.items[0].id, "synthetic-page2");
+            let details = browser
+                .fetch(music, &BrowseRequest::Details("synthetic".into()))
+                .await
+                .unwrap();
+            assert_eq!(details.items[0].title, "Fixture details");
+            let error = browser
+                .fetch(music, &BrowseRequest::Details("unavailable".into()))
+                .await
+                .unwrap_err()
+                .to_string();
+            assert!(error.contains("Fixture video is private"));
+        }
+        for category in ["songs", "albums", "artists", "videos", "playlists"] {
+            let page = browser
+                .fetch(
+                    true,
+                    &BrowseRequest::MusicSearch {
+                        query: "fixture & song".into(),
+                        category: category.into(),
+                    },
+                )
+                .await
+                .unwrap();
+            assert_eq!(page.items.len(), 1);
         }
         assert_eq!(bootstraps.load(Ordering::SeqCst), 2);
         task.abort();

@@ -1,7 +1,8 @@
 # Rewrite parity and release gate
 
 The Rust app is an alpha implementation, not a declaration that all bugs or all
-milestones have passed. The Python application/installer remain intact. Native
+milestones have passed. The user authorized the Rust-only repository transition
+after [the gap inventory](REMAINING_WORK.md) was committed. Native
 YouTube extraction has the explicit upstream limitations documented in RUST.md.
 
 | Area | Rust implementation | Remaining release work |
@@ -32,7 +33,8 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | Statistics/history filters | Dedicated searchable/filterable panel with recorded transfer/media totals | Broader statistics and physical disk inventory are optional |
 | Offline library and local resume | Existing completed-media catalog, explicit local resume, private bounded positions and `--offline` mode | Actual mpv/device acceptance and additional codec/filesystem coverage |
 | MPRIS and lyrics | Optional feature ideas | Not required for this alpha; separate work |
-| Packaging/installer | Rust source build + separate ytui-rs installer | Default replacement/release packages only after target acceptance |
+| General settings | Eight categories, 50 fields, choices, switches, mouse Save/Cancel and validated persistence; every category/size/theme tested | Real desktop preferences and account/keyring acceptance |
+| Packaging/installer | Default Rust installer publishes both ytui and ytui-rs; old Python sources/package/tests removed; Rust screenshot tooling | Signed release packages and stable desktop acceptance |
 
 `clipboard_watcher`, `notifications` and `notification_sound` now have Rust effects
 and working Settings controls. Clipboard watching defaults off and never starts a
@@ -47,6 +49,6 @@ version 2 upgrades retain a version-1 backup. Forced exits can leave recoverable
 staging directories; only stale owned credential exports/manifests are cleaned
 automatically after the instance lock is acquired.
 
-Replacing the default installer still requires the plan's parity/scope decision
-and target-machine acceptance. This branch does not remove the Python fallback
-application or claim those gates have passed.
+The default installer and repository application are Rust at the user's explicit
+request. Live desktop/account release gates remain open. The optional external
+yt-dlp executable is retained as the previously requested explicit fallback.

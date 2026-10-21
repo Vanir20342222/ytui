@@ -12,15 +12,15 @@ lists remaining gaps, including options preserved verbatim by migration.
 
 ## Work in this transition
 
-| Gap | Action |
+| Gap recorded before removal | Result |
 | --- | --- |
-| General settings is a long flat form with hidden configuration options | Build a categorized settings window, expose missing defaults, add choice controls and save/cancel actions; test each section and invalid-save recovery. |
-| Python source, packaging and installer are still the default | Remove the Python app/tests/package metadata; make the default installer build Rust, preserve the `ytui-rs` launcher, and retain legacy-data migration. |
-| Screenshot generation and PNG verification use Python tooling | Replace repository Python tools with Rust tooling and maintain WQHD screenshots. |
-| Migration does not apply legacy audio quality, playlist mode or reduced-motion preference | Map these values and report unsupported fields explicitly. |
-| Music category search lacks a playlists category | Add a distinct playlists search route and UI feed/command entry. |
-| Tests cover rendering but don't exercise every popup's interactions | Add a popup interaction inventory, category/field/error/save/cancel tests, and actual terminal smoke checks. |
-| Live YouTube checks are blocked here | Run public search/details/native extraction probes and record actual failures; keep signed-in browser/device tests explicitly pending. |
+| General settings is a long flat form with hidden configuration options | Implemented eight sections and 50 fields, choice controls, keyboard/mouse Save/Cancel, validation and persistence. All sections/ends/themes/sizes have coverage. |
+| Python source, packaging and installer are still the default | Removed the old app/tests/package metadata. Default installer builds Rust and publishes both launchers; migration remains available. |
+| Screenshot generation and PNG verification use Python tooling | Replaced by a Rust PTY/font renderer and Rust PNG/manifest test; 43 WQHD captures generated. |
+| Migration does not apply legacy audio quality, playlist mode or reduced-motion preference | Mapped these values. Unsupported settings are retained and identified in the migration report. |
+| Music category search lacks a playlists category | Implemented `:playlists QUERY`, the saved-playlist route, and headless Music category commands. Live API validation remains blocked. |
+| Tests cover rendering but don't exercise every popup's interactions | Added real-executable PTY popup/resize/terminal-restoration coverage and settings edit/error/save/cancel/mouse/persistence tests. See the popup inventory in VALIDATION.md. |
+| Live YouTube checks are blocked here | Ran four opt-in tests: public search, Music search, details and native test-video download. All four failed during HTTP/proxy access. Signed-in/browser/device acceptance stays pending. |
 
 ## Unsupported or partial functionality
 
@@ -41,6 +41,8 @@ lists remaining gaps, including options preserved verbatim by migration.
 | History/statistics | Search/filter/group and recorded totals exist. Full disk inventory and charts are optional, not implemented. |
 | Updates/packaging | Source build is supported. Automatic in-place binary updates, signed release archives, distribution packages and non-Linux packaging are not implemented. Rust replaces the repository app at the user's request, without a stable-release claim. |
 | Language/localization | English UI only; the original app also shipped only English translations. |
+| First run / legacy connection fields | Setup is through `:auth`, `init` and `doctor`, without an automatic welcome wizard. Legacy `first_run_done` is retained but unused. Legacy browser/cookie path fields do not trigger automatic credential reads; import explicitly. Proxy type comes from the URL scheme rather than a separate legacy type field. |
+| Bulk selection | Loaded-page ranges and explicit playlist download options exist. Selecting across an entire remote collection depends on fetching its pages; native upstream playlist extraction remains limited. |
 
 ## Data compatibility
 

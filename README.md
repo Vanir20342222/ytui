@@ -1,182 +1,74 @@
-# ytui — Rust rewrite
+# ytui
 
-This branch contains the Rust edition: Downloads, YouTube, Music and Cliamp / Radio
-in a keyboard-driven terminal UI, with native Rust extraction by default and an
-explicit yt-dlp fallback. It targets CachyOS + Caelestia + Ghostty + Brave Origin.
+A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interface
+uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
+CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-```sh
-cargo run --release --locked -p ytui -- --demo
-cargo run --release --locked -p ytui -- --offline
-cargo run --release --locked -p ytui -- doctor
-./install-rust.sh   # installs ytui-rs alongside the Python launcher
-```
-
-Using an older installed alpha? Pulling source does not update the executable.
-See [alpha.3 update and connection diagnostics](docs/RUST.md#updating-an-older-rust-alpha)
-for the exact branch, reinstall and `doctor --network` commands.
-
-See [Rust setup and usage](docs/RUST.md), [implementation/release parity](docs/PARITY.md),
-[validation](docs/VALIDATION.md) and the [rewrite plan](RUST_REWRITE_PLAN.md).
-This is an alpha; signed-in and desktop acceptance checks are still required.
-Native yt-dlp-rs has incomplete YouTube coverage. `Y` explicitly selects the
-Python yt-dlp fallback; it is never used automatically.
-
-The Lazygit/Lazydocker-style layout has status, workspaces and feeds on the left,
-with catalog/details panes on the right. Press `b` for feeds, `/` to search, and
-`?` for shortcuts. Compact windows keep the main list usable.
-
-[WQHD theme gallery](docs/UI_THEMES.md) · [Feature audit](docs/FEATURE_AUDIT.md)
-
-![Rust terminal demo with fictional content](docs/screenshots/youtube.png)
-
----
-
-## Legacy Python edition
-
-The original app and installer below remain available during migration.
-
-```
-  ██╗   ██╗████████╗██╗   ██╗██╗
-  ╚██╗ ██╔╝╚══██╔══╝██║   ██║██║
-   ╚████╔╝    ██║   ██║   ██║██║
-    ╚██╔╝     ██║   ██║   ██║██║
-     ██║      ██║   ╚██████╔╝██║
-     ╚═╝      ╚═╝    ╚═════╝ ╚═╝
-```
-
-# `ytui` — Terminal YouTube & Media Downloader
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-brightgreen.svg)](https://www.python.org/)
-[![Textual](https://img.shields.io/badge/TUI-Textual-purple.svg)](https://textual.textualize.io/)
-[![yt-dlp](https://img.shields.io/badge/engine-yt--dlp-red.svg)](https://github.com/yt-dlp/yt-dlp)
-
-> **ytui** is a modern, full-featured Terminal User Interface (TUI) for downloading, converting, and managing YouTube videos, audio tracks, and playlists directly from your command line. Built with Python 3, `yt-dlp`, `Textual`, and `FFmpeg`.
-
----
-
-## [ Features ]
-
-- **High-Performance Concurrent Downloads**: Parallel downloading engine with dynamic concurrency throttling.
-- **Modern Centered TUI**: Built with Textual, featuring responsive dark/midnight themes, status badges, and interactive command bars.
-- **Official Proton VPN Integration**: Dedicated `/vpn` manager panel with server selection (DE, US, Fastest Free Server), real-time connection status monitoring, and account verification.
-- **FFmpeg Conversion Engine**: Built-in support for converting local or downloaded files into high-quality MP3, AAC, FLAC, M4A, or MP4 formats.
-- **Interactive YouTube Search**: Type plain text search queries or use `/search <query>` to resolve video metadata before queuing.
-- **Clipboard Autopolling**: Automatically detect copied YouTube URLs and submit them to your queue.
-- **SQLite Persistence & Recovery**: Interrupted or pending downloads automatically recover and resume across app restarts.
-- **Vim-Inspired Shortcuts & Slash Commands**: Intuitive `/` command prompt with real-time autocompletion suggestions.
-
----
-
-## [ Quick Start ] (1-Command Installation)
-
-You can install `ytui` with a single shell command:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Vanir20342222/ytui/main/install.sh | bash
-```
-
-Alternatively, clone the repository locally and run the installer:
+This is **0.2.0-alpha.4**. Live account and desktop acceptance remains open;
+[remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
 git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
-```
-
-Now you can launch the app from **any directory** using just one command:
-
-```bash
+ytui doctor
 ytui
 ```
 
----
-
-## [ Manual Installation ]
-
-### Requirements
-
-- **Python 3.11+**
-- **FFmpeg** (Recommended for audio extraction & format conversions)
-  ```bash
-  # Debian / Ubuntu
-  sudo apt install ffmpeg
-
-  # Arch Linux
-  sudo pacman -S ffmpeg
-
-  # macOS
-  brew install ffmpeg
-  ```
-
-### Via `pipx` (Recommended)
+The installer builds Rust and installs both `ytui` and the compatible `ytui-rs`
+launcher. Install current stable Rust, a C compiler, pkg-config, OpenSSL headers,
+mpv and FFmpeg first. On CachyOS/Arch:
 
 ```bash
-pipx install git+https://github.com/Vanir20342222/ytui.git
+sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg
+rustup default stable
 ```
 
-### From Source
+Until this change reaches main, use the `rewrite/rust-only-settings` branch.
+Pulling source alone does not replace an installed binary: rerun `./install.sh`
+and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
+
+- `1`–`4`: Downloads, YouTube, Music, Radio. `b`: feeds; `/`: search; `?`: help.
+- `Enter`: play/open; `v`: short muted mpv preview; `d`: download options.
+- `,` or `:settings`: general settings window. PgUp/PgDn changes sections;
+  F6 focuses categories; arrows edit choices; Space toggles; Enter saves; Esc cancels.
+- `:auth`: import a selected local browser session. Personal feeds need sign-in;
+  anonymous Home may have no recommendations.
+- `u`: explicit local playback resume; `p`: playback queue.
+- `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
+- `ytui doctor --network`: opt-in public provider diagnostics without importing an account.
+
+Native Rust extraction through pinned [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs)
+is the default. It has incomplete YouTube/challenge/playlist/resume support.
+The previously requested **external yt-dlp fallback remains explicit** (`Y` or
+`--backend yt-dlp`); ytui never switches to it automatically. It is optional and
+is not bundled as a Python app in this repository.
+
+Rust migration reads existing legacy settings, profiles and queues on request:
+`ytui migrate` previews; `ytui migrate --apply` imports with backups. Existing
+user files and downloaded media are retained. The old Python source is available
+in Git history.
+
+[Usage and settings](docs/RUST.md) · [Remaining work](docs/REMAINING_WORK.md) ·
+[Feature audit](docs/FEATURE_AUDIT.md) · [Validation](docs/VALIDATION.md) ·
+[WQHD theme gallery](docs/UI_THEMES.md) · [Rewrite plan](RUST_REWRITE_PLAN.md)
+
+![Rust terminal demo with fictional content](docs/screenshots/youtube.png)
+
+Run checks with `cargo fmt --all -- --check`,
+`cargo clippy --workspace --all-targets --locked -- -D warnings` and
+`cargo test --workspace --locked`. The separate real-media fixture and opt-in
+live YouTube tests are described in the validation record.
+
+Generate WQHD captures entirely in Rust:
 
 ```bash
-git clone https://github.com/Vanir20342222/ytui.git
-cd ytui
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
-ytui
+cargo build -p ytui --locked
+cargo run -p ytui --example capture_ui --locked -- --binary target/debug/ytui
 ```
 
----
+The capture tool runs the actual executable in an isolated PTY with fictional
+content. No real account or desktop is captured. A monospaced TTF font is required;
+pass `--font /path/to/your/font.ttf` if DejaVu Sans Mono is installed elsewhere.
 
-## [ Keyboard Shortcuts ]
-
-| Shortcut | Action |
-| :--- | :--- |
-| `/` or `:` | Focus command input bar |
-| `Space` | Pause / Resume selected download item |
-| `d` | Delete / Remove selected item from queue |
-| `r` | Retry selected failed item |
-| `p` | Open **Proton VPN Manager** panel |
-| `s` | Open **Settings** panel |
-| `?` | Toggle **Help** modal |
-| `Ctrl+C` / `q` | Quit application |
-
----
-
-## [ Slash Commands Reference ]
-
-Type `/` in the command input bar to access interactive commands with autocompletion:
-
-| Command | Description |
-| :--- | :--- |
-| `/search <query>` | Search YouTube interactively and queue results |
-| `/vpn` | Open the Proton VPN Manager panel |
-| `/convert [path]` | Open the FFmpeg conversion panel or convert specified local file |
-| `/audio` | Switch active mode to Best Audio (MP3) |
-| `/video` | Switch active mode to Best Video (MP4) |
-| `/subs` / `/subtitles` | Open Subtitle configuration tab |
-| `/metadata` | Open Metadata & Tagging configuration tab |
-| `/dir` | Open Target Download Directories tab |
-| `/keys` | Open Keybindings reference tab |
-| `/pauseall` | Pause all active downloads in queue |
-| `/resumeall` | Resume all paused downloads in queue |
-| `/clear` | Clear completed/finished items from the display queue |
-| `/update` | Check for and update the underlying `yt-dlp` engine |
-| `/settings` | Open full Application Settings modal |
-| `/quit` / `/q` | Exit application safely |
-
----
-
-## [ Proton VPN Integration ]
-
-`ytui` includes a dedicated Proton VPN manager. Simply type `/vpn` or press `p` to open the panel:
-
-- **Server Selection**: Choose between *Fastest Free Server (Auto)*, *Germany (DE)*, *United States (US)*, or custom locations.
-- **Smart Free Plan Fallback**: Automatically falls back to available free servers if a country selection requires a Plus subscription.
-- **Account Verification**: Displays live login status (`Logged In (user@proton.me)`).
-
----
-
-## [ License ]
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+Licensed under MIT. See [third-party notices](THIRD_PARTY_NOTICES.md).

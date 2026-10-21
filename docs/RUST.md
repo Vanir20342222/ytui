@@ -3,8 +3,9 @@
 The Rust edition implements four provider tabs, a native download backend,
 mpv playback, browser-cookie sign-in and desktop theme following. It is an alpha:
 its automated tests are offline, and live signed-in behavior still needs checking
-on CachyOS with Caelestia, Ghostty and Brave Origin. The original Python release
-remains runnable while those acceptance gates are completed.
+on CachyOS with Caelestia, Ghostty and Brave Origin. The repository application
+and its screenshot/test tooling are Rust. [Remaining work](REMAINING_WORK.md)
+was inventoried before removing the old Python application at the user's request.
 
 ## Build and run
 
@@ -20,9 +21,11 @@ cargo run --release --locked -p ytui -- doctor
 cargo run --release --locked -p ytui
 ```
 
-Or run `./install-rust.sh` from the checkout. It installs `~/.local/bin/ytui-rs`
-alongside Python's `ytui`. It does not install system dependencies or modify the
-Python installer. Every example below uses `ytui-rs`; with Cargo, replace it with
+Run `./install.sh` from the checkout to install both `~/.local/bin/ytui` and the
+compatible `ytui-rs` launcher. `./install-rust.sh` calls the same Rust installer.
+It builds before publishing and replaces an old launcher symlink itself without
+writing through it into a virtualenv. It does not install system dependencies.
+Every `ytui-rs` example below also works with `ytui`; with Cargo, use
 `cargo run -p ytui --`.
 
 ```sh
@@ -38,22 +41,22 @@ ytui-rs --help
 
 `git pull` updates source files; it does not replace an installed `ytui-rs`.
 Also, changes on an unmerged PR branch are not included when building `main`.
-For the alpha.3 provider fixes and the Lazygit-style UI, build this branch:
+For the alpha.4 Rust-only application and general settings window, build this branch:
 
 ```sh
 git fetch origin
-git switch rewrite/provider-reliability
+git switch rewrite/rust-only-settings
 git pull --ff-only
-./install-rust.sh
+./install.sh
 hash -r
-~/.local/bin/ytui-rs --version          # must report 0.2.0-alpha.3
+~/.local/bin/ytui-rs --version          # must report 0.2.0-alpha.4
 ~/.local/bin/ytui-rs doctor --network
 ```
 
 The explicit binary path uses the default install location; use your chosen
 `YTUI_INSTALL_DIR` if different. `doctor` also prints the executable path to
-identify a stale binary elsewhere in PATH. The installer keeps the Python
-launcher and existing Rust settings/state.
+identify a stale binary elsewhere in PATH. The installer replaces both launchers
+with Rust and preserves installed data, settings and media.
 
 `doctor` alone makes no provider requests. `doctor --network` runs anonymous
 YouTube/Music searches and a fresh radio catalog/directory request. It reports
@@ -245,6 +248,29 @@ scrolls with arrows/Page Up/Page Down. `:keys` edits bindings, including several
 keys per action separated by spaces; duplicate assignments are rejected. Ctrl+C
 remains the emergency quit key.
 
+### General settings
+
+Press `,` or enter `:settings` to open the settings window. Its eight sections are
+General, Appearance, Downloads, Subtitles & media, Network & account, Schedule,
+Tools and Radio. All 50 fields are reachable at compact sizes as well as WQHD.
+PgUp/PgDn or Ctrl+Left/Right switches sections; F6 focuses the category list.
+Up/Down selects a field, Left/Right cycles listed choices, Space toggles a switch,
+and ordinary text fields support Unicode editing/paste. Save/Cancel and visible
+fields/categories also accept mouse clicks. The compact view keeps the current
+section and field visible while scrolling.
+
+Enter or the Save button validates the whole draft before applying it. A parsing
+or validation error leaves the draft open; Esc/Cancel discards edits. Save applies
+new download defaults to new jobs and updates theme, image/network adapters and
+player configuration. Existing jobs keep their captured options. Changing auth
+storage copies the loaded session to the explicitly selected store; changing
+account index validates that account before saving. `:auth` handles cookie import.
+
+Defaults now include video/audio formats, resolution, audio quality, playlist
+mode, duplicate handling and per-download/global bandwidth. Tools and Radio
+include executable paths, pinned countries and directory servers. Reduced motion
+limits redraws to ten frames per second; normal input renders at up to sixty.
+
 ```toml
 [keybindings]
 "V" = "preview"
@@ -280,6 +306,7 @@ Useful commands:
 :songs ambient piano
 :albums live sessions
 :artists artist name
+:playlists ambient mixes
 :albums
 :artists
 ```
@@ -544,7 +571,9 @@ SQLite backup retains the source groups/schema/fields not represented by Rust's
 current UI. Backups also preserve Python settings/shortcuts and existing Rust
 configuration. Review [PARITY.md](PARITY.md) for deferred features and data fields.
 
-Rollback is simply using the Python launcher and its original state again. Do not
+The installed launchers now run Rust. Previous Rust builds need a compatible copy
+of their database version for rollback. The old Python implementation is retained
+in Git history and any existing legacy installation/data is left on disk. Do not
 run both editions downloading to the same destination simultaneously. Rust's
 separate state lock cannot coordinate another program's download directory.
 

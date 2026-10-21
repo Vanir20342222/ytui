@@ -34,8 +34,12 @@ use ytui_services::{
 };
 
 pub const TAB_NAMES: [&str; 4] = ["Downloads", "YouTube", "Music", "Cliamp / Radio"];
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum HitTarget {
+    SettingSection(usize),
+    SettingField(usize),
+    SettingsSave,
+    SettingsCancel,
     Tab(usize),
     Feed(usize),
     Feeds,
@@ -784,18 +788,24 @@ impl App {
         }
         let paths = self.paths.clone();
         let account_changed = self.config.account_index != c.account_index;
+        let storage_changed = self.config.auth_store != c.auth_store;
         let current = self.session.clone();
         self.tasks.spawn(async move {
             let mut account = None;
             let result = async {
-                if account_changed && let Some(session) = current {
+                ytui_services::http_client(c.proxy.as_deref())?;
+                if (account_changed || storage_changed)
+                    && let Some(session) = current
+                {
                     let mut candidate = (*session).clone();
-                    let browser = Browser::new(
-                        ytui_services::http_client(c.proxy.as_deref())?,
-                        Some(session),
-                        c.account_index,
-                    );
-                    candidate.account = browser.validate().await?;
+                    if account_changed {
+                        let browser = Browser::new(
+                            ytui_services::http_client(c.proxy.as_deref())?,
+                            Some(session),
+                            c.account_index,
+                        );
+                        candidate.account = browser.validate().await?;
+                    }
                     let store = SessionStore::new(&paths, &c.auth_store);
                     let saved = candidate.clone();
                     tokio::task::spawn_blocking(move || store.save(&saved)).await??;
@@ -1078,14 +1088,50 @@ impl App {
                 _ => self.modal = Some(modal),
             },
             Modal::Form(form) => {
+                let settings = matches!(form.kind, FormKind::Settings(_));
+                if settings && key.code == KeyCode::F(6) {
+                    form.sections_focused = !form.sections_focused;
+                    self.modal = Some(modal);
+                    return;
+                }
+                if settings
+                    && (matches!(key.code, KeyCode::PageUp | KeyCode::PageDown)
+                        || key.modifiers.contains(KeyModifiers::CONTROL)
+                            && matches!(key.code, KeyCode::Left | KeyCode::Right))
+                {
+                    let delta = if matches!(key.code, KeyCode::PageUp | KeyCode::Left) {
+                        -1
+                    } else {
+                        1
+                    };
+                    let next = (form.section as isize + delta)
+                        .rem_euclid(crate::forms::SETTINGS_SECTIONS.len() as isize)
+                        as usize;
+                    form.select_section(next);
+                    self.modal = Some(modal);
+                    return;
+                }
+                if settings && form.sections_focused {
+                    match key.code {
+                        KeyCode::Up => form.select_section(form.section.saturating_sub(1)),
+                        KeyCode::Down => form.select_section(form.section + 1),
+                        KeyCode::Tab | KeyCode::Right | KeyCode::Enter => {
+                            form.sections_focused = false
+                        }
+                        _ => {}
+                    }
+                    self.modal = Some(modal);
+                    return;
+                }
                 match key.code {
-                    KeyCode::Up | KeyCode::BackTab => {
-                        form.selected = form.selected.saturating_sub(1)
-                    }
-                    KeyCode::Down | KeyCode::Tab => {
-                        form.selected = (form.selected + 1).min(form.fields.len() - 1)
-                    }
+                    KeyCode::Up | KeyCode::BackTab => form.move_field(-1),
+                    KeyCode::Down | KeyCode::Tab => form.move_field(1),
                     KeyCode::Char(' ') if form.fields[form.selected].toggle => form.toggle(),
+                    KeyCode::Left | KeyCode::Right
+                        if !form.fields[form.selected].choices.is_empty() =>
+                    {
+                        form.cycle_choice(if key.code == KeyCode::Left { -1 } else { 1 });
+                    }
                     KeyCode::Enter => {
                         let outcome = match &form.kind {
                             FormKind::Download(_, _) => form.download_values().map(|(m, o)| {
@@ -1171,6 +1217,39 @@ impl App {
         self.redraw = true;
     }
     pub fn mouse(&mut self, mouse: MouseEvent) {
+        if let Some(Modal::Form(form)) = &mut self.modal
+            && matches!(form.kind, FormKind::Settings(_))
+        {
+            let hit = self
+                .hit_targets
+                .iter()
+                .rev()
+                .find(|(rect, _)| rect.contains(Position::new(mouse.column, mouse.row)))
+                .map(|(_, hit)| *hit);
+            match (mouse.kind, hit) {
+                (MouseEventKind::Down(_), Some(HitTarget::SettingSection(section))) => {
+                    form.select_section(section);
+                    form.sections_focused = false;
+                }
+                (MouseEventKind::Down(_), Some(HitTarget::SettingField(index))) => {
+                    form.selected = index;
+                    form.sections_focused = false;
+                    form.cycle_choice(1);
+                }
+                (MouseEventKind::Down(_), Some(HitTarget::SettingsSave)) => {
+                    form.sections_focused = false;
+                    self.modal_key(KeyCode::Enter.into());
+                }
+                (MouseEventKind::Down(_), Some(HitTarget::SettingsCancel)) => {
+                    self.modal_key(KeyCode::Esc.into())
+                }
+                (MouseEventKind::ScrollDown, _) => form.move_field(1),
+                (MouseEventKind::ScrollUp, _) => form.move_field(-1),
+                _ => {}
+            }
+            self.redraw = true;
+            return;
+        }
         if self.modal.is_some() || self.input.is_some() {
             return;
         }
@@ -2451,12 +2530,13 @@ impl App {
                     false,
                 );
             }
-            "songs" | "albums" | "artists" | "videos" => {
+            "songs" | "albums" | "artists" | "videos" | "playlists" => {
                 self.change_tab(2);
                 if value.is_empty() {
                     let id = match cmd {
                         "albums" => "FEmusic_liked_albums",
                         "artists" => "FEmusic_library_corpus_artists",
+                        "playlists" => "FEmusic_liked_playlists",
                         _ => "FEmusic_liked_videos",
                     };
                     ensure!(
