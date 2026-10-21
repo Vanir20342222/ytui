@@ -4895,7 +4895,7 @@ dependencies = [
 
 [[package]]
 name = "ytui"
-version = "0.2.0-alpha.5"
+version = "0.2.0-alpha.6"
 dependencies = [
  "anyhow",
  "clap",
@@ -4923,7 +4923,7 @@ dependencies = [
 
 [[package]]
 name = "ytui-core"
-version = "0.2.0-alpha.5"
+version = "0.2.0-alpha.6"
 dependencies = [
  "anyhow",
  "serde",
@@ -4935,13 +4935,14 @@ dependencies = [
 
 [[package]]
 name = "ytui-services"
-version = "0.2.0-alpha.5"
+version = "0.2.0-alpha.6"
 dependencies = [
  "anyhow",
  "directories",
  "fs2",
  "futures-util",
  "hex",
+ "httpdate",
  "image",
  "keyring",
  "libc",

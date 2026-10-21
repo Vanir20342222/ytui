@@ -1,6 +1,6 @@
 # ytui Rust rewrite plan
 
-Status: PRs #5, #6 and #7 are merged into the PR #4 media branch. Alpha.5 playback/navigation work is on `improve/playback-navigation`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
+Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
@@ -596,3 +596,12 @@ See [the coordinated playback/navigation plan](docs/PLAYBACK_NAVIGATION_PLAN.md)
 for the user report, confirmed auto fallback change, implementation and evidence.
 The bottom command entry is replaced by Actions/forms. Native upstream restrictions
 and failed live checks remain visible instead of being described as passed features.
+
+### M4/M5 follow-up: automatic feed recovery (alpha.6)
+
+The user reports having to refresh YouTube feeds manually. Transient load and
+continuation failures now retry automatically with bounded request duration and
+backoff, preserving visible content. Fresh HTML Home data avoids an API request;
+client contexts renew, and overlapping pages can advance.
+See [FEED_RECOVERY_PLAN.md](docs/FEED_RECOVERY_PLAN.md) for behavior and checks.
+Successful live account/desktop acceptance remains required.

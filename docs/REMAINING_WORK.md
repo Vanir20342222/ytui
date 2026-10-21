@@ -30,6 +30,15 @@ continuous feed loading, Actions/forms, persistent player preferences and revers
 playback SponsorBlock. General settings now has nine sections / 53 fields.
 No mandatory live-service/desktop gate is removed by these implementations.
 
+## Alpha.6 feed recovery (M4/M5)
+
+Temporary YouTube/Music failures recover automatically with backoff/Retry-After,
+active-tab scheduling and stale-result protection. Fresh embedded Home data avoids
+an API round trip; stale contexts and bare Home shells renew once. Loaded content
+and same-feed selection survive refresh/recovery. Overlapping continuation pages
+advance with token-cycle/empty-run bounds. See [FEED_RECOVERY_PLAN.md](FEED_RECOVERY_PLAN.md).
+This does not remove consent, expired-session, service-block or live-account gates.
+
 ## Unsupported or partial functionality
 
 | Area | Current limit / planned acceptance |

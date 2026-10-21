@@ -2,17 +2,100 @@
 use crate::auth::Session;
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::{Value, json};
-use std::{collections::HashSet, sync::Arc};
+use std::{
+    collections::HashSet,
+    sync::Arc,
+    time::{Duration, Instant, SystemTime},
+};
 use tokio::sync::Mutex;
 use ytui_core::{BrowseRequest, Media, MediaKind, Page, clean_text};
+
+/// Only transient transport/service failures may trigger automatic feed recovery.
+#[derive(Debug)]
+pub struct FeedRetry {
+    message: String,
+    pub after: Duration,
+}
+impl FeedRetry {
+    pub fn new(message: impl Into<String>, after: Duration) -> Self {
+        Self {
+            message: message.into(),
+            after,
+        }
+    }
+}
+impl std::fmt::Display for FeedRetry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+impl std::error::Error for FeedRetry {}
+
+fn transient(error: anyhow::Error) -> anyhow::Error {
+    FeedRetry::new(error.to_string(), Duration::ZERO).into()
+}
+fn response_status(response: &reqwest::Response, bootstrap: bool) -> Result<()> {
+    let status = response.status().as_u16();
+    let wait = response
+        .headers()
+        .get("retry-after")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| {
+            v.parse::<u64>().ok().map(Duration::from_secs).or_else(|| {
+                httpdate::parse_http_date(v)
+                    .ok()
+                    .map(|t| t.duration_since(SystemTime::now()).unwrap_or_default())
+            })
+        })
+        .unwrap_or(if status == 429 {
+            Duration::from_secs(60)
+        } else {
+            Duration::ZERO
+        });
+    match status {
+        200..300 => Ok(()),
+        408 | 425 | 429 | 500..=599 => Err(FeedRetry::new(
+            if status == 429 {
+                "YouTube rate limit; retrying automatically after the service cooldown".into()
+            } else {
+                format!("YouTube temporarily unavailable (HTTP {status})")
+            },
+            wait,
+        )
+        .into()),
+        401 | 403 => bail!(
+            "YouTube rejected this session/request; re-import the selected browser profile or check service access"
+        ),
+        _ if bootstrap => bail!(
+            "YouTube bootstrap returned HTTP {status}. Check connectivity, consent, or browser session."
+        ),
+        _ => bail!("YouTube returned HTTP {status}"),
+    }
+}
+
+#[derive(Debug)]
+struct StaleContext;
+impl std::fmt::Display for StaleContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("YouTube rejected the refreshed client context")
+    }
+}
+impl std::error::Error for StaleContext {}
+
+#[derive(Clone)]
+struct ClientContext {
+    config: Value,
+    loaded: Instant,
+    initial_home: Option<Page>,
+}
 
 #[derive(Clone)]
 pub struct Browser {
     client: reqwest::Client,
     session: Option<Arc<Session>>,
     account: u32,
-    web: Arc<Mutex<Option<Value>>>,
-    music: Arc<Mutex<Option<Value>>>,
+    web: Arc<Mutex<Option<ClientContext>>>,
+    music: Arc<Mutex<Option<ClientContext>>>,
     origins: [String; 2],
 }
 impl Browser {
@@ -53,8 +136,10 @@ impl Browser {
     async fn bootstrap(&self, music: bool) -> Result<Value> {
         let cache = if music { &self.music } else { &self.web };
         let mut guard = cache.lock().await;
-        if let Some(c) = &*guard {
-            return Ok(c.clone());
+        if let Some(c) = &*guard
+            && c.loaded.elapsed() < Duration::from_secs(30 * 60)
+        {
+            return Ok(c.config.clone());
         }
         let origin = self.origin(music);
         let mut start = url::Url::parse(origin)?;
@@ -72,18 +157,56 @@ impl Browser {
             crate::http::Redirects::SameOrigin,
             if music { "YouTube Music" } else { "YouTube" },
         )
-        .await?;
-        ensure!(
-            response.status().is_success(),
-            "YouTube bootstrap returned HTTP {}. Check connectivity, consent, or browser session.",
-            response.status().as_u16()
-        );
+        .await
+        .map_err(|error| {
+            if error
+                .downcast_ref::<crate::http::TransportError>()
+                .is_some()
+            {
+                transient(error)
+            } else {
+                error
+            }
+        })?;
+        response_status(&response, true)?;
         let text = limited_text(response, 8 * 1024 * 1024).await?;
         let config=extract_config(&text).context("YouTube did not return a supported client context; browser consent or a service change may require attention")?;
-        *guard = Some(config.clone());
+        let initial_home = if let Some(data) = extract_initial_data(&text) {
+            self.check_session(&data)?;
+            Some(parse_page(&data, music))
+                .filter(|page| !page.items.is_empty() || page.notice.is_some())
+        } else {
+            None
+        };
+        *guard = Some(ClientContext {
+            config: config.clone(),
+            loaded: Instant::now(),
+            initial_home,
+        });
         Ok(config)
     }
-    async fn post(&self, music: bool, endpoint: &str, mut body: Value) -> Result<Value> {
+    async fn invalidate(&self, music: bool) {
+        *(if music { &self.music } else { &self.web }).lock().await = None;
+    }
+    async fn post(&self, music: bool, endpoint: &str, body: Value) -> Result<Value> {
+        // A stale client version/visitor context can be rejected with 400/412.
+        // Renew it once; never loop on authentication, consent, or rate limits.
+        for attempt in 0..2 {
+            let result = self.post_once(music, endpoint, body.clone()).await;
+            if attempt == 0
+                && result
+                    .as_ref()
+                    .err()
+                    .is_some_and(|e| e.is::<StaleContext>())
+            {
+                self.invalidate(music).await;
+            } else {
+                return result;
+            }
+        }
+        unreachable!()
+    }
+    async fn post_once(&self, music: bool, endpoint: &str, mut body: Value) -> Result<Value> {
         let config = self.bootstrap(music).await?;
         let origin = self.origin(music);
         let mut context = config
@@ -128,35 +251,55 @@ impl Browser {
             .send()
             .await
             .map_err(|e| {
-                crate::http::request_error(
+                transient(crate::http::request_error(
                     "YouTube API",
                     &url::Url::parse(origin).expect("validated origin"),
                     e,
-                )
+                ))
             })?;
-        match response.status().as_u16() {
-            401 | 403 => bail!(
-                "YouTube rejected this session/request; re-import the selected browser profile or check service access"
-            ),
-            429 => bail!("YouTube rate limit; wait before refreshing"),
-            n if !(200..300).contains(&n) => bail!("YouTube returned HTTP {n}"),
-            _ => {}
+        if matches!(response.status().as_u16(), 400 | 412) {
+            return Err(StaleContext.into());
         }
+        response_status(&response, false)?;
         let data: Value = serde_json::from_str(&limited_text(response, 16 * 1024 * 1024).await?)
-            .context("YouTube returned an invalid response")?;
-        ensure!(
-            data.get("error").is_none(),
-            "YouTube API rejected the request; refresh your session or check this endpoint's availability"
-        );
-        if self.session.is_some()
-            && data
-                .pointer("/responseContext/mainAppWebResponseContext/loggedOut")
-                .and_then(Value::as_bool)
-                == Some(true)
-        {
-            bail!("Browser session has expired; import it again");
+            .map_err(|_| {
+                anyhow::Error::from(FeedRetry::new(
+                    "YouTube returned an incomplete response",
+                    Duration::from_secs(5),
+                ))
+            })?;
+        if let Some(error) = data.get("error") {
+            match error.get("code").and_then(Value::as_u64) {
+                Some(400 | 412) => return Err(StaleContext.into()),
+                Some(code @ (408 | 425 | 429 | 500..=599)) => {
+                    return Err(FeedRetry::new(
+                        format!("YouTube API temporarily unavailable ({code})"),
+                        if code == 429 {
+                            Duration::from_secs(60)
+                        } else {
+                            Duration::ZERO
+                        },
+                    )
+                    .into());
+                }
+                _ => bail!(
+                    "YouTube API rejected the request; check your session or this endpoint's availability"
+                ),
+            }
         }
+        self.check_session(&data)?;
         Ok(data)
+    }
+    fn check_session(&self, data: &Value) -> Result<()> {
+        ensure!(
+            self.session.is_none()
+                || data
+                    .pointer("/responseContext/mainAppWebResponseContext/loggedOut")
+                    .and_then(Value::as_bool)
+                    != Some(true),
+            "Browser session has expired; import it again"
+        );
+        Ok(())
     }
     pub async fn validate(&self) -> Result<String> {
         ensure!(self.session.is_some(), "No session loaded");
@@ -172,6 +315,48 @@ impl Browser {
         account.context("Could not validate the selected account/channel; import a signed-in YouTube session and select the correct account index")
     }
     pub async fn fetch(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
+        tokio::time::timeout(Duration::from_secs(35), self.fetch_page(music, request))
+            .await
+            .unwrap_or_else(|_| {
+                Err(FeedRetry::new(
+                    "YouTube feed request timed out; reconnecting automatically",
+                    Duration::ZERO,
+                )
+                .into())
+            })
+    }
+    async fn fetch_page(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
+        let mut page = self.fetch_once(music, request).await?;
+        // YouTube occasionally returns a bare Home shell. Renew the visitor context
+        // once instead of making the user press refresh. Explicit empty-feed/consent
+        // messages are meaningful and must not be hidden by retries.
+        if matches!(request, BrowseRequest::Home)
+            && page.items.is_empty()
+            && page.continuation.is_none()
+            && page.notice.is_none()
+        {
+            self.invalidate(music).await;
+            page = self.fetch_once(music, request).await?;
+            if self.session.is_some() && page.items.is_empty() && page.notice.is_none() {
+                return Err(FeedRetry::new(
+                    "YouTube returned an incomplete Home feed",
+                    Duration::from_secs(30),
+                )
+                .into());
+            }
+        }
+        if page.items.is_empty() && page.notice.is_none() {
+            page.notice = Some(if matches!(request, BrowseRequest::Home) && self.session.is_none() {
+                "No anonymous Home recommendations were returned. Press / to search, or F2 → Account → Connect browser to import your signed-in browser profile."
+            } else if matches!(request, BrowseRequest::Search(_) | BrowseRequest::MusicSearch { .. }) {
+                "No search results were returned. Try a different query; if this persists, the service response may have changed."
+            } else {
+                "No supported items were returned. This feed may be empty, unavailable for this account, or using a changed YouTube response. Choose another feed or check your session."
+            }.into());
+        }
+        Ok(page)
+    }
+    async fn fetch_once(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
         let (endpoint, body, title) = match request {
             BrowseRequest::Category { endpoint, payload } => {
                 ensure!(
@@ -262,6 +447,23 @@ impl Browser {
             }
             _ => bail!("This feed belongs to the radio provider"),
         };
+        if matches!(request, BrowseRequest::Home) {
+            // The HTML bootstrap often already contains the complete personalized
+            // feed. Consume it once while fresh, saving another network round trip.
+            self.bootstrap(music).await?;
+            let mut guard = (if music { &self.music } else { &self.web }).lock().await;
+            if let Some(context) = &mut *guard {
+                let initial = context.initial_home.take();
+                if context.loaded.elapsed() < Duration::from_secs(60)
+                    && let Some(mut page) = initial
+                {
+                    page.title = title;
+                    page.continuation =
+                        page.continuation.map(|token| format!("{endpoint}:{token}"));
+                    return Ok(page);
+                }
+            }
+        }
         let data = self.post(music, endpoint, body).await?;
         if endpoint == "player"
             && let Some(status) = data
@@ -338,15 +540,6 @@ impl Browser {
         if let Some(token) = page.continuation.take() {
             page.continuation = Some(format!("{endpoint}:{token}"));
         }
-        if page.items.is_empty() && page.notice.is_none() {
-            page.notice = Some(if matches!(request, BrowseRequest::Home) && self.session.is_none() {
-                "No anonymous Home recommendations were returned. Press / to search, or F2 → Account → Connect browser to import your signed-in browser profile."
-            } else if matches!(request, BrowseRequest::Search(_) | BrowseRequest::MusicSearch { .. }) {
-                "No search results were returned. Try a different query; if this persists, the service response may have changed."
-            } else {
-                "No supported items were returned. This feed may be empty, unavailable for this account, or using a changed YouTube response. Choose another feed or refresh your session."
-            }.into());
-        }
         Ok(page)
     }
     fn require_auth(&self) -> Result<()> {
@@ -359,7 +552,12 @@ impl Browser {
 }
 pub async fn limited_text(mut response: reqwest::Response, limit: usize) -> Result<String> {
     let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await? {
+    let origin = response.url().clone();
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|e| transient(crate::http::request_error("Service response", &origin, e)))?
+    {
         ensure!(
             bytes.len() + chunk.len() <= limit,
             "Service response exceeds the size limit"
@@ -386,6 +584,26 @@ fn extract_config(html: &str) -> Option<Value> {
     } else {
         None
     }
+}
+// Parse JSON only; never evaluate the bootstrap page's JavaScript.
+fn extract_initial_data(html: &str) -> Option<Value> {
+    for part in html.split("ytInitialData").skip(1) {
+        let part = part.trim_start();
+        let part = part
+            .strip_prefix("\"]")
+            .or_else(|| part.strip_prefix("']"))
+            .unwrap_or(part)
+            .trim_start();
+        if let Some(json) = part.strip_prefix('=')
+            && let Some(Ok(value @ Value::Object(_))) =
+                serde_json::Deserializer::from_str(json.trim_start())
+                    .into_iter::<Value>()
+                    .next()
+        {
+            return Some(value);
+        }
+    }
+    None
 }
 pub fn text(value: &Value) -> String {
     let result = if let Some(s) = value.as_str() {
@@ -884,7 +1102,7 @@ mod request_tests {
                 .unwrap();
             assert_eq!(page.items.len(), 1);
         }
-        assert_eq!(bootstraps.load(Ordering::SeqCst), 2);
+        assert_eq!(bootstraps.load(Ordering::SeqCst), 4);
         task.abort();
         let _ = task.await;
     }
@@ -922,6 +1140,217 @@ mod request_tests {
             assert!(!error.contains("synthetic-secret"));
             task.abort();
         }
+    }
+    #[test]
+    fn initial_home_json_is_parsed_without_executing_scripts() {
+        for assignment in [
+            "var ytInitialData =",
+            "window[\"ytInitialData\"] =",
+            "window['ytInitialData']=",
+            "ytInitialData=",
+        ] {
+            let html = format!(
+                "<script>{assignment} {{\"contents\":[]}}; throw new Error('never execute');</script>"
+            );
+            assert_eq!(extract_initial_data(&html), Some(json!({"contents":[]})));
+        }
+        assert!(extract_initial_data("ytInitialData = window.secret;").is_none());
+        let browser = Browser::new(
+            client(),
+            Some(Arc::new(Session {
+                cookies: vec![],
+                account: "synthetic".into(),
+                imported_at: 0,
+            })),
+            0,
+        );
+        assert!(
+            browser
+                .check_session(
+                    &json!({"responseContext":{"mainAppWebResponseContext":{"loggedOut":true}}})
+                )
+                .is_err()
+        );
+    }
+    #[tokio::test]
+    async fn home_uses_fresh_html_feed_once_and_then_requests_new_data() {
+        for music in [false, true] {
+            let gets = Arc::new(AtomicUsize::new(0));
+            let posts = Arc::new(AtomicUsize::new(0));
+            let (g, p) = (gets.clone(), posts.clone());
+            let (base,task) = crate::test_http::serve_request(move |request| {
+                let id = if request.starts_with("GET") {g.fetch_add(1,Ordering::SeqCst); "html-home"}
+                    else {p.fetch_add(1,Ordering::SeqCst); "fresh-home"};
+                let data = json!({"contents":[{"videoRenderer":{"videoId":id,"title":{"simpleText":"Recommendation"}}}],"continuationCommand":{"token":"next-page"}});
+                let body = if request.starts_with("GET") {
+                    format!("ytcfg.set({{\"INNERTUBE_CLIENT_VERSION\":\"fixture\"}});var ytInitialData = {data};")
+                } else {data.to_string()};
+                (200,String::new(),body.into_bytes())
+            }).await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let first = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert_eq!(first.items[0].id, "html-home");
+            assert_eq!(first.continuation.as_deref(), Some("browse:next-page"));
+            assert_eq!(
+                posts.load(Ordering::SeqCst),
+                0,
+                "initial home should need only one request"
+            );
+            let second = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert_eq!(second.items[0].id, "fresh-home");
+            assert_eq!(gets.load(Ordering::SeqCst), 1);
+            assert_eq!(posts.load(Ordering::SeqCst), 1);
+            // A bootstrap loaded by another endpoint cannot provide an old Home snapshot.
+            browser.invalidate(music).await;
+            browser.bootstrap(music).await.unwrap();
+            (if music { &browser.music } else { &browser.web })
+                .lock()
+                .await
+                .as_mut()
+                .unwrap()
+                .loaded = Instant::now() - Duration::from_secs(61);
+            let third = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert_eq!(third.items[0].id, "fresh-home");
+            assert_eq!(posts.load(Ordering::SeqCst), 2);
+            task.abort();
+        }
+    }
+    #[tokio::test]
+    async fn stale_context_renews_once_and_expired_context_refreshes_before_use() {
+        let gets = Arc::new(AtomicUsize::new(0));
+        let posts = Arc::new(AtomicUsize::new(0));
+        let (g, p) = (gets.clone(), posts.clone());
+        let (base, task) = crate::test_http::serve_request(move |request| {
+            if request.starts_with("GET") {
+                let n = g.fetch_add(1, Ordering::SeqCst) + 1;
+                return (200, String::new(), format!("ytcfg.set({{\"INNERTUBE_CLIENT_VERSION\":\"v{n}\"}});").into_bytes());
+            }
+            p.fetch_add(1, Ordering::SeqCst);
+            if request.contains("x-youtube-client-version: v1") {
+                return (400, String::new(), vec![]);
+            }
+            (200, String::new(), br#"{"contents":[{"videoRenderer":{"videoId":"recovered","title":{"simpleText":"Recovered"}}}]}"#.to_vec())
+        }).await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [base.clone(), base];
+        let page = browser
+            .fetch(false, &BrowseRequest::Search("test".into()))
+            .await
+            .unwrap();
+        assert_eq!(page.items[0].id, "recovered");
+        assert_eq!(gets.load(Ordering::SeqCst), 2);
+        assert_eq!(posts.load(Ordering::SeqCst), 2);
+        browser.web.lock().await.as_mut().unwrap().loaded =
+            Instant::now() - Duration::from_secs(1801);
+        browser
+            .fetch(false, &BrowseRequest::Search("test".into()))
+            .await
+            .unwrap();
+        assert_eq!(gets.load(Ordering::SeqCst), 3);
+        // Refreshing WEB must not prime/replace the Music context.
+        assert!(browser.music.lock().await.is_none());
+        task.abort();
+    }
+    #[tokio::test]
+    async fn bare_home_shell_recovers_without_refresh_and_explicit_notice_is_not_retried() {
+        for music in [false, true] {
+            let calls = Arc::new(AtomicUsize::new(0));
+            let count = calls.clone();
+            let (base, task) = crate::test_http::serve_request(move |request| {
+                if request.starts_with("GET") {
+                    return (200, String::new(), br#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"#.to_vec());
+                }
+                let n = count.fetch_add(1, Ordering::SeqCst);
+                let data = match n {
+                    0 => json!({"contents": []}),
+                    1 => json!({"contents":[{"videoRenderer":{"videoId":"home","title":{"simpleText":"Recovered Home"}}}]}),
+                    _ => json!({"backgroundPromoRenderer":{"bodyText":{"simpleText":"Turn on watch history"}}}),
+                };
+                (200, String::new(), data.to_string().into_bytes())
+            }).await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let page = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert_eq!(page.items[0].id, "home");
+            assert_eq!(calls.load(Ordering::SeqCst), 2);
+            let page = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
+            assert_eq!(page.notice.as_deref(), Some("Turn on watch history"));
+            assert_eq!(calls.load(Ordering::SeqCst), 3);
+            task.abort();
+        }
+    }
+    #[tokio::test]
+    async fn transient_statuses_retry_after_and_permanent_errors_are_distinguished() {
+        for (status, headers, body, retry, minimum) in [
+            (503, "", "", true, 0),
+            (408, "", "", true, 0),
+            (429, "Retry-After: 120\r\n", "", true, 120),
+            (429, "", "", true, 60),
+            (200, "", r#"{"error":{"code":503}}"#, true, 0),
+            (200, "", "{incomplete", true, 5),
+            (403, "", "", false, 0),
+            (401, "", "", false, 0),
+            (404, "", "", false, 0),
+            (400, "", "", false, 0),
+        ] {
+            let posts = Arc::new(AtomicUsize::new(0));
+            let count = posts.clone();
+            let (base, task) = crate::test_http::serve_request(move |request| {
+                if request.starts_with("GET") {
+                    return (
+                        200,
+                        String::new(),
+                        br#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"#.to_vec(),
+                    );
+                }
+                count.fetch_add(1, Ordering::SeqCst);
+                (status, headers.into(), body.as_bytes().to_vec())
+            })
+            .await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let error = browser
+                .fetch(false, &BrowseRequest::Home)
+                .await
+                .unwrap_err();
+            assert_eq!(error.is::<FeedRetry>(), retry, "HTTP {status}: {error}");
+            if retry {
+                assert!(
+                    error.downcast_ref::<FeedRetry>().unwrap().after
+                        >= Duration::from_secs(minimum)
+                );
+            }
+            assert_eq!(
+                posts.load(Ordering::SeqCst),
+                if status == 400 { 2 } else { 1 }
+            );
+            task.abort();
+        }
+    }
+    #[tokio::test]
+    async fn bootstrap_rate_limits_http_dates_and_transport_failures_are_retryable() {
+        let date = httpdate::fmt_http_date(SystemTime::now() + Duration::from_secs(120));
+        let (base, task) =
+            crate::test_http::serve(move |_| (429, format!("Retry-After: {date}\r\n"), vec![]))
+                .await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [base.clone(), base.clone()];
+        let error = browser
+            .fetch(false, &BrowseRequest::Home)
+            .await
+            .unwrap_err();
+        let delay = error.downcast_ref::<FeedRetry>().unwrap().after;
+        assert!(delay > Duration::from_secs(115) && delay <= Duration::from_secs(120));
+        task.abort();
+        let _ = task.await;
+        let error = browser
+            .fetch(false, &BrowseRequest::Home)
+            .await
+            .unwrap_err();
+        assert!(error.is::<FeedRetry>(), "{error}");
+        assert!(error.to_string().contains("cannot reach"));
+        assert!(!error.to_string().contains("?"));
     }
     #[test]
     fn empty_feed_preserves_service_message_without_terminal_controls() {

@@ -1,6 +1,6 @@
 # Rust edition
 
-Alpha.5 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.6 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
@@ -11,7 +11,7 @@ On CachyOS/Arch:
 ```sh
 sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
 rustup default stable
-git clone --branch improve/playback-navigation https://github.com/Vanir20342222/ytui.git
+git clone --branch improve/feed-recovery https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 hash -r
@@ -34,11 +34,11 @@ installed executable:
 ```sh
 cd ~/ytui
 git fetch origin
-git switch improve/playback-navigation
+git switch improve/feed-recovery
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.5
+~/.local/bin/ytui --version             # 0.2.0-alpha.6
 type -a ytui ytui-rs
 ```
 
@@ -95,6 +95,26 @@ redraws to ten frames per second. Normal input is capped at sixty; idle player
 status does not force constant redraws. State writes wait independently of input.
 Keys can be remapped through F2 → Keyboard bindings or `[keybindings]` in TOML.
 Ctrl+C is reserved for emergency quit.
+
+## Automatic feed recovery
+
+YouTube and Music recover transient feed failures without pressing Refresh. The
+active tab retries after 2, 5, 15, 30, then 60 seconds (remaining at 60); server
+`Retry-After` delays take priority. Hidden tabs wait until revisited. Offline/demo
+mode does not start retries. Loaded videos remain usable during recovery, and a
+same-feed refresh preserves the selected video where it is still present.
+
+Fresh Home data embedded in the bootstrap HTML is used once, avoiding an extra
+API round trip. Empty bare Home shells renew the client context once. WEB and
+WEB_REMIX contexts remain separate, expire after 30 minutes, and renew once on
+400/412 rejection. Each fetch has a 35-second overall deadline. Session expiry,
+consent and HTTP 401/403 require the displayed account/network action rather than
+repeated requests. Anonymous Home may legitimately have no recommendations.
+
+Near-end prefetch also considers visible cards. Overlapping or empty continuation
+pages with new tokens can advance; repeated/cyclic tokens and three consecutive
+pages without new items stop the loop. Refresh/Next do not restart pending loads
+or bypass their cooldown. Feed recovery never writes watch history to YouTube.
 
 ## Native Rust and automatic fallback
 

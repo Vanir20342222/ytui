@@ -10,16 +10,26 @@ pub(crate) enum Redirects {
     Public,
 }
 
+#[derive(Debug)]
+pub(crate) struct TransportError(String);
+impl std::fmt::Display for TransportError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+impl std::error::Error for TransportError {}
+
 pub(crate) fn request_error(service: &str, url: &Url, error: reqwest::Error) -> anyhow::Error {
     let reason = if error.is_timeout() {
         "request timed out".to_owned()
     } else {
         crate::process::diagnostic(&format!("{:#}", anyhow::Error::new(error.without_url())))
     };
-    anyhow::anyhow!(
+    TransportError(format!(
         "{service}: cannot reach {} ({reason}). Check DNS, TLS certificates, proxy or VPN.",
         url.host_str().unwrap_or("the service")
-    )
+    ))
+    .into()
 }
 
 fn destination(start: &Url, current: &Url, location: &str, policy: Redirects) -> Result<Url> {

@@ -781,7 +781,17 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         Paragraph::new(format!(
             " {}{}",
             view.page.title,
-            if view.loading { " · Loading…" } else { "" }
+            if view.loading {
+                " · Loading…"
+            } else if view
+                .load
+                .as_ref()
+                .is_some_and(|load| load.retry_at.is_some())
+            {
+                " · Reconnecting automatically…"
+            } else {
+                ""
+            }
         ))
         .style(style(app, app.palette.text).add_modifier(Modifier::BOLD)),
         heading[0],
@@ -825,7 +835,16 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                 "Nothing here yet"
             },
             &format!(
-                "{notice}\n\n{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
+                "{notice}\n\n{}\n{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
+                if view
+                    .load
+                    .as_ref()
+                    .is_some_and(|load| load.retry_at.is_some())
+                {
+                    "Reconnecting automatically. No refresh needed."
+                } else {
+                    ""
+                },
                 key(app, Action::Feeds),
                 key(app, Action::Search),
                 key(app, Action::Refresh)

@@ -4,6 +4,33 @@ Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. All automated application tests use synthetic/offline data.
 
 
+## Alpha.6 automatic feed recovery evidence (M4/M5)
+
+- `cargo test --workspace --locked`: **106 passed**, 6 opt-in tests excluded.
+  Includes 12 new recovery/provider/controller tests and the real-executable PTY
+  navigation/popup/resize/terminal-restoration test. New recovery states retain
+  content across all 13 themes at two sizes (26 states); existing theme/settings/
+  download-form coverage also passes.
+- Loopback requests exercise fresh embedded WEB/Music Home data, single-use and
+  freshness, bare-shell recovery, one-shot stale-context renewal/TTL, explicit
+  notices, transient/permanent/JSON/API errors, Retry-After seconds and HTTP date,
+  and connection loss. No browser cookies or account credentials are used.
+- Controller events exercise automatic tick retry of the failed continuation
+  without a refresh key, cooldown/hidden/offline behavior, stale-generation
+  rejection, usable existing cards, selected-media/history stability, overlapping
+  pages/token cycles/empty-run limits, viewport prefetch and duplicate Next actions.
+- `cargo fmt --all -- --check`, strict workspace/all-target Clippy and optimized
+  `cargo build --release --locked` pass. Actual `install.sh` into an isolated
+  directory passes; both installed `ytui` and `ytui-rs` report `0.2.0-alpha.6`.
+- Current public **YouTube Home and Music Home CLI probes both failed** at the
+  configured proxy tunnel (`cannot reach … tunnel error: unsuccessful`). No
+  network bypass was attempted. These are failed live probes, not feed success.
+  Signed-in Brave Origin/Proton/Ghostty acceptance remains open.
+
+Implementation/limits: [FEED_RECOVERY_PLAN.md](FEED_RECOVERY_PLAN.md).
+Historical evidence below applies to the earlier feature work; unrelated real
+mpv/FFmpeg/SponsorBlock probes were not repeated for this feed-only change.
+
 ## Alpha.5 playback/navigation evidence
 
 This supersedes alpha.4 UI/backend descriptions lower in this historical record.
