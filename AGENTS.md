@@ -11,8 +11,10 @@ baseline defects, milestones, migration requirements, and acceptance checks.
   optional cliamp launch, and permits yt-dlp/FFmpeg as external tools.
 - Reference milestone IDs in changes and update completion evidence in the plan.
   Coordinate shared model/service contracts before independent feature work.
-- Keep the Python app working until the Rust replacement passes the release and
-  migration gates. Do not discard existing user settings, queues, or history.
+- The user explicitly authorized removing the Python app on 2026-10-21 after
+  documenting gaps. Rust is now the repository application. Keep migration and
+  existing user settings, queues, history and downloaded files intact. Remaining
+  live-service/desktop release gates still apply; see docs/REMAINING_WORK.md.
 - Keep tests deterministic and offline by default. Never read a developer's real
   browser cookies or alter VPN/system theme settings as a test side effect.
 - Never commit cookies, authorization headers, private feed fixtures, or signed
