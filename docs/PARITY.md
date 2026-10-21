@@ -11,7 +11,7 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | Native download/playback extraction | Pinned yt-dlp-rs, isolated worker; default | Many YouTube videos/playlists/live/resume unsupported upstream; explicit fallback retained |
 | yt-dlp fallback | Explicit per-job/action/CLI/global selection | Real YouTube challenge/version checks |
 | Format/container, conversion, metadata, cover art | Implemented | Broad codec/container fixture coverage |
-| Subtitles | Native literal-language selection, manual/automatic sidecars and embedding; explicit fallback also supported | Live caption formats and real FFmpeg embedding acceptance |
+| Subtitles | Native literal-language selection, manual/automatic sidecars and embedding; explicit fallback also supported | Live captions and broader codec/container acceptance (real FFmpeg fixture passes) |
 | SponsorBlock, chapter split, bandwidth | Implemented in explicit fallback; native rejects unsupported options | Native adapters remain incomplete upstream/in ytui |
 | Local conversion | Separate FFmpeg output; input preserved | Broad real-codec checks |
 | Search and personalized YouTube feeds | Rust internal-API adapter; current and legacy renderer parsing | Live signed-in home/subscriptions/Watch Later validation |

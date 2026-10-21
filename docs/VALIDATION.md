@@ -21,7 +21,8 @@ Coverage includes:
 - Opt-in clipboard baseline/change and exact-host checks using synthetic text;
   stale/disabled results cannot open a download. No actual clipboard is read.
 - Native subtitle sidecar transfer from loopback, missing-language errors and
-  overwrite refusal. Real/live subtitle embedding still needs target acceptance.
+  overwrite refusal. A separate real-FFmpeg embedding smoke check is recorded below;
+  live YouTube caption formats still need target acceptance.
 - Profile/keymap roundtrip, duplicate-key rejection, verbatim unknown legacy
   values/profile backups, migrated desktop toggles and bandwidth windows.
 - Filtered/grouped history preserves real queue indices and playlist order;
@@ -84,6 +85,12 @@ output rendered with a monospaced font; the catalog is explicitly fictional.
 - Real FFmpeg smoke check: generated a 0.1-second WAV, converted it through the
   Rust CLI to a separate MP3, and confirmed the resulting format/duration with
   ffprobe. This exercised the real conversion tool without an audio device.
+- Real native subtitle smoke check: generated a one-second MP4 and synthetic VTT,
+  served an HTML5 video page over loopback, and downloaded it through the release
+  CLI/native worker with yt-dlp configured to a nonexistent path. ffprobe confirmed
+  video, audio and `mov_text` subtitle streams; the VTT sidecar was retained with
+  its expected contents. This checks actual FFmpeg embedding without YouTube or
+  an audio device; it does not prove live YouTube caption compatibility.
 - No real browser profile, cookie store, Google account or desktop keyring was read
   in this cloud workspace. No VPN or desktop theme setting was changed.
 
