@@ -3,10 +3,8 @@
 Status: planning; implementation has not started. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
-Publication: prepared on `docs/rust-rewrite-plan`. The initial GitHub branch-create
-request and Git push dry-run both returned HTTP 403 on 2026-10-21. Repository
-metadata reports user write access, but the current integration cannot write.
-Publishing this plan and opening its review PR remain blocked on connection access.
+Publication: pushed to `docs/rust-rewrite-plan` on 2026-10-21. This branch contains
+the plan and agent instructions for review; implementation has not started.
 
 ## Goal and confirmed decisions
 
