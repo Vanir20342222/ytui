@@ -1,0 +1,48 @@
+# Native Rust is the default. yt-dlp is used only when explicitly selected.
+# Empty output directories use ~/Videos/ytui and ~/Music/ytui.
+# Set native_js_runtime = "/usr/bin/deno" at the top level to enable challenge solving.
+
+version = 1
+theme = "system"
+theme_provider = "auto"
+image_protocol = "auto"
+thumbnails = true
+reduced_motion = false
+concurrency = 3
+max_retries = 3
+retry_delay_seconds = 5
+download_backend = "native"
+yt_dlp = "yt-dlp"
+ffmpeg = "ffmpeg"
+mpv = "mpv"
+cliamp = "cliamp"
+auth_store = "keyring"
+account_index = 0
+radio_servers = []
+custom_stations = []
+clipboard_watcher = false
+notifications = true
+
+[download]
+audio = false
+quality = "1080"
+container = "mp4"
+audio_container = "mp3"
+audio_quality = "0"
+directory = ""
+audio_directory = ""
+filename_template = "%(title).180s [%(id)s].%(ext)s"
+subtitles = []
+auto_subtitles = false
+embed_subtitles = true
+metadata = true
+thumbnail = false
+playlist = false
+bandwidth_kib = 0
+global_bandwidth_kib = 0
+sponsorblock = []
+sponsorblock_remove = false
+split_chapters = false
+skip_duplicates = true
+
+[keybindings]
