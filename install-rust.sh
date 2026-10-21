@@ -10,4 +10,5 @@ ytui_install_dir="${YTUI_INSTALL_DIR:-$HOME/.local/bin}"
 cargo build --manifest-path "$ytui_source_dir/Cargo.toml" --release --locked -p ytui
 mkdir -p -- "$ytui_install_dir"
 install -m 755 -- "$ytui_source_dir/target/release/ytui" "$ytui_install_dir/ytui-rs"
+"$ytui_install_dir/ytui-rs" --version
 printf 'Installed %s/ytui-rs\nRun ytui-rs doctor, then ytui-rs.\n' "$ytui_install_dir"

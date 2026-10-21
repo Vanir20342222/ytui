@@ -784,7 +784,7 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                 "Nothing here yet"
             },
             &format!(
-                "{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
+                "{notice}\n\n{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
                 key(app, Action::Feeds),
                 key(app, Action::Search),
                 key(app, Action::Refresh)

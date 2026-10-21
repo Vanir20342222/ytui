@@ -7,7 +7,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **70 passed**, zero failures; one real-media test is explicitly ignored in this command.
+- `cargo test --workspace --locked`: **77 passed**, zero failures; one real-media test is explicitly ignored in this command.
 - `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
@@ -133,9 +133,24 @@ theme matrix and the complete feature-by-feature coverage/acceptance inventory.
 
 ## Live checks and boundaries
 
-- The application fetched the live cliamp catalog: **15 channels**, all currently
+- Alpha.3 public probes used the actual optimized binary with isolated XDG
+  paths, no browser session and the inherited environment proxy. The cliamp
+  endpoint returned **HTTP 503**; both `doctor --network` and `radio` successfully
+  returned **80 real Radio Browser stations**, clearly labelled as a fallback.
+  No station stream was played. Directory discovery and a direct directory
+  query also returned HTTP 200 in an independent anonymous endpoint check.
+- Alpha.3 YouTube and Music public searches failed at proxy tunnel setup
+  (`client error (Connect): tunnel error: unsuccessful`). Independent anonymous
+  endpoint probes received tunnel HTTP 403. These failures prevent claiming
+  live YouTube/Music acceptance. They do not establish how the user's Proton
+  exit behaves. No VPN setting or proxy restriction was changed.
+- The user's screenshot identifies their installed binary as **alpha.1**.
+  PR #5 UI changes were merged into the PR #4 media branch, while PR #4 remained
+  open against main. [Update instructions](RUST.md#updating-an-older-rust-alpha)
+  explicitly select the provider-fix branch, reinstall, and verify alpha.3.
+- An earlier application check fetched the live cliamp catalog: **15 channels**, all then
   exposing track-library URLs. The Omarchy track endpoint was also inspected.
-  No stream was played on an audio device.
+  That earlier success is not evidence of current catalog availability.
 - Public YouTube browsing was attempted and failed at network/proxy connection
   setup. The earlier Python baseline audit received proxy HTTP 403 from YouTube.
   No attempt was made to bypass the environment's networking controls.
@@ -152,6 +167,22 @@ theme matrix and the complete feature-by-feature coverage/acceptance inventory.
   an audio device; it does not prove live YouTube caption compatibility.
 - No real browser profile, cookie store, Google account or desktop keyring was read
   in this cloud workspace. No VPN or desktop theme setting was changed.
+
+## Alpha.3 provider regression coverage
+
+Seven additional default tests exercise complete loopback requests and failure
+handling: same-origin bootstrap redirects and loop limits; refusing external
+origins before sending synthetic Cookie/Authorization headers; consent/sign-in
+instructions without leaking redirect queries; separate WEB/WEB_REMIX bootstrap
+caches, client versions and visitor headers; search and search continuations;
+anonymous Home messages and sanitized upstream empty-feed text; HTTP 403/429;
+public catalog redirects; cliamp HTTP 503/empty catalog/redirect-loop fallback;
+and retaining connection causes without exposing URL query tokens.
+
+The existing headless setup test also verifies `doctor` reports its executable
+and refuses `--offline doctor --network`. Default CI does not contact providers.
+Consent redirects to another origin remain explicit browser/import actions;
+the app does not automatically accept consent or bypass service restrictions.
 
 ## Outstanding target-machine acceptance
 

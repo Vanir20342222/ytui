@@ -1,5 +1,6 @@
 use crate::browse::limited_text;
 use anyhow::{Context, Result, bail, ensure};
+use futures_util::{StreamExt, stream::FuturesUnordered};
 use serde_json::Value;
 use ytui_core::{BrowseRequest, Media, MediaKind, Page, http_url};
 
@@ -8,6 +9,7 @@ pub struct Radio {
     client: reqwest::Client,
     pub servers: Vec<String>,
     cache: Option<std::path::PathBuf>,
+    catalog: String,
 }
 impl Radio {
     pub fn new(client: reqwest::Client, servers: Vec<String>) -> Self {
@@ -15,6 +17,7 @@ impl Radio {
             client,
             servers,
             cache: None,
+            catalog: "https://radio.cliamp.stream/stations".into(),
         }
     }
     pub fn with_cache(mut self, path: std::path::PathBuf) -> Self {
@@ -22,6 +25,23 @@ impl Radio {
         self
     }
     pub async fn fetch(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
+        match self.fetch_cached(request, offset).await {
+            Err(error) if matches!(request, BrowseRequest::Cliamp) => {
+                let mut page = self
+                    .fetch_cached(&BrowseRequest::RadioSearch(String::new()), offset)
+                    .await
+                    .map_err(|fallback| {
+                        anyhow::anyhow!("{error}. Radio Browser fallback also failed: {fallback}")
+                    })?;
+                page.notice = Some(format!(
+                    "cliamp catalog unavailable: {error}. Showing Radio Browser stations instead. Refresh to retry cliamp."
+                ));
+                Ok(page)
+            }
+            result => result,
+        }
+    }
+    async fn fetch_cached(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
         use sha2::{Digest, Sha256};
         let key = hex::encode(Sha256::digest(format!(
             "{}:{offset}",
@@ -54,27 +74,40 @@ impl Radio {
         }
     }
     async fn json(&self, url: &str) -> Result<Value> {
-        let response = self
-            .client
-            .get(http_url(url)?)
-            .header("User-Agent", "ytui/0.2 (terminal radio client)")
-            .send()
-            .await
-            .context("Radio service is unreachable")?;
+        let target = http_url(url)?;
+        let host = target.host_str().unwrap_or("radio service").to_owned();
+        // Public catalog requests have no browser cookies or authorization headers.
+        let response = crate::http::get(
+            target,
+            |url| {
+                Ok(self
+                    .client
+                    .get(url.clone())
+                    .timeout(std::time::Duration::from_secs(8))
+                    .header("User-Agent", "ytui/0.2 (terminal radio client)"))
+            },
+            crate::http::Redirects::Public,
+            "Radio",
+        )
+        .await?;
         ensure!(
             response.status().is_success(),
-            "Radio service returned HTTP {}",
+            "{host} returned HTTP {}",
             response.status().as_u16()
         );
-        Ok(serde_json::from_str(
-            &limited_text(response, 8 * 1024 * 1024).await?,
-        )?)
+        serde_json::from_str(&limited_text(response, 8 * 1024 * 1024).await?)
+            .with_context(|| format!("{host} returned an invalid radio catalog"))
     }
     async fn fetch_live(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
         match request {
-            BrowseRequest::Cliamp => Ok(parse_cliamp(
-                &self.json("https://radio.cliamp.stream/stations").await?,
-            )),
+            BrowseRequest::Cliamp => {
+                let page = parse_cliamp(&self.json(&self.catalog).await?);
+                ensure!(
+                    !page.items.is_empty(),
+                    "cliamp returned no supported stations"
+                );
+                Ok(page)
+            }
             BrowseRequest::CliampTracks(url) => {
                 let parsed = http_url(url)?;
                 ensure!(
@@ -110,6 +143,7 @@ impl Radio {
                 } else {
                     self.servers.clone()
                 };
+                let mut pending = FuturesUnordered::new();
                 for server in servers {
                     let mut url = http_url(&server)?;
                     url.set_path("/json/stations/search");
@@ -132,16 +166,25 @@ impl Radio {
                         }
                         _ => {}
                     }
-                    if let Ok(data) = self.json(url.as_str()).await {
-                        let mut page = parse_radio_browser(&data);
-                        if page.items.len() == 80 {
-                            page.continuation = Some((offset + 80).to_string());
+                    pending.push(async move { self.json(url.as_str()).await });
+                }
+                let mut errors = Vec::new();
+                while let Some(result) = pending.next().await {
+                    match result {
+                        Ok(data) if data.is_array() => {
+                            let mut page = parse_radio_browser(&data);
+                            if data.as_array().is_some_and(|rows| rows.len() == 80) {
+                                page.continuation = Some((offset + 80).to_string());
+                            }
+                            return Ok(page);
                         }
-                        return Ok(page);
+                        Ok(_) => errors.push("Unexpected directory response format".into()),
+                        Err(error) => errors.push(error.to_string()),
                     }
                 }
                 bail!(
-                    "Radio Browser is unavailable on all directory servers; cached stations and cliamp remain available"
+                    "Radio Browser is unavailable on all directory servers: {}",
+                    errors.join("; ")
                 )
             }
             _ => bail!("Unsupported radio feed"),
@@ -463,5 +506,76 @@ mod cache_tests {
         assert_eq!(restored.items.len(), 1);
         assert!(restored.title.contains("cached"));
         assert!(restored.notice.unwrap().contains("unavailable"));
+    }
+}
+
+#[cfg(test)]
+mod outage_tests {
+    use super::*;
+    use serde_json::json;
+    #[tokio::test]
+    async fn catalog_redirects_and_outages_use_a_labelled_directory_fallback() {
+        let (base, task) = crate::test_http::serve(|path| {
+            let (status, headers, body) = match path.split('?').next().unwrap() {
+                "/catalog" => (302, "Location: /catalog-ready\r\n", json!({})),
+                "/catalog-ready" => (200, "", json!({"stations":[{"name":"cliamp fixture", "stream":"https://example.test/live"}]})),
+                "/outage" => (503, "", json!({})),
+                "/empty" => (200, "", json!({"stations":[]})),
+                "/loop" => (302, "Location: /loop\r\n", json!({})),
+                "/json/stations/search" => (200, "", json!([{"name":"Directory fixture", "url_resolved":"https://example.test/live"}])),
+                _ => (404, "", json!({})),
+            };
+            (status, headers.into(), body.to_string().into_bytes())
+        }).await;
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .unwrap();
+        let mut radio = Radio::new(client, vec![base.clone()]);
+        radio.catalog = format!("{base}/catalog");
+        let catalog = radio.fetch(&BrowseRequest::Cliamp, 0).await.unwrap();
+        assert_eq!(catalog.items[0].title, "cliamp fixture");
+        assert!(catalog.notice.is_none());
+        for (path, reason) in [
+            ("outage", "503"),
+            ("empty", "no supported stations"),
+            ("loop", "redirect limit"),
+        ] {
+            radio.catalog = format!("{base}/{path}");
+            let page = radio.fetch(&BrowseRequest::Cliamp, 0).await.unwrap();
+            assert_eq!(page.items[0].title, "Directory fixture");
+            let notice = page.notice.unwrap();
+            assert!(notice.contains("Radio Browser"));
+            assert!(notice.contains(reason), "{notice}");
+        }
+        let cache = tempfile::tempdir().unwrap();
+        let cached = radio.with_cache(cache.path().into());
+        assert_eq!(
+            cached.fetch(&BrowseRequest::Cliamp, 0).await.unwrap().items[0].title,
+            "Directory fixture"
+        );
+        task.abort();
+        let _ = task.await;
+        let restored = cached.fetch(&BrowseRequest::Cliamp, 0).await.unwrap();
+        assert_eq!(restored.items[0].title, "Directory fixture");
+        assert!(restored.title.contains("cached"));
+    }
+    #[tokio::test]
+    async fn network_errors_retain_the_host_and_cause_without_private_url_queries() {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!(
+            "http://{}/?token=synthetic-secret",
+            listener.local_addr().unwrap()
+        );
+        drop(listener);
+        let radio = Radio::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            vec![],
+        );
+        let error = radio.json(&url).await.unwrap_err().to_string();
+        assert!(error.contains("127.0.0.1"));
+        assert!(error.contains("connect"), "{error}");
+        assert!(!error.contains("synthetic-secret"));
     }
 }

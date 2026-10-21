@@ -33,7 +33,11 @@ pub struct Args {
 #[derive(Subcommand)]
 pub enum Command {
     /// Check installed tools, desktop themes and configuration without reading browser stores.
-    Doctor,
+    Doctor {
+        /// Also probe public YouTube, Music and radio requests, without importing a browser session.
+        #[arg(long)]
+        network: bool,
+    },
     /// Write a documented TOML configuration (never overwrites an existing file).
     Init,
     /// Locate browser profiles, import a session, or disconnect.
@@ -137,8 +141,13 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             )?;
             println!("{}", paths.config_file().display());
         }
-        Command::Doctor => {
+        Command::Doctor { network } => {
+            ensure!(
+                !network || !config.offline,
+                "Network diagnostics require network access; restart without --offline"
+            );
             println!("ytui {} · Native Rust backend", env!("CARGO_PKG_VERSION"));
+            println!("Executable: {}", std::env::current_exe()?.display());
             println!("Configuration: {}", paths.config_file().display());
             println!("State: {}", paths.state.display());
             println!(
@@ -212,8 +221,32 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                     .unwrap_or("none")
             );
             println!(
-                "Browser stores were not opened. Use `ytui auth profiles` to list profile paths."
+                "Browser stores were not opened. Use `ytui-rs auth profiles` to list profile paths."
             );
+            if network {
+                let client = ytui_services::http_client(config.proxy.as_deref())?;
+                let browser = Browser::new(client.clone(), None, 0);
+                for (label, music) in [
+                    ("YouTube public search", false),
+                    ("Music public search", true),
+                ] {
+                    print_probe(
+                        label,
+                        browser
+                            .fetch(music, &BrowseRequest::Search("music".into()))
+                            .await,
+                    );
+                }
+                print_probe(
+                    "Radio catalog/directory",
+                    Radio::new(client, config.radio_servers.clone())
+                        .fetch(&BrowseRequest::Cliamp, 0)
+                        .await,
+                );
+                println!(
+                    "These public probes do not validate signed-in feeds or media playback. VPN configuration was not changed."
+                );
+            }
         }
         Command::Auth { command } => match command {
             AuthCommand::Profiles => {
@@ -292,7 +325,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
         Command::Vpn { action, uuid } => {
             let cancel = CancellationToken::new();
             if action == "connect" || action == "disconnect" {
-                let id = uuid.context("Provide a UUID from `ytui vpn list`")?;
+                let id = uuid.context("Provide a UUID from `ytui-rs vpn list`")?;
                 ytui_services::vpn::change(&config.nmcli, &id, action == "connect", cancel).await?;
                 println!("VPN action completed");
             } else {
@@ -506,6 +539,29 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
         }
     }
     Ok(())
+}
+
+fn print_probe(label: &str, result: Result<Page>) {
+    match result {
+        Ok(page) if !page.items.is_empty() => {
+            println!("{label}: OK ({} items)", page.items.len());
+            if let Some(notice) = page.notice {
+                println!("  {}", ytui_services::process::diagnostic(&notice));
+            }
+        }
+        Ok(page) => println!(
+            "{label}: EMPTY · {}",
+            ytui_services::process::diagnostic(
+                page.notice
+                    .as_deref()
+                    .unwrap_or("No supported items returned")
+            )
+        ),
+        Err(error) => println!(
+            "{label}: FAILED · {}",
+            ytui_services::process::diagnostic(&error.to_string())
+        ),
+    }
 }
 pub fn executable(program: &str) -> Option<PathBuf> {
     let p = PathBuf::from(program);

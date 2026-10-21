@@ -11,6 +11,10 @@ cargo run --release --locked -p ytui -- doctor
 ./install-rust.sh   # installs ytui-rs alongside the Python launcher
 ```
 
+Using an older installed alpha? Pulling source does not update the executable.
+See [alpha.3 update and connection diagnostics](docs/RUST.md#updating-an-older-rust-alpha)
+for the exact branch, reinstall and `doctor --network` commands.
+
 See [Rust setup and usage](docs/RUST.md), [implementation/release parity](docs/PARITY.md),
 [validation](docs/VALIDATION.md) and the [rewrite plan](RUST_REWRITE_PLAN.md).
 This is an alpha; signed-in and desktop acceptance checks are still required.

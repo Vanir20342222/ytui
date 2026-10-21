@@ -1,6 +1,6 @@
 # Rust edition
 
-The Rust edition has four working provider tabs, a native download backend,
+The Rust edition implements four provider tabs, a native download backend,
 mpv playback, browser-cookie sign-in and desktop theme following. It is an alpha:
 its automated tests are offline, and live signed-in behavior still needs checking
 on CachyOS with Caelestia, Ghostty and Brave Origin. The original Python release
@@ -30,8 +30,49 @@ ytui-rs --demo                         # fictional catalog, no browser access
 ytui-rs --offline                      # local library; no account loading or online jobs
 ytui-rs init                           # create ~/.config/ytui/rust.toml
 ytui-rs doctor                         # dependencies and desktop integration
+ytui-rs doctor --network               # public provider probes; no browser session import
 ytui-rs --help
 ```
+
+### Updating an older Rust alpha
+
+`git pull` updates source files; it does not replace an installed `ytui-rs`.
+Also, changes on an unmerged PR branch are not included when building `main`.
+For the alpha.3 provider fixes and the Lazygit-style UI, build this branch:
+
+```sh
+git fetch origin
+git switch rewrite/provider-reliability
+git pull --ff-only
+./install-rust.sh
+hash -r
+~/.local/bin/ytui-rs --version          # must report 0.2.0-alpha.3
+~/.local/bin/ytui-rs doctor --network
+```
+
+The explicit binary path uses the default install location; use your chosen
+`YTUI_INSTALL_DIR` if different. `doctor` also prints the executable path to
+identify a stale binary elsewhere in PATH. The installer keeps the Python
+launcher and existing Rust settings/state.
+
+`doctor` alone makes no provider requests. `doctor --network` runs anonymous
+YouTube/Music searches and a fresh radio catalog/directory request. It reports
+OK, EMPTY or FAILED separately, includes sanitized connection causes and does
+not read browser stores, change VPN connections or validate private feeds.
+
+Music bootstrap follows up to four redirects within its own origin. Redirects
+to consent/sign-in pages require a browser session: open both YouTube and
+YouTube Music in Brave Origin, complete any browser prompts, then import the
+profile with `:auth`. ytui does not automatically accept consent or forward
+credentials to another origin. A VPN exit can affect service availability;
+use the public probes to distinguish connection failures from empty feeds.
+Anonymous Home may have no recommendations; `/` opens public search and
+`:auth` enables the personalized feed when the service supports that session.
+
+When the cliamp service fails, a previously saved catalog is preferred. With
+no saved cliamp catalog, ytui tries Radio Browser and labels the substituted
+stations. This does not restore cliamp's track libraries during its outage.
+Actual stream playback still depends on each station and mpv.
 
 Linux is the supported implementation target. macOS/Windows packaging and
 platform playback adapters are not implemented; the player uses Unix sockets.
