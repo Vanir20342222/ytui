@@ -315,6 +315,14 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 "collection" => {
                     BrowseRequest::Collection(query.context("Provide a collection ID")?)
                 }
+                "details" => BrowseRequest::Details(query.context("Provide a video ID")?),
+                "related" => BrowseRequest::Related(query.context("Provide a video ID")?),
+                "songs" | "albums" | "artists" | "videos" | "playlists" if music => {
+                    BrowseRequest::MusicSearch {
+                        query: query.context("Provide a Music search query")?,
+                        category: feed.clone(),
+                    }
+                }
                 _ => anyhow::bail!("Unknown feed"),
             };
             println!(

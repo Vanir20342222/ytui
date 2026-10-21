@@ -130,6 +130,22 @@ impl Config {
                 .all(|c| c.len() == 2 && c.bytes().all(|b| b.is_ascii_alphabetic())),
             "Pinned radio countries must use two-letter codes"
         );
+        ensure!(
+            self.radio_servers.len() <= 8,
+            "At most eight radio directory servers are allowed"
+        );
+        for server in &self.radio_servers {
+            crate::http_url(server)?;
+        }
+        if let Some(proxy) = &self.proxy {
+            let proxy = url::Url::parse(proxy)
+                .map_err(|_| anyhow::anyhow!("Proxy must be a valid HTTP(S) or SOCKS URL"))?;
+            ensure!(
+                matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h")
+                    && proxy.host_str().is_some(),
+                "Proxy must use HTTP(S), socks5 or socks5h and include a host"
+            );
+        }
         self.schedule.validate()?;
         self.download.validate()
     }

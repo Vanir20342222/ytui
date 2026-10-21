@@ -34,6 +34,10 @@ in every theme. Built-in RGB text, muted text and selected text must reach contr
 4.5:1; accent/status roles must reach 3:1 against the background. These checks do
 not certify arbitrary user palettes, terminal ANSI colors or real desktop themes.
 
+The eight settings categories additionally render their first and last selected
+fields in all 13 themes and five sizes: 1,040 settings states. Keyboard/mouse
+editing, invalid-save recovery, cancellation and persistence have separate tests.
+
 Other WQHD views: [Downloads](screenshots/downloads.png),
 [YouTube](screenshots/youtube.png), [Music](screenshots/music.png),
 [Radio](screenshots/radio.png), [feed focus](screenshots/feeds.png),
@@ -42,13 +46,22 @@ Other WQHD views: [Downloads](screenshots/downloads.png),
 [offline library](screenshots/offline.png), [resume](screenshots/resume.png),
 [watches](screenshots/watches.png), [compact](screenshots/compact.png).
 
-Recreate captures with development-only Python helpers (the application remains Rust):
+Settings categories: [General](screenshots/settings/general.png),
+[Appearance](screenshots/settings/appearance.png),
+[Downloads](screenshots/settings/downloads.png),
+[Subtitles](screenshots/settings/subtitles.png),
+[Network/account](screenshots/settings/network.png),
+[Schedule](screenshots/settings/schedule.png), [Tools](screenshots/settings/tools.png),
+[Radio](screenshots/settings/radio.png), [compact](screenshots/settings/compact.png).
+
+Recreate captures entirely in Rust:
 
 ```sh
 cargo build --locked -p ytui
-uv run --no-project tools/capture_ui.py --binary target/debug/ytui
+cargo run -p ytui --example capture_ui --locked -- --binary target/debug/ytui
 ```
 
 The helper isolates XDG/config/state, uses demo and synthetic offline fixtures,
 checks every image size, resizes the real terminal and verifies ICANON/ECHO on exit.
+The Rust repository test verifies PNG headers and manifest completeness in CI.
 Full feature coverage and live acceptance gaps: [FEATURE_AUDIT.md](FEATURE_AUDIT.md).

@@ -1,84 +1,29 @@
-# Byte-compiled / optimized / DLL files
+# Rust build output and generated local data
+/target/
+/build/
+/dist/
+/downloads/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.cookies.txt
+session.json
+settings.json
+settings.json.tmp
+# Local caches, including leftovers from the removed legacy app
+.cache/
 __pycache__/
 *.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
+.venv/
+venv/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
-
-# Virtual environments
-venv/
-.venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# Project databases & local runtime data
-*.db
-*.sqlite
-*.sqlite3
-settings.json
-settings.json.tmp
-
-# Antigravity & Agent caches
+*.egg-info/
+# Editor, agent and OS files
 .gemini/
 .openharness/
-
-# OS artifacts
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-
-# Rust build and local session artifacts
-/target/
-*.cookies.txt
-session.json

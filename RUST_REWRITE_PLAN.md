@@ -1,12 +1,12 @@
 # ytui Rust rewrite plan
 
-Status: Rust alpha merged in PR #2; PR #5 UI changes merged into the PR #4 media branch; alpha.3 provider fixes on `rewrite/provider-reliability` above it. PR #4 and target-machine release gates remain open. Updated: 2026-10-21.
+Status: PRs #5 and #6 are merged into the PR #4 media branch. The alpha.4 Rust-only transition and general settings window are on `rewrite/rust-only-settings`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
 on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
-the provider follow-up lives on `rewrite/provider-reliability`;
+the provider follow-up PR #6 is merged there, with the Rust-only follow-up on `rewrite/rust-only-settings`;
 the parity work in PR #3 is merged. See docs/RUST.md, docs/PARITY.md and
 docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
@@ -44,9 +44,9 @@ This is a full rewrite delivered in verifiable stages. A search box with empty
 Music/Radio tabs is not feature completion. "All bugs fixed" is not a testable
 promise: track reproduced defects, regression coverage, and remaining limitations.
 
-## Current project audit
+## Original baseline audit
 
-The current app is a Python downloader with queue/history persistence, Textual
+At the planning baseline, the app was a Python downloader with queue/history persistence, Textual
 panels, conversion, settings/profiles, cookie options, and VPN helpers. Personalized
 YouTube browsing, a dedicated Music tab, a radio tab, and video previews need new
 implementations. Existing cookie options configure extraction; they do not by
@@ -285,8 +285,10 @@ Core rules:
 
 ## Migration and compatibility
 
-- Keep the Python application runnable while Rust reaches parity; land Rust on
-  a rewrite branch with staged PRs. Do not remove working code at scaffolding time.
+- The original staged migration kept Python runnable. On 2026-10-21 the user
+  explicitly requested removal after documenting remaining gaps. That instruction
+  supersedes the former installer/source-retention gate. The gap inventory was
+  committed before removal; stable account/desktop acceptance is still open.
 - Inventory every setting/command and label it retained, replaced, or deferred.
   Cover quality/container overrides, playlists, conversion, subtitles, metadata,
   SponsorBlock, profiles, proxy/bandwidth/schedules, duplicates, notifications,
@@ -302,7 +304,7 @@ Core rules:
 - Mark every deferred legacy feature in release notes and obtain a scope decision
   before replacing the default installer. A smaller first milestone is not the
   finished rewrite.
-- Replace the installer/package metadata only at the release gate. Document Rust
+- At the user's request, replace the installer/package metadata with Rust. Document Rust
   build/install, external tools (including any current yt-dlp JS runtime requirement),
   Arch/CachyOS packaging, upgrades, and a rollback path to the Python baseline.
 
@@ -342,7 +344,7 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 77 default offline tests plus a real-media fixture, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Default Rust installer with both launcher names, migration/gap inventory, 85 default tests plus real-media fixture, opt-in live probes and 43 native WQHD captures. | Repository transition authorized/completed; stable desktop/account release gate remains open. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
@@ -448,6 +450,30 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
   WEB/WEB_REMIX contexts, visitor headers, consent/rate-limit/rejected requests,
   anonymous empty Home and radio outage fallback. Live endpoint evidence and
   remaining service/account/device boundaries are recorded in docs/VALIDATION.md.
+
+### Rust-only application and general settings (M1/M2/M3/M5/M7/M8)
+
+- Committed docs/REMAINING_WORK.md before removing legacy Python source, tests,
+  themes, packaging and development tools. Existing installed files/data remain
+  intact; migration and Git history preserve the compatibility path.
+- Default installer builds Rust and publishes both `ytui` and `ytui-rs` after
+  build/version verification. A failed build preserves existing launchers; a
+  launcher symlink is replaced without overwriting its target. Compatibility
+  install-rust.sh calls the same installer. Alpha version is 0.2.0-alpha.4.
+- Added eight settings categories and 50 editable fields with choices, switches,
+  keyboard/mouse Save/Cancel, draft validation and persistent configuration.
+  Settings tests cover 1,040 additional theme/size/first-last-field combinations.
+  Frame pacing coalesces burst input; reduced motion limits redraw frequency.
+- Mapped legacy audio quality, playlist and motion preferences, and list retained
+  unsupported fields. Added Music playlists search and CLI category/details/
+  related routes, plus clear player-unavailable reasons.
+- Replaced Python capture/check scripts with a native Rust PTY/font renderer and
+  PNG/manifest integration check. Generated 43 WQHD captures, including every
+  theme, settings category and additional popups. Real terminal checks cover
+  popup navigation, Unicode input, resize and terminal restoration.
+- 85 default tests pass; strict Clippy/formatting and a separate real-FFmpeg
+  fixture pass. Four opt-in public YouTube tests were run and failed on HTTP/
+  proxy access; they do not satisfy live account/native playback acceptance.
 
 ### Agent handoff and completion evidence
 

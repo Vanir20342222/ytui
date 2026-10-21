@@ -51,6 +51,7 @@ fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
                 .fg(themed(app, app.palette.text)),
         )
 }
+mod settings;
 mod workspace;
 pub use workspace::render;
 fn time(seconds: f64) -> String {
@@ -67,7 +68,14 @@ fn centered(area: Rect, width: u16, height: u16) -> Rect {
         h,
     )
 }
-fn modal(f: &mut Frame, app: &App, area: Rect) {
+fn modal(f: &mut Frame, app: &mut App, area: Rect) {
+    if let Some(Modal::Form(form)) = &app.modal
+        && matches!(form.kind, crate::forms::FormKind::Settings(_))
+    {
+        let hits = settings::render(f, app, form, centered(area, 112, 34));
+        app.hit_targets.extend(hits);
+        return;
+    }
     let Some(modal) = &app.modal else {
         return;
     };

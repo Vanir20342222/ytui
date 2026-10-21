@@ -1,9 +1,6 @@
-mod app;
-mod cli;
-mod editor;
-mod forms;
-mod terminal;
-mod ui;
+#[cfg(test)]
+use ytui::forms;
+use ytui::{app, cli, terminal, ui};
 
 use anyhow::Result;
 use clap::Parser;
@@ -167,14 +164,19 @@ async fn interface(
     let mut tick = tokio::time::interval(Duration::from_millis(50));
     tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut last_save = Instant::now();
+    let mut last_draw = Instant::now() - Duration::from_millis(16);
     #[cfg(unix)]
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
     while !app.quit {
-        if app.redraw {
+        let frame_interval =
+            Duration::from_millis(if app.config.reduced_motion { 100 } else { 16 });
+        if app.redraw && last_draw.elapsed() >= frame_interval {
             terminal.draw(|f| ui::render(f, app))?;
             app.redraw = false;
+            last_draw = Instant::now();
         }
         tokio::select! {
+            _=tokio::time::sleep_until(tokio::time::Instant::from_std(last_draw + frame_interval)),if app.redraw=>{},
             event=events.next()=>match event {
                 Some(Ok(Event::Key(key))) if key.kind!=KeyEventKind::Release=>app.key(key),
                 Some(Ok(Event::Paste(text)))=>app.paste(&text),

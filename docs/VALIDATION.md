@@ -7,7 +7,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **77 passed**, zero failures; one real-media test is explicitly ignored in this command.
+- `cargo test --workspace --locked`: **85 passed**, zero failures; one real-media and four live-YouTube tests are explicitly ignored in this command.
 - `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
@@ -121,18 +121,27 @@ show this actual terminal output with fictional content. No account/network
 provider or media device was used. The offline catalog/resume/watch PTY check
 also passed again with the new layout.
 
-The latest reproducible capture is `uv run --no-project tools/capture_ui.py`:
-**27 PNGs, each 2560×1440**, including all 13 themes, four workspaces, forms,
-history, offline library, resume, watches and compact mode. It operates actual
+The latest reproducible capture is `cargo run -p ytui --example capture_ui --locked -- --binary target/debug/ytui`:
+**43 PNGs, each 2560×1440**, including all 13 themes, four workspaces, forms,
+all eight settings categories, additional popups, history, offline library,
+resume, watches and compact mode. It operates actual
 demo/offline binaries at 212×58 → 80×24 → 35×12 → 212×58, waits for generated
 thumbnail fixtures and checks terminal restoration. The artwork is generated in
 Rust; these are rendered terminal captures, not screenshots of a real Ghostty
-desktop. CI also runs `python3 tools/check_screenshots.py` without image libraries.
+desktop. CI checks PNG headers and manifest completeness through the Rust
+`repository` integration test; no repository Python scripts are needed.
 See [UI_THEMES.md](UI_THEMES.md) and [FEATURE_AUDIT.md](FEATURE_AUDIT.md) for the
 theme matrix and the complete feature-by-feature coverage/acceptance inventory.
 
 ## Live checks and boundaries
 
+- Alpha.4 ran `cargo test -p ytui --test live_youtube -- --ignored --nocapture`.
+  **Four tests failed**: public YouTube search, Music search and video details
+  failed at proxy tunnel setup; native Rust download of the small public test
+  video `BaW_jenozKc` failed on its HTTP request. The tests use isolated paths,
+  no browser session, native backend and a temporary download directory.
+  Signed-in feeds/playback remain unverified. Run these opt-in checks only when
+  live access is available; default CI keeps them ignored and offline.
 - Alpha.3 public probes used the actual optimized binary with isolated XDG
   paths, no browser session and the inherited environment proxy. The cliamp
   endpoint returned **HTTP 503**; both `doctor --network` and `radio` successfully
@@ -186,7 +195,41 @@ the app does not automatically accept consent or bypass service restrictions.
 
 ## Outstanding target-machine acceptance
 
-Before replacing the default Python installer/releasing the Rust edition as stable:
+### Popup and settings coverage
+
+The real-executable Rust PTY test opens, checks and dismisses these surfaces:
+
+| Surface | Trigger / check |
+| --- | --- |
+| Help | `:help`; Keyboard & commands title |
+| Theme chooser | `:theme`; all themes additionally applied during capture |
+| General settings | `:settings`; all eight sections, narrow layouts, Unicode input |
+| Keybinding editor | `:keys`; key validation also covered by form tests |
+| Browser/account form | `:auth`; opens/cancels without reading a profile in demo |
+| Download options | `:add URL`; audio/video/playlist options have controller tests |
+| Playback queue | `p`; queue operations have core/controller coverage |
+| Resume | `:resume`; empty and synthetic saved-position render/capture |
+| Collection watches | `:watches`; empty and synthetic configured-watch capture |
+| History/statistics | `:stats`, `:downloads failed`; filtering and group indices tested |
+| Groups | `:groups`; group expansion has controller coverage |
+| Feed picker | `:feeds`, wide `b`; navigation/remapping has controller coverage |
+| Text/diagnostics/update | `:log`, `:update`; real terminal title and dismissal |
+
+Separate settings tests render first and last fields in all eight categories,
+all 13 themes and five sizes (1,040 states). Every one of the 50 fields belongs
+to exactly one category. Tests verify draft roundtrips, new defaults, choice and
+toggle editing, invalid-save recovery, Esc/Cancel, mouse categories/fields/buttons
+and actual asynchronous file persistence. Actual PTY resize covers 212×58,
+80×24 and 35×12 and verifies terminal flags are restored on exit.
+
+The installer integration test verifies build failure retains the old launcher,
+both installed names report the current Rust version, the compatibility installer
+works, and replacing a symlink never overwrites its legacy virtualenv target.
+
+### Remaining release acceptance
+
+The user explicitly authorized Rust replacing the repository app/installer after
+the gap inventory. Before declaring the Rust edition stable:
 
 1. Import Brave Origin on CachyOS and verify correct YouTube account/channel,
    Home/subscriptions/Watch Later and Music library/search/continuations.
@@ -199,9 +242,9 @@ Before replacing the default Python installer/releasing the Rust edition as stab
 5. Exercise daily scheduling/rate transitions during long transfers, Wayland
    clipboard detection/review, notifications/sound, and optional NetworkManager
    VPN actions on the target desktop.
-6. Upgrade a copy of real Python state, review deferred fields in PARITY.md, and
-   exercise the Python rollback path. Resolve the deferred legacy-feature scope
-   before switching the default installer.
+6. Upgrade a copy of real legacy state, review deferred fields in REMAINING_WORK.md,
+   and exercise compatible Rust-state recovery. Old source is retained in Git;
+   the installed `ytui` and `ytui-rs` launchers now both run Rust.
 
 These are release gates, not completed tests. The branch is reviewable and runnable,
 but this record does not claim that all upstream/API/platform bugs are fixed.
