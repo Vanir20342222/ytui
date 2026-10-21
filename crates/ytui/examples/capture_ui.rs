@@ -21,6 +21,9 @@ use ytui_services::store::{Snapshot, Store};
 struct Args {
     #[arg(long, default_value = "target/debug/ytui")]
     binary: PathBuf,
+    /// Refresh only the three existing download-form screenshots.
+    #[arg(long)]
+    downloads_only: bool,
     #[arg(long, default_value = "docs/screenshots")]
     output: PathBuf,
     #[arg(
@@ -72,14 +75,9 @@ fn color(color: vt100::Color, background: bool) -> [u8; 3] {
     }
 }
 fn shot(capture: &mut Capture, path: &Path, font: &Font) -> Result<()> {
-    let deadline = std::time::Instant::now() + Duration::from_secs(5);
-    while capture.text().contains("Loading thumbnail") && std::time::Instant::now() < deadline {
-        capture.read_for(Duration::from_millis(100));
-    }
-    ensure!(
-        !capture.text().contains("Loading thumbnail"),
-        "Thumbnail fixture did not finish"
-    );
+    // Drain complete redraws after asynchronous demo image/protocol work.
+    // Readiness no longer depends on the removed loading-placeholder text.
+    capture.read_for(Duration::from_millis(900));
     let screen = capture.parser.screen();
     let (rows, cols) = screen.size();
     let cw = (2544 / u32::from(cols)).min(1392 / (2 * u32::from(rows)));
@@ -199,6 +197,29 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.downloads_only {
+        capture.command(
+            "add https://www.youtube.com/watch?v=fixture1234",
+            "Video quality",
+        )?;
+        for name in [
+            "download-options",
+            "download-destination",
+            "download-captions",
+        ] {
+            shot(
+                &mut capture,
+                &args.output.join(format!("{name}.png")),
+                &font,
+            )?;
+            capture.send("\x1b[6~")?;
+        }
+        capture.send("\x1b")?;
+        capture.close()?;
+        println!("3 WQHD download-form screenshots refreshed");
+        return Ok(());
+    }
+
     for theme in ytui_services::theme::THEMES {
         capture.command(&format!("theme {theme}"), theme)?;
         capture.read_for(Duration::from_millis(350));
@@ -208,7 +229,7 @@ async fn main() -> Result<()> {
             &font,
         )?;
     }
-    capture.send(":theme ytui-dark\r")?;
+    capture.command("theme ytui-dark", "ytui-dark")?;
     for (tab, name) in [
         ("1", "downloads"),
         ("2", "youtube"),
@@ -222,11 +243,27 @@ async fn main() -> Result<()> {
             &font,
         )?;
     }
+    capture.send("2:")?;
+    shot(&mut capture, &args.output.join("actions.png"), &font)?;
+    capture.send("\x1b")?;
+    capture.send("o")?;
+    shot(
+        &mut capture,
+        &args.output.join("player-controls.png"),
+        &font,
+    )?;
+    capture.send("\x1b")?;
+    capture.command("categories", "Feed categories")?;
+    shot(&mut capture, &args.output.join("categories.png"), &font)?;
+    capture.send("\x1b/")?;
+    capture.send("Studio sessions")?;
+    shot(&mut capture, &args.output.join("search.png"), &font)?;
+    capture.send("\x1b")?;
     capture.send("2b")?;
     shot(&mut capture, &args.output.join("feeds.png"), &font)?;
     capture.send("\x1b")?;
     for (command, name, expected) in [
-        ("help", "help", "Keyboard & commands"),
+        ("help", "help", "Keyboard & navigation"),
         ("stats", "history", "Downloads · all"),
         ("keys", "keybindings", "Keyboard shortcuts"),
         ("settings", "settings", "General settings"),
@@ -249,10 +286,27 @@ async fn main() -> Result<()> {
         )?;
         capture.send("\x1b")?;
     }
+    capture.command(
+        "add https://www.youtube.com/watch?v=fixture1234",
+        "Video quality",
+    )?;
+    capture.send("\x1b[6~")?;
+    shot(
+        &mut capture,
+        &args.output.join("download-destination.png"),
+        &font,
+    )?;
+    capture.send("\x1b[6~")?;
+    shot(
+        &mut capture,
+        &args.output.join("download-captions.png"),
+        &font,
+    )?;
+    capture.send("\x1b")?;
     capture.send("p")?;
     shot(&mut capture, &args.output.join("playback-queue.png"), &font)?;
     capture.send("\x1b")?;
-    capture.send(":settings\r")?;
+    capture.command("settings", "General settings")?;
     for name in [
         "general",
         "appearance",
@@ -262,6 +316,7 @@ async fn main() -> Result<()> {
         "schedule",
         "tools",
         "radio",
+        "playback",
     ] {
         shot(
             &mut capture,
@@ -273,7 +328,7 @@ async fn main() -> Result<()> {
     capture.send("\x1b")?;
     capture.resize(80, 24)?;
     shot(&mut capture, &args.output.join("compact.png"), &font)?;
-    capture.send(":settings\r")?;
+    capture.command("settings", "General settings")?;
     shot(
         &mut capture,
         &args.output.join("settings/compact.png"),
@@ -281,7 +336,7 @@ async fn main() -> Result<()> {
     )?;
     capture.send("\x1b")?;
     capture.resize(35, 12)?;
-    capture.send(":settings\r")?;
+    capture.command("settings", "General settings")?;
     ensure!(
         capture.text().contains("General settings"),
         "Tiny settings window disappeared"
@@ -294,7 +349,14 @@ async fn main() -> Result<()> {
     let mut capture = Capture::new(&binary, &offline, true)?;
     shot(&mut capture, &args.output.join("offline.png"), &font)?;
     for (command, name) in [("resume", "resume"), ("watches", "watches")] {
-        capture.send(&format!(":{command}\r"))?;
+        capture.command(
+            command,
+            if command == "resume" {
+                "Continue watching"
+            } else {
+                "Collection"
+            },
+        )?;
         shot(
             &mut capture,
             &args.output.join(format!("{name}.png")),

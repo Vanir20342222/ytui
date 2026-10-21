@@ -3,16 +3,17 @@
 This inventory covers every implemented area in [PARITY.md](PARITY.md). A passing
 fixture verifies the stated behavior; it does not certify a live YouTube account,
 browser decryptor, desktop integration or audio device. This cloud workspace has
-FFmpeg/ffprobe, but no mpv/cliamp installation, CachyOS desktop, Brave Origin
-profile or signed-in Google account. The earlier public YouTube attempt failed at
+FFmpeg/ffprobe; mpv 0.40 was unpacked in an isolated temporary directory for
+headless real-process checks. It has no cliamp installation, CachyOS desktop,
+Brave Origin profile or signed-in Google account. The earlier public YouTube attempt failed at
 the environment's network/proxy boundary. No credentials or private feeds were
 used, and no networking restrictions were bypassed.
 
 ## Results
 
-- **85 default tests pass**, with one real-media and four live-YouTube tests intentionally excluded.
+- **94 default tests pass**, with two media tests and four live-YouTube tests intentionally excluded.
 - The separate real-FFmpeg/ffprobe mark/cut/split fixture passes.
-- All **13 theme entries** render four workspaces and twelve dialogs at five
+- All **13 theme entries** render four workspaces and fifteen dialogs at five
   sizes: 35×12, 80×24, 120×40, 180×50 and 212×58. All ten download phases are
   additionally checked in every theme. Text/selection contrast checks and ANSI
   color checks pass. See the [theme gallery](UI_THEMES.md).
@@ -27,11 +28,11 @@ used, and no networking restrictions were bypassed.
 | Feature | What was checked successfully | What remains unverified or unsupported |
 | --- | --- | --- |
 | Four workspaces and pane focus | Every theme/size; `b` focuses the wide feed pane, Enter chooses, Esc returns; compact picker; no playback on navigation | Actual Ghostty/tmux visual acceptance |
-| General settings | Eight sections/50 fields, first/last-field rendering in 1,040 theme/size/selection states; real PTY navigation, keyboard/choice/mouse controls, invalid-save recovery, cancel and actual file persistence | Real account/keyring and desktop effects remain covered by their separate open gates |
+| General settings | Nine sections/53 fields, first/last-field rendering in 1,170 theme/size/selection states, plus 390 download-form states; real PTY navigation, keyboard/choice/mouse controls, invalid-save recovery, cancel and actual file persistence | Real account/keyring and desktop effects remain covered by their separate open gates |
 | Keyboard, paste, mouse and resizing | Unicode editors; input isolation; remapping and occupied defaults; selection visibility; rendered mouse targets; clicks cannot pass through dialogs | Real terminal keyboard-layout variations |
 | Theme selection and following | 13 render/capture variants; role contrast; ANSI chrome; synthetic Caelestia/Omarchy parsing and atomic replacement; last-valid recovery | Real GNOME/portal/Omarchy/Caelestia sessions; `system` gallery uses the built-in preview |
 | Main/catalog/details/empty/error UI | Selected content, errors and controls remain visible; no preview action on stations/collections; all dialogs; ten queue phases | Subjective desktop review |
-| Thumbnails | Real loopback PNG fetch/decode; disk-cache outage; corrupt data removal; byte/dimension limits; geometry, aspect and modal exclusion | Real YouTube CDN and Ghostty Kitty/Sixel behavior |
+| Thumbnails | Loopback fetch coalescing, sized decode/memory/disk cache across restart/outage; URL variant selection; byte/dimension limits; card/modal geometry | Real YouTube CDN and Ghostty Kitty/Sixel behavior |
 | Native downloads | Actual Rust CLI/helper transfer with Python executable absent; final output and byte checks; cancellable pacing | Upstream native YouTube coverage, long live transfers, disk-full/hardware errors |
 | Explicit Python fallback | Fake executable contract; failure after 100% is not success; original outputs retained | Current real yt-dlp and YouTube challenges |
 | Queue pause/retry/remove/reorder | Generation checks, deleted-row protection, restart recovery, cancellation/process ownership, UI/controller paths | Target-machine long-transfer stress |
@@ -88,3 +89,32 @@ Alpha.4 explicitly ran all four public YouTube smoke checks. Search, Music and
 details failed at proxy tunnel setup; the native test-video download failed on its
 HTTP request. These are recorded failures, not successful live-provider tests.
 The prior Python app was removed only after committing [the gap inventory](REMAINING_WORK.md).
+
+## Alpha.5 follow-up checks
+
+- Auto fallback invokes the external tool once for a deterministic native limitation;
+  strict native does not invoke it. Final output is checked, not merely process launch.
+- Playback preferences survive switching/restart; IPC IDs match out-of-order replies
+  and a silent status server consumes one short timeout instead of sequential waits.
+- SponsorBlock public-ID/category requests omit cookies/auth, filter invalid marks,
+  merge overlaps and permit replay without immediately skipping the range again.
+- Continuation appends keep selection/deduplicate/stop repeated tokens; live station
+  Enter stays on its stream and songs advance through the loaded collection.
+- Actual terminal navigation opens Actions/forms, playback controls, settings and
+  existing popups, edits Unicode, resizes and restores terminal flags. All themes
+  have WQHD captures; captured player/catalog state is fictional.
+- The mpv menu has a standalone Lua 5.4 synthetic-API regression check (quality,
+  audio, SponsorBlock, keys/close). This does not certify a real mpv window/device.
+- Four opt-in YouTube tests were retried: all fail here. Web/Music/details fail
+  during proxy tunnel connection; native test-video download fails its HTTP request.
+  Separate public curl returned HTTP 403. Cliamp catalog and Lofi track list were
+  fetched successfully. mpv decoded three seconds of the live Lofi stream into
+  null output through the configured proxy; actual audio-device output is unverified.
+
+The separate **real mpv 0.40 headless regression also passes**, using a generated
+12-second MKV with video, two audio streams and subtitles. Production startup,
+IPC, menu Lua and actor are used with null audio/video outputs. It verifies pause
+response within 500 ms, volume/mute/speed, absolute seek, audio/subtitle cycling,
+subtitle visibility, the actual window-menu quality request/re-resolution,
+pause preservation across quality changes, SponsorBlock skip/undo and unchanged
+source bytes. This does not test an actual displayed window or audio device.

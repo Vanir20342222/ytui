@@ -14,6 +14,9 @@ pub struct Config {
     pub thumbnails: bool,
     pub reduced_motion: bool,
     pub playback_history: bool,
+    pub show_hints: bool,
+    pub playback_sponsorblock: String,
+    pub playback_sponsor_categories: Vec<String>,
     pub download: DownloadOptions,
     pub concurrency: usize,
     pub max_retries: u32,
@@ -51,12 +54,15 @@ impl Default for Config {
             thumbnails: true,
             reduced_motion: false,
             playback_history: true,
+            show_hints: true,
+            playback_sponsorblock: "skip".into(),
+            playback_sponsor_categories: vec!["sponsor".into()],
             download: DownloadOptions::default(),
             concurrency: 3,
             max_retries: 3,
             retry_delay_seconds: 5,
             proxy: None,
-            download_backend: "native".into(),
+            download_backend: "auto".into(),
             native_js_runtime: None,
             yt_dlp: "yt-dlp".into(),
             ffmpeg: "ffmpeg".into(),
@@ -111,8 +117,8 @@ impl Config {
             );
         }
         ensure!(
-            ["native", "yt-dlp"].contains(&self.download_backend.as_str()),
-            "download_backend must be native or yt-dlp"
+            ["auto", "native", "yt-dlp"].contains(&self.download_backend.as_str()),
+            "download_backend must be auto, native or yt-dlp"
         );
         ensure!(
             ["auto", "caelestia", "omarchy", "portal", "gnome"]
@@ -146,6 +152,13 @@ impl Config {
                 "Proxy must use HTTP(S), socks5 or socks5h and include a host"
             );
         }
+        ensure!(
+            ["skip", "mark", "off"].contains(&self.playback_sponsorblock.as_str()),
+            "SponsorBlock playback must be skip, mark or off"
+        );
+        let mut sponsor = self.download.clone();
+        sponsor.sponsorblock = self.playback_sponsor_categories.clone();
+        sponsor.validate()?;
         self.schedule.validate()?;
         self.download.validate()
     }
@@ -220,7 +233,7 @@ impl DownloadOptions {
         ensure!(
             self.backend
                 .as_deref()
-                .is_none_or(|b| b == "native" || b == "yt-dlp"),
+                .is_none_or(|b| b == "auto" || b == "native" || b == "yt-dlp"),
             "Unknown download backend"
         );
         ensure!(

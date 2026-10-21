@@ -1,7 +1,237 @@
+//! Size-aware thumbnail cache. No cookies are sent to image origins.
 use crate::paths::atomic_write;
 use anyhow::{Context, Result, ensure};
 use sha2::{Digest, Sha256};
-use std::{io::Cursor, path::PathBuf};
+use std::{
+    collections::HashMap,
+    io::Cursor,
+    path::PathBuf,
+    sync::{
+        Arc, Mutex, Weak,
+        atomic::{AtomicUsize, Ordering},
+    },
+};
+
+#[derive(Default)]
+struct Memory {
+    images: HashMap<String, (u64, image::DynamicImage)>,
+    clock: u64,
+}
+impl Memory {
+    fn get(&mut self, key: &str) -> Option<image::DynamicImage> {
+        self.clock += 1;
+        self.images.get_mut(key).map(|(age, image)| {
+            *age = self.clock;
+            image.clone()
+        })
+    }
+    fn insert(&mut self, key: String, image: image::DynamicImage) {
+        self.clock += 1;
+        self.images.insert(key, (self.clock, image));
+        while self.images.len() > 96
+            || self
+                .images
+                .values()
+                .map(|(_, i)| i.as_bytes().len())
+                .sum::<usize>()
+                > 32 * 1024 * 1024
+        {
+            let Some(oldest) = self
+                .images
+                .iter()
+                .min_by_key(|(_, (age, _))| age)
+                .map(|(k, _)| k.clone())
+            else {
+                break;
+            };
+            self.images.remove(&oldest);
+        }
+    }
+}
+#[derive(Clone)]
+pub struct ImageCache {
+    client: reqwest::Client,
+    dir: PathBuf,
+    permits: Arc<tokio::sync::Semaphore>,
+    memory: Arc<Mutex<Memory>>,
+    flights: Arc<Mutex<HashMap<String, Weak<tokio::sync::Mutex<()>>>>>,
+    writes: Arc<AtomicUsize>,
+}
+impl ImageCache {
+    pub fn new(client: reqwest::Client, dir: PathBuf) -> Self {
+        Self {
+            client,
+            dir,
+            permits: Arc::new(tokio::sync::Semaphore::new(4)),
+            memory: Arc::new(Mutex::new(Memory::default())),
+            flights: Arc::new(Mutex::new(HashMap::new())),
+            writes: Arc::new(AtomicUsize::new(0)),
+        }
+    }
+    pub async fn load(&self, url: &str) -> Result<image::DynamicImage> {
+        self.load_sized(url, 1280, 720).await
+    }
+    pub async fn load_sized(
+        &self,
+        url: &str,
+        width: u32,
+        height: u32,
+    ) -> Result<image::DynamicImage> {
+        ytui_core::http_url(url)?;
+        let (width, height) = (width.clamp(1, 1280), height.clamp(1, 720));
+        let key = hex::encode(Sha256::digest(format!("v2:{url}:{width}:{height}")));
+        if let Some(image) = self.memory.lock().unwrap().get(&key) {
+            return Ok(image);
+        }
+        let flight = {
+            let mut flights = self.flights.lock().unwrap();
+            flights.retain(|_, v| v.strong_count() > 0);
+            if let Some(flight) = flights.get(&key).and_then(Weak::upgrade) {
+                flight
+            } else {
+                let flight = Arc::new(tokio::sync::Mutex::new(()));
+                flights.insert(key.clone(), Arc::downgrade(&flight));
+                flight
+            }
+        };
+        let _flight = flight.lock().await;
+        if let Some(image) = self.memory.lock().unwrap().get(&key) {
+            return Ok(image);
+        }
+        let _permit = self.permits.acquire().await?;
+        let path = self.dir.join(&key);
+        if let Ok(bytes) = tokio::fs::read(&path).await {
+            if let Ok(image) = decode(bytes, width, height).await {
+                self.memory.lock().unwrap().insert(key, image.clone());
+                return Ok(image);
+            }
+            let _ = tokio::fs::remove_file(&path).await;
+        }
+        let mut response = crate::http::get(
+            ytui_core::http_url(url)?,
+            |url| {
+                Ok(self
+                    .client
+                    .get(url.clone())
+                    .timeout(std::time::Duration::from_secs(8)))
+            },
+            crate::http::Redirects::Public,
+            "Thumbnail",
+        )
+        .await
+        .context("Thumbnail unavailable")?;
+        ensure!(response.status().is_success(), "Thumbnail unavailable");
+        let mut bytes = Vec::new();
+        while let Some(chunk) = response.chunk().await? {
+            ensure!(
+                bytes.len() + chunk.len() <= 4 * 1024 * 1024,
+                "Thumbnail too large"
+            );
+            bytes.extend_from_slice(&chunk);
+        }
+        let image = decode(bytes, width, height).await?;
+        let saved = image.clone();
+        tokio::task::spawn_blocking(move || {
+            let mut bytes = Cursor::new(Vec::new());
+            saved.write_to(&mut bytes, image::ImageFormat::Png)?;
+            atomic_write(&path, bytes.get_ref())
+        })
+        .await??;
+        self.memory.lock().unwrap().insert(key, image.clone());
+        // A directory scan on every cache hit made navigating large feeds expensive.
+        if self
+            .writes
+            .fetch_add(1, Ordering::Relaxed)
+            .is_multiple_of(32)
+        {
+            let _ = self.prune().await;
+        }
+        Ok(image)
+    }
+    pub async fn prune(&self) -> Result<()> {
+        let dir = self.dir.clone();
+        tokio::task::spawn_blocking(move || {
+            std::fs::create_dir_all(&dir)?;
+            let mut files = std::fs::read_dir(dir)?
+                .flatten()
+                .filter_map(|e| {
+                    let m = e.metadata().ok()?;
+                    m.is_file()
+                        .then(|| Some((m.modified().ok()?, m.len(), e.path())))?
+                })
+                .collect::<Vec<_>>();
+            files.sort_by_key(|(time, _, _)| *time);
+            let mut total: u64 = files.iter().map(|(_, len, _)| len).sum();
+            for (_, len, path) in files {
+                if total <= 128 * 1024 * 1024 {
+                    break;
+                }
+                std::fs::remove_file(path)?;
+                total = total.saturating_sub(len);
+            }
+            Ok::<_, anyhow::Error>(())
+        })
+        .await?
+    }
+}
+async fn decode(bytes: Vec<u8>, width: u32, height: u32) -> Result<image::DynamicImage> {
+    tokio::task::spawn_blocking(move || {
+        let mut reader = image::ImageReader::new(Cursor::new(bytes)).with_guessed_format()?;
+        let mut limits = image::Limits::default();
+        limits.max_image_width = Some(4096);
+        limits.max_image_height = Some(4096);
+        limits.max_alloc = Some(64 * 1024 * 1024);
+        reader.limits(limits);
+        let image = reader.decode()?;
+        Ok(if image.width() > width || image.height() > height {
+            image.thumbnail(width, height)
+        } else {
+            image
+        })
+    })
+    .await?
+}
+
+/// Prefer the smallest advertised image that covers the displayed pixels.
+/// Fall back to the largest advertised image; never manufacture a missing CDN variant.
+pub fn thumbnail_url(media: &ytui_core::Media, width: u32, height: u32) -> String {
+    let selected = media
+        .thumbnails
+        .iter()
+        .filter(|t| t.width >= width && t.height >= height)
+        .min_by_key(|t| t.width as u64 * t.height as u64)
+        .or_else(|| {
+            media
+                .thumbnails
+                .iter()
+                .max_by_key(|t| t.width as u64 * t.height as u64)
+        });
+    let mut url = selected
+        .map(|t| t.url.clone())
+        .unwrap_or_else(|| media.thumbnail.clone());
+    if let Ok(mut parsed) = url::Url::parse(&url) {
+        let host = parsed.host_str().unwrap_or_default();
+        if host == "lh3.googleusercontent.com"
+            || host.ends_with(".googleusercontent.com")
+            || host.ends_with(".ggpht.com")
+        {
+            // These image endpoints support dynamic size parameters. Preserve all other URLs.
+            let path = parsed
+                .path()
+                .split_once('=')
+                .map(|(p, _)| p)
+                .unwrap_or(parsed.path())
+                .to_owned();
+            parsed.set_path(&format!(
+                "{path}=w{}-h{}-l90-rj",
+                width.clamp(1, 1280),
+                height.clamp(1, 720)
+            ));
+            url = parsed.into();
+        }
+    }
+    url
+}
 
 #[cfg(test)]
 mod tests {
@@ -50,96 +280,68 @@ mod tests {
     }
 }
 
-#[derive(Clone)]
-pub struct ImageCache {
-    client: reqwest::Client,
-    dir: PathBuf,
-    permits: std::sync::Arc<tokio::sync::Semaphore>,
-}
-impl ImageCache {
-    pub fn new(client: reqwest::Client, dir: PathBuf) -> Self {
-        Self {
-            client,
-            dir,
-            permits: std::sync::Arc::new(tokio::sync::Semaphore::new(4)),
+#[cfg(test)]
+mod sized_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    #[tokio::test]
+    async fn concurrent_requests_share_one_fetch_and_resized_disk_cache_survives_restart() {
+        let count = Arc::new(AtomicUsize::new(0));
+        let calls = count.clone();
+        let (base, server) = crate::test_http::serve_request(move |request| {
+            assert!(!request.to_lowercase().contains("\ncookie:"));
+            calls.fetch_add(1, Ordering::SeqCst);
+            let mut bytes = Cursor::new(Vec::new());
+            image::DynamicImage::new_rgb8(1280, 720)
+                .write_to(&mut bytes, image::ImageFormat::Png)
+                .unwrap();
+            (
+                200,
+                "Content-Type: image/png\r\n".into(),
+                bytes.into_inner(),
+            )
+        })
+        .await;
+        let temp = tempfile::tempdir().unwrap();
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
+        let cache = ImageCache::new(client.clone(), temp.path().into());
+        let url = format!("{base}/image.png");
+        let (a, b) = tokio::join!(
+            cache.load_sized(&url, 320, 180),
+            cache.load_sized(&url, 320, 180)
+        );
+        for image in [a.unwrap(), b.unwrap()] {
+            assert_eq!((image.width(), image.height()), (320, 180));
         }
-    }
-    pub async fn load(&self, url: &str) -> Result<image::DynamicImage> {
-        let _permit = self.permits.acquire().await?;
-        ytui_core::http_url(url)?;
-        let filename = hex::encode(Sha256::digest(url));
-        let path = self.dir.join(filename);
-        let bytes = if let Ok(bytes) = tokio::fs::read(&path).await {
-            bytes
-        } else {
-            let mut response = self
-                .client
-                .get(url)
-                .send()
-                .await
-                .context("Thumbnail unavailable")?;
-            ensure!(response.status().is_success(), "Thumbnail unavailable");
-            let mut bytes = Vec::new();
-            while let Some(chunk) = response.chunk().await? {
-                ensure!(
-                    bytes.len() + chunk.len() <= 4 * 1024 * 1024,
-                    "Thumbnail too large"
-                );
-                bytes.extend_from_slice(&chunk);
-            }
-            let saved = bytes.clone();
-            let p = path.clone();
-            tokio::task::spawn_blocking(move || atomic_write(&p, &saved)).await??;
-            bytes
+        assert_eq!(count.load(Ordering::SeqCst), 1);
+        server.abort();
+        let _ = server.await;
+        drop(cache);
+        let cache = ImageCache::new(client, temp.path().into());
+        let cached = cache.load_sized(&url, 320, 180).await.unwrap();
+        assert_eq!((cached.width(), cached.height()), (320, 180));
+        let media = ytui_core::Media {
+            thumbnail: "https://cdn.test/large".into(),
+            thumbnails: vec![
+                ytui_core::Thumbnail {
+                    url: "https://cdn.test/small".into(),
+                    width: 120,
+                    height: 90,
+                },
+                ytui_core::Thumbnail {
+                    url: "https://cdn.test/medium".into(),
+                    width: 480,
+                    height: 270,
+                },
+                ytui_core::Thumbnail {
+                    url: "https://cdn.test/large".into(),
+                    width: 1280,
+                    height: 720,
+                },
+            ],
+            ..Default::default()
         };
-        let decoded = tokio::task::spawn_blocking(move || {
-            let mut reader = image::ImageReader::new(Cursor::new(bytes)).with_guessed_format()?;
-            let mut limits = image::Limits::default();
-            limits.max_image_width = Some(4096);
-            limits.max_image_height = Some(4096);
-            limits.max_alloc = Some(64 * 1024 * 1024);
-            reader.limits(limits);
-            let image = reader.decode()?;
-            Ok(if image.width() > 1280 || image.height() > 720 {
-                image.thumbnail(1280, 720)
-            } else {
-                image
-            })
-        })
-        .await?;
-        if decoded.is_err() {
-            let _ = tokio::fs::remove_file(&path).await;
-        } else {
-            let _ = self.prune().await;
-        }
-        decoded
-    }
-    pub async fn prune(&self) -> Result<()> {
-        let dir = self.dir.clone();
-        tokio::task::spawn_blocking(move || {
-            std::fs::create_dir_all(&dir)?;
-            let mut files = std::fs::read_dir(dir)?
-                .flatten()
-                .filter_map(|e| {
-                    let m = e.metadata().ok()?;
-                    if m.is_file() {
-                        Some((m.modified().ok()?, m.len(), e.path()))
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<_>>();
-            files.sort_by_key(|(time, _, _)| *time);
-            let mut total: u64 = files.iter().map(|(_, len, _)| len).sum();
-            for (_, len, path) in files {
-                if total <= 128 * 1024 * 1024 {
-                    break;
-                }
-                std::fs::remove_file(path)?;
-                total = total.saturating_sub(len);
-            }
-            Ok::<_, anyhow::Error>(())
-        })
-        .await?
+        assert_eq!(thumbnail_url(&media, 320, 180), "https://cdn.test/medium");
+        assert_eq!(thumbnail_url(&media, 900, 500), "https://cdn.test/large");
     }
 }

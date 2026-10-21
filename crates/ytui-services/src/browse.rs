@@ -173,6 +173,13 @@ impl Browser {
     }
     pub async fn fetch(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
         let (endpoint, body, title) = match request {
+            BrowseRequest::Category { endpoint, payload } => {
+                ensure!(
+                    ["browse", "search", "next"].contains(&endpoint.as_str()),
+                    "Unsupported category endpoint"
+                );
+                (endpoint.as_str(), payload.clone(), "Recommendations".into())
+            }
             BrowseRequest::MusicSearch { query, category } => {
                 ensure!(music, "Music categories require the Music tab");
                 let bits = match category.as_str() {
@@ -299,6 +306,7 @@ impl Browser {
                         .map(clean_text)
                         .unwrap_or_default(),
                     thumbnail: thumb(details),
+                    thumbnails: thumbnails(details),
                     duration: details
                         .get("lengthSeconds")
                         .and_then(Value::as_str)
@@ -332,7 +340,7 @@ impl Browser {
         }
         if page.items.is_empty() && page.notice.is_none() {
             page.notice = Some(if matches!(request, BrowseRequest::Home) && self.session.is_none() {
-                "No anonymous Home recommendations were returned. Press / to search, or :auth to import your signed-in browser profile."
+                "No anonymous Home recommendations were returned. Press / to search, or F2 → Account → Connect browser to import your signed-in browser profile."
             } else if matches!(request, BrowseRequest::Search(_) | BrowseRequest::MusicSearch { .. }) {
                 "No search results were returned. Try a different query; if this persists, the service response may have changed."
             } else {
@@ -344,7 +352,7 @@ impl Browser {
     fn require_auth(&self) -> Result<()> {
         ensure!(
             self.session.is_some(),
-            "Sign in first: use :auth or `ytui-rs auth import --browser brave-origin --profile PATH`"
+            "Sign in first: use F2 → Account → Connect browser or `ytui-rs auth import --browser brave-origin --profile PATH`"
         );
         Ok(())
     }
@@ -407,33 +415,53 @@ fn duration(label: &str) -> Option<u64> {
         .split(':')
         .try_fold(0u64, |v, n| Some(v * 60 + n.trim().parse::<u64>().ok()?))
 }
-fn thumb(value: &Value) -> String {
-    let mut best = (0, String::new());
-    fn walk(v: &Value, best: &mut (u64, String)) {
+fn thumbnails(value: &Value) -> Vec<ytui_core::Thumbnail> {
+    let mut images = Vec::new();
+    fn walk(v: &Value, images: &mut Vec<ytui_core::Thumbnail>) {
         match v {
             Value::Object(m) => {
-                if let Some(url) = m.get("url").and_then(Value::as_str)
-                    && m.contains_key("width")
+                if let (Some(url), Some(width), Some(height)) = (
+                    m.get("url").and_then(Value::as_str),
+                    m.get("width").and_then(Value::as_u64),
+                    m.get("height").and_then(Value::as_u64),
+                ) && ytui_core::http_url(url).is_ok()
+                    && width > 0
+                    && height > 0
+                    && width <= 4096
+                    && height <= 4096
+                    && !images.iter().any(|t| t.url == url)
                 {
-                    let width = m.get("width").and_then(Value::as_u64).unwrap_or(0);
-                    if width >= best.0 {
-                        *best = (width, url.to_owned());
-                    }
+                    images.push(ytui_core::Thumbnail {
+                        url: url.into(),
+                        width: width as u32,
+                        height: height as u32,
+                    });
                 }
-                for child in m.values() {
-                    walk(child, best);
+                for (name, child) in m {
+                    if !["avatar", "avatarViewModel", "channelThumbnail", "menu"]
+                        .contains(&name.as_str())
+                    {
+                        walk(child, images);
+                    }
                 }
             }
             Value::Array(a) => {
                 for child in a {
-                    walk(child, best);
+                    walk(child, images)
                 }
             }
             _ => {}
         }
     }
-    walk(value, &mut best);
-    best.1
+    walk(value, &mut images);
+    images
+}
+fn thumb(value: &Value) -> String {
+    thumbnails(value)
+        .into_iter()
+        .max_by_key(|t| t.width as u64 * t.height as u64)
+        .map(|t| t.url)
+        .unwrap_or_default()
 }
 fn parse_lockup(r: &Value, music: bool) -> Option<Media> {
     let id = r.get("contentId")?.as_str()?;
@@ -454,6 +482,7 @@ fn parse_lockup(r: &Value, music: bool) -> Option<Media> {
         title,
         creator,
         thumbnail: thumb(r),
+        thumbnails: thumbnails(r),
         kind: if collection {
             MediaKind::Playlist
         } else if music {
@@ -488,6 +517,7 @@ fn parse_renderer(name: &str, r: &Value, music: bool) -> Option<Media> {
     let mut item = Media {
         title,
         thumbnail: thumb(r),
+        thumbnails: thumbnails(r),
         ..Default::default()
     };
     item.creator = r
@@ -594,14 +624,77 @@ fn parse_renderer(name: &str, r: &Value, music: bool) -> Option<Media> {
 pub fn parse_page(data: &Value, music: bool) -> Page {
     let mut page = Page::default();
     let mut seen = HashSet::new();
-    fn walk(value: &Value, music: bool, page: &mut Page, seen: &mut HashSet<String>) {
+    fn walk(
+        value: &Value,
+        music: bool,
+        page: &mut Page,
+        seen: &mut HashSet<String>,
+        section: &str,
+    ) {
         match value {
             Value::Object(map) => {
                 for (name, v) in map {
-                    if name == "lockupViewModel" {
-                        if let Some(item) = parse_lockup(v, music)
+                    if [
+                        "shelfRenderer",
+                        "richShelfRenderer",
+                        "musicCarouselShelfRenderer",
+                        "musicShelfRenderer",
+                    ]
+                    .contains(&name.as_str())
+                    {
+                        let title = v
+                            .get("title")
+                            .or_else(|| {
+                                v.pointer("/header/musicCarouselShelfBasicHeaderRenderer/title")
+                            })
+                            .map(text)
+                            .filter(|s| !s.is_empty())
+                            .unwrap_or_else(|| section.into());
+                        walk(v, music, page, seen, &title);
+                    } else if [
+                        "chipCloudChipRenderer",
+                        "musicNavigationButtonRenderer",
+                        "chipViewModel",
+                    ]
+                    .contains(&name.as_str())
+                    {
+                        let title = v
+                            .get("text")
+                            .or_else(|| v.get("buttonText"))
+                            .map(text)
+                            .filter(|s| !s.is_empty())
+                            .or_else(|| {
+                                v.pointer("/text/content")
+                                    .and_then(Value::as_str)
+                                    .map(clean_text)
+                            })
+                            .unwrap_or_default();
+                        let target = [
+                            ("browseEndpoint", "browse"),
+                            ("searchEndpoint", "search"),
+                            ("watchEndpoint", "next"),
+                        ]
+                        .into_iter()
+                        .find_map(|(key, endpoint)| {
+                            find_key(v, key).map(|payload| (endpoint, payload.clone()))
+                        });
+                        if let Some((endpoint, payload)) = target
+                            && !title.is_empty()
+                            && !page.categories.iter().any(|c| c.title == title)
+                        {
+                            page.categories.push(ytui_core::Category {
+                                title,
+                                request: BrowseRequest::Category {
+                                    endpoint: endpoint.into(),
+                                    payload,
+                                },
+                            });
+                        }
+                    } else if name == "lockupViewModel" {
+                        if let Some(mut item) = parse_lockup(v, music)
                             && seen.insert(item.id.clone())
                         {
+                            item.section = section.into();
                             page.items.push(item);
                         }
                     } else if [
@@ -617,9 +710,10 @@ pub fn parse_page(data: &Value, music: bool) -> Page {
                     ]
                     .contains(&name.as_str())
                     {
-                        if let Some(item) = parse_renderer(name, v, music)
+                        if let Some(mut item) = parse_renderer(name, v, music)
                             && seen.insert(item.id.clone())
                         {
+                            item.section = section.into();
                             page.items.push(item);
                         }
                         // Do not recurse into menus/overlays and mistake their actions for cards.
@@ -641,19 +735,19 @@ pub fn parse_page(data: &Value, music: bool) -> Page {
                             page.notice = Some(message);
                         }
                     } else if name != "menu" && name != "trackingParams" {
-                        walk(v, music, page, seen);
+                        walk(v, music, page, seen, section);
                     }
                 }
             }
             Value::Array(items) => {
                 for item in items {
-                    walk(item, music, page, seen);
+                    walk(item, music, page, seen, section);
                 }
             }
             _ => {}
         }
     }
-    walk(data, music, &mut page, &mut seen);
+    walk(data, music, &mut page, &mut seen, "");
     page
 }
 #[cfg(test)]
@@ -746,7 +840,11 @@ mod request_tests {
         browser.origins = [format!("{base}/web"), format!("{base}/music")];
         for music in [false, true] {
             let home = browser.fetch(music, &BrowseRequest::Home).await.unwrap();
-            assert!(home.notice.unwrap().contains(":auth"));
+            assert!(
+                home.notice
+                    .unwrap()
+                    .contains("F2 → Account → Connect browser")
+            );
             let results = browser
                 .fetch(music, &BrowseRequest::Search("fixture & song".into()))
                 .await
@@ -797,7 +895,7 @@ mod request_tests {
                 302,
                 "Location: https://consent.youtube.com/m?token=synthetic-secret\r\n",
                 "",
-                ":auth",
+                "F2 → Account → Connect browser",
             ),
             (429, "", "", "rate limit"),
             (403, "", "", "re-import"),
@@ -834,5 +932,32 @@ mod request_tests {
         let message = page.notice.unwrap();
         assert!(message.contains("Turn on watch history"));
         assert!(!message.contains('\u{001b}'));
+    }
+}
+
+#[cfg(test)]
+mod category_tests {
+    use super::*;
+    #[test]
+    fn shelves_keep_labels_thumbnail_variants_and_real_category_payloads() {
+        let page = parse_page(
+            &json!({"contents":[
+                {"chipCloudChipRenderer":{"text":{"simpleText":"Music"},"navigationEndpoint":{"browseEndpoint":{"browseId":"FEwhat_to_watch","params":"server-filter"}}}},
+                {"musicCarouselShelfRenderer":{"header":{"musicCarouselShelfBasicHeaderRenderer":{"title":{"runs":[{"text":"Listen again"}]}}},"contents":[
+                    {"musicResponsiveListItemRenderer":{"flexColumns":[{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Song"}]}}}],"playlistItemData":{"videoId":"fixture"},"thumbnail":{"thumbnails":[{"url":"https://cdn.test/small","width":120,"height":120},{"url":"https://cdn.test/large","width":600,"height":600}]}}}
+                ]}},
+                {"continuationCommand":{"token":"next"}}
+            ]}),
+            true,
+        );
+        assert_eq!(page.items[0].section, "Listen again");
+        assert_eq!(page.items[0].thumbnails.len(), 2);
+        assert_eq!(page.categories[0].title, "Music");
+        let BrowseRequest::Category { endpoint, payload } = &page.categories[0].request else {
+            panic!("category was lost")
+        };
+        assert_eq!(endpoint, "browse");
+        assert_eq!(payload["params"], "server-filter");
+        assert_eq!(page.continuation.as_deref(), Some("next"));
     }
 }

@@ -22,8 +22,10 @@ baseline defects, milestones, migration requirements, and acceptance checks.
 - Report checks actually run, environmental blockers, and remaining limitations.
   An empty feature tab or a successful compile does not satisfy its milestone.
 
-- Current backend decision: native Rust via pinned aagedal/yt-dlp-rs is the default.
-  Python yt-dlp is allowed only through an explicit fallback action/configuration.
+- Current backend decision (user confirmed this follow-up): recommend `auto`,
+  trying pinned aagedal/yt-dlp-rs first and external yt-dlp for supported extractor
+  limitations. Keep explicit `native` and `yt-dlp` modes. Never download/install
+  executables or change an existing explicit backend without a user action.
 - Implementation evidence and open gates are in docs/VALIDATION.md and
   docs/PARITY.md. Do not equate implemented provider code with a successful live
   account, Ghostty, audio-device or stable-release acceptance result.

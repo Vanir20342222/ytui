@@ -14,7 +14,7 @@ fn real_terminal_opens_every_popup_edits_settings_resizes_and_restores_flags() {
     }
     term.send("2").unwrap();
     for (command, expected) in [
-        ("help", "Keyboard & commands"),
+        ("help", "Keyboard & navigation"),
         ("theme", "Themes"),
         ("settings", "General settings"),
         ("keys", "Keyboard shortcuts"),
@@ -43,7 +43,7 @@ fn real_terminal_opens_every_popup_edits_settings_resizes_and_restores_flags() {
     term.send("p").unwrap();
     assert!(term.text().contains("Playback queue"));
     term.send("\x1b").unwrap();
-    term.send(":settings\r").unwrap();
+    term.command("settings", "General settings").unwrap();
     for section in [
         "General",
         "Appearance",
@@ -53,6 +53,7 @@ fn real_terminal_opens_every_popup_edits_settings_resizes_and_restores_flags() {
         "Schedule",
         "Tools",
         "Radio",
+        "Playback",
     ] {
         assert!(term.text().contains(section));
         term.send("\x1b[6~").unwrap();
@@ -64,7 +65,7 @@ fn real_terminal_opens_every_popup_edits_settings_resizes_and_restores_flags() {
     term.send("\x1b").unwrap();
     for (cols, rows) in [(80, 24), (35, 12), (212, 58)] {
         term.resize(cols, rows).unwrap();
-        term.send(":settings\r").unwrap();
+        term.command("settings", "General settings").unwrap();
         assert!(term.text().contains("General settings"));
         term.send("\x1b").unwrap();
     }

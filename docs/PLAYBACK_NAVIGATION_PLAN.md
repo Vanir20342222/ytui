@@ -6,8 +6,8 @@ sizes, browsing stops at page boundaries, and command-only features are hard to 
 
 Implementation order:
 
-1. Make extraction failures actionable in the UI. Keep native as default and the
-   existing explicit external yt-dlp fallback unless the user changes that decision.
+1. Make extraction failures actionable in the UI. Initially retain native/default behavior pending the question; the user then
+   confirmed recommending automatic fallback (see implementation below).
    Verify upstream capabilities before claiming current YouTube playback works.
 2. Preserve volume and mute across station changes/restarts; bound IPC polling
    independently of input. Improve playback controls, queue continuation and live
@@ -31,4 +31,36 @@ quality/audio/subtitle/speed controls and ytui settings. Ad-free direct extracti
 does not insert website ads; SponsorBlock is a separate public API. Do not promise
 YouTube website UI parity or bypass server-side access/bot restrictions.
 
-Status/evidence will be recorded here as implementation progresses.
+## Implementation/evidence (alpha.5)
+
+- The user confirmed recommending automatic fallback. New config default is auto;
+  strict native and explicit yt-dlp remain. Existing choices are not overwritten.
+  Extraction limitations and rejected native playback streams can use the fallback;
+  tool installation remains explicit. Pinned upstream has no newer revision.
+- Persistent volume/mute/speed, bounded batched IPC, background state persistence,
+  direct live stations, loaded-song continuation, interactive timeline/player
+  actions and a bundled mpv window menu are implemented.
+- Playback SponsorBlock uses public-ID/category API requests without credentials,
+  non-destructive marks/skip/undo, and skip/mark/off/category settings. Direct media
+  extraction avoids the website ad player; embedded stream ads are not guaranteed.
+- Sized advertised thumbnail variants, dynamic CDN size hints, bounded decoded and
+  resized disk caches, shared in-flight requests, nearby prefetch and visible-card
+  protocol retention replace late full-size image processing/loading text.
+- Continuation prefetch preserves selection and deduplicates/stops repeated pages;
+  provider section labels/category endpoints remain attached to cards/filters.
+- Actions/parameter forms replace bottom command input. Search is query/URL only.
+  Nine settings sections / 53 fields, three download sections, visible entry points,
+  remapped hint labels and F1 toggling are implemented.
+- 94 default tests + separate real FFmpeg and real mpv 0.40 headless tests pass. Settings/download ends render
+  in 1,560 additional theme/size states. 50 WQHD PTY captures use synthetic content;
+  standalone Lua menu behavior is checked against a synthetic mp API. Real mpv
+  also exercises its menu/quality request, audio/subtitle switching, pause/seek,
+  preference preservation and SponsorBlock replay with null outputs.
+- Four real public YouTube tests fail on this cloud's HTTP/proxy access. Successful
+  live YouTube, signed-in browsing, Ghostty/Brave/Proton and displayed mpv/device output
+  remain open. Cliamp catalog and Lofi track list HTTP fetches succeeded. Real mpv also decoded
+  three seconds of Lofi into null audio output through the proxy; real devices
+  and reconnect are unverified. SponsorBlock test-video lookup returned 404/no marks.
+
+Full commands, results and boundaries: [VALIDATION.md](VALIDATION.md).
+Update/use instructions: [RUST.md](RUST.md).

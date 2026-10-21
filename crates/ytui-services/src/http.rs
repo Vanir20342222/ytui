@@ -39,11 +39,11 @@ fn destination(start: &Url, current: &Url, location: &str, policy: Redirects) ->
         .contains(&host)
         {
             bail!(
-                "YouTube requires browser consent or sign-in at {host}. Open YouTube and YouTube Music in your browser, then use :auth to import that profile."
+                "YouTube requires browser consent or sign-in at {host}. Open YouTube and YouTube Music in your browser, then use F2 → Account → Connect browser to import that profile."
             );
         }
         bail!(
-            "YouTube redirected to another origin ({host}); credentials were not forwarded. Check service availability in your VPN region or refresh your browser session with :auth."
+            "YouTube redirected to another origin ({host}); credentials were not forwarded. Check service availability in your VPN region or refresh your browser session with F2 → Account → Connect browser."
         );
     }
     Ok(next)
@@ -108,7 +108,7 @@ mod tests {
         )
         .unwrap_err()
         .to_string();
-        assert!(error.contains(":auth"));
+        assert!(error.contains("F2 → Account → Connect browser"));
         assert!(!error.contains("synthetic-secret"));
         assert!(destination(&start, &start, "http://radio.test/", Redirects::Public).is_err());
         assert!(destination(&start, &start, "https://radio.test/", Redirects::Public).is_ok());

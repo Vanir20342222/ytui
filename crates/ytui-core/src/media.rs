@@ -15,6 +15,13 @@ pub enum MediaKind {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct Thumbnail {
+    pub url: String,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct Media {
     pub id: String,
@@ -22,6 +29,8 @@ pub struct Media {
     pub creator: String,
     pub url: String,
     pub thumbnail: String,
+    pub thumbnails: Vec<Thumbnail>,
+    pub section: String,
     pub duration: Option<u64>,
     pub description: String,
     pub kind: MediaKind,
@@ -53,14 +62,29 @@ impl Media {
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Page {
+    #[serde(default)]
+    pub categories: Vec<Category>,
     pub title: String,
     pub items: Vec<Media>,
     pub continuation: Option<String>,
     pub notice: Option<String>,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Category {
+    pub title: String,
+    pub request: BrowseRequest,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum BrowseRequest {
-    MusicSearch { query: String, category: String },
+    MusicSearch {
+        query: String,
+        category: String,
+    },
+    Category {
+        endpoint: String,
+        payload: serde_json::Value,
+    },
     Details(String),
     Home,
     Search(String),
@@ -78,7 +102,10 @@ pub enum BrowseRequest {
     RadioCountry(String),
     RadioTag(String),
     Favorites,
-    OfflineLibrary { query: String, audio: Option<bool> },
+    OfflineLibrary {
+        query: String,
+        audio: Option<bool>,
+    },
 }
 
 pub fn http_url(raw: &str) -> anyhow::Result<Url> {

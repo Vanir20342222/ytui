@@ -51,6 +51,7 @@ fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
                 .fg(themed(app, app.palette.text)),
         )
 }
+mod menus;
 mod settings;
 mod workspace;
 pub use workspace::render;
@@ -70,7 +71,7 @@ fn centered(area: Rect, width: u16, height: u16) -> Rect {
 }
 fn modal(f: &mut Frame, app: &mut App, area: Rect) {
     if let Some(Modal::Form(form)) = &app.modal
-        && matches!(form.kind, crate::forms::FormKind::Settings(_))
+        && form.is_grouped()
     {
         let hits = settings::render(f, app, form, centered(area, 112, 34));
         app.hit_targets.extend(hits);
@@ -80,6 +81,8 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         return;
     };
     let size = match modal {
+        Modal::Actions { .. } => (96, 32),
+        Modal::Categories(_) => (70, 26),
         Modal::Feeds(_) => (64, app.feed_choices().len() as u16 * 3 + 4),
         Modal::Help(_) => (90, 35),
         Modal::Themes(_) => (52, 20),
@@ -111,6 +114,14 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
     let rect = centered(area, size.0, size.1);
     f.render_widget(Clear, rect);
     match modal {
+        Modal::Actions { selected, query } => {
+            let hits = menus::actions(f, app, *selected, query, rect);
+            app.hit_targets.extend(hits);
+        }
+        Modal::Categories(selected) => {
+            let hits = menus::categories(f, app, *selected, rect);
+            app.hit_targets.extend(hits);
+        }
         Modal::Feeds(selected) => {
             let block = panel(" Browse feeds & library ", app)
                 .title_bottom(Line::from(" ↑/↓ choose · Enter opens · Esc closes ").centered())
@@ -170,7 +181,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                         .fg(themed(app, app.palette.accent))
                         .add_modifier(Modifier::BOLD),
                 ),
-                Line::from("↑/↓ or PgUp/PgDn scroll · Esc closes · :keys edits shortcuts"),
+                Line::from("↑/↓ or PgUp/PgDn scroll · Esc closes · F2 → Keyboard bindings"),
                 Line::from(""),
             ];
             for (_, action, _, description) in REGISTRY {
@@ -179,17 +190,15 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
             }
             lines.extend([
                 Line::from(""),
-                Line::from(":home :subscriptions :later :liked :library :history"),
-                Line::from(":radio name :country DE :tag jazz :favorites :cliamp"),
-                Line::from(":auth :settings :details :songs QUERY :albums :artists"),
-                Line::from(":downloads completed QUERY :stats :groups :download-page 1,3:7"),
-                Line::from(":schedule 30m URL :clipboard :profiles :profile load NAME"),
-                Line::from(":offline audio QUERY · :resume · :watch add 30m · :watches · :log"),
+                Line::from("F2 Actions: account, downloads, library, radio, profiles, VPN and diagnostics."),
+                Line::from(", opens General settings. F1 shows or hides the bottom shortcut hints."),
+                Line::from("o opens player controls. G opens settings inside the mpv window."),
+                Line::from("F3 opens server-provided feed categories; scroll to fetch more results."),
             ]);
             f.render_widget(
                 Paragraph::new(lines)
                     .scroll((*offset as u16, 0))
-                    .block(panel(" Keyboard & commands ", app))
+                    .block(panel(" Keyboard & navigation ", app))
                     .wrap(Wrap { trim: true }),
                 rect,
             );
@@ -266,7 +275,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 chunks[1],
                 &mut state,
             );
-            f.render_widget(Paragraph::new(" ↑/↓ navigate · f filter · Enter shows queue item · g expands group\n :downloads completed QUERY · :stats failed · Esc closes").style(Style::default().fg(themed(app, app.palette.accent))), chunks[2]);
+            f.render_widget(Paragraph::new(" ↑/↓ navigate · f filter · Enter shows queue item · g expands group\n F2 → Downloads · Esc closes").style(Style::default().fg(themed(app, app.palette.accent))), chunks[2]);
         }
         Modal::Groups(selected) => {
             let groups = app.download_groups();
@@ -294,7 +303,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         }
         Modal::Watches(selected) => {
             if app.snapshot.watches.is_empty() {
-                f.render_widget(Paragraph::new("\n  No collection watches yet.\n  Open a playlist, then run :watch add 30m.")
+                f.render_widget(Paragraph::new("\n  No collection watches yet.\n  Open a playlist, then F2 → Watch this collection.")
                     .wrap(Wrap { trim: true }).block(panel(" Collection watches · Esc closes ", app)), rect);
                 return;
             }
