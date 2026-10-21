@@ -1,10 +1,11 @@
 # ytui Rust rewrite plan
 
-Status: planning; implementation has not started. Updated: 2026-10-21.
+Status: Rust alpha implementation on `rewrite/rust`; target-machine release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
-Publication: pushed to `docs/rust-rewrite-plan` on 2026-10-21. This branch contains
-the plan and agent instructions for review; implementation has not started.
+Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
+Implementation lives on `rewrite/rust`; see docs/RUST.md, docs/PARITY.md and
+docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
 ## Goal and confirmed decisions
 
@@ -17,7 +18,9 @@ downloads are the user's biggest current frustrations.
 Confirmed by the user:
 
 - Keep a terminal UI, inline thumbnails, and mpv video playback.
-- Rust owns the application; external yt-dlp, mpv, and FFmpeg are allowed.
+- Rust owns the application; mpv and FFmpeg are external tools. The user later
+  selected **native Rust extraction by default**, using aagedal/yt-dlp-rs, with
+  an **explicit yt-dlp fallback**. Never switch to Python automatically.
 - Provide Downloads, YouTube, YouTube Music, and Cliamp / Radio tabs.
 - Support browser-cookie sign-in, a configurable video-preview shortcut,
   attractive themes, and automatic system-theme following.
@@ -302,8 +305,9 @@ Core rules:
 
 ## Implementation milestones and review gates
 
-All milestones are **TODO**. Dependencies are deliberate; tasks can be assigned
-to agents after shared contracts land. No task is done merely because it compiles.
+The module implementations and offline checks now exist. The status ledger below
+distinguishes them from the live/target acceptance gates, which have not all passed.
+Dependencies remain deliberate; no task is done merely because it compiles.
 
 | ID | Work / deliverable | Depends on | Acceptance gate |
 | --- | --- | --- | --- |
@@ -317,9 +321,33 @@ to agents after shared contracts land. No task is done merely because it compile
 | M7 | Curated themes, live Caelestia/Omarchy/portal following, accessibility and UI polish. | M1; may overlap M2–M6 | Change Caelestia theme while app runs; switch light/dark; malformed/atomic file changes and portal absence recover; all tabs readable. |
 | M8 | Full parity review, package/install migration, CachyOS acceptance, release docs/artifacts. | M2–M7 | All required journeys and mandatory checks pass; deferred features explicitly resolved; clean install + old-data upgrade + rollback exercised. |
 
-The next implementation action after this plan is published is M0, then a narrow
-M1/M2 vertical slice with actual downloads. Avoid building all UI first and
-leaving service behavior as stubs.
+The implemented vertical slice transfers media through the native Rust worker and
+verifies final files. All four tabs call real provider adapters. Personal feeds
+and desktop/audio behavior still need the target acceptance checks below; the
+fixture/demo catalog is not counted as live-service validation.
+
+
+### Implementation ledger (2026-10-21)
+
+| Milestone | Current evidence | Status |
+| --- | --- | --- |
+| M0 | Legacy audit, license/API inspection, native transfer fixture, actual cliamp catalog, scoped auth and palette parsing. Evaluated ytmapi-rs; kept one isolated transport for WEB/WEB_REMIX. | Implemented spikes; YouTube/browser/device checks blocked in cloud. |
+| M1 | Three-crate workspace, all four provider tabs, forms, Unicode input, remapping, demo, CI; render tests and PTY resize/restore check. | Implemented and checked offline. |
+| M2 | Supervised native/explicit-fallback workers, queue/retry/cancel/reorder/persistence, final paths, local conversion, backups/import/export. | Core implemented; native persistent resume unsupported upstream and full legacy parity remains open. |
+| M3 | WEB feeds/search/collections/details, scoped rookie import/validation/storage, account invalidation, async thumbnails. | Implemented; live account/Origin/Ghostty checks pending. |
+| M4 | Native stream resolution, explicit fallback action, mpv IPC, queue and muted preview with pause restoration. | Implemented; fake IPC/process checks pass; real playback pending. |
+| M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
+| M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
+| M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
+| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 29 offline tests, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+
+Backend decision: the native library is pinned to revision
+`10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
+Python yt-dlp: native YouTube coverage, playlist support and cross-process resume
+are limited. Native subtitle/SponsorBlock/chapter/rate controls currently require
+an explicit fallback. The user's native-default preference changes the original
+resume/reliability gate; do not present unsupported native behavior as completed.
+See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 
 ### Agent handoff and completion evidence
 

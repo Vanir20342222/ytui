@@ -1,3 +1,29 @@
+# ytui — Rust rewrite
+
+This branch contains the Rust edition: Downloads, YouTube, Music and Cliamp / Radio
+in a keyboard-driven terminal UI, with native Rust extraction by default and an
+explicit yt-dlp fallback. It targets CachyOS + Caelestia + Ghostty + Brave Origin.
+
+```sh
+cargo run --release --locked -p ytui -- --demo
+cargo run --release --locked -p ytui -- doctor
+./install-rust.sh   # installs ytui-rs alongside the Python launcher
+```
+
+See [Rust setup and usage](docs/RUST.md), [implementation/release parity](docs/PARITY.md),
+[validation](docs/VALIDATION.md) and the [rewrite plan](RUST_REWRITE_PLAN.md).
+This is an alpha; signed-in and desktop acceptance checks are still required.
+Native yt-dlp-rs has incomplete YouTube coverage. `Y` explicitly selects the
+Python yt-dlp fallback; it is never used automatically.
+
+![Rust terminal demo with fictional content](docs/screenshots/youtube.png)
+
+---
+
+## Legacy Python edition
+
+The original app and installer below remain available during migration.
+
 ```
   ██╗   ██╗████████╗██╗   ██╗██╗
   ╚██╗ ██╔╝╚══██╔══╝██║   ██║██║

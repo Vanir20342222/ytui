@@ -77,3 +77,8 @@ settings.json.tmp
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Rust build and local session artifacts
+/target/
+*.cookies.txt
+session.json

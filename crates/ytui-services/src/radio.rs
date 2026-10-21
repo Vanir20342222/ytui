@@ -1,0 +1,386 @@
+use crate::browse::limited_text;
+use anyhow::{Context, Result, bail, ensure};
+use serde_json::Value;
+use ytui_core::{BrowseRequest, Media, MediaKind, Page, http_url};
+
+#[derive(Clone)]
+pub struct Radio {
+    client: reqwest::Client,
+    pub servers: Vec<String>,
+    cache: Option<std::path::PathBuf>,
+}
+impl Radio {
+    pub fn new(client: reqwest::Client, servers: Vec<String>) -> Self {
+        Self {
+            client,
+            servers,
+            cache: None,
+        }
+    }
+    pub fn with_cache(mut self, path: std::path::PathBuf) -> Self {
+        self.cache = Some(path);
+        self
+    }
+    pub async fn fetch(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
+        use sha2::{Digest, Sha256};
+        let key = hex::encode(Sha256::digest(format!(
+            "{}:{offset}",
+            serde_json::to_string(request)?
+        )));
+        let path = self.cache.as_ref().map(|p| p.join(key));
+        match self.fetch_live(request, offset).await {
+            Ok(page) => {
+                if let Some(path) = path {
+                    let data = serde_json::to_vec(&page)?;
+                    let _ = tokio::task::spawn_blocking(move || {
+                        crate::paths::atomic_write(&path, &data)
+                    })
+                    .await;
+                }
+                Ok(page)
+            }
+            Err(error) => {
+                if let Some(path) = path
+                    && let Ok(bytes) = tokio::fs::read(path).await
+                    && let Ok(mut page) = serde_json::from_slice::<Page>(&bytes)
+                {
+                    page.title.push_str(" · cached");
+                    page.notice =
+                        Some("Radio service unavailable · showing the last saved catalog".into());
+                    return Ok(page);
+                }
+                Err(error)
+            }
+        }
+    }
+    async fn json(&self, url: &str) -> Result<Value> {
+        let response = self
+            .client
+            .get(http_url(url)?)
+            .header("User-Agent", "ytui/0.2 (terminal radio client)")
+            .send()
+            .await
+            .context("Radio service is unreachable")?;
+        ensure!(
+            response.status().is_success(),
+            "Radio service returned HTTP {}",
+            response.status().as_u16()
+        );
+        Ok(serde_json::from_str(
+            &limited_text(response, 8 * 1024 * 1024).await?,
+        )?)
+    }
+    async fn fetch_live(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
+        match request {
+            BrowseRequest::Cliamp => Ok(parse_cliamp(
+                &self.json("https://radio.cliamp.stream/stations").await?,
+            )),
+            BrowseRequest::CliampTracks(url) => {
+                let parsed = http_url(url)?;
+                ensure!(
+                    parsed.host_str() == Some("radio.cliamp.stream"),
+                    "Unexpected cliamp track-library origin"
+                );
+                Ok(parse_cliamp_tracks(&self.json(url).await?))
+            }
+            BrowseRequest::RadioSearch(_)
+            | BrowseRequest::RadioCountry(_)
+            | BrowseRequest::RadioTag(_) => {
+                let servers = if self.servers.is_empty() {
+                    let mut discovered = self
+                        .json("https://all.api.radio-browser.info/json/servers")
+                        .await
+                        .ok()
+                        .and_then(|v| v.as_array().cloned())
+                        .unwrap_or_default()
+                        .into_iter()
+                        .filter_map(|v| v.get("name").and_then(Value::as_str).map(str::to_owned))
+                        .filter(|s| s.ends_with(".api.radio-browser.info") && !s.contains('/'))
+                        .take(4)
+                        .map(|s| format!("https://{s}"))
+                        .collect::<Vec<_>>();
+                    if discovered.is_empty() {
+                        discovered = vec![
+                            "https://de1.api.radio-browser.info".into(),
+                            "https://nl1.api.radio-browser.info".into(),
+                            "https://at1.api.radio-browser.info".into(),
+                        ];
+                    }
+                    discovered
+                } else {
+                    self.servers.clone()
+                };
+                for server in servers {
+                    let mut url = http_url(&server)?;
+                    url.set_path("/json/stations/search");
+                    url.query_pairs_mut()
+                        .append_pair("limit", "80")
+                        .append_pair("offset", &offset.to_string())
+                        .append_pair("hidebroken", "true")
+                        .append_pair("order", "clickcount")
+                        .append_pair("reverse", "true");
+                    match request {
+                        BrowseRequest::RadioSearch(q) => {
+                            url.query_pairs_mut().append_pair("name", q);
+                        }
+                        BrowseRequest::RadioCountry(q) => {
+                            url.query_pairs_mut()
+                                .append_pair("countrycode", &q.to_uppercase());
+                        }
+                        BrowseRequest::RadioTag(q) => {
+                            url.query_pairs_mut().append_pair("tag", q);
+                        }
+                        _ => {}
+                    }
+                    if let Ok(data) = self.json(url.as_str()).await {
+                        let mut page = parse_radio_browser(&data);
+                        if page.items.len() == 80 {
+                            page.continuation = Some((offset + 80).to_string());
+                        }
+                        return Ok(page);
+                    }
+                }
+                bail!(
+                    "Radio Browser is unavailable on all directory servers; cached stations and cliamp remain available"
+                )
+            }
+            _ => bail!("Unsupported radio feed"),
+        }
+    }
+    pub async fn resolve_playlist(&self, url: &str) -> Result<String> {
+        let mut url = http_url(url)?;
+        for _ in 0..4 {
+            let path = url.path().to_ascii_lowercase();
+            if !path.ends_with(".m3u") && !path.ends_with(".m3u8") && !path.ends_with(".pls") {
+                return Ok(url.into());
+            }
+            // HLS manifests belong to mpv; only resolve ordinary wrapper playlists.
+            let response = self.client.get(url.clone()).send().await?;
+            if response.status().is_redirection() {
+                let location = response
+                    .headers()
+                    .get("location")
+                    .and_then(|v| v.to_str().ok())
+                    .context("Radio redirect has no destination")?;
+                url = url.join(location)?;
+                http_url(url.as_str())?;
+                continue;
+            }
+            ensure!(
+                response.status().is_success(),
+                "Station playlist returned HTTP {}",
+                response.status()
+            );
+            let data = limited_text(response, 128 * 1024).await?;
+            if data.contains("#EXT-X-") {
+                return Ok(url.into());
+            }
+            let target = data
+                .lines()
+                .map(str::trim)
+                .find_map(|line| {
+                    if line.starts_with('#') || line.is_empty() {
+                        None
+                    } else if line.starts_with("http://") || line.starts_with("https://") {
+                        Some(line)
+                    } else if let Some((key, value)) = line.split_once('=') {
+                        if key.to_ascii_lowercase().starts_with("file") {
+                            Some(value)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .context("Station playlist has no supported HTTP(S) stream")?;
+            url = url.join(target)?;
+            http_url(url.as_str())?;
+        }
+        bail!("Station playlist/redirect nesting exceeds four levels")
+    }
+}
+pub fn parse_cliamp(data: &Value) -> Page {
+    let items = data
+        .get("stations")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|s| {
+            let url = s.get("stream")?.as_str()?;
+            http_url(url).ok()?;
+            Some(Media {
+                id: s.get("id").and_then(Value::as_str).unwrap_or(url).into(),
+                title: s
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .unwrap_or("Station")
+                    .into(),
+                creator: s
+                    .get("genre")
+                    .and_then(Value::as_str)
+                    .unwrap_or("cliamp radio")
+                    .into(),
+                url: url.into(),
+                kind: MediaKind::Station,
+                live: true,
+                tracks_url: s
+                    .get("tracks_url")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
+                description: s
+                    .get("description")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .into(),
+                ..Default::default()
+            })
+        })
+        .collect();
+    Page {
+        title: "cliamp radio".into(),
+        items,
+        ..Default::default()
+    }
+}
+pub fn parse_cliamp_tracks(data: &Value) -> Page {
+    let items = data
+        .get("tracks")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|t| {
+            let url = t.get("url")?.as_str()?;
+            http_url(url).ok()?;
+            Some(Media {
+                id: t.get("id").and_then(Value::as_str).unwrap_or(url).into(),
+                title: t
+                    .get("title")
+                    .and_then(Value::as_str)
+                    .unwrap_or("Track")
+                    .into(),
+                creator: t
+                    .get("artist")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .into(),
+                url: url.into(),
+                kind: MediaKind::Song,
+                ..Default::default()
+            })
+        })
+        .collect();
+    Page {
+        title: data
+            .get("name")
+            .and_then(Value::as_str)
+            .unwrap_or("Tracks")
+            .into(),
+        items,
+        ..Default::default()
+    }
+}
+pub fn parse_radio_browser(data: &Value) -> Page {
+    let items = data
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|s| {
+            let url = s
+                .get("url_resolved")
+                .and_then(Value::as_str)
+                .filter(|s| !s.is_empty())
+                .or_else(|| s.get("url").and_then(Value::as_str))?;
+            http_url(url).ok()?;
+            Some(Media {
+                id: s
+                    .get("stationuuid")
+                    .and_then(Value::as_str)
+                    .unwrap_or(url)
+                    .into(),
+                title: s
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .unwrap_or("Station")
+                    .into(),
+                creator: s
+                    .get("country")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .into(),
+                description: s
+                    .get("tags")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .into(),
+                url: url.into(),
+                thumbnail: s
+                    .get("favicon")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .into(),
+                kind: MediaKind::Station,
+                live: true,
+                ..Default::default()
+            })
+        })
+        .collect();
+    Page {
+        title: "Radio Browser".into(),
+        items,
+        ..Default::default()
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn live_and_library_channels_are_distinct() {
+        let p = parse_cliamp(
+            &json!({"stations":[{"id":"one","name":"One","stream":"https://radio.test/live","tracks_url":"https://radio.cliamp.stream/one/tracks"},{"name":"Live","stream":"https://radio.test/only-live"},{"name":"Unsafe","stream":"file:///etc/passwd"}]}),
+        );
+        assert_eq!(p.items.len(), 2);
+        assert!(p.items[0].tracks_url.is_some());
+        assert!(p.items[1].tracks_url.is_none());
+    }
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+    use sha2::{Digest, Sha256};
+    #[tokio::test]
+    async fn directory_outage_uses_a_saved_catalog_with_a_notice() {
+        let t = tempfile::tempdir().unwrap();
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        drop(listener);
+        let request = BrowseRequest::RadioSearch("fixture".into());
+        let key = hex::encode(Sha256::digest(format!(
+            "{}:0",
+            serde_json::to_string(&request).unwrap()
+        )));
+        let page = Page {
+            title: "Radio Browser".into(),
+            items: vec![Media {
+                id: "one".into(),
+                title: "Saved station".into(),
+                url: "https://station.test/live".into(),
+                kind: MediaKind::Station,
+                live: true,
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        crate::paths::atomic_write(&t.path().join(key), &serde_json::to_vec(&page).unwrap())
+            .unwrap();
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
+        let radio = Radio::new(client, vec![format!("http://127.0.0.1:{port}")])
+            .with_cache(t.path().into());
+        let restored = radio.fetch(&request, 0).await.unwrap();
+        assert_eq!(restored.items.len(), 1);
+        assert!(restored.title.contains("cached"));
+        assert!(restored.notice.unwrap().contains("unavailable"));
+    }
+}

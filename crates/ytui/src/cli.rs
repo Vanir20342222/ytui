@@ -1,0 +1,416 @@
+use anyhow::{Context, Result, ensure};
+use clap::{Parser, Subcommand};
+use std::{path::PathBuf, sync::Arc};
+use tokio::sync::mpsc;
+use tokio_util::sync::CancellationToken;
+use ytui_core::*;
+use ytui_services::{
+    auth::{self, SessionStore},
+    browse::Browser,
+    paths::Paths,
+    radio::Radio,
+    store::Store,
+};
+
+#[derive(Parser)]
+#[command(
+    version,
+    about = "YouTube, Music, downloads and radio in your terminal"
+)]
+pub struct Args {
+    #[arg(long, global = true)]
+    pub config: Option<PathBuf>,
+    #[arg(long, global = true)]
+    pub state_dir: Option<PathBuf>,
+    #[arg(long)]
+    pub demo: bool,
+    #[command(subcommand)]
+    pub command: Option<Command>,
+}
+#[derive(Subcommand)]
+pub enum Command {
+    /// Check installed tools, desktop themes and configuration without reading browser stores.
+    Doctor,
+    /// Write a documented TOML configuration (never overwrites an existing file).
+    Init,
+    /// Locate browser profiles, import a session, or disconnect.
+    Auth {
+        #[command(subcommand)]
+        command: AuthCommand,
+    },
+    /// Browse YouTube or Music and print normalized JSON.
+    Browse {
+        #[arg(long)]
+        music: bool,
+        #[arg(default_value = "home")]
+        feed: String,
+        query: Option<String>,
+    },
+    /// Print cliamp channels or Radio Browser search results.
+    Radio {
+        query: Option<String>,
+        #[arg(long)]
+        country: Option<String>,
+        #[arg(long)]
+        tag: Option<String>,
+    },
+    /// Download using native Rust by default. --backend yt-dlp explicitly selects the fallback.
+    Download {
+        url: String,
+        #[arg(long)]
+        audio: bool,
+        #[arg(long)]
+        quality: Option<String>,
+        #[arg(short = 'o', long)]
+        directory: Option<PathBuf>,
+        #[arg(long)]
+        playlist: bool,
+        #[arg(long)]
+        items: Option<String>,
+        #[arg(long)]
+        backend: Option<String>,
+    },
+    /// Preview/import Python state without modifying the original files.
+    Migrate {
+        #[arg(long)]
+        apply: bool,
+    },
+    /// Import cliamp stations/favorites; preserves the original cliamp files.
+    ImportRadio { file: PathBuf },
+    #[command(name = "__native-worker", hide = true)]
+    NativeWorker { request: PathBuf },
+}
+#[derive(Subcommand)]
+pub enum AuthCommand {
+    /// List profile directories without reading their cookies.
+    Profiles,
+    /// Validate a selected browser/cookie-file session before storing it.
+    Import {
+        #[arg(long, default_value = "brave-origin")]
+        browser: String,
+        #[arg(long)]
+        profile: Option<PathBuf>,
+        #[arg(long)]
+        cookies: Option<PathBuf>,
+        #[arg(long)]
+        file_store: bool,
+    },
+    Status,
+    Disconnect,
+}
+async fn load_session(config: &Config, paths: &Paths) -> Option<Arc<auth::Session>> {
+    let store = SessionStore::new(paths, &config.auth_store);
+    match tokio::task::spawn_blocking(move || store.load()).await {
+        Ok(Ok(s)) => s.map(Arc::new),
+        _ => None,
+    }
+}
+pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<()> {
+    match command {
+        Command::NativeWorker { request } => {
+            tokio::task::spawn_blocking(move || ytui_services::native::worker(&request)).await??
+        }
+        Command::Init => {
+            ensure!(
+                !paths.config_file().exists(),
+                "rust.toml already exists; it was not overwritten"
+            );
+            paths.save_config(&config)?;
+            println!("{}", paths.config_file().display());
+        }
+        Command::Doctor => {
+            println!("ytui {} · Native Rust backend", env!("CARGO_PKG_VERSION"));
+            println!("Configuration: {}", paths.config_file().display());
+            println!("State: {}", paths.state.display());
+            println!(
+                "Backend: {} (fallback is explicit)",
+                config.download_backend
+            );
+            println!(
+                "yt-dlp-rs revision: {}",
+                ytui_services::native::UPSTREAM_REV
+            );
+            for (label, tool) in [
+                ("FFmpeg", &config.ffmpeg),
+                ("mpv", &config.mpv),
+                ("yt-dlp (optional fallback)", &config.yt_dlp),
+                ("cliamp (optional)", &config.cliamp),
+            ] {
+                println!(
+                    "{label}: {}",
+                    if executable(tool).is_some() {
+                        "found"
+                    } else {
+                        "missing"
+                    }
+                );
+            }
+            println!(
+                "Deno runtime: {}",
+                if config
+                    .native_js_runtime
+                    .as_ref()
+                    .is_some_and(|p| p.is_file())
+                {
+                    "configured"
+                } else {
+                    "not configured (native YouTube challenges may fail)"
+                }
+            );
+            println!(
+                "Terminal: {} · image mode {}",
+                std::env::var("TERM").unwrap_or_else(|_| "unknown".into()),
+                config.image_protocol
+            );
+            match ytui_services::theme::resolve(&config, &paths).await {
+                Ok(p) => println!("Theme: {} · {}", p.name, p.source),
+                Err(_) => println!(
+                    "Theme provider unavailable; last valid palette/default will be retained"
+                ),
+            }
+            println!(
+                "Browser stores were not opened. Use `ytui auth profiles` to list profile paths."
+            );
+        }
+        Command::Auth { command } => match command {
+            AuthCommand::Profiles => {
+                for p in auth::profiles(&paths) {
+                    println!("{}\t{}", p.browser, p.path.display());
+                }
+            }
+            AuthCommand::Import {
+                browser,
+                profile,
+                cookies,
+                file_store,
+            } => {
+                if file_store {
+                    config.auth_store = "file".into();
+                }
+                let mut session = tokio::task::spawn_blocking(move || {
+                    if let Some(file) = cookies {
+                        auth::import_netscape(&file)
+                    } else {
+                        auth::import_browser(&browser, profile.as_deref())
+                    }
+                })
+                .await??;
+                let api = Browser::new(
+                    ytui_services::http_client(config.proxy.as_deref())?,
+                    Some(Arc::new(session.clone())),
+                    config.account_index,
+                );
+                session.account = api.validate().await?;
+                let store = SessionStore::new(&paths, &config.auth_store);
+                let account = session.account.clone();
+                tokio::task::spawn_blocking(move || store.save(&session)).await??;
+                if file_store {
+                    paths.save_config(&config)?;
+                }
+                println!("Connected as {account}");
+            }
+            AuthCommand::Status => match load_session(&config, &paths).await {
+                Some(s) => println!("Stored session for {} (not live-validated)", s.account),
+                None => println!(
+                    "No accessible session; unlock the keyring or import a browser profile"
+                ),
+            },
+            AuthCommand::Disconnect => {
+                let store = SessionStore::new(&paths, &config.auth_store);
+                tokio::task::spawn_blocking(move || store.disconnect()).await??;
+                println!("Disconnected; browser profile unchanged");
+            }
+        },
+        Command::Browse { music, feed, query } => {
+            let session = load_session(&config, &paths).await;
+            let browser = Browser::new(
+                ytui_services::http_client(config.proxy.as_deref())?,
+                session,
+                config.account_index,
+            );
+            let request = match feed.as_str() {
+                "home" => BrowseRequest::Home,
+                "search" => BrowseRequest::Search(query.context("Provide a search query")?),
+                "library" => BrowseRequest::Library,
+                "liked" => BrowseRequest::Liked,
+                "later" => BrowseRequest::WatchLater,
+                "subscriptions" => BrowseRequest::Subscriptions,
+                "history" => BrowseRequest::History,
+                "collection" => {
+                    BrowseRequest::Collection(query.context("Provide a collection ID")?)
+                }
+                _ => anyhow::bail!("Unknown feed"),
+            };
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&browser.fetch(music, &request).await?)?
+            );
+        }
+        Command::Radio {
+            query,
+            country,
+            tag,
+        } => {
+            let request = if let Some(country) = country {
+                BrowseRequest::RadioCountry(country)
+            } else if let Some(tag) = tag {
+                BrowseRequest::RadioTag(tag)
+            } else if let Some(query) = query {
+                BrowseRequest::RadioSearch(query)
+            } else {
+                BrowseRequest::Cliamp
+            };
+            let radio = Radio::new(
+                ytui_services::http_client(config.proxy.as_deref())?,
+                config.radio_servers.clone(),
+            )
+            .with_cache(paths.cache.join("radio"));
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&radio.fetch(&request, 0).await?)?
+            );
+        }
+        Command::Download {
+            url,
+            audio,
+            quality,
+            directory,
+            playlist,
+            items,
+            backend,
+        } => {
+            let normalized = if std::path::Path::new(&url).is_file() {
+                std::fs::canonicalize(&url)?.to_string_lossy().into_owned()
+            } else {
+                normalize_media_url(&url)?
+            };
+            let mut options = config.download.clone();
+            options.audio = audio;
+            options.playlist = playlist;
+            options.playlist_items = items;
+            options.backend = backend;
+            if let Some(q) = quality {
+                options.quality = q;
+            }
+            if let Some(dir) = directory {
+                if audio {
+                    options.audio_directory = dir;
+                } else {
+                    options.directory = dir;
+                }
+            }
+            options.validate()?;
+            let session = load_session(&config, &paths).await;
+            let store = Store::open(&paths.state)?;
+            let mut snapshot = store.load().await?;
+            let mut job = Job::new(
+                Media {
+                    title: "Resolving media…".into(),
+                    url: normalized,
+                    ..Default::default()
+                },
+                options,
+            );
+            job.state = JobState::Resolving;
+            let id = job.id;
+            snapshot.downloads.jobs.push(job.clone());
+            store.save(snapshot.clone()).await?;
+            let (tx, mut rx) = mpsc::channel(128);
+            let cancel = CancellationToken::new();
+            let worker = tokio::spawn(ytui_services::download::execute(
+                job,
+                config,
+                paths,
+                session,
+                cancel.clone(),
+                tx,
+            ));
+            let mut failure = None;
+            loop {
+                tokio::select! {
+                    event=rx.recv()=>{let Some(event)=event else{break;};let terminal=matches!(event.update,JobUpdate::Finished|JobUpdate::Failed{..});snapshot.downloads.apply(event);
+                        if terminal{let job=snapshot.downloads.jobs.iter().find(|j|j.id==id).context("Download disappeared")?;if job.state==JobState::Done{for p in &job.outputs{println!("Saved {}",p.display());}}else{failure=job.error.clone();}break;}
+                    },
+                    _=tokio::signal::ctrl_c()=>{cancel.cancel();if let Some(j)=snapshot.downloads.jobs.iter_mut().find(|j|j.id==id){j.invalidate(JobState::Paused);}break;}
+                }
+            }
+            rx.close();
+            cancel.cancel();
+            let _ = worker.await;
+            store.save(snapshot).await?;
+            store.close().await?;
+            if let Some(error) = failure {
+                anyhow::bail!("{error}");
+            }
+        }
+        Command::Migrate { apply } => {
+            let store = Store::open(&paths.state)?;
+            let mut snapshot = store.load().await?;
+            let p = paths.clone();
+            let mut c = config.clone();
+            let (result, snapshot, new_config) = tokio::task::spawn_blocking(move || {
+                let result = ytui_services::migration::import(&p, &mut c, &mut snapshot, apply);
+                (result, snapshot, c)
+            })
+            .await?;
+            let report = result?;
+            if apply {
+                store.save(snapshot).await?;
+                config = new_config;
+                let _ = &config;
+            }
+            store.close().await?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Command::ImportRadio { file } => {
+            let raw = std::fs::read_to_string(file)?;
+            let value: toml::Value = toml::from_str(&raw)?;
+            let mut imported = 0;
+            for key in ["station", "stations", "radio", "favorites"] {
+                if let Some(entries) = value.get(key).and_then(toml::Value::as_array) {
+                    for station in entries {
+                        let Some(url) = station
+                            .get("url")
+                            .or_else(|| station.get("stream"))
+                            .and_then(toml::Value::as_str)
+                        else {
+                            continue;
+                        };
+                        if http_url(url).is_err()
+                            || config.custom_stations.iter().any(|s| s.url == url)
+                        {
+                            continue;
+                        }
+                        config.custom_stations.push(Media {
+                            id: url.into(),
+                            url: url.into(),
+                            title: station
+                                .get("name")
+                                .and_then(toml::Value::as_str)
+                                .unwrap_or("Custom station")
+                                .into(),
+                            kind: MediaKind::Station,
+                            live: true,
+                            ..Default::default()
+                        });
+                        imported += 1;
+                    }
+                }
+            }
+            paths.save_config(&config)?;
+            println!("Imported {imported} stations; originals were left intact");
+        }
+    }
+    Ok(())
+}
+pub fn executable(program: &str) -> Option<PathBuf> {
+    let p = PathBuf::from(program);
+    if p.components().count() > 1 {
+        return p.is_file().then_some(p);
+    }
+    std::env::var_os("PATH").and_then(|v| {
+        std::env::split_paths(&v)
+            .map(|dir| dir.join(program))
+            .find(|p| p.is_file())
+    })
+}

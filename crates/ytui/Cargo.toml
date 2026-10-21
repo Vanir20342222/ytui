@@ -1,0 +1,27 @@
+[package]
+name = "ytui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+[dependencies]
+ytui-core = { path = "../ytui-core" }
+ytui-services = { path = "../ytui-services" }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+uuid.workspace = true
+url.workspace = true
+clap = { version = "4", features = ["derive"] }
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+ratatui-image = { version = "8", default-features = false, features = ["crossterm"] }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+futures-util = "0.3"
+shell-words = "1"
+unicode-width = "0.2"
+[dev-dependencies]
+tempfile.workspace = true

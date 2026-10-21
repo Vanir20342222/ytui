@@ -19,3 +19,9 @@ baseline defects, milestones, migration requirements, and acceptance checks.
   stream URLs. Use synthetic sessions and sanitized diagnostics.
 - Report checks actually run, environmental blockers, and remaining limitations.
   An empty feature tab or a successful compile does not satisfy its milestone.
+
+- Current backend decision: native Rust via pinned aagedal/yt-dlp-rs is the default.
+  Python yt-dlp is allowed only through an explicit fallback action/configuration.
+- Implementation evidence and open gates are in docs/VALIDATION.md and
+  docs/PARITY.md. Do not equate implemented provider code with a successful live
+  account, Ghostty, audio-device or stable-release acceptance result.
