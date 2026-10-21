@@ -33,7 +33,7 @@ impl Field {
     }
 }
 pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
-    ("General", &[15, 16, 17, 34, 38]),
+    ("General", &[15, 16, 17, 34, 38, 50]),
     ("Appearance", &[0, 1, 2, 3]),
     (
         "Downloads",
@@ -44,11 +44,16 @@ pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
     ("Schedule", &[18, 19, 20]),
     ("Tools", &[13, 14, 7, 8, 9, 35, 46, 47, 31]),
     ("Radio", &[48, 49]),
+    ("Playback", &[51, 52]),
 ];
 pub enum FormKind {
     Download(Media, DownloadOptions),
     Settings(Config),
     Auth,
+    Action {
+        title: &'static str,
+        command: &'static str,
+    },
     Keys(Config),
 }
 pub struct Form {
@@ -59,14 +64,58 @@ pub struct Form {
     pub section: usize,
     pub sections_focused: bool,
 }
+pub const DOWNLOAD_SECTIONS: &[(&str, &[usize])] = &[
+    ("Quality & format", &[0, 1, 2, 3, 13, 12]),
+    ("Files & playlist", &[4, 5, 6, 11]),
+    ("Captions & metadata", &[7, 8, 9, 10]),
+];
 impl Form {
+    pub fn is_grouped(&self) -> bool {
+        matches!(self.kind, FormKind::Settings(_) | FormKind::Download(..))
+    }
+    pub fn sections(&self) -> &'static [(&'static str, &'static [usize])] {
+        if matches!(self.kind, FormKind::Download(..)) {
+            DOWNLOAD_SECTIONS
+        } else {
+            SETTINGS_SECTIONS
+        }
+    }
+
+    pub fn action(entry: &crate::actions::Entry) -> Self {
+        Self {
+            kind: FormKind::Action {
+                title: entry.title,
+                command: entry.command,
+            },
+            fields: entry
+                .fields
+                .iter()
+                .map(|(name, default)| Field::text(name, default))
+                .collect(),
+            selected: 0,
+            error: None,
+            section: 0,
+            sections_focused: false,
+        }
+    }
+
     pub fn download(media: Media, options: DownloadOptions) -> Self {
         let o = &options;
         let fields = vec![
             Field::flag("Audio only", o.audio),
-            Field::text("Video quality", &o.quality),
-            Field::text("Video container", &o.container),
-            Field::text("Audio format", &o.audio_container),
+            Field::choice(
+                "Video quality",
+                &o.quality,
+                &[
+                    "144", "240", "360", "480", "720", "1080", "1440", "2160", "best",
+                ],
+            ),
+            Field::choice("Video container", &o.container, &["mp4", "mkv", "webm"]),
+            Field::choice(
+                "Audio format",
+                &o.audio_container,
+                &["mp3", "m4a", "flac", "opus", "wav", "aac", "vorbis"],
+            ),
             Field::text("Destination", o.output_directory().display()),
             Field::flag("Whole playlist", o.playlist),
             Field::text(
@@ -78,9 +127,10 @@ impl Form {
             Field::flag("Embed metadata", o.metadata),
             Field::flag("Embed thumbnail", o.thumbnail),
             Field::text("Limit KiB/s (0=off)", o.bandwidth_kib),
-            Field::text(
+            Field::choice(
                 "Backend (blank=default)",
                 o.backend.clone().unwrap_or_default(),
+                &["", "auto", "native", "yt-dlp"],
             ),
             Field::text("Audio quality / bitrate", &o.audio_quality),
         ];
@@ -120,7 +170,7 @@ impl Form {
             Field::choice(
                 "Download / playback backend",
                 &c.download_backend,
-                &["native", "yt-dlp"],
+                &["auto", "native", "yt-dlp"],
             ),
             Field::text(
                 "Deno runtime (optional)",
@@ -185,6 +235,16 @@ impl Form {
             Field::text("NetworkManager executable", &c.nmcli),
             Field::text("Pinned countries", c.radio_pinned_countries.join(",")),
             Field::text("Directory servers", c.radio_servers.join(",")),
+            Field::flag("Show shortcut hints (F1)", c.show_hints),
+            Field::choice(
+                "SponsorBlock playback",
+                &c.playback_sponsorblock,
+                &["skip", "mark", "off"],
+            ),
+            Field::text(
+                "Playback skip categories",
+                c.playback_sponsor_categories.join(","),
+            ),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -208,7 +268,11 @@ impl Form {
                 Field::text(
                     description,
                     if mapped.is_empty() {
-                        default.to_string()
+                        if config.keybindings.contains_key(*default) {
+                            format!("alt+{default}")
+                        } else {
+                            default.to_string()
+                        }
                     } else {
                         mapped.join(" ")
                     },
@@ -265,6 +329,7 @@ impl Form {
         match &self.kind {
             FormKind::Download(_, _) => "Download",
             FormKind::Settings(_) => "General settings",
+            FormKind::Action { title, .. } => title,
             FormKind::Auth => "Connect your YouTube account",
             FormKind::Keys(_) => "Keyboard shortcuts",
         }
@@ -273,12 +338,12 @@ impl Form {
         self.fields[index].value.text.trim()
     }
     pub fn select_section(&mut self, section: usize) {
-        self.section = section.min(SETTINGS_SECTIONS.len() - 1);
-        self.selected = SETTINGS_SECTIONS[self.section].1[0];
+        self.section = section.min(self.sections().len() - 1);
+        self.selected = self.sections()[self.section].1[0];
     }
     pub fn move_field(&mut self, delta: isize) {
-        if matches!(self.kind, FormKind::Settings(_)) {
-            let indices = SETTINGS_SECTIONS[self.section].1;
+        if self.is_grouped() {
+            let indices = self.sections()[self.section].1;
             let current = indices
                 .iter()
                 .position(|i| *i == self.selected)
@@ -460,6 +525,15 @@ impl Form {
             .split(',')
             .map(str::trim)
             .filter(|s| !s.is_empty())
+            .map(str::to_owned)
+            .collect();
+        c.show_hints = self.value(50) == "yes";
+        c.playback_sponsorblock = self.value(51).into();
+        c.playback_sponsor_categories = self
+            .value(52)
+            .split(',')
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
             .map(str::to_owned)
             .collect();
         c.validate()?;

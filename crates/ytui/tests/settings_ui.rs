@@ -223,3 +223,173 @@ async fn settings_mouse_buttons_and_persistence_use_the_visible_window() {
     assert!(app.paths.load_config().unwrap().notifications);
     app.shutdown().await;
 }
+
+#[tokio::test]
+async fn catalog_append_is_stable_and_repeated_continuations_stop() {
+    use ytui::app::UiEvent;
+    use ytui_core::{Media, Page};
+    let (mut app, _temp) = fixture();
+    app.tab = 1;
+    app.tabs[1].generation = 4;
+    app.tabs[1].selected = 1;
+    app.tabs[1].page = Page {
+        items: ["a", "b"]
+            .into_iter()
+            .map(|id| Media {
+                id: id.into(),
+                ..Default::default()
+            })
+            .collect(),
+        continuation: Some("browse:2".into()),
+        ..Default::default()
+    };
+    app.apply(UiEvent::Page {
+        tab: 1,
+        generation: 4,
+        append: true,
+        result: Ok(Page {
+            items: ["b", "c", "c"]
+                .into_iter()
+                .map(|id| Media {
+                    id: id.into(),
+                    ..Default::default()
+                })
+                .collect(),
+            continuation: Some("browse:3".into()),
+            ..Default::default()
+        }),
+    });
+    assert_eq!(
+        app.tabs[1]
+            .page
+            .items
+            .iter()
+            .map(|m| m.id.as_str())
+            .collect::<Vec<_>>(),
+        ["a", "b", "c"]
+    );
+    assert_eq!(app.tabs[1].selected, 1);
+    app.apply(UiEvent::Page {
+        tab: 1,
+        generation: 4,
+        append: true,
+        result: Ok(Page {
+            items: vec![Media {
+                id: "c".into(),
+                ..Default::default()
+            }],
+            continuation: Some("browse:3".into()),
+            ..Default::default()
+        }),
+    });
+    assert!(app.tabs[1].page.continuation.is_none());
+    app.shutdown().await;
+}
+#[tokio::test]
+async fn live_stations_play_directly_and_songs_continue_through_the_collection() {
+    use ytui_core::{Media, MediaKind, Page};
+    use ytui_services::player::PlayerCommand;
+    let (mut app, _temp) = fixture();
+    let (sender, mut receiver) = mpsc::channel(32);
+    app.player = sender;
+    app.demo = false;
+    app.tab = 3;
+    app.tabs[3].page = Page {
+        items: vec![Media {
+            id: "station".into(),
+            url: "https://radio.test/live".into(),
+            tracks_url: Some("https://radio.cliamp.stream/fixture/tracks".into()),
+            kind: MediaKind::Station,
+            live: true,
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    app.action(Action::Open);
+    assert!(
+        matches!(receiver.try_recv().unwrap(),PlayerCommand::Play {media,..} if media.url=="https://radio.test/live")
+    );
+    assert!(
+        !app.tabs[3].loading,
+        "opening a live station should not load its track library"
+    );
+    app.tab = 2;
+    app.tabs[2].page = Page {
+        items: (0..3)
+            .map(|i| Media {
+                id: format!("song-{i}"),
+                url: format!("https://music.youtube.com/watch?v=fixture{i}"),
+                kind: MediaKind::Song,
+                ..Default::default()
+            })
+            .collect(),
+        ..Default::default()
+    };
+    app.action(Action::Open);
+    let first = app.tabs[2].page.items[0].clone();
+    assert!(
+        matches!(receiver.try_recv().unwrap(),PlayerCommand::Play {media,..} if media.id=="song-0")
+    );
+    app.playback_ended(&first);
+    assert!(
+        matches!(receiver.try_recv().unwrap(),PlayerCommand::Play {media,..} if media.id=="song-1")
+    );
+    app.shutdown().await;
+}
+#[tokio::test]
+async fn action_menu_filters_and_parameter_forms_isolate_typing_and_download_sections_are_readable()
+{
+    let (mut app, _temp) = fixture();
+    app.action(Action::ToggleHints);
+    assert!(!app.config.show_hints);
+    app.action(Action::ToggleHints);
+    assert!(app.config.show_hints);
+    app.action(Action::Search);
+    app.paste("/quit");
+    app.key(KeyCode::Enter.into());
+    assert!(!app.quit, "search text must not execute a hidden command");
+    app.action(Action::Command);
+    app.paste("Connect browser");
+    app.key(KeyCode::Enter.into());
+    assert!(
+        matches!(app.modal,Some(Modal::Form(ref form)) if matches!(form.kind,ytui::forms::FormKind::Auth))
+    );
+    app.key(KeyCode::Esc.into());
+    let entry = ytui::actions::ENTRIES
+        .iter()
+        .position(|e| e.command == "add")
+        .unwrap();
+    app.open_action(entry);
+    app.paste("https://www.youtube.com/watch?v=fixture1234");
+    app.key(KeyCode::Enter.into());
+    assert!(
+        matches!(app.modal,Some(Modal::Form(ref form)) if matches!(form.kind,ytui::forms::FormKind::Download(..)))
+    );
+    for theme in ytui_services::theme::THEMES {
+        app.palette = ytui_services::theme::builtin(theme).unwrap();
+        for (cols, rows) in [(35, 12), (80, 24), (120, 40), (180, 50), (212, 58)] {
+            let mut terminal = Terminal::new(TestBackend::new(cols, rows)).unwrap();
+            for section in 0..ytui::forms::DOWNLOAD_SECTIONS.len() {
+                for edge in [false, true] {
+                    if let Some(Modal::Form(form)) = &mut app.modal {
+                        form.select_section(section);
+                        if edge {
+                            form.selected = *form.sections()[section].1.last().unwrap();
+                        }
+                    }
+                    terminal.draw(|frame| ui::render(frame, &mut app)).unwrap();
+                    let Some(Modal::Form(form)) = &app.modal else {
+                        panic!("download form closed")
+                    };
+                    assert!(
+                        app.hit_targets
+                            .iter()
+                            .any(|(_, hit)| *hit == HitTarget::SettingField(form.selected)),
+                        "download field hidden: {theme} {cols}x{rows} section {section}"
+                    );
+                }
+            }
+        }
+    }
+    app.shutdown().await;
+}

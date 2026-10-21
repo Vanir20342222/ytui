@@ -106,7 +106,40 @@ impl Capture {
         Ok(())
     }
     pub fn command(&mut self, command: &str, expected: &str) -> Result<()> {
-        self.send(&format!(":{command}\r"))?;
+        let entries = ytui::actions::ENTRIES;
+        let entry = entries
+            .iter()
+            .filter(|entry| {
+                if entry.fields.is_empty() {
+                    command == entry.command
+                } else {
+                    command == entry.command
+                        || command
+                            .strip_prefix(entry.command)
+                            .is_some_and(|rest| rest.starts_with(' '))
+                }
+            })
+            .max_by_key(|entry| entry.command.len())
+            .ok_or_else(|| anyhow::anyhow!("No UI route for {command}"))?;
+        self.send(":")?;
+        self.send(entry.title)?;
+        // Prefer the exact title when its words also match a longer neighboring action.
+        let matches = ytui::actions::matching(entry.title);
+        let selected = matches
+            .iter()
+            .position(|index| entries[*index].title == entry.title)
+            .unwrap_or(0);
+        for _ in 0..selected {
+            self.send("\x1b[B")?;
+        }
+        self.send("\r")?;
+        if !entry.fields.is_empty() {
+            let value = command
+                .strip_prefix(entry.command)
+                .unwrap_or_default()
+                .trim();
+            self.send(&format!("\x15{value}\r"))?;
+        }
         self.wait_for(expected)
     }
     pub fn text(&self) -> String {

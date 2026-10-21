@@ -507,3 +507,64 @@ fn failed_native_tagging_keeps_a_recoverable_source_and_publishes_no_final_file(
     );
     assert!(!String::from_utf8_lossy(&result.stdout).contains("Saved"));
 }
+
+#[cfg(unix)]
+#[test]
+fn automatic_fallback_runs_once_for_a_native_limitation_but_strict_native_stays_native() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let final_file = temp.path().join("fallback.mp4");
+    let marker = temp.path().join("fallback-called");
+    let script = temp.path().join("yt-dlp-fixture");
+    std::fs::write(
+        &script,
+        format!(
+            "#!/bin/sh\nprintf x >> '{}'\nprintf media > '{}'\nprintf '%s\\n' 'YTUI_OUTPUT:{}'\n",
+            marker.display(),
+            final_file.display(),
+            serde_json::to_string(&final_file.to_string_lossy()).unwrap()
+        ),
+    )
+    .unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let mut config = Config {
+        auth_store: "file".into(),
+        yt_dlp: script.display().to_string(),
+        max_retries: 0,
+        ..Default::default()
+    };
+    config.download.metadata = false;
+    config.download.sponsorblock = vec!["sponsor".into()];
+    config.download.sponsorblock_remove = true;
+    config.download.subtitles = vec!["en".into()];
+    let config_path = temp.path().join("config.toml");
+    std::fs::write(&config_path, toml::to_string(&config).unwrap()).unwrap();
+    let run = |backend: &str| {
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .args([
+                "--config",
+                config_path.to_str().unwrap(),
+                "--state-dir",
+                temp.path().join("state").to_str().unwrap(),
+                "download",
+                "https://www.youtube.com/watch?v=BaW_jenozKc",
+                "--directory",
+                temp.path().join("media").to_str().unwrap(),
+                "--backend",
+                backend,
+            ])
+            .output()
+            .unwrap()
+    };
+    let strict = run("native");
+    assert!(!strict.status.success());
+    assert!(!marker.exists());
+    let automatic = run("auto");
+    assert!(
+        automatic.status.success(),
+        "{}",
+        String::from_utf8_lossy(&automatic.stderr)
+    );
+    assert_eq!(std::fs::read(&marker).unwrap(), b"x");
+    assert_eq!(std::fs::read(&final_file).unwrap(), b"media");
+}

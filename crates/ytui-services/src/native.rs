@@ -507,7 +507,7 @@ pub async fn resolve(
     .await?;
     ensure!(
         result.success,
-        "Native playback extraction failed: {}. Select yt-dlp explicitly in settings to use the fallback.",
+        "Native playback extraction failed: {}. Open F2 → Playback repair. Select auto/yt-dlp, or configure the supported Deno 2.9.7 runtime for native extraction.",
         process::diagnostic(&result.stderr)
     );
     for line in result.lines {
@@ -516,6 +516,25 @@ pub async fn resolve(
         }
     }
     bail!("Native backend did not return a playback stream")
+}
+
+/// Auto mode falls back for extractor limitations, without changing the explicit
+/// native mode or retrying cancellations/local publication failures externally.
+pub fn fallback_eligible(message: &str) -> bool {
+    let message = message.to_lowercase();
+    [
+        "unsupported youtube",
+        "no eligible media",
+        "signature",
+        "url challenges",
+        "native extractor returned no media",
+        "native backend did not return",
+        "native preview of fragmented",
+        "needs explicit yt-dlp fallback",
+        "native extractor did not supply",
+    ]
+    .iter()
+    .any(|s| message.contains(s))
 }
 
 #[cfg(test)]

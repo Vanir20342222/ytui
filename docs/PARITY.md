@@ -9,8 +9,8 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | --- | --- | --- |
 | Four-tab shell, Unicode input, focus, help, back navigation | Adaptive catalog/details, tab-specific feed picker, remapped hints, compact player/dialogs and size/input tests | Ghostty/tmux graphical inspection |
 | Download queue, pause/cancel/remove/retry/reorder | Implemented; generations reject stale results | Long real-media and disk-full tests on CachyOS |
-| Native download/playback extraction | Pinned yt-dlp-rs, isolated worker; default | Many YouTube videos/playlists/live/resume unsupported upstream; explicit fallback retained |
-| yt-dlp fallback | Explicit per-job/action/CLI/global selection | Real YouTube challenge/version checks |
+| Native download/playback extraction | Pinned yt-dlp-rs, isolated worker; auto tries native first | Many YouTube videos/playlists/live/resume unsupported upstream; user-confirmed automatic fallback plus strict native retained |
+| yt-dlp fallback | Auto for supported limitations plus explicit per-job/action/CLI/global selection | Real YouTube challenge/version checks |
 | Format/container, conversion, metadata, cover art | Implemented | Broad codec/container fixture coverage |
 | Subtitles | Native literal-language selection, manual/automatic sidecars and embedding; explicit fallback also supported | Live captions and broader codec/container acceptance (real FFmpeg fixture passes) |
 | SponsorBlock, chapter split, bandwidth | Native pacing, chapter parsing/embedding/splitting and SponsorBlock mark/cut adapters; explicit fallback also supported | Live YouTube/API and broader codec coverage; cuts with subtitles require fallback; chapter copies can round to keyframes |
@@ -33,7 +33,7 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | Statistics/history filters | Dedicated searchable/filterable panel with recorded transfer/media totals | Broader statistics and physical disk inventory are optional |
 | Offline library and local resume | Existing completed-media catalog, explicit local resume, private bounded positions and `--offline` mode | Actual mpv/device acceptance and additional codec/filesystem coverage |
 | MPRIS and lyrics | Optional feature ideas | Not required for this alpha; separate work |
-| General settings | Eight categories, 50 fields, choices, switches, mouse Save/Cancel and validated persistence; every category/size/theme tested | Real desktop preferences and account/keyring acceptance |
+| General settings | Nine categories, 53 fields, choices, switches, mouse Save/Cancel and validated persistence; every category/size/theme tested | Real desktop preferences and account/keyring acceptance |
 | Packaging/installer | Default Rust installer publishes both ytui and ytui-rs; old Python sources/package/tests removed; Rust screenshot tooling | Signed release packages and stable desktop acceptance |
 
 `clipboard_watcher`, `notifications` and `notification_sound` now have Rust effects
@@ -52,3 +52,16 @@ automatically after the instance lock is acquired.
 The default installer and repository application are Rust at the user's explicit
 request. Live desktop/account release gates remain open. The optional external
 yt-dlp executable is retained as the previously requested explicit fallback.
+
+## Alpha.5 navigation/playback update
+
+- F2 Actions and parameter forms replace the bottom command entry; nine settings
+  sections / 53 fields and three download sections expose the controls.
+- Size-aware memory/disk thumbnails, nearby prefetch, section/category parsing and
+  background continuation keep browsing selection stable.
+- Persistent volume/mute/speed, batched IPC, direct live station selection, song
+  continuation, player/timeline controls and a bundled mpv window menu are implemented.
+- Read-only playback SponsorBlock provides marks, configurable skip and undo without
+  cutting source media. Direct extraction does not run the website ad player.
+- Current live and desktop acceptance boundaries are in VALIDATION.md; no claim of
+  full YouTube website/player parity or all bugs fixed is made.

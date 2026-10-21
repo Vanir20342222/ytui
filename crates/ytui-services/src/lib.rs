@@ -14,6 +14,7 @@ pub mod process;
 pub mod profiles;
 pub mod queue_import;
 pub mod radio;
+pub mod sponsorblock;
 pub mod store;
 #[cfg(test)]
 mod test_http;

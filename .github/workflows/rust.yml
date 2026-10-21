@@ -1,7 +1,7 @@
 name: Rust
 on:
   push:
-    branches: [main, 'rewrite/**']
+    branches: [main, 'rewrite/**', 'improve/**']
   pull_request:
 permissions:
   contents: read
@@ -18,7 +18,9 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
       - name: Install real-media fixture tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg lua5.4
+      - name: Check mpv window menu with a synthetic API
+        run: lua5.4 crates/ytui-services/tests/player_menu.lua
       - name: Verify native cuts, chapters and splitting with FFmpeg
         env:
           NO_PROXY: 127.0.0.1,localhost

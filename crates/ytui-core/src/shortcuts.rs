@@ -38,6 +38,20 @@ pub enum Action {
     Fallback,
     Resume,
     Feeds,
+    ToggleHints,
+    PlayerMenu,
+    Categories,
+    Tracks,
+    SpeedUp,
+    SpeedDown,
+    Fullscreen,
+    CycleAudio,
+    CycleSubtitles,
+    ToggleSubtitles,
+    NextChapter,
+    PreviousChapter,
+    SponsorToggle,
+    SponsorUndo,
 }
 impl Action {
     pub fn name(self) -> &'static str {
@@ -55,6 +69,66 @@ impl Action {
     }
 }
 pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
+    (
+        "f1",
+        Action::ToggleHints,
+        "toggle_hints",
+        "Show / hide shortcut hints",
+    ),
+    ("f2", Action::Command, "command", "Actions panel"),
+    ("o", Action::PlayerMenu, "player_menu", "Player controls"),
+    (
+        "f3",
+        Action::Categories,
+        "categories",
+        "YouTube / Music categories",
+    ),
+    ("l", Action::Tracks, "tracks", "Station track library"),
+    (">", Action::SpeedUp, "speed_up", "Speed +0.25"),
+    ("<", Action::SpeedDown, "speed_down", "Speed -0.25"),
+    (
+        "z",
+        Action::Fullscreen,
+        "fullscreen",
+        "Toggle video fullscreen",
+    ),
+    ("a", Action::CycleAudio, "cycle_audio", "Next audio track"),
+    (
+        "c",
+        Action::CycleSubtitles,
+        "cycle_subtitles",
+        "Next subtitle track",
+    ),
+    (
+        "V",
+        Action::ToggleSubtitles,
+        "toggle_subtitles",
+        "Show / hide subtitles",
+    ),
+    (
+        "ctrl+right",
+        Action::NextChapter,
+        "next_chapter",
+        "Next chapter",
+    ),
+    (
+        "ctrl+left",
+        Action::PreviousChapter,
+        "previous_chapter",
+        "Previous chapter",
+    ),
+    (
+        "B",
+        Action::SponsorToggle,
+        "sponsor_toggle",
+        "Toggle SponsorBlock skipping",
+    ),
+    (
+        "U",
+        Action::SponsorUndo,
+        "sponsor_undo",
+        "Replay skipped segment",
+    ),
     ("b", Action::Feeds, "feeds", "Browse feeds & library"),
     (
         "u",
@@ -71,7 +145,6 @@ pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
     ("q", Action::Quit, "quit", "Quit"),
     ("?", Action::Help, "help", "Keyboard help"),
     ("/", Action::Search, "search", "Search / add URL"),
-    (":", Action::Command, "command", "Commands and feeds"),
     ("tab", Action::NextTab, "next_tab", "Next tab"),
     (
         "shift+tab",

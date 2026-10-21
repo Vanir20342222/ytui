@@ -298,7 +298,7 @@ async fn execute_inner(
         .backend
         .as_deref()
         .unwrap_or(&config.download_backend);
-    let args = if backend == "yt-dlp" {
+    let args = if backend != "native" {
         args(job, config, cookies.as_ref().map(|f| f.path()))?
     } else {
         Vec::new()
@@ -311,7 +311,7 @@ async fn execute_inner(
         let sender = tx.clone();
         let id = job.id;
         let generation = job.generation;
-        let progress = move |line: &str| {
+        let mut progress = move |line: &str| {
             if let Some(update) = parse_progress(line) {
                 let _ = sender.try_send(JobEvent {
                     id,
@@ -322,7 +322,7 @@ async fn execute_inner(
             if let Some(raw) = line.strip_prefix("YTUI_META:")
                 && let Ok(value) = serde_json::from_str::<Value>(raw)
             {
-                let update = JobUpdate::Metadata(metadata(&value, ""));
+                let update = JobUpdate::Metadata(Box::new(metadata(&value, "")));
                 let _ = sender.try_send(JobEvent {
                     id,
                     generation,
@@ -330,7 +330,7 @@ async fn execute_inner(
                 });
             }
         };
-        let result = if backend == "native" {
+        let mut result = if backend != "yt-dlp" {
             crate::native::run(
                 crate::native::WorkerRequest {
                     job: job.clone(),
@@ -341,17 +341,36 @@ async fn execute_inner(
                 },
                 &paths.state.join("auth/transient"),
                 cancel.clone(),
-                progress,
+                &mut progress,
             )
             .await
         } else {
             process::run(
                 ProcessSpec::new(&config.yt_dlp, args.clone(), 24 * 60 * 60),
                 cancel.clone(),
-                progress,
+                &mut progress,
             )
             .await
         };
+        if backend == "auto" && !cancel.is_cancelled() {
+            let limitation = match &result {
+                Ok(result) if !result.success => crate::native::fallback_eligible(&result.stderr),
+                Err(error) => crate::native::fallback_eligible(&error.to_string()),
+                _ => false,
+            };
+            if limitation {
+                ensure!(
+                    crate::paths::executable(&config.yt_dlp).is_some(),
+                    "Native extraction requires fallback. Install yt-dlp and its supported JavaScript runtime; yt-dlp was not found. F2 → Playback repair configures the executable."
+                );
+                result = process::run(
+                    ProcessSpec::new(&config.yt_dlp, args.clone(), 24 * 60 * 60),
+                    cancel.clone(),
+                    &mut progress,
+                )
+                .await;
+            }
+        }
         let error = match result {
             Ok(result) if result.success => {
                 let mut outputs = Vec::new();
@@ -361,7 +380,12 @@ async fn execute_inner(
                         && let Ok(value) = serde_json::from_str::<Value>(json)
                     {
                         resolved_media = metadata(&value, &job.media.url);
-                        send(tx, job, JobUpdate::Metadata(resolved_media.clone())).await;
+                        send(
+                            tx,
+                            job,
+                            JobUpdate::Metadata(Box::new(resolved_media.clone())),
+                        )
+                        .await;
                     }
                     if let Some(json) = line.strip_prefix("YTUI_OUTPUT:") {
                         let path: std::path::PathBuf = serde_json::from_str::<String>(json)

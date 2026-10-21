@@ -67,7 +67,7 @@ pub enum Command {
         #[arg(long)]
         tag: Option<String>,
     },
-    /// Download using native Rust by default. --backend yt-dlp explicitly selects the fallback.
+    /// Download with Rust first, falling back for supported extractor limitations in auto mode.
     Download {
         url: String,
         #[arg(long)]
@@ -146,12 +146,12 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 !network || !config.offline,
                 "Network diagnostics require network access; restart without --offline"
             );
-            println!("ytui {} · Native Rust backend", env!("CARGO_PKG_VERSION"));
+            println!("ytui {} · Rust application", env!("CARGO_PKG_VERSION"));
             println!("Executable: {}", std::env::current_exe()?.display());
             println!("Configuration: {}", paths.config_file().display());
             println!("State: {}", paths.state.display());
             println!(
-                "Backend: {} (fallback is explicit)",
+                "Backend: {} (auto uses yt-dlp for supported native limitations)",
                 config.download_backend
             );
             println!(
@@ -162,7 +162,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 ("FFmpeg", &config.ffmpeg),
                 ("FFprobe (chapters/SponsorBlock)", &config.ffprobe),
                 ("mpv", &config.mpv),
-                ("yt-dlp (optional fallback)", &config.yt_dlp),
+                ("yt-dlp (required for auto fallback)", &config.yt_dlp),
                 ("cliamp (optional)", &config.cliamp),
             ] {
                 println!(

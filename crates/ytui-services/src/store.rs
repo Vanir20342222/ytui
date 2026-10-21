@@ -108,6 +108,15 @@ impl Store {
         self.tx.send(Request::Load(tx)).await?;
         rx.await?
     }
+    /// Queue one bounded background save; the interface awaits its acknowledgement
+    /// independently of keyboard input and never queues overlapping snapshots.
+    pub fn begin_save(&self, snapshot: Snapshot) -> Result<oneshot::Receiver<Result<()>>> {
+        let (tx, rx) = oneshot::channel();
+        self.tx
+            .try_send(Request::Save(Box::new(snapshot), tx))
+            .map_err(|_| anyhow::anyhow!("State save worker is busy or unavailable"))?;
+        Ok(rx)
+    }
     pub async fn save(&self, snapshot: Snapshot) -> Result<()> {
         let (tx, rx) = oneshot::channel();
         self.tx.send(Request::Save(Box::new(snapshot), tx)).await?;

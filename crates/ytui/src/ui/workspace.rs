@@ -58,6 +58,7 @@ fn inset(area: Rect) -> Rect {
 pub fn render(f: &mut Frame, app: &mut App) {
     let area = f.area();
     app.image_area = Rect::default();
+    app.card_areas.clear();
     app.hit_targets.clear();
     f.render_widget(
         Block::default()
@@ -79,7 +80,7 @@ pub fn render(f: &mut Frame, app: &mut App) {
         app.feeds_focused = false;
         compact_workspace(f, app, area);
     }
-    if app.modal.is_some() {
+    if app.modal.is_some() || app.input.is_some() {
         for cell in &mut f.buffer_mut().content {
             let fade = |color| match color {
                 Color::Rgb(r, g, b) => {
@@ -99,7 +100,11 @@ pub fn render(f: &mut Frame, app: &mut App) {
                 fade(cell.bg)
             });
         }
-        modal(f, app, area);
+        if app.modal.is_some() {
+            modal(f, app, area);
+        } else {
+            super::menus::search(f, app, centered(area, 90, 8));
+        }
     }
 }
 fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
@@ -111,11 +116,11 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
         Constraint::Length(if area.height < 18 {
             1
         } else if !compact && app.player_status.active {
-            4
+            6
         } else {
             3
         }),
-        Constraint::Length(if app.input.is_some() { 3 } else { 2 }),
+        Constraint::Length(if app.config.show_hints { 2 } else { 1 }),
     ])
     .split(area);
     header(f, app, chunks[0]);
@@ -183,14 +188,14 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
 fn wide_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     let rows = Layout::vertical([
         Constraint::Min(10),
-        Constraint::Length(if app.input.is_some() { 3 } else { 2 }),
+        Constraint::Length(if app.config.show_hints { 2 } else { 1 }),
     ])
     .split(area);
     let cols = Layout::horizontal([Constraint::Length(34), Constraint::Min(40)]).split(rows[0]);
     sidebar(f, app, cols[0]);
     let main = Layout::vertical([
         Constraint::Min(8),
-        Constraint::Length(if app.player_status.active { 4 } else { 3 }),
+        Constraint::Length(if app.player_status.active { 6 } else { 3 }),
     ])
     .split(cols[1]);
     if app.tab == 0 {
@@ -358,33 +363,46 @@ fn header(f: &mut Frame, app: &App, area: Rect) {
         cols[1],
     );
 }
-fn footer(f: &mut Frame, app: &App, area: Rect) {
-    if let Some(input) = &app.input {
-        let title = if input.command {
-            " Command "
-        } else if app.offline {
-            " Search downloaded media "
-        } else if app.tab == 0 {
-            " Paste a URL or search YouTube "
-        } else {
-            " Search or paste a URL "
-        };
-        let block = panel(title, app).border_style(style(app, app.palette.accent));
-        let inner = block.inner(area);
-        let (text, cursor) = viewport(
-            &input.editor.text,
-            input.editor.cursor,
-            inner.width.saturating_sub(1),
-        );
-        f.render_widget(Paragraph::new(text).block(block), area);
-        f.set_cursor_position((inner.x + cursor, inner.y));
-        return;
-    }
+fn footer(f: &mut Frame, app: &mut App, area: Rect) {
     let rows = Layout::vertical([Constraint::Length(1), Constraint::Length(1)]).split(area);
+    let cols = Layout::horizontal([
+        Constraint::Min(1),
+        Constraint::Length(if area.width >= 80 { 47 } else { 27 }),
+    ])
+    .split(rows[0]);
+    let buttons: &[(Action, &str)] = if area.width >= 80 {
+        &[
+            (Action::Command, "Actions"),
+            (Action::Settings, "Settings"),
+            (Action::PlayerMenu, "Player"),
+            (Action::ToggleHints, "Hints"),
+        ]
+    } else {
+        &[
+            (Action::Command, "Menu"),
+            (Action::Settings, "Settings"),
+            (Action::ToggleHints, "Hints"),
+        ]
+    };
+    let mut x = cols[1].x;
+    for (action, label) in buttons {
+        let label = format!(" {} {label} ", key(app, *action));
+        let width = (label.width() as u16).min(cols[1].right().saturating_sub(x));
+        let rect = Rect::new(x, cols[1].y, width, 1);
+        f.render_widget(
+            Paragraph::new(label).style(style(app, app.palette.accent)),
+            rect,
+        );
+        app.hit_targets.push((rect, HitTarget::Action(*action)));
+        x += width;
+    }
     f.render_widget(
         Paragraph::new(format!(" {}", app.status)).style(style(app, app.palette.muted)),
-        rows[0],
+        cols[0],
     );
+    if !app.config.show_hints {
+        return;
+    }
     let mut entries = if app.feeds_focused {
         vec![
             (Action::Up, "previous"),
@@ -730,7 +748,30 @@ fn empty(f: &mut Frame, app: &App, area: Rect, title: &str, message: &str) {
 }
 fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     let view = &app.tabs[app.tab];
-    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).split(area);
+    let category_rows = if view.page.categories.is_empty() {
+        2
+    } else {
+        3
+    };
+    let chunks =
+        Layout::vertical([Constraint::Length(category_rows), Constraint::Min(1)]).split(area);
+    if !view.page.categories.is_empty() {
+        let mut x = area.x + 1;
+        for (index, category) in view.page.categories.iter().enumerate() {
+            let width = (category.title.width() as u16 + 4).min(area.width.saturating_sub(2));
+            if x + width > area.right() {
+                break;
+            }
+            let rect = Rect::new(x, area.y + 2, width, 1);
+            f.render_widget(
+                Paragraph::new(format!(" {} ", category.title))
+                    .style(style(app, app.palette.accent).bg(themed(app, app.palette.surface))),
+                rect,
+            );
+            app.hit_targets.push((rect, HitTarget::Category(index)));
+            x += width + 1;
+        }
+    }
     let heading = Layout::horizontal([
         Constraint::Min(10),
         Constraint::Length(if area.width > 65 { 23 } else { 10 }),
@@ -794,11 +835,7 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     }
     let wide = area.width >= 100 && area.height >= 17;
     let cols = Layout::horizontal([
-        Constraint::Percentage(if wide {
-            if app.sidebar_visible { 40 } else { 62 }
-        } else {
-            100
-        }),
+        Constraint::Percentage(if wide { 74 } else { 100 }),
         Constraint::Min(0),
     ])
     .split(chunks[1]);
@@ -834,14 +871,15 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     let list_area = block.inner(cols[0]);
     f.render_widget(block, cols[0]);
     app.hit_targets.push((cols[0], HitTarget::Catalog));
-    let height = if app.sidebar_visible {
-        2
+    let cards = area.height >= 24 && list_area.width >= 65 && app.tab != 3;
+    let height = if cards {
+        8
     } else if list_area.height < 12 {
         3u16
     } else {
         4
     };
-    let columns = if !app.sidebar_visible && list_area.width >= 110 {
+    let columns = if cards && list_area.width >= 110 {
         2
     } else {
         1usize
@@ -892,6 +930,39 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
             },
             if favorite { " · saved" } else { "" }
         );
+        let text_x = if cards
+            && app.config.thumbnails
+            && app.config.image_protocol != "none"
+            && !item.thumbnail.is_empty()
+        {
+            let (fw, fh) = app.picker.font_size();
+            let aspect = if app.tab == 2 { 1.0 } else { 16.0 / 9.0 };
+            let image_width =
+                ((height - 1) as f64 * fh as f64 * aspect / fw.max(1) as f64).round() as u16;
+            let image_width = image_width.min(row.width / 2).max(1);
+            let image_area = Rect::new(row.x + 2, row.y, image_width, height - 1);
+            app.card_areas.push((index, image_area));
+            let key = app.card_key(item, image_area);
+            if app.modal.is_none()
+                && let Some(image) = app.card_images.get(&key)
+            {
+                f.render_widget(Image::new(image), image_area);
+            } else {
+                f.render_widget(
+                    Block::default().style(Style::default().bg(themed(app, app.palette.surface))),
+                    image_area,
+                );
+            }
+            image_area.right() + 2
+        } else {
+            row.x + 2
+        };
+        let section = if item.section.is_empty() {
+            String::new()
+        } else {
+            format!(" · {}", item.section)
+        };
+        let meta = format!("{meta}{section}");
         let lines = if height <= 3 {
             vec![
                 Line::styled(
@@ -925,7 +996,12 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         };
         f.render_widget(
             Paragraph::new(lines).style(Style::default().bg(bg)),
-            Rect::new(row.x + 2, row.y, row.width.saturating_sub(3), row.height),
+            Rect::new(
+                text_x,
+                row.y,
+                row.right().saturating_sub(text_x + 1),
+                row.height,
+            ),
         );
     }
     if wide {
@@ -943,18 +1019,24 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
         && app.config.image_protocol != "none"
         && !media.thumbnail.is_empty()
         && app.modal.is_none();
+    let (font_width, font_height) = app.picker.font_size();
+    let aspect = if app.tab == 2 { 1.0 } else { 16.0 / 9.0 };
     let image_height = if show_image {
-        (inner.width * 9 / 32)
-            .min(if app.sidebar_visible { 20 } else { 11 })
-            .min(inner.height.saturating_sub(8))
+        (inner.width as f64 * font_width as f64 / font_height.max(1) as f64 / aspect).round() as u16
+    } else {
+        0
+    };
+    let image_height = if show_image {
+        image_height.min(14).min(inner.height.saturating_sub(8))
     } else {
         0
     };
     let text_y = if image_height > 0 {
         let (font_width, font_height) = app.picker.font_size();
-        let image_width =
-            (image_height as u32 * font_height as u32 * 16 / 9 / font_width.max(1) as u32)
-                .min(inner.width as u32) as u16;
+        let image_width = ((image_height as f64 * font_height as f64 * aspect
+            / font_width.max(1) as f64)
+            .round() as u32)
+            .min(inner.width as u32) as u16;
         let rect = Rect::new(
             inner.x + (inner.width - image_width) / 2,
             inner.y,
@@ -966,7 +1048,7 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
             f.render_widget(Image::new(image), rect);
         } else {
             f.render_widget(
-                Paragraph::new(app.image_error.as_deref().unwrap_or("Loading thumbnail…"))
+                Paragraph::new(app.image_error.as_deref().unwrap_or(""))
                     .centered()
                     .style(style(app, app.palette.muted).bg(themed(app, app.palette.surface))),
                 rect,
@@ -1021,7 +1103,7 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
                 regions[1].width,
             ),
             Line::styled(
-                " :watch add 30m · watch new items",
+                " F2 → Library → Watch collection",
                 style(app, app.palette.muted),
             ),
         ]
@@ -1042,7 +1124,7 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
     };
     f.render_widget(Paragraph::new(actions), regions[1]);
 }
-fn playback(f: &mut Frame, app: &App, area: Rect) {
+fn playback(f: &mut Frame, app: &mut App, area: Rect) {
     let status = &app.player_status;
     if status.preview {
         let message = format!(" Muted preview · 10s · {} closes", key(app, Action::Back));
@@ -1111,12 +1193,22 @@ fn playback(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(block, area);
     if let Some(error) = &status.error {
         f.render_widget(
-            Paragraph::new(error.as_str()).style(style(app, app.palette.error)),
+            Paragraph::new(format!(
+                "{error}\nF2 → Playback repair · Y retry with yt-dlp · , settings"
+            ))
+            .wrap(Wrap { trim: true })
+            .style(style(app, app.palette.error)),
             inner,
         );
     } else if status.active {
-        let rows = Layout::vertical([Constraint::Length(1), Constraint::Length(1)]).split(inner);
-        let right_width = if inner.width > 60 { 24 } else { 14 };
+        let rows = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Length(1),
+            Constraint::Length(1),
+            Constraint::Min(0),
+        ])
+        .split(inner);
+        let right_width = if inner.width > 60 { 39 } else { 14 };
         let cols = Layout::horizontal([Constraint::Min(1), Constraint::Length(right_width)])
             .split(rows[0]);
         f.render_widget(
@@ -1135,7 +1227,12 @@ fn playback(f: &mut Frame, app: &App, area: Rect) {
         );
         f.render_widget(
             Paragraph::new(if inner.width > 60 {
-                format!("{timing}  ·  {:.0}%", status.volume)
+                format!(
+                    "{timing} · {:.0}%{} · {:.2}×",
+                    status.volume,
+                    if status.muted { " M" } else { "" },
+                    status.speed
+                )
             } else {
                 timing
             })
@@ -1144,11 +1241,36 @@ fn playback(f: &mut Frame, app: &App, area: Rect) {
             cols[1],
         );
         if let Some(duration) = status.duration.filter(|d| d.is_finite() && *d > 0.0) {
-            f.render_widget(
-                Paragraph::new(meter(status.position / duration, inner.width as usize))
-                    .style(style(app, app.palette.accent)),
-                rows[1],
-            );
+            let mut spans = Vec::new();
+            for column in 0..inner.width {
+                let seconds = (column as f64 + 0.5) / inner.width.max(1) as f64 * duration;
+                let marked = status
+                    .segments
+                    .iter()
+                    .any(|s| seconds >= s.start && seconds < s.end);
+                spans.push(Span::styled(
+                    if seconds <= status.position {
+                        "█"
+                    } else if marked {
+                        "▒"
+                    } else {
+                        "░"
+                    },
+                    style(
+                        app,
+                        if marked {
+                            app.palette.warning
+                        } else if seconds <= status.position {
+                            app.palette.accent
+                        } else {
+                            app.palette.muted
+                        },
+                    )
+                    .add_modifier(Modifier::BOLD),
+                ));
+            }
+            f.render_widget(Paragraph::new(Line::from(spans)), rows[1]);
+            app.hit_targets.push((rows[1], HitTarget::Timeline));
         } else {
             f.render_widget(
                 Paragraph::new(if status.buffering {
@@ -1158,6 +1280,60 @@ fn playback(f: &mut Frame, app: &App, area: Rect) {
                 })
                 .style(style(app, app.palette.accent)),
                 rows[1],
+            );
+        }
+        if rows[2].height > 0 {
+            let controls = [
+                (Action::PreviousTrack, "[ Previous ]"),
+                (
+                    Action::Pause,
+                    if status.paused {
+                        "[ Play ]"
+                    } else {
+                        "[ Pause ]"
+                    },
+                ),
+                (Action::NextTrack, "[ Next ]"),
+                (
+                    Action::Mute,
+                    if status.muted {
+                        "[ Unmute ]"
+                    } else {
+                        "[ Mute ]"
+                    },
+                ),
+                (Action::PlayerMenu, "[ Controls ]"),
+                (Action::SponsorUndo, "[ Replay skip ]"),
+            ];
+            let mut x = rows[2].x;
+            for (action, label) in controls {
+                let width = label.len() as u16 + 1;
+                if x + width > rows[2].right() {
+                    break;
+                }
+                let rect = Rect::new(x, rows[2].y, width, 1);
+                f.render_widget(
+                    Paragraph::new(label).style(style(app, app.palette.accent)),
+                    rect,
+                );
+                app.hit_targets.push((rect, HitTarget::Action(action)));
+                x += width;
+            }
+        }
+        if rows[3].height > 0 {
+            f.render_widget(
+                Paragraph::new(status.notice.clone().unwrap_or_else(|| {
+                    format!(
+                        "SponsorBlock {} · B toggle · U replay · o all controls",
+                        if status.sponsor_enabled {
+                            "skip"
+                        } else {
+                            "marks only"
+                        }
+                    )
+                }))
+                .style(style(app, app.palette.warning)),
+                rows[3],
             );
         }
     } else {

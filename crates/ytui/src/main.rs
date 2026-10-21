@@ -164,6 +164,7 @@ async fn interface(
     let mut tick = tokio::time::interval(Duration::from_millis(50));
     tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut last_save = Instant::now();
+    let mut pending_save: Option<tokio::sync::oneshot::Receiver<Result<()>>> = None;
     let mut last_draw = Instant::now() - Duration::from_millis(16);
     #[cfg(unix)]
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
@@ -184,6 +185,7 @@ async fn interface(
                 Some(Ok(Event::Mouse(mouse)))=>app.mouse(mouse),
                 Some(Err(e))=>return Err(e.into()),None=>app.quit=true,_=>{}
             },
+            saved=async {pending_save.as_mut().expect("guarded pending save").await},if pending_save.is_some()=>{saved??;pending_save=None;},
             Some(event)=job_rx.recv()=>{
                 app.job_event(event);
             },
@@ -194,8 +196,8 @@ async fn interface(
             },
             _=tick.tick()=>{
                 app.tick().await;
-                if player.status.has_changed().unwrap_or(false){app.player_update(player.status.borrow_and_update().clone());}
-                if app.dirty&&last_save.elapsed()>Duration::from_millis(500){if let Some(store)=store{store.save(app.snapshot.clone()).await?;}app.dirty=false;last_save=Instant::now();}
+                if player.status.has_changed().unwrap_or(false){let status=player.status.borrow_and_update().clone();if !app.demo {app.player_update(status);}}
+                if app.dirty&&pending_save.is_none()&&last_save.elapsed()>Duration::from_millis(500){if let Some(store)=store{pending_save=Some(store.begin_save(app.snapshot.clone())?);}app.dirty=false;last_save=Instant::now();}
             },
             _=tokio::signal::ctrl_c()=>app.quit=true,
             _=terminate.recv()=>app.quit=true,
@@ -278,6 +280,12 @@ mod tests {
     #[tokio::test]
     async fn all_tabs_and_modals_render_at_supported_sizes() {
         let (mut a, _rx, _temp) = fixture().await;
+        for tab in 1..4 {
+            a.tabs[tab].page.categories = vec![ytui_core::Category {
+                title: "Fixture category".into(),
+                request: ytui_core::BrowseRequest::Search("fixture".into()),
+            }];
+        }
         for name in ytui_services::theme::THEMES {
             a.palette = ytui_services::theme::builtin(name).unwrap();
             for (w, h) in [(80, 24), (120, 40), (180, 50), (35, 12), (212, 58)] {
@@ -299,6 +307,17 @@ mod tests {
                     }
                 }
                 for modal in [
+                    app::Modal::Actions {
+                        selected: 0,
+                        query: ytui::editor::Editor::default(),
+                    },
+                    app::Modal::Categories(0),
+                    app::Modal::Form(Box::new(forms::Form::action(
+                        ytui::actions::ENTRIES
+                            .iter()
+                            .find(|entry| entry.command == "add")
+                            .unwrap(),
+                    ))),
                     app::Modal::Feeds(0),
                     app::Modal::Help(0),
                     app::Modal::Themes(0),
@@ -455,11 +474,11 @@ mod tests {
         let rect = a
             .hit_targets
             .iter()
-            .find(|(_, t)| matches!(t, HitTarget::Item(10)))
+            .find(|(_, t)| matches!(t, HitTarget::Item(4)))
             .unwrap()
             .0;
         click(&mut a, rect);
-        assert_eq!(a.tabs[a.tab].selected, 10);
+        assert_eq!(a.tabs[a.tab].selected, 4);
         a.modal = Some(app::Modal::Help(0));
         let rect = a
             .hit_targets

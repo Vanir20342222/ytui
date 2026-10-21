@@ -1,6 +1,6 @@
 # ytui Rust rewrite plan
 
-Status: PRs #5 and #6 are merged into the PR #4 media branch. The alpha.4 Rust-only transition and general settings window are on `rewrite/rust-only-settings`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
+Status: PRs #5, #6 and #7 are merged into the PR #4 media branch. Alpha.5 playback/navigation work is on `improve/playback-navigation`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
@@ -23,7 +23,9 @@ Confirmed by the user:
 - Keep a terminal UI, inline thumbnails, and mpv video playback.
 - Rust owns the application; mpv and FFmpeg are external tools. The user later
   selected **native Rust extraction by default**, using aagedal/yt-dlp-rs, with
-  an **explicit yt-dlp fallback**. Never switch to Python automatically.
+  an **explicit yt-dlp fallback** initially. In the alpha.5 follow-up the user
+  confirmed recommending an `auto` mode: Rust first, external yt-dlp for supported
+  extractor limitations. Explicit strict-native and yt-dlp modes remain available.
 - Provide Downloads, YouTube, YouTube Music, and Cliamp / Radio tabs.
 - Support browser-cookie sign-in, a configurable video-preview shortcut,
   attractive themes, and automatic system-theme following.
@@ -344,14 +346,15 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Default Rust installer with both launcher names, migration/gap inventory, 85 default tests plus real-media fixture, opt-in live probes and 43 native WQHD captures. | Repository transition authorized/completed; stable desktop/account release gate remains open. |
+| M8 | Default Rust installer with both launcher names, migration/gap inventory, 94 default tests plus real-media fixture, opt-in live probes and 50 native WQHD captures. | Repository transition authorized/completed; stable desktop/account release gate remains open. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
 Python yt-dlp: native YouTube coverage, playlist support and cross-process resume
 are limited. Native subtitles, pacing, SponsorBlock and chapter adapters now exist;
-unsupported codec/caption combinations still require an explicit fallback. The user's native-default preference changes the original
-resume/reliability gate; do not present unsupported native behavior as completed.
+unsupported codec/caption combinations need the fallback. The user confirmed
+automatic fallback for supported native limitations in this follow-up; strict
+native mode remains available. Do not present unverified live behavior as completed.
 See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 
 ### Parity follow-up (M1/M2/M6/M7/M8)
@@ -586,3 +589,10 @@ check each dependency or copied component's actual license before incorporation.
   palette schema, mode, staged replacements, current state location and older compatibility.
 - [XDG Settings portal](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Settings.html):
   desktop appearance hints and change notifications.
+
+## Alpha.5 follow-up (M3–M8)
+
+See [the coordinated playback/navigation plan](docs/PLAYBACK_NAVIGATION_PLAN.md)
+for the user report, confirmed auto fallback change, implementation and evidence.
+The bottom command entry is replaced by Actions/forms. Native upstream restrictions
+and failed live checks remain visible instead of being described as passed features.

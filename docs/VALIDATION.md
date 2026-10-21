@@ -3,11 +3,63 @@
 Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. All automated application tests use synthetic/offline data.
 
+
+## Alpha.5 playback/navigation evidence
+
+This supersedes alpha.4 UI/backend descriptions lower in this historical record.
+The user confirmed automatic yt-dlp fallback for native extraction limitations.
+Existing explicit backend settings are preserved; new configs recommend `auto`.
+
+- 94 deterministic Cargo tests pass, plus the separate real FFmpeg fixture.
+- 1,170 settings and 390 categorized-download states cover 13 themes / five sizes.
+  Actual PTY interactions exercise Actions, forms, popups, Unicode, resize and
+  terminal restoration. 50 WQHD captures are generated with Rust, using fictional
+  data and a fictional active player strip.
+- Regression checks cover one-shot auto fallback/strict native, sized/coalesced
+  thumbnail memory/disk cache/restart, continuation deduplication/selection,
+  station-vs-track selection, next-song queueing, player preference persistence,
+  batched IPC IDs/timeouts, SponsorBlock filtering/overlap/replay and auth-free API.
+- Bundled player menu syntax/navigation/quality/audio/SponsorBlock/close passes a
+  Lua 5.4 test with a synthetic mp API. CI installs Lua and runs the same test.
+- All four opt-in live YouTube tests were run again and **failed**: three at proxy
+  tunnel connection, the native video transfer at its HTTP request. A separate
+  public watch-page curl returned HTTP 403. No cookies or network bypass were used.
+- Live Cliamp catalog and Lofi track-library HTTP requests succeeded. A real mpv
+  stream probe decoded three seconds of Lofi (44.1 kHz stereo) through the configured
+  proxy into null audio output; startup, time progression and clean EOF were checked.
+  Actual device output, metadata refresh and reconnect remain open.
+- Public SponsorBlock lookup for the yt-dlp test video returned HTTP 404 (no stored
+  segments). Live marked-video skipping was not claimed; API parsing/replay are
+  covered by loopback requests and real mpv synthetic marks.
+- Real Ghostty image protocols, signed-in Brave Origin/keyring, Proton routing,
+  graphical mpv window interaction and audio/video output remain target gates.
+  Terminal moving video is not enabled. Browser categories are supported where
+  the server supplies a recognized response; they are not hardcoded website clones.
+
+A real mpv 0.40 headless regression passed separately using generated MKV media
+with two audio streams and subtitles. It checks production startup/IPC, pause within
+500 ms, volume/mute/speed, seek, audio/subtitle tracks/visibility, the bundled Lua
+menu and quality re-resolution with pause/preferences preserved, SponsorBlock
+skip/undo and source-byte preservation. The Debian binary and six runtime packages
+were unpacked under /tmp; no system installation or browser/session was used.
+Null audio/video outputs exercise real decoding/control without a display/device.
+
+Reproduce with current mpv and FFmpeg installed:
+
+```sh
+YTUI_TEST_MPV=/usr/bin/mpv cargo test -p ytui-services --locked real_mpv_ -- --ignored
+```
+
+Reproduce the Lua check with `lua5.4 crates/ytui-services/tests/player_menu.lua`.
+Locally it was executed through installed liblua5.4 with the same synthetic API;
+no production Python dependency was added. Re-run failed live checks explicitly:
+`cargo test -p ytui --test live_youtube --locked -- --ignored --nocapture`.
+
 ## Completed
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --locked -- -D warnings`
-- `cargo test --workspace --locked`: **85 passed**, zero failures; one real-media and four live-YouTube tests are explicitly ignored in this command.
+- `cargo test --workspace --locked`: **94 passed**, zero failures; two media tests and four live-YouTube tests are explicitly ignored in this command.
 - `NO_PROXY=127.0.0.1,localhost cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored`: **1 passed** using generated media, real FFmpeg/ffprobe and a synthetic loopback SponsorBlock service. CI now runs this check separately.
 - `cargo build --release --locked`: optimized Linux binary produced.
 - `bash -n install-rust.sh`
@@ -203,7 +255,7 @@ The real-executable Rust PTY test opens, checks and dismisses these surfaces:
 | --- | --- |
 | Help | `:help`; Keyboard & commands title |
 | Theme chooser | `:theme`; all themes additionally applied during capture |
-| General settings | `:settings`; all eight sections, narrow layouts, Unicode input |
+| General settings | `,`; all nine sections, narrow layouts, Unicode input |
 | Keybinding editor | `:keys`; key validation also covered by form tests |
 | Browser/account form | `:auth`; opens/cancels without reading a profile in demo |
 | Download options | `:add URL`; audio/video/playlist options have controller tests |
@@ -216,7 +268,7 @@ The real-executable Rust PTY test opens, checks and dismisses these surfaces:
 | Text/diagnostics/update | `:log`, `:update`; real terminal title and dismissal |
 
 Separate settings tests render first and last fields in all eight categories,
-all 13 themes and five sizes (1,040 states). Every one of the 50 fields belongs
+all 13 themes and five sizes (1,170 states). Every one of the 53 fields belongs
 to exactly one category. Tests verify draft roundtrips, new defaults, choice and
 toggle editing, invalid-save recovery, Esc/Cancel, mouse categories/fields/buttons
 and actual asynchronous file persistence. Actual PTY resize covers 212×58,

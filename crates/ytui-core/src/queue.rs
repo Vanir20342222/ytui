@@ -95,7 +95,7 @@ impl Job {
 #[derive(Clone, Debug)]
 pub enum JobUpdate {
     Phase(JobState),
-    Metadata(Media),
+    Metadata(Box<Media>),
     Progress(Progress),
     Output(PathBuf),
     Finished,
@@ -147,7 +147,13 @@ impl DownloadQueue {
                     media.id = job.media.id.clone();
                 }
                 media.kind = job.media.kind;
-                job.media = media;
+                if media.thumbnails.is_empty() {
+                    media.thumbnails = job.media.thumbnails.clone();
+                }
+                if media.section.is_empty() {
+                    media.section = job.media.section.clone();
+                }
+                job.media = *media;
             }
             JobUpdate::Progress(progress) => {
                 if job.state == JobState::Resolving {
@@ -204,7 +210,7 @@ mod tests {
         assert!(!q.apply(JobEvent {
             id,
             generation: 0,
-            update: JobUpdate::Metadata(Media::default())
+            update: JobUpdate::Metadata(Box::default())
         }));
         assert!(q.jobs.is_empty());
     }
