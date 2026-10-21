@@ -7,7 +7,7 @@ mod ui;
 
 use anyhow::Result;
 use clap::Parser;
-use crossterm::event::{Event, EventStream, KeyEventKind, MouseEventKind};
+use crossterm::event::{Event, EventStream, KeyEventKind};
 use futures_util::StreamExt;
 use ratatui::{Terminal, backend::CrosstermBackend};
 use ratatui_image::picker::{Picker, ProtocolType};
@@ -49,7 +49,11 @@ async fn entry() -> Result<()> {
     paths.config_override = args.config.clone();
     paths.create()?;
     let mut config = if let Some(path) = &args.config {
-        toml::from_str::<Config>(&std::fs::read_to_string(path)?)?
+        if matches!(&args.command, Some(cli::Command::Init)) && !path.try_exists()? {
+            Config::default()
+        } else {
+            toml::from_str::<Config>(&std::fs::read_to_string(path)?)?
+        }
     } else {
         paths.load_config()?
     };
@@ -175,10 +179,7 @@ async fn interface(
                 Some(Ok(Event::Key(key))) if key.kind!=KeyEventKind::Release=>app.key(key),
                 Some(Ok(Event::Paste(text)))=>app.paste(&text),
                 Some(Ok(Event::Resize(_, _)))=>{app.image=None;app.redraw=true;},
-                Some(Ok(Event::Mouse(mouse))) if app.modal.is_none()&&app.input.is_none()=>match mouse.kind{
-                    MouseEventKind::ScrollDown=>app.move_selection(1),MouseEventKind::ScrollUp=>app.move_selection(-1),
-                    MouseEventKind::Down(_) if mouse.row>=2&&mouse.row<5=>{let width=terminal.size()?.width;let tab=if mouse.column<width*23/100{0}else if mouse.column<width*46/100{1}else if mouse.column<width*69/100{2}else{3};app.change_tab(tab);},_=>{}
-                },
+                Some(Ok(Event::Mouse(mouse)))=>app.mouse(mouse),
                 Some(Err(e))=>return Err(e.into()),None=>app.quit=true,_=>{}
             },
             Some(event)=job_rx.recv()=>{
@@ -275,34 +276,405 @@ mod tests {
     #[tokio::test]
     async fn all_tabs_and_modals_render_at_supported_sizes() {
         let (mut a, _rx, _temp) = fixture().await;
-        for (w, h) in [(80, 24), (120, 40), (180, 50), (35, 12)] {
-            let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
-            for tab in 0..4 {
-                a.change_tab(tab);
-                terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        for name in ytui_services::theme::THEMES {
+            a.palette = ytui_services::theme::builtin(name).unwrap();
+            for (w, h) in [(80, 24), (120, 40), (180, 50), (35, 12), (212, 58)] {
+                let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
+                for tab in 0..4 {
+                    a.change_tab(tab);
+                    terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+                    if *name == "terminal" {
+                        assert!(
+                            terminal
+                                .backend()
+                                .buffer()
+                                .content
+                                .iter()
+                                .all(|cell| !matches!(cell.fg, ratatui::style::Color::Rgb(..))
+                                    && !matches!(cell.bg, ratatui::style::Color::Rgb(..))),
+                            "ANSI workspace must use terminal colors"
+                        );
+                    }
+                }
+                for modal in [
+                    app::Modal::Feeds(0),
+                    app::Modal::Help(0),
+                    app::Modal::Themes(0),
+                    app::Modal::Form(Box::new(forms::Form::settings(a.config.clone()))),
+                    app::Modal::Form(Box::new(forms::Form::auth())),
+                    app::Modal::Queue(0),
+                    app::Modal::History(Default::default()),
+                    app::Modal::Groups(0),
+                    app::Modal::Resume(0),
+                    app::Modal::Watches(0),
+                    app::Modal::Text {
+                        title: "VPN connections".into(),
+                        lines: vec!["Fixture".into()],
+                        offset: 0,
+                    },
+                    app::Modal::Form(Box::new(forms::Form::keys(a.config.clone()))),
+                ] {
+                    a.modal = Some(modal);
+                    terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+                    a.modal = None;
+                }
             }
-            for modal in [
-                app::Modal::Help(0),
-                app::Modal::Themes(0),
-                app::Modal::Form(Box::new(forms::Form::settings(a.config.clone()))),
-                app::Modal::Form(Box::new(forms::Form::auth())),
-                app::Modal::Queue(0),
-                app::Modal::History(Default::default()),
-                app::Modal::Groups(0),
-                app::Modal::Resume(0),
-                app::Modal::Watches(0),
-                app::Modal::Text {
-                    title: "VPN connections".into(),
-                    lines: vec!["Fixture".into()],
-                    offset: 0,
-                },
-                app::Modal::Form(Box::new(forms::Form::keys(a.config.clone()))),
+            let mut terminal = Terminal::new(TestBackend::new(120, 40)).unwrap();
+            a.tab = 0;
+            for (state, label) in [
+                (ytui_core::JobState::Queued, "Queued"),
+                (ytui_core::JobState::Resolving, "Resolving"),
+                (ytui_core::JobState::Downloading, "Downloading"),
+                (ytui_core::JobState::Merging, "Merging"),
+                (ytui_core::JobState::Converting, "Converting"),
+                (ytui_core::JobState::Backoff, "Retry wait"),
+                (ytui_core::JobState::Paused, "Paused"),
+                (ytui_core::JobState::Cancelled, "Cancelled"),
+                (ytui_core::JobState::Done, "Complete"),
+                (ytui_core::JobState::Error, "Failed"),
             ] {
-                a.modal = Some(modal);
+                a.snapshot.downloads.jobs[0].state = state;
                 terminal.draw(|f| ui::render(f, &mut a)).unwrap();
-                a.modal = None;
+                let text = terminal
+                    .backend()
+                    .buffer()
+                    .content
+                    .iter()
+                    .map(|cell| cell.symbol())
+                    .collect::<String>();
+                assert!(text.contains(label), "{name} hides phase {label}");
+            }
+            a.snapshot.downloads.jobs[0].state = ytui_core::JobState::Paused;
+        }
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn command_panels_and_download_forms_are_usable_without_network_side_effects() {
+        let (mut a, mut rx, _temp) = fixture().await;
+        a.paths.fill_directories(&mut a.config);
+        let before = a.snapshot.downloads.jobs.len();
+        for command in [
+            "help",
+            "keys",
+            "stats",
+            "downloads failed",
+            "schedule",
+            "settings",
+            "auth",
+            "log",
+            "update",
+            "resume",
+            "groups",
+            "watches",
+            "feeds",
+        ] {
+            a.command(command)
+                .unwrap_or_else(|error| panic!("{command}: {error}"));
+            assert!(a.modal.is_some(), "{command} must show its panel");
+            a.key(KeyCode::Esc.into());
+        }
+        for (command, audio, playlist) in [
+            ("audio", true, false),
+            ("video", false, false),
+            ("audio-playlist", true, true),
+            ("video-playlist", false, true),
+        ] {
+            a.command(command).unwrap();
+            assert_eq!(a.config.download.audio, audio);
+            assert_eq!(a.config.download.playlist, playlist);
+            a.command("add https://www.youtube.com/watch?v=abcdefghijk")
+                .unwrap();
+            let Some(app::Modal::Form(form)) = &a.modal else {
+                panic!("{command} did not open options");
+            };
+            let (_, options) = form.download_values().unwrap();
+            assert_eq!(options.audio, audio);
+            assert_eq!(options.playlist, playlist);
+            a.key(KeyCode::Esc.into());
+        }
+        assert_eq!(a.snapshot.downloads.jobs.len(), before);
+        assert!(rx.try_recv().is_err());
+        a.tab = 3;
+        a.action(ytui_core::shortcuts::Action::Favorite);
+        assert_eq!(a.snapshot.favorites.len(), 1);
+        a.action(ytui_core::shortcuts::Action::Favorite);
+        assert!(a.snapshot.favorites.is_empty());
+        a.command("pin-country DE").unwrap();
+        a.command("pin-country de").unwrap();
+        assert_eq!(
+            a.config
+                .radio_pinned_countries
+                .iter()
+                .filter(|c| c.as_str() == "DE")
+                .count(),
+            1
+        );
+        a.command("unpin-country DE").unwrap();
+        assert!(!a.config.radio_pinned_countries.iter().any(|c| c == "DE"));
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn sidebar_keyboard_and_mouse_targets_follow_the_rendered_layout() {
+        use app::HitTarget;
+        use crossterm::event::{MouseButton, MouseEvent, MouseEventKind};
+        let (mut a, mut rx, _temp) = fixture().await;
+        let mut terminal = Terminal::new(TestBackend::new(212, 58)).unwrap();
+        terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        assert!(a.sidebar_visible);
+        let before = a.snapshot.downloads.jobs.len();
+        a.action(ytui_core::shortcuts::Action::Feeds);
+        assert!(a.feeds_focused && a.modal.is_none());
+        a.action(ytui_core::shortcuts::Action::Down);
+        assert_eq!(a.feed_selected, 1);
+        assert_eq!(a.snapshot.downloads.jobs.len(), before);
+        assert!(rx.try_recv().is_err());
+        a.action(ytui_core::shortcuts::Action::Back);
+        assert!(!a.feeds_focused);
+        let click = |a: &mut app::App, rect: ratatui::layout::Rect| {
+            a.mouse(MouseEvent {
+                kind: MouseEventKind::Down(MouseButton::Left),
+                column: rect.x,
+                row: rect.y,
+                modifiers: KeyModifiers::NONE,
+            })
+        };
+        let rect = a
+            .hit_targets
+            .iter()
+            .find(|(_, t)| matches!(t, HitTarget::Feed(2)))
+            .unwrap()
+            .0;
+        click(&mut a, rect);
+        assert!(a.feeds_focused);
+        assert_eq!(a.feed_selected, 2);
+        a.action(ytui_core::shortcuts::Action::Open);
+        assert!(!a.feeds_focused);
+        assert!(rx.try_recv().is_err());
+        let rect = a
+            .hit_targets
+            .iter()
+            .find(|(_, t)| matches!(t, HitTarget::Item(10)))
+            .unwrap()
+            .0;
+        click(&mut a, rect);
+        assert_eq!(a.tabs[a.tab].selected, 10);
+        a.modal = Some(app::Modal::Help(0));
+        let rect = a
+            .hit_targets
+            .iter()
+            .find(|(_, t)| matches!(t, HitTarget::Tab(3)))
+            .unwrap()
+            .0;
+        click(&mut a, rect);
+        assert_eq!(a.tab, 1, "clicks must not pass through dialogs");
+        a.modal = None;
+        click(&mut a, rect);
+        assert_eq!(a.tab, 3);
+        a.feeds_focused = true;
+        let mut small = Terminal::new(TestBackend::new(80, 24)).unwrap();
+        small.draw(|f| ui::render(f, &mut a)).unwrap();
+        assert!(!a.sidebar_visible && !a.feeds_focused);
+        let rect = a
+            .hit_targets
+            .iter()
+            .find(|(_, t)| matches!(t, HitTarget::Tab(0)))
+            .unwrap()
+            .0;
+        click(&mut a, rect);
+        assert_eq!(a.tab, 0);
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn feed_picker_is_remappable_scoped_and_requires_an_explicit_selection() {
+        let (mut a, mut rx, _temp) = fixture().await;
+        a.config.keybindings.insert("f8".into(), "feeds".into());
+        a.key(KeyCode::Char('b').into());
+        assert!(a.modal.is_none());
+        a.key(KeyCode::F(8).into());
+        assert!(matches!(a.modal, Some(app::Modal::Feeds(0))));
+        let before = a.snapshot.downloads.jobs.len();
+        a.key(KeyCode::Down.into());
+        assert!(matches!(a.modal, Some(app::Modal::Feeds(1))));
+        assert_eq!(a.snapshot.downloads.jobs.len(), before);
+        assert!(rx.try_recv().is_err());
+        a.key(KeyCode::Esc.into());
+        a.offline = true;
+        assert!(
+            a.feed_choices()
+                .iter()
+                .all(|(_, _, command)| command.starts_with("offline")
+                    || ["resume", "watches"].contains(command))
+        );
+        a.key(KeyCode::F(8).into());
+        a.key(KeyCode::Down.into());
+        a.key(KeyCode::Down.into());
+        a.key(KeyCode::Enter.into());
+        assert!(matches!(a.modal, Some(app::Modal::Resume(0))));
+        assert!(rx.try_recv().is_err());
+        a.modal = None;
+        a.offline = false;
+        a.tab = 3;
+        let mut terminal = Terminal::new(TestBackend::new(120, 40)).unwrap();
+        terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        let text = terminal
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .map(|c| c.symbol())
+            .collect::<String>();
+        assert!(text.contains("save station"));
+        assert!(
+            !text.contains("v preview"),
+            "stations must not advertise unsupported previews"
+        );
+        a.tab = 1;
+        a.tabs[1].page.items[0].kind = ytui_core::MediaKind::Playlist;
+        terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        let text = terminal
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .map(|c| c.symbol())
+            .collect::<String>();
+        assert!(text.contains("open collection"));
+        assert!(!text.contains("v preview"));
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn responsive_workspace_keeps_selection_errors_and_remapped_shortcuts_visible() {
+        use ratatui_image::Resize;
+        let (mut a, _rx, _temp) = fixture().await;
+        a.config.keybindings.insert("f8".into(), "feeds".into());
+        a.tab = 1;
+        a.tabs[1].selected = 17;
+        a.tabs[1].page.items[17].title = "日本語 · final selected item".into();
+        a.tabs[1].error = Some("Fixture feed failed; loaded content remains".into());
+        a.tabs[1].page.items[17].thumbnail = "https://example.test/synthetic.jpg".into();
+        a.image = Some(
+            a.picker
+                .new_protocol(
+                    image::DynamicImage::new_rgb8(160, 90),
+                    ratatui::layout::Rect::new(0, 0, 36, 9),
+                    Resize::Fit(None),
+                )
+                .unwrap(),
+        );
+        for (width, height) in [(35, 12), (80, 24), (120, 40), (180, 50)] {
+            let mut terminal = Terminal::new(TestBackend::new(width, height)).unwrap();
+            terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+            let buffer = terminal.backend().buffer();
+            let lines = (0..height)
+                .map(|y| {
+                    (0..width)
+                        .map(|x| buffer[(x, y)].symbol())
+                        .collect::<String>()
+                })
+                .collect::<Vec<_>>();
+            let text = lines.join("\n");
+            assert!(
+                text.contains("final selected item"),
+                "selection lost at {width}x{height}"
+            );
+            assert!(text.contains("18 / 18"));
+            assert!(text.contains("Fixture feed failed"));
+            assert!(
+                lines.last().unwrap().contains("help"),
+                "help hidden at {width}x{height}"
+            );
+            assert!(
+                !lines.last().unwrap().contains("b feeds"),
+                "stale default binding in footer"
+            );
+            if width >= 100 {
+                assert!(a.image_area.width > 0 && a.image_area.height > 0);
+                assert!(a.image_area.right() <= width && a.image_area.bottom() <= height);
+            } else {
+                assert_eq!(a.image_area.width, 0);
+            }
+            a.modal = Some(app::Modal::Feeds(0));
+            terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+            assert_eq!(
+                a.image_area.width, 0,
+                "image must not draw through an overlay"
+            );
+            a.modal = None;
+        }
+        a.config.keybindings.clear();
+        a.config.keybindings.insert("b".into(), "help".into());
+        let mut terminal = Terminal::new(TestBackend::new(120, 40)).unwrap();
+        terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        let text = terminal
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .map(|c| c.symbol())
+            .collect::<String>();
+        assert!(text.contains(":feeds  Browse feeds"));
+        assert!(
+            !text.contains("b  Browse feeds"),
+            "a key claimed by another action must not be advertised"
+        );
+        a.shutdown().await;
+    }
+    #[tokio::test]
+    async fn download_counts_and_player_time_stay_readable_in_small_and_light_layouts() {
+        use ytui_core::JobState;
+        let (mut a, _rx, _temp) = fixture().await;
+        a.tab = 0;
+        a.snapshot.downloads.jobs[0].state = JobState::Error;
+        a.snapshot.downloads.jobs[0].error =
+            Some("Fixture transfer failed; retry available".into());
+        a.snapshot.downloads.jobs[0].progress = ytui_core::Progress {
+            downloaded: 42,
+            total: Some(100),
+            eta: Some(30.0),
+            ..Default::default()
+        };
+        a.player_status = ytui_services::player::PlayerStatus {
+            active: true,
+            title: "A deliberately long fictional title that must not hide playback timing".into(),
+            position: 135.0,
+            duration: Some(300.0),
+            ..Default::default()
+        };
+        for palette in ["ytui-dark", "ytui-light", "terminal"] {
+            a.palette = ytui_services::theme::builtin(palette).unwrap();
+            for (w, h) in [(35, 12), (80, 24), (120, 40)] {
+                let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
+                terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+                let text = terminal
+                    .backend()
+                    .buffer()
+                    .content
+                    .iter()
+                    .map(|cell| cell.symbol())
+                    .collect::<String>();
+                assert!(text.contains("2:15"), "time hidden at {w}x{h} ({palette})");
+                assert!(text.contains("Failed"));
+                assert!(text.contains("42%"));
+                assert!(text.contains(if w < 70 { "1 fail" } else { "1 failed" }));
+                assert!(text.contains(if w < 70 { "1 done" } else { "1 complete" }));
+                if w >= 115 {
+                    assert!(text.contains("Fixture transfer failed"));
+                }
             }
         }
+        a.player_status.preview = true;
+        a.player_status.active = false;
+        let mut terminal = Terminal::new(TestBackend::new(80, 24)).unwrap();
+        terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+        let text = terminal
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .map(|c| c.symbol())
+            .collect::<String>();
+        assert!(text.contains("Muted preview"));
+        assert!(text.contains("esc closes"));
         a.shutdown().await;
     }
     #[tokio::test]

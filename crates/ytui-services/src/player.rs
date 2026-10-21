@@ -561,6 +561,8 @@ mod tests {
         let listener = UnixListener::bind(&socket).unwrap();
         let paused = Arc::new(std::sync::Mutex::new(false));
         let recorded = paused.clone();
+        let commands = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let command_log = commands.clone();
         let server = tokio::spawn(async move {
             loop {
                 let Ok((stream, _)) = listener.accept().await else {
@@ -571,6 +573,7 @@ mod tests {
                 if let Ok(Some(line)) = lines.next_line().await {
                     let request: Value = serde_json::from_str(&line).unwrap();
                     let command = &request["command"];
+                    command_log.lock().unwrap().push(command.clone());
                     if command[0] == "set_property" && command[1] == "pause" {
                         *recorded.lock().unwrap() = command[2].as_bool().unwrap();
                     }
@@ -632,6 +635,26 @@ mod tests {
             reconnect_count: 0,
             reconnect_at: None,
         };
+        for command in [
+            PlayerCommand::Seek(5.0),
+            PlayerCommand::Seek(-5.0),
+            PlayerCommand::Volume(5.0),
+            PlayerCommand::Volume(-5.0),
+            PlayerCommand::Mute,
+            PlayerCommand::TogglePause,
+        ] {
+            actor.handle(command).await;
+        }
+        for expected in [
+            json!(["seek", 5.0, "relative"]),
+            json!(["seek", -5.0, "relative"]),
+            json!(["add", "volume", 5.0]),
+            json!(["add", "volume", -5.0]),
+            json!(["cycle", "mute"]),
+            json!(["cycle", "pause"]),
+        ] {
+            assert!(commands.lock().unwrap().contains(&expected));
+        }
         actor
             .preview(Media {
                 url: "https://radio.test/preview.mp4".into(),

@@ -71,8 +71,8 @@ pub fn builtin(name: &str) -> Result<Palette> {
         ),
         "catppuccin-latte" => (
             [
-                "eff1f5", "e6e9ef", "4c4f69", "6c6f85", "8839ef", "ccd0da", "d20f39", "df8e1d",
-                "40a02b",
+                "eff1f5", "e6e9ef", "4c4f69", "66697f", "8839ef", "ccd0da", "d20f39", "946000",
+                "2d7a1f",
             ],
             true,
         ),
@@ -405,6 +405,43 @@ pub fn watch(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn bundled_palettes_keep_text_selection_and_status_roles_readable() {
+        fn luminance((r, g, b): Rgb) -> f64 {
+            let channel = |v: u8| {
+                let v = v as f64 / 255.0;
+                if v <= 0.04045 {
+                    v / 12.92
+                } else {
+                    ((v + 0.055) / 1.055).powf(2.4)
+                }
+            };
+            channel(r) * 0.2126 + channel(g) * 0.7152 + channel(b) * 0.0722
+        }
+        let ratio = |a, b| {
+            let a = luminance(a);
+            let b = luminance(b);
+            (a.max(b) + 0.05) / (a.min(b) + 0.05)
+        };
+        for name in THEMES.iter().filter(|name| **name != "terminal") {
+            let p = builtin(name).unwrap();
+            for (role, foreground, background, minimum) in [
+                ("text", p.text, p.background, 4.5),
+                ("muted", p.muted, p.background, 4.5),
+                ("selection", p.text, p.selection, 4.5),
+                ("accent", p.accent, p.background, 3.0),
+                ("error", p.error, p.background, 3.0),
+                ("warning", p.warning, p.background, 3.0),
+                ("success", p.success, p.background, 3.0),
+            ] {
+                assert!(
+                    ratio(foreground, background) >= minimum,
+                    "{name}/{role} contrast {} is below {minimum}",
+                    ratio(foreground, background)
+                );
+            }
+        }
+    }
     #[test]
     fn parses_caelestia_and_legacy_omarchy_and_rejects_partial_writes() {
         let raw = r##"{"mode":"dark","colours":{"surface":"101010","surfaceContainer":"202020","onSurface":"eeeeee","onSurfaceVariant":"bbbbbb","primary":"88aaff","primaryContainer":"334455","error":"ff6688"}}"##;

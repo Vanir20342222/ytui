@@ -17,6 +17,12 @@ This is an alpha; signed-in and desktop acceptance checks are still required.
 Native yt-dlp-rs has incomplete YouTube coverage. `Y` explicitly selects the
 Python yt-dlp fallback; it is never used automatically.
 
+The Lazygit/Lazydocker-style layout has status, workspaces and feeds on the left,
+with catalog/details panes on the right. Press `b` for feeds, `/` to search, and
+`?` for shortcuts. Compact windows keep the main list usable.
+
+[WQHD theme gallery](docs/UI_THEMES.md) · [Feature audit](docs/FEATURE_AUDIT.md)
+
 ![Rust terminal demo with fictional content](docs/screenshots/youtube.png)
 
 ---

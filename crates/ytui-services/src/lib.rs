@@ -14,6 +14,8 @@ pub mod profiles;
 pub mod queue_import;
 pub mod radio;
 pub mod store;
+#[cfg(test)]
+mod test_http;
 pub mod theme;
 mod throttle;
 pub mod vpn;

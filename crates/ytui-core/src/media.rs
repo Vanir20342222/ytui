@@ -228,5 +228,34 @@ mod tests {
         assert_eq!(q.current, Some(0));
         q.repeat = Repeat::Off;
         assert!(q.advance(true).is_none());
+        q.current = Some(0);
+        q.repeat = Repeat::All;
+        assert_eq!(q.advance(true).unwrap().id, "two");
+        q.push(Media {
+            id: "three".into(),
+            ..Default::default()
+        });
+        q.push(Media {
+            id: "four".into(),
+            ..Default::default()
+        });
+        q.shuffle = true;
+        for _ in 0..50 {
+            let previous = q.current;
+            assert!(q.advance(false).is_some());
+            assert_ne!(
+                q.current, previous,
+                "shuffle must not repeat the current item"
+            );
+        }
+        q.repeat = Repeat::One;
+        let previous = q.current;
+        q.advance(true).unwrap();
+        assert_eq!(q.current, previous);
+        q.shuffle = false;
+        q.current = Some(0);
+        assert_eq!(q.previous().unwrap().id, "two");
+        q.remove(999);
+        assert_eq!(q.items.len(), 3);
     }
 }

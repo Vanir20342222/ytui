@@ -3,6 +3,53 @@ use anyhow::{Context, Result, ensure};
 use sha2::{Digest, Sha256};
 use std::{io::Cursor, path::PathBuf};
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[tokio::test]
+    async fn thumbnail_decode_cache_and_size_limits_work_without_provider_access() {
+        fn png(w: u32, h: u32) -> Vec<u8> {
+            let mut bytes = Cursor::new(Vec::new());
+            image::DynamicImage::new_rgb8(w, h)
+                .write_to(&mut bytes, image::ImageFormat::Png)
+                .unwrap();
+            bytes.into_inner()
+        }
+        let (base, server) = crate::test_http::serve(|target| {
+            (
+                200,
+                "Content-Type: image/png\r\n".into(),
+                match target {
+                    "/valid.png" => png(160, 90),
+                    "/dimensions.png" => png(5000, 1),
+                    "/huge.png" => vec![0; 4 * 1024 * 1024 + 1],
+                    _ => b"not an image".to_vec(),
+                },
+            )
+        })
+        .await;
+        let temp = tempfile::tempdir().unwrap();
+        let cache = ImageCache::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            temp.path().into(),
+        );
+        let url = format!("{base}/valid.png");
+        let image = cache.load(&url).await.unwrap();
+        assert_eq!((image.width(), image.height()), (160, 90));
+        for path in ["invalid.png", "dimensions.png", "huge.png"] {
+            let url = format!("{base}/{path}");
+            assert!(cache.load(&url).await.is_err());
+            assert!(!temp.path().join(hex::encode(Sha256::digest(&url))).exists());
+        }
+        server.abort();
+        let _ = server.await;
+        assert!(
+            cache.load(&url).await.is_ok(),
+            "cached thumbnails must survive a service outage"
+        );
+    }
+}
+
 #[derive(Clone)]
 pub struct ImageCache {
     client: reqwest::Client,
@@ -52,7 +99,12 @@ impl ImageCache {
             limits.max_image_height = Some(4096);
             limits.max_alloc = Some(64 * 1024 * 1024);
             reader.limits(limits);
-            Ok(reader.decode()?.thumbnail(1280, 720))
+            let image = reader.decode()?;
+            Ok(if image.width() > 1280 || image.height() > 720 {
+                image.thumbnail(1280, 720)
+            } else {
+                image
+            })
         })
         .await?;
         if decoded.is_err() {

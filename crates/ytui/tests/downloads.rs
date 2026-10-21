@@ -12,6 +12,75 @@ use std::{
 };
 use ytui_core::Config;
 
+#[test]
+fn headless_setup_station_import_and_offline_guards_preserve_user_files() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("rust.toml");
+    let run = |args: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .arg("--config")
+            .arg(&config_path)
+            .arg("--state-dir")
+            .arg(temp.path().join("state"))
+            .arg("--offline")
+            .args(args)
+            .env("XDG_CONFIG_HOME", temp.path().join("config"))
+            .env("XDG_STATE_HOME", temp.path().join("xdg-state"))
+            .env("XDG_CACHE_HOME", temp.path().join("cache"))
+            .output()
+            .unwrap()
+    };
+    assert!(run(&["init"]).status.success());
+    assert!(
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .current_dir(temp.path())
+            .args(["--config", "relative.toml", "--offline", "init"])
+            .env("XDG_CONFIG_HOME", temp.path().join("config"))
+            .env("XDG_STATE_HOME", temp.path().join("xdg-state"))
+            .env("XDG_CACHE_HOME", temp.path().join("cache"))
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert!(temp.path().join("relative.toml").is_file());
+    let original = std::fs::read(&config_path).unwrap();
+    assert!(!run(&["init"]).status.success());
+    assert_eq!(std::fs::read(&config_path).unwrap(), original);
+    let mut config: Config = toml::from_str(std::str::from_utf8(&original).unwrap()).unwrap();
+    config.auth_store = "file".into();
+    config.theme = "ytui-dark".into();
+    std::fs::write(&config_path, toml::to_string(&config).unwrap()).unwrap();
+    let source = temp.path().join("cliamp.toml");
+    let stations = "[[stations]]\nname='Fixture radio'\nurl='https://example.test/live'\n[[stations]]\nname='Duplicate'\nstream='https://example.test/live'\n[[stations]]\nname='Unsupported'\nurl='file:///synthetic/local'\n";
+    std::fs::write(&source, stations).unwrap();
+    assert!(
+        run(&["import-radio", source.to_str().unwrap()])
+            .status
+            .success()
+    );
+    assert!(
+        run(&["import-radio", source.to_str().unwrap()])
+            .status
+            .success()
+    );
+    let saved: Config = toml::from_str(&std::fs::read_to_string(&config_path).unwrap()).unwrap();
+    assert_eq!(saved.custom_stations.len(), 1);
+    assert_eq!(std::fs::read_to_string(&source).unwrap(), stations);
+    let doctor = run(&["doctor"]);
+    assert!(doctor.status.success());
+    assert!(String::from_utf8_lossy(&doctor.stdout).contains("Browser stores were not opened"));
+    for args in [
+        vec!["browse", "home"],
+        vec!["download", "https://www.youtube.com/watch?v=abcdefghijk"],
+        vec!["auth", "import", "--browser", "brave-origin"],
+    ] {
+        let result = run(&args);
+        assert!(!result.status.success());
+        assert!(String::from_utf8_lossy(&result.stderr).contains("restart without --offline"));
+    }
+}
+
 struct Server {
     url: String,
     stop: Arc<AtomicBool>,

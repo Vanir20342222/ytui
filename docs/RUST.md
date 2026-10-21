@@ -156,6 +156,7 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 | `1`–`4`, `Tab`, `Shift+Tab` | Switch tabs |
 | Arrows or `j` / `k` | Select an item |
 | `/` | Search, or paste a URL to open download options |
+| `b` | Focus Feeds on wide screens; open the feed picker on compact screens |
 | `:` | Run a command/feed action |
 | `Enter` | Open collection / play selected media |
 | `v` | Muted ten-second mpv video preview |
@@ -174,6 +175,27 @@ requests. Separate simultaneously signed-in ytui profiles are not yet supported.
 | `t`, `,`, `?` | Themes, settings, contextual help |
 | `C` | Suspend ytui and run installed cliamp |
 | `q`, `Ctrl+c` | Clean shutdown |
+
+The Lazygit/Lazydocker-style workspace shows status, workspaces and feeds in a
+left sidebar on screens at least 140 columns wide and 26 rows tall. `b` focuses
+Feeds: arrows select, Enter opens, Esc returns to the catalog. `1`–`4` switch
+workspaces. Smaller windows use the compact picker; `:feeds` always opens it.
+Choices follow the current tab and offline mode offers local actions only.
+Moving through feeds never starts playback or a download. Mouse clicks select
+visible workspaces/feed entries/catalog items; scrolling follows the pane under
+the pointer and dialogs block underlying clicks.
+
+The workspace adapts to terminal size: wide layouts show selected-item details
+and thumbnails, narrow layouts give the catalog the full width, and short windows
+use a single-line player. Downloads show separate active/queued/paused/failed/
+complete counts and a selected-item panel with progress, ETA, destination and
+errors when space permits. Footer and selected-item shortcuts follow remapped
+bindings. Dialogs hide thumbnail graphics while open; resume and watch dialogs
+size to their contents and explain empty states.
+
+The [WQHD gallery](UI_THEMES.md) has actual PTY captures for every bundled theme;
+[the audit](FEATURE_AUDIT.md) lists verified behavior and remaining live checks.
+Demo artwork is generated locally in Rust on a worker, without a thumbnail service.
 
 Forms use `↑/↓` or `Tab` to change fields, `Space` for toggles, `Enter` to submit,
 and `Esc` to cancel. Unicode editing and bracketed paste are supported. Typing in

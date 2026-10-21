@@ -68,13 +68,27 @@ impl Paths {
 }
 /// Same-directory rename, private temporary file from creation, and durable flush.
 pub fn atomic_write(path: &Path, data: &[u8]) -> Result<()> {
+    write_atomic(path, data, true)
+}
+/// Atomically create a new file and refuse to replace even a racing creator.
+pub fn atomic_write_new(path: &Path, data: &[u8]) -> Result<()> {
+    write_atomic(path, data, false)
+}
+fn write_atomic(path: &Path, data: &[u8], replace: bool) -> Result<()> {
     use std::io::Write;
-    let parent = path.parent().context("Output has no parent directory")?;
+    let parent = path
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent)?;
     let mut temp = tempfile::NamedTempFile::new_in(parent)?;
     temp.write_all(data)?;
     temp.as_file().sync_all()?;
-    temp.persist(path).map_err(|e| e.error)?;
+    if replace {
+        temp.persist(path).map_err(|e| e.error)?;
+    } else {
+        temp.persist_noclobber(path).map_err(|e| e.error)?;
+    }
     fs::File::open(parent)?.sync_all()?;
     Ok(())
 }
