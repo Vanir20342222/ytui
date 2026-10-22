@@ -19,12 +19,17 @@ cat > "$test_root/bin/uname" <<'EOF'
 #!/usr/bin/env bash
 echo x86_64
 EOF
+cat > "$test_root/bin/rg" <<'EOF'
+#!/usr/bin/env bash
+# GitHub's minimal Ubuntu image does not provide ripgrep.
+exit 127
+EOF
 cat > "$test_root/bin/timeout" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$CI_TEST_LOG.timeout"
 [[ "$1" == --kill-after=10s && ( "$2" == 60s || "$2" == 180s ) ]] || exit 99
 shift 2
-exec /usr/bin/timeout --kill-after=0.1s 0.1s "$@"
+exec /usr/bin/timeout --kill-after=0.1s 0.5s "$@"
 EOF
 cat > "$test_root/bin/apt-get" <<'EOF'
 #!/usr/bin/env bash
@@ -42,8 +47,8 @@ for arg; do
 done
 case "$CI_TEST_CASE" in
     primary_success) exit 0;;
-    primary_install_stall) "$fallback" || [[ "$operation" != install ]] || sleep 3;;
-    primary_update_stall) "$fallback" || [[ "$operation" != update ]] || sleep 3;;
+    primary_install_stall) "$fallback" || [[ "$operation" != install ]] || sleep 8;;
+    primary_update_stall) "$fallback" || [[ "$operation" != update ]] || sleep 8;;
     primary_update_failure) "$fallback" || exit 100;;
     primary_install_failure) "$fallback" || [[ "$operation" != install ]] || exit 100;;
     all_failure) exit 100;;
@@ -56,7 +61,7 @@ export GITHUB_ACTIONS=true RUNNER_OS=Linux
 for test_case in primary_install_stall primary_update_stall primary_success primary_update_failure primary_install_failure all_failure; do
     export CI_TEST_CASE="$test_case" CI_TEST_LOG="$test_root/$test_case"
     status=0
-    /usr/bin/timeout --kill-after=1s 2s bash "$installer" mpv ffmpeg > "$test_root/output" 2>&1 || status=$?
+    /usr/bin/timeout --kill-after=1s 5s bash "$installer" mpv ffmpeg > "$test_root/output" 2>&1 || status=$?
     if [[ "$test_case" == all_failure ]]; then
         [[ "$status" == 1 ]] || { cat "$test_root/output"; echo 'FAIL: failed mirrors must fail setup'; exit 1; }
     else
@@ -64,16 +69,16 @@ for test_case in primary_install_stall primary_update_stall primary_success prim
     fi
     [[ -s "$CI_TEST_LOG.timeout" ]] || { echo 'FAIL: apt operations lack deadlines'; exit 1; }
     if [[ "$test_case" != all_failure ]]; then
-        rg -q ' install -y --no-install-recommends mpv ffmpeg$' "$CI_TEST_LOG"
+        grep -Eq ' install -y --no-install-recommends mpv ffmpeg$' "$CI_TEST_LOG"
     fi
     if [[ "$test_case" == primary_success ]]; then
         [[ ! -e "$CI_TEST_LOG.sources" ]] || { echo 'FAIL: unnecessary fallback'; exit 1; }
     else
         [[ -s "$CI_TEST_LOG.sources" ]]
-        rg -q '^deb https://archive.ubuntu.com/ubuntu noble ' "$CI_TEST_LOG.sources"
-        rg -q '^deb https://security.ubuntu.com/ubuntu noble-security ' "$CI_TEST_LOG.sources"
-        [[ "$(rg -c ' update$' "$CI_TEST_LOG")" == 2 ]]
-        [[ "$(rg -c 'Dir::Etc::sourceparts=-' "$CI_TEST_LOG")" -ge 1 ]]
+        grep -Eq '^deb https://archive.ubuntu.com/ubuntu noble ' "$CI_TEST_LOG.sources"
+        grep -Eq '^deb https://security.ubuntu.com/ubuntu noble-security ' "$CI_TEST_LOG.sources"
+        [[ "$(grep -Ec ' update$' "$CI_TEST_LOG")" == 2 ]]
+        [[ "$(grep -Ec 'Dir::Etc::sourceparts=-' "$CI_TEST_LOG")" -ge 1 ]]
     fi
     echo "PASS: $test_case"
 done

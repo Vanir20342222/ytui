@@ -51,6 +51,10 @@ failure, install failure, both mirrors failing, and environment/argument guards.
 The mock shortens production deadlines and asserts the real timeout arguments,
 requested packages, fallback source content and apt source isolation. A failed
 fallback still exits nonzero. Rust CI now runs this regression before media setup.
+The first remote rerun exposed a missing `rg` dependency in the new harness;
+the follow-up uses standard grep and explicitly masks ripgrep in every local/CI
+regression run. This is a harness portability repair, not a changed playback
+verdict.
 
 Shell syntax, workflow YAML parsing and `git diff --check` pass locally. No Rust
 application source changed, so this repair does not need a new application build
