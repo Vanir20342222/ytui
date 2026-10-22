@@ -923,7 +923,12 @@ impl Actor {
                         self.state.error = None;
                     }
                     Err(e) => {
+                        self.state.buffering = false;
+                        self.state.active = false;
                         self.state.error = Some(process::diagnostic(&format!("{e:#}")));
+                        event = Some(PlayerEvent::Error(
+                            self.state.error.clone().unwrap_or_default(),
+                        ));
                     }
                 }
             }
@@ -1661,6 +1666,13 @@ mod responsiveness_tests {
             assert!(!native_stream_retryable(error));
         }
         assert!(native_stream_retryable("Connection reset by peer"));
+        // A synchronous relaunch failure must not leave the UI buffering forever.
+        actor.playing.as_mut().unwrap().0.url = "invalid playback URL".into();
+        actor.reconnect_at = Some(tokio::time::Instant::now());
+        actor.state.buffering = true;
+        assert!(matches!(actor.tick().await, Some(PlayerEvent::Error(_))));
+        assert!(!actor.state.buffering);
+        assert!(!actor.state.active);
     }
     #[tokio::test]
     async fn preview_controls_never_overwrite_saved_main_player_preferences() {

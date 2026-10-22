@@ -13,6 +13,14 @@ pub fn recovery(message: &str) -> Option<Recovery> {
             "Open Account in Actions. Complete YouTube verification in your browser, then reconnect the signed-in session.",
         )
     } else if has(&[
+        "all player responses are invalid",
+        "ip is likely being blocked",
+    ]) {
+        (
+            "YouTube rejected player responses",
+            "Check this video in your browser on the same network. The extractor reports possible IP blocking; verify account/network access before retrying.",
+        )
+    } else if has(&[
         "connect tunnel",
         "tunnel connection failed",
         "tunnel failed",
@@ -132,6 +140,10 @@ mod tests {
             (
                 "ERROR: Sign in to confirm you’re not a bot",
                 "YouTube requires verification",
+            ),
+            (
+                "All player responses are invalid. Your IP is likely being blocked by Youtube",
+                "YouTube rejected player responses",
             ),
             (
                 "Unable to connect to proxy: Tunnel connection failed: 403 Forbidden",

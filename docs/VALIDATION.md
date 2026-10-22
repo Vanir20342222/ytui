@@ -12,7 +12,9 @@ mpv native HLS / external split streams / controls tests (three), playback CLI
 progress/failure test, four-format native audio conversion checks (two), and
 actual external two-entry playlist test pass. Native tests never use external
 yt-dlp. Public native playback here fails **0/3 passed** at the inherited proxy
-tunnel. This does not establish live watching or the requested 99% reliability;
+tunnel. Public native GitHub run [39781157622](https://github.com/Vanir20342222/ytui/actions/runs/39781157622)
+also fails **0/3 passed**: the extractor reports invalid player responses and
+possible IP blocking. This does not establish live watching or the requested 99% reliability;
 see [NATIVE_PLAYBACK.md](NATIVE_PLAYBACK.md) for the dedicated runner and open gates.
 
 ## Alpha.8 stability pass (M3/M5/M8)

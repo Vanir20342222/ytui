@@ -55,6 +55,12 @@ playback on the user's desktop.
 - The managed-workspace public native run failed **0/3 passed** at the HTTPS
   proxy tunnel. No external extractor was started. Live CI results must be
   recorded separately; a local fixture does not clear this gate.
+- Public native CI [39781157622](https://github.com/Vanir20342222/ytui/actions/runs/39781157622)
+  built the real application and failed **0/3 passed** with the native extractor's
+  “All player responses are invalid. Your IP is likely being blocked by Youtube.”
+  This is the extractor's diagnosis, not proof that every such response is an IP
+  block. No Python fallback was enabled. The UI now gives account/network guidance
+  for that response instead of suggesting a runtime change.
 
 **The requested 99% watching success rate is not established.** It needs an
 independent representative public-video corpus, complete/long sessions, supported

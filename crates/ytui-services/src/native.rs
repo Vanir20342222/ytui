@@ -543,10 +543,15 @@ pub async fn resolve(
             .any(|part| line.contains(part))
         })
         .unwrap_or(&result.stderr);
+    let diagnostic = process::diagnostic(reason);
+    let guidance = crate::failure::recovery(&diagnostic)
+        .map(|recovery| recovery.instruction)
+        .unwrap_or("Check the installed Node.js 22+ or Deno 2.9.7 runtime in Settings → Tools, or open Playback repair.");
     ensure!(
         result.success,
-        "Native playback extraction failed: {}. Check the installed Node.js 22+ or Deno 2.9.7 runtime in Settings → Tools, or open Playback repair. No external extractor was used in native mode.",
-        process::diagnostic(reason)
+        "Native playback extraction failed: {}. {} No external extractor was used in native mode.",
+        diagnostic,
+        guidance
     );
     for line in result.lines {
         if let Some(json) = line.strip_prefix("YTUI_RESOLVED:") {
