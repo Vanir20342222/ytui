@@ -1,6 +1,6 @@
 # Rust edition
 
-Alpha.9 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.11 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
@@ -38,7 +38,7 @@ git switch fix/native-playback
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.9
+~/.local/bin/ytui --version             # 0.2.0-alpha.11
 type -a ytui ytui-rs
 ```
 
@@ -50,6 +50,7 @@ detected automatically; clear an old unsupported Deno path to use detection.
 Install external `yt-dlp` separately for auto/external modes or explicit `Y` retry.
 Existing jobs retain their own backend overrides. `doctor` prints executable and
 configuration paths to identify another installation earlier in PATH.
+See [the example configuration](../examples/config.toml) for the current defaults.
 
 ## Navigation and settings
 
@@ -131,7 +132,8 @@ watching request. Native [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs), pinn
 application. It accepts native HLS manifests and forwards extractor headers to
 mpv. Interrupted CDN streams can renew their URL once and resume locally; bot,
 account and proxy failures do not enter that retry loop. Native mode never starts
-external yt-dlp. See [native validation and open gates](NATIVE_PLAYBACK.md).
+external yt-dlp. See [current playback checks and limits](SINGLE_VIDEO_SWEEP.md)
+and [hosted-runner CI diagnosis](CI_PLAYBACK_DIAGNOSIS.md).
 
 Downloads retain `download_backend = "auto"`. Playback can opt into auto separately.
 Both settings offer:

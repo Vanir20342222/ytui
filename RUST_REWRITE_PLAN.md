@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M2/M8 repository maintenance: removed unused direct dependencies, consolidated
+acceptance-runner reporting, expanded dense Rust blocks and aligned the example
+configuration/current guides with alpha.11. [The documentation index](docs/README.md)
+separates current guides from dated validation reports. Compilation and syntax
+checks are recorded in docs/VALIDATION.md; no new live acceptance is claimed.
+
 M5/M8 CI follow-up: diagnosed the screenshot's cancellation as a stalled Ubuntu
 package installation, added whole-operation deadlines/official HTTPS mirror
 recovery and seven offline CI-setup regression groups. The public native runner

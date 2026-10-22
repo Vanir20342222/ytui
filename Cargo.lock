@@ -4925,7 +4925,6 @@ dependencies = [
  "portable-pty",
  "ratatui",
  "ratatui-image",
- "serde",
  "serde_json",
  "shell-words",
  "tempfile",
@@ -4947,7 +4946,6 @@ dependencies = [
  "anyhow",
  "serde",
  "serde_json",
- "toml",
  "url",
  "uuid",
 ]

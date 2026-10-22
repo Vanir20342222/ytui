@@ -10,6 +10,17 @@ The detailed feature/verification inventory is [FEATURE_AUDIT.md](FEATURE_AUDIT.
 [PARITY.md](PARITY.md) maps the implemented Rust equivalents. This document
 lists remaining gaps, including options preserved verbatim by migration.
 
+## Current local evidence (alpha.11)
+
+The transition and alpha sections below retain their original results. Later
+target-PC runs verified public native playback/downloads, provider caching, radio
+catalogs/streams and playback fault recovery. One complete muted gpu-next/PipeWire
+desktop session also passed. See [the playback sweep](SINGLE_VIDEO_SWEEP.md) and
+[network report](NETWORK_PERFORMANCE.md) for exact scope. Human visual/audible
+acceptance, signed-in journeys, broader media coverage and the requested 99%
+reliability remain open. Hosted-runner extraction failures are recorded separately
+in [the CI diagnosis](CI_PLAYBACK_DIAGNOSIS.md).
+
 ## Work in this transition
 
 | Gap recorded before removal | Result |
@@ -81,9 +92,9 @@ live acceptance gates above. See [STABILITY_PASS.md](STABILITY_PASS.md).
 | VPN | Existing NetworkManager VPN/WireGuard profiles can be listed/connected/disconnected explicitly. Standalone Proton login/server selection, automatic reconnect monitoring, raw wg-quick and non-Linux adapters are not implemented. No startup VPN mutations. |
 | YouTube account features | Home/subscriptions/library/liked/later/history are implemented through a read-only internal API, but live signed-in correctness, brand channels, expiry and Brave Origin keyring decryption need target testing. Account mutations and automatic watch-history upload are intentionally absent. |
 | Music | Dedicated WEB_REMIX browsing/search/library exists; live continuations/account journeys need verification. Lyrics, MPRIS/media keys and track-based radio are not implemented. |
-| Cliamp | Native catalog, track libraries and optional external launch exist. The live catalog and Lofi track library were reachable during alpha.5 work; real stream/audio acceptance remains open. A labelled Radio Browser fallback is available. This is not a full port of cliamp's unrelated providers. |
-| Playback tracks | Audio/subtitle cycling operates on tracks loaded by mpv. Native URL-only resolution does not yet enumerate every alternative YouTube language/caption track; full website-style track discovery remains open. Real mpv headless controls are checked; displayed window/device acceptance remains open. |
-| Radio | Directory search/country/tag, favorites, custom stations, playlist resolution and reconnect exist. Automatic location suggestions are absent. Real stream metadata/reconnect/audio-device behavior needs testing. |
+| Cliamp | Native catalog, track libraries and optional external launch exist. Public catalog/library and real headless station playback passed locally; physical audio acceptance remains open. A labelled Radio Browser fallback is available. This is not a full port of cliamp's unrelated providers. |
+| Playback tracks | Audio/subtitle cycling operates on tracks loaded by mpv. Native URL-only resolution does not yet enumerate every alternative YouTube language/caption track; full website-style track discovery remains open. Real headless controls and one muted desktop completion pass; human visual and audible-device acceptance remains open. |
+| Radio | Directory search/country/tag, favorites, custom stations, playlist resolution and reconnect exist. Public catalog/filter and headless stream checks passed locally. Automatic location suggestions are absent; broader live metadata/reconnect and physical audio acceptance remain open. |
 | Hooks/notifications/clipboard | Native implementations exist and fixture tests pass. Real Wayland/X11 clipboard, D-Bus sound hints and arbitrary user hooks need local acceptance. Hooks stay opt-in. |
 | Scheduling/watches | Download/bandwidth windows and collection watches exist. Large collection bounds are explicit; long-transfer DST/timezone behavior and live account polling need acceptance. |
 | History/statistics | Search/filter/group and recorded totals exist. Full disk inventory and charts are optional, not implemented. |

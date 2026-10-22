@@ -4,16 +4,7 @@
 set -uo pipefail
 trap 'exit 130' INT
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
-video_failures=()
-video_checks=0
-run_check() {
-    local label="$1"
-    shift
-    video_checks=$((video_checks + 1))
-    printf '\nChecking %s\n' "$label"
-    if "$@"; then printf 'PASS %s\n' "$label"
-    else video_failures+=("$label"); printf 'FAIL %s\n' "$label" >&2; fi
-}
+source tools/lib/checks.sh
 run_check build-harness cargo build -p ytui --locked --example playback_sweep
 video_binary="${CARGO_TARGET_DIR:-target}/debug/examples/playback_sweep"
 run_check offline-faults cargo test --workspace --locked
@@ -28,5 +19,4 @@ run_check native-cli env YTUI_LIVE_BACKEND=native cargo test -p ytui --locked --
 run_check external-cli env YTUI_LIVE_BACKEND=yt-dlp cargo test -p ytui --locked --test live_youtube -- --ignored --test-threads=2 --nocapture --skip public_search --skip playlist
 run_check formatting cargo fmt --all -- --check
 run_check clippy cargo clippy --workspace --all-targets --locked -- -D warnings
-printf '\nCompleted %d groups; %d failed.\n' "$video_checks" "${#video_failures[@]}"
-if ((${#video_failures[@]})); then printf 'Failed: %s\n' "${video_failures[@]}"; exit 1; fi
+finish_checks

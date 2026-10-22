@@ -1,5 +1,21 @@
 # Validation record — 2026-10-22
 
+## M2/M8 repository cleanup
+
+Removed unused direct `ytui` → `serde` and `ytui-core` → `toml` dependencies;
+their workspace dependencies remain where used and the lockfile retains the same
+package versions. Expanded dense demo/render/CLI/watch blocks without changing
+their control flow or rendered text. The broad-network and single-video runners
+share their failure collection/reporting helper. The example config now documents
+native playback, independent auto downloads and automatic supported JS-runtime
+detection. Current guide versions match alpha.11; a documentation index separates
+usage from dated evidence, and release-gap summaries include the later local runs.
+
+Workspace/all-target offline compilation and strict Clippy, formatting, Bash
+syntax, manifest/example TOML parsing, local documentation links and diff
+whitespace checks pass. No application tests or live services were run for this
+cleanup; earlier acceptance records retain their original scope.
+
 ## M5/M8 playback CI follow-up
 
 The screenshot's 25-minute cancellation occurred entirely during Ubuntu package

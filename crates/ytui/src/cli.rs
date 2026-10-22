@@ -524,10 +524,33 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             let mut terminal_received = false;
             loop {
                 tokio::select! {
-                    event=rx.recv()=>{let Some(event)=event else{break;};let terminal=matches!(event.update,JobUpdate::Finished|JobUpdate::Failed{..});snapshot.downloads.apply(event);
-                        if terminal{terminal_received=true;let job=snapshot.downloads.jobs.iter().find(|j|j.id==id).context("Download disappeared")?;if job.state==JobState::Done{for p in &job.outputs{println!("Saved {}",p.display());}}else{failure=job.error.clone();}break;}
+                    event = rx.recv() => {
+                        let Some(event) = event else { break; };
+                        let terminal = matches!(event.update, JobUpdate::Finished | JobUpdate::Failed { .. });
+                        snapshot.downloads.apply(event);
+                        if terminal {
+                            terminal_received = true;
+                            let job = snapshot.downloads.jobs.iter()
+                                .find(|j| j.id == id)
+                                .context("Download disappeared")?;
+                            if job.state == JobState::Done {
+                                for path in &job.outputs {
+                                    println!("Saved {}", path.display());
+                                }
+                            } else {
+                                failure = job.error.clone();
+                            }
+                            break;
+                        }
                     },
-                    _=tokio::signal::ctrl_c()=>{interrupted=true;cancel.cancel();if let Some(j)=snapshot.downloads.jobs.iter_mut().find(|j|j.id==id){j.invalidate(JobState::Paused);}break;}
+                    _ = tokio::signal::ctrl_c() => {
+                        interrupted = true;
+                        cancel.cancel();
+                        if let Some(job) = snapshot.downloads.jobs.iter_mut().find(|j| j.id == id) {
+                            job.invalidate(JobState::Paused);
+                        }
+                        break;
+                    }
                 }
             }
             rx.close();

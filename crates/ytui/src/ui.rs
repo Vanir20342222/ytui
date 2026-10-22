@@ -240,7 +240,20 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 Constraint::Length(2),
             ])
             .split(inner);
-            f.render_widget(Paragraph::new(format!(" {} complete · {} failed · {} audio · {} output paths · {:.1}h completed media\n {:.1} MiB recorded transfer bytes · search: {}", stats.completed, stats.failed, stats.audio, stats.outputs, stats.media_seconds as f64 / 3600.0, stats.recorded_bytes as f64 / 1048576.0, if view.query.is_empty() { "—" } else { &view.query })).style(Style::default().fg(themed(app, app.palette.muted))), chunks[0]);
+            f.render_widget(
+                Paragraph::new(format!(
+                    " {} complete · {} failed · {} audio · {} output paths · {:.1}h completed media\n {:.1} MiB recorded transfer bytes · search: {}",
+                    stats.completed,
+                    stats.failed,
+                    stats.audio,
+                    stats.outputs,
+                    stats.media_seconds as f64 / 3600.0,
+                    stats.recorded_bytes as f64 / 1048576.0,
+                    if view.query.is_empty() { "—" } else { &view.query },
+                ))
+                .style(Style::default().fg(themed(app, app.palette.muted))),
+                chunks[0],
+            );
             let items = rows
                 .iter()
                 .map(|(_, job)| {

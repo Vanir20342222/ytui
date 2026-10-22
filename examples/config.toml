@@ -1,6 +1,7 @@
-# Native Rust is the default. yt-dlp is used only when explicitly selected.
+# Playback defaults to native Rust; downloads use native Rust with yt-dlp fallback.
 # Empty output directories use ~/Videos/ytui and ~/Music/ytui.
-# Set native_js_runtime = "/usr/bin/deno" at the top level to enable challenge solving.
+# Installed Node.js 22+ or Deno 2.9.7 is detected for native challenge solving.
+# Set native_js_runtime = "/path/to/supported/runtime" at the top level to override.
 
 version = 1
 theme = "system"
@@ -9,10 +10,14 @@ image_protocol = "auto"
 thumbnails = true
 reduced_motion = false
 playback_history = true
+show_hints = true
+playback_sponsorblock = "skip"
+playback_sponsor_categories = ["sponsor"]
 concurrency = 3
 max_retries = 3
 retry_delay_seconds = 5
-download_backend = "native"
+download_backend = "auto"
+playback_backend = "native"
 yt_dlp = "yt-dlp"
 ffmpeg = "ffmpeg"
 ffprobe = "ffprobe"

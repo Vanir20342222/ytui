@@ -413,7 +413,51 @@ impl App {
     }
     fn load_demo(&mut self) {
         for tab in 1..4 {
-            self.tabs[tab].page=Page{title:if tab==3{"cliamp radio"}else if tab==2{"Your music"}else{"For you"}.into(),items:(0..18).map(|i|Media{id:format!("demo-{i}"),thumbnail:format!("demo://art/{i}"),title:["A quieter corner of the internet","Late night, soft keys","Building something that lasts","A walk through the northern lights","The art of paying attention","Small discoveries, every day"][i%6].into(),creator:if tab==2{"Studio Sessions"}else if tab==3{"Independent radio"}else{"Everyday Curiosity"}.into(),duration:Some((i as u64+1)*97),description:"Fictional demo content. Press / to explore the interface, t to choose a theme, or ? for shortcuts. No account or network is used for this catalog.".into(),kind:if tab==2{MediaKind::Song}else if tab==3{MediaKind::Station}else{MediaKind::Video},live:tab==3,..Default::default()}).collect(),..Default::default()};
+            self.tabs[tab].page = Page {
+                title: if tab == 3 {
+                    "cliamp radio"
+                } else if tab == 2 {
+                    "Your music"
+                } else {
+                    "For you"
+                }
+                .into(),
+                items: (0..18)
+                    .map(|i| Media {
+                        id: format!("demo-{i}"),
+                        thumbnail: format!("demo://art/{i}"),
+                        title: [
+                            "A quieter corner of the internet",
+                            "Late night, soft keys",
+                            "Building something that lasts",
+                            "A walk through the northern lights",
+                            "The art of paying attention",
+                            "Small discoveries, every day",
+                        ][i % 6]
+                            .into(),
+                        creator: if tab == 2 {
+                            "Studio Sessions"
+                        } else if tab == 3 {
+                            "Independent radio"
+                        } else {
+                            "Everyday Curiosity"
+                        }
+                        .into(),
+                        duration: Some((i as u64 + 1) * 97),
+                        description: "Fictional demo content. Press / to explore the interface, t to choose a theme, or ? for shortcuts. No account or network is used for this catalog.".into(),
+                        kind: if tab == 2 {
+                            MediaKind::Song
+                        } else if tab == 3 {
+                            MediaKind::Station
+                        } else {
+                            MediaKind::Video
+                        },
+                        live: tab == 3,
+                        ..Default::default()
+                    })
+                    .collect(),
+                ..Default::default()
+            };
         }
         let mut a = Job::new(
             self.tabs[1].page.items[0].clone(),

@@ -4,7 +4,7 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.9**. Live account and desktop acceptance remains open;
+This is **0.2.0-alpha.11**. Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
@@ -48,23 +48,24 @@ Playback backend** selects native, auto or external yt-dlp explicitly; downloads
 retain their separate `auto` default. Install `yt-dlp` separately if you choose
 fallback or external extraction. Existing explicit playback choices are retained.
 Successful live access still depends on the account/network; a 99% watching
-success rate is **not established**. See [native playback](docs/NATIVE_PLAYBACK.md).
+success rate is **not established**. See [current playback evidence](docs/SINGLE_VIDEO_SWEEP.md)
+and [CI diagnosis](docs/CI_PLAYBACK_DIAGNOSIS.md).
 
 Playlist links select collection downloads automatically; watch links with playlist
 context stay single-video unless explicitly expanded. Playlist jobs retain their
 source across entry metadata/retries, and auto uses yt-dlp for native playlist limits.
 [Playback/playlist fixes and validation boundaries](docs/PLAYBACK_REPAIR.md).
-Alpha.8 additionally preserves valid outputs after malformed later records, rejects
-empty files, isolates preview controls from saved player preferences, and shows
-contextual recovery steps for service/tool/storage failures. See the
-[stability checks](docs/STABILITY_PASS.md).
+Downloads preserve valid outputs after malformed later records and reject empty
+files. Preview controls preserve saved player preferences; service/tool/storage
+failures show contextual recovery steps.
 
 Thumbnails use sized memory/disk caches and nearby prefetch. Feeds load continuation
 pages near the end and recover temporary errors automatically, keeping visible
 videos and selection. Fresh HTML Home data saves an extra request; overlapping
-pages no longer end the feed immediately. Server categories/section labels remain.
-Wide cards
-get most of the width, with square Music art. `o` opens player controls; **g in mpv**
+pages no longer end the feed immediately. Bounded feed/radio/stream caches reuse
+recent requests; explicit refresh invalidates cached feeds. Server categories and
+section labels remain. Wide cards get most of the width, with square Music art.
+`o` opens player controls; **g in mpv**
 opens its window menu. Volume/mute persist. `B` toggles SponsorBlock skipping and `U`
 replays a skipped part; Settings → Playback controls categories and skip/mark/off.
 
@@ -73,7 +74,7 @@ Rust migration reads existing legacy settings, profiles and queues on request:
 user files and downloaded media are retained. The old Python source is available
 in Git history.
 
-[Usage and settings](docs/RUST.md) · [Remaining work](docs/REMAINING_WORK.md) ·
+[Documentation index](docs/README.md) · [Usage and settings](docs/RUST.md) · [Remaining work](docs/REMAINING_WORK.md) ·
 [Feature audit](docs/FEATURE_AUDIT.md) · [Validation](docs/VALIDATION.md) ·
 [WQHD theme gallery](docs/UI_THEMES.md) · [Rewrite plan](RUST_REWRITE_PLAN.md)
 
