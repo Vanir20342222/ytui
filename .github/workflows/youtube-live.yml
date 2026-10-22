@@ -1,0 +1,60 @@
+name: YouTube live
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/playback-fallback']
+    paths:
+      - '.github/workflows/youtube-live.yml'
+      - 'crates/ytui/tests/live_youtube.rs'
+      - 'tools/test-youtube.sh'
+permissions:
+  contents: read
+concurrency:
+  group: youtube-live-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  public-network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe public YouTube from the GitHub runner
+        shell: bash
+        run: |
+          failures=0
+          for origin in https://www.youtube.com https://music.youtube.com; do
+            if status=$(curl --silent --show-error --location --max-time 25 --output /dev/null --write-out '%{http_code}' "$origin"); then
+              echo "$origin HTTP $status"
+              [[ "$status" =~ ^[23] ]] || failures=$((failures + 1))
+            else
+              echo "$origin transport failed"
+              failures=$((failures + 1))
+            fi
+          done
+          exit "$failures"
+  public-media:
+    needs: public-network
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [auto, yt-dlp]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Install media test tools
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mpv ffmpeg
+          curl --fail --location --retry 2 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux --output "$RUNNER_TEMP/yt-dlp"
+          chmod +x "$RUNNER_TEMP/yt-dlp"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Test public browsing, playback and downloads through ytui
+        env:
+          YTUI_LIVE_TEST_BACKEND: ${{ matrix.backend }}
+        run: tools/test-youtube.sh "$YTUI_LIVE_TEST_BACKEND"

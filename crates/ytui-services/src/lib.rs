@@ -9,6 +9,7 @@ pub mod migration;
 pub mod native;
 mod native_post;
 pub mod paths;
+mod playback_extract;
 pub mod player;
 pub mod process;
 pub mod profiles;

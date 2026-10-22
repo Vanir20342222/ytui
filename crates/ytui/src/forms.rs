@@ -99,7 +99,9 @@ impl Form {
         }
     }
 
-    pub fn download(media: Media, options: DownloadOptions) -> Self {
+    pub fn download(media: Media, mut options: DownloadOptions) -> Self {
+        options.playlist |=
+            ytui_core::is_playlist_url(&media.url) || options.playlist_items.is_some();
         let o = &options;
         let fields = vec![
             Field::flag("Audio only", o.audio),
@@ -418,6 +420,13 @@ impl Form {
         } else {
             Some(self.value(6).into())
         };
+        ensure!(
+            !ytui_core::is_playlist_url(&media.url) || o.playlist,
+            "This is a playlist link. Enable Whole playlist or use a single-song URL"
+        );
+        if o.playlist_items.is_some() {
+            o.playlist = true;
+        }
         o.subtitles = self
             .value(7)
             .split(',')
@@ -595,5 +604,33 @@ mod tests {
             form.download_values().unwrap().1.directory.to_str(),
             Some("/custom")
         );
+    }
+    #[test]
+    fn playlist_links_enable_collection_download_but_watch_context_does_not() {
+        let mut form = Form::download(
+            Media {
+                url: "https://music.youtube.com/playlist?list=PLsynthetic".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                directory: "/synthetic/downloads".into(),
+                ..Default::default()
+            },
+        );
+        assert_eq!(form.value(5), "yes");
+        assert!(form.download_values().unwrap().1.playlist);
+        form.fields[5].value = Editor::new("no");
+        assert!(form.download_values().is_err());
+        let form = Form::download(
+            Media {
+                url: "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                directory: "/synthetic/downloads".into(),
+                ..Default::default()
+            },
+        );
+        assert_eq!(form.value(5), "no");
     }
 }

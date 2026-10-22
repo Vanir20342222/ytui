@@ -371,6 +371,21 @@ async fn execute_inner(
                 .await;
             }
         }
+        // A later playlist entry may fail after earlier files were published.
+        // Retain those outputs without marking the whole collection successful.
+        if job.options.playlist
+            && let Ok(output) = &result
+            && !output.success
+        {
+            for line in &output.lines {
+                if let Some(raw) = line.strip_prefix("YTUI_OUTPUT:")
+                    && let Ok(path) = serde_json::from_str::<std::path::PathBuf>(raw)
+                    && path.is_file()
+                {
+                    send(tx, job, JobUpdate::Output(path)).await;
+                }
+            }
+        }
         let error = match result {
             Ok(result) if result.success => {
                 let mut outputs = Vec::new();
@@ -395,16 +410,23 @@ async fn execute_inner(
                             path.is_file(),
                             "yt-dlp exited successfully but the final output file is missing"
                         );
-                        outputs.push(path);
+                        if !outputs.iter().any(|(existing, _)| existing == &path) {
+                            outputs.push((path, resolved_media.clone()));
+                        }
                     }
                 }
                 ensure!(
                     !outputs.is_empty(),
                     "yt-dlp did not report a final output file; check the URL, playlist selection, and installed yt-dlp version"
                 );
-                for output in &outputs {
+                // Register every completed file before running fallible hooks.
+                // Associate each output with its own entry, not the last metadata
+                // record of the playlist, and never invoke a hook twice per path.
+                for (output, _) in &outputs {
                     send(tx, job, JobUpdate::Output(output.clone())).await;
-                    run_hook(job, &resolved_media, output, cancel.clone()).await?;
+                }
+                for (output, media) in &outputs {
+                    run_hook(job, media, output, cancel.clone()).await?;
                 }
                 return Ok(());
             }

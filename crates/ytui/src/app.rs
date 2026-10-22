@@ -2166,6 +2166,8 @@ impl App {
             && self.snapshot.downloads.jobs.iter().any(|j| {
                 j.media.url == media.url
                     && j.options.audio == options.audio
+                    && j.options.playlist == options.playlist
+                    && j.options.playlist_items == options.playlist_items
                     && j.options.quality == options.quality
                     && j.state != JobState::Error
                     && j.state != JobState::Cancelled
@@ -2205,7 +2207,8 @@ impl App {
                 url,
                 ..Default::default()
             };
-            let o = self.config.download.clone();
+            let mut o = self.config.download.clone();
+            o.audio |= self.tab == 2;
             self.modal = Some(Modal::Form(Box::new(Form::download(media, o))));
         } else if self.tab == 0 {
             self.change_tab(1);

@@ -63,6 +63,7 @@ async fn entry() -> Result<()> {
                 !matches!(
                     &command,
                     cli::Command::Browse { .. }
+                        | cli::Command::PlaybackCheck { .. }
                         | cli::Command::Radio { .. }
                         | cli::Command::Auth {
                             command: cli::AuthCommand::Import { .. }
