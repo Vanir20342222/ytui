@@ -15,7 +15,7 @@ fn video_url(music: bool) -> String {
     };
     std::env::var(variable).unwrap_or_else(|_| {
         format!(
-            "https://{}.youtube.com/watch?v=BaW_jenozKc",
+            "https://{}.youtube.com/watch?v=jNQXAC9IVRw",
             if music { "music" } else { "www" }
         )
     })
@@ -109,9 +109,20 @@ async fn live_music_public_search() {
 #[tokio::test]
 #[ignore = "requires live public YouTube player/details access; no account or cookies"]
 async fn live_youtube_video_details() {
-    let (output, _temp) = run(&["browse", "details", "BaW_jenozKc"]).await;
+    let url = url::Url::parse(&video_url(false)).unwrap();
+    let id = url
+        .query_pairs()
+        .find(|(key, _)| key == "v")
+        .map(|(_, value)| value.into_owned())
+        .unwrap_or_else(|| url.path().trim_start_matches('/').into());
+    assert_eq!(
+        id.len(),
+        11,
+        "Use a public watch or youtu.be URL for the video fixture"
+    );
+    let (output, _temp) = run(&["browse", "details", &id]).await;
     let page = page(output);
-    assert_eq!(page.items[0].id, "BaW_jenozKc");
+    assert_eq!(page.items[0].id, id);
     assert!(!page.items[0].title.is_empty());
 }
 
@@ -246,9 +257,10 @@ async fn live_music_two_entry_playlist_download() {
 #[ignore = "downloads the small public yt-dlp test video with native Rust; requires YouTube and FFmpeg"]
 async fn live_native_youtube_test_video_download() {
     let destination = tempfile::tempdir().unwrap();
+    let source = video_url(false);
     let (output, _temp) = run(&[
         "download",
-        "https://www.youtube.com/watch?v=BaW_jenozKc",
+        &source,
         "--quality",
         "360",
         "--directory",

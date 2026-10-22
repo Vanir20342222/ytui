@@ -12,8 +12,8 @@ These are explicit network tests, excluded from ordinary `cargo test`. They use
 temporary configuration, state, caches and download destinations, never import
 browser cookies, and delete downloaded test media afterwards. They preserve the
 machine's inherited proxy configuration. No account, consent, VPN or system theme
-settings are changed. The default public video is yt-dlp's small `BaW_jenozKc`
-fixture. The two-entry Music playlist check uses the public `JODA15` playlist from
+settings are changed. The default public video is the short public `jNQXAC9IVRw`
+("Me at the zoo"). The two-entry Music playlist check uses the public `JODA15` playlist from
 yt-dlp's own YouTube tab tests. Public fixtures can change or become unavailable.
 
 Checks include YouTube/Music search, video details, video and audio playback,
@@ -43,8 +43,8 @@ The runner does not install missing tools. On Arch/CachyOS, install the appropri
 For a single public playback diagnostic with your configured mpv output:
 
 ```sh
-ytui playback-check 'https://www.youtube.com/watch?v=BaW_jenozKc' --backend auto
-ytui playback-check 'https://music.youtube.com/watch?v=BaW_jenozKc' --audio --backend yt-dlp
+ytui playback-check 'https://www.youtube.com/watch?v=jNQXAC9IVRw' --backend auto
+ytui playback-check 'https://music.youtube.com/watch?v=jNQXAC9IVRw' --audio --backend yt-dlp
 ```
 
 This command intentionally loads no browser session. It closes mpv after three
@@ -59,7 +59,7 @@ cargo test -p ytui --test downloads --locked real_mpv_playback_check_ -- --ignor
 ```
 
 The separate **YouTube live** GitHub workflow runs a public network preflight
-before installing tools/building/running the same tests. It is triggered by
+before installing tools/building/running the same tests in both auto and yt-dlp modes. It is triggered by
 changes to its test files on the repair branch; `workflow_dispatch` is available
 once GitHub registers it on the default branch. Hosted-runner IPs may themselves
 be challenged by YouTube; a failed hosted test still needs a run on the target PC.

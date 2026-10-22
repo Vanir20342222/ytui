@@ -35,6 +35,10 @@ jobs:
     needs: public-network
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [auto, yt-dlp]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -51,4 +55,6 @@ jobs:
           chmod +x "$RUNNER_TEMP/yt-dlp"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: Test public browsing, playback and downloads through ytui
-        run: tools/test-youtube.sh auto
+        env:
+          YTUI_LIVE_TEST_BACKEND: ${{ matrix.backend }}
+        run: tools/test-youtube.sh "$YTUI_LIVE_TEST_BACKEND"
