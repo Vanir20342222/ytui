@@ -1,0 +1,4 @@
+# Public smoke corpus. These three cases cannot establish 99% reliability.
+https://www.youtube.com/watch?v=jNQXAC9IVRw
+https://youtu.be/aqz-KE-bpKQ
+https://music.youtube.com/watch?v=jNQXAC9IVRw

@@ -26,6 +26,13 @@ baseline defects, milestones, migration requirements, and acceptance checks.
   trying pinned aagedal/yt-dlp-rs first and external yt-dlp for supported extractor
   limitations. Keep explicit `native` and `yt-dlp` modes. Never download/install
   executables or change an existing explicit backend without a user action.
+- The later native-playback objective supersedes the shared playback policy:
+  `playback_backend` defaults to `native` and never automatically starts Python
+  yt-dlp. Keep download backend settings separate and preserve an explicit
+  playback override. Node.js 22+ / pinned Deno 2.9.7 run the native extractor's
+  offline JS challenges; detect installed tools, never auto-install them.
+- A 99% watching-success claim requires representative live evidence. A local
+  fixture, startup smoke test or successful fallback cannot establish that claim.
 - Implementation evidence and open gates are in docs/VALIDATION.md and
   docs/PARITY.md. Do not equate implemented provider code with a successful live
   account, Ghostty, audio-device or stable-release acceptance result.

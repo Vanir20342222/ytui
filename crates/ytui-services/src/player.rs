@@ -318,8 +318,8 @@ async fn start(
     let native_dir = paths.state.join("auth/transient");
     let (backend_tx, backend) = watch::channel(String::new());
     let task = tokio::spawn(async move {
-        let fallback_spec = (youtube && config.download_backend == "auto").then(|| spec.clone());
-        let spec = if youtube && config.download_backend != "yt-dlp" {
+        let fallback_spec = (youtube && config.playback_backend == "auto").then(|| spec.clone());
+        let spec = if youtube && config.playback_backend != "yt-dlp" {
             let mut options = config.download.clone();
             options.audio = audio;
             if preview {
@@ -336,7 +336,7 @@ async fn start(
             let resolved = match resolved {
                 Ok(resolved) => resolved,
                 Err(error)
-                    if config.download_backend == "auto"
+                    if config.playback_backend == "auto"
                         && !token.is_cancelled()
                         && crate::native::fallback_eligible(&error.to_string()) =>
                 {
@@ -359,22 +359,14 @@ async fn start(
                 Err(error) => return Err(error),
             };
             let _ = backend_tx.send("native Rust".into());
-            let mut direct = spec.args;
-            direct.pop();
-            direct.pop();
-            if let Some(audio) = resolved.audio_url {
-                direct.push(format!("--audio-file={audio}"));
-            }
-            if let Some(path) = &cookie_path {
-                direct.push("--cookies=yes".into());
-                direct.push(format!("--cookies-file={}", path.display()));
-            }
-            direct.push("--".into());
-            direct.push(resolved.url);
-            ProcessSpec::new(
-                spec.program,
-                direct,
-                if preview { 20 } else { 24 * 60 * 60 },
+            crate::playback_extract::direct(
+                spec,
+                crate::playback_extract::Stream {
+                    url: resolved.url,
+                    audio: resolved.audio_url,
+                    headers: resolved.headers,
+                },
+                cookie_path.as_deref(),
             )
         } else if youtube {
             let _ = backend_tx.send("yt-dlp".into());
@@ -515,6 +507,32 @@ struct Actor {
     sponsor_task: Option<JoinHandle<Result<Vec<crate::sponsorblock::Segment>>>>,
     ignore_segments_until: f64,
 }
+fn native_stream_retryable(message: &str) -> bool {
+    let lower = message.to_lowercase();
+    if [
+        "not a bot",
+        "sign in",
+        "private video",
+        "tunnel",
+        "proxy",
+        "permission denied",
+        "no space left",
+    ]
+    .iter()
+    .any(|part| lower.contains(part))
+    {
+        return false;
+    }
+    crate::download::transient(message)
+        || [
+            "http error 403",
+            "http error 404",
+            "server returned 403",
+            "server returned 404",
+        ]
+        .iter()
+        .any(|part| lower.contains(part))
+}
 impl Actor {
     fn preferences(&self) -> Preferences {
         Preferences {
@@ -584,7 +602,7 @@ impl Actor {
         }
         let mut config = self.config.clone();
         if fallback {
-            config.download_backend = "yt-dlp".into();
+            config.playback_backend = "yt-dlp".into();
         }
         match start(
             &config,
@@ -841,6 +859,23 @@ impl Actor {
                     "Radio disconnected · reconnecting ({}/3)",
                     self.reconnect_count
                 ));
+            } else if !success
+                && self.config.playback_backend == "native"
+                && self.state.backend == "native Rust"
+                && self.reconnect_count == 0
+                && self.playing.as_ref().is_some_and(|(media, _, fallback)| {
+                    !fallback && crate::sponsorblock::video_id(media).is_some()
+                })
+                && native_stream_retryable(&message)
+            {
+                // Refresh an expired/interrupted CDN URL through Rust once,
+                // retaining the last position and never escalating to yt-dlp.
+                self.reconnect_count = 1;
+                self.reconnect_at = Some(tokio::time::Instant::now() + Duration::from_secs(1));
+                self.state.error = None;
+                self.state.buffering = true;
+                self.state.notice =
+                    Some("Native stream interrupted · refreshing URL and resuming once".into());
             } else if success
                 && self
                     .state
@@ -876,7 +911,7 @@ impl Actor {
                         audio: *audio,
                         preview: false,
                         paused: self.state.paused,
-                        position: None,
+                        position: (!media.live).then_some(self.state.position),
                         preferences: &self.preferences(),
                     },
                 )
@@ -888,7 +923,12 @@ impl Actor {
                         self.state.error = None;
                     }
                     Err(e) => {
+                        self.state.buffering = false;
+                        self.state.active = false;
                         self.state.error = Some(process::diagnostic(&format!("{e:#}")));
+                        event = Some(PlayerEvent::Error(
+                            self.state.error.clone().unwrap_or_default(),
+                        ));
                     }
                 }
             }
@@ -1229,7 +1269,7 @@ mod tests {
         std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
         let config = Config {
             mpv: script.to_string_lossy().into(),
-            download_backend: "yt-dlp".into(),
+            playback_backend: "yt-dlp".into(),
             ..Default::default()
         };
         let paths = Paths {
@@ -1320,7 +1360,7 @@ mod tests {
             config: Config {
                 mpv: "/must/not/start/mpv".into(),
                 yt_dlp: tool.display().to_string(),
-                download_backend: "yt-dlp".into(),
+                playback_backend: "yt-dlp".into(),
                 playback_sponsorblock: "off".into(),
                 ..Default::default()
             },
@@ -1429,7 +1469,7 @@ sleep 30
             Config {
                 mpv: mpv.display().to_string(),
                 yt_dlp: extractor.display().to_string(),
-                download_backend: "yt-dlp".into(),
+                playback_backend: "yt-dlp".into(),
                 playback_sponsorblock: "off".into(),
                 ..Default::default()
             },
@@ -1558,6 +1598,81 @@ mod responsiveness_tests {
             legacy_data: root.join("legacy"),
             home: root.into(),
         }
+    }
+    #[tokio::test]
+    async fn interrupted_native_stream_refreshes_once_without_advancing_or_losing_position() {
+        let temp = tempfile::tempdir().unwrap();
+        let media = Media {
+            id: "abcdefghijk".into(),
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            ..Default::default()
+        };
+        let mut actor = Actor {
+            config: Config::default(),
+            paths: paths(temp.path()),
+            session: None,
+            full: None,
+            preview: None,
+            state: PlayerStatus {
+                active: true,
+                position: 42.0,
+                duration: Some(100.0),
+                backend: "native Rust".into(),
+                volume: 37.0,
+                speed: 1.25,
+                ..Default::default()
+            },
+            playing: Some((media, false, false)),
+            reconnect_at: None,
+            reconnect_count: 0,
+            resume_after_preview: false,
+            sponsor_task: None,
+            ignore_segments_until: 0.0,
+        };
+        for (attempt, should_retry) in [(0, true), (1, false)] {
+            actor.reconnect_at = None;
+            actor.full = Some(Active {
+                cancel: CancellationToken::new(),
+                task: tokio::spawn(async {
+                    Ok(ProcessResult {
+                        success: false,
+                        lines: vec![],
+                        stderr: "[ffmpeg] HTTP error 403 Forbidden".into(),
+                    })
+                }),
+                socket: temp.path().join("unused"),
+                backend: watch::channel(String::new()).1,
+                _dir: tempfile::tempdir().unwrap(),
+                _cookies: None,
+            });
+            tokio::task::yield_now().await;
+            let event = actor.tick().await;
+            assert_eq!(
+                actor.reconnect_at.is_some(),
+                should_retry,
+                "attempt {attempt}"
+            );
+            assert_eq!(matches!(event, Some(PlayerEvent::Error(_))), !should_retry);
+            assert_eq!(actor.state.position, 42.0);
+            assert_eq!(actor.state.volume, 37.0);
+            assert_eq!(actor.state.speed, 1.25);
+        }
+        for error in [
+            "Sign in to confirm you're not a bot",
+            "Unable to connect to proxy: HTTP error 403",
+            "Permission denied",
+            "private video",
+        ] {
+            assert!(!native_stream_retryable(error));
+        }
+        assert!(native_stream_retryable("Connection reset by peer"));
+        // A synchronous relaunch failure must not leave the UI buffering forever.
+        actor.playing.as_mut().unwrap().0.url = "invalid playback URL".into();
+        actor.reconnect_at = Some(tokio::time::Instant::now());
+        actor.state.buffering = true;
+        assert!(matches!(actor.tick().await, Some(PlayerEvent::Error(_))));
+        assert!(!actor.state.buffering);
+        assert!(!actor.state.active);
     }
     #[tokio::test]
     async fn preview_controls_never_overwrite_saved_main_player_preferences() {
@@ -1828,6 +1943,137 @@ mod responsiveness_tests {
 #[cfg(test)]
 mod real_mpv_tests {
     use super::*;
+    #[tokio::test]
+    #[ignore = "requires actual mpv and FFmpeg; native HLS manifest/headers over loopback only"]
+    async fn real_mpv_native_hls_handoff_keeps_the_manifest_and_native_identity() {
+        let temp = tempfile::tempdir().unwrap();
+        let manifest = temp.path().join("stream.m3u8");
+        let generated = tokio::process::Command::new("ffmpeg")
+            .args([
+                "-v",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=blue:s=64x64:r=10",
+                "-f",
+                "lavfi",
+                "-i",
+                "sine=frequency=440",
+                "-t",
+                "5",
+                "-c:v",
+                "mpeg2video",
+                "-c:a",
+                "mp2",
+                "-f",
+                "hls",
+                "-hls_time",
+                "1",
+                "-hls_list_size",
+                "0",
+            ])
+            .arg(&manifest)
+            .output()
+            .await
+            .unwrap();
+        assert!(
+            generated.status.success(),
+            "{}",
+            String::from_utf8_lossy(&generated.stderr)
+        );
+        let root = temp.path().to_owned();
+        let segment_requests = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let requests = segment_requests.clone();
+        let (base, server) = crate::test_http::serve_request(move |request| {
+            if !request
+                .to_lowercase()
+                .contains("user-agent: native-hls-client")
+            {
+                return (403, String::new(), b"Incorrect native client".to_vec());
+            }
+            let path = request
+                .lines()
+                .next()
+                .unwrap()
+                .split_whitespace()
+                .nth(1)
+                .unwrap()
+                .trim_start_matches('/');
+            if path.ends_with(".ts") {
+                requests.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            }
+            let data = std::fs::read(root.join(path)).unwrap();
+            (
+                200,
+                format!(
+                    "Content-Type: {}\r\n",
+                    if path.ends_with("m3u8") {
+                        "application/vnd.apple.mpegurl"
+                    } else {
+                        "video/mp2t"
+                    }
+                ),
+                data,
+            )
+        })
+        .await;
+        let info: yt_dlp_rs::VideoInfo = serde_json::from_value(json!({"id":"fixture", "title":"Native HLS", "ext":"mp4", "url":format!("{base}/stream.m3u8"), "webpage_url":"https://www.youtube.com/watch?v=abcdefghijk", "extractor":"youtube", "extractor_key":"Youtube", "protocol":"m3u8_native", "fragments":[{"url":format!("{base}/stream0.ts")}], "http_headers":{"User-Agent":"native-hls-client"}})).unwrap();
+        let source = crate::native::playback_source(&info, false).unwrap();
+        let mpv = std::env::var("YTUI_TEST_MPV").unwrap_or_else(|_| "mpv".into());
+        let socket = temp.path().join("mpv-ipc");
+        let spec = crate::playback_extract::direct(
+            ProcessSpec::new(
+                mpv,
+                vec![
+                    "--no-config".into(),
+                    "--vo=null".into(),
+                    "--ao=null".into(),
+                    "--terminal=yes".into(),
+                    "--msg-level=all=warn".into(),
+                    format!("--input-ipc-server={}", socket.display()),
+                    "--user-agent=incorrect-default".into(),
+                    "--".into(),
+                    info.webpage_url.to_string(),
+                ],
+                12,
+            ),
+            crate::playback_extract::Stream {
+                url: source.url,
+                audio: source.audio_url,
+                headers: source.headers,
+            },
+            None,
+        );
+        let cancel = CancellationToken::new();
+        let token = cancel.clone();
+        let task = tokio::spawn(process::run(spec, token, |_| {}));
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+        loop {
+            if ipc(&socket, json!(["get_property", "time-pos"]))
+                .await
+                .ok()
+                .and_then(|v| v.as_f64())
+                .is_some_and(|v| v >= 1.0)
+            {
+                break;
+            }
+            assert!(
+                !task.is_finished(),
+                "native HLS player exited before playback advanced"
+            );
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "native HLS playback did not advance"
+            );
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        cancel.cancel();
+        let _ = task.await;
+        assert!(segment_requests.load(std::sync::atomic::Ordering::Relaxed) > 0);
+        server.abort();
+        let _ = server.await;
+    }
     use std::os::unix::fs::PermissionsExt;
     async fn ready(actor: &mut Actor) {
         let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
@@ -2264,7 +2510,7 @@ mod real_mpv_tests {
             config: Config {
                 mpv: wrapper.display().to_string(),
                 yt_dlp: extractor.display().to_string(),
-                download_backend: "yt-dlp".into(),
+                playback_backend: "yt-dlp".into(),
                 playback_sponsorblock: "off".into(),
                 ..Default::default()
             },

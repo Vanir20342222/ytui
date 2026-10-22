@@ -123,6 +123,47 @@ fn doctor_network_returns_failure_when_its_public_probes_are_rejected() {
     assert!(output.contains("Music public search: FAILED"));
     assert!(String::from_utf8_lossy(&result.stderr).contains("public network probe(s) failed"));
 }
+#[test]
+fn native_playback_never_invokes_external_extraction_even_for_legacy_auto_configs() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let proxy = Server::with_status(b"Fixture rejection".to_vec(), 403);
+    let marker = temp.path().join("external-was-used");
+    let extractor = temp.path().join("yt-dlp");
+    std::fs::write(
+        &extractor,
+        format!("#!/bin/sh\nprintf x > '{}'\nexit 1\n", marker.display()),
+    )
+    .unwrap();
+    std::fs::set_permissions(&extractor, std::fs::Permissions::from_mode(0o755)).unwrap();
+    // Deliberately deserialize a config predating playback_backend.
+    let mut config: Config =
+        toml::from_str("download_backend='auto'\nauth_store='file'\ntheme='ytui-dark'").unwrap();
+    config.proxy = Some(proxy.url.clone());
+    config.yt_dlp = extractor.display().to_string();
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let result = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .arg("--config")
+        .arg(config_file)
+        .arg("--state-dir")
+        .arg(temp.path().join("state"))
+        .args([
+            "playback-check",
+            "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+        ])
+        .env("XDG_CONFIG_HOME", temp.path().join("config"))
+        .env("XDG_STATE_HOME", temp.path().join("state"))
+        .env("XDG_CACHE_HOME", temp.path().join("cache"))
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).contains("Native playback"));
+    assert!(
+        !marker.exists(),
+        "native playback silently started external yt-dlp"
+    );
+}
 impl Server {
     fn start() -> Self {
         Self::with_payload(b"synthetic-media-fixture".to_vec())
@@ -687,6 +728,12 @@ done
             auth_store: "file".into(),
             yt_dlp: script.display().to_string(),
             max_retries: 0,
+            download_backend: if case == "watch-single" {
+                "yt-dlp"
+            } else {
+                "auto"
+            }
+            .into(),
             ..Default::default()
         };
         let config_file = temp.path().join("config.toml");
@@ -702,7 +749,11 @@ done
                 "download",
                 url,
                 "--backend",
-                "auto",
+                if case == "watch-single" {
+                    "yt-dlp"
+                } else {
+                    "auto"
+                },
                 "--directory",
                 media.to_str().unwrap(),
             ])

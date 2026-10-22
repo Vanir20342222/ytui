@@ -1809,6 +1809,9 @@ dependencies = [
  "icu_properties",
  "icu_provider",
  "smallvec",
+ "utf16_iter",
+ "utf8_iter",
+ "write16",
  "zerovec",
 ]
 
@@ -4221,6 +4224,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 
 [[package]]
+name = "utf16_iter"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8232dd3cdaed5356e0f716d285e4b40b932ac434100fe9b7e0e8e935b9e6246"
+
+[[package]]
 name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4832,6 +4841,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "write16"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1890f4022759daae28ed4fe62859b1236caebfc61ede2f63ed4e695f3f6d936"
+
+[[package]]
 name = "writeable"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4872,8 +4887,8 @@ dependencies = [
 
 [[package]]
 name = "yt-dlp-rs"
-version = "0.1.0"
-source = "git+https://github.com/aagedal/yt-dlp-rs?rev=10223c019ef6ec5552627b90251d8e967404e440#10223c019ef6ec5552627b90251d8e967404e440"
+version = "0.2.0-alpha.1"
+source = "git+https://github.com/aagedal/yt-dlp-rs?rev=f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab#f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab"
 dependencies = [
  "aes 0.9.3",
  "base64 0.22.1",
@@ -4882,7 +4897,11 @@ dependencies = [
  "cookie",
  "cookie_store",
  "httpdate",
+ "icu_normalizer",
+ "icu_properties",
+ "log",
  "percent-encoding",
+ "regex",
  "reqwest",
  "roxmltree",
  "scraper",
@@ -4895,7 +4914,7 @@ dependencies = [
 
 [[package]]
 name = "ytui"
-version = "0.2.0-alpha.8"
+version = "0.2.0-alpha.9"
 dependencies = [
  "anyhow",
  "clap",
@@ -4923,7 +4942,7 @@ dependencies = [
 
 [[package]]
 name = "ytui-core"
-version = "0.2.0-alpha.8"
+version = "0.2.0-alpha.9"
 dependencies = [
  "anyhow",
  "serde",
@@ -4935,7 +4954,7 @@ dependencies = [
 
 [[package]]
 name = "ytui-services"
-version = "0.2.0-alpha.8"
+version = "0.2.0-alpha.9"
 dependencies = [
  "anyhow",
  "directories",

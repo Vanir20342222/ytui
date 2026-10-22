@@ -42,6 +42,7 @@ async fn run(args: &[&str]) -> (std::process::Output, tempfile::TempDir) {
         auth_store: "file".into(),
         notifications: false,
         download_backend: backend(),
+        playback_backend: backend(),
         max_retries: 0,
         mpv: wrapper.display().to_string(),
         yt_dlp: std::env::var("YTUI_TEST_YT_DLP").unwrap_or_else(|_| "yt-dlp".into()),

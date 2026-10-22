@@ -13,6 +13,14 @@ pub fn recovery(message: &str) -> Option<Recovery> {
             "Open Account in Actions. Complete YouTube verification in your browser, then reconnect the signed-in session.",
         )
     } else if has(&[
+        "all player responses are invalid",
+        "ip is likely being blocked",
+    ]) {
+        (
+            "YouTube rejected player responses",
+            "Check this video in your browser on the same network. The extractor reports possible IP blocking; verify account/network access before retrying.",
+        )
+    } else if has(&[
         "connect tunnel",
         "tunnel connection failed",
         "tunnel failed",
@@ -45,6 +53,14 @@ pub fn recovery(message: &str) -> Option<Recovery> {
         (
             "YouTube rate limit",
             "Wait for the service cooldown before retrying. Repeated refreshes will not help.",
+        )
+    } else if has(&[
+        "native youtube solving requires",
+        "configured native javascript runtime was not found",
+    ]) {
+        (
+            "Native JavaScript runtime needs attention",
+            "Use installed Node.js 22+ or Deno 2.9.7. Clear the native runtime field in Settings → Tools for automatic detection.",
         )
     } else if has(&[
         "no supported javascript runtime",
@@ -84,7 +100,7 @@ pub fn recovery(message: &str) -> Option<Recovery> {
     ]) {
         (
             "YouTube extraction needs attention",
-            "Open Playback repair in Actions. Choose Auto or yt-dlp, or try another quality; check installed tool versions.",
+            "Open Playback settings and check the native JavaScript runtime and quality. Native mode never switches to external yt-dlp.",
         )
     } else if has(&[
         "video is unavailable",
@@ -124,6 +140,10 @@ mod tests {
             (
                 "ERROR: Sign in to confirm you’re not a bot",
                 "YouTube requires verification",
+            ),
+            (
+                "All player responses are invalid. Your IP is likely being blocked by Youtube",
+                "YouTube rejected player responses",
             ),
             (
                 "Unable to connect to proxy: Tunnel connection failed: 403 Forbidden",

@@ -206,20 +206,26 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Player", "Stop", "player-stop"),
     entry!(
         "Playback repair",
-        "Retry selection using yt-dlp",
+        "Retry using external yt-dlp (Python)",
         "fallback"
     ),
     entry!(
         "Playback repair",
-        "Select extraction backend",
+        "Select download extraction backend",
         "backend",
         &[("Backend: auto, native or yt-dlp", "auto")]
     ),
     entry!(
         "Playback repair",
-        "Configure installed native Deno runtime",
+        "Select playback backend",
+        "playback-backend",
+        &[("Playback: native, auto or yt-dlp", "native")]
+    ),
+    entry!(
+        "Playback repair",
+        "Configure native JavaScript runtime",
         "native-runtime",
-        &[("Deno 2.9.7 executable", "deno")]
+        &[("Node.js 22+ or Deno 2.9.7 executable", "node")]
     ),
     entry!("Tools", "Diagnostics", "log"),
     entry!("Tools", "Check for updates", "update"),

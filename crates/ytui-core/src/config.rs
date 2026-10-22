@@ -23,6 +23,7 @@ pub struct Config {
     pub retry_delay_seconds: u64,
     pub proxy: Option<String>,
     pub download_backend: String,
+    pub playback_backend: String,
     pub native_js_runtime: Option<PathBuf>,
     pub yt_dlp: String,
     pub ffmpeg: String,
@@ -63,6 +64,7 @@ impl Default for Config {
             retry_delay_seconds: 5,
             proxy: None,
             download_backend: "auto".into(),
+            playback_backend: "native".into(),
             native_js_runtime: None,
             yt_dlp: "yt-dlp".into(),
             ffmpeg: "ffmpeg".into(),
@@ -119,6 +121,10 @@ impl Config {
         ensure!(
             ["auto", "native", "yt-dlp"].contains(&self.download_backend.as_str()),
             "download_backend must be auto, native or yt-dlp"
+        );
+        ensure!(
+            ["auto", "native", "yt-dlp"].contains(&self.playback_backend.as_str()),
+            "playback_backend must be native, auto or yt-dlp"
         );
         ensure!(
             ["auto", "caelestia", "omarchy", "portal", "gnome"]
