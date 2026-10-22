@@ -669,3 +669,42 @@ async fn reconnecting_feed_keeps_content_and_explains_automatic_recovery_in_all_
     assert!(app.tabs[1].load.as_ref().unwrap().retry_at.unwrap() > Instant::now());
     app.shutdown().await;
 }
+
+#[tokio::test]
+async fn music_playlist_paste_sets_audio_and_playlist_intent_and_single_jobs_do_not_block_it() {
+    use ytui_core::{DownloadOptions, Media};
+    let (mut app, _temp) = fixture();
+    app.tab = 2;
+    app.search("https://music.youtube.com/playlist?list=PLsynthetic");
+    let Some(Modal::Form(form)) = &app.modal else {
+        panic!("playlist did not open download options")
+    };
+    let (_, options) = form.download_values().unwrap();
+    assert!(options.audio && options.playlist);
+    app.modal = None;
+    app.demo = false;
+    app.snapshot.downloads.jobs.clear();
+    let media = Media {
+        url: "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic".into(),
+        ..Default::default()
+    };
+    let mut options = DownloadOptions {
+        audio: true,
+        ..Default::default()
+    };
+    app.enqueue_download(media.clone(), options.clone());
+    options.playlist = true;
+    app.enqueue_download(media.clone(), options.clone());
+    assert_eq!(
+        app.snapshot.downloads.jobs.len(),
+        2,
+        "single-video history blocked a collection download"
+    );
+    app.enqueue_download(media, options);
+    assert_eq!(
+        app.snapshot.downloads.jobs.len(),
+        2,
+        "identical playlist request was not deduplicated"
+    );
+    app.shutdown().await;
+}

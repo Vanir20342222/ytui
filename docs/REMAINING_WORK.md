@@ -39,6 +39,20 @@ and same-feed selection survive refresh/recovery. Overlapping continuation pages
 advance with token-cycle/empty-run bounds. See [FEED_RECOVERY_PLAN.md](FEED_RECOVERY_PLAN.md).
 This does not remove consent, expired-session, service-block or live-account gates.
 
+## Alpha.7 playback fallback repair (M5/M8)
+
+The user reports all videos failing after fallback with mpv 0.41.0 and yt-dlp
+2026.08.19. External playback now resolves through yt-dlp directly and hands streams,
+headers and separate audio to mpv. Actual mpv errors are captured from stdout/stderr.
+See [PLAYBACK_REPAIR.md](PLAYBACK_REPAIR.md). This fixes the hidden-error path and
+removes the mpv extraction-hook dependency; successful live YouTube playback on the
+reported desktop remains an acceptance gate. Dedicated playlist intent and saved
+source/ranges now survive entry metadata/import/retry; native YouTube playlists use
+auto fallback. Partial output records do not turn failed collections into success.
+A real native audio transfer/MP3 conversion is verified with loopback/FFmpeg; actual
+YouTube Music and playlists still require live acceptance. Re-add original playlist
+links for older jobs already reduced to a single-song URL.
+
 ## Unsupported or partial functionality
 
 | Area | Current limit / planned acceptance |

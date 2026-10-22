@@ -4,11 +4,11 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.6**. Live account and desktop acceptance remains open;
+This is **0.2.0-alpha.7**. Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
-git clone --branch improve/feed-recovery https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/playback-fallback https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ytui doctor
@@ -24,7 +24,7 @@ sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
 rustup default stable
 ```
 
-Until this change reaches main, use the `improve/feed-recovery` branch.
+Until this change reaches main, use the `fix/playback-fallback` branch.
 Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 
@@ -44,6 +44,11 @@ Strict `native` and explicit `yt-dlp` modes remain available. Existing settings 
 their chosen mode: **F2 → Select extraction backend → auto** enables automatic
 fallback after upgrading. The application stays Rust; external yt-dlp is separately
 installed. Successful live YouTube access still depends on the account/network.
+
+Playlist links select collection downloads automatically; watch links with playlist
+context stay single-video unless explicitly expanded. Playlist jobs retain their
+source across entry metadata/retries, and auto uses yt-dlp for native playlist limits.
+[Playback/playlist fixes and validation boundaries](docs/PLAYBACK_REPAIR.md).
 
 Thumbnails use sized memory/disk caches and nearby prefetch. Feeds load continuation
 pages near the end and recover temporary errors automatically, keeping visible

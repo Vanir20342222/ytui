@@ -4,6 +4,48 @@ Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. All automated application tests use synthetic/offline data.
 
 
+## Alpha.7 playback/playlist repair evidence (M3/M5/M8)
+
+User reports mpv 0.41.0 / yt-dlp 2026.08.19 and fallback followed by `Playback failed`,
+plus playlists saving only the first song. Tool versions are user-provided.
+
+- `cargo test --workspace --locked`: **119 passed**, 8 opt-in tests excluded.
+  Includes all existing UI/theme/settings/actual-PTY tests and new explicit external
+  extraction/headers/arguments/cancellation, visible mpv stdout failures, player
+  error state/events, playlist source/intent/import/dedupe and real-executable
+  multi-output CLI/state fixtures. Extractor responses in these cases are synthetic.
+- Formatting and strict workspace/all-target Clippy pass. Optimized release build
+  and actual isolated `install.sh` pass; both installed names report alpha.7.
+- Separate real mpv 0.40 **two tests passed** with null outputs: generated local
+  controls/menu/quality/SponsorBlock/replay and external-extraction handoff to
+  header-requiring loopback split-video/audio and audio-only streams. A controlled
+  missing-file error verifies stdout diagnostics. The seek assertion waits for the
+  asynchronous decoder update within two seconds; it still requires actual skip.
+  mpv and missing libraries were unpacked from official Debian packages outside
+  the repository. The user's displayed mpv 0.41/device was not tested here.
+- Separate real FFmpeg/ffprobe MP3 test **passed**: Rust downloads generated MP4
+  audio over loopback, real FFmpeg converts it to MP3, ffprobe confirms audio/codec/
+  duration, and source bytes stay unchanged. No yt-dlp executable was available to
+  that test; successful live YouTube audio extraction is not claimed.
+- A loopback HTTP 403 fails strict native and triggers exactly one external fallback
+  in auto; an invalid local destination triggers none. Playlist CLI cases preserve
+  all three outputs, a two-item subset, and partial outputs on later failure, while
+  retaining the original URL in SQLite. Watch-page single-video behavior is checked.
+- Public watch-page probe through the inherited proxy still **failed**: CONNECT
+  tunnel HTTP 403, curl exit 56. No browser cookies, consent actions, VPN mutation or
+  network bypass were used. No successful live YouTube/CDN playback is claimed.
+- CI installs mpv/FFmpeg and runs the real external-handoff and MP3 regressions
+  separately; real-service tests remain opt-in.
+
+Reproduce optional local checks with installed tools:
+
+```sh
+YTUI_TEST_MPV=/usr/bin/mpv cargo test -p ytui-services --locked real_mpv_ -- --ignored
+cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
+```
+
+Implementation and recovery of old first-song jobs: [PLAYBACK_REPAIR.md](PLAYBACK_REPAIR.md).
+
 ## Alpha.6 automatic feed recovery evidence (M4/M5)
 
 - `cargo test --workspace --locked`: **106 passed**, 6 opt-in tests excluded.

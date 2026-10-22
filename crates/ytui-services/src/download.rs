@@ -371,6 +371,21 @@ async fn execute_inner(
                 .await;
             }
         }
+        // A later playlist entry may fail after earlier files were published.
+        // Retain those outputs without marking the whole collection successful.
+        if job.options.playlist
+            && let Ok(output) = &result
+            && !output.success
+        {
+            for line in &output.lines {
+                if let Some(raw) = line.strip_prefix("YTUI_OUTPUT:")
+                    && let Ok(path) = serde_json::from_str::<std::path::PathBuf>(raw)
+                    && path.is_file()
+                {
+                    send(tx, job, JobUpdate::Output(path)).await;
+                }
+            }
+        }
         let error = match result {
             Ok(result) if result.success => {
                 let mut outputs = Vec::new();

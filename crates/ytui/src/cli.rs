@@ -398,7 +398,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             };
             let mut options = config.download.clone();
             options.audio = audio;
-            options.playlist = playlist;
+            options.playlist = playlist || items.is_some() || is_playlist_url(&normalized);
             options.playlist_items = items;
             options.backend = backend;
             if let Some(q) = quality {

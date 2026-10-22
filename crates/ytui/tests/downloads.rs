@@ -2,6 +2,7 @@
 use std::{
     io::{Read, Write},
     net::TcpListener,
+    path::Path,
     process::Command,
     sync::{
         Arc,
@@ -93,6 +94,9 @@ impl Server {
         Self::with_payload(b"synthetic-media-fixture".to_vec())
     }
     fn with_payload(payload: Vec<u8>) -> Self {
+        Self::with_status(payload, 200)
+    }
+    fn with_status(payload: Vec<u8>, status: u16) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         listener.set_nonblocking(true).unwrap();
         let addr = listener.local_addr().unwrap();
@@ -108,7 +112,7 @@ impl Server {
                         let mut request = [0u8; 4096];
                         let _ = stream.read(&mut request);
                         let headers = format!(
-                            "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nETag: \"fixture-v1\"\r\nConnection: close\r\n\r\n",
+                            "HTTP/1.1 {status} Fixture\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nETag: \"fixture-v1\"\r\nConnection: close\r\n\r\n",
                             payload.len()
                         );
                         let _ = stream.write_all(headers.as_bytes());
@@ -567,4 +571,355 @@ fn automatic_fallback_runs_once_for_a_native_limitation_but_strict_native_stays_
     );
     assert_eq!(std::fs::read(&marker).unwrap(), b"x");
     assert_eq!(std::fs::read(&final_file).unwrap(), b"media");
+}
+
+#[cfg(unix)]
+#[test]
+fn playlist_downloads_keep_all_outputs_source_and_explicit_item_selection() {
+    use std::os::unix::fs::PermissionsExt;
+    for (case, url, audio, extra, expected) in [
+        (
+            "music",
+            "https://music.youtube.com/playlist?list=PLsynthetic",
+            true,
+            vec![],
+            3,
+        ),
+        (
+            "video",
+            "https://www.youtube.com/playlist?list=PLsynthetic",
+            false,
+            vec![],
+            3,
+        ),
+        (
+            "watch-playlist",
+            "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic",
+            true,
+            vec!["--playlist"],
+            3,
+        ),
+        (
+            "watch-single",
+            "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic",
+            true,
+            vec![],
+            1,
+        ),
+        (
+            "selected",
+            "https://music.youtube.com/playlist?list=PLsynthetic",
+            true,
+            vec!["--items", "2,3"],
+            2,
+        ),
+    ] {
+        let temp = tempfile::tempdir().unwrap();
+        let record = temp.path().join("arguments");
+        let media = temp.path().join("media");
+        std::fs::create_dir(&media).unwrap();
+        let script = temp.path().join("yt-dlp");
+        std::fs::write(&script,format!(r#"#!/bin/sh
+printf '%s\n' "$@" > '{}'
+entries='1'
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --yes-playlist) entries='1 2 3' ;;
+    --playlist-items) shift; [ "$1" = '2,3' ] && entries='2 3' ;;
+  esac
+  shift
+done
+for entry in $entries; do
+  final='{}/track-'$entry'.media'
+  printf media > "$final"
+  printf '%s\n' 'YTUI_META:{{"id":"track-'$entry'","title":"Track '$entry'","webpage_url":"https://www.youtube.com/watch?v=track'$entry'"}}'
+  printf 'YTUI_OUTPUT:"%s"\n' "$final"
+done
+"#,record.display(),media.display())).unwrap();
+        std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let config = Config {
+            auth_store: "file".into(),
+            yt_dlp: script.display().to_string(),
+            max_retries: 0,
+            ..Default::default()
+        };
+        let config_file = temp.path().join("config.toml");
+        std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+        let state = temp.path().join("state");
+        let mut command = Command::new(env!("CARGO_BIN_EXE_ytui"));
+        command
+            .args([
+                "--config",
+                config_file.to_str().unwrap(),
+                "--state-dir",
+                state.to_str().unwrap(),
+                "download",
+                url,
+                "--backend",
+                "auto",
+                "--directory",
+                media.to_str().unwrap(),
+            ])
+            .args(extra);
+        if audio {
+            command.arg("--audio");
+        }
+        let result = command.output().unwrap();
+        assert!(
+            result.status.success(),
+            "{case}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&result.stdout)
+                .matches("Saved ")
+                .count(),
+            expected,
+            "{case}"
+        );
+        let args = std::fs::read_to_string(record).unwrap();
+        assert!(
+            args.contains(if expected == 1 {
+                "--no-playlist\n"
+            } else {
+                "--yes-playlist\n"
+            }),
+            "{case}: {args}"
+        );
+        let snapshot = tokio::runtime::Runtime::new().unwrap().block_on(async {
+            let store = ytui_services::store::Store::open(&state).unwrap();
+            let snapshot = store.load().await.unwrap();
+            store.close().await.unwrap();
+            snapshot
+        });
+        let job = &snapshot.downloads.jobs[0];
+        assert_eq!(job.outputs.len(), expected, "{case}");
+        assert!(job.outputs.iter().all(|path| path.is_file()));
+        assert_eq!(job.state, ytui_core::JobState::Done);
+        if expected > 1 {
+            assert_eq!(job.media.url, url, "{case}: entry replaced playlist source");
+        }
+        if case == "selected" {
+            assert_eq!(job.options.playlist_items.as_deref(), Some("2,3"));
+        }
+    }
+}
+#[cfg(unix)]
+#[test]
+fn failed_playlist_retains_completed_outputs_and_strict_native_reports_limit() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let final_file = temp.path().join("first.m4a");
+    let script = temp.path().join("yt-dlp");
+    std::fs::write(&script,format!("#!/bin/sh\nprintf media > '{}'\nprintf '%s\\n' 'YTUI_OUTPUT:{}'\necho 'Playlist item 2 is unavailable' >&2\nexit 1\n",final_file.display(),serde_json::to_string(&final_file.display().to_string()).unwrap())).unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let config = Config {
+        auth_store: "file".into(),
+        yt_dlp: script.display().to_string(),
+        max_retries: 0,
+        ..Default::default()
+    };
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let source = "https://music.youtube.com/playlist?list=PLsynthetic";
+    let run = |backend: &str, state: &Path| {
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .args([
+                "--config",
+                config_file.to_str().unwrap(),
+                "--state-dir",
+                state.to_str().unwrap(),
+                "download",
+                source,
+                "--audio",
+                "--backend",
+                backend,
+                "--directory",
+                temp.path().join("media").to_str().unwrap(),
+            ])
+            .output()
+            .unwrap()
+    };
+    let strict = run("native", &temp.path().join("strict-state"));
+    assert!(!strict.status.success());
+    assert!(
+        !final_file.exists(),
+        "strict native unexpectedly launched fallback"
+    );
+    assert!(
+        String::from_utf8_lossy(&strict.stderr)
+            .contains("Native YouTube playlists require yt-dlp fallback")
+    );
+    let state = temp.path().join("state");
+    let failed = run("auto", &state);
+    assert!(!failed.status.success());
+    assert!(!String::from_utf8_lossy(&failed.stdout).contains("Saved "));
+    assert!(String::from_utf8_lossy(&failed.stderr).contains("item 2 is unavailable"));
+    let snapshot = tokio::runtime::Runtime::new().unwrap().block_on(async {
+        let store = ytui_services::store::Store::open(&state).unwrap();
+        let snapshot = store.load().await.unwrap();
+        store.close().await.unwrap();
+        snapshot
+    });
+    let job = &snapshot.downloads.jobs[0];
+    assert_eq!(job.state, ytui_core::JobState::Error);
+    assert_eq!(job.media.url, source);
+    assert_eq!(job.outputs, vec![final_file]);
+}
+
+#[test]
+#[ignore = "requires real FFmpeg and ffprobe; uses generated audio over loopback, no YouTube or cookies"]
+fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
+    let temp = tempfile::tempdir().unwrap();
+    let source = temp.path().join("source.mp4");
+    let generated = Command::new("ffmpeg")
+        .args([
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:sample_rate=44100",
+            "-t",
+            "0.8",
+            source.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        generated.status.success(),
+        "{}",
+        String::from_utf8_lossy(&generated.stderr)
+    );
+    let original = std::fs::read(&source).unwrap();
+    let server = Server::with_payload(original.clone());
+    let mut config = Config {
+        auth_store: "file".into(),
+        yt_dlp: "/must/not/run/yt-dlp".into(),
+        max_retries: 0,
+        ..Default::default()
+    };
+    config.download.audio_container = "mp3".into();
+    config.download.metadata = false;
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .args([
+            "--config",
+            config_file.to_str().unwrap(),
+            "--state-dir",
+            temp.path().join("state").to_str().unwrap(),
+            "download",
+            &server.url,
+            "--audio",
+            "--backend",
+            "native",
+            "--directory",
+            temp.path().join("music").to_str().unwrap(),
+        ])
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let files = std::fs::read_dir(temp.path().join("music"))
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .collect::<Vec<_>>();
+    assert_eq!(files.len(), 1);
+    assert_eq!(files[0].extension().unwrap(), "mp3");
+    let probe = Command::new("ffprobe")
+        .args([
+            "-v",
+            "error",
+            "-show_streams",
+            "-show_format",
+            "-of",
+            "json",
+            files[0].to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(probe.status.success());
+    let data: serde_json::Value = serde_json::from_slice(&probe.stdout).unwrap();
+    assert_eq!(data["streams"][0]["codec_name"], "mp3");
+    assert_eq!(data["streams"][0]["codec_type"], "audio");
+    assert!(
+        data["format"]["duration"]
+            .as_str()
+            .unwrap()
+            .parse::<f64>()
+            .unwrap()
+            > 0.5
+    );
+    assert_eq!(std::fs::read(source).unwrap(), original);
+}
+
+#[cfg(unix)]
+#[test]
+fn rejected_native_http_stream_uses_one_fallback_and_destination_errors_do_not() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let server = Server::with_status(b"Forbidden".to_vec(), 403);
+    let record = temp.path().join("fallback-count");
+    let final_file = temp.path().join("video.mp4");
+    let script = temp.path().join("yt-dlp");
+    std::fs::write(
+        &script,
+        format!(
+            "#!/bin/sh\nprintf x >> '{}'\nprintf media > '{}'\nprintf '%s\\n' 'YTUI_OUTPUT:{}'\n",
+            record.display(),
+            final_file.display(),
+            serde_json::to_string(&final_file.display().to_string()).unwrap()
+        ),
+    )
+    .unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let config = Config {
+        auth_store: "file".into(),
+        yt_dlp: script.display().to_string(),
+        max_retries: 0,
+        ..Default::default()
+    };
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let run = |backend: &str, destination: &Path| {
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .args([
+                "--config",
+                config_file.to_str().unwrap(),
+                "--state-dir",
+                temp.path().join("state").to_str().unwrap(),
+                "download",
+                &server.url,
+                "--backend",
+                backend,
+                "--directory",
+                destination.to_str().unwrap(),
+            ])
+            .env("NO_PROXY", "127.0.0.1,localhost")
+            .output()
+            .unwrap()
+    };
+    let strict = run("native", &temp.path().join("media"));
+    assert!(!strict.status.success());
+    assert!(!record.exists());
+    let automatic = run("auto", &temp.path().join("media"));
+    assert!(
+        automatic.status.success(),
+        "{}",
+        String::from_utf8_lossy(&automatic.stderr)
+    );
+    assert_eq!(std::fs::read(&record).unwrap(), b"x");
+    let blocked = temp.path().join("not-a-directory");
+    std::fs::write(&blocked, b"existing").unwrap();
+    assert!(!run("auto", &blocked).status.success());
+    assert_eq!(
+        std::fs::read(record).unwrap(),
+        b"x",
+        "local destination failure launched a fallback"
+    );
 }

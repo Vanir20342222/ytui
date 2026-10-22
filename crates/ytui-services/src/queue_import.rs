@@ -54,6 +54,16 @@ pub fn read(path: &Path, config: &Config) -> Result<Vec<Job>> {
         {
             options.quality = quality.into();
         }
+        options.playlist = row
+            .pointer("/options/playlist")
+            .and_then(Value::as_bool)
+            .unwrap_or(options.playlist)
+            || ytui_core::is_playlist_url(&url);
+        options.playlist_items = row
+            .pointer("/options/playlist_items")
+            .and_then(Value::as_str)
+            .map(str::to_owned);
+        options.playlist |= options.playlist_items.is_some();
         options.validate()?;
         let title = row
             .pointer("/media/title")
@@ -77,6 +87,8 @@ pub fn append(queue: &mut DownloadQueue, jobs: Vec<Job>) -> usize {
         if !queue.jobs.iter().any(|j| {
             j.media.url == job.media.url
                 && j.options.audio == job.options.audio
+                && j.options.playlist == job.options.playlist
+                && j.options.playlist_items == job.options.playlist_items
                 && j.options.quality == job.options.quality
         }) {
             queue.jobs.push(job);
@@ -104,5 +116,25 @@ mod tests {
         std::fs::write(&path, "https://example.test/video\nfile:///secret\n").unwrap();
         assert!(read(&path, &Config::default()).is_err());
         assert_eq!(queue.jobs.len(), 1);
+    }
+    #[test]
+    fn playlist_intent_and_indices_survive_import_and_differ_from_a_single_video() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path().join("playlist.json");
+        std::fs::write(&path,r#"[{"media":{"url":"https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic"},"options":{"audio":true,"playlist":true,"playlist_items":"2,3","post_download_hook":"/untrusted"}}]"#).unwrap();
+        let jobs = read(&path, &Config::default()).unwrap();
+        assert!(jobs[0].options.playlist);
+        assert_eq!(jobs[0].options.playlist_items.as_deref(), Some("2,3"));
+        assert!(jobs[0].options.post_download_hook.is_none());
+        let mut queue = DownloadQueue::default();
+        let mut single = jobs[0].clone();
+        single.options.playlist = false;
+        single.options.playlist_items = None;
+        assert_eq!(append(&mut queue, vec![single]), 1);
+        assert_eq!(append(&mut queue, jobs), 1);
+        assert_eq!(
+            append(&mut queue, read(&path, &Config::default()).unwrap()),
+            0
+        );
     }
 }

@@ -251,27 +251,17 @@ async fn start(
     };
     let mut args = vec![
         "--no-config".into(),
-        "--no-terminal".into(),
+        // Output is piped by process::run, so terminal logging cannot corrupt the
+        // TUI. Disabling it also hides mpv/ytdl errors and caused "Playback failed".
+        "--terminal=yes".into(),
+        "--input-terminal=no".into(),
+        "--msg-color=no".into(),
+        "--msg-level=all=warn".into(),
         "--input-default-bindings=yes".into(),
         "--idle=no".into(),
         "--keep-open=no".into(),
-        "--ytdl=yes".into(),
+        "--ytdl=no".into(),
         format!("--input-ipc-server={}", socket.display()),
-        format!("--script-opts=ytdl_hook-ytdl_path={}", config.yt_dlp),
-        "--ytdl-raw-options=ignore-config=,no-playlist=".into(),
-        format!(
-            "--ytdl-format={}",
-            if audio {
-                "bestaudio/best".into()
-            } else if config.download.quality == "best" {
-                "bestvideo+bestaudio/best".into()
-            } else {
-                format!(
-                    "bestvideo[height<=?{}]+bestaudio/best[height<=?{}]",
-                    config.download.quality, config.download.quality
-                )
-            }
-        ),
         format!("--volume={}", preferences.volume),
         format!("--mute={}", if preferences.muted { "yes" } else { "no" }),
         format!("--speed={}", preferences.speed),
@@ -307,19 +297,12 @@ async fn start(
         args.push("--force-window=yes".into());
     }
     if preview {
-        args.retain(|a| !a.starts_with("--mute=") && !a.starts_with("--ytdl-format="));
+        args.retain(|a| !a.starts_with("--mute="));
         args.extend([
             "--mute=yes".into(),
             "--length=10".into(),
-            "--ytdl-format=best[height<=360]/best".into(),
             "--title=ytui · Preview".into(),
         ]);
-    }
-    if let Some(cookies) = &cookies {
-        args.push(format!(
-            "--ytdl-raw-options-append=cookies={}",
-            cookies.path().display()
-        ));
     }
     if let Some(proxy) = &config.proxy {
         args.push(format!("--http-proxy={proxy}"));
@@ -328,14 +311,6 @@ async fn start(
     args.push(media.url.clone());
     let cancel = CancellationToken::new();
     let token = cancel.clone();
-    if local || !youtube {
-        args.retain(|a| {
-            a != "--ytdl=yes"
-                && !a.starts_with("--script-opts=")
-                && !a.starts_with("--ytdl-raw-options")
-        });
-        args.insert(0, "--ytdl=no".into());
-    }
     let spec = ProcessSpec::new(&config.mpv, args, if preview { 45 } else { 24 * 60 * 60 });
     let config = config.clone();
     let media = media.clone();
@@ -351,7 +326,7 @@ async fn start(
                 options.quality = "360".into();
             }
             let resolved = crate::native::resolve(
-                ytui_core::Job::new(media, options),
+                ytui_core::Job::new(media.clone(), options),
                 config.clone(),
                 cookie_path.clone(),
                 &native_dir,
@@ -370,28 +345,27 @@ async fn start(
                         "Native extraction needs fallback. Install yt-dlp and a supported JavaScript runtime (usually Deno); yt-dlp was not found. F2 → Playback repair configures tools."
                     );
                     let _ = backend_tx.send("yt-dlp fallback".into());
-                    return process::run(spec, token, |_| {}).await;
+                    return external_playback(
+                        spec,
+                        &config,
+                        &media,
+                        audio,
+                        preview,
+                        cookie_path.as_deref(),
+                        token,
+                    )
+                    .await;
                 }
                 Err(error) => return Err(error),
             };
             let _ = backend_tx.send("native Rust".into());
-            let mut direct = Vec::new();
-            for arg in spec.args {
-                if !arg.starts_with("--script-opts=")
-                    && !arg.starts_with("--ytdl-raw-options")
-                    && !arg.starts_with("--ytdl-format=")
-                    && arg != "--ytdl=yes"
-                {
-                    direct.push(arg);
-                }
-            }
+            let mut direct = spec.args;
             direct.pop();
             direct.pop();
-            direct.push("--ytdl=no".into());
             if let Some(audio) = resolved.audio_url {
                 direct.push(format!("--audio-file={audio}"));
             }
-            if let Some(path) = cookie_path {
+            if let Some(path) = &cookie_path {
                 direct.push("--cookies=yes".into());
                 direct.push(format!("--cookies-file={}", path.display()));
             }
@@ -402,7 +376,19 @@ async fn start(
                 direct,
                 if preview { 20 } else { 24 * 60 * 60 },
             )
-        } else if !youtube && !local {
+        } else if youtube {
+            let _ = backend_tx.send("yt-dlp".into());
+            return external_playback(
+                spec,
+                &config,
+                &media,
+                audio,
+                preview,
+                cookie_path.as_deref(),
+                token,
+            )
+            .await;
+        } else if !local {
             let _ = backend_tx.send("direct stream".into());
             let radio = crate::radio::Radio::new(
                 crate::http_client(config.proxy.as_deref())?,
@@ -417,7 +403,7 @@ async fn start(
             let _ = backend_tx.send(if youtube { "yt-dlp" } else { "local" }.into());
             spec
         };
-        let result = process::run(spec, token.clone(), |_| {}).await;
+        let result = run_mpv(spec, token.clone()).await;
         if let Some(fallback) = fallback_spec
             && !token.is_cancelled()
             && matches!(&result,Ok(result) if !result.success && ["403", "404", "Failed to open", "Failed to recognize"].iter().any(|part| result.stderr.contains(part)))
@@ -427,7 +413,16 @@ async fn start(
                 "The native stream was rejected and yt-dlp fallback was not found. F2 → Playback repair."
             );
             let _ = backend_tx.send("yt-dlp fallback".into());
-            return process::run(fallback, token, |_| {}).await;
+            return external_playback(
+                fallback,
+                &config,
+                &media,
+                audio,
+                preview,
+                cookie_path.as_deref(),
+                token,
+            )
+            .await;
         }
         result
     });
@@ -439,6 +434,72 @@ async fn start(
         _dir: dir,
         _cookies: cookies,
     })
+}
+async fn external_playback(
+    spec: ProcessSpec,
+    config: &Config,
+    media: &Media,
+    audio: bool,
+    preview: bool,
+    cookies: Option<&Path>,
+    cancel: CancellationToken,
+) -> Result<ProcessResult> {
+    let format = if preview {
+        "best[height<=360]/best".into()
+    } else if audio {
+        "bestaudio/best".into()
+    } else if config.download.quality == "best" {
+        "bestvideo+bestaudio/best".into()
+    } else {
+        format!(
+            "bestvideo[height<=?{}]+bestaudio/best[height<=?{}]",
+            config.download.quality, config.download.quality
+        )
+    };
+    let stream = crate::playback_extract::resolve(
+        config,
+        &media.url,
+        &format,
+        audio,
+        cookies,
+        cancel.clone(),
+    )
+    .await?;
+    run_mpv(
+        crate::playback_extract::direct(spec, stream, cookies),
+        cancel,
+    )
+    .await
+}
+fn playback_diagnostic(result: &ProcessResult) -> String {
+    // mpv emits most decoder/network errors on stdout, including Lua hook errors.
+    let output = result
+        .lines
+        .iter()
+        .rev()
+        .take(16)
+        .rev()
+        .cloned()
+        .collect::<Vec<_>>()
+        .join("\n");
+    let text = if result.stderr.is_empty() {
+        output
+    } else {
+        format!("{}\n{output}", result.stderr)
+    };
+    let message = process::diagnostic(&text);
+    if message.is_empty() {
+        "mpv exited without a diagnostic. Check the mpv executable and audio/video output in Settings → Tools.".into()
+    } else {
+        message
+    }
+}
+async fn run_mpv(spec: ProcessSpec, cancel: CancellationToken) -> Result<ProcessResult> {
+    let mut result = process::run(spec, cancel, |_| {}).await?;
+    if !result.success {
+        result.stderr = playback_diagnostic(&result);
+    }
+    Ok(result)
 }
 struct Actor {
     config: Config,
@@ -540,7 +601,11 @@ impl Actor {
         .await
         {
             Ok(p) => self.full = Some(p),
-            Err(e) => self.state.error = Some(process::diagnostic(&e.to_string())),
+            Err(e) => {
+                self.state.error = Some(process::diagnostic(&format!("{e:#}")));
+                self.state.active = false;
+                self.state.buffering = false;
+            }
         }
     }
     async fn close_preview(&mut self) {
@@ -591,7 +656,7 @@ impl Actor {
                 self.state.preview = true;
             }
             Err(e) => {
-                self.state.error = Some(process::diagnostic(&e.to_string()));
+                self.state.error = Some(process::diagnostic(&format!("{e:#}")));
                 self.close_preview().await;
             }
         }
@@ -692,7 +757,7 @@ impl Actor {
                         _ => return,
                     };
                     if let Err(e) = p.command(args).await {
-                        self.state.error = Some(process::diagnostic(&e.to_string()));
+                        self.state.error = Some(process::diagnostic(&format!("{e:#}")));
                     } else {
                         match command {
                             PlayerCommand::TogglePause => self.state.paused = !self.state.paused,
@@ -719,7 +784,7 @@ impl Actor {
                     Ok(Ok(r)) if !r.success => {
                         self.state.error = Some(process::diagnostic(&r.stderr))
                     }
-                    Ok(Err(e)) => self.state.error = Some(process::diagnostic(&e.to_string())),
+                    Ok(Err(e)) => self.state.error = Some(process::diagnostic(&format!("{e:#}"))),
                     _ => {}
                 }
             }
@@ -741,8 +806,9 @@ impl Actor {
             let result = p.task.await;
             let success = matches!(&result,Ok(Ok(r)) if r.success);
             let message = match result {
-                Ok(Ok(r)) => process::diagnostic(&r.stderr),
-                Ok(Err(e)) => process::diagnostic(&e.to_string()),
+                Ok(Ok(r)) if !r.success => playback_diagnostic(&r),
+                Ok(Ok(_)) => String::new(),
+                Ok(Err(e)) => process::diagnostic(&format!("{e:#}")),
                 Err(_) => "mpv worker exited unexpectedly".into(),
             };
             self.state.buffering = false;
@@ -772,7 +838,9 @@ impl Actor {
                 } else {
                     message.clone()
                 });
-                event = Some(PlayerEvent::Error(message));
+                event = Some(PlayerEvent::Error(
+                    self.state.error.clone().unwrap_or(message),
+                ));
             }
         }
         if self
@@ -802,7 +870,7 @@ impl Actor {
                         self.state.error = None;
                     }
                     Err(e) => {
-                        self.state.error = Some(process::diagnostic(&e.to_string()));
+                        self.state.error = Some(process::diagnostic(&format!("{e:#}")));
                     }
                 }
             }
@@ -1157,6 +1225,128 @@ mod tests {
                 .iter()
                 .any(|line| line.starts_with("--script-opts="))
         );
+    }
+    #[tokio::test]
+    async fn mpv_stdout_failures_are_visible_and_sanitized() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let tool = temp.path().join("mpv");
+        std::fs::write(&tool,"#!/bin/sh\necho '[ffmpeg] HTTP error 403 Forbidden https://media.test/?token=synthetic-private'\nexit 2\n").unwrap();
+        std::fs::set_permissions(&tool, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let result = run_mpv(
+            ProcessSpec::new(tool.display().to_string(), vec![], 5),
+            CancellationToken::new(),
+        )
+        .await
+        .unwrap();
+        assert!(!result.success);
+        assert!(result.stderr.contains("403 Forbidden"));
+        assert!(!result.stderr.contains("synthetic-private"));
+        assert!(
+            !playback_diagnostic(&ProcessResult {
+                success: false,
+                lines: vec![],
+                stderr: String::new()
+            })
+            .is_empty()
+        );
+    }
+    #[tokio::test]
+    async fn extraction_error_reaches_player_state_and_event_without_generic_failure() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let tool = temp.path().join("extractor");
+        std::fs::write(
+            &tool,
+            "#!/bin/sh\necho 'ERROR: JavaScript runtime is unavailable' >&2\nexit 1\n",
+        )
+        .unwrap();
+        std::fs::set_permissions(&tool, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().join("state"),
+            config: temp.path().join("config"),
+            state: temp.path().join("state"),
+            cache: temp.path().join("cache"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        paths.create().unwrap();
+        let mut actor = Actor {
+            config: Config {
+                mpv: "/must/not/start/mpv".into(),
+                yt_dlp: tool.display().to_string(),
+                download_backend: "yt-dlp".into(),
+                playback_sponsorblock: "off".into(),
+                ..Default::default()
+            },
+            paths,
+            session: None,
+            full: None,
+            preview: None,
+            state: PlayerStatus {
+                volume: 37.0,
+                speed: 1.0,
+                ..Default::default()
+            },
+            resume_after_preview: false,
+            playing: None,
+            reconnect_count: 0,
+            reconnect_at: None,
+            sponsor_task: None,
+            ignore_segments_until: 0.0,
+        };
+        actor
+            .play(
+                Media {
+                    url: "https://www.youtube.com/watch?v=synthetic00".into(),
+                    ..Default::default()
+                },
+                false,
+                false,
+                None,
+                false,
+            )
+            .await;
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+        let event = loop {
+            if let Some(event) = actor.tick().await {
+                break event;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "failed extractor did not finish"
+            );
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        };
+        assert!(
+            matches!(event,PlayerEvent::Error(message) if message.contains("JavaScript runtime"))
+        );
+        assert!(
+            actor
+                .state
+                .error
+                .as_ref()
+                .unwrap()
+                .contains("yt-dlp playback extraction failed")
+        );
+        assert!(!actor.state.active && !actor.state.buffering);
+        // Synchronous launch errors must also clear the loading state.
+        actor
+            .play(
+                Media {
+                    url: "file:///unsupported".into(),
+                    ..Default::default()
+                },
+                false,
+                false,
+                None,
+                false,
+            )
+            .await;
+        assert!(actor.state.error.is_some());
+        assert!(!actor.state.active && !actor.state.buffering);
+        actor.stop().await;
     }
     #[tokio::test]
     async fn closing_a_window_early_does_not_complete_the_track_or_advance_the_queue() {
@@ -1691,11 +1881,19 @@ mod real_mpv_tests {
         actor.state.sponsor_enabled = true;
         actor.handle(PlayerCommand::TogglePause).await;
         actor.handle(PlayerCommand::SeekTo(5.5)).await;
-        actor.tick().await;
-        assert!(
-            actor.state.last_skip.is_some(),
-            "real mpv was not asked to skip the marked range"
-        );
+        // The seek command is acknowledged before mpv's decoder updates time-pos.
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+        loop {
+            actor.tick().await;
+            if actor.state.last_skip.is_some() {
+                break;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "real mpv was not asked to skip the marked range"
+            );
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
         actor.handle(PlayerCommand::UndoSkip).await;
         let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
         loop {
@@ -1723,5 +1921,213 @@ mod real_mpv_tests {
             original,
             "playback controls changed the source file"
         );
+    }
+    #[tokio::test]
+    #[ignore = "requires modern mpv and FFmpeg; uses synthetic extraction and loopback streams only"]
+    async fn real_mpv_external_playback_uses_split_streams_and_extractor_http_headers() {
+        let mpv = std::env::var("YTUI_TEST_MPV").unwrap_or_else(|_| "mpv".into());
+        let program = crate::paths::executable(&mpv).expect("Install mpv or set YTUI_TEST_MPV");
+        let temp = tempfile::tempdir().unwrap();
+        let video = temp.path().join("video.mkv");
+        let audio = temp.path().join("audio.wav");
+        for (source, output, codec) in [
+            ("color=c=black:s=160x90:r=10", &video, "mpeg4"),
+            ("sine=frequency=440:sample_rate=8000", &audio, "pcm_s16le"),
+        ] {
+            let result = std::process::Command::new("ffmpeg")
+                .args([
+                    "-v",
+                    "error",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    source,
+                    "-t",
+                    "5",
+                    "-threads",
+                    "1",
+                    "-c",
+                    codec,
+                    output.to_str().unwrap(),
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+        }
+        let video_bytes = std::fs::read(video).unwrap();
+        let audio_bytes = std::fs::read(audio).unwrap();
+        let requests = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let observed = requests.clone();
+        let (base, server) = crate::test_http::serve_request(move |request| {
+            let lower = request.to_ascii_lowercase();
+            assert!(
+                lower.contains("user-agent: synthetic-stream-agent"),
+                "extractor UA missing"
+            );
+            assert!(
+                lower.contains("referer: https://www.youtube.com/"),
+                "extractor Referer missing"
+            );
+            assert!(
+                lower.contains("accept-language: en-us,en;q=0.9"),
+                "comma-containing header changed: {lower}"
+            );
+            observed
+                .lock()
+                .unwrap()
+                .push(request.lines().next().unwrap().to_string());
+            (
+                200,
+                "Content-Type: application/octet-stream\r\n".into(),
+                if request.starts_with("GET /audio") {
+                    audio_bytes.clone()
+                } else {
+                    video_bytes.clone()
+                },
+            )
+        })
+        .await;
+        let metadata = temp.path().join("metadata.json");
+        std::fs::write(&metadata,json!({"http_headers":{"User-Agent":"synthetic-stream-agent","Referer":"https://www.youtube.com/","Accept-Language":"en-US,en;q=0.9"},"requested_formats":[
+            {"url":format!("{base}/video"),"vcodec":"mpeg4","acodec":"none"},
+            {"url":format!("{base}/audio"),"vcodec":"none","acodec":"pcm_s16le"}]}).to_string()).unwrap();
+        let extractor = temp.path().join("yt-dlp");
+        std::fs::write(
+            &extractor,
+            format!("#!/bin/sh\ncat '{}'\n", metadata.display()),
+        )
+        .unwrap();
+        std::fs::set_permissions(&extractor, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let wrapper = temp.path().join("mpv-headless");
+        let quoted = program.to_string_lossy().replace('\'', "'\\''");
+        std::fs::write(
+            &wrapper,
+            format!("#!/bin/sh\nexec '{quoted}' --vo=null --ao=null \"$@\"\n"),
+        )
+        .unwrap();
+        std::fs::set_permissions(&wrapper, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().join("state"),
+            config: temp.path().join("config"),
+            state: temp.path().join("state"),
+            cache: temp.path().join("cache"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        paths.create().unwrap();
+        let mut actor = Actor {
+            config: Config {
+                mpv: wrapper.display().to_string(),
+                yt_dlp: extractor.display().to_string(),
+                download_backend: "yt-dlp".into(),
+                playback_sponsorblock: "off".into(),
+                ..Default::default()
+            },
+            paths,
+            session: None,
+            full: None,
+            preview: None,
+            state: PlayerStatus {
+                volume: 37.0,
+                speed: 1.0,
+                ..Default::default()
+            },
+            resume_after_preview: false,
+            playing: None,
+            reconnect_count: 0,
+            reconnect_at: None,
+            sponsor_task: None,
+            ignore_segments_until: 0.0,
+        };
+        for audio_only in [false, true] {
+            actor
+                .play(
+                    Media {
+                        title: "Synthetic YouTube playback".into(),
+                        url: "https://www.youtube.com/watch?v=synthetic00".into(),
+                        ..Default::default()
+                    },
+                    audio_only,
+                    false,
+                    None,
+                    false,
+                )
+                .await;
+            ready(&mut actor).await;
+            assert!(actor.state.error.is_none());
+            let tracks = actor
+                .full
+                .as_ref()
+                .unwrap()
+                .command(json!(["get_property", "track-list"]))
+                .await
+                .unwrap();
+            assert!(
+                tracks
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|track| track["type"] == "audio"),
+                "audio missing: {tracks}"
+            );
+            if !audio_only {
+                assert!(
+                    tracks
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .any(|track| track["type"] == "video"),
+                    "video missing: {tracks}"
+                );
+            }
+            actor.handle(PlayerCommand::TogglePause).await;
+            assert!(actor.state.paused);
+            actor.stop().await;
+        }
+        assert!(
+            requests
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|line| line.contains("/video"))
+        );
+        assert!(
+            requests
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|line| line.contains("/audio"))
+        );
+        // Real mpv reports file-open errors on stdout. They must survive capture.
+        let result = run_mpv(
+            ProcessSpec::new(
+                wrapper.display().to_string(),
+                vec![
+                    "--no-config".into(),
+                    "--terminal=yes".into(),
+                    "--input-terminal=no".into(),
+                    "--msg-level=all=warn".into(),
+                    "--ytdl=no".into(),
+                    "--".into(),
+                    temp.path().join("missing.mkv").display().to_string(),
+                ],
+                5,
+            ),
+            CancellationToken::new(),
+        )
+        .await
+        .unwrap();
+        assert!(!result.success);
+        assert!(
+            result.stderr.contains("Failed to open") || result.stderr.contains("Cannot open"),
+            "lost mpv error: {}",
+            result.stderr
+        );
+        server.abort();
     }
 }

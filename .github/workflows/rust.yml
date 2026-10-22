@@ -1,7 +1,7 @@
 name: Rust
 on:
   push:
-    branches: [main, 'rewrite/**', 'improve/**']
+    branches: [main, 'rewrite/**', 'improve/**', 'fix/**']
   pull_request:
 permissions:
   contents: read
@@ -18,11 +18,20 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
       - name: Install real-media fixture tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg lua5.4
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg lua5.4 mpv
       - name: Check mpv window menu with a synthetic API
         run: lua5.4 crates/ytui-services/tests/player_menu.lua
       - name: Verify native cuts, chapters and splitting with FFmpeg
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored
+      - name: Verify an actual audio download and MP3 conversion
+        env:
+          NO_PROXY: 127.0.0.1,localhost
+        run: cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
+      - name: Verify actual mpv external-extraction handoff
+        env:
+          NO_PROXY: 127.0.0.1,localhost
+          no_proxy: 127.0.0.1,localhost
+        run: cargo test -p ytui-services --locked real_mpv_external_playback_ -- --ignored
       - run: cargo build --release --locked
