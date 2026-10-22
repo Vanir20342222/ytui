@@ -134,7 +134,9 @@ impl DownloadQueue {
                 if job.options.playlist {
                     return true;
                 }
-                if media.url.is_empty() {
+                // Keep the submitted source for retry, including Music/watch
+                // context. Extractor canonical URLs describe metadata, not intent.
+                if !job.media.url.is_empty() {
                     media.url = job.media.url.clone();
                 }
                 if media.thumbnail.is_empty() {
@@ -265,6 +267,31 @@ mod tests {
             .options
             .playlist
         );
+    }
+    #[test]
+    fn music_source_survives_canonical_entry_metadata_for_retry() {
+        let source = "https://music.youtube.com/watch?v=abcdefghijk";
+        let mut job = Job::new(
+            Media {
+                url: source.into(),
+                ..Default::default()
+            },
+            DownloadOptions::default(),
+        );
+        job.state = JobState::Resolving;
+        let id = job.id;
+        let mut queue = DownloadQueue { jobs: vec![job] };
+        queue.apply(JobEvent {
+            id,
+            generation: 0,
+            update: JobUpdate::Metadata(Box::new(Media {
+                url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+                title: "Resolved title".into(),
+                ..Default::default()
+            })),
+        });
+        assert_eq!(queue.jobs[0].media.url, source);
+        assert_eq!(queue.jobs[0].media.title, "Resolved title");
     }
     #[test]
     fn pause_and_retry_reject_previous_attempt_results() {

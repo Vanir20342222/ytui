@@ -216,6 +216,7 @@ struct Launch<'a> {
     paused: bool,
     position: Option<f64>,
     preferences: &'a Preferences,
+    streams: Arc<crate::cache::ResponseCache<crate::native::Resolved>>,
 }
 async fn start(
     config: &Config,
@@ -230,6 +231,7 @@ async fn start(
         paused,
         position,
         preferences,
+        streams,
     } = launch;
     let local = Path::new(&media.url).is_file();
     let youtube = if local {
@@ -325,14 +327,25 @@ async fn start(
             if preview {
                 options.quality = "360".into();
             }
-            let resolved = crate::native::resolve(
-                ytui_core::Job::new(media.clone(), options),
-                config.clone(),
-                cookie_path.clone(),
-                &native_dir,
-                token.clone(),
-            )
-            .await;
+            let cache_key = serde_json::to_string(&(
+                &media.url,
+                audio,
+                &options.quality,
+                &config.proxy,
+                &config.native_js_runtime,
+                &config.ffmpeg,
+            ))?;
+            let resolved = streams
+                .load(cache_key.clone(), Duration::from_secs(120), || {
+                    crate::native::resolve(
+                        ytui_core::Job::new(media.clone(), options),
+                        config.clone(),
+                        cookie_path.clone(),
+                        &native_dir,
+                        token.clone(),
+                    )
+                })
+                .await;
             let resolved = match resolved {
                 Ok(resolved) => resolved,
                 Err(error)
@@ -396,6 +409,12 @@ async fn start(
             spec
         };
         let result = run_mpv(spec, token.clone()).await;
+        if youtube && !token.is_cancelled() && !matches!(&result, Ok(result) if result.success) {
+            // Never replay a rejected CDN URL from cache during renewal.
+            // The provider cache is small, so clear it rather than guess whether
+            // the failure came from the video or separate audio URL.
+            streams.clear();
+        }
         if let Some(fallback) = fallback_spec
             && !token.is_cancelled()
             && matches!(&result,Ok(result) if !result.success && ["403", "404", "Failed to open", "Failed to recognize"].iter().any(|part| result.stderr.contains(part)))
@@ -506,6 +525,7 @@ struct Actor {
     reconnect_at: Option<tokio::time::Instant>,
     sponsor_task: Option<JoinHandle<Result<Vec<crate::sponsorblock::Segment>>>>,
     ignore_segments_until: f64,
+    streams: Arc<crate::cache::ResponseCache<crate::native::Resolved>>,
 }
 fn native_stream_retryable(message: &str) -> bool {
     let lower = message.to_lowercase();
@@ -615,6 +635,7 @@ impl Actor {
                 paused,
                 position,
                 preferences: &self.preferences(),
+                streams: self.streams.clone(),
             },
         )
         .await
@@ -667,6 +688,7 @@ impl Actor {
                 paused: false,
                 position: None,
                 preferences: &self.preferences(),
+                streams: self.streams.clone(),
             },
         )
         .await
@@ -711,6 +733,7 @@ impl Actor {
             PlayerCommand::Preview(media) => self.preview(media).await,
             PlayerCommand::ClosePreview => self.close_preview().await,
             PlayerCommand::Configure(config) => {
+                self.streams = Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024));
                 let changed = self.config.playback_sponsorblock != config.playback_sponsorblock
                     || self.config.playback_sponsor_categories
                         != config.playback_sponsor_categories
@@ -750,6 +773,7 @@ impl Actor {
             }
             PlayerCommand::Session(session) => {
                 self.stop().await;
+                self.streams = Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024));
                 self.session = session;
             }
             PlayerCommand::Stop => self.stop().await,
@@ -913,6 +937,7 @@ impl Actor {
                         paused: self.state.paused,
                         position: (!media.live).then_some(self.state.position),
                         preferences: &self.preferences(),
+                        streams: self.streams.clone(),
                     },
                 )
                 .await
@@ -1040,6 +1065,7 @@ impl Player {
                 reconnect_at: None,
                 sponsor_task: None,
                 ignore_segments_until: 0.0,
+                streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
             };
             let mut tick = tokio::time::interval(Duration::from_millis(125));
             tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
@@ -1089,6 +1115,114 @@ impl Player {
 mod tests {
     use super::*;
     use tokio::net::UnixListener;
+    #[tokio::test]
+    async fn native_replay_uses_cached_streams_and_a_failed_open_invalidates_them() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let mpv = temp.path().join("mpv");
+        std::fs::write(&mpv, "#!/bin/sh\nsleep 30\n").unwrap();
+        std::fs::set_permissions(&mpv, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let config = Config {
+            mpv: mpv.display().to_string(),
+            native_js_runtime: Some("/must-not-run-a-runtime".into()),
+            ..Default::default()
+        };
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().into(),
+            config: temp.path().into(),
+            state: temp.path().into(),
+            cache: temp.path().into(),
+            legacy_data: temp.path().into(),
+            home: temp.path().into(),
+        };
+        let media = Media {
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            ..Default::default()
+        };
+        let streams = Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024));
+        let key = serde_json::to_string(&(
+            &media.url,
+            false,
+            &config.download.quality,
+            &config.proxy,
+            &config.native_js_runtime,
+            &config.ffmpeg,
+        ))
+        .unwrap();
+        streams
+            .load(key.clone(), Duration::from_secs(120), || async {
+                Ok(crate::native::Resolved {
+                    url: "https://stream.test/video?sig=synthetic".into(),
+                    audio_url: None,
+                    headers: vec![],
+                })
+            })
+            .await
+            .unwrap();
+        let mut active = start(
+            &config,
+            &paths,
+            None,
+            &media,
+            Launch {
+                audio: false,
+                preview: false,
+                paused: false,
+                position: None,
+                preferences: &Preferences::default(),
+                streams: streams.clone(),
+            },
+        )
+        .await
+        .unwrap();
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while active.backend.borrow().is_empty() {
+                active.backend.changed().await.unwrap();
+            }
+        })
+        .await
+        .unwrap();
+        active.stop().await;
+        assert!(
+            streams
+                .load(key.clone(), Duration::from_secs(120), || async {
+                    anyhow::bail!("cancelled playback must retain its valid stream")
+                })
+                .await
+                .is_ok()
+        );
+        std::fs::write(&mpv, "#!/bin/sh\nexit 1\n").unwrap();
+        let active = start(
+            &config,
+            &paths,
+            None,
+            &media,
+            Launch {
+                audio: false,
+                preview: false,
+                paused: false,
+                position: None,
+                preferences: &Preferences::default(),
+                streams: streams.clone(),
+            },
+        )
+        .await
+        .unwrap();
+        let result = active.task.await.unwrap().unwrap();
+        assert!(!result.success);
+        assert_eq!(
+            &*active.backend.borrow(),
+            "native Rust",
+            "runtime validation would fail if replay extracted again"
+        );
+        let fresh = streams
+            .load(key, Duration::from_secs(120), || async {
+                anyhow::bail!("must refresh rejected URL")
+            })
+            .await;
+        assert!(fresh.is_err(), "failed streams must not remain cached");
+    }
     #[tokio::test]
     async fn preview_restores_prior_playback_pause_state_and_is_muted() {
         use std::os::unix::fs::PermissionsExt;
@@ -1178,6 +1312,7 @@ mod tests {
             reconnect_at: None,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         for command in [
             PlayerCommand::Seek(5.0),
@@ -1295,6 +1430,7 @@ mod tests {
                 paused: false,
                 position: Some(42.25),
                 preferences: &Preferences::default(),
+                streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
             },
         )
         .await
@@ -1379,6 +1515,7 @@ mod tests {
             reconnect_at: None,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         actor
             .play(
@@ -1576,6 +1713,7 @@ sleep 30
                 reconnect_at: None,
                 sponsor_task: None,
                 ignore_segments_until: 0.0,
+                streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
             };
             let event = actor.tick().await;
             assert_eq!(matches!(event, Some(PlayerEvent::Ended(_))), should_end);
@@ -1628,6 +1766,7 @@ mod responsiveness_tests {
             resume_after_preview: false,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         for (attempt, should_retry) in [(0, true), (1, false)] {
             actor.reconnect_at = None;
@@ -1751,6 +1890,7 @@ mod responsiveness_tests {
             resume_after_preview: false,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         for command in [
             PlayerCommand::Volume(-20.0),
@@ -1862,6 +2002,7 @@ mod responsiveness_tests {
             reconnect_at: None,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         let media = Media {
             url: "https://radio.test/live".into(),
@@ -2195,6 +2336,7 @@ mod real_mpv_tests {
             reconnect_at: None,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         actor
             .play(
@@ -2529,6 +2671,7 @@ mod real_mpv_tests {
             reconnect_at: None,
             sponsor_task: None,
             ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
         };
         let valid_metadata = std::fs::read(&metadata).unwrap();
         std::fs::write(&metadata, b"invalid metadata").unwrap();

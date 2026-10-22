@@ -27,7 +27,7 @@ pub struct WorkerRequest {
     #[serde(default)]
     pub staging: Option<PathBuf>,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Resolved {
     pub url: String,
     pub audio_url: Option<String>,

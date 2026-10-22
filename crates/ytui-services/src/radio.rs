@@ -10,6 +10,7 @@ pub struct Radio {
     pub servers: Vec<String>,
     cache: Option<std::path::PathBuf>,
     catalog: String,
+    pages: std::sync::Arc<crate::cache::ResponseCache<Page>>,
 }
 impl Radio {
     pub fn new(client: reqwest::Client, servers: Vec<String>) -> Self {
@@ -18,13 +19,37 @@ impl Radio {
             servers,
             cache: None,
             catalog: "https://radio.cliamp.stream/stations".into(),
+            pages: std::sync::Arc::new(crate::cache::ResponseCache::new(32, 4 * 1024 * 1024)),
         }
     }
     pub fn with_cache(mut self, path: std::path::PathBuf) -> Self {
         self.cache = Some(path);
+        self.pages = std::sync::Arc::new(crate::cache::ResponseCache::new(32, 4 * 1024 * 1024));
         self
     }
     pub async fn fetch(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
+        self.pages
+            .load(
+                self.page_key(request, offset)?,
+                std::time::Duration::from_secs(60),
+                || self.fetch_uncached(request, offset),
+            )
+            .await
+    }
+    fn page_key(&self, request: &BrowseRequest, offset: usize) -> Result<String> {
+        Ok(format!(
+            "{}:{:?}:{offset}:{}",
+            self.catalog,
+            self.servers,
+            serde_json::to_string(request)?
+        ))
+    }
+    pub fn invalidate_page(&self, request: &BrowseRequest, offset: usize) {
+        if let Ok(key) = self.page_key(request, offset) {
+            self.pages.invalidate(&key);
+        }
+    }
+    async fn fetch_uncached(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
         match self.fetch_cached(request, offset).await {
             Err(error) if matches!(request, BrowseRequest::Cliamp) => {
                 let mut page = self
@@ -158,8 +183,15 @@ impl Radio {
                             url.query_pairs_mut().append_pair("name", q);
                         }
                         BrowseRequest::RadioCountry(q) => {
-                            url.query_pairs_mut()
-                                .append_pair("countrycode", &q.to_uppercase());
+                            let q = q.trim();
+                            if q.len() == 2 && q.bytes().all(|b| b.is_ascii_alphabetic()) {
+                                url.query_pairs_mut()
+                                    .append_pair("countrycode", &q.to_ascii_uppercase());
+                            } else {
+                                url.query_pairs_mut()
+                                    .append_pair("country", q)
+                                    .append_pair("countryExact", "true");
+                            }
                         }
                         BrowseRequest::RadioTag(q) => {
                             url.query_pairs_mut().append_pair("tag", q);
@@ -514,6 +546,48 @@ mod outage_tests {
     use super::*;
     use serde_json::json;
     #[tokio::test]
+    async fn country_names_and_codes_use_the_matching_directory_filter() {
+        let (base, task) = crate::test_http::serve_request(|request| {
+            let target = request
+                .lines()
+                .next()
+                .unwrap()
+                .split_whitespace()
+                .nth(1)
+                .unwrap();
+            let url = url::Url::parse(&format!("http://fixture{target}")).unwrap();
+            let pairs = url
+                .query_pairs()
+                .collect::<std::collections::HashMap<_, _>>();
+            if pairs.get("countrycode").is_some_and(|v| v == "DE")
+                || pairs.get("country").is_some_and(|v| v == "Germany")
+            {
+                (
+                    200,
+                    String::new(),
+                    json!([{"name":"German station","url_resolved":"https://station.test/live"}])
+                        .to_string()
+                        .into_bytes(),
+                )
+            } else {
+                (200, String::new(), b"[]".to_vec())
+            }
+        })
+        .await;
+        let radio = Radio::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            vec![base],
+        );
+        for country in ["de", "Germany"] {
+            let page = radio
+                .fetch(&BrowseRequest::RadioCountry(country.into()), 0)
+                .await
+                .unwrap();
+            assert_eq!(page.items.len(), 1, "country {country} failed");
+        }
+        task.abort();
+    }
+    #[tokio::test]
     async fn catalog_redirects_and_outages_use_a_labelled_directory_fallback() {
         let (base, task) = crate::test_http::serve(|path| {
             let (status, headers, body) = match path.split('?').next().unwrap() {
@@ -557,6 +631,7 @@ mod outage_tests {
         );
         task.abort();
         let _ = task.await;
+        cached.invalidate_page(&BrowseRequest::Cliamp, 0);
         let restored = cached.fetch(&BrowseRequest::Cliamp, 0).await.unwrap();
         assert_eq!(restored.items[0].title, "Directory fixture");
         assert!(restored.title.contains("cached"));

@@ -78,3 +78,27 @@ qualities, Music/audio/video, account states and the target desktop/network.
 Even 299/299 independent representative successes would only put the one-sided
 95% exact lower confidence bound above 99%; three startup cases cannot support
 that claim. Login/live/DRM and alternate-language track discovery remain open.
+
+## Target PC repair — 2026-10-22 (M5/M8)
+
+The local checkout and both installed launchers were still alpha.7. With isolated
+state and no cookies, that installed binary failed all three native smoke cases
+with “no eligible media formats.” Checked out `fix/native-playback` at `7cc5a43`
+and completed `cargo build -p ytui --locked`. Doctor detects `/usr/bin/node`
+(26.8.1), native playback and the updated extractor without a runtime override.
+
+`YTUI_TEST_PLAY_SECONDS=10 tools/test-native-playback.sh` successfully played the
+first public video (`jNQXAC9IVRw`) through native Rust with actual mpv null outputs:
+position 10.066667, duration 18.933333. The second case, release build and solver
+test were stopped when the user requested no heavy commands while gaming. The
+remaining cases and solver suite have no completed result from this task.
+
+Installed the completed **development build**, alpha.9, as both
+`~/.local/bin/ytui` and `ytui-rs` without another build. Both report alpha.9 and
+the installed doctor detects Node. Existing settings, account session, queue,
+history and media were preserved; VPN was unchanged. Previous alpha.7 launchers
+are backed up under
+`~/Work/caelestia-customization/ytui-playback-20261022-151851/before/home/vanir/.local/bin/`.
+Restart ytui to use the new binary. An optimized build can replace it when the
+user permits compilation again. This establishes one local native playback
+success; displayed video/audio-device acceptance and reliability remain open.

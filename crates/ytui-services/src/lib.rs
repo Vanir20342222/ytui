@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod browse;
+mod cache;
 pub mod desktop;
 pub mod download;
 pub mod failure;

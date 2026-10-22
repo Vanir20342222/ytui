@@ -97,6 +97,7 @@ pub struct Browser {
     web: Arc<Mutex<Option<ClientContext>>>,
     music: Arc<Mutex<Option<ClientContext>>>,
     origins: [String; 2],
+    pages: Arc<crate::cache::ResponseCache<Page>>,
 }
 impl Browser {
     pub fn new(client: reqwest::Client, session: Option<Arc<Session>>, account: u32) -> Self {
@@ -104,6 +105,7 @@ impl Browser {
             client,
             session,
             account,
+            pages: Arc::new(crate::cache::ResponseCache::new(64, 8 * 1024 * 1024)),
             web: Arc::new(Mutex::new(None)),
             music: Arc::new(Mutex::new(None)),
             origins: [
@@ -315,7 +317,23 @@ impl Browser {
         account.context("Could not validate the selected account/channel; import a signed-in YouTube session and select the correct account index")
     }
     pub async fn fetch(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
-        tokio::time::timeout(Duration::from_secs(35), self.fetch_page(music, request))
+        let fetch = async {
+            // Home remains live so recovery/refresh never repeats an old recommendation shell.
+            if matches!(request, BrowseRequest::Home) {
+                return self.fetch_page(music, request).await;
+            }
+            let ttl = Duration::from_secs(if matches!(request, BrowseRequest::Details(_)) {
+                300
+            } else {
+                60
+            });
+            self.pages
+                .load(Self::page_key(music, request)?, ttl, || {
+                    self.fetch_page(music, request)
+                })
+                .await
+        };
+        tokio::time::timeout(Duration::from_secs(35), fetch)
             .await
             .unwrap_or_else(|_| {
                 Err(FeedRetry::new(
@@ -324,6 +342,14 @@ impl Browser {
                 )
                 .into())
             })
+    }
+    fn page_key(music: bool, request: &BrowseRequest) -> Result<String> {
+        Ok(format!("{music}:{}", serde_json::to_string(request)?))
+    }
+    pub fn invalidate_page(&self, music: bool, request: &BrowseRequest) {
+        if let Ok(key) = Self::page_key(music, request) {
+            self.pages.invalidate(&key);
+        }
     }
     async fn fetch_page(&self, music: bool, request: &BrowseRequest) -> Result<Page> {
         let mut page = self.fetch_once(music, request).await?;
@@ -464,7 +490,18 @@ impl Browser {
                 }
             }
         }
-        let data = self.post(music, endpoint, body).await?;
+        // The watch page supplies metadata in one request. WEB's player API can
+        // reject a playable video without playback context; use it only when the
+        // page has no supported metadata, preserving its specific service errors.
+        let embedded = if let BrowseRequest::Details(id) = request {
+            self.watch_response(music, id).await.ok()
+        } else {
+            None
+        };
+        let data = match embedded {
+            Some(data) => data,
+            None => self.post(music, endpoint, body).await?,
+        };
         if endpoint == "player"
             && let Some(status) = data
                 .pointer("/playabilityStatus/status")
@@ -542,6 +579,39 @@ impl Browser {
         }
         Ok(page)
     }
+    async fn watch_response(&self, music: bool, id: &str) -> Result<Value> {
+        ensure!(
+            id.len() == 11
+                && id
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-'),
+            "Invalid video ID"
+        );
+        let origin = self.origin(music);
+        let mut url = url::Url::parse(&format!("{origin}/watch"))?;
+        url.query_pairs_mut()
+            .append_pair("v", id)
+            .append_pair("hl", "en");
+        let response = crate::http::get(
+            url,
+            |url| self.authorized(self.client.get(url.clone()), origin),
+            crate::http::Redirects::SameOrigin,
+            "YouTube details",
+        )
+        .await?;
+        response_status(&response, true)?;
+        let html = limited_text(response, 8 * 1024 * 1024).await?;
+        let data = extract_assignment(&html, "ytInitialPlayerResponse")
+            .context("No watch-page metadata")?;
+        ensure!(
+            data.pointer("/videoDetails/videoId")
+                .and_then(Value::as_str)
+                == Some(id),
+            "Watch-page video identity mismatch"
+        );
+        self.check_session(&data)?;
+        Ok(data)
+    }
     fn require_auth(&self) -> Result<()> {
         ensure!(
             self.session.is_some(),
@@ -587,7 +657,10 @@ fn extract_config(html: &str) -> Option<Value> {
 }
 // Parse JSON only; never evaluate the bootstrap page's JavaScript.
 fn extract_initial_data(html: &str) -> Option<Value> {
-    for part in html.split("ytInitialData").skip(1) {
+    extract_assignment(html, "ytInitialData")
+}
+fn extract_assignment(html: &str, name: &str) -> Option<Value> {
+    for part in html.split(name).skip(1) {
         let part = part.trim_start();
         let part = part
             .strip_prefix("\"]")
@@ -1014,6 +1087,71 @@ mod request_tests {
             .unwrap()
     }
     #[tokio::test]
+    async fn repeated_and_concurrent_searches_share_one_request_per_provider() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let count = calls.clone();
+        let (base, task) = crate::test_http::serve_request(move |request| {
+            let body = if request.starts_with("GET") {
+                r#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"#.into()
+            } else {
+                count.fetch_add(1, Ordering::SeqCst);
+                json!({"contents":[{"videoRenderer":{"videoId":"cached","title":{"simpleText":"Cached"}}}]}).to_string()
+            };
+            (200, String::new(), body.into_bytes())
+        }).await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [base.clone(), base];
+        let request = BrowseRequest::Search("repeat".into());
+        let (a, b) = tokio::join!(
+            browser.fetch(false, &request),
+            browser.fetch(false, &request)
+        );
+        assert_eq!(a.unwrap().items[0].id, "cached");
+        assert_eq!(b.unwrap().items[0].id, "cached");
+        browser.fetch(false, &request).await.unwrap();
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            1,
+            "identical searches must share their network result"
+        );
+        browser.fetch(true, &request).await.unwrap();
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            2,
+            "Music and YouTube must not share pages"
+        );
+        browser.invalidate_page(false, &request);
+        browser.fetch(false, &request).await.unwrap();
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            3,
+            "explicit refresh must fetch again"
+        );
+        task.abort();
+    }
+    #[tokio::test]
+    async fn rejected_player_api_recovers_metadata_from_the_watch_page() {
+        let (base, task) = crate::test_http::serve_request(|request| {
+            let body = if request.starts_with("GET /watch?") {
+                r#"var ytInitialPlayerResponse = {"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"abcdefghijk","title":"Playable video","lengthSeconds":"19"},"streamingData":{"formats":[{"url":"https://cdn.test/private?sig=synthetic"}]}};"#.into()
+            } else if request.starts_with("GET") {
+                r#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"#.into()
+            } else {
+                json!({"playabilityStatus":{"status":"ERROR","reason":"Video unavailable"}}).to_string()
+            };
+            (200, String::new(), body.into_bytes())
+        }).await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [base.clone(), base];
+        let page = browser
+            .fetch(false, &BrowseRequest::Details("abcdefghijk".into()))
+            .await
+            .unwrap();
+        assert_eq!(page.items[0].title, "Playable video");
+        assert!(!serde_json::to_string(&page).unwrap().contains("synthetic"));
+        task.abort();
+    }
+    #[tokio::test]
     async fn redirected_bootstrap_search_empty_home_and_music_keep_separate_contexts() {
         let bootstraps = Arc::new(AtomicUsize::new(0));
         let count = bootstraps.clone();
@@ -1032,6 +1170,9 @@ mod request_tests {
             if target.ends_with("-ready") {
                 let config = json!({"INNERTUBE_CONTEXT":{"client":{"clientVersion":version,"visitorData":"synthetic-visitor"}},"INNERTUBE_API_KEY":"synthetic-key"});
                 return (200, String::new(), format!("<script>ytcfg.set({config});</script>").into_bytes());
+            }
+            if target.contains("/watch?") {
+                return (200, String::new(), b"No embedded player metadata".to_vec());
             }
             let body: Value = serde_json::from_str(body).unwrap();
             assert_eq!(body.pointer("/context/client/clientName").unwrap(), if music {"WEB_REMIX"} else {"WEB"});
@@ -1243,6 +1384,7 @@ mod request_tests {
         assert_eq!(posts.load(Ordering::SeqCst), 2);
         browser.web.lock().await.as_mut().unwrap().loaded =
             Instant::now() - Duration::from_secs(1801);
+        browser.invalidate_page(false, &BrowseRequest::Search("test".into()));
         browser
             .fetch(false, &BrowseRequest::Search("test".into()))
             .await

@@ -1,5 +1,20 @@
 # ytui Rust rewrite plan
 
+Alpha.10 local M2–M6/M8 follow-up: public details/country/Music-source defects are
+fixed; bounded provider and native-resolution caches avoid repeated requests.
+154 offline tests, eight actual-media checks, two Node checks, four live provider
+checks and native playback/download checks pass. Auto/external public suites each
+pass 8/9 with anonymous Music consent still failing. See
+[the target-PC report](docs/NETWORK_PERFORMANCE.md); account/device/reliability
+acceptance remains open.
+
+Local M5/M8 follow-up, 2026-10-22: replaced the PC's stale alpha.7 launchers with
+the completed alpha.9 development build at `7cc5a43`. One public video advanced
+past ten seconds through native Rust and real mpv null outputs; the user requested
+stopping heavy work while gaming, so the release build, solver suite and remaining
+live cases were interrupted. See `docs/NATIVE_PLAYBACK.md` for evidence, rollback
+and the remaining displayed/audio-device/reliability gates.
+
 Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair and alpha.8 stability follow-up are on `fix/playback-fallback` (PR #10). Alpha.9 native playback follows on `fix/native-playback` (draft PR #11). PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-22.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 

@@ -1,5 +1,19 @@
 # Validation record — 2026-10-22
 
+## Alpha.10 target-PC network/performance follow-up (M2–M6/M8)
+
+On the actual CachyOS LTS PC: **154 offline tests**, eight actual-media checks,
+two actual Node solver checks and four new live provider/cache checks pass.
+Auto and explicit yt-dlp public suites each pass **8/9**; anonymous Music search
+still requires browser consent. Strict-native video download and the three-case
+native playback corpus pass. Fixed incorrect details rejection, radio country
+names and Music source replacement; added bounded page/radio/native stream
+caching with refresh/cancellation/error invalidation. Live cached searches return
+in about 0.033 ms versus a 1.487-second cold request in the measured run.
+See [NETWORK_PERFORMANCE.md](NETWORK_PERFORMANCE.md) for commands, limits,
+installation/rollback and acceptance that remains open. Earlier sections below
+describe their original cloud environments, not this new local evidence.
+
 Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. Default tests use synthetic/offline data; explicit live runs are
 recorded separately below.

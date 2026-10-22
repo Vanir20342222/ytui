@@ -2015,6 +2015,8 @@ impl App {
                 if self.tab > 0
                     && let Some(req) = self.tabs[self.tab].request.clone()
                 {
+                    self.browser.invalidate_page(self.tab == 2, &req);
+                    self.radio.invalidate_page(&req, 0);
                     self.navigate(self.tab, req, false);
                 }
             }

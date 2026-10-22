@@ -73,6 +73,7 @@ pub enum Command {
     /// Print cliamp channels or Radio Browser search results.
     Radio {
         query: Option<String>,
+        /// Country name or two-letter country code (for example Germany or DE).
         #[arg(long)]
         country: Option<String>,
         #[arg(long)]
