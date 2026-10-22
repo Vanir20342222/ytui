@@ -25,7 +25,7 @@ jobs:
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui-services --locked real_ffmpeg_ -- --ignored
-      - name: Verify an actual audio download and MP3 conversion
+      - name: Verify actual audio downloads in MP3, M4A, Opus and FLAC
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored

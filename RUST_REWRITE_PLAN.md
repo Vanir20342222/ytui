@@ -622,3 +622,9 @@ failure. Native YouTube playlists request the supported auto fallback before any
 transfer. A real FFmpeg MP3 download/conversion and loopback HTTP-rejection fallback
 complement synthetic three-entry playlist checks. Old jobs whose collection URL was
 already replaced need the original playlist re-added; downloaded files are preserved.
+
+The requested test expansion adds eleven default regressions for failure/retry/
+cancellation/tool metadata and player recovery, plus real M4A/Opus/FLAC conversion
+and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata,
+duplicate invocation and missing output records on hook failure (M3/M8). Final
+counts and reproducible commands are in docs/VALIDATION.md.

@@ -85,3 +85,17 @@ rejects playlists and video URLs containing list=.
 
 After updating, re-add the original playlist link if an old job already contains
 only a song URL. That lost playlist identity cannot be reconstructed safely.
+
+## Additional regression checks requested by the user
+
+Eleven additional default tests stress failed/retried/cancelled playlists, saved
+state, missing outputs, Unicode paths, extractor errors and player recovery.
+They exposed three real per-file-hook defects: wrong entry metadata, duplicate
+invocations and incomplete output records after a hook failed. Each output now
+retains its own metadata, duplicate paths are ignored and all completed files are
+recorded before fallible hooks run. A hook failure still prevents job success.
+
+Actual audio conversion now covers MP3, M4A/AAC, Opus and FLAC. Actual mpv checks
+also cover recovery after invalid metadata, paused resume through range-capable
+HTTP and muted preview restoration. Synthetic extraction and null devices do not
+replace live account/VPN/desktop acceptance. See VALIDATION.md for results.

@@ -9,7 +9,7 @@ CachyOS desktop. All automated application tests use synthetic/offline data.
 User reports mpv 0.41.0 / yt-dlp 2026.08.19 and fallback followed by `Playback failed`,
 plus playlists saving only the first song. Tool versions are user-provided.
 
-- `cargo test --workspace --locked`: **119 passed**, 8 opt-in tests excluded.
+- `cargo test --workspace --locked`: **130 passed**, 9 opt-in tests excluded.
   Includes all existing UI/theme/settings/actual-PTY tests and new explicit external
   extraction/headers/arguments/cancellation, visible mpv stdout failures, player
   error state/events, playlist source/intent/import/dedupe and real-executable
@@ -23,9 +23,9 @@ plus playlists saving only the first song. Tool versions are user-provided.
   asynchronous decoder update within two seconds; it still requires actual skip.
   mpv and missing libraries were unpacked from official Debian packages outside
   the repository. The user's displayed mpv 0.41/device was not tested here.
-- Separate real FFmpeg/ffprobe MP3 test **passed**: Rust downloads generated MP4
-  audio over loopback, real FFmpeg converts it to MP3, ffprobe confirms audio/codec/
-  duration, and source bytes stay unchanged. No yt-dlp executable was available to
+- Two separate real FFmpeg/ffprobe tests **passed** across **MP3, M4A/AAC, Opus
+  and FLAC**: Rust downloads generated MP4 audio over loopback, real FFmpeg converts
+  it, ffprobe confirms audio/codec/duration, and source bytes stay unchanged. No yt-dlp executable was available to
   that test; successful live YouTube audio extraction is not claimed.
 - A loopback HTTP 403 fails strict native and triggers exactly one external fallback
   in auto; an invalid local destination triggers none. Playlist CLI cases preserve
@@ -42,7 +42,27 @@ Reproduce optional local checks with installed tools:
 ```sh
 YTUI_TEST_MPV=/usr/bin/mpv cargo test -p ytui-services --locked real_mpv_ -- --ignored
 cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
+cargo test -p ytui --test download_recovery --locked
 ```
+
+Additional tests requested after the initial alpha.7 repair add **11 default tests**:
+seven transfer lifecycle checks, three external-metadata/tool checks and one player
+command-channel recovery check. They cover Unicode/space paths, duplicate output
+records, per-track hook identity, hook failure with multiple completed files,
+invalid/missing output records, temporary versus permanent failures, saved-job
+retry, cancellation/stale generations, malformed/unsafe extraction metadata, tool
+permission errors, and recovery through the public Player command channel.
+
+The new assertions reproduced three hook defects: the last entry's metadata was
+used for every file, duplicate reports re-ran hooks, and an early hook failure
+left later completed files unrecorded. Fix: associate each unique output with its
+metadata and register all validated outputs before invoking hooks. A failed hook
+still fails the job; completed media stays recorded.
+
+The actual mpv external-handoff fixture now also fails extraction first, recovers,
+starts paused at one second, opens a muted preview and preserves the prior pause
+state on close. Its loopback HTTP fixture implements byte ranges for genuine seek
+support. No new live YouTube success or browser/device acceptance is claimed.
 
 Implementation and recovery of old first-song jobs: [PLAYBACK_REPAIR.md](PLAYBACK_REPAIR.md).
 

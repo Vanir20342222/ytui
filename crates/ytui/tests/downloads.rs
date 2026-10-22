@@ -767,9 +767,7 @@ fn failed_playlist_retains_completed_outputs_and_strict_native_reports_limit() {
     assert_eq!(job.outputs, vec![final_file]);
 }
 
-#[test]
-#[ignore = "requires real FFmpeg and ffprobe; uses generated audio over loopback, no YouTube or cookies"]
-fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
+fn assert_real_audio_conversion(format: &str, codec: &str) {
     let temp = tempfile::tempdir().unwrap();
     let source = temp.path().join("source.mp4");
     let generated = Command::new("ffmpeg")
@@ -799,7 +797,7 @@ fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
         max_retries: 0,
         ..Default::default()
     };
-    config.download.audio_container = "mp3".into();
+    config.download.audio_container = format.into();
     config.download.metadata = false;
     let config_file = temp.path().join("config.toml");
     std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
@@ -830,7 +828,7 @@ fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
         .map(|entry| entry.unwrap().path())
         .collect::<Vec<_>>();
     assert_eq!(files.len(), 1);
-    assert_eq!(files[0].extension().unwrap(), "mp3");
+    assert_eq!(files[0].extension().unwrap(), format);
     let probe = Command::new("ffprobe")
         .args([
             "-v",
@@ -845,7 +843,7 @@ fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
         .unwrap();
     assert!(probe.status.success());
     let data: serde_json::Value = serde_json::from_slice(&probe.stdout).unwrap();
-    assert_eq!(data["streams"][0]["codec_name"], "mp3");
+    assert_eq!(data["streams"][0]["codec_name"], codec);
     assert_eq!(data["streams"][0]["codec_type"], "audio");
     assert!(
         data["format"]["duration"]
@@ -856,6 +854,19 @@ fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
             > 0.5
     );
     assert_eq!(std::fs::read(source).unwrap(), original);
+}
+
+#[test]
+#[ignore = "requires real FFmpeg and ffprobe; generated audio over loopback only"]
+fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
+    assert_real_audio_conversion("mp3", "mp3");
+}
+#[test]
+#[ignore = "requires real FFmpeg and ffprobe; generated audio over loopback only"]
+fn real_ffmpeg_native_audio_formats_m4a_opus_flac_are_decodable() {
+    for (format, codec) in [("m4a", "aac"), ("opus", "opus"), ("flac", "flac")] {
+        assert_real_audio_conversion(format, codec);
+    }
 }
 
 #[cfg(unix)]

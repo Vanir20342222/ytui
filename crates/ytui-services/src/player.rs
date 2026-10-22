@@ -1349,6 +1349,97 @@ mod tests {
         actor.stop().await;
     }
     #[tokio::test]
+    async fn player_command_channel_recovers_from_failure_and_stops_replacement_worker() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let paths = Paths {
+            config_override: None,
+            xdg_state: temp.path().join("state"),
+            config: temp.path().join("config"),
+            state: temp.path().join("state"),
+            cache: temp.path().join("cache"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        paths.create().unwrap();
+        let failed = temp.path().join("failed-once");
+        let extractor = temp.path().join("extractor");
+        std::fs::write(&extractor,format!("#!/bin/sh\nif [ ! -f '{}' ]; then : > '{}'; echo 'ERROR: extraction failed' >&2; exit 1; fi\nprintf '%s\n' '{{\"url\":\"https://media.test/audio\"}}'\n",failed.display(),failed.display())).unwrap();
+        let args = temp.path().join("mpv-arguments");
+        let mpv = temp.path().join("mpv");
+        std::fs::write(
+            &mpv,
+            format!(
+                r#"#!/bin/sh
+printf '%s\n' "$@" > '{}'
+sleep 30
+"#,
+                args.display()
+            ),
+        )
+        .unwrap();
+        for path in [&mpv, &extractor] {
+            std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+        let mut player = Player::spawn(
+            Config {
+                mpv: mpv.display().to_string(),
+                yt_dlp: extractor.display().to_string(),
+                download_backend: "yt-dlp".into(),
+                playback_sponsorblock: "off".into(),
+                ..Default::default()
+            },
+            paths,
+            None,
+        );
+        let media = Media {
+            url: "https://www.youtube.com/watch?v=synthetic00".into(),
+            ..Default::default()
+        };
+        player
+            .commands
+            .send(PlayerCommand::Play {
+                media: media.clone(),
+                audio: true,
+            })
+            .await
+            .unwrap();
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if player.status.borrow().error.is_some() {
+                    break;
+                }
+                player.status.changed().await.unwrap();
+            }
+        })
+        .await
+        .unwrap();
+        assert!(!args.exists(), "mpv started despite failed extraction");
+        player
+            .commands
+            .send(PlayerCommand::Play { media, audio: true })
+            .await
+            .unwrap();
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if args.exists()
+                    && player.status.borrow().active
+                    && player.status.borrow().error.is_none()
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .unwrap();
+        let args = std::fs::read_to_string(args).unwrap();
+        assert!(args.contains("--ytdl=no") && args.contains("--no-video"));
+        tokio::time::timeout(Duration::from_secs(2), player.close())
+            .await
+            .expect("replacement player was not reaped");
+    }
+    #[tokio::test]
     async fn closing_a_window_early_does_not_complete_the_track_or_advance_the_queue() {
         let temp = tempfile::tempdir().unwrap();
         let paths = Paths {
@@ -1980,15 +2071,17 @@ mod real_mpv_tests {
                 .lock()
                 .unwrap()
                 .push(request.lines().next().unwrap().to_string());
-            (
-                200,
-                "Content-Type: application/octet-stream\r\n".into(),
-                if request.starts_with("GET /audio") {
-                    audio_bytes.clone()
-                } else {
-                    video_bytes.clone()
-                },
-            )
+            let bytes = if request.starts_with("GET /audio") { &audio_bytes } else { &video_bytes };
+            let range = lower.lines().find_map(|line| line.strip_prefix("range: "))
+                .and_then(|value| value.strip_prefix("bytes="))
+                .and_then(|value| value.split_once('-'))
+                .and_then(|(start,end)| Some((start.parse::<usize>().ok()?,end.parse::<usize>().unwrap_or(bytes.len()-1))));
+            if let Some((start,end)) = range {
+                if start>=bytes.len() {return (416,format!("Content-Range: bytes */{}\r\n",bytes.len()),vec![]);}
+                let end = end.min(bytes.len()-1);
+                return (206,format!("Content-Type: application/octet-stream\r\nAccept-Ranges: bytes\r\nContent-Range: bytes {start}-{end}/{}\r\n",bytes.len()),bytes[start..=end].to_vec());
+            }
+            (200,"Content-Type: application/octet-stream\r\nAccept-Ranges: bytes\r\n".into(),bytes.clone())
         })
         .await;
         let metadata = temp.path().join("metadata.json");
@@ -2044,6 +2137,34 @@ mod real_mpv_tests {
             sponsor_task: None,
             ignore_segments_until: 0.0,
         };
+        let valid_metadata = std::fs::read(&metadata).unwrap();
+        std::fs::write(&metadata, b"invalid metadata").unwrap();
+        actor
+            .play(
+                Media {
+                    url: "https://www.youtube.com/watch?v=synthetic00".into(),
+                    ..Default::default()
+                },
+                false,
+                false,
+                None,
+                false,
+            )
+            .await;
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        loop {
+            actor.tick().await;
+            if actor.state.error.is_some() {
+                break;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "bad extraction did not report an error"
+            );
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+        assert!(!actor.state.active);
+        std::fs::write(&metadata, valid_metadata).unwrap();
         for audio_only in [false, true] {
             actor
                 .play(
@@ -2054,8 +2175,8 @@ mod real_mpv_tests {
                     },
                     audio_only,
                     false,
-                    None,
-                    false,
+                    Some(1.0),
+                    true,
                 )
                 .await;
             ready(&mut actor).await;
@@ -2085,8 +2206,67 @@ mod real_mpv_tests {
                     "video missing: {tracks}"
                 );
             }
+            assert!(actor.state.paused, "resume start lost pause state");
+            // Duration is available before the initial seek/frame has settled.
+            let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+            while (actor.state.position - 1.0).abs() >= 0.4 {
+                assert!(
+                    tokio::time::Instant::now() < deadline,
+                    "resume position was lost: {}",
+                    actor.state.position
+                );
+                actor.tick().await;
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+            if !audio_only {
+                actor
+                    .preview(Media {
+                        url: "https://www.youtube.com/watch?v=synthetic00".into(),
+                        ..Default::default()
+                    })
+                    .await;
+                let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+                loop {
+                    let preview = actor.preview.as_ref().expect("preview did not start");
+                    if preview
+                        .command(json!(["get_property", "duration"]))
+                        .await
+                        .ok()
+                        .is_some_and(|duration| duration.as_f64().is_some())
+                    {
+                        break;
+                    }
+                    assert!(!preview.task.is_finished(), "preview exited unexpectedly");
+                    assert!(
+                        tokio::time::Instant::now() < deadline,
+                        "preview did not load"
+                    );
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+                assert_eq!(
+                    actor
+                        .preview
+                        .as_ref()
+                        .unwrap()
+                        .command(json!(["get_property", "mute"]))
+                        .await
+                        .unwrap(),
+                    true
+                );
+                actor.close_preview().await;
+                assert_eq!(
+                    actor
+                        .full
+                        .as_ref()
+                        .unwrap()
+                        .command(json!(["get_property", "pause"]))
+                        .await
+                        .unwrap(),
+                    true
+                );
+            }
             actor.handle(PlayerCommand::TogglePause).await;
-            assert!(actor.state.paused);
+            assert!(!actor.state.paused);
             actor.stop().await;
         }
         assert!(

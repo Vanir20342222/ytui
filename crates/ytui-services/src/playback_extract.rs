@@ -311,4 +311,104 @@ mod tests {
             .unwrap();
         assert!(format!("{:#}", result.err().unwrap()).contains("cancelled"));
     }
+    #[tokio::test]
+    async fn malformed_and_unsafe_extractor_responses_fail_without_exposing_urls() {
+        let temp = tempfile::tempdir().unwrap();
+        let metadata = temp.path().join("metadata.json");
+        let extractor = tool(&temp, &format!("cat '{}'\n", metadata.display()));
+        let config = Config {
+            yt_dlp: extractor,
+            ..Default::default()
+        };
+        for data in [
+            "<html>not JSON</html>",
+            "{}",
+            r#"{"url":"ftp://media.test/stream?token=synthetic-private"}"#,
+            r#"{"requested_formats":[{"url":"https://media.test/video","vcodec":"vp9","acodec":"none"},{"url":"file:///synthetic/private","vcodec":"none","acodec":"opus"}]}"#,
+        ] {
+            std::fs::write(&metadata, data).unwrap();
+            let error = resolve(
+                &config,
+                "https://www.youtube.com/watch?v=synthetic00",
+                "bestvideo+bestaudio/best",
+                false,
+                None,
+                CancellationToken::new(),
+            )
+            .await
+            .err()
+            .expect("invalid metadata was accepted");
+            let error = format!("{error:#}");
+            assert!(!error.contains("synthetic-private"));
+            assert!(!error.contains("file:///synthetic/private"));
+        }
+    }
+    #[tokio::test]
+    async fn missing_or_nonexecutable_extractors_report_the_actual_failure() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut config = Config {
+            yt_dlp: temp.path().join("missing").display().to_string(),
+            ..Default::default()
+        };
+        let error = resolve(
+            &config,
+            "https://www.youtube.com/watch?v=synthetic00",
+            "best",
+            false,
+            None,
+            CancellationToken::new(),
+        )
+        .await
+        .err()
+        .unwrap();
+        assert!(error.to_string().contains("yt-dlp is required"));
+        config.yt_dlp = tool(&temp, "exit 0");
+        std::fs::set_permissions(&config.yt_dlp, std::fs::Permissions::from_mode(0o644)).unwrap();
+        let error = resolve(
+            &config,
+            "https://www.youtube.com/watch?v=synthetic00",
+            "best",
+            false,
+            None,
+            CancellationToken::new(),
+        )
+        .await
+        .err()
+        .unwrap();
+        assert!(
+            format!("{error:#}").contains("Permission denied"),
+            "{error:#}"
+        );
+    }
+    #[test]
+    fn audio_stream_header_overrides_are_not_taken_from_video_and_urls_remain_encoded() {
+        let data = json!({"http_headers":{"User-Agent":"common"},"requested_formats":[
+            {"url":"https://media.test/video?signature=synthetic%2Bvalue","vcodec":"vp9","acodec":"none","http_headers":{"User-Agent":"video"}},
+            {"url":"https://media.test/audio?signature=synthetic%2Fvalue","vcodec":"none","acodec":"opus","http_headers":{"User-Agent":"audio"}}
+        ]});
+        let audio = parse(&data, true).unwrap();
+        assert_eq!(
+            audio.url,
+            "https://media.test/audio?signature=synthetic%2Fvalue"
+        );
+        assert!(
+            audio
+                .headers
+                .contains(&("User-Agent".into(), "audio".into()))
+        );
+        let video = parse(&data, false).unwrap();
+        assert_eq!(
+            video.url,
+            "https://media.test/video?signature=synthetic%2Bvalue"
+        );
+        assert!(
+            video
+                .headers
+                .contains(&("User-Agent".into(), "video".into()))
+        );
+        assert_eq!(
+            video.audio.as_deref(),
+            Some("https://media.test/audio?signature=synthetic%2Fvalue")
+        );
+    }
 }
