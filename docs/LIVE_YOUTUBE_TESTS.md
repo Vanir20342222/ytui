@@ -74,7 +74,15 @@ No proxy or route bypass was attempted. A separate GitHub runner is being checke
 Both public roots returned **HTTP 200** on GitHub's Ubuntu runner:
 [network job, run 39756304985](https://github.com/Vanir20342222/ytui/actions/runs/39756304985/job/119749053849).
 This establishes page reachability there; it does not establish stream extraction
-or playback. The media job runs the application checks separately.
+or playback. The repeated [media run 39757202167](https://github.com/Vanir20342222/ytui/actions/runs/39757202167)
+ran all nine checks in **auto and yt-dlp modes**: each had **two passing searches
+and seven failures**. YouTube required a bot-confirmation sign-in for details and
+media on both hosted runners. No successful CDN playback/download is claimed.
+Use the local runner for target-network evidence; never upload browser cookies to
+make a public CI job pass. These checks intentionally stay failed for that response.
+
+The older `BaW_jenozKc` fixture returned unavailable in the initial run; the second
+run used the replacement above and reported the distinct bot challenge.
 
 The previously failing Rust workflow had **no jobs started**: GitHub rejected
 case-insensitive duplicate `NO_PROXY` / `no_proxy` environment keys. The duplicate

@@ -1,7 +1,45 @@
-# Validation record — 2026-10-21
+# Validation record — 2026-10-22
 
 Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
-CachyOS desktop. All automated application tests use synthetic/offline data.
+CachyOS desktop. Default tests use synthetic/offline data; explicit live runs are
+recorded separately below.
+
+## Public YouTube runner (M3/M4/M5/M8)
+
+The managed workspace still rejects the YouTube HTTPS CONNECT tunnel with proxy
+HTTP 403. A separate GitHub Actions runner reached both YouTube and Music roots
+with **HTTP 200** and ran the actual ytui executable against both services.
+
+- Run [39757202167](https://github.com/Vanir20342222/ytui/actions/runs/39757202167),
+  **auto and explicit external backends: each 2 passed, 7 failed**. Public YouTube and Music
+  searches returned nonempty normalized pages. Details, video/audio/Music playback,
+  video/audio downloads and the two-entry playlist check failed with YouTube's
+  **“Sign in to confirm you're not a bot”** response. This is an actual YouTube
+  rejection, distinct from the workspace's proxy failure. No successful CDN
+  playback/download is claimed. Both modes report the service's bot challenge.
+- The first live run used `BaW_jenozKc`, which returned “This video is unavailable”
+  on that runner. The public fixture was replaced with short `jNQXAC9IVRw` and
+  the checks were repeated. The playlist uses a public upstream yt-dlp fixture.
+- Latest run tools include mpv **0.37.0**, yt-dlp **2026.10.21**, Deno **2.9.8**, FFmpeg **6.1.1**
+  and Rust **1.99.1**. These are not the user's desktop versions.
+- **130 default tests pass**, 16 explicit opt-in tests excluded. Formatting,
+  workspace/all-target strict Clippy, actionlint for both workflows, shell syntax
+  and optimized build pass. A new separate real-mpv 0.40 loopback test passes:
+  the public `playback-check` CLI must observe real progress and also surface a
+  decoder failure. Its offline guard is included in the default CLI checks.
+- The prior Rust workflow never started jobs because GitHub rejected duplicate
+  case-insensitive `NO_PROXY` / `no_proxy` keys. Removing the duplicate allowed
+  both ordinary Rust runs on `ae51307` to **pass** on GitHub.
+- A later CI run caught a race in the existing fake-mpv preview test: it read the
+  argument file after creation but before writing finished. The fixture now
+  publishes it with an atomic rename and waits up to two seconds for publication;
+  mute/length/pause assertions remain unchanged. This is test synchronization,
+  not evidence that preview audio was unmuted in the application.
+
+The public runner does not load cookies, upload media, change VPN settings or
+bypass network policy. The same [local runner](LIVE_YOUTUBE_TESTS.md) can check the
+target PC's normal network. Signed-in feeds and physical display/audio remain
+separate acceptance gates. Failed live cases remain failures, not passing skips.
 
 
 ## Alpha.7 playback/playlist repair evidence (M3/M5/M8)

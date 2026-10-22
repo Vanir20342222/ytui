@@ -1,6 +1,6 @@
 # ytui Rust rewrite plan
 
-Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair is on `fix/playback-fallback`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
+Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair is on `fix/playback-fallback`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-22.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).

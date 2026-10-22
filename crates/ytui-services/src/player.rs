@@ -1066,7 +1066,9 @@ mod tests {
         std::fs::write(
             &fake,
             format!(
-                "#!/bin/sh\nprintf '%s\\n' \"$@\" > '{}'\nsleep 30\n",
+                "#!/bin/sh\nprintf '%s\\n' \"$@\" > '{}.tmp'\nmv '{}.tmp' '{}'\nsleep 30\n",
+                args.display(),
+                args.display(),
                 args.display()
             ),
         )
@@ -1142,12 +1144,15 @@ mod tests {
                 ..Default::default()
             })
             .await;
-        for _ in 0..50 {
-            if args.exists() {
-                break;
+        // The fake publishes a complete argument file atomically. Merely waiting
+        // for creation could observe an empty file while the shell was writing it.
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while !args.exists() {
+                tokio::time::sleep(Duration::from_millis(10)).await;
             }
-            tokio::time::sleep(Duration::from_millis(10)).await;
-        }
+        })
+        .await
+        .expect("preview process did not publish its arguments");
         assert!(*paused.lock().unwrap());
         let recorded = std::fs::read_to_string(args).unwrap();
         assert!(recorded.contains("--mute=yes"));

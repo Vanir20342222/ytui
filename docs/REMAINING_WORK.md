@@ -53,6 +53,12 @@ A real native audio transfer/MP3 conversion is verified with loopback/FFmpeg; ac
 YouTube Music and playlists still require live acceptance. Re-add original playlist
 links for older jobs already reduced to a single-song URL.
 
+Live follow-up on 2026-10-22: GitHub runners reached public YouTube/Music and both
+searches passed through ytui. In both auto and yt-dlp modes, the other seven live
+checks failed with YouTube's bot-confirmation request. See [LIVE_YOUTUBE_TESTS.md](LIVE_YOUTUBE_TESTS.md)
+for the executable local runner and actual CI evidence. Playback, downloads,
+two-entry playlists and authenticated/device acceptance remain open.
+
 ## Unsupported or partial functionality
 
 | Area | Current limit / planned acceptance |
