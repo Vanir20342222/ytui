@@ -293,25 +293,30 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             if network {
                 let client = ytui_services::http_client(config.proxy.as_deref())?;
                 let browser = Browser::new(client.clone(), None, 0);
+                let mut failures = 0;
                 for (label, music) in [
                     ("YouTube public search", false),
                     ("Music public search", true),
                 ] {
-                    print_probe(
+                    failures += usize::from(!print_probe(
                         label,
                         browser
                             .fetch(music, &BrowseRequest::Search("music".into()))
                             .await,
-                    );
+                    ));
                 }
-                print_probe(
+                failures += usize::from(!print_probe(
                     "Radio catalog/directory",
                     Radio::new(client, config.radio_servers.clone())
                         .fetch(&BrowseRequest::Cliamp, 0)
                         .await,
-                );
+                ));
                 println!(
                     "These public probes do not validate signed-in feeds or media playback. VPN configuration was not changed."
+                );
+                ensure!(
+                    failures == 0,
+                    "{failures} public network probe(s) failed or returned no supported items; see the results above"
                 );
             }
         }
@@ -616,26 +621,33 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
     Ok(())
 }
 
-fn print_probe(label: &str, result: Result<Page>) {
+fn print_probe(label: &str, result: Result<Page>) -> bool {
     match result {
         Ok(page) if !page.items.is_empty() => {
             println!("{label}: OK ({} items)", page.items.len());
             if let Some(notice) = page.notice {
                 println!("  {}", ytui_services::process::diagnostic(&notice));
             }
+            true
         }
-        Ok(page) => println!(
-            "{label}: EMPTY · {}",
-            ytui_services::process::diagnostic(
-                page.notice
-                    .as_deref()
-                    .unwrap_or("No supported items returned")
-            )
-        ),
-        Err(error) => println!(
-            "{label}: FAILED · {}",
-            ytui_services::process::diagnostic(&error.to_string())
-        ),
+        Ok(page) => {
+            println!(
+                "{label}: EMPTY · {}",
+                ytui_services::process::diagnostic(
+                    page.notice
+                        .as_deref()
+                        .unwrap_or("No supported items returned")
+                )
+            );
+            false
+        }
+        Err(error) => {
+            println!(
+                "{label}: FAILED · {}",
+                ytui_services::process::diagnostic(&error.to_string())
+            );
+            false
+        }
     }
 }
 pub fn executable(program: &str) -> Option<PathBuf> {

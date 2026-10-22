@@ -642,6 +642,40 @@ mod tests {
         a.shutdown().await;
     }
     #[tokio::test]
+    async fn playback_failures_explain_recovery_and_keep_remapped_actions_visible_in_all_themes() {
+        let (mut a, _rx, _temp) = fixture().await;
+        a.tab = 1;
+        a.config.keybindings.insert("f8".into(), "command".into());
+        a.config.keybindings.insert("f9".into(), "settings".into());
+        a.player_status.error =
+            Some("yt-dlp failed: ERROR: Sign in to confirm you are not a bot".into());
+        for theme in ytui_services::theme::THEMES {
+            a.palette = ytui_services::theme::builtin(theme).unwrap();
+            for (width, height) in [(35, 12), (80, 24), (180, 50)] {
+                let mut terminal = Terminal::new(TestBackend::new(width, height)).unwrap();
+                terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+                let text = terminal
+                    .backend()
+                    .buffer()
+                    .content
+                    .iter()
+                    .map(|c| c.symbol())
+                    .collect::<String>();
+                assert!(
+                    text.contains("f8 Actions"),
+                    "{theme} {width}x{height} hides recovery actions"
+                );
+                if width >= 80 {
+                    assert!(text.contains("YouTube requires verification"));
+                    assert!(text.contains("f9 Settings"));
+                    assert!(text.contains("Open Account"));
+                    assert!(!text.contains("Y retry with yt-dlp"));
+                }
+            }
+        }
+        a.shutdown().await;
+    }
+    #[tokio::test]
     async fn download_counts_and_player_time_stay_readable_in_small_and_light_layouts() {
         use ytui_core::JobState;
         let (mut a, _rx, _temp) = fixture().await;
@@ -695,7 +729,7 @@ mod tests {
             .iter()
             .map(|c| c.symbol())
             .collect::<String>();
-        assert!(text.contains("Muted preview"));
+        assert!(text.contains("Video preview"));
         assert!(text.contains("esc closes"));
         a.shutdown().await;
     }

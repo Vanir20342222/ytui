@@ -61,8 +61,13 @@ two-entry playlists and authenticated/device acceptance remain open.
 
 ## Unsupported or partial functionality
 
+Alpha.8 closes additional local output/preview/diagnostic defects and adds an
+actual yt-dlp two-file playlist regression over loopback. It does not remove the
+live acceptance gates above. See [STABILITY_PASS.md](STABILITY_PASS.md).
+
 | Area | Current limit / planned acceptance |
 | --- | --- |
+| Interrupted playlists | Completed files stay on disk; per-entry durable checkpoints during cancellation are partial. Strict generations still reject late updates from stopped workers. Retry/library discovery can recover existing files. |
 | Native YouTube extractor | Pinned upstream has incomplete current-video/challenge/live/playlist support. Native transfer pause starts again; persistent range resume is partial upstream functionality. User-confirmed auto fallback is implemented for supported extractor limitations; strict native mode remains available. Successful live playback is still unverified here. |
 | Native subtitles | Literal languages, automatic/manual captions, sidecars and embedding exist. Regex selectors, configurable subtitle conversion format, and automatic translation to a target language are not implemented. Cuts with subtitles require explicit fallback to prevent desynchronization. |
 | Video selection | Resolution/container are supported. A separate prefer-high-frame-rate control and Python's automatic video-conversion policy are not implemented. Local conversion remains explicit and preserves the source. |

@@ -4,6 +4,25 @@ Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. Default tests use synthetic/offline data; explicit live runs are
 recorded separately below.
 
+## Alpha.8 stability pass (M3/M5/M8)
+
+**139 default tests pass**, with 17 opt-in checks excluded. New regressions cover
+valid output retention before later invalid records, empty-file rejection,
+single-video failure recovery, permanent proxy retry policy, stderr root-cause
+retention/bounds, preview preference isolation, error UI across 13 palettes and
+three sizes, and the network doctor's failure exit status. Four pre-fix failures
+were observed for output retention/empty files and repeated preview close.
+
+Separate actual-tool checks pass: three mpv 0.40 tests with null outputs, two
+FFmpeg/ffprobe tests across four audio formats, and a new genuine yt-dlp 2026.10.21
+two-entry HTML playlist transfer/conversion. Both real MP3 files have distinct
+paths and valid tracks/durations and remain recorded with the original source in
+SQLite. HTML/media are generated locally; this is **not** a YouTube CDN success.
+
+Formatting, strict workspace/all-target Clippy, actionlint, optimized build and
+isolated installation pass. Both launchers report `0.2.0-alpha.8`. Implementation,
+commands and limitations: [STABILITY_PASS.md](STABILITY_PASS.md).
+
 ## Public YouTube runner (M3/M4/M5/M8)
 
 The managed workspace still rejects the YouTube HTTPS CONNECT tunnel with proxy

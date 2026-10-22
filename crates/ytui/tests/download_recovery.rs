@@ -108,6 +108,21 @@ printf 'YTUI_OUTPUT:"%s/first.media"\n' "$PWD"
 printf '%s\n' 'YTUI_META:{"id":"two","title":"Second track"}'
 printf 'YTUI_OUTPUT:"%s/second.media"\n' "$PWD"
 "#;
+#[test]
+fn retry_policy_does_not_repeat_permanent_proxy_or_storage_rejections() {
+    for message in [
+        "Unable to connect to proxy: Tunnel connection failed: 403 Forbidden",
+        "CONNECT tunnel failed, response 403",
+        "HTTP 407 Proxy Authentication Required; connection failed",
+        "Read-only file system after connection reset",
+    ] {
+        assert!(!download::transient(message), "{message}");
+    }
+    assert!(download::transient(
+        "Connection reset while contacting proxy"
+    ));
+    assert!(download::transient("HTTP Error 503: Service Unavailable"));
+}
 #[tokio::test]
 async fn playlist_hooks_use_each_tracks_metadata_once_even_for_duplicate_output_records() {
     let mut fixture = Fixture::new(&format!(
@@ -173,6 +188,50 @@ async fn success_without_valid_final_outputs_cannot_finish_a_job() {
                 .any(|event| matches!(event, JobUpdate::Finished))
         );
     }
+}
+#[tokio::test]
+async fn a_later_invalid_output_never_discards_completed_playlist_files() {
+    for invalid in [
+        r#"printf 'YTUI_OUTPUT:"%s/missing.media"\n' "$PWD""#,
+        "printf '%s\\n' 'YTUI_OUTPUT:not-json'",
+    ] {
+        let fixture = Fixture::new(&format!(
+            r#"
+printf first > first.media
+printf 'YTUI_OUTPUT:"%s/first.media"\n' "$PWD"
+{invalid}
+"#
+        ));
+        let (job, events) = fixture.run(fixture.job()).await;
+        assert_eq!(job.state, JobState::Error);
+        assert_eq!(job.outputs, vec![fixture.root().join("first.media")]);
+        assert!(!events.iter().any(|e| matches!(e, JobUpdate::Finished)));
+    }
+}
+#[tokio::test]
+async fn an_empty_final_file_is_not_a_successful_download() {
+    let fixture = Fixture::new(
+        r#": > empty.media
+printf 'YTUI_OUTPUT:"%s/empty.media"\n' "$PWD""#,
+    );
+    let (job, _) = fixture.run(fixture.job()).await;
+    assert_eq!(job.state, JobState::Error);
+    assert!(job.outputs.is_empty());
+}
+#[tokio::test]
+async fn a_failed_single_video_keeps_its_published_output() {
+    let fixture = Fixture::new(
+        r#"printf media > first.media
+printf 'YTUI_OUTPUT:"%s/first.media"\n' "$PWD"
+echo 'postprocessing failed' >&2
+exit 1"#,
+    );
+    let mut job = fixture.job();
+    job.options.playlist = false;
+    job.media.url = "https://www.youtube.com/watch?v=abcdefghijk".into();
+    let (job, _) = fixture.run(job).await;
+    assert_eq!(job.state, JobState::Error);
+    assert_eq!(job.outputs, vec![fixture.root().join("first.media")]);
 }
 #[tokio::test]
 async fn temporary_playlist_failure_retries_whole_source_and_keeps_completed_outputs() {

@@ -2,6 +2,7 @@ pub mod auth;
 pub mod browse;
 pub mod desktop;
 pub mod download;
+pub mod failure;
 mod http;
 pub mod images;
 pub mod library;

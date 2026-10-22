@@ -93,6 +93,36 @@ struct Server {
     stop: Arc<AtomicBool>,
     thread: Option<thread::JoinHandle<()>>,
 }
+#[test]
+fn doctor_network_returns_failure_when_its_public_probes_are_rejected() {
+    let temp = tempfile::tempdir().unwrap();
+    // A local rejecting HTTP proxy prevents all actual external provider access.
+    let proxy = Server::with_status(b"Fixture proxy rejection".to_vec(), 403);
+    let config = Config {
+        theme: "ytui-dark".into(),
+        auth_store: "file".into(),
+        proxy: Some(proxy.url.clone()),
+        ..Default::default()
+    };
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let result = Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .arg("--config")
+        .arg(config_file)
+        .arg("--state-dir")
+        .arg(temp.path().join("state"))
+        .args(["doctor", "--network"])
+        .env("XDG_CONFIG_HOME", temp.path().join("config"))
+        .env("XDG_STATE_HOME", temp.path().join("state"))
+        .env("XDG_CACHE_HOME", temp.path().join("cache"))
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    let output = String::from_utf8_lossy(&result.stdout);
+    assert!(output.contains("YouTube public search: FAILED"), "{output}");
+    assert!(output.contains("Music public search: FAILED"));
+    assert!(String::from_utf8_lossy(&result.stderr).contains("public network probe(s) failed"));
+}
 impl Server {
     fn start() -> Self {
         Self::with_payload(b"synthetic-media-fixture".to_vec())
@@ -101,6 +131,11 @@ impl Server {
         Self::with_status(payload, 200)
     }
     fn with_status(payload: Vec<u8>, status: u16) -> Self {
+        Self::with_handler(move |_| (status, "video/mp4", payload.clone()))
+    }
+    fn with_handler(
+        handler: impl Fn(&str) -> (u16, &'static str, Vec<u8>) + Send + 'static,
+    ) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         listener.set_nonblocking(true).unwrap();
         let addr = listener.local_addr().unwrap();
@@ -114,9 +149,16 @@ impl Server {
                             .set_read_timeout(Some(Duration::from_secs(2)))
                             .unwrap();
                         let mut request = [0u8; 4096];
-                        let _ = stream.read(&mut request);
+                        let count = stream.read(&mut request).unwrap_or(0);
+                        let request = String::from_utf8_lossy(&request[..count]);
+                        let target = request
+                            .lines()
+                            .next()
+                            .and_then(|line| line.split_whitespace().nth(1))
+                            .unwrap_or("/");
+                        let (status, mime, payload) = handler(target);
                         let headers = format!(
-                            "HTTP/1.1 {status} Fixture\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nETag: \"fixture-v1\"\r\nConnection: close\r\n\r\n",
+                            "HTTP/1.1 {status} Fixture\r\nContent-Type: {mime}\r\nContent-Length: {}\r\nETag: \"fixture-v1\"\r\nConnection: close\r\n\r\n",
                             payload.len()
                         );
                         let _ = stream.write_all(headers.as_bytes());
@@ -870,6 +912,120 @@ fn real_ffmpeg_native_audio_download_produces_a_decodable_mp3() {
 fn real_ffmpeg_native_audio_formats_m4a_opus_flac_are_decodable() {
     for (format, codec) in [("m4a", "aac"), ("opus", "opus"), ("flac", "flac")] {
         assert_real_audio_conversion(format, codec);
+    }
+}
+
+#[tokio::test]
+#[ignore = "requires actual yt-dlp, FFmpeg and ffprobe; two HTML media entries served over loopback, no YouTube"]
+async fn real_ytdlp_playlist_saves_two_distinct_decodable_audio_files() {
+    let temp = tempfile::tempdir().unwrap();
+    let source = temp.path().join("source.mp4");
+    let generated = Command::new("ffmpeg")
+        .args([
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:sample_rate=44100",
+            "-t",
+            "2",
+        ])
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(
+        generated.status.success(),
+        "{}",
+        String::from_utf8_lossy(&generated.stderr)
+    );
+    let bytes = std::fs::read(source).unwrap();
+    let server = Server::with_handler(move |target| {
+        match target {
+        "/playlist.html" => (200, "text/html", b"<!doctype html><html><head><title>Playlist fixture</title></head><body><video src='/one.mp4'></video><video src='/two.mp4'></video></body></html>".to_vec()),
+        "/one.mp4" | "/two.mp4" => (200, "video/mp4", bytes.clone()),
+        _ => (404, "text/plain", b"Missing fixture".to_vec()),
+    }
+    });
+    let url = server.url.replace("fixture.mp4", "playlist.html");
+    let config = Config {
+        theme: "ytui-dark".into(),
+        auth_store: "file".into(),
+        max_retries: 0,
+        yt_dlp: std::env::var("YTUI_TEST_YT_DLP").unwrap_or_else(|_| "yt-dlp".into()),
+        ..Default::default()
+    };
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let result = tokio::process::Command::new(env!("CARGO_BIN_EXE_ytui"))
+        .arg("--config")
+        .arg(config_file)
+        .arg("--state-dir")
+        .arg(temp.path().join("state"))
+        .args([
+            "download",
+            &url,
+            "--playlist",
+            "--audio",
+            "--backend",
+            "yt-dlp",
+            "--now",
+            "--directory",
+        ])
+        .arg(temp.path().join("output"))
+        .env("XDG_CONFIG_HOME", temp.path().join("config"))
+        .env("XDG_STATE_HOME", temp.path().join("state"))
+        .env("XDG_CACHE_HOME", temp.path().join("cache"))
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .env("no_proxy", "127.0.0.1,localhost")
+        .kill_on_drop(true)
+        .output()
+        .await
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let store = ytui_services::store::Store::open(&temp.path().join("state")).unwrap();
+    let snapshot = store.load().await.unwrap();
+    store.close().await.unwrap();
+    let job = &snapshot.downloads.jobs[0];
+    assert_eq!(job.state, ytui_core::JobState::Done);
+    assert_eq!(job.media.url, url);
+    assert_eq!(
+        job.outputs.len(),
+        2,
+        "real yt-dlp saved only the first playlist entry"
+    );
+    assert_ne!(job.outputs[0], job.outputs[1]);
+    for path in &job.outputs {
+        assert!(path.metadata().unwrap().len() > 0);
+        let probe = Command::new("ffprobe")
+            .args([
+                "-v",
+                "error",
+                "-select_streams",
+                "a:0",
+                "-show_entries",
+                "stream=codec_name:format=duration",
+                "-of",
+                "json",
+            ])
+            .arg(path)
+            .output()
+            .unwrap();
+        assert!(probe.status.success());
+        let json: serde_json::Value = serde_json::from_slice(&probe.stdout).unwrap();
+        assert_eq!(json["streams"][0]["codec_name"], "mp3");
+        assert!(
+            json["format"]["duration"]
+                .as_str()
+                .unwrap()
+                .parse::<f64>()
+                .unwrap()
+                >= 1.9
+        );
     }
 }
 

@@ -4,7 +4,7 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.7**. Live account and desktop acceptance remains open;
+This is **0.2.0-alpha.8**. Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
@@ -50,6 +50,10 @@ Playlist links select collection downloads automatically; watch links with playl
 context stay single-video unless explicitly expanded. Playlist jobs retain their
 source across entry metadata/retries, and auto uses yt-dlp for native playlist limits.
 [Playback/playlist fixes and validation boundaries](docs/PLAYBACK_REPAIR.md).
+Alpha.8 additionally preserves valid outputs after malformed later records, rejects
+empty files, isolates preview controls from saved player preferences, and shows
+contextual recovery steps for service/tool/storage failures. See the
+[stability checks](docs/STABILITY_PASS.md).
 
 Thumbnails use sized memory/disk caches and nearby prefetch. Feeds load continuation
 pages near the end and recover temporary errors automatically, keeping visible

@@ -223,6 +223,10 @@ pub fn transient(error: &str) -> bool {
             "cookies",
             "requested format",
             "postprocessing failed",
+            "tunnel connection failed: 403",
+            "connect tunnel failed, response 403",
+            "proxy authentication required",
+            "read-only file system",
         ]
         .iter()
         .any(|s| e.contains(s))
@@ -371,16 +375,16 @@ async fn execute_inner(
                 .await;
             }
         }
-        // A later playlist entry may fail after earlier files were published.
-        // Retain those outputs without marking the whole collection successful.
-        if job.options.playlist
-            && let Ok(output) = &result
-            && !output.success
-        {
+        // Publication is independent from the tool's eventual exit status or a
+        // later malformed output record. Keep every real file before validating
+        // the complete response or running fallible post-download hooks.
+        if let Ok(output) = &result {
+            let mut registered = std::collections::HashSet::new();
             for line in &output.lines {
                 if let Some(raw) = line.strip_prefix("YTUI_OUTPUT:")
                     && let Ok(path) = serde_json::from_str::<std::path::PathBuf>(raw)
-                    && path.is_file()
+                    && valid_output(&path)
+                    && registered.insert(path.clone())
                 {
                     send(tx, job, JobUpdate::Output(path)).await;
                 }
@@ -407,8 +411,8 @@ async fn execute_inner(
                             .context("Invalid final output path from yt-dlp")?
                             .into();
                         ensure!(
-                            path.is_file(),
-                            "yt-dlp exited successfully but the final output file is missing"
+                            valid_output(&path),
+                            "yt-dlp exited successfully but the final output file is missing or empty"
                         );
                         if !outputs.iter().any(|(existing, _)| existing == &path) {
                             outputs.push((path, resolved_media.clone()));
@@ -419,12 +423,8 @@ async fn execute_inner(
                     !outputs.is_empty(),
                     "yt-dlp did not report a final output file; check the URL, playlist selection, and installed yt-dlp version"
                 );
-                // Register every completed file before running fallible hooks.
-                // Associate each output with its own entry, not the last metadata
-                // record of the playlist, and never invoke a hook twice per path.
-                for (output, _) in &outputs {
-                    send(tx, job, JobUpdate::Output(output.clone())).await;
-                }
+                // Valid files are already registered. Each unique output keeps
+                // its own entry metadata and invokes its hook only once.
                 for (output, media) in &outputs {
                     run_hook(job, media, output, cancel.clone()).await?;
                 }
@@ -453,6 +453,10 @@ async fn execute_inner(
         tokio::select! {_=cancel.cancelled()=>bail!("Operation cancelled"),_=tokio::time::sleep(Duration::from_secs(delay))=>{}}
     }
     bail!("Download retry budget exhausted")
+}
+
+fn valid_output(path: &Path) -> bool {
+    path.metadata().is_ok_and(|m| m.is_file() && m.len() > 0)
 }
 
 async fn run_hook(

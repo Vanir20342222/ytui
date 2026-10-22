@@ -535,6 +535,7 @@ impl Actor {
             p.stop().await;
         }
         self.reconnect_at = None;
+        self.resume_after_preview = false;
         if let Some(task) = self.sponsor_task.take() {
             task.abort();
             let _ = task.await;
@@ -612,7 +613,7 @@ impl Actor {
         if let Some(p) = self.preview.take() {
             p.stop().await;
         }
-        if self.resume_after_preview
+        if std::mem::take(&mut self.resume_after_preview)
             && let Some(p) = &self.full
         {
             let _ = p.command(json!(["set_property", "pause", false])).await;
@@ -629,6 +630,7 @@ impl Actor {
                     .await
                     .is_err()
             {
+                self.resume_after_preview = false;
                 self.state.error = Some(
                     "Playback is still loading; wait until it starts, or stop it before previewing"
                         .into(),
@@ -734,6 +736,7 @@ impl Actor {
             }
             PlayerCommand::Stop => self.stop().await,
             command => {
+                let previewing = self.preview.is_some();
                 let active = self.preview.as_ref().or(self.full.as_ref());
                 if let Some(p) = active {
                     let args = match command {
@@ -742,11 +745,21 @@ impl Actor {
                         PlayerCommand::SeekTo(s) if s.is_finite() => {
                             json!(["seek", s.max(0.0), "absolute+exact"])
                         }
-                        PlayerCommand::Speed(delta) => json!([
-                            "set_property",
-                            "speed",
-                            (self.state.speed + delta).clamp(0.25, 4.0)
-                        ]),
+                        PlayerCommand::Speed(delta) if delta.is_finite() => {
+                            let speed = if previewing {
+                                match p.command(json!(["get_property", "speed"])).await {
+                                    Ok(value) => value.as_f64().unwrap_or(1.0),
+                                    Err(error) => {
+                                        self.state.error =
+                                            Some(process::diagnostic(&error.to_string()));
+                                        return;
+                                    }
+                                }
+                            } else {
+                                self.state.speed
+                            };
+                            json!(["set_property", "speed", (speed + delta).clamp(0.25, 4.0)])
+                        }
                         PlayerCommand::CycleAudio => json!(["cycle", "aid"]),
                         PlayerCommand::CycleSubtitles => json!(["cycle", "sid"]),
                         PlayerCommand::ToggleSubtitles => json!(["cycle", "sub-visibility"]),
@@ -759,17 +772,22 @@ impl Actor {
                     if let Err(e) = p.command(args).await {
                         self.state.error = Some(process::diagnostic(&format!("{e:#}")));
                     } else {
-                        match command {
-                            PlayerCommand::TogglePause => self.state.paused = !self.state.paused,
-                            PlayerCommand::Volume(delta) => {
-                                self.state.volume = (self.state.volume + delta).clamp(0.0, 100.0)
+                        if !previewing {
+                            match command {
+                                PlayerCommand::TogglePause => {
+                                    self.state.paused = !self.state.paused
+                                }
+                                PlayerCommand::Volume(delta) => {
+                                    self.state.volume =
+                                        (self.state.volume + delta).clamp(0.0, 100.0)
+                                }
+                                PlayerCommand::Mute => self.state.muted = !self.state.muted,
+                                PlayerCommand::Speed(delta) => {
+                                    self.state.speed = (self.state.speed + delta).clamp(0.25, 4.0)
+                                }
+                                PlayerCommand::SeekTo(s) => self.state.position = s.max(0.0),
+                                _ => {}
                             }
-                            PlayerCommand::Mute => self.state.muted = !self.state.muted,
-                            PlayerCommand::Speed(delta) => {
-                                self.state.speed = (self.state.speed + delta).clamp(0.25, 4.0)
-                            }
-                            PlayerCommand::SeekTo(s) => self.state.position = s.max(0.0),
-                            _ => {}
                         }
                         self.state.error = None;
                     }
@@ -1054,6 +1072,9 @@ mod tests {
                     command_log.lock().unwrap().push(command.clone());
                     if command[0] == "set_property" && command[1] == "pause" {
                         *recorded.lock().unwrap() = command[2].as_bool().unwrap();
+                    } else if command[0] == "cycle" && command[1] == "pause" {
+                        let mut value = recorded.lock().unwrap();
+                        *value = !*value;
                     }
                     let _ = write
                         .write_all(b"{\"request_id\":1,\"error\":\"success\",\"data\":null}\n")
@@ -1175,9 +1196,27 @@ mod tests {
             !*paused.lock().unwrap(),
             "a previously playing player must resume"
         );
-        actor.stop().await;
+        actor.handle(PlayerCommand::TogglePause).await;
+        actor.close_preview().await;
+        assert!(
+            *paused.lock().unwrap(),
+            "closing an already closed preview must not unpause playback"
+        );
         server.abort();
         let _ = server.await;
+        actor.state.paused = false;
+        actor
+            .preview(Media {
+                url: "https://radio.test/unopened-preview.mp4".into(),
+                ..Default::default()
+            })
+            .await;
+        assert!(
+            !actor.resume_after_preview,
+            "a failed pause must not retain a future resume action"
+        );
+        assert!(!actor.state.preview);
+        actor.stop().await;
     }
     #[tokio::test]
     async fn local_resume_passes_start_time_and_disables_extraction() {
@@ -1519,6 +1558,109 @@ mod responsiveness_tests {
             legacy_data: root.join("legacy"),
             home: root.into(),
         }
+    }
+    #[tokio::test]
+    async fn preview_controls_never_overwrite_saved_main_player_preferences() {
+        let temp = tempfile::tempdir().unwrap();
+        let socket = temp.path().join("preview-ipc");
+        let listener = tokio::net::UnixListener::bind(&socket).unwrap();
+        let speed = Arc::new(std::sync::Mutex::new(1.0));
+        let observed_speed = speed.clone();
+        let server = tokio::spawn(async move {
+            loop {
+                let (stream, _) = listener.accept().await.unwrap();
+                let (read, mut write) = stream.into_split();
+                let request: Value = serde_json::from_str(
+                    &BufReader::new(read)
+                        .lines()
+                        .next_line()
+                        .await
+                        .unwrap()
+                        .unwrap(),
+                )
+                .unwrap();
+                let command = &request["command"];
+                if command[0] == "set_property" && command[1] == "speed" {
+                    *observed_speed.lock().unwrap() = command[2].as_f64().unwrap();
+                }
+                let data = if command[0] == "get_property" {
+                    json!(*observed_speed.lock().unwrap())
+                } else {
+                    Value::Null
+                };
+                write
+                    .write_all(
+                        format!(
+                            "{}\n",
+                            json!({"request_id":1,"error":"success","data":data})
+                        )
+                        .as_bytes(),
+                    )
+                    .await
+                    .unwrap();
+            }
+        });
+        let cancel = CancellationToken::new();
+        let token = cancel.clone();
+        let mut actor = Actor {
+            config: Config::default(),
+            paths: paths(temp.path()),
+            session: None,
+            full: None,
+            preview: Some(Active {
+                cancel,
+                task: tokio::spawn(async move {
+                    token.cancelled().await;
+                    Ok(ProcessResult {
+                        success: true,
+                        lines: vec![],
+                        stderr: String::new(),
+                    })
+                }),
+                socket,
+                backend: watch::channel(String::new()).1,
+                _dir: tempfile::tempdir().unwrap(),
+                _cookies: None,
+            }),
+            state: PlayerStatus {
+                volume: 42.0,
+                speed: 1.0,
+                paused: true,
+                position: 7.0,
+                preview: true,
+                ..Default::default()
+            },
+            playing: None,
+            reconnect_at: None,
+            reconnect_count: 0,
+            resume_after_preview: false,
+            sponsor_task: None,
+            ignore_segments_until: 0.0,
+        };
+        for command in [
+            PlayerCommand::Volume(-20.0),
+            PlayerCommand::Mute,
+            PlayerCommand::TogglePause,
+            PlayerCommand::SeekTo(2.0),
+            PlayerCommand::Speed(0.25),
+            PlayerCommand::Speed(0.25),
+        ] {
+            actor.handle(command).await;
+            assert!(actor.state.error.is_none());
+            assert_eq!(actor.state.volume, 42.0);
+            assert!(!actor.state.muted);
+            assert!(actor.state.paused);
+            assert_eq!(actor.state.speed, 1.0);
+            assert_eq!(actor.state.position, 7.0);
+        }
+        assert_eq!(
+            *speed.lock().unwrap(),
+            1.5,
+            "preview speed changes must accumulate independently"
+        );
+        actor.stop().await;
+        server.abort();
+        let _ = server.await;
     }
     #[tokio::test]
     async fn batched_status_matches_response_ids_and_has_one_timeout_budget() {
@@ -2257,6 +2399,26 @@ mod real_mpv_tests {
                         .await
                         .unwrap(),
                     true
+                );
+                let before = actor.preferences();
+                actor.handle(PlayerCommand::Volume(-15.0)).await;
+                actor.handle(PlayerCommand::Mute).await;
+                actor.handle(PlayerCommand::TogglePause).await;
+                actor.handle(PlayerCommand::Speed(0.25)).await;
+                actor.handle(PlayerCommand::Speed(0.25)).await;
+                assert_eq!(actor.state.volume, before.volume);
+                assert_eq!(actor.state.muted, before.muted);
+                assert_eq!(actor.state.speed, before.speed);
+                assert!(actor.state.paused);
+                assert_eq!(
+                    actor
+                        .preview
+                        .as_ref()
+                        .unwrap()
+                        .command(json!(["get_property", "speed"]))
+                        .await
+                        .unwrap(),
+                    before.speed + 0.5
                 );
                 actor.close_preview().await;
                 assert_eq!(

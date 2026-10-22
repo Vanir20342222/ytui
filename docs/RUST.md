@@ -1,6 +1,6 @@
 # Rust edition
 
-Alpha.7 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.8 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
@@ -38,7 +38,7 @@ git switch fix/playback-fallback
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.7
+~/.local/bin/ytui --version             # 0.2.0-alpha.8
 type -a ytui ytui-rs
 ```
 
@@ -50,6 +50,11 @@ options or press `Y` for an explicit yt-dlp retry. `doctor` prints the executabl
 and configuration paths to identify another installation earlier in PATH.
 
 ## Navigation and settings
+
+Alpha.8 shows contextual recovery instructions for playback/download failures.
+`doctor --network` returns nonzero if any public probe fails or has no supported
+items. Preview controls preserve the main player's saved volume/mute/speed and
+pause intent. [Stability validation](STABILITY_PASS.md) lists checks and limits.
 
 | Key | Action |
 | --- | --- |

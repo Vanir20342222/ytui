@@ -115,7 +115,7 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
         Constraint::Min(3),
         Constraint::Length(if area.height < 18 {
             1
-        } else if !compact && app.player_status.active {
+        } else if !compact && (app.player_status.active || app.player_status.error.is_some()) {
             6
         } else {
             3
@@ -195,7 +195,13 @@ fn wide_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     sidebar(f, app, cols[0]);
     let main = Layout::vertical([
         Constraint::Min(8),
-        Constraint::Length(if app.player_status.active { 6 } else { 3 }),
+        Constraint::Length(
+            if app.player_status.active || app.player_status.error.is_some() {
+                6
+            } else {
+                3
+            },
+        ),
     ])
     .split(cols[1]);
     if app.tab == 0 {
@@ -675,8 +681,20 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
     let inner = inset(block.inner(area));
     f.render_widget(block, area);
     let (label, color) = job_state(app, job);
-    let mut lines = vec![
-        Line::styled(label, style(app, color).add_modifier(Modifier::BOLD)),
+    let mut lines = vec![Line::styled(
+        label,
+        style(app, color).add_modifier(Modifier::BOLD),
+    )];
+    if let Some(error) = &job.error {
+        if let Some(recovery) = ytui_services::failure::recovery(error) {
+            lines.extend([
+                Line::styled(recovery.title, style(app, app.palette.error)),
+                Line::from(recovery.instruction),
+            ]);
+        }
+        lines.push(Line::styled(error.clone(), style(app, app.palette.error)));
+    }
+    lines.extend([
         Line::from(""),
         Line::styled(
             job.media.title.clone(),
@@ -684,7 +702,7 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
         ),
         Line::styled(job.media.creator.clone(), style(app, app.palette.muted)),
         Line::from(""),
-    ];
+    ]);
     if let Some(value) = job.progress.fraction() {
         lines.push(Line::styled(
             format!(
@@ -723,12 +741,6 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
                 .unwrap_or_else(|| job.options.output_directory().display().to_string()),
         ),
     ]);
-    if let Some(error) = &job.error {
-        lines.extend([
-            Line::from(""),
-            Line::styled(error.clone(), style(app, app.palette.error)),
-        ]);
-    }
     f.render_widget(Paragraph::new(lines).wrap(Wrap { trim: true }), inner);
 }
 fn empty(f: &mut Frame, app: &App, area: Rect, title: &str, message: &str) {
@@ -1146,7 +1158,7 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
 fn playback(f: &mut Frame, app: &mut App, area: Rect) {
     let status = &app.player_status;
     if status.preview {
-        let message = format!(" Muted preview · 10s · {} closes", key(app, Action::Back));
+        let message = format!(" Video preview · 10s · {} closes", key(app, Action::Back));
         let widget = Paragraph::new(message).style(style(app, app.palette.accent));
         f.render_widget(
             if area.height > 1 {
@@ -1159,7 +1171,15 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
         return;
     }
     if area.height == 1 {
-        if status.active {
+        if let Some(error) = &status.error {
+            let title =
+                ytui_services::failure::recovery(error).map_or("Playback failed", |r| r.title);
+            f.render_widget(
+                Paragraph::new(format!(" {} Actions · {title}", key(app, Action::Command)))
+                    .style(style(app, app.palette.error)),
+                area,
+            );
+        } else if status.active {
             let cols = Layout::horizontal([Constraint::Min(1), Constraint::Length(7)]).split(area);
             f.render_widget(
                 Paragraph::new(format!(" ▶ {}", status.title)).style(style(app, app.palette.text)),
@@ -1211,12 +1231,36 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
     let inner = inset(block.inner(area));
     f.render_widget(block, area);
     if let Some(error) = &status.error {
+        let recovery = ytui_services::failure::recovery(error);
+        let title = recovery.map_or("Playback failed", |r| r.title);
+        let instruction = recovery.map_or(
+            "Open Playback repair or Diagnostics in Actions for details.",
+            |r| r.instruction,
+        );
+        let heading = if inner.width < 60 {
+            format!("{} Actions · {title}", key(app, Action::Command))
+        } else {
+            format!(
+                "{title} · {} Actions · {} Settings",
+                key(app, Action::Command),
+                key(app, Action::Settings)
+            )
+        };
+        let mut message = vec![
+            Line::styled(
+                heading,
+                style(app, app.palette.error).add_modifier(Modifier::BOLD),
+            ),
+            Line::from(instruction),
+            Line::styled(error.clone(), style(app, app.palette.muted)),
+        ];
+        if recovery.is_none() {
+            message.swap(1, 2);
+        }
         f.render_widget(
-            Paragraph::new(format!(
-                "{error}\nF2 → Playback repair · Y retry with yt-dlp · , settings"
-            ))
-            .wrap(Wrap { trim: true })
-            .style(style(app, app.palette.error)),
+            Paragraph::new(message)
+                .wrap(Wrap { trim: true })
+                .style(style(app, app.palette.text)),
             inner,
         );
     } else if status.active {
