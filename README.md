@@ -75,6 +75,7 @@ user files and downloaded media are retained. The old Python source is available
 in Git history.
 
 [Documentation index](docs/README.md) · [Usage and settings](docs/RUST.md) · [Remaining work](docs/REMAINING_WORK.md) ·
+[Current app audit and backlog](docs/APP_AUDIT_2026-10-22.md) ·
 [Feature audit](docs/FEATURE_AUDIT.md) · [Validation](docs/VALIDATION.md) ·
 [WQHD theme gallery](docs/UI_THEMES.md) · [Rewrite plan](RUST_REWRITE_PLAN.md)
 

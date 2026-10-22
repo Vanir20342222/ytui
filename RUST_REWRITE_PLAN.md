@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M2–M8 full-app audit on alpha.11 (`e2b01ea`):
+[prioritized bug and feature report](docs/APP_AUDIT_2026-10-22.md).
+Nine bug/release entries, separately identified risks and acceptance criteria are
+recorded with executable isolated repros. This is analysis, not their implementation.
+The current development branch is alpha.11; main still ships alpha.5 at audit time.
+
 M2/M8 repository maintenance: removed unused direct dependencies, consolidated
 acceptance-runner reporting, expanded dense Rust blocks and aligned the example
 configuration/current guides with alpha.11. [The documentation index](docs/README.md)
@@ -36,7 +42,7 @@ stopping heavy work while gaming, so the release build, solver suite and remaini
 live cases were interrupted. See `docs/NATIVE_PLAYBACK.md` for evidence, rollback
 and the remaining displayed/audio-device/reliability gates.
 
-Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair and alpha.8 stability follow-up are on `fix/playback-fallback` (PR #10). Alpha.9 native playback follows on `fix/native-playback` (draft PR #11). PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-22.
+Historical alpha.9 status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair and alpha.8 stability follow-up are on `fix/playback-fallback` (PR #10). Alpha.9 native playback follows on `fix/native-playback` (then-draft PR #11). PR #4 and target-machine stable-release gates were open. For the later alpha.11 state, use the follow-ups and current audit above.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Alpha.8 follow-up (M3/M5/M8): reproduced output-retention/empty-file and preview
