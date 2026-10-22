@@ -2670,8 +2670,14 @@ impl App {
                 config.validate()?;
                 self.save_config(config);
             }
+            "playback-backend" => {
+                let mut config = self.config.clone();
+                config.playback_backend = value;
+                config.validate()?;
+                self.save_config(config);
+            }
             "native-runtime" => {
-                let path = ytui_services::paths::executable(&value).context("Deno was not found. Install the native extractor's supported Deno 2.9.7, then select its executable here.")?;
+                let path = ytui_services::paths::executable(&value).context("Runtime was not found. Install Node.js 22+ or Deno 2.9.7, or clear the runtime field in Settings → Tools for automatic detection.")?;
                 let mut config = self.config.clone();
                 config.native_js_runtime = Some(path);
                 self.save_config(config);
@@ -2859,9 +2865,10 @@ impl App {
             "log" | "diagnostics" => {
                 let mut lines = vec![
                     format!(
-                        "ytui {} · backend {}",
+                        "ytui {} · downloads {} · playback {}",
                         env!("CARGO_PKG_VERSION"),
-                        self.config.download_backend
+                        self.config.download_backend,
+                        self.config.playback_backend
                     ),
                     format!("Theme: {} · {}", self.palette.name, self.palette.source),
                     "Browser credentials and signed URLs are never included.".into(),

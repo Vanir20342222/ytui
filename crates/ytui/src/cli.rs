@@ -146,7 +146,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
         } => {
             ensure!(!config.offline, "Playback checks require network access");
             if let Some(backend) = backend {
-                config.download_backend = backend;
+                config.playback_backend = backend;
             }
             config.playback_sponsorblock = "off".into();
             let media = Media {
@@ -222,6 +222,10 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 config.download_backend
             );
             println!(
+                "Playback backend: {} (native never starts yt-dlp)",
+                config.playback_backend
+            );
+            println!(
                 "yt-dlp-rs revision: {}",
                 ytui_services::native::UPSTREAM_REV
             );
@@ -241,18 +245,16 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                     }
                 );
             }
-            println!(
-                "Deno runtime: {}",
-                if config
-                    .native_js_runtime
-                    .as_ref()
-                    .is_some_and(|p| p.is_file())
-                {
-                    "configured"
-                } else {
-                    "not configured (native YouTube challenges may fail)"
-                }
-            );
+            match ytui_services::native_runtime::select(&config, CancellationToken::new()).await {
+                Ok(Some(path)) => println!("Native JavaScript runtime: {}", path.display()),
+                Ok(None) => println!(
+                    "Native JavaScript runtime: missing; install Node.js 22+ or Deno 2.9.7 for current YouTube challenges"
+                ),
+                Err(error) => println!(
+                    "Native JavaScript runtime: {}",
+                    ytui_services::process::diagnostic(&error.to_string())
+                ),
+            }
             println!(
                 "Terminal: {} · image mode {}",
                 std::env::var("TERM").unwrap_or_else(|_| "unknown".into()),

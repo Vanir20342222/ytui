@@ -1,6 +1,6 @@
 # Rust edition
 
-Alpha.8 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.9 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
@@ -9,9 +9,9 @@ CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 On CachyOS/Arch:
 
 ```sh
-sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
+sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
-git clone --branch fix/playback-fallback https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/native-playback https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 hash -r
@@ -34,20 +34,22 @@ installed executable:
 ```sh
 cd ~/ytui
 git fetch origin
-git switch fix/playback-fallback
+git switch fix/native-playback
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.8
+~/.local/bin/ytui --version             # 0.2.0-alpha.9
 type -a ytui ytui-rs
 ```
 
-An existing `download_backend = "native"` stays native. To enable the recommended
-automatic fallback in that configuration, open **F2 → Select extraction backend**,
-choose `auto`, then save. General settings → Tools exposes the same choice.
-Existing jobs with an explicit backend override retain it; change their download
-options or press `Y` for an explicit yt-dlp retry. `doctor` prints the executable
-and configuration paths to identify another installation earlier in PATH.
+Playback and downloads have independent backends. An older configuration with
+only `download_backend` now uses native playback; an explicit `playback_backend`
+is preserved. General settings → Playback selects playback extraction; Tools
+selects download extraction and the native JavaScript runtime. Node.js 22+ is
+detected automatically; clear an old unsupported Deno path to use detection.
+Install external `yt-dlp` separately for auto/external modes or explicit `Y` retry.
+Existing jobs retain their own backend overrides. `doctor` prints executable and
+configuration paths to identify another installation earlier in PATH.
 
 ## Navigation and settings
 
@@ -85,7 +87,7 @@ path, query, name or ID open a form. Search input never runs arbitrary commands.
 Internal action routing retains migration compatibility; text in the search form
 is always a query or URL. Headless CLI subcommands remain available.
 
-General settings contains **nine sections / 53 fields**: General, Appearance,
+General settings contains **nine sections / 54 fields**: General, Appearance,
 Downloads, Subtitles & media, Network & account, Schedule, Tools, Radio, Playback.
 Download options has three sections: Quality & format, Files & playlist, Captions
 & metadata. Wide forms space fields vertically; compact forms keep selected fields
@@ -121,20 +123,24 @@ pages with new tokens can advance; repeated/cyclic tokens and three consecutive
 pages without new items stop the loop. Refresh/Next do not restart pending loads
 or bypass their cooldown. Feed recovery never writes watch history to YouTube.
 
-## Native Rust and automatic fallback
+## Native Rust playback and separate download fallback
 
-New configurations default to `download_backend = "auto"`, as confirmed by the
-user. Native [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs), pinned at
-`10223c019ef6ec5552627b90251d8e967404e440`, tries first in a supervised copy of the
-Rust application. Supported native extractor limitations then use external
-**yt-dlp**. Playback reports the fallback in the player strip. Auto playback can
-also retry a rejected native stream through yt-dlp. It never downloads/install tools.
+Playback defaults to `playback_backend = "native"` following the later native-only
+watching request. Native [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs), pinned at
+`f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab`, runs in a supervised copy of the Rust
+application. It accepts native HLS manifests and forwards extractor headers to
+mpv. Interrupted CDN streams can renew their URL once and resume locally; bot,
+account and proxy failures do not enter that retry loop. Native mode never starts
+external yt-dlp. See [native validation and open gates](NATIVE_PLAYBACK.md).
+
+Downloads retain `download_backend = "auto"`. Playback can opt into auto separately.
+Both settings offer:
 
 - `auto`: Rust first, yt-dlp for supported extractor limitations.
 - `native`: strict Rust extraction, with actionable failures and no external fallback.
 - `yt-dlp`: explicitly use the external extractor immediately.
 
-`Y` is still available for one explicit retry. Per-job backend choices and
+`Y` is still available for one explicit external retry. Per-job backend choices and
 `ytui download URL --backend auto|native|yt-dlp` override the global default.
 Cancellation and local publication/disk failures do not trigger an external retry.
 
@@ -149,11 +155,13 @@ installed yt-dlp (normally through PATH); the pinned native runtime setting is s
 
 Auto fallback is not a solution to every VPN, account, consent or bot restriction.
 
-The pinned native solver requires an explicitly configured **Deno 2.9.7** path
-for its supported signature/n challenges. F2 → Configure installed native Deno
-runtime sets `native_js_runtime`; a newer distribution Deno may only be compatible
-with external yt-dlp. No executable or browser session is fetched automatically.
-Native upstream still has token/live/playlist and persistent range-resume limits.
+The native solver detects installed **Node.js 22+**, then **Deno 2.9.7**, for its
+supported signature/n challenges. Settings → Tools → Native JavaScript runtime
+overrides detection; a blank field restores it. Explicit unsupported versions
+produce an actionable error. A newer distribution Deno may only be compatible
+with external yt-dlp. JavaScript runs locally with restricted permissions; no
+executable or browser session is fetched automatically. Upstream still has
+account/live/DRM limitations, and ytui native playlist downloads stay gated.
 Pausing a native transfer preserves intent but restarting it may repeat transfer;
 yt-dlp can continue its own partials. Partials are not moved between backends.
 

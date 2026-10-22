@@ -4,6 +4,17 @@ Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
 CachyOS desktop. Default tests use synthetic/offline data; explicit live runs are
 recorded separately below.
 
+## Alpha.9 native playback (M3/M5/M8)
+
+**147 default tests pass**, with 18 actual-tool/live checks excluded. Formatting
+and strict Clippy pass. Separate actual Node saved-player/permission tests (two),
+mpv native HLS / external split streams / controls tests (three), playback CLI
+progress/failure test, four-format native audio conversion checks (two), and
+actual external two-entry playlist test pass. Native tests never use external
+yt-dlp. Public native playback here fails **0/3 passed** at the inherited proxy
+tunnel. This does not establish live watching or the requested 99% reliability;
+see [NATIVE_PLAYBACK.md](NATIVE_PLAYBACK.md) for the dedicated runner and open gates.
+
 ## Alpha.8 stability pass (M3/M5/M8)
 
 **139 default tests pass**, with 17 opt-in checks excluded. New regressions cover

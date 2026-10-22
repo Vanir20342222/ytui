@@ -11,15 +11,23 @@ pub(crate) struct Stream {
     pub audio: Option<String>,
     pub headers: Vec<(String, String)>,
 }
-fn parse(data: &Value, audio: bool) -> Result<Stream> {
+pub(crate) fn parse(data: &Value, audio: bool) -> Result<Stream> {
+    let has_video = |format: &Value| {
+        format.get("vcodec").and_then(Value::as_str) != Some("none")
+            && format.get("stream_kind").and_then(Value::as_str) != Some("audio_only")
+    };
+    let has_audio = |format: &Value| {
+        format.get("acodec").and_then(Value::as_str) != Some("none")
+            && format.get("stream_kind").and_then(Value::as_str) != Some("video_only")
+    };
     let formats = data.get("requested_formats").and_then(Value::as_array);
     let primary = formats
         .and_then(|formats| {
             formats.iter().find(|format| {
                 if audio {
-                    format.get("acodec").and_then(Value::as_str) != Some("none")
+                    has_audio(format)
                 } else {
-                    format.get("vcodec").and_then(Value::as_str) != Some("none")
+                    has_video(format)
                 }
             })
         })
@@ -65,10 +73,9 @@ fn parse(data: &Value, audio: bool) -> Result<Stream> {
         None
     } else {
         formats.and_then(|formats| {
-            formats.iter().find(|format| {
-                format.get("vcodec").and_then(Value::as_str) == Some("none")
-                    && format.get("acodec").and_then(Value::as_str) != Some("none")
-            })
+            formats
+                .iter()
+                .find(|format| !has_video(format) && has_audio(format))
         })
     };
     Ok(Stream {

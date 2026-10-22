@@ -4,11 +4,11 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.8**. Live account and desktop acceptance remains open;
+This is **0.2.0-alpha.9**. Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
-git clone --branch fix/playback-fallback https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/native-playback https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ytui doctor
@@ -20,11 +20,11 @@ launcher. Install current stable Rust, a C compiler, pkg-config, OpenSSL headers
 mpv and FFmpeg first. On CachyOS/Arch:
 
 ```bash
-sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
+sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
 ```
 
-Until this change reaches main, use the `fix/playback-fallback` branch.
+Until this change reaches main, use the `fix/native-playback` branch.
 Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 
@@ -37,14 +37,18 @@ and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility al
 - `u`: explicit local playback resume; `p`: playback queue.
 - `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
 - `ytui doctor --network`: opt-in public provider diagnostics without importing an account.
-- `ytui playback-check URL --backend auto`: check three seconds of actual mpv playback without browser cookies.
+- `ytui playback-check URL --backend native`: check three seconds of actual mpv playback without browser cookies.
 
-The recommended `auto` backend tries pinned [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs)
-first and falls back to external yt-dlp for supported extraction limitations.
-Strict `native` and explicit `yt-dlp` modes remain available. Existing settings keep
-their chosen mode: **F2 → Select extraction backend → auto** enables automatic
-fallback after upgrading. The application stays Rust; external yt-dlp is separately
-installed. Successful live YouTube access still depends on the account/network.
+Playback now defaults to **native Rust**, using updated pinned
+[yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs). Installed Node.js 22+ (or Deno
+2.9.7) solves its offline JavaScript challenges. Playback preserves native stream
+headers, accepts HLS manifests, and refreshes an interrupted native URL once.
+It never starts Python automatically in native mode. **Settings → Playback →
+Playback backend** selects native, auto or external yt-dlp explicitly; downloads
+retain their separate `auto` default. Install `yt-dlp` separately if you choose
+fallback or external extraction. Existing explicit playback choices are retained.
+Successful live access still depends on the account/network; a 99% watching
+success rate is **not established**. See [native playback](docs/NATIVE_PLAYBACK.md).
 
 Playlist links select collection downloads automatically; watch links with playlist
 context stay single-video unless explicitly expanded. Playlist jobs retain their

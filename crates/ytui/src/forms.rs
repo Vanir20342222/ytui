@@ -44,7 +44,7 @@ pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
     ("Schedule", &[18, 19, 20]),
     ("Tools", &[13, 14, 7, 8, 9, 35, 46, 47, 31]),
     ("Radio", &[48, 49]),
-    ("Playback", &[51, 52]),
+    ("Playback", &[53, 51, 52]),
 ];
 pub enum FormKind {
     Download(Media, DownloadOptions),
@@ -170,12 +170,12 @@ impl Form {
             Field::text("Account index", c.account_index),
             Field::text("Proxy (optional)", c.proxy.clone().unwrap_or_default()),
             Field::choice(
-                "Download / playback backend",
+                "Download backend",
                 &c.download_backend,
                 &["auto", "native", "yt-dlp"],
             ),
             Field::text(
-                "Deno runtime (optional)",
+                "Native JS runtime (blank = auto Node/Deno)",
                 c.native_js_runtime
                     .as_ref()
                     .map(|p| p.display().to_string())
@@ -246,6 +246,11 @@ impl Form {
             Field::text(
                 "Playback skip categories",
                 c.playback_sponsor_categories.join(","),
+            ),
+            Field::choice(
+                "Playback backend",
+                &c.playback_backend,
+                &["native", "auto", "yt-dlp"],
             ),
         ];
         Self {
@@ -470,6 +475,7 @@ impl Form {
             Some(self.value(12).into())
         };
         c.download_backend = self.value(13).into();
+        c.playback_backend = self.value(53).into();
         c.native_js_runtime = if self.value(14).is_empty() {
             None
         } else {

@@ -47,6 +47,14 @@ pub fn recovery(message: &str) -> Option<Recovery> {
             "Wait for the service cooldown before retrying. Repeated refreshes will not help.",
         )
     } else if has(&[
+        "native youtube solving requires",
+        "configured native javascript runtime was not found",
+    ]) {
+        (
+            "Native JavaScript runtime needs attention",
+            "Use installed Node.js 22+ or Deno 2.9.7. Clear the native runtime field in Settings → Tools for automatic detection.",
+        )
+    } else if has(&[
         "no supported javascript runtime",
         "no valid javascript runtime",
         "javascript runtime could not",
@@ -84,7 +92,7 @@ pub fn recovery(message: &str) -> Option<Recovery> {
     ]) {
         (
             "YouTube extraction needs attention",
-            "Open Playback repair in Actions. Choose Auto or yt-dlp, or try another quality; check installed tool versions.",
+            "Open Playback settings and check the native JavaScript runtime and quality. Native mode never switches to external yt-dlp.",
         )
     } else if has(&[
         "video is unavailable",

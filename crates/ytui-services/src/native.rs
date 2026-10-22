@@ -17,7 +17,7 @@ use yt_dlp_rs::{
 };
 use ytui_core::{Config, Job};
 
-pub const UPSTREAM_REV: &str = "10223c019ef6ec5552627b90251d8e967404e440";
+pub const UPSTREAM_REV: &str = "f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab";
 #[derive(Clone, Serialize, Deserialize)]
 pub struct WorkerRequest {
     pub job: Job,
@@ -31,6 +31,19 @@ pub struct WorkerRequest {
 pub struct Resolved {
     pub url: String,
     pub audio_url: Option<String>,
+    #[serde(default)]
+    pub headers: Vec<(String, String)>,
+}
+pub(crate) fn playback_source(info: &VideoInfo, audio: bool) -> Result<Resolved> {
+    // HLS manifests and direct HTTP URLs remain playable by mpv even when the
+    // downloader also exposes an ordered fragment plan. Do not send a fragment
+    // file or reject the entire stream merely because that plan exists.
+    let stream = crate::playback_extract::parse(&serde_json::to_value(info)?, audio)?;
+    Ok(Resolved {
+        url: stream.url,
+        audio_url: stream.audio,
+        headers: stream.headers,
+    })
 }
 pub fn worker(path: &Path) -> Result<()> {
     let request: WorkerRequest = serde_json::from_slice(&std::fs::read(path)?)?;
@@ -66,10 +79,12 @@ pub fn worker(path: &Path) -> Result<()> {
                 crate::paths::executable(&p.to_string_lossy()).unwrap_or_else(|| p.clone())
             }),
             include_translated_subtitles: o.auto_subtitles,
+            no_playlist: request.resolve || !o.playlist,
         },
         HttpOptions {
             cookies,
             proxy: request.config.proxy.clone(),
+            socket_timeout: Some(15.0),
             ..Default::default()
         },
     )?
@@ -102,25 +117,9 @@ pub fn worker(path: &Path) -> Result<()> {
     ensure!(!infos.is_empty(), "Native extractor returned no media");
     if request.resolve {
         let info = &infos[0];
-        ensure!(
-            info.fragments.is_empty()
-                && info
-                    .requested_formats
-                    .iter()
-                    .all(|format| format.fragments.is_empty()),
-            "Native preview of fragmented media is not supported; choose the yt-dlp playback backend explicitly"
-        );
-        let (url, audio_url) = if info.requested_formats.len() == 2 {
-            (
-                info.requested_formats[0].url.to_string(),
-                Some(info.requested_formats[1].url.to_string()),
-            )
-        } else {
-            (info.url.to_string(), None)
-        };
         println!(
             "YTUI_RESOLVED:{}",
-            serde_json::to_string(&Resolved { url, audio_url })?
+            serde_json::to_string(&playback_source(info, o.audio)?)?
         );
         std::io::stdout().flush()?;
         return Ok(());
@@ -191,12 +190,17 @@ pub fn worker(path: &Path) -> Result<()> {
             } else {
                 None
             },
+            ..Default::default()
         };
         throttle.new_resource();
         let result = client.download_processed_with_progress(
             &info,
             &staged_media,
-            DownloadOptions { retries: 0 },
+            DownloadOptions {
+                retries: 0,
+                fragment_retries: 0,
+                ..Default::default()
+            },
             &processors,
             |progress| {
                 throttle.pace(progress);
@@ -340,7 +344,11 @@ fn prepare_subtitles(
             info,
             &subtitle,
             &path,
-            DownloadOptions { retries: 0 },
+            DownloadOptions {
+                retries: 0,
+                fragment_retries: 0,
+                ..Default::default()
+            },
             |progress| {
                 throttle.pace(progress);
                 ControlFlow::Continue(())
@@ -443,6 +451,12 @@ pub async fn run(
     cancel: CancellationToken,
     on_line: impl FnMut(&str) + Send,
 ) -> Result<ProcessResult> {
+    if ytui_core::http_url(&request.job.media.url)
+        .is_ok_and(|url| ytui_core::youtube_host(url.host_str().unwrap_or_default()))
+    {
+        request.config.native_js_runtime =
+            crate::native_runtime::select(&request.config, cancel.clone()).await?;
+    }
     crate::paths::private_dir(dir)?;
     // Parent ownership ensures ordinary cancellation cleans staging after the helper is reaped.
     let staging = if request.resolve {
@@ -469,7 +483,7 @@ pub async fn run(
                 "__native-worker".into(),
                 manifest.path().to_string_lossy().into(),
             ],
-            if request.resolve { 40 } else { 24 * 60 * 60 },
+            if request.resolve { 75 } else { 24 * 60 * 60 },
         ),
         cancel.clone(),
         on_line,
@@ -514,10 +528,25 @@ pub async fn resolve(
         |_| {},
     )
     .await?;
+    let reason = result
+        .stderr
+        .lines()
+        .find(|line| {
+            let line = line.to_lowercase();
+            [
+                "not a bot",
+                "sign in",
+                "video is unavailable",
+                "private video",
+            ]
+            .iter()
+            .any(|part| line.contains(part))
+        })
+        .unwrap_or(&result.stderr);
     ensure!(
         result.success,
-        "Native playback extraction failed: {}. Open F2 → Playback repair. Select auto/yt-dlp, or configure the supported Deno 2.9.7 runtime for native extraction.",
-        process::diagnostic(&result.stderr)
+        "Native playback extraction failed: {}. Check the installed Node.js 22+ or Deno 2.9.7 runtime in Settings → Tools, or open Playback repair. No external extractor was used in native mode.",
+        process::diagnostic(reason)
     );
     for line in result.lines {
         if let Some(json) = line.strip_prefix("YTUI_RESOLVED:") {
@@ -538,6 +567,10 @@ pub fn fallback_eligible(message: &str) -> bool {
         "http status client error (404",
         "http 403",
         "http 404",
+        "http error 403",
+        "http error 404",
+        "native youtube solving requires",
+        "configured native javascript runtime was not found",
         "no eligible media",
         "signature",
         "url challenges",
@@ -554,6 +587,50 @@ pub fn fallback_eligible(message: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn info(extra: serde_json::Value) -> VideoInfo {
+        let mut value = json!({"id":"fixture","title":"Fixture","ext":"mp4","url":"https://media.test/video.mp4","webpage_url":"https://www.youtube.com/watch?v=abcdefghijk","extractor":"youtube","extractor_key":"Youtube"});
+        value
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        serde_json::from_value(value).unwrap()
+    }
+    #[test]
+    fn native_hls_keeps_the_manifest_url_and_extractor_request_headers() {
+        let video = info(
+            json!({"url":"https://media.test/video.m3u8","protocol":"m3u8_native","fragments":[{"url":"https://media.test/segment.ts"}],"http_headers":{"User-Agent":"native-client","Referer":"https://www.youtube.com/","Authorization":"must-not-leak"}}),
+        );
+        let source = playback_source(&video, false).unwrap();
+        assert_eq!(source.url, "https://media.test/video.m3u8");
+        assert!(source.audio_url.is_none());
+        assert!(
+            source
+                .headers
+                .contains(&("User-Agent".into(), "native-client".into()))
+        );
+        assert!(!source.headers.iter().any(|(k, _)| k == "Authorization"));
+    }
+    #[test]
+    fn native_pair_roles_are_independent_of_order_and_audio_only_is_not_video() {
+        let video = info(json!({"requested_formats":[
+            {"format_id":"audio","url":"https://media.test/audio.m4a","ext":"m4a","stream_kind":"audio_only"},
+            {"format_id":"video","url":"https://media.test/video.mp4","ext":"mp4","stream_kind":"video_only","http_headers":{"User-Agent":"native-video"}}
+        ]}));
+        let source = playback_source(&video, false).unwrap();
+        assert_eq!(source.url, "https://media.test/video.mp4");
+        assert_eq!(
+            source.audio_url.as_deref(),
+            Some("https://media.test/audio.m4a")
+        );
+        assert!(
+            source
+                .headers
+                .contains(&("User-Agent".into(), "native-video".into()))
+        );
+        let source = playback_source(&video, true).unwrap();
+        assert_eq!(source.url, "https://media.test/audio.m4a");
+        assert!(source.audio_url.is_none());
+    }
     #[test]
     fn native_subtitles_download_and_refuse_to_overwrite() {
         use std::{

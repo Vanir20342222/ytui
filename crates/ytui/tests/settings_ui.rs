@@ -92,6 +92,18 @@ fn settings_sections_cover_every_field_and_new_defaults_roundtrip() {
     form.fields[49].value = Editor::new("file:///invalid");
     assert!(form.config_values().is_err());
 }
+#[test]
+fn legacy_auto_download_config_keeps_native_playback_and_settings_edit_them_separately() {
+    let config: Config = toml::from_str("download_backend='auto'").unwrap();
+    assert_eq!(config.playback_backend, "native");
+    let mut form = Form::settings(config);
+    form.fields[13].value = Editor::new("yt-dlp");
+    assert_eq!(form.config_values().unwrap().playback_backend, "native");
+    form.fields[53].value = Editor::new("auto");
+    assert_eq!(form.config_values().unwrap().playback_backend, "auto");
+    form.fields[53].value = Editor::new("invalid");
+    assert!(form.config_values().is_err());
+}
 #[tokio::test]
 async fn every_settings_section_renders_first_and_last_fields_in_all_themes_and_sizes() {
     let (mut app, _temp) = fixture();

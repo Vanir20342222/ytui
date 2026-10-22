@@ -1,0 +1,23 @@
+name: Native YouTube playback
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/native-playback']
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install playback tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mpv ffmpeg
+      - run: cargo build -p ytui --locked
+      - name: Play public videos through native Rust extraction only
+        run: tools/test-native-playback.sh
