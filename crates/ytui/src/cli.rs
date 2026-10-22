@@ -177,11 +177,14 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                             "duration": state.duration,
                         }));
                     }
-                    player
-                        .status
-                        .changed()
-                        .await
-                        .context("Playback worker stopped")?;
+                    tokio::select! {
+                        changed = player.status.changed() => changed.context("Playback worker stopped")?,
+                        event = player.events.recv() => match event {
+                            Some(ytui_services::player::PlayerEvent::Error(error)) => anyhow::bail!("{}", ytui_services::process::diagnostic(&error)),
+                            _ => anyhow::bail!("Playback ended before the required progress"),
+                        },
+                        _ = tokio::signal::ctrl_c() => anyhow::bail!("Playback check interrupted"),
+                    }
                 }
             })
             .await;

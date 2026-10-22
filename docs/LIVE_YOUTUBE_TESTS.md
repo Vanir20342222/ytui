@@ -51,6 +51,12 @@ This command intentionally loads no browser session. It closes mpv after three
 seconds of progress, prints backend/position/duration JSON, and returns nonzero
 on playback failure or a 120-second startup timeout. Errors are sanitized rather
 than exposing signed media URLs. It does not add playback to the saved queue.
+Ctrl+C also stops/reaps the owned playback worker. A separate real-mpv loopback
+regression checks both progress JSON and a visible decoder failure:
+
+```sh
+cargo test -p ytui --test downloads --locked real_mpv_playback_check_ -- --ignored
+```
 
 The separate **YouTube live** GitHub workflow runs a public network preflight
 before installing tools/building/running the same tests. It is triggered by
@@ -65,7 +71,10 @@ The managed workspace reports enforced unrestricted HTTP policy, but the inherit
 proxy rejects the YouTube HTTPS CONNECT request with HTTP 403 (curl exit 56).
 This is before any YouTube HTTP response. Retained network diagnostics are absent.
 No proxy or route bypass was attempted. A separate GitHub runner is being checked;
-see the latest workflow run for actual results, not this setup description.
+Both public roots returned **HTTP 200** on GitHub's Ubuntu runner:
+[network job, run 39756304985](https://github.com/Vanir20342222/ytui/actions/runs/39756304985/job/119749053849).
+This establishes page reachability there; it does not establish stream extraction
+or playback. The media job runs the application checks separately.
 
 The previously failing Rust workflow had **no jobs started**: GitHub rejected
 case-insensitive duplicate `NO_PROXY` / `no_proxy` environment keys. The duplicate

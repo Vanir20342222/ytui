@@ -75,6 +75,10 @@ fn headless_setup_station_import_and_offline_guards_preserve_user_files() {
     for args in [
         vec!["doctor", "--network"],
         vec!["browse", "home"],
+        vec![
+            "playback-check",
+            "https://www.youtube.com/watch?v=abcdefghijk",
+        ],
         vec!["download", "https://www.youtube.com/watch?v=abcdefghijk"],
         vec!["auth", "import", "--browser", "brave-origin"],
     ] {
@@ -867,6 +871,96 @@ fn real_ffmpeg_native_audio_formats_m4a_opus_flac_are_decodable() {
     for (format, codec) in [("m4a", "aac"), ("opus", "opus"), ("flac", "flac")] {
         assert_real_audio_conversion(format, codec);
     }
+}
+
+#[test]
+#[ignore = "requires actual mpv and FFmpeg; generated six-second video over loopback, no YouTube"]
+fn real_mpv_playback_check_requires_actual_progress_and_reports_tool_failure() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let source = temp.path().join("source.mp4");
+    let generated = Command::new("ffmpeg")
+        .args([
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=blue:s=64x64:r=10",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440",
+            "-t",
+            "6",
+            "-c:v",
+            "mpeg4",
+            "-c:a",
+            "aac",
+            "-movflags",
+            "+faststart",
+        ])
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(
+        generated.status.success(),
+        "{}",
+        String::from_utf8_lossy(&generated.stderr)
+    );
+    let server = Server::with_payload(std::fs::read(source).unwrap());
+    let mpv = std::env::var("YTUI_TEST_MPV").unwrap_or_else(|_| "mpv".into());
+    let mpv = ytui_services::paths::executable(&mpv).expect("Install mpv or set YTUI_TEST_MPV");
+    let wrapper = temp.path().join("mpv-headless");
+    std::fs::write(
+        &wrapper,
+        format!(
+            "#!/bin/sh\nexec '{}' --vo=null --ao=null \"$@\"\n",
+            mpv.to_string_lossy().replace('\'', "'\\''")
+        ),
+    )
+    .unwrap();
+    std::fs::set_permissions(&wrapper, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let config = Config {
+        mpv: wrapper.display().to_string(),
+        auth_store: "file".into(),
+        playback_sponsorblock: "off".into(),
+        ..Default::default()
+    };
+    let config_file = temp.path().join("config.toml");
+    std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();
+    let check = || {
+        Command::new(env!("CARGO_BIN_EXE_ytui"))
+            .arg("--config")
+            .arg(&config_file)
+            .arg("--state-dir")
+            .arg(temp.path().join("state"))
+            .args(["playback-check", &server.url, "--seconds", "2"])
+            .env("XDG_CONFIG_HOME", temp.path().join("config"))
+            .env("XDG_STATE_HOME", temp.path().join("state"))
+            .env("XDG_CACHE_HOME", temp.path().join("cache"))
+            .env("NO_PROXY", "127.0.0.1,localhost")
+            .env("no_proxy", "127.0.0.1,localhost")
+            .output()
+            .unwrap()
+    };
+    let result = check();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let value: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert!(value["position"].as_f64().unwrap() >= 2.0);
+    assert!(value["duration"].as_f64().unwrap() >= 5.0);
+    std::fs::write(
+        &wrapper,
+        "#!/bin/sh\necho 'Fixture decoder failure'\nexit 1\n",
+    )
+    .unwrap();
+    let result = check();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).contains("Fixture decoder failure"));
 }
 
 #[cfg(unix)]

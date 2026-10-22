@@ -33,4 +33,6 @@ jobs:
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui-services --locked real_mpv_external_playback_ -- --ignored
+      - name: Verify headless playback diagnostic with real mpv
+        run: cargo test -p ytui --test downloads --locked real_mpv_playback_check_ -- --ignored
       - run: cargo build --release --locked

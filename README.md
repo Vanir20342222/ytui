@@ -37,6 +37,7 @@ and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility al
 - `u`: explicit local playback resume; `p`: playback queue.
 - `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
 - `ytui doctor --network`: opt-in public provider diagnostics without importing an account.
+- `ytui playback-check URL --backend auto`: check three seconds of actual mpv playback without browser cookies.
 
 The recommended `auto` backend tries pinned [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs)
 first and falls back to external yt-dlp for supported extraction limitations.
@@ -74,6 +75,9 @@ Run checks with `cargo fmt --all -- --check`,
 `cargo clippy --workspace --all-targets --locked -- -D warnings` and
 `cargo test --workspace --locked`. The separate real-media fixture and opt-in
 live YouTube tests are described in the validation record.
+Run `tools/test-youtube.sh auto` for isolated public browsing, playback and
+two-entry playlist checks; [live test instructions](docs/LIVE_YOUTUBE_TESTS.md)
+describe the required tools, optional public fixture URLs and CI runner.
 
 Generate WQHD captures entirely in Rust:
 
