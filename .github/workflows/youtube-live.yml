@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   public-network:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Probe public YouTube from the GitHub runner
@@ -33,7 +33,7 @@ jobs:
           exit "$failures"
   public-media:
     needs: public-network
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -47,11 +47,13 @@ jobs:
         with:
           deno-version: v2.x
       - name: Install media test tools
+        timeout-minutes: 10
+        run: bash tools/ci-install-media.sh mpv ffmpeg
+      - name: Install external extractor for the explicit live backend matrix
+        timeout-minutes: 4
         shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends mpv ffmpeg
-          curl --fail --location --retry 2 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux --output "$RUNNER_TEMP/yt-dlp"
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 60 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux --output "$RUNNER_TEMP/yt-dlp"
           chmod +x "$RUNNER_TEMP/yt-dlp"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: Test public browsing, playback and downloads through ytui

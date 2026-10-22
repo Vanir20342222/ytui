@@ -5,9 +5,12 @@ on:
     branches: ['fix/native-playback']
 permissions:
   contents: read
+concurrency:
+  group: native-playback-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   native:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +20,27 @@ jobs:
         with:
           node-version: '24'
       - name: Install playback tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mpv ffmpeg
+        id: media-tools
+        timeout-minutes: 10
+        run: bash tools/ci-install-media.sh mpv ffmpeg
       - run: cargo build -p ytui --locked
+      - name: Check native runtime configuration without accessing browser stores
+        run: target/debug/ytui doctor
       - name: Play public videos through native Rust extraction only
+        id: playback
+        timeout-minutes: 8
         run: tools/test-native-playback.sh
+      - name: Report setup and live playback separately
+        if: always()
+        env:
+          SETUP_OUTCOME: ${{ steps.media-tools.outcome }}
+          PLAYBACK_OUTCOME: ${{ steps.playback.outcome }}
+        run: |
+          {
+            echo '## Native YouTube playback on this GitHub runner'
+            echo "Media setup: **$SETUP_OUTCOME**. Live playback: **$PLAYBACK_OUTCOME**."
+            echo
+            echo 'A skipped playback step provides no playback result. A failed playback step remains a failed check; inspect its logs for extraction or CDN errors.'
+            echo 'Player-response rejection can depend on the runner network or YouTube access policy. The extractor message alone does not prove IP blocking.'
+            echo 'This workflow imports no cookies and never enables external yt-dlp. Local/loopback tests are reported separately by Rust CI.'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,5 +1,12 @@
 # ytui Rust rewrite plan
 
+M5/M8 CI follow-up: diagnosed the screenshot's cancellation as a stalled Ubuntu
+package installation, added whole-operation deadlines/official HTTPS mirror
+recovery and seven offline CI-setup regression groups. The public native runner
+passes 3/3 again on the target PC. A separate hosted-runner player-response
+rejection remains a real failed live check; it is not hidden by the setup repair.
+See [CI playback diagnosis](docs/CI_PLAYBACK_DIAGNOSIS.md).
+
 Alpha.11 single-video M2/M4/M8 sweep: reproduced and repaired completion/truncated
 EOF handling, indefinite player stalls, missed native backend notifications,
 worker launches after executable replacement, unavailable external preview

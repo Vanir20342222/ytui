@@ -1,5 +1,16 @@
 # Validation record — 2026-10-22
 
+## M5/M8 playback CI follow-up
+
+The screenshot's 25-minute cancellation occurred entirely during Ubuntu package
+installation; no playback ran. A newer GitHub run built successfully but failed
+3/3 native cases during player-response acquisition. Added bounded CI setup,
+one official HTTPS mirror fallback and explicit setup/playback summaries without
+weakening the live assertions. Seven offline installer regression groups pass;
+the identical public native runner passes 3/3 on the PC using optimized alpha.11.
+See [CI_PLAYBACK_DIAGNOSIS.md](CI_PLAYBACK_DIAGNOSIS.md) for run links, commands and
+the remaining hosted-runner extraction failure.
+
 ## Alpha.11 single-video sweep (M2/M4/M8)
 
 Defined live player cases now pass after six repair areas: **25 scenario checks**
