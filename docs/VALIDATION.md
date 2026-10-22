@@ -7,7 +7,12 @@ recorded separately below.
 ## Alpha.9 native playback (M3/M5/M8)
 
 **147 default tests pass**, with 18 actual-tool/live checks excluded. Formatting
-and strict Clippy pass. Separate actual Node saved-player/permission tests (two),
+and strict Clippy pass. Full GitHub Rust CI
+[39781634440](https://github.com/Vanir20342222/ytui/actions/runs/39781634440) passes
+on code commit `a638d8289c44fb01760fd542b340a69348d55248`, including actual tools
+and optimized build. The isolated installer publishes both alpha.9 launchers;
+installed offline doctor detects Node without opening browser stores.
+Separate actual Node saved-player/permission tests (two),
 mpv native HLS / external split streams / controls tests (three), playback CLI
 progress/failure test, four-format native audio conversion checks (two), and
 actual external two-entry playlist test pass. Native tests never use external

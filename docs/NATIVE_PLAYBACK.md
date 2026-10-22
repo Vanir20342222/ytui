@@ -44,6 +44,16 @@ playback on the user's desktop.
 
 - 147 default tests pass; 18 explicit actual-tool/live checks are excluded.
   Formatting and strict workspace/all-target Clippy pass.
+- Full GitHub Rust CI [39781634440](https://github.com/Vanir20342222/ytui/actions/runs/39781634440)
+  passes on code commit `a638d8289c44fb01760fd542b340a69348d55248`, including the
+  default suite, actual Node vectors, native HLS, FFmpeg audio, external playlist
+  checks and optimized build. Later documentation-only commits do not change the
+  application used by that result.
+- Optimized build and isolated `install.sh` pass. Both installed launchers report
+  `0.2.0-alpha.9`; the installed offline doctor detects actual Node 24 and the new
+  extractor revision, reports native playback separately from auto downloads,
+  and confirms browser stores were not opened. Installed native playback also
+  reproduces the same proxy rejection with contextual network guidance.
 - Actual Node 24.19.0 passes the pinned dependency's two saved-player challenge
   and permission tests, including signature/n solving. These are offline vectors.
 - Actual mpv 0.40 passes native HLS handoff with a server that requires the native
@@ -52,11 +62,11 @@ playback on the user's desktop.
 - Real FFmpeg/ffprobe checks pass for native MP3/M4A/Opus/FLAC transfers. A real
   external yt-dlp two-entry loopback playlist regression also passes; it is
   separate from native-only watching evidence.
-- The managed-workspace public native run failed **0/3 passed** at the HTTPS
-  proxy tunnel. No external extractor was started. Live CI results must be
-  recorded separately; a local fixture does not clear this gate.
+- The managed-workspace public native run recorded **0/3 passed** at the HTTPS
+  proxy tunnel. No external extractor was started. Public service results remain
+  separate from the passing offline workflow; a local fixture does not clear this gate.
 - Public native CI [39781157622](https://github.com/Vanir20342222/ytui/actions/runs/39781157622)
-  built the real application and failed **0/3 passed** with the native extractor's
+  built the real application and recorded **0/3 passed** with the native extractor's
   “All player responses are invalid. Your IP is likely being blocked by Youtube.”
   This is the extractor's diagnosis, not proof that every such response is an IP
   block. No Python fallback was enabled. The UI now gives account/network guidance

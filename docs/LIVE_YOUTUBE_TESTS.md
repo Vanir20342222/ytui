@@ -1,6 +1,20 @@
 # Real YouTube checks (M3/M4/M5/M8)
 
-Run from a checkout of `fix/playback-fallback` with Rust, FFmpeg/ffprobe, mpv,
+For native-only watching on `fix/native-playback`, use installed Node.js 22+ or
+Deno 2.9.7 and mpv:
+
+```sh
+cargo build -p ytui --locked
+tools/test-native-solver.sh
+tools/test-native-playback.sh
+```
+
+This separate runner never invokes external yt-dlp and measures actual mpv
+progress. [Native playback evidence](NATIVE_PLAYBACK.md) records the failed
+public runs and the open reliability gate. Pass a public URL file to extend the
+corpus; startup success alone does not establish complete watching or 99% success.
+
+For the broader existing download/fallback suite, run from this checkout with Rust, FFmpeg/ffprobe, mpv,
 yt-dlp and a current Deno runtime installed:
 
 ```sh
