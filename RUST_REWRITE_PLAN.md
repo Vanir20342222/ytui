@@ -1,5 +1,13 @@
 # ytui Rust rewrite plan
 
+Alpha.11 single-video M2/M4/M8 sweep: reproduced and repaired completion/truncated
+EOF handling, indefinite player stalls, missed native backend notifications,
+worker launches after executable replacement, unavailable external preview
+formats and a shutdown instance-lock race. Full live playback reaches EOF,
+including one muted gpu-next/PipeWire desktop run. See
+[the sweep evidence and rerun commands](docs/SINGLE_VIDEO_SWEEP.md) for the fixed
+public fixture, failure matrix and remaining coverage limits.
+
 Alpha.10 local M2–M6/M8 follow-up: public details/country/Music-source defects are
 fixed; bounded provider and native-resolution caches avoid repeated requests.
 154 offline tests, eight actual-media checks, two Node checks, four live provider

@@ -119,6 +119,7 @@ pub fn recovery(message: &str) -> Option<Recovery> {
         "connection refused",
         "network is unreachable",
         "connection reset",
+        "stream ended before its expected duration",
         "error sending request",
     ]) {
         (

@@ -87,6 +87,8 @@ pub struct Player {
     task: JoinHandle<()>,
 }
 struct Active {
+    progress_at: tokio::time::Instant,
+    last_position: Option<f64>,
     cancel: CancellationToken,
     task: JoinHandle<Result<ProcessResult>>,
     socket: PathBuf,
@@ -95,6 +97,36 @@ struct Active {
     _cookies: Option<tempfile::NamedTempFile>,
 }
 impl Active {
+    async fn expire_stalled(&mut self, suspended: bool) -> bool {
+        if self.task.is_finished() {
+            return false;
+        }
+        if suspended && self.last_position.is_some() {
+            self.progress_at = tokio::time::Instant::now();
+            return false;
+        }
+        let limit = if self.last_position.is_some() { 45 } else { 90 };
+        if self.progress_at.elapsed() < Duration::from_secs(limit) {
+            return false;
+        }
+        let message = if self.last_position.is_some() {
+            "Playback timed out: no decoded progress for 45 seconds. Check the connection or output device and retry."
+        } else {
+            "Playback startup timed out: mpv did not decode media within 90 seconds. Check extraction, mpv and its output/device configuration."
+        };
+        self.cancel.cancel();
+        let _ = (&mut self.task).await;
+        // Feed the deadline through the same bounded recovery/error path as an
+        // actual player failure. The old process tree is already reaped.
+        self.task = tokio::spawn(async move {
+            Ok(ProcessResult {
+                success: false,
+                lines: Vec::new(),
+                stderr: message.into(),
+            })
+        });
+        true
+    }
     async fn stop(self) {
         self.cancel.cancel();
         let _ = self.task.await;
@@ -438,6 +470,8 @@ async fn start(
         result
     });
     Ok(Active {
+        progress_at: tokio::time::Instant::now(),
+        last_position: None,
         cancel,
         task,
         socket,
@@ -456,7 +490,9 @@ async fn external_playback(
     cancel: CancellationToken,
 ) -> Result<ProcessResult> {
     let format = if preview {
-        "best[height<=360]/best".into()
+        // Muted previews do not need audio or a combined progressive format.
+        // Current YouTube responses can contain only separate video/audio.
+        "bestvideo[height<=?360]/best[height<=?360]".into()
     } else if audio {
         "bestaudio/best".into()
     } else if config.download.quality == "best" {
@@ -545,6 +581,7 @@ fn native_stream_retryable(message: &str) -> bool {
     }
     crate::download::transient(message)
         || [
+            "stream ended before its expected duration",
             "http error 403",
             "http error 404",
             "server returned 403",
@@ -838,6 +875,13 @@ impl Actor {
         }
     }
     async fn tick(&mut self) -> Option<PlayerEvent> {
+        if let Some(player) = &mut self.full
+            && player
+                .expire_stalled(self.state.paused || self.preview.is_some())
+                .await
+        {
+            self.streams.clear();
+        }
         if self.preview.as_ref().is_some_and(|p| p.task.is_finished()) {
             if let Some(p) = self.preview.take() {
                 match p.task.await {
@@ -851,21 +895,38 @@ impl Actor {
             self.close_preview().await;
         }
         let mut event = None;
-        if let Some(active) = &mut self.full
-            && active.backend.has_changed().unwrap_or(false)
-        {
-            self.state.backend = active.backend.borrow_and_update().clone();
-            if self.state.backend == "yt-dlp fallback" {
-                self.state.notice = Some(
-                    "Automatic yt-dlp fallback · native extractor could not play this media".into(),
-                );
+        if let Some(active) = &mut self.full {
+            // has_changed() returns an error once the sender closes, even if
+            // its final value was never read. Fast failures still need their
+            // actual backend identity to enter native URL renewal.
+            let backend = active.backend.borrow_and_update().clone();
+            if !backend.is_empty() && self.state.backend != backend {
+                self.state.backend = backend;
+                if self.state.backend == "yt-dlp fallback" {
+                    self.state.notice = Some(
+                        "Automatic yt-dlp fallback · native extractor could not play this media"
+                            .into(),
+                    );
+                }
             }
         }
         if self.full.as_ref().is_some_and(|p| p.task.is_finished()) {
             let p = self.full.take().expect("Finished player exists");
             let result = p.task.await;
             let success = matches!(&result,Ok(Ok(r)) if r.success);
+            let eof = matches!(&result, Ok(Ok(r)) if r.lines.iter().map(String::as_str).chain(r.stderr.lines()).any(|line| line.trim_end().ends_with("YTUI_END_FILE:eof")));
+            let truncated = success
+                && eof
+                && self
+                    .state
+                    .duration
+                    .is_some_and(|duration| duration > 0.0 && self.state.position < duration - 2.0);
+            let success = success && !truncated;
             let message = match result {
+                _ if truncated => {
+                    self.streams.clear();
+                    "Playback stream ended before its expected duration. Check the connection and retry.".into()
+                }
                 Ok(Ok(r)) if !r.success => playback_diagnostic(&r),
                 Ok(Ok(_)) => String::new(),
                 Ok(Err(e)) => process::diagnostic(&format!("{e:#}")),
@@ -884,7 +945,7 @@ impl Actor {
                     self.reconnect_count
                 ));
             } else if !success
-                && self.config.playback_backend == "native"
+                && self.config.playback_backend != "yt-dlp"
                 && self.state.backend == "native Rust"
                 && self.reconnect_count == 0
                 && self.playing.as_ref().is_some_and(|(media, _, fallback)| {
@@ -901,16 +962,20 @@ impl Actor {
                 self.state.notice =
                     Some("Native stream interrupted · refreshing URL and resuming once".into());
             } else if success
+                && eof
+                && self.state.position > 0.0
                 && self
                     .state
                     .duration
-                    .is_none_or(|duration| self.state.position >= duration - 2.0)
+                    .is_none_or(|duration| duration > 0.0 && self.state.position >= duration - 2.0)
             {
                 if let Some((media, _, _)) = &self.playing {
                     event = Some(PlayerEvent::Ended(Box::new(media.clone())));
                 }
-            } else if !success {
-                self.state.error = Some(if message.is_empty() {
+            } else if !success || self.state.position == 0.0 {
+                self.state.error = Some(if success {
+                    "mpv exited before playback started; no video was completed. Check its output/device configuration and retry.".into()
+                } else if message.is_empty() {
                     "Playback failed".into()
                 } else {
                     message.clone()
@@ -970,7 +1035,7 @@ impl Actor {
             }
         }
         let mut window_action = None;
-        if let Some(p) = &self.full
+        if let Some(p) = &mut self.full
             && let Ok(v) = properties(&p.socket).await
         {
             if let Some(action) = v["user-data/ytui/action"]
@@ -983,6 +1048,10 @@ impl Actor {
                     .await;
             }
             if let Some(position) = v["time-pos"].as_f64() {
+                if p.last_position != Some(position) {
+                    p.progress_at = tokio::time::Instant::now();
+                    p.last_position = Some(position);
+                }
                 self.state.position = position;
                 self.state.buffering = v["paused-for-cache"].as_bool().unwrap_or(false);
             }
@@ -1115,6 +1184,69 @@ impl Player {
 mod tests {
     use super::*;
     use tokio::net::UnixListener;
+    #[tokio::test]
+    async fn muted_external_previews_accept_video_only_formats_without_muxed_streams() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let extractor = temp.path().join("extractor");
+        std::fs::write(
+            &extractor,
+            r#"#!/bin/sh
+format=''
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = '--format' ]; then shift; format="$1"; fi
+  shift
+done
+case "$format" in
+  bestvideo*) :;;
+  *) printf 'ERROR: Requested format is not available\n' >&2; exit 1;;
+esac
+printf '%s\n' '{"url":"https://synthetic.test/video.webm","vcodec":"vp9","acodec":"none"}'
+"#,
+        )
+        .unwrap();
+        let mpv = temp.path().join("mpv");
+        std::fs::write(&mpv, "#!/bin/sh\nprintf '%s\\n' \"$@\"\n").unwrap();
+        for tool in [&extractor, &mpv] {
+            std::fs::set_permissions(tool, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+        let media = Media {
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            ..Default::default()
+        };
+        let result = external_playback(
+            ProcessSpec::new(
+                mpv.display().to_string(),
+                vec!["--mute=yes".into(), "--".into(), media.url.clone()],
+                5,
+            ),
+            &Config {
+                yt_dlp: extractor.display().to_string(),
+                ..Default::default()
+            },
+            &media,
+            false,
+            true,
+            None,
+            CancellationToken::new(),
+        )
+        .await
+        .unwrap();
+        assert!(result.success);
+        assert!(
+            result
+                .lines
+                .iter()
+                .any(|line| line == "https://synthetic.test/video.webm")
+        );
+        assert!(result.lines.iter().any(|line| line == "--mute=yes"));
+        assert!(
+            !result
+                .lines
+                .iter()
+                .any(|line| line.starts_with("--audio-file"))
+        );
+    }
     #[tokio::test]
     async fn native_replay_uses_cached_streams_and_a_failed_open_invalidates_them() {
         use std::os::unix::fs::PermissionsExt;
@@ -1282,6 +1414,8 @@ mod tests {
         let token = CancellationToken::new();
         let stopping = token.clone();
         let full = Active {
+            progress_at: tokio::time::Instant::now(),
+            last_position: None,
             cancel: token,
             task: tokio::spawn(async move {
                 stopping.cancelled().await;
@@ -1672,11 +1806,23 @@ sleep 30
             legacy_data: temp.path().join("legacy"),
             home: temp.path().into(),
         };
-        for (position, should_end) in [(40.0, false), (99.5, true)] {
-            let task = tokio::spawn(async {
+        for (position, duration, eof, should_end) in [
+            (40.0, Some(100.0), false, false),
+            (40.0, Some(100.0), true, false),
+            (99.5, Some(100.0), true, true),
+            (99.5, Some(100.0), false, false),
+            (0.0, None, false, false),
+            (20.0, None, false, false),
+            (20.0, None, true, true),
+        ] {
+            let task = tokio::spawn(async move {
                 Ok(ProcessResult {
                     success: true,
-                    lines: Vec::new(),
+                    lines: if eof {
+                        vec!["[ytui-player] YTUI_END_FILE:eof".into()]
+                    } else {
+                        Vec::new()
+                    },
                     stderr: String::new(),
                 })
             });
@@ -1691,6 +1837,8 @@ sleep 30
                 paths: paths.clone(),
                 session: None,
                 full: Some(Active {
+                    progress_at: tokio::time::Instant::now(),
+                    last_position: None,
                     cancel: CancellationToken::new(),
                     task,
                     socket: temp.path().join("unused-ipc"),
@@ -1703,7 +1851,7 @@ sleep 30
                     title: media.title.clone(),
                     media: Some(media.clone()),
                     position,
-                    duration: Some(100.0),
+                    duration,
                     active: true,
                     ..Default::default()
                 },
@@ -1717,6 +1865,12 @@ sleep 30
             };
             let event = actor.tick().await;
             assert_eq!(matches!(event, Some(PlayerEvent::Ended(_))), should_end);
+            if eof && !should_end {
+                assert!(
+                    actor.state.error.is_some(),
+                    "truncated EOF must surface an error"
+                );
+            }
             assert!(!actor.state.active);
         }
     }
@@ -1735,6 +1889,72 @@ mod responsiveness_tests {
             cache: root.join("cache"),
             legacy_data: root.join("legacy"),
             home: root.into(),
+        }
+    }
+    #[tokio::test]
+    async fn stalled_startup_and_decoder_report_errors_but_manual_pause_is_allowed() {
+        for (position, paused, should_fail) in [
+            (None, false, true),
+            (Some(42.0), false, true),
+            (Some(42.0), true, false),
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let cancel = CancellationToken::new();
+            let token = cancel.clone();
+            let task = tokio::spawn(async move {
+                token.cancelled().await;
+                Ok(ProcessResult {
+                    success: false,
+                    lines: vec![],
+                    stderr: "fixture cancelled".into(),
+                })
+            });
+            let media = Media {
+                url: "/tmp/synthetic-stalled-video.mp4".into(),
+                ..Default::default()
+            };
+            let mut actor = Actor {
+                config: Config::default(),
+                paths: paths(temp.path()),
+                session: None,
+                full: Some(Active {
+                    progress_at: tokio::time::Instant::now() - Duration::from_secs(91),
+                    last_position: position,
+                    cancel,
+                    task,
+                    socket: temp.path().join("absent-ipc"),
+                    backend: watch::channel(String::new()).1,
+                    _dir: tempfile::tempdir().unwrap(),
+                    _cookies: None,
+                }),
+                preview: None,
+                state: PlayerStatus {
+                    active: true,
+                    buffering: !paused,
+                    paused,
+                    position: position.unwrap_or(0.0),
+                    ..Default::default()
+                },
+                resume_after_preview: false,
+                playing: Some((media, false, false)),
+                reconnect_count: 0,
+                reconnect_at: None,
+                sponsor_task: None,
+                ignore_segments_until: 0.0,
+                streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
+            };
+            actor.tick().await;
+            tokio::task::yield_now().await;
+            actor.tick().await;
+            assert_eq!(
+                actor.state.error.is_some(),
+                should_fail,
+                "position={position:?}, paused={paused}"
+            );
+            if should_fail {
+                assert!(!actor.state.active && !actor.state.buffering);
+            }
+            actor.stop().await;
         }
     }
     #[tokio::test]
@@ -1770,7 +1990,13 @@ mod responsiveness_tests {
         };
         for (attempt, should_retry) in [(0, true), (1, false)] {
             actor.reconnect_at = None;
+            actor.state.backend.clear();
+            let (sender, backend) = watch::channel(String::new());
+            sender.send("native Rust".into()).unwrap();
+            drop(sender);
             actor.full = Some(Active {
+                progress_at: tokio::time::Instant::now(),
+                last_position: None,
                 cancel: CancellationToken::new(),
                 task: tokio::spawn(async {
                     Ok(ProcessResult {
@@ -1780,7 +2006,7 @@ mod responsiveness_tests {
                     })
                 }),
                 socket: temp.path().join("unused"),
-                backend: watch::channel(String::new()).1,
+                backend,
                 _dir: tempfile::tempdir().unwrap(),
                 _cookies: None,
             });
@@ -1862,6 +2088,8 @@ mod responsiveness_tests {
             session: None,
             full: None,
             preview: Some(Active {
+                progress_at: tokio::time::Instant::now(),
+                last_position: None,
                 cancel,
                 task: tokio::spawn(async move {
                     token.cancelled().await;

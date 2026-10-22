@@ -1,5 +1,9 @@
 # Target PC network and performance pass — alpha.10
 
+The subsequent [alpha.11 single-video sweep](SINGLE_VIDEO_SWEEP.md) records further
+repairs, complete playback/output checks and the latest installation. Results
+below remain the historical alpha.10 network/performance evidence.
+
 2026-10-22, M2–M6/M8. This record concerns the user's actual CachyOS LTS PC,
 not the earlier cloud/GitHub network failures. Tools: Rust 1.99.1, mpv 0.41.0,
 FFmpeg 9.0.1, yt-dlp 2026.08.19, Node 26.8.1, Deno 2.9.6. Native solving selects

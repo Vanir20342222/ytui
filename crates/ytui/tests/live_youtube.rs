@@ -233,9 +233,27 @@ async fn download(audio: bool, playlist: bool) {
                 .and_then(|s| s.parse::<f64>().ok())
                 .is_some_and(|v| v > 0.0)
         );
+        let decode = tokio::process::Command::new("ffmpeg")
+            .args([
+                "-nostdin",
+                "-v",
+                "error",
+                "-xerror",
+                "-err_detect",
+                "explode",
+                "-threads",
+                "2",
+                "-i",
+            ])
+            .arg(file)
+            .args(["-map", "0:v?", "-map", "0:a?", "-f", "null", "-"])
+            .output()
+            .await
+            .unwrap();
+        success(&decode);
     }
     println!(
-        "Verified {} real media file(s) with ffprobe",
+        "Verified {} real media file(s) with ffprobe and complete FFmpeg decoding",
         job.outputs.len()
     );
 }

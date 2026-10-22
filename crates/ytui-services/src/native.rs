@@ -475,6 +475,11 @@ pub async fn run(
         .tempfile_in(dir)?;
     manifest.write_all(&serde_json::to_vec(&request)?)?;
     manifest.flush()?;
+    // Linux retains the running inode through /proc even after an atomic upgrade
+    // unlinks its old pathname. current_exe() then includes " (deleted)".
+    #[cfg(target_os = "linux")]
+    let exe = PathBuf::from("/proc/self/exe");
+    #[cfg(not(target_os = "linux"))]
     let exe = std::env::current_exe()?;
     let result = process::run(
         ProcessSpec::new(

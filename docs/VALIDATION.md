@@ -1,5 +1,20 @@
 # Validation record — 2026-10-22
 
+## Alpha.11 single-video sweep (M2/M4/M8)
+
+Defined live player cases now pass after six repair areas: **25 scenario checks**
+across native/auto/external modes, including actual EOF, quality/control/preview
+behavior, renewal/resume, bounded retry, hung startup, missing tools, cancellation
+and one muted displayed gpu-next/PipeWire completion. Both selected CLI suites
+pass **7/7**, using the same public video; completed audio/video files are fully
+decoded with FFmpeg. Eight actual-media regressions pass. Deterministic tests
+reproduced early/near-end quit, truncated EOF, missed closed-channel backend
+updates, deleted executable launch and inherited instance-lock failures before
+their fixes. **158 offline tests pass**, with 22 opt-in checks excluded from that
+run. Formatting, strict all-target Clippy, shell syntax, Lua checks, optimized
+build and installation of both alpha.11 launchers pass. Details and limits:
+[SINGLE_VIDEO_SWEEP.md](SINGLE_VIDEO_SWEEP.md).
+
 ## Alpha.10 target-PC network/performance follow-up (M2–M6/M8)
 
 On the actual CachyOS LTS PC: **154 offline tests**, eight actual-media checks,

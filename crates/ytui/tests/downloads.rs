@@ -93,6 +93,70 @@ struct Server {
     stop: Arc<AtomicBool>,
     thread: Option<thread::JoinHandle<()>>,
 }
+#[cfg(target_os = "linux")]
+#[test]
+fn native_worker_survives_replacing_the_running_executable() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let running = temp.path().join("ytui-running");
+    if std::fs::hard_link(env!("CARGO_BIN_EXE_ytui"), &running).is_err() {
+        std::fs::copy(env!("CARGO_BIN_EXE_ytui"), &running).unwrap();
+    }
+    let ready = temp.path().join("runtime-ready");
+    let release = temp.path().join("runtime-release");
+    let runtime = temp.path().join("node");
+    std::fs::write(&runtime, format!("#!/bin/sh\ntouch '{}'\nwhile [ ! -f '{}' ]; do sleep 0.01; done\nprintf 'v26.8.1\\n'\n", ready.display(), release.display())).unwrap();
+    std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let proxy = Server::with_status(b"Synthetic proxy rejection".to_vec(), 403);
+    let config = Config {
+        auth_store: "file".into(),
+        theme: "ytui-dark".into(),
+        playback_backend: "native".into(),
+        native_js_runtime: Some(runtime),
+        proxy: Some(proxy.url.clone()),
+        ..Default::default()
+    };
+    let path = temp.path().join("config.toml");
+    std::fs::write(&path, toml::to_string(&config).unwrap()).unwrap();
+    let child = Command::new(&running)
+        .arg("--config")
+        .arg(path)
+        .arg("--state-dir")
+        .arg(temp.path().join("state"))
+        .args([
+            "playback-check",
+            "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+        ])
+        .env("XDG_CONFIG_HOME", temp.path().join("config"))
+        .env("XDG_STATE_HOME", temp.path().join("xdg"))
+        .env("XDG_CACHE_HOME", temp.path().join("cache"))
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    let start = std::time::Instant::now();
+    while !ready.exists() {
+        assert!(
+            start.elapsed() < Duration::from_secs(3),
+            "runtime barrier never opened"
+        );
+        thread::sleep(Duration::from_millis(5));
+    }
+    // An atomic upgrade unlinks the executable's original directory entry.
+    std::fs::remove_file(&running).unwrap();
+    std::fs::write(&release, b"continue").unwrap();
+    let output = child.wait_with_output().unwrap();
+    let error = String::from_utf8_lossy(&output.stderr);
+    assert!(!output.status.success());
+    assert!(
+        !error.contains("(deleted)"),
+        "running-binary replacement broke native worker launch: {error}"
+    );
+    assert!(
+        error.to_lowercase().contains("proxy") || error.to_lowercase().contains("tunnel"),
+        "worker must reach the rejecting fixture proxy: {error}"
+    );
+}
 #[test]
 fn doctor_network_returns_failure_when_its_public_probes_are_rejected() {
     let temp = tempfile::tempdir().unwrap();
