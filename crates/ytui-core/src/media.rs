@@ -15,6 +15,13 @@ pub enum MediaKind {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct Thumbnail {
+    pub url: String,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct Media {
     pub id: String,
@@ -22,12 +29,15 @@ pub struct Media {
     pub creator: String,
     pub url: String,
     pub thumbnail: String,
+    pub thumbnails: Vec<Thumbnail>,
+    pub section: String,
     pub duration: Option<u64>,
     pub description: String,
     pub kind: MediaKind,
     pub browse_id: Option<String>,
     pub tracks_url: Option<String>,
     pub live: bool,
+    pub chapters: Vec<crate::Chapter>,
 }
 impl Media {
     pub fn collection(&self) -> bool {
@@ -52,14 +62,29 @@ impl Media {
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Page {
+    #[serde(default)]
+    pub categories: Vec<Category>,
     pub title: String,
     pub items: Vec<Media>,
     pub continuation: Option<String>,
     pub notice: Option<String>,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Category {
+    pub title: String,
+    pub request: BrowseRequest,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum BrowseRequest {
-    MusicSearch { query: String, category: String },
+    MusicSearch {
+        query: String,
+        category: String,
+    },
+    Category {
+        endpoint: String,
+        payload: serde_json::Value,
+    },
     Details(String),
     Home,
     Search(String),
@@ -77,6 +102,10 @@ pub enum BrowseRequest {
     RadioCountry(String),
     RadioTag(String),
     Favorites,
+    OfflineLibrary {
+        query: String,
+        audio: Option<bool>,
+    },
 }
 
 pub fn http_url(raw: &str) -> anyhow::Result<Url> {
@@ -226,5 +255,34 @@ mod tests {
         assert_eq!(q.current, Some(0));
         q.repeat = Repeat::Off;
         assert!(q.advance(true).is_none());
+        q.current = Some(0);
+        q.repeat = Repeat::All;
+        assert_eq!(q.advance(true).unwrap().id, "two");
+        q.push(Media {
+            id: "three".into(),
+            ..Default::default()
+        });
+        q.push(Media {
+            id: "four".into(),
+            ..Default::default()
+        });
+        q.shuffle = true;
+        for _ in 0..50 {
+            let previous = q.current;
+            assert!(q.advance(false).is_some());
+            assert_ne!(
+                q.current, previous,
+                "shuffle must not repeat the current item"
+            );
+        }
+        q.repeat = Repeat::One;
+        let previous = q.current;
+        q.advance(true).unwrap();
+        assert_eq!(q.current, previous);
+        q.shuffle = false;
+        q.current = Some(0);
+        assert_eq!(q.previous().unwrap().id, "two");
+        q.remove(999);
+        assert_eq!(q.items.len(), 3);
     }
 }

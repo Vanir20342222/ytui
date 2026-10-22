@@ -6,11 +6,17 @@ use std::{collections::BTreeMap, path::PathBuf};
 #[serde(default)]
 pub struct Config {
     pub version: u32,
+    #[serde(skip)]
+    pub offline: bool,
     pub theme: String,
     pub theme_provider: String,
     pub image_protocol: String,
     pub thumbnails: bool,
     pub reduced_motion: bool,
+    pub playback_history: bool,
+    pub show_hints: bool,
+    pub playback_sponsorblock: String,
+    pub playback_sponsor_categories: Vec<String>,
     pub download: DownloadOptions,
     pub concurrency: usize,
     pub max_retries: u32,
@@ -20,6 +26,7 @@ pub struct Config {
     pub native_js_runtime: Option<PathBuf>,
     pub yt_dlp: String,
     pub ffmpeg: String,
+    pub ffprobe: String,
     pub mpv: String,
     pub cliamp: String,
     pub nmcli: String,
@@ -40,20 +47,26 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             version: 1,
+            offline: false,
             theme: "system".into(),
             theme_provider: "auto".into(),
             image_protocol: "auto".into(),
             thumbnails: true,
             reduced_motion: false,
+            playback_history: true,
+            show_hints: true,
+            playback_sponsorblock: "skip".into(),
+            playback_sponsor_categories: vec!["sponsor".into()],
             download: DownloadOptions::default(),
             concurrency: 3,
             max_retries: 3,
             retry_delay_seconds: 5,
             proxy: None,
-            download_backend: "native".into(),
+            download_backend: "auto".into(),
             native_js_runtime: None,
             yt_dlp: "yt-dlp".into(),
             ffmpeg: "ffmpeg".into(),
+            ffprobe: "ffprobe".into(),
             mpv: "mpv".into(),
             cliamp: "cliamp".into(),
             nmcli: "nmcli".into(),
@@ -104,8 +117,8 @@ impl Config {
             );
         }
         ensure!(
-            ["native", "yt-dlp"].contains(&self.download_backend.as_str()),
-            "download_backend must be native or yt-dlp"
+            ["auto", "native", "yt-dlp"].contains(&self.download_backend.as_str()),
+            "download_backend must be auto, native or yt-dlp"
         );
         ensure!(
             ["auto", "caelestia", "omarchy", "portal", "gnome"]
@@ -123,6 +136,29 @@ impl Config {
                 .all(|c| c.len() == 2 && c.bytes().all(|b| b.is_ascii_alphabetic())),
             "Pinned radio countries must use two-letter codes"
         );
+        ensure!(
+            self.radio_servers.len() <= 8,
+            "At most eight radio directory servers are allowed"
+        );
+        for server in &self.radio_servers {
+            crate::http_url(server)?;
+        }
+        if let Some(proxy) = &self.proxy {
+            let proxy = url::Url::parse(proxy)
+                .map_err(|_| anyhow::anyhow!("Proxy must be a valid HTTP(S) or SOCKS URL"))?;
+            ensure!(
+                matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h")
+                    && proxy.host_str().is_some(),
+                "Proxy must use HTTP(S), socks5 or socks5h and include a host"
+            );
+        }
+        ensure!(
+            ["skip", "mark", "off"].contains(&self.playback_sponsorblock.as_str()),
+            "SponsorBlock playback must be skip, mark or off"
+        );
+        let mut sponsor = self.download.clone();
+        sponsor.sponsorblock = self.playback_sponsor_categories.clone();
+        sponsor.validate()?;
         self.schedule.validate()?;
         self.download.validate()
     }
@@ -149,6 +185,7 @@ pub struct DownloadOptions {
     pub bandwidth_kib: u64,
     pub global_bandwidth_kib: u64,
     pub sponsorblock: Vec<String>,
+    pub sponsorblock_api: String,
     pub sponsorblock_remove: bool,
     pub split_chapters: bool,
     pub skip_duplicates: bool,
@@ -176,6 +213,7 @@ impl Default for DownloadOptions {
             bandwidth_kib: 0,
             global_bandwidth_kib: 0,
             sponsorblock: Vec::new(),
+            sponsorblock_api: "https://sponsor.ajay.app".into(),
             sponsorblock_remove: false,
             split_chapters: false,
             skip_duplicates: true,
@@ -195,7 +233,7 @@ impl DownloadOptions {
         ensure!(
             self.backend
                 .as_deref()
-                .is_none_or(|b| b == "native" || b == "yt-dlp"),
+                .is_none_or(|b| b == "auto" || b == "native" || b == "yt-dlp"),
             "Unknown download backend"
         );
         ensure!(
@@ -224,6 +262,32 @@ impl DownloadOptions {
         ensure!(
             !self.filename_template.is_empty(),
             "filename_template cannot be empty"
+        );
+        let quality = self
+            .audio_quality
+            .trim_end_matches(['k', 'K'])
+            .parse::<f64>()
+            .map_err(|_| {
+                anyhow::anyhow!("Audio quality must be 0..10 or a bitrate such as 320K")
+            })?;
+        ensure!(
+            quality.is_finite() && (0.0..=1_000_000.0).contains(&quality),
+            "Audio quality must be finite and between 0 and 1000000"
+        );
+        crate::http_url(&self.sponsorblock_api)?;
+        ensure!(
+            self.sponsorblock.iter().all(|s| [
+                "sponsor",
+                "intro",
+                "outro",
+                "selfpromo",
+                "interaction",
+                "preview",
+                "music_offtopic",
+                "filler"
+            ]
+            .contains(&s.as_str())),
+            "Unsupported SponsorBlock category"
         );
         if let Some(items) = &self.playlist_items {
             ensure!(

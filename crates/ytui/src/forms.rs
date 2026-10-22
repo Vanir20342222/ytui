@@ -6,6 +6,7 @@ pub struct Field {
     pub label: &'static str,
     pub value: Editor,
     pub toggle: bool,
+    pub choices: &'static [&'static str],
 }
 impl Field {
     fn text(label: &'static str, value: impl ToString) -> Self {
@@ -13,6 +14,7 @@ impl Field {
             label,
             value: Editor::new(value.to_string()),
             toggle: false,
+            choices: &[],
         }
     }
     fn flag(label: &'static str, value: bool) -> Self {
@@ -20,13 +22,38 @@ impl Field {
             label,
             value: Editor::new(if value { "yes" } else { "no" }),
             toggle: true,
+            choices: &[],
+        }
+    }
+    fn choice(label: &'static str, value: impl ToString, choices: &'static [&'static str]) -> Self {
+        Self {
+            choices,
+            ..Self::text(label, value)
         }
     }
 }
+pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
+    ("General", &[15, 16, 17, 34, 38, 50]),
+    ("Appearance", &[0, 1, 2, 3]),
+    (
+        "Downloads",
+        &[39, 40, 41, 42, 37, 43, 44, 4, 5, 6, 45, 21, 32, 33, 30],
+    ),
+    ("Subtitles & media", &[22, 23, 24, 25, 26, 27, 28, 29, 36]),
+    ("Network & account", &[12, 10, 11]),
+    ("Schedule", &[18, 19, 20]),
+    ("Tools", &[13, 14, 7, 8, 9, 35, 46, 47, 31]),
+    ("Radio", &[48, 49]),
+    ("Playback", &[51, 52]),
+];
 pub enum FormKind {
     Download(Media, DownloadOptions),
     Settings(Config),
     Auth,
+    Action {
+        title: &'static str,
+        command: &'static str,
+    },
     Keys(Config),
 }
 pub struct Form {
@@ -34,15 +61,61 @@ pub struct Form {
     pub fields: Vec<Field>,
     pub selected: usize,
     pub error: Option<String>,
+    pub section: usize,
+    pub sections_focused: bool,
 }
+pub const DOWNLOAD_SECTIONS: &[(&str, &[usize])] = &[
+    ("Quality & format", &[0, 1, 2, 3, 13, 12]),
+    ("Files & playlist", &[4, 5, 6, 11]),
+    ("Captions & metadata", &[7, 8, 9, 10]),
+];
 impl Form {
+    pub fn is_grouped(&self) -> bool {
+        matches!(self.kind, FormKind::Settings(_) | FormKind::Download(..))
+    }
+    pub fn sections(&self) -> &'static [(&'static str, &'static [usize])] {
+        if matches!(self.kind, FormKind::Download(..)) {
+            DOWNLOAD_SECTIONS
+        } else {
+            SETTINGS_SECTIONS
+        }
+    }
+
+    pub fn action(entry: &crate::actions::Entry) -> Self {
+        Self {
+            kind: FormKind::Action {
+                title: entry.title,
+                command: entry.command,
+            },
+            fields: entry
+                .fields
+                .iter()
+                .map(|(name, default)| Field::text(name, default))
+                .collect(),
+            selected: 0,
+            error: None,
+            section: 0,
+            sections_focused: false,
+        }
+    }
+
     pub fn download(media: Media, options: DownloadOptions) -> Self {
         let o = &options;
         let fields = vec![
             Field::flag("Audio only", o.audio),
-            Field::text("Video quality", &o.quality),
-            Field::text("Video container", &o.container),
-            Field::text("Audio format", &o.audio_container),
+            Field::choice(
+                "Video quality",
+                &o.quality,
+                &[
+                    "144", "240", "360", "480", "720", "1080", "1440", "2160", "best",
+                ],
+            ),
+            Field::choice("Video container", &o.container, &["mp4", "mkv", "webm"]),
+            Field::choice(
+                "Audio format",
+                &o.audio_container,
+                &["mp3", "m4a", "flac", "opus", "wav", "aac", "vorbis"],
+            ),
             Field::text("Destination", o.output_directory().display()),
             Field::flag("Whole playlist", o.playlist),
             Field::text(
@@ -54,24 +127,36 @@ impl Form {
             Field::flag("Embed metadata", o.metadata),
             Field::flag("Embed thumbnail", o.thumbnail),
             Field::text("Limit KiB/s (0=off)", o.bandwidth_kib),
-            Field::text(
+            Field::choice(
                 "Backend (blank=default)",
                 o.backend.clone().unwrap_or_default(),
+                &["", "auto", "native", "yt-dlp"],
             ),
+            Field::text("Audio quality / bitrate", &o.audio_quality),
         ];
         Self {
             kind: FormKind::Download(media, options),
             fields,
             selected: 0,
             error: None,
+            section: 0,
+            sections_focused: false,
         }
     }
     pub fn settings(config: Config) -> Self {
         let c = &config;
         let fields = vec![
-            Field::text("Theme", &c.theme),
-            Field::text("Theme provider", &c.theme_provider),
-            Field::text("Image protocol", &c.image_protocol),
+            Field::choice("Theme", &c.theme, ytui_services::theme::THEMES),
+            Field::choice(
+                "Theme provider",
+                &c.theme_provider,
+                &["auto", "caelestia", "omarchy", "portal", "gnome"],
+            ),
+            Field::choice(
+                "Image protocol",
+                &c.image_protocol,
+                &["auto", "kitty", "sixel", "iterm2", "halfblocks", "none"],
+            ),
             Field::flag("Thumbnails", c.thumbnails),
             Field::text("Concurrent downloads", c.concurrency),
             Field::text("Video directory", c.download.directory.display()),
@@ -79,10 +164,14 @@ impl Form {
             Field::text("yt-dlp executable", &c.yt_dlp),
             Field::text("mpv executable", &c.mpv),
             Field::text("FFmpeg executable", &c.ffmpeg),
-            Field::text("Auth storage", &c.auth_store),
+            Field::choice("Auth storage", &c.auth_store, &["keyring", "file"]),
             Field::text("Account index", c.account_index),
             Field::text("Proxy (optional)", c.proxy.clone().unwrap_or_default()),
-            Field::text("Download / playback backend", &c.download_backend),
+            Field::choice(
+                "Download / playback backend",
+                &c.download_backend,
+                &["auto", "native", "yt-dlp"],
+            ),
             Field::text(
                 "Deno runtime (optional)",
                 c.native_js_runtime
@@ -122,12 +211,48 @@ impl Form {
             ),
             Field::text("Retry count", c.max_retries),
             Field::text("Retry delay seconds", c.retry_delay_seconds),
+            Field::flag("Save local playback positions", c.playback_history),
+            Field::text("FFprobe executable", &c.ffprobe),
+            Field::text("SponsorBlock API", &c.download.sponsorblock_api),
+            Field::text("Audio quality / bitrate", &c.download.audio_quality),
+            Field::flag("Reduced motion", c.reduced_motion),
+            Field::flag("Audio only by default", c.download.audio),
+            Field::text("Default video quality", &c.download.quality),
+            Field::choice(
+                "Default video container",
+                &c.download.container,
+                &["mp4", "mkv", "webm"],
+            ),
+            Field::choice(
+                "Default audio format",
+                &c.download.audio_container,
+                &["mp3", "m4a", "flac", "opus", "vorbis", "wav", "aac"],
+            ),
+            Field::flag("Whole playlists by default", c.download.playlist),
+            Field::flag("Skip duplicate downloads", c.download.skip_duplicates),
+            Field::text("Per-download KiB/s", c.download.bandwidth_kib),
+            Field::text("cliamp executable", &c.cliamp),
+            Field::text("NetworkManager executable", &c.nmcli),
+            Field::text("Pinned countries", c.radio_pinned_countries.join(",")),
+            Field::text("Directory servers", c.radio_servers.join(",")),
+            Field::flag("Show shortcut hints (F1)", c.show_hints),
+            Field::choice(
+                "SponsorBlock playback",
+                &c.playback_sponsorblock,
+                &["skip", "mark", "off"],
+            ),
+            Field::text(
+                "Playback skip categories",
+                c.playback_sponsor_categories.join(","),
+            ),
         ];
         Self {
             kind: FormKind::Settings(config),
             fields,
-            selected: 0,
+            selected: SETTINGS_SECTIONS[0].1[0],
             error: None,
+            section: 0,
+            sections_focused: false,
         }
     }
     pub fn keys(config: Config) -> Self {
@@ -143,7 +268,11 @@ impl Form {
                 Field::text(
                     description,
                     if mapped.is_empty() {
-                        default.to_string()
+                        if config.keybindings.contains_key(*default) {
+                            format!("alt+{default}")
+                        } else {
+                            default.to_string()
+                        }
                     } else {
                         mapped.join(" ")
                     },
@@ -155,6 +284,8 @@ impl Form {
             fields,
             selected: 0,
             error: None,
+            section: 0,
+            sections_focused: false,
         }
     }
     pub fn key_values(&self) -> Result<Config> {
@@ -190,12 +321,15 @@ impl Form {
             ],
             selected: 0,
             error: None,
+            section: 0,
+            sections_focused: false,
         }
     }
     pub fn title(&self) -> &str {
         match &self.kind {
             FormKind::Download(_, _) => "Download",
-            FormKind::Settings(_) => "Settings",
+            FormKind::Settings(_) => "General settings",
+            FormKind::Action { title, .. } => title,
             FormKind::Auth => "Connect your YouTube account",
             FormKind::Keys(_) => "Keyboard shortcuts",
         }
@@ -203,7 +337,61 @@ impl Form {
     pub fn value(&self, index: usize) -> &str {
         self.fields[index].value.text.trim()
     }
+    pub fn select_section(&mut self, section: usize) {
+        self.section = section.min(self.sections().len() - 1);
+        self.selected = self.sections()[self.section].1[0];
+    }
+    pub fn move_field(&mut self, delta: isize) {
+        if self.is_grouped() {
+            let indices = self.sections()[self.section].1;
+            let current = indices
+                .iter()
+                .position(|i| *i == self.selected)
+                .unwrap_or(0);
+            self.selected = indices[current.saturating_add_signed(delta).min(indices.len() - 1)];
+        } else {
+            self.selected = self
+                .selected
+                .saturating_add_signed(delta)
+                .min(self.fields.len() - 1);
+        }
+    }
+    pub fn cycle_choice(&mut self, delta: isize) {
+        let field = &mut self.fields[self.selected];
+        if field.toggle {
+            self.toggle();
+            return;
+        }
+        if !field.choices.is_empty() {
+            let current = field
+                .choices
+                .iter()
+                .position(|v| *v == field.value.text)
+                .unwrap_or(0);
+            let index =
+                (current as isize + delta).rem_euclid(field.choices.len() as isize) as usize;
+            field.value = Editor::new(field.choices[index]);
+        }
+    }
     pub fn toggle(&mut self) {
+        if self.selected == 0
+            && let FormKind::Download(_, base) = &self.kind
+        {
+            let current = self.value(0) == "yes";
+            let old = if current {
+                &base.audio_directory
+            } else {
+                &base.directory
+            };
+            let new = if current {
+                &base.directory
+            } else {
+                &base.audio_directory
+            };
+            if self.value(4) == old.to_string_lossy() {
+                self.fields[4].value = Editor::new(new.to_string_lossy());
+            }
+        }
         if self.fields[self.selected].toggle {
             let v = self.value(self.selected) != "yes";
             self.fields[self.selected].value = Editor::new(if v { "yes" } else { "no" });
@@ -246,6 +434,7 @@ impl Form {
         } else {
             Some(self.value(12).into())
         };
+        o.audio_quality = self.value(13).into();
         o.validate()?;
         Ok((media.clone(), o))
     }
@@ -310,6 +499,43 @@ impl Form {
         c.download.post_download_hook = (!self.value(31).is_empty()).then(|| self.value(31).into());
         c.max_retries = self.value(32).parse()?;
         c.retry_delay_seconds = self.value(33).parse()?;
+        c.playback_history = self.value(34) == "yes";
+        c.ffprobe = self.value(35).into();
+        c.download.sponsorblock_api = self.value(36).into();
+        c.download.audio_quality = self.value(37).into();
+        c.reduced_motion = self.value(38) == "yes";
+        c.download.audio = self.value(39) == "yes";
+        c.download.quality = self.value(40).into();
+        c.download.container = self.value(41).into();
+        c.download.audio_container = self.value(42).into();
+        c.download.playlist = self.value(43) == "yes";
+        c.download.skip_duplicates = self.value(44) == "yes";
+        c.download.bandwidth_kib = self.value(45).parse()?;
+        c.cliamp = self.value(46).into();
+        c.nmcli = self.value(47).into();
+        c.radio_pinned_countries = self
+            .value(48)
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(str::to_uppercase)
+            .collect();
+        c.radio_servers = self
+            .value(49)
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(str::to_owned)
+            .collect();
+        c.show_hints = self.value(50) == "yes";
+        c.playback_sponsorblock = self.value(51).into();
+        c.playback_sponsor_categories = self
+            .value(52)
+            .split(',')
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
+            .map(str::to_owned)
+            .collect();
         c.validate()?;
         Ok(c)
     }
@@ -349,5 +575,25 @@ mod tests {
         assert!(saved.clipboard_watcher);
         form.fields[18].value = Editor::new("25:00-08:00");
         assert!(form.config_values().is_err());
+    }
+    #[test]
+    fn switching_audio_mode_uses_its_default_destination_but_preserves_custom_edits() {
+        let options = DownloadOptions {
+            directory: "/video".into(),
+            audio_directory: "/music".into(),
+            ..Default::default()
+        };
+        let mut form = Form::download(Media::default(), options);
+        form.toggle();
+        assert_eq!(
+            form.download_values().unwrap().1.audio_directory.to_str(),
+            Some("/music")
+        );
+        form.fields[4].value = Editor::new("/custom");
+        form.toggle();
+        assert_eq!(
+            form.download_values().unwrap().1.directory.to_str(),
+            Some("/custom")
+        );
     }
 }

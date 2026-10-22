@@ -2,18 +2,27 @@ pub mod auth;
 pub mod browse;
 pub mod desktop;
 pub mod download;
+mod http;
 pub mod images;
+pub mod library;
 pub mod migration;
 pub mod native;
+mod native_post;
 pub mod paths;
 pub mod player;
 pub mod process;
 pub mod profiles;
 pub mod queue_import;
 pub mod radio;
+pub mod sponsorblock;
 pub mod store;
+#[cfg(test)]
+mod test_http;
 pub mod theme;
+mod throttle;
 pub mod vpn;
+pub mod watch;
+mod worker_process;
 
 pub fn http_client(proxy: Option<&str>) -> anyhow::Result<reqwest::Client> {
     let mut builder = reqwest::Client::builder()

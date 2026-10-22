@@ -1,429 +1,263 @@
 # Rust edition
 
-The Rust edition has four working provider tabs, a native download backend,
-mpv playback, browser-cookie sign-in and desktop theme following. It is an alpha:
-its automated tests are offline, and live signed-in behavior still needs checking
-on CachyOS with Caelestia, Ghostty and Brave Origin. The original Python release
-remains runnable while those acceptance gates are completed.
+Alpha.5 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+application. mpv plays video in its own window and audio through the shared player.
+CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
 ## Build and run
 
-Install current stable Rust, a C compiler, pkg-config and OpenSSL development
-headers. On CachyOS/Arch:
+On CachyOS/Arch:
 
 ```sh
-sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg
+sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
 rustup default stable
-git clone https://github.com/Vanir20342222/ytui.git
+git clone --branch improve/playback-navigation https://github.com/Vanir20342222/ytui.git
 cd ytui
-cargo run --release --locked -p ytui -- doctor
-cargo run --release --locked -p ytui
+./install.sh
+hash -r
+~/.local/bin/ytui --version
+~/.local/bin/ytui doctor
 ```
 
-Or run `./install-rust.sh` from the checkout. It installs `~/.local/bin/ytui-rs`
-alongside Python's `ytui`. It does not install system dependencies or modify the
-Python installer. Every example below uses `ytui-rs`; with Cargo, replace it with
-`cargo run -p ytui --`.
+The installer builds Rust and installs `ytui` and `ytui-rs` in `~/.local/bin`, or
+`YTUI_INSTALL_DIR`. It builds before replacing launchers, replaces an old symlink
+itself, and preserves settings, queues, history, browser profiles and media.
+`install-rust.sh` is a compatibility entry point. No system package is installed
+by these scripts. Native extraction can run without external yt-dlp; auto fallback
+requires that tool and its supported JavaScript runtime.
+
+### Updating an older Rust alpha
+
+Changes on this branch are not yet on main. Pulling source does not replace your
+installed executable:
 
 ```sh
-ytui-rs --demo                         # fictional catalog, no browser access
-ytui-rs init                           # create ~/.config/ytui/rust.toml
-ytui-rs doctor                         # dependencies and desktop integration
-ytui-rs --help
+cd ~/ytui
+git fetch origin
+git switch improve/playback-navigation
+git pull --ff-only
+./install.sh
+hash -r
+~/.local/bin/ytui --version             # 0.2.0-alpha.5
+type -a ytui ytui-rs
 ```
 
-Linux is the supported implementation target. macOS/Windows packaging and
-platform playback adapters are not implemented; the player uses Unix sockets.
+An existing `download_backend = "native"` stays native. To enable the recommended
+automatic fallback in that configuration, open **F2 → Select extraction backend**,
+choose `auto`, then save. General settings → Tools exposes the same choice.
+Existing jobs with an explicit backend override retain it; change their download
+options or press `Y` for an explicit yt-dlp retry. `doctor` prints the executable
+and configuration paths to identify another installation earlier in PATH.
 
-## Native Rust and the explicit fallback
-
-`download_backend = "native"` is the default for downloads and YouTube playback.
-The application links [aagedal/yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs), pinned
-to revision `10223c019ef6ec5552627b90251d8e967404e440`. It executes in a supervised
-copy of the Rust binary so blocking extraction and child FFmpeg jobs can be
-terminated. It does not invoke Python. Browser imports use the Rust rookie crate.
-
-Upstream's native YouTube extractor remains an early prototype. Many current
-videos, token-restricted streams, live YouTube, YouTube playlists and persistent
-cross-process transfer resume are unsupported. Native pause stops the operation;
-resume starts that transfer again. The yt-dlp fallback can continue its own
-partial downloads when the source supports it. A partial created by one backend
-is not transferred to the other backend.
-
-YouTube signature/n challenges may require an explicitly installed Deno runtime.
-The pinned upstream expects Deno 2.9.7 for its bundled solver; configure its actual
-executable path with `native_js_runtime = "/usr/bin/deno"`. A runtime is only
-launched when needed. Deno and FFmpeg are external tools, not Python dependencies.
-
-**There is no automatic fallback.** To use the Python yt-dlp executable deliberately:
-
-- Press `Y` on a failed/paused download to retry that job with yt-dlp.
-- Press `Y` on a video/song to play it through mpv's yt-dlp hook.
-- Set a download form's backend to `yt-dlp` for that job.
-- Run `ytui-rs download URL --backend yt-dlp`.
-- Set `download_backend = "yt-dlp"` to select it globally.
-
-Install yt-dlp separately for these actions. Native-only use does not require it.
-Settings choose the backend for new playback, previews and download jobs. Existing
-jobs retain any explicit backend override.
-
-Native download support includes direct HTTP media, the upstream HTML5/YouTube
-subset, separate-stream merging, audio conversion, remuxing and metadata tagging.
-Native subtitle selection, sidecar downloads and FFmpeg embedding now use the
-upstream Rust APIs. Language selectors support literal codes, `all` and exclusions;
-regex selectors still require explicit fallback. Sidecars are retained alongside
-media, including when embedded. Unavailable languages or unsupported embedding
-produce visible errors and preserve existing files. Native SponsorBlock, chapter
-splitting and bandwidth caps are currently rejected with an actionable fallback message; they are not silently
-ignored. The fallback implements these download controls. Native template syntax
-is narrower than yt-dlp's; the shipped template works on both backends.
-
-## Your browser and account
-
-Sign in to YouTube in the selected browser first. Discovery lists directories
-without opening browser cookie databases:
-
-```sh
-ytui-rs auth profiles
-ytui-rs auth import --browser brave-origin --profile "$HOME/.config/BraveSoftware/Brave-Origin/Default"
-ytui-rs auth status
-```
-
-Brave's [Linux path implementation](https://github.com/brave/brave-core/blob/master/chromium_src/chrome/common/chrome_paths_linux.cc)
-uses `BraveSoftware/Brave-Origin` for Origin, with optional channel suffixes.
-Automatic Origin selection works only when discovery finds exactly one profile;
-otherwise select one explicitly. `brave://version` shows the actual Profile Path.
-Brave Origin decryption on the user's keyring still needs local verification.
-
-Other supported import routes include Firefox, Librewolf, Chrome, Chromium, Edge,
-Vivaldi, and custom profile paths for Zen. Flatpak Brave/Firefox roots are included
-in directory discovery. Not every browser packaging/keyring combination is tested.
-
-In the TUI, `:auth` opens the same setup form. Choose a browser/profile or a
-Netscape cookie file. Candidate credentials are scoped to relevant Google/YouTube
-domains, checked for a valid session, and validated against the selected YouTube
-account before replacing a stored session. Existing credentials remain intact
-when import/validation fails. A locked desktop keyring must be unlocked by the user.
-
-The default store is the desktop keyring. For an explicitly chosen local-file
-alternative:
-
-```sh
-ytui-rs auth import --cookies /path/to/cookies.txt --file-store
-```
-
-This saves credentials in a private directory with atomic `0600` files and records
-`auth_store = "file"` in the config. Temporary child-tool cookie files are private
-and removed after normal completion/cancellation. Forced machine/process failure
-can leave private temporary files; they are never committed or logged.
-
-`:disconnect` or `ytui-rs auth disconnect` removes the selected ytui session store.
-It does not sign the browser out. Disconnect also clears the TUI's account-scoped
-pages and playback queue. CLI disconnect takes effect in another running TUI when
-it is restarted. Do not share cookie files, raw API fixtures, or signed stream URLs.
-
-`account_index` selects the browser's YouTube account/channel index. Changing it
-in the TUI validates the candidate account and invalidates old account pages and
-requests. Separate simultaneously signed-in ytui profiles are not yet supported.
-
-## Navigation
+## Navigation and settings
 
 | Key | Action |
 | --- | --- |
-| `1`–`4`, `Tab`, `Shift+Tab` | Switch tabs |
+| `1`–`4`, Tab / Shift+Tab | Workspaces |
 | Arrows or `j` / `k` | Select an item |
-| `/` | Search, or paste a URL to open download options |
-| `:` | Run a command/feed action |
-| `Enter` | Open collection / play selected media |
-| `v` | Muted ten-second mpv video preview |
-| `Esc` | Close preview/modal or go back |
-| `d` | Download options |
-| `Space` | Pause playback; pause/resume selected job in Downloads |
-| `Delete`, `r`, `Ctrl+↑` / `Ctrl+↓` | Remove, retry or reorder downloads |
-| `Y` | Explicit yt-dlp retry/playback fallback |
-| `e`, `p` | Add to playback queue / show queue |
-| `[` / `]`, `←` / `→` | Previous/next track, seek ±5 seconds |
-| `+` / `-`, `m` | Volume, mute |
-| `s`, `R`, `x` | Shuffle, cycle repeat, stop |
-| `f` | Favorite selected radio station |
-| `n`, `Ctrl+r` | Load more / refresh |
-| `t`, `,`, `?` | Themes, settings, contextual help |
-| `C` | Suspend ytui and run installed cliamp |
-| `q`, `Ctrl+c` | Clean shutdown |
+| `b` | Feed/source list; Enter opens the selected feed |
+| `/` | Centered search / URL form |
+| `F2` | Searchable Actions panel; type words, arrows choose, Enter opens |
+| `,` | General settings |
+| `F1` | Show/hide bottom shortcut hints; stored in configuration |
+| `?` | Keyboard and navigation help |
+| `Enter` | Play a video/song/live station, or open a collection |
+| `v` | Explicit muted ten-second low-resolution mpv preview |
+| `d` | Categorized download options |
+| `F3` | Categories supplied by the current YouTube/Music response |
+| `Esc` | Close/back; restore previous page and selection |
+| `n` | Explicitly load another page; near-end scrolling also prefetches |
+| `u` | Resume a locally saved playback position |
+| `e`, `p` | Add media to queue / open queue |
+| `l` | Open selected station's separate track library |
+| `Y` | Explicitly retry/play selected media through yt-dlp |
+| `q`, Ctrl+C | Quit |
 
-Forms use `↑/↓` or `Tab` to change fields, `Space` for toggles, `Enter` to submit,
-and `Esc` to cancel. Unicode editing and bracketed paste are supported. Typing in
-an input never triggers the global letter shortcuts. Help reflects remappings and
-scrolls with arrows/Page Up/Page Down. `:keys` edits bindings, including several
-keys per action separated by spaces; duplicate assignments are rejected. Ctrl+C
-remains the emergency quit key.
+The bottom command entry has been removed. `:` is a compatibility key for the
+Actions panel. Accounts, feeds, Music category search, downloads/history, watches,
+profiles, VPN, diagnostics and updates have labeled actions; actions needing a
+path, query, name or ID open a form. Search input never runs arbitrary commands.
+Internal action routing retains migration compatibility; text in the search form
+is always a query or URL. Headless CLI subcommands remain available.
 
-```toml
-[keybindings]
-"V" = "preview"
-"ctrl+d" = "download"
-"f1" = "help"
-```
+General settings contains **nine sections / 53 fields**: General, Appearance,
+Downloads, Subtitles & media, Network & account, Schedule, Tools, Radio, Playback.
+Download options has three sections: Quality & format, Files & playlist, Captions
+& metadata. Wide forms space fields vertically; compact forms keep selected fields
+visible. PgUp/PgDn or Ctrl+Left/Right changes section; F6 focuses categories;
+Up/Down or Tab changes field, Left/Right cycles choices, Space toggles switches,
+Ctrl+U clears text, Enter validates/applies, and Esc cancels. Fields, categories,
+Save/Cancel also accept mouse clicks. Validation errors preserve the draft.
 
-These move the action's default binding to the supplied key. Valid action names
-are defined in `ytui-core/src/shortcuts.rs`. Unknown actions/key names are errors.
+Defaults apply to new jobs. Auth storage changes copy the currently loaded session
+to the chosen store; account changes validate before saving. Reduced motion limits
+redraws to ten frames per second. Normal input is capped at sixty; idle player
+status does not force constant redraws. State writes wait independently of input.
+Keys can be remapped through F2 → Keyboard bindings or `[keybindings]` in TOML.
+Ctrl+C is reserved for emergency quit.
 
-## YouTube and Music
+## Native Rust and automatic fallback
 
-The browse and Music tabs have separate WEB/WEB_REMIX request contexts. Signed-in
-feeds use the selected account's browser session, not a generic video search
-standing in for a personal library. Reads use an isolated internal API adapter;
-YouTube service changes can require parser updates. Access is read-only: no hidden
-likes, subscription changes, playlist mutations or watch-history uploads.
+New configurations default to `download_backend = "auto"`, as confirmed by the
+user. Native [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs), pinned at
+`10223c019ef6ec5552627b90251d8e967404e440`, tries first in a supervised copy of the
+Rust application. Supported native extractor limitations then use external
+**yt-dlp**. Playback reports the fallback in the player strip. Auto playback can
+also retry a rejected native stream through yt-dlp. It never downloads/install tools.
 
-Useful commands:
+- `auto`: Rust first, yt-dlp for supported extractor limitations.
+- `native`: strict Rust extraction, with actionable failures and no external fallback.
+- `yt-dlp`: explicitly use the external extractor immediately.
 
-```text
-:home
-:search query
-:subscriptions
-:later
-:liked
-:library
-:history
-:details
-:related
-:playlist PLAYLIST_ID
-:channel CHANNEL_ID
-:songs ambient piano
-:albums live sessions
-:artists artist name
-:albums
-:artists
-```
+`Y` is still available for one explicit retry. Per-job backend choices and
+`ytui download URL --backend auto|native|yt-dlp` override the global default.
+Cancellation and local publication/disk failures do not trigger an external retry.
+Auto fallback is not a solution to every VPN, account, consent or bot restriction.
 
-The final two open the signed-in Music album/artist libraries. `:library` in Music
-opens playlists; `:liked` opens liked songs. Collection pages are navigable with
-`Enter`; `n` loads another page and `Esc` restores the previous page and selection.
-`:details` loads the selected video's description and metadata. Thumbnails render
-for the selected item in wide layouts; narrow terminals retain a usable text list.
-There is no in-terminal moving video; previews and full video use mpv windows.
+The pinned native solver requires an explicitly configured **Deno 2.9.7** path
+for its supported signature/n challenges. F2 → Configure installed native Deno
+runtime sets `native_js_runtime`; a newer distribution Deno may only be compatible
+with external yt-dlp. No executable or browser session is fetched automatically.
+Native upstream still has token/live/playlist and persistent range-resume limits.
+Pausing a native transfer preserves intent but restarting it may repeat transfer;
+yt-dlp can continue its own partials. Partials are not moved between backends.
 
-## Downloads and local conversion
+## Browsing and thumbnails
 
-```sh
-ytui-rs download 'https://example.com/video.mp4'
-ytui-rs download URL --audio --directory "$HOME/Music/ytui"
-ytui-rs download PLAYLIST_URL --playlist --items '1,3:7' --backend yt-dlp
-```
+YouTube and Music use separate WEB / WEB_REMIX contexts. Browser-session import
+is explicit: **F2 → Account → Connect browser or cookie file**. Select Brave Origin
+and the actual Profile Path from `brave://version`, or a Netscape cookie file.
+Cookies stay on the user's machine, scoped to approved YouTube/Google origins.
+The default store is the desktop keyring; `auth_store = "file"` uses private files.
+F2 → Disconnect removes ytui's saved session and account caches, leaving the browser.
 
-The download form chooses audio/video, height, containers, destination, playlist
-selection, subtitles, metadata, cover art, rate limit and backend. It snapshots
-these options per job. A video URL is single-video by default; a whole playlist is
-an explicit choice. Download progress can have unknown size or ETA. Completion
-requires a successful child exit, successful postprocessing and existing final
-output files. Download history remains visible after restart; `:clear` clears
-completed rows without deleting media. `:export PATH` exports queue/history JSON.
+Home, subscriptions, Watch Later, liked media, library and history depend on what
+the selected account/service returns. Anonymous Home can be empty; `/` offers
+public search. Account access is read-only: no likes, playlist edits, subscriptions
+or automatic watch-history uploads. Consent or cross-origin sign-in redirects
+require completing that flow in the browser and importing the session again.
 
-`:convert "/path/to/local file.mkv"` opens conversion options for a local file.
-FFmpeg writes a separate output and never changes the input. Existing conversion
-destinations are not overwritten. Partial conversion files can be removed manually.
+Home/search cards retain server section labels. Category chips and F3 follow the
+actual server-provided endpoint/parameters; available categories differ by account,
+feed and region. Unsupported response shapes can still require provider updates.
+When selection approaches the last twelve loaded items, a continuation loads in
+the background. Appending keeps selection and existing content, deduplicates IDs,
+and stops repeated/empty tokens. Failures wait for a deliberate refresh/retry.
 
-Transient network failures have bounded, cancellable backoff; permanent errors are
-not retried automatically. Pause/removal invalidates older worker results before
-they can touch the queue or persistence. A single-writer lock protects the state
-DB, and a dedicated DB thread owns its connection. Normal shutdown reaps owned
-process groups before closing the database.
+The catalog gets 74% of the browse width on wide terminals, with inline image
+cards and a smaller details pane. Music artwork uses a square region. Small
+terminals keep a usable list. Thumbnails choose the smallest advertised size
+covering the displayed pixels; supported dynamic image origins receive size
+parameters. Nearby images prefetch with bounded concurrency. Decoded images are
+cached in memory (96 entries / 32 MiB), resized PNGs on disk (128 MiB). Disk cache
+survives restart and provider outages. Cold images still need their first fetch;
+a quiet placeholder replaces the loading text. Images never receive account cookies.
 
-## Scheduling, clipboard and notifications
+## Player, radio and SponsorBlock
 
-Settings expose daily download and bandwidth windows in local system time:
+mpv's mouse controller remains available. Press **g in the mpv window** for the
+bundled menu: quality, audio/subtitle tracks, subtitle visibility, speed, chapters,
+SponsorBlock and fullscreen. Quality changes re-resolve the source and resume near
+the previous position while keeping a paused video paused. The window menu uses modern mpv's `user-data` property;
+use current mpv (0.38 or later). Hardware decoding and native window video remain
+mpv's responsibility. An in-terminal renderer such as mpv `tct` has lower image
+quality and a larger terminal/CPU cost; it is not enabled by this change.
 
-```toml
-[schedule]
-download_window = "22:30-06:00"   # blank field / omitted key means all day
-bandwidth_window = "09:00-18:00"
-window_bandwidth_kib = 512       # total cap during this window; 0 = unlimited
-```
+In the terminal, `o` opens player actions; the player strip has clickable controls
+and a clickable seek timeline. `Space` pauses (in Downloads it controls the selected
+job), Left/Right seeks five seconds, `+`/`-` changes volume, `m` mutes, `[`/`]`
+changes track, `<`/`>` changes speed, `a` changes audio, `c` changes subtitles, `V`
+toggles subtitles, Ctrl+Left/Right changes chapter and `z` toggles fullscreen.
+`s` shuffles, `R` cycles repeat, `x` stops. Volume, mute and speed persist privately
+in `player.json` and carry across tracks/stations/restarts. Status polling uses
+one bounded IPC batch; commands are prioritized over the polling tick.
 
-The normal total cap is `download.global_bandwidth_kib`. The window rate replaces
-that cap while its window is active; a per-job cap can lower it further. The total
-cap is divided conservatively over configured concurrency, in bytes, including
-small limits. These caps currently require **explicitly selecting yt-dlp** because
-the pinned native downloader has no rate-limit adapter.
-
-Closing the daily window stops/reaps active jobs and leaves them queued. Opening
-it resumes eligible jobs; manual pauses remain paused. Changing the active total
-cap restarts transfers so the new cap takes effect. Native transfers restart from
-the beginning; fallback continuation follows yt-dlp's normal partial-file support.
-No downloads run after ytui quits: keep the TUI running for scheduling.
-
-`:schedule 30m URL`, `:schedule 2h URL` or `:schedule 90s URL` creates a persistent
-delayed job. It also respects the daily window. Headless `download` refuses to
-start outside that window unless `--now` is explicitly supplied; it snapshots the
-rate at launch rather than running the TUI scheduler during a long transfer.
-Recurring channel/playlist watch subscriptions are not implemented.
-
-Clipboard watching is disabled by default. Enable it in Settings or with
-`:clipboard on`; disable with `:clipboard off`. It polls the regular clipboard
-at two-second intervals using `wl-paste` on Wayland or `xclip`/`xsel` on X11.
-Install `wl-clipboard` on CachyOS/Wayland. The first read establishes a baseline;
-subsequent new YouTube URLs offer `:clipboard` to review download options. It
-never automatically starts a download, reads the primary selection, or saves
-arbitrary clipboard text. Unavailable readers back off for 30 seconds.
-
-Desktop completion/failure notifications use the native freedesktop D-Bus API.
-`notifications` controls them; `notification_sound` defaults to false. Sounds use
-the notification server's sound hints and depend on that server's configuration.
-Notification failure never changes download success. No notification tools or
-Python modules are required. Actual desktop/sound acceptance is still pending.
-
-## History, groups, profiles and import
-
-`:downloads completed QUERY` searches completed titles/creators/URLs;
-`:downloads failed`, `:downloads audio`, `:downloads video`, or `:stats` opens the
-filtered history/statistics panel. `f` cycles filters, `Enter` jumps to the actual
-queue row, and `g` expands its group. Statistics use recorded progress and paths;
-they do not claim to measure current disk usage. `:history` in Downloads opens
-completed downloads; in YouTube/Music it keeps its personal-feed meaning.
-
-Open a collection and use `:download-page 1,3:7` or `:download-page all` to queue
-individual entries from the **loaded page**, using the current download defaults.
-This does not silently fetch or download unseen pages. `:groups` expands these
-batches or migrated playlist groups while preserving entry order.
-
-```text
-:profiles
-:profile save Music
-:profile load Music
-:profile delete Music
-:import /path/to/queue.json
-:export /path/to/queue.json
-```
-
-Profiles retain the complete native configuration and keymap. Loading goes through
-normal validation/account-switch handling. Legacy profile JSON, unsupported values,
-and original shortcuts are retained in migration backups and `legacy_settings` /
-`legacy_keybindings`; preservation does not make unsupported fields active.
-
-Queue import accepts Rust snapshots, legacy `items` JSON, URL arrays or one URL
-per text line. It imports URL, mode, quality and title into **new queued jobs**;
-other defaults come from your current config. It never imports executable hooks,
-credentials or arbitrary output paths from an export. Invalid imports add nothing;
-repeat imports skip duplicates. Headless `ytui-rs import FILE` saves the queue for
-the next TUI session. `:clear`/removal delete records, never media files.
-
-Legacy slash commands are also accepted when pasted/entered into the input
-(e.g. `/history`, `/queue`, `/audio`, `/pauseall`, `/stopall`, `/profile`). Their
-colon equivalents are available; `/history` always means download history.
-`/update` and `/log` do not have native equivalents yet. Update the pinned Rust
-application through a new build; no extractor is downloaded or replaced silently.
-
-## Optional VPN control
-
-`:vpn list` lists existing NetworkManager VPN/WireGuard profiles with UUIDs.
-`:vpn connect UUID` and `:vpn disconnect UUID` explicitly operate on one listed
-profile. The same actions are available as `ytui-rs vpn list/connect/disconnect`.
-NetworkManager handles authentication and permissions; ytui neither escalates
-privileges nor reads/imports WireGuard private keys. It never probes or changes
-VPN connections at startup and never disconnects on quit. `nmcli` must be installed;
-its path can be set with `nmcli = "/path/to/nmcli"`.
-
-This supports Proton configurations already imported into NetworkManager. It does
-not implement the standalone Proton CLI login/server selector, raw wg-quick config
-management, or Windows/macOS VPN helpers. Those legacy scope items remain visible
-in PARITY.md. Automated tests invoke only a synthetic nmcli executable.
-
-## Radio and cliamp
-
-The radio tab fetches live cliamp channel metadata from its service. `Enter` opens
-a channel's track library when provided, or plays a live-only station. `:live`
-plays a selected channel's continuous stream. Track libraries support normal queue
-controls; live streams reconnect with bounded delays. mpv supplies stream metadata.
-
-```text
-:cliamp
-:radio station name
-:country DE
-:tag jazz
-:favorites
-:custom
-:live
-```
-
-Radio Browser uses server discovery/failover and country/tag/name filtering.
-Favorite stations persist locally. Custom HTTP(S) stations can be configured in
-`rust.toml` or imported without changing cliamp's files:
+**Enter on a radio station plays its continuous live stream.** `l` opens its track
+library if exposed. Playing a song queues the subsequent loaded songs, advancing
+on completion. Live stations reconnect with bounded delays. Favorites, country/tag
+search and Radio Browser failover are available through the source list/Actions.
+Custom HTTP(S) stations can be added through Actions or imported read-only:
 
 ```sh
-ytui-rs import-radio "$HOME/.config/cliamp/radios.toml"
-ytui-rs import-radio "$HOME/.config/cliamp/radio_favorites.toml"
+ytui import-radio "$HOME/.config/cliamp/radios.toml"
+ytui import-radio "$HOME/.config/cliamp/radio_favorites.toml"
 ```
 
-`C` runs cliamp as a separate installed application while ytui's terminal is
-suspended. This is not a full reimplementation of cliamp's unrelated providers.
-Catalogs are cached to disk and used with a visible notice when the service is
-unavailable. Existing loaded pages and saved favorites remain usable while
-refreshing. `:pin-country DE`, `:unpin-country DE` and `:countries` manage saved
-country shortcuts; browse one with `:country DE`. Location-based suggestions are
-not implemented; no location lookup is made.
+The optional installed cliamp program launches through a separate action while
+ytui suspends/restores its terminal. Its unrelated providers are outside this port.
 
-## Themes and terminal images
+Direct extraction plays media without the YouTube website's ad player. This is the
+ad-free playback path; it does not promise removal of server-side ads embedded in
+a stream. **Playback SponsorBlock** defaults to `skip` with category `sponsor`.
+Settings → Playback supports `skip`, `mark`, `off` and a category list. API requests
+contain only the public video ID and selected categories, never cookies/signed URLs.
+Segments appear in a contrasting timeline color. `B` toggles skipping for the
+current media; `U` replays the last skipped range without immediately skipping it
+again. Overlapping segments merge for a forward seek. An API outage leaves playback
+working and shows a notice. The source video is never cut by playback skipping.
 
-`t` opens curated dark/light themes. `:theme NAME` applies a named theme, `system`
-follows the desktop, and `terminal` uses terminal ANSI colors. A custom palette
-file uses Omarchy-style `background`, `foreground`, optional accent/status colors.
+Download SponsorBlock settings are separate: selected categories can be marked or
+removed with supervised FFmpeg. Native cuts with requested captions require the
+fallback to preserve timing. Chapter splitting may round to keyframes. Source and
+completed media are preserved when a later processing/publication step fails.
 
-System providers are `auto`, `caelestia`, `omarchy`, `portal` and `gnome`:
-
-- Caelestia: `$XDG_STATE_HOME/caelestia/scheme.json`, mapping Material color roles.
-- Omarchy: `$XDG_STATE_HOME/omarchy/current/theme/colors.toml`, with the older
-  `$XDG_CONFIG_HOME/omarchy/current/theme/colors.toml` fallback and `light.mode`.
-- GNOME/KDE/other compatible desktops: Settings portal light/dark/accent hints;
-  GNOME GSettings is an available fallback. These hints are not a full GTK palette.
-
-Palette files are polled every two seconds, covering symlink and atomic directory
-replacement. Portal signals also trigger updates. Invalid intermediate files keep
-the last valid palette. Theme scripts are never executed and desktop settings are
-not modified. Manual theme selection overrides automatic following.
-
-`image_protocol` supports `auto`, `kitty`, `sixel`, `iterm2`, `halfblocks`, `none`.
-Auto detection queries the terminal; half-block rendering is the fallback. Ghostty
-uses the Kitty graphics protocol. For tmux/SSH, set an explicit protocol if
-capability reporting is unreliable. Explicit protocol changes apply immediately;
-switching back to `auto` uses half-blocks until the next startup capability query.
-Moving app state with `--state-dir` does not relocate the desktop palette files.
-Image decoding/encoding runs outside the
-render loop, with request/size limits and a bounded disk cache.
-
-## State, migration and rollback
-
-Rust configuration: `$XDG_CONFIG_HOME/ytui/rust.toml`.
-Rust state: `$XDG_STATE_HOME/ytui/rust/state.db`.
-Thumbnail cache: `$XDG_CACHE_HOME/ytui/rust/images`.
-Use `--config PATH` and `--state-dir PATH` for isolated installations/tests.
+## Downloads, local library and data
 
 ```sh
-ytui-rs migrate             # report only; no Python state is modified
-ytui-rs migrate --apply     # back up and import supported fields
+ytui download URL --backend auto
+ytui download URL --audio --audio-quality 320K --directory "$HOME/Music/ytui"
+ytui download PLAYLIST_URL --playlist --items '1,3:7' --backend yt-dlp
+ytui --offline
+ytui migrate                          # preview legacy migration
+ytui migrate --apply                  # import with backups
 ```
 
-Migration imports queue/history order, paused state, group IDs, paths, supported
-settings/shortcuts and profiles, including bandwidth schedules and desktop toggles.
-Repeated imports do not duplicate jobs. An online
-SQLite backup retains the source groups/schema/fields not represented by Rust's
-current UI. Backups also preserve Python settings/shortcuts and existing Rust
-configuration. Review [PARITY.md](PARITY.md) for deferred features and data fields.
+The queue persists phases, progress, retries, pause/cancel, order, groups and final
+output paths. Completion requires a successful process and existing reported final
+file. Download options include audio/video quality/container, destination, playlist
+ranges, captions, metadata, cover, rate caps and backend. Unknown sizes/ETAs remain
+unknown. Native captions support literal language selection and embedding; regex,
+translation and additional format conversion remain gaps. Local conversion keeps
+its source. Removal/clear deletes records, not completed media.
 
-Rollback is simply using the Python launcher and its original state again. Do not
-run both editions downloading to the same destination simultaneously. Rust's
-separate state lock cannot coordinate another program's download directory.
+F2 exposes history/statistics/filtering, page selection, JSON/text import/export,
+profile save/load/delete, clipboard review, delayed jobs and settings. Imported
+queues never acquire executable hooks from an export. User hooks are opt-in and
+receive literal arguments/environment, without a shell. Notification delivery and
+Wayland clipboard behavior still need desktop acceptance.
 
-## Development checks
+Local resume is explicit with `u`; nothing plays at startup and no history is
+uploaded. Offline startup disables account loading, remote providers/thumbnails,
+remote playback/jobs and watch polling. It lists existing recorded outputs and
+excludes missing/sidecar files. Online queue entries wait for an online session.
 
-```sh
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --locked -- -D warnings
-cargo test --workspace --locked
-cargo build --release --locked
-```
+Collection watches have a complete initial baseline with no retroactive downloads,
+duplicate checks, backoff and account invalidation. Actions adds a watch for the
+current collection; the manager pauses/removes/opens it. Limits are two checks at
+once, 120 seconds, 32 pages, 2,000 entries and 16 MiB. Download/bandwidth windows use
+local HH:MM-HH:MM, including midnight boundaries. Headless `--now` explicitly bypasses
+a download window. Long DST transitions still need local acceptance.
 
-Tests use synthetic cookies, recorded/synthetic API shapes, fake processes, local
-HTTP transfers and fake mpv IPC. No network account, browser database, desktop
-keyring, audio device or live radio station is needed. Live-service and target
-Linux checks are recorded separately in [VALIDATION.md](VALIDATION.md).
+F2 → VPN operates on existing NetworkManager VPN/WireGuard profile UUIDs only.
+No connection changes happen at startup. This is not a standalone Proton login or
+server selector; keep using Proton normally. ytui never requires root for cookies.
+
+State format 2 backs up an old version-1 database before upgrading and rejects
+older readers. Migration retains original legacy files, raw unsupported values
+and profile/keymap backups. Restore a backup into a separate state directory when
+rolling back; do not let an older binary rewrite newer state. The former Python
+source remains recoverable from Git history. See [remaining work](REMAINING_WORK.md).
+
+## Validation and diagnostics
+
+`ytui doctor` checks configuration/tools without provider requests. `doctor --network`
+probes public YouTube/Music/radio without reading browser sessions or changing VPN.
+F2 → Diagnostics reports sanitized recent errors. F2 → Check for updates describes
+the source-build update; it never silently replaces binaries. No signed release
+archives or distribution packages are implemented yet.
+
+Tests, capture reproduction and actual failures are recorded in
+[VALIDATION.md](VALIDATION.md), [FEATURE_AUDIT.md](FEATURE_AUDIT.md) and the
+[WQHD gallery](UI_THEMES.md). Browser/keyring, Ghostty graphics, audio devices,
+real mpv window integration and successful live YouTube access remain acceptance
+gates where the cloud cannot reproduce the user's desktop/network.

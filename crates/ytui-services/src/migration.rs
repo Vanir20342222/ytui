@@ -34,6 +34,30 @@ pub fn import(
         let data: Value = serde_json::from_str(&std::fs::read_to_string(&settings)?)?;
         config.legacy_settings = Some(serde_json::to_string(&data)?);
         map_settings(&data, config);
+        let unapplied = [
+            "/quality/prefer_hfr",
+            "/quality/auto_convert_video",
+            "/directories/recent_dirs",
+            "/directories/open_after_download",
+            "/appearance/icon_style",
+            "/appearance/ui_density",
+            "/subtitles/format",
+            "/subtitles/auto_translate",
+            "/subtitles/auto_translate_lang",
+            "/network/browser_cookies",
+            "/network/cookies_from_browser",
+            "/network/cookies_file",
+            "/network/cookie_file",
+        ]
+        .into_iter()
+        .filter(|path| data.pointer(path).is_some())
+        .collect::<Vec<_>>();
+        if !unapplied.is_empty() {
+            report.notes.push(format!(
+                "Retained without applying (see docs/REMAINING_WORK.md): {}",
+                unapplied.join(", ")
+            ));
+        }
         if apply {
             let backup = paths.state.join("legacy-settings.json");
             if !backup.exists() {
@@ -208,7 +232,7 @@ pub fn import(
         }
         paths.save_config(config)?;
     }
-    report.notes.push("Original settings, profiles and keybindings are preserved, including unmapped values. VPN control and some legacy commands still require parity review; the Rust installer does not replace Python. See docs/PARITY.md.".into());
+    report.notes.push("Original settings, profiles and keybindings are preserved, including unmapped values. Rust is the installed application; the old source remains in Git history. See docs/REMAINING_WORK.md for unsupported fields and open acceptance gates.".into());
     Ok(report)
 }
 fn legacy_id(value: &str) -> uuid::Uuid {
@@ -255,6 +279,9 @@ fn map_settings(v: &Value, c: &mut Config) {
                 .unwrap_or(500);
         }
     }
+    if let Some(s) = string("/advanced/sponsor_block_api") {
+        c.download.sponsorblock_api = s;
+    }
     if let Some(s) = string("/quality/video_quality") {
         c.download.quality = s;
     }
@@ -263,6 +290,25 @@ fn map_settings(v: &Value, c: &mut Config) {
     }
     if let Some(s) = string("/quality/audio_container") {
         c.download.audio_container = if s == "ogg" { "vorbis".into() } else { s };
+    }
+    if let Some(s) = string("/quality/audio_quality") {
+        c.download.audio_quality = match s.as_str() {
+            "best" | "lossless" => "0".into(),
+            value if value.chars().all(|c| c.is_ascii_digit()) => format!("{value}K"),
+            _ => s,
+        };
+        if string("/quality/audio_quality").as_deref() == Some("lossless") {
+            c.download.audio_container = "flac".into();
+        }
+    }
+    if let Some(value) = v.pointer("/quality/playlist_mode").and_then(Value::as_bool) {
+        c.download.playlist = value;
+    }
+    if let Some(value) = v
+        .pointer("/appearance/animations_enabled")
+        .and_then(Value::as_bool)
+    {
+        c.reduced_motion = !value;
     }
     if let Some(s) = string("/quality/download_mode") {
         c.download.audio = s == "audio";
@@ -372,6 +418,25 @@ fn map_settings(v: &Value, c: &mut Config) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn legacy_audio_playlist_and_motion_values_are_applied_without_losing_raw_data() {
+        let mut config = Config::default();
+        map_settings(
+            &serde_json::json!({"quality":{"audio_quality":"320","playlist_mode":true},"appearance":{"animations_enabled":false}}),
+            &mut config,
+        );
+        assert_eq!(config.download.audio_quality, "320K");
+        assert!(config.download.playlist);
+        assert!(config.reduced_motion);
+        config.validate().unwrap();
+        map_settings(
+            &serde_json::json!({"quality":{"audio_quality":"lossless"}}),
+            &mut config,
+        );
+        assert_eq!(config.download.audio_container, "flac");
+        assert_eq!(config.download.audio_quality, "0");
+        config.validate().unwrap();
+    }
     #[test]
     fn repeated_migration_does_not_duplicate_jobs_and_preserves_source() {
         let t = tempfile::tempdir().unwrap();

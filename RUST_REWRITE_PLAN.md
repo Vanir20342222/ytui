@@ -1,11 +1,13 @@
 # ytui Rust rewrite plan
 
-Status: Rust alpha merged in PR #2; parity follow-up on `rewrite/parity`; target-machine release gates remain open. Updated: 2026-10-21.
+Status: PRs #5, #6 and #7 are merged into the PR #4 media branch. Alpha.5 playback/navigation work is on `improve/playback-navigation`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
-on `rewrite/parity`; see docs/RUST.md, docs/PARITY.md and
+on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
+the provider follow-up PR #6 is merged there, with the Rust-only follow-up on `rewrite/rust-only-settings`;
+the parity work in PR #3 is merged. See docs/RUST.md, docs/PARITY.md and
 docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates.
 
 ## Goal and confirmed decisions
@@ -21,7 +23,9 @@ Confirmed by the user:
 - Keep a terminal UI, inline thumbnails, and mpv video playback.
 - Rust owns the application; mpv and FFmpeg are external tools. The user later
   selected **native Rust extraction by default**, using aagedal/yt-dlp-rs, with
-  an **explicit yt-dlp fallback**. Never switch to Python automatically.
+  an **explicit yt-dlp fallback** initially. In the alpha.5 follow-up the user
+  confirmed recommending an `auto` mode: Rust first, external yt-dlp for supported
+  extractor limitations. Explicit strict-native and yt-dlp modes remain available.
 - Provide Downloads, YouTube, YouTube Music, and Cliamp / Radio tabs.
 - Support browser-cookie sign-in, a configurable video-preview shortcut,
   attractive themes, and automatic system-theme following.
@@ -42,9 +46,9 @@ This is a full rewrite delivered in verifiable stages. A search box with empty
 Music/Radio tabs is not feature completion. "All bugs fixed" is not a testable
 promise: track reproduced defects, regression coverage, and remaining limitations.
 
-## Current project audit
+## Original baseline audit
 
-The current app is a Python downloader with queue/history persistence, Textual
+At the planning baseline, the app was a Python downloader with queue/history persistence, Textual
 panels, conversion, settings/profiles, cookie options, and VPN helpers. Personalized
 YouTube browsing, a dedicated Music tab, a radio tab, and video previews need new
 implementations. Existing cookie options configure extraction; they do not by
@@ -283,8 +287,10 @@ Core rules:
 
 ## Migration and compatibility
 
-- Keep the Python application runnable while Rust reaches parity; land Rust on
-  a rewrite branch with staged PRs. Do not remove working code at scaffolding time.
+- The original staged migration kept Python runnable. On 2026-10-21 the user
+  explicitly requested removal after documenting remaining gaps. That instruction
+  supersedes the former installer/source-retention gate. The gap inventory was
+  committed before removal; stable account/desktop acceptance is still open.
 - Inventory every setting/command and label it retained, replaced, or deferred.
   Cover quality/container overrides, playlists, conversion, subtitles, metadata,
   SponsorBlock, profiles, proxy/bandwidth/schedules, duplicates, notifications,
@@ -300,7 +306,7 @@ Core rules:
 - Mark every deferred legacy feature in release notes and obtain a scope decision
   before replacing the default installer. A smaller first milestone is not the
   finished rewrite.
-- Replace the installer/package metadata only at the release gate. Document Rust
+- At the user's request, replace the installer/package metadata with Rust. Document Rust
   build/install, external tools (including any current yt-dlp JS runtime requirement),
   Arch/CachyOS packaging, upgrades, and a rollback path to the Python baseline.
 
@@ -340,14 +346,15 @@ fixture/demo catalog is not counted as live-service validation.
 | M5 | Dedicated Music context, categorized search, libraries and collection navigation, shared audio queue. | Implemented; live Music account tests pending. |
 | M6 | Live cliamp catalog/track libraries, Radio Browser search/filter/failover/cache, favorites/custom import, external cliamp launch. | Implemented; actual audio/cliamp checks pending. |
 | M7 | Curated themes, ANSI mode, Caelestia/Omarchy paths, portal signals/GNOME fallback, last-valid recovery. | Implemented; live file fixture passes; real desktop/graphics checks pending. |
-| M8 | Separate Rust installer, migration/rollback docs, parity inventory, 43 offline tests, lint/release build and screenshots. | Release gate remains open; Python installer is intentionally retained. |
+| M8 | Default Rust installer with both launcher names, migration/gap inventory, 94 default tests plus real-media fixture, opt-in live probes and 50 native WQHD captures. | Repository transition authorized/completed; stable desktop/account release gate remains open. |
 
 Backend decision: the native library is pinned to revision
 `10223c019ef6ec5552627b90251d8e967404e440`. It is not a drop-in replacement for
 Python yt-dlp: native YouTube coverage, playlist support and cross-process resume
-are limited. Native subtitles now use upstream APIs; SponsorBlock/chapter/rate
-controls still require an explicit fallback. The user's native-default preference changes the original
-resume/reliability gate; do not present unsupported native behavior as completed.
+are limited. Native subtitles, pacing, SponsorBlock and chapter adapters now exist;
+unsupported codec/caption combinations need the fallback. The user confirmed
+automatic fallback for supported native limitations in this follow-up; strict
+native mode remains available. Do not present unverified live behavior as completed.
 See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
 
 ### Parity follow-up (M1/M2/M6/M7/M8)
@@ -369,6 +376,107 @@ See [the usage guide](docs/RUST.md) and [remaining parity](docs/PARITY.md).
   palette discovery when app state is relocated with `--state-dir`.
 - Offline checks and target-machine limitations are recorded in VALIDATION.md.
   These changes do not close live account/device or stable packaging gates.
+
+### Media/reliability follow-up (M1/M2/M3/M4/M5/M8)
+
+- Native media/caption pacing with cancellable worker ownership; native chapter
+  metadata/splitting and SponsorBlock mark/removal. Real FFmpeg/ffprobe fixtures
+  verify markers, reduced duration, chapter outputs and unchanged originals.
+- Native outputs stage privately and publish without clobbering existing files.
+  A later postprocessor failure reports a recoverable source directory. Fixed
+  HTTP 503 retry classification and audio-toggle destination selection.
+- Explicit local resume on `u` / `:resume`, bounded private positions, offline
+  catalog and startup mode, and early-window-close handling. The user selected
+  local resume actions, no automatic playback or YouTube history write-back.
+- Recurring collection watches with a complete initial baseline, duplicate checks,
+  persistence, resource limits/backoff and account/generation invalidation.
+- State format 2 adds a SQLite version-1 backup before upgrade; stale owned
+  credential exports/manifests are cleaned only while holding the instance lock.
+- Added sanitized diagnostics/update instructions and CI's explicit real-media
+  check. Actual account/Origin/Ghostty/audio tests and stable packaging gates remain
+  open; standalone Proton/raw wg-quick parity remains a separate scope item.
+
+### UI polish and feature audit follow-up (M1/M2/M6/M7/M8)
+
+- Compact tab/navigation shell, denser catalog rows, selected-item actions and
+  adaptive thumbnail/details panels. Removed the empty thumbnail placeholder.
+- Added a remappable `b` feed/library picker with tab-specific and offline-only
+  choices. Footer/detail hints reflect the actual keybinding configuration.
+- Download summary counts now distinguish queued, paused, failed and completed
+  jobs; wide layouts show destination, errors, progress and ETA separately.
+- Responsive player with visible timing, compact empty dialogs, explicit empty
+  states, settings toggle indicators/field position, and a faded modal backdrop.
+- Regression checks caught and fixed disappearing selected rows in 35×12
+  windows. Offline render checks cover selection/scrolling, remapped hints,
+  thumbnail overlay bounds, status counts and playback time in dark/light/ANSI.
+- PTY checks exercise the real binary at 120×40, 80×24 and 35×12, feed selection,
+  input isolation and terminal restoration; screenshots are fictional demo data.
+  Real Ghostty image-protocol/device acceptance remains open.
+
+- The user requested Lazygit/Lazydocker-style panes and WQHD captures. Wide
+  layouts now have status/workspace/feed panes and a larger detail/thumbnail area;
+  `b` focuses the feed pane. Replaced hard-coded mouse coordinates with rendered
+  targets for workspaces, feeds and scrolled lists. Narrow layouts stay usable.
+- All 13 theme entries render 1,040 tab/dialog/size combinations, plus all ten
+  download phases. Added contrast checks and improved Catppuccin Latte's muted,
+  warning and success roles. Every committed PNG is 2560×1440; CI checks headers.
+- Rust-generated demo artwork and a reproducible PTY capture helper exercise the
+  actual image renderer without provider access. Demo image generation is off
+  the input thread. Text/selection/image geometry and ANSI colors are checked.
+- The feature audit added thumbnail decode/cache/limit checks, radio wrapper/HLS/
+  failover tests, playback-control IPC and shuffle/repeat coverage, command/form
+  checks, and CLI setup/import/offline guards. It found/fixed unnecessary thumbnail
+  upscaling, relative M3U handling and new/relative config initialization errors.
+- Full evidence and explicitly unverified live behaviors are in
+  docs/FEATURE_AUDIT.md; docs/UI_THEMES.md links the 27 WQHD captures. Real account,
+  Origin/keyring, Ghostty, media devices and stable packaging remain release gates.
+
+### Provider failure follow-up (M1/M3/M5/M6/M8)
+
+- User screenshots reproduced alpha.1's hidden radio connection error, Music
+  bootstrap HTTP 302 and empty anonymous Home. The user's installed alpha.1
+  predates the UI branch; PR #4 remains unmerged into main. Reinstall/version
+  instructions now identify the exact branch and executable; version is alpha.3.
+- Added bounded same-origin bootstrap redirects without forwarding browser
+  credentials to another origin. Consent/sign-in redirects give browser/import
+  instructions; no consent choice is made automatically. Public service
+  redirects may change host but never downgrade HTTPS.
+- Empty anonymous Home explains search/sign-in, provider empty-feed messages
+  are preserved, and the central empty/error pane shows the complete explanation.
+- Radio catalogs follow public redirects; server requests run concurrently with
+  eight-second deadlines and retain sanitized failure causes. A saved cliamp
+  catalog is preferred during an outage; otherwise a clearly labelled Radio
+  Browser fallback keeps station browsing available.
+- Added opt-in `doctor --network` public probes without browser-cookie access,
+  cached success masking, VPN changes or network activity in ordinary doctor.
+- Request-level loopback coverage now checks redirects, origin scoping, separate
+  WEB/WEB_REMIX contexts, visitor headers, consent/rate-limit/rejected requests,
+  anonymous empty Home and radio outage fallback. Live endpoint evidence and
+  remaining service/account/device boundaries are recorded in docs/VALIDATION.md.
+
+### Rust-only application and general settings (M1/M2/M3/M5/M7/M8)
+
+- Committed docs/REMAINING_WORK.md before removing legacy Python source, tests,
+  themes, packaging and development tools. Existing installed files/data remain
+  intact; migration and Git history preserve the compatibility path.
+- Default installer builds Rust and publishes both `ytui` and `ytui-rs` after
+  build/version verification. A failed build preserves existing launchers; a
+  launcher symlink is replaced without overwriting its target. Compatibility
+  install-rust.sh calls the same installer. Alpha version is 0.2.0-alpha.4.
+- Added eight settings categories and 50 editable fields with choices, switches,
+  keyboard/mouse Save/Cancel, draft validation and persistent configuration.
+  Settings tests cover 1,040 additional theme/size/first-last-field combinations.
+  Frame pacing coalesces burst input; reduced motion limits redraw frequency.
+- Mapped legacy audio quality, playlist and motion preferences, and list retained
+  unsupported fields. Added Music playlists search and CLI category/details/
+  related routes, plus clear player-unavailable reasons.
+- Replaced Python capture/check scripts with a native Rust PTY/font renderer and
+  PNG/manifest integration check. Generated 43 WQHD captures, including every
+  theme, settings category and additional popups. Real terminal checks cover
+  popup navigation, Unicode input, resize and terminal restoration.
+- 85 default tests pass; strict Clippy/formatting and a separate real-FFmpeg
+  fixture pass. Four opt-in public YouTube tests were run and failed on HTTP/
+  proxy access; they do not satisfy live account/native playback acceptance.
 
 ### Agent handoff and completion evidence
 
@@ -481,3 +589,10 @@ check each dependency or copied component's actual license before incorporation.
   palette schema, mode, staged replacements, current state location and older compatibility.
 - [XDG Settings portal](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Settings.html):
   desktop appearance hints and change notifications.
+
+## Alpha.5 follow-up (M3–M8)
+
+See [the coordinated playback/navigation plan](docs/PLAYBACK_NAVIGATION_PLAN.md)
+for the user report, confirmed auto fallback change, implementation and evidence.
+The bottom command entry is replaced by Actions/forms. Native upstream restrictions
+and failed live checks remain visible instead of being described as passed features.

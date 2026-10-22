@@ -1,9 +1,13 @@
+pub mod chapters;
 pub mod config;
+pub use chapters::Chapter;
 pub mod history;
 pub mod media;
+pub mod playback_history;
 pub mod queue;
 pub mod schedule;
 pub mod shortcuts;
+pub mod watch;
 pub use config::*;
 pub use media::*;
 pub use queue::*;

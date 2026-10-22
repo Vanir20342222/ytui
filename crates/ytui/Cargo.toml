@@ -25,3 +25,6 @@ shell-words = "1"
 unicode-width = "0.2"
 [dev-dependencies]
 tempfile.workspace = true
+fontdue = "0.9"
+portable-pty = "0.9"
+vt100 = "0.15"

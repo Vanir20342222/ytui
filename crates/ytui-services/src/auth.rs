@@ -183,7 +183,7 @@ pub fn import_browser(browser: &str, profile: Option<&Path>) -> Result<Session> 
             .collect::<Vec<_>>();
         ensure!(
             candidates.len() == 1,
-            "Brave Origin has zero or multiple discoverable profiles; use `ytui auth profiles` and select --profile PATH"
+            "Brave Origin has zero or multiple discoverable profiles; use `ytui-rs auth profiles` and select --profile PATH"
         );
         return import_browser("brave", Some(&candidates[0].path));
     }
@@ -232,7 +232,7 @@ pub fn import_browser(browser: &str, profile: Option<&Path>) -> Result<Session> 
             "edge" => rookie::edge(domains),
             "vivaldi" => rookie::vivaldi(domains),
             "brave-origin" | "zen" => bail!(
-                "Select a profile path for {browser}; use `ytui auth profiles` to discover local stores"
+                "Select a profile path for {browser}; use `ytui-rs auth profiles` to discover local stores"
             ),
             _ => bail!(
                 "Unsupported browser; select a supported browser/profile or import a Netscape cookie file"
