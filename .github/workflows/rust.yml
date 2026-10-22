@@ -32,6 +32,5 @@ jobs:
       - name: Verify actual mpv external-extraction handoff
         env:
           NO_PROXY: 127.0.0.1,localhost
-          no_proxy: 127.0.0.1,localhost
         run: cargo test -p ytui-services --locked real_mpv_external_playback_ -- --ignored
       - run: cargo build --release --locked

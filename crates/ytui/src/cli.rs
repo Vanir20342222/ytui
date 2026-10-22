@@ -53,6 +53,17 @@ pub enum Command {
         feed: String,
         query: Option<String>,
     },
+    /// Check actual mpv playback of a public URL without loading browser cookies.
+    PlaybackCheck {
+        url: String,
+        #[arg(long)]
+        audio: bool,
+        #[arg(long, value_parser = ["auto", "native", "yt-dlp"])]
+        backend: Option<String>,
+        /// Require this many seconds of playback before reporting success.
+        #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u32).range(2..=30))]
+        seconds: u32,
+    },
     /// Explicit control of existing NetworkManager VPN/WireGuard profiles (never runs at startup).
     Vpn {
         #[arg(default_value = "list", value_parser = ["list", "status", "connect", "disconnect"])]
@@ -127,6 +138,59 @@ async fn load_session(config: &Config, paths: &Paths) -> Option<Arc<auth::Sessio
 }
 pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<()> {
     match command {
+        Command::PlaybackCheck {
+            url,
+            audio,
+            backend,
+            seconds,
+        } => {
+            ensure!(!config.offline, "Playback checks require network access");
+            if let Some(backend) = backend {
+                config.download_backend = backend;
+            }
+            config.playback_sponsorblock = "off".into();
+            let media = Media {
+                url: normalize_media_url(&url)?,
+                title: "Public playback check".into(),
+                ..Default::default()
+            };
+            let mut player = ytui_services::player::Player::spawn(config, paths, None);
+            player
+                .commands
+                .send(ytui_services::player::PlayerCommand::Play { media, audio })
+                .await?;
+            let result = tokio::time::timeout(std::time::Duration::from_secs(120), async {
+                loop {
+                    let state = player.status.borrow_and_update().clone();
+                    if let Some(error) = state.error {
+                        anyhow::bail!("{}", ytui_services::process::diagnostic(&error));
+                    }
+                    if state.active
+                        && !state.paused
+                        && !state.buffering
+                        && state.position >= f64::from(seconds)
+                    {
+                        return Ok(serde_json::json!({
+                            "backend": state.backend,
+                            "audio_only": audio,
+                            "position": state.position,
+                            "duration": state.duration,
+                        }));
+                    }
+                    player
+                        .status
+                        .changed()
+                        .await
+                        .context("Playback worker stopped")?;
+                }
+            })
+            .await;
+            player.close().await;
+            println!(
+                "{}",
+                result.context("Playback did not advance within 120 seconds")??
+            );
+        }
         Command::NativeWorker { request } => {
             tokio::task::spawn_blocking(move || ytui_services::native::worker(&request)).await??
         }

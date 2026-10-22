@@ -4,6 +4,10 @@ Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recover
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
+Live-service validation follow-up (M3/M4/M5/M8): a dedicated public YouTube CI
+workflow and an isolated local runner now exercise real playback and two-entry
+playlist downloads. See [docs/LIVE_YOUTUBE_TESTS.md](docs/LIVE_YOUTUBE_TESTS.md)
+for commands, assertions and environmental evidence; setup is not live success.
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
 on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
 the provider follow-up PR #6 is merged there, with the Rust-only follow-up on `rewrite/rust-only-settings`;
