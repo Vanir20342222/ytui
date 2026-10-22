@@ -59,7 +59,8 @@ pub struct Job {
     pub completed_at: Option<u64>,
 }
 impl Job {
-    pub fn new(mut media: Media, options: DownloadOptions) -> Self {
+    pub fn new(mut media: Media, mut options: DownloadOptions) -> Self {
+        options.playlist |= crate::is_playlist_url(&media.url) || options.playlist_items.is_some();
         if options.audio {
             media.kind = crate::MediaKind::Song;
         }
@@ -128,6 +129,11 @@ impl DownloadQueue {
                 }
             }
             JobUpdate::Metadata(mut media) => {
+                // Per-entry metadata must not replace the collection source. A
+                // retry/resume would otherwise download only the last seen song.
+                if job.options.playlist {
+                    return true;
+                }
                 if media.url.is_empty() {
                     media.url = job.media.url.clone();
                 }
@@ -213,6 +219,52 @@ mod tests {
             update: JobUpdate::Metadata(Box::default())
         }));
         assert!(q.jobs.is_empty());
+    }
+    #[test]
+    fn playlist_source_survives_entry_metadata_and_restart() {
+        let source = "https://music.youtube.com/playlist?list=PLsynthetic";
+        let mut job = Job::new(
+            Media {
+                url: source.into(),
+                title: "My playlist".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                audio: true,
+                ..Default::default()
+            },
+        );
+        assert!(job.options.playlist);
+        job.state = JobState::Downloading;
+        let id = job.id;
+        let mut queue = DownloadQueue { jobs: vec![job] };
+        for track in 1..=3 {
+            assert!(queue.apply(JobEvent {
+                id,
+                generation: 0,
+                update: JobUpdate::Metadata(Box::new(Media {
+                    id: format!("song-{track}"),
+                    url: format!("https://music.youtube.com/watch?v=song{track}"),
+                    title: format!("Song {track}"),
+                    ..Default::default()
+                }))
+            }));
+        }
+        queue.jobs[0].restart_recovery();
+        assert_eq!(queue.jobs[0].media.url, source);
+        assert_eq!(queue.jobs[0].media.title, "My playlist");
+        assert_eq!(queue.jobs[0].state, JobState::Queued);
+        assert!(
+            !Job::new(
+                Media {
+                    url: "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic".into(),
+                    ..Default::default()
+                },
+                DownloadOptions::default()
+            )
+            .options
+            .playlist
+        );
     }
     #[test]
     fn pause_and_retry_reject_previous_attempt_results() {

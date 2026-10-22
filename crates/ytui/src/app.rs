@@ -50,6 +50,13 @@ pub enum HitTarget {
     Category(usize),
     Timeline,
 }
+pub struct FeedLoad {
+    pub request: BrowseRequest,
+    pub append: bool,
+    pub preserve_selection: bool,
+    pub failures: u32,
+    pub retry_at: Option<Instant>,
+}
 #[derive(Default)]
 pub struct TabView {
     pub page: Page,
@@ -60,6 +67,9 @@ pub struct TabView {
     pub generation: u64,
     pub cancel: CancellationToken,
     pub history: Vec<(BrowseRequest, Page, usize)>,
+    pub load: Option<FeedLoad>,
+    pub empty_pages: u8,
+    pub seen_tokens: std::collections::HashSet<String>,
 }
 pub enum Modal {
     Actions {
@@ -479,7 +489,8 @@ impl App {
             return;
         }
         let view = &mut self.tabs[tab];
-        if !append {
+        let preserve_selection = !append && view.request.as_ref() == Some(&request);
+        if !append && !preserve_selection {
             if let Some(old) = view.request.take()
                 && !view.page.items.is_empty()
             {
@@ -490,6 +501,32 @@ impl App {
             }
             view.request = Some(request.clone());
         }
+        if !append {
+            view.empty_pages = 0;
+            view.seen_tokens.clear();
+        }
+        // Manual next-page repeats must not cancel an in-flight request or bypass
+        // a rate-limit cooldown. Navigation to another feed always replaces it.
+        if append && view.load.is_some() {
+            return;
+        }
+        view.load = Some(FeedLoad {
+            request,
+            append,
+            preserve_selection,
+            failures: 0,
+            retry_at: None,
+        });
+        self.start_browse(tab);
+    }
+    fn start_browse(&mut self, tab: usize) {
+        let view = &mut self.tabs[tab];
+        let Some(load) = &mut view.load else {
+            return;
+        };
+        let request = load.request.clone();
+        let append = load.append;
+        load.retry_at = None;
         view.cancel.cancel();
         view.cancel = CancellationToken::new();
         let cancel = view.cancel.clone();
@@ -572,6 +609,9 @@ impl App {
                 view.loading = false;
                 match result {
                     Ok(page) => {
+                        let preserve_selection =
+                            view.load.take().is_some_and(|load| load.preserve_selection);
+                        view.error = None;
                         if append {
                             let mut ids = view
                                 .page
@@ -585,20 +625,35 @@ impl App {
                                     view.page.items.push(media);
                                 }
                             }
-                            // Repeated tokens or duplicate-only pages must not spin in a background loop.
-                            view.page.continuation = if view.page.items.len() == before
-                                || view.page.continuation == page.continuation
-                            {
-                                None
+                            // Recommendation pages may overlap or be empty yet carry a
+                            // useful next token. Follow up to three such pages, while
+                            // rejecting repeated tokens and cycles (A → B → A).
+                            if view.page.items.len() == before {
+                                view.empty_pages = view.empty_pages.saturating_add(1);
                             } else {
-                                page.continuation
-                            };
+                                view.empty_pages = 0;
+                            }
+                            if let Some(token) = view.page.continuation.take() {
+                                view.seen_tokens.insert(token);
+                            }
+                            view.page.continuation = page.continuation.filter(|token| {
+                                view.empty_pages < 3 && !view.seen_tokens.contains(token)
+                            });
                             if !page.categories.is_empty() {
                                 view.page.categories = page.categories;
                             }
                         } else {
+                            let selected_id = preserve_selection
+                                .then(|| view.page.items.get(view.selected).map(|m| m.id.clone()))
+                                .flatten();
+                            view.selected = selected_id
+                                .and_then(|id| page.items.iter().position(|m| m.id == id))
+                                .unwrap_or(if preserve_selection {
+                                    view.selected.min(page.items.len().saturating_sub(1))
+                                } else {
+                                    0
+                                });
                             view.page = page;
-                            view.selected = 0;
                         }
                         if tab == self.tab && !append {
                             self.selection_changed();
@@ -607,7 +662,25 @@ impl App {
                             self.prefetch_images();
                         }
                     }
-                    Err(e) => view.error = Some(ytui_services::process::diagnostic(&e.to_string())),
+                    Err(e) => {
+                        view.error = Some(ytui_services::process::diagnostic(&e.to_string()));
+                        if matches!(tab, 1 | 2)
+                            && let Some(retry) =
+                                e.downcast_ref::<ytui_services::browse::FeedRetry>()
+                            && let Some(load) = &mut view.load
+                        {
+                            let backoff = [2, 5, 15, 30, 60][(load.failures as usize).min(4)];
+                            load.failures = load.failures.saturating_add(1);
+                            // Obey Retry-After even when it exceeds our normal backoff.
+                            let delay = Duration::from_secs(backoff).max(retry.after);
+                            load.retry_at =
+                                Some(Instant::now().checked_add(delay).unwrap_or_else(|| {
+                                    Instant::now() + Duration::from_secs(86400)
+                                }));
+                        } else {
+                            view.load = None;
+                        }
+                    }
                 }
             }
             UiEvent::Image { generation, result } => {
@@ -835,6 +908,10 @@ impl App {
             self.tabs[tab].history.clear();
             self.tabs[tab].request = None;
             self.tabs[tab].loading = false;
+            self.tabs[tab].load = None;
+            self.tabs[tab].error = None;
+            self.tabs[tab].empty_pages = 0;
+            self.tabs[tab].seen_tokens.clear();
         }
         if let Ok(client) = ytui_services::http_client(self.config.proxy.as_deref()) {
             self.browser = Browser::new(client, self.session.clone(), self.config.account_index);
@@ -1529,6 +1606,21 @@ impl App {
             UiEvent::Prefetched
         });
     }
+    fn recover_feed(&mut self) {
+        if self.demo || self.offline || !matches!(self.tab, 1 | 2) {
+            return;
+        }
+        let view = &self.tabs[self.tab];
+        if !view.loading
+            && view
+                .load
+                .as_ref()
+                .and_then(|load| load.retry_at)
+                .is_some_and(|at| at <= Instant::now())
+        {
+            self.start_browse(self.tab);
+        }
+    }
     fn prefetch_page(&mut self) {
         if self.tab == 0 || self.demo || self.offline {
             return;
@@ -1536,8 +1628,21 @@ impl App {
         let view = &self.tabs[self.tab];
         if !view.loading
             && view.error.is_none()
-            && !view.page.items.is_empty()
-            && view.selected.saturating_add(12) >= view.page.items.len()
+            && view.load.is_none()
+            && (view.selected.saturating_add(12) >= view.page.items.len()
+                || self
+                    .hit_targets
+                    .iter()
+                    .filter_map(|(_, hit)| {
+                        if let HitTarget::Item(index) = hit {
+                            Some(index.saturating_add(12))
+                        } else {
+                            None
+                        }
+                    })
+                    .max()
+                    .unwrap_or(0)
+                    >= view.page.items.len())
             && view.page.continuation.is_some()
         {
             self.action(Action::NextPage);
@@ -1896,10 +2001,16 @@ impl App {
                     view.request = Some(request);
                     view.loading = false;
                     view.error = None;
+                    view.load = None;
+                    view.empty_pages = 0;
+                    view.seen_tokens.clear();
                     self.selection_changed();
                 }
             }
             Action::Refresh => {
+                if self.tab > 0 && self.tabs[self.tab].load.is_some() {
+                    return;
+                }
                 self.card_requests.clear();
                 if self.tab > 0
                     && let Some(req) = self.tabs[self.tab].request.clone()
@@ -2055,6 +2166,8 @@ impl App {
             && self.snapshot.downloads.jobs.iter().any(|j| {
                 j.media.url == media.url
                     && j.options.audio == options.audio
+                    && j.options.playlist == options.playlist
+                    && j.options.playlist_items == options.playlist_items
                     && j.options.quality == options.quality
                     && j.state != JobState::Error
                     && j.state != JobState::Cancelled
@@ -2094,7 +2207,8 @@ impl App {
                 url,
                 ..Default::default()
             };
-            let o = self.config.download.clone();
+            let mut o = self.config.download.clone();
+            o.audio |= self.tab == 2;
             self.modal = Some(Modal::Form(Box::new(Form::download(media, o))));
         } else if self.tab == 0 {
             self.change_tab(1);
@@ -2228,6 +2342,7 @@ impl App {
         let _ = self.player.try_send(PlayerCommand::Play { media, audio });
     }
     pub async fn tick(&mut self) {
+        self.recover_feed();
         self.prefetch_page();
         let finished = self
             .running

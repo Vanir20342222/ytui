@@ -35,6 +35,15 @@ pub struct Resolved {
 pub fn worker(path: &Path) -> Result<()> {
     let request: WorkerRequest = serde_json::from_slice(&std::fs::read(path)?)?;
     let o = &request.job.options;
+    if !request.resolve
+        && o.playlist
+        && ytui_core::http_url(&request.job.media.url)
+            .is_ok_and(|url| ytui_core::youtube_host(url.host_str().unwrap_or_default()))
+    {
+        bail!(
+            "Native YouTube playlists require yt-dlp fallback; no items were downloaded. Choose auto or yt-dlp to process the collection"
+        );
+    }
     // Do not pretend that upstream supports these features or silently discard options.
     if !request.resolve {
         ensure!(
@@ -524,6 +533,11 @@ pub fn fallback_eligible(message: &str) -> bool {
     let message = message.to_lowercase();
     [
         "unsupported youtube",
+        "native youtube playlists require yt-dlp fallback",
+        "http status client error (403",
+        "http status client error (404",
+        "http 403",
+        "http 404",
         "no eligible media",
         "signature",
         "url challenges",

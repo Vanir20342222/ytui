@@ -1,6 +1,6 @@
 # Rust edition
 
-Alpha.5 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.7 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
@@ -11,7 +11,7 @@ On CachyOS/Arch:
 ```sh
 sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
 rustup default stable
-git clone --branch improve/playback-navigation https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/playback-fallback https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 hash -r
@@ -34,11 +34,11 @@ installed executable:
 ```sh
 cd ~/ytui
 git fetch origin
-git switch improve/playback-navigation
+git switch fix/playback-fallback
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.5
+~/.local/bin/ytui --version             # 0.2.0-alpha.7
 type -a ytui ytui-rs
 ```
 
@@ -96,6 +96,26 @@ status does not force constant redraws. State writes wait independently of input
 Keys can be remapped through F2 → Keyboard bindings or `[keybindings]` in TOML.
 Ctrl+C is reserved for emergency quit.
 
+## Automatic feed recovery
+
+YouTube and Music recover transient feed failures without pressing Refresh. The
+active tab retries after 2, 5, 15, 30, then 60 seconds (remaining at 60); server
+`Retry-After` delays take priority. Hidden tabs wait until revisited. Offline/demo
+mode does not start retries. Loaded videos remain usable during recovery, and a
+same-feed refresh preserves the selected video where it is still present.
+
+Fresh Home data embedded in the bootstrap HTML is used once, avoiding an extra
+API round trip. Empty bare Home shells renew the client context once. WEB and
+WEB_REMIX contexts remain separate, expire after 30 minutes, and renew once on
+400/412 rejection. Each fetch has a 35-second overall deadline. Session expiry,
+consent and HTTP 401/403 require the displayed account/network action rather than
+repeated requests. Anonymous Home may legitimately have no recommendations.
+
+Near-end prefetch also considers visible cards. Overlapping or empty continuation
+pages with new tokens can advance; repeated/cyclic tokens and three consecutive
+pages without new items stop the loop. Refresh/Next do not restart pending loads
+or bypass their cooldown. Feed recovery never writes watch history to YouTube.
+
 ## Native Rust and automatic fallback
 
 New configurations default to `download_backend = "auto"`, as confirmed by the
@@ -112,6 +132,16 @@ also retry a rejected native stream through yt-dlp. It never downloads/install t
 `Y` is still available for one explicit retry. Per-job backend choices and
 `ytui download URL --backend auto|native|yt-dlp` override the global default.
 Cancellation and local publication/disk failures do not trigger an external retry.
+
+Alpha.7 resolves external playback directly with yt-dlp, then hands validated video/
+audio URLs and the extractor's HTTP headers to mpv with its extraction hook disabled.
+Cookies, proxy, quality, audio-only and preview selections are passed explicitly.
+This avoids dependence on mpv's bundled yt-dlp hook and its option translation.
+mpv output is captured, including stdout errors, so failures show whether extraction
+or opening the stream failed. **F2 → Diagnostics** shows the current player error;
+signed URLs are redacted. For external extraction, Deno must be discoverable by
+installed yt-dlp (normally through PATH); the pinned native runtime setting is separate.
+
 Auto fallback is not a solution to every VPN, account, consent or bot restriction.
 
 The pinned native solver requires an explicitly configured **Deno 2.9.7** path
@@ -121,6 +151,27 @@ with external yt-dlp. No executable or browser session is fetched automatically.
 Native upstream still has token/live/playlist and persistent range-resume limits.
 Pausing a native transfer preserves intent but restarting it may repeat transfer;
 yt-dlp can continue its own partials. Partials are not moved between backends.
+
+## Playlist and music downloads
+
+Paste a dedicated YouTube/Music `…/playlist?list=…` link: the download form enables
+Whole playlist, and pasting in Music selects audio. In the CLI:
+
+```sh
+ytui download 'https://music.youtube.com/playlist?list=PLAYLIST_ID' --audio --backend auto
+```
+
+A watch link containing both v= and list= remains a single video unless you choose
+Whole playlist or pass `--playlist`. Playlist indices restrict the collection, for
+example `--items '2,3'`. Auto uses external yt-dlp for unsupported native YouTube
+playlists; strict native reports that limit. Current per-entry metadata cannot
+replace the saved collection source. Partial completed outputs remain recorded
+when a later entry fails, and the job stays failed until successfully retried.
+
+Re-add the original playlist URL after upgrading if an older job already points
+to only its first song. Existing files are preserved. A standalone music-download
+pipeline is covered by real FFmpeg conversion; live YouTube extraction and the
+reported desktop/VPN still need acceptance.
 
 ## Browsing and thumbnails
 

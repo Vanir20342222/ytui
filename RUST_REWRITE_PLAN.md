@@ -1,9 +1,13 @@
 # ytui Rust rewrite plan
 
-Status: PRs #5, #6 and #7 are merged into the PR #4 media branch. Alpha.5 playback/navigation work is on `improve/playback-navigation`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
+Status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair is on `fix/playback-fallback`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-22.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
+Live-service validation follow-up (M3/M4/M5/M8): a dedicated public YouTube CI
+workflow and an isolated local runner now exercise real playback and two-entry
+playlist downloads. See [docs/LIVE_YOUTUBE_TESTS.md](docs/LIVE_YOUTUBE_TESTS.md)
+for commands, assertions and environmental evidence; setup is not live success.
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
 on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
 the provider follow-up PR #6 is merged there, with the Rust-only follow-up on `rewrite/rust-only-settings`;
@@ -596,3 +600,35 @@ See [the coordinated playback/navigation plan](docs/PLAYBACK_NAVIGATION_PLAN.md)
 for the user report, confirmed auto fallback change, implementation and evidence.
 The bottom command entry is replaced by Actions/forms. Native upstream restrictions
 and failed live checks remain visible instead of being described as passed features.
+
+### M4/M5 follow-up: automatic feed recovery (alpha.6)
+
+The user reports having to refresh YouTube feeds manually. Transient load and
+continuation failures now retry automatically with bounded request duration and
+backoff, preserving visible content. Fresh HTML Home data avoids an API request;
+client contexts renew, and overlapping pages can advance.
+See [FEED_RECOVERY_PLAN.md](docs/FEED_RECOVERY_PLAN.md) for behavior and checks.
+Successful live account/desktop acceptance remains required.
+
+### M5/M8 follow-up: playback fallback repair (alpha.7)
+
+User reports every video failing after the fallback indicator with mpv 0.41.0 /
+yt-dlp 2026.08.19. External playback now resolves streams directly with yt-dlp,
+forwards the extractor HTTP identity and separate audio, and launches mpv without
+its extraction hook. Capture stdout/stderr and preserve specific extraction/open
+errors. Real mpv loopback split-video/audio and audio-only playback is covered,
+alongside default regressions. See [PLAYBACK_REPAIR.md](docs/PLAYBACK_REPAIR.md)
+and [VALIDATION.md](docs/VALIDATION.md) for actual evidence and live boundaries.
+
+The same follow-up covers M3: dedicated playlist intent, original collection source
+preservation, subset/import/dedupe handling and retained completed files on partial
+failure. Native YouTube playlists request the supported auto fallback before any
+transfer. A real FFmpeg MP3 download/conversion and loopback HTTP-rejection fallback
+complement synthetic three-entry playlist checks. Old jobs whose collection URL was
+already replaced need the original playlist re-added; downloaded files are preserved.
+
+The requested test expansion adds eleven default regressions for failure/retry/
+cancellation/tool metadata and player recovery, plus real M4A/Opus/FLAC conversion
+and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata,
+duplicate invocation and missing output records on hook failure (M3/M8). Final
+counts and reproducible commands are in docs/VALIDATION.md.

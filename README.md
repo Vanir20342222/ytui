@@ -4,11 +4,11 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.5**. Live account and desktop acceptance remains open;
+This is **0.2.0-alpha.7**. Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
-git clone --branch improve/playback-navigation https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/playback-fallback https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ytui doctor
@@ -24,7 +24,7 @@ sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg yt-dlp deno
 rustup default stable
 ```
 
-Until this change reaches main, use the `improve/playback-navigation` branch.
+Until this change reaches main, use the `fix/playback-fallback` branch.
 Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 
@@ -37,6 +37,7 @@ and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility al
 - `u`: explicit local playback resume; `p`: playback queue.
 - `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
 - `ytui doctor --network`: opt-in public provider diagnostics without importing an account.
+- `ytui playback-check URL --backend auto`: check three seconds of actual mpv playback without browser cookies.
 
 The recommended `auto` backend tries pinned [yt-dlp-rs](https://github.com/aagedal/yt-dlp-rs)
 first and falls back to external yt-dlp for supported extraction limitations.
@@ -45,8 +46,16 @@ their chosen mode: **F2 → Select extraction backend → auto** enables automat
 fallback after upgrading. The application stays Rust; external yt-dlp is separately
 installed. Successful live YouTube access still depends on the account/network.
 
+Playlist links select collection downloads automatically; watch links with playlist
+context stay single-video unless explicitly expanded. Playlist jobs retain their
+source across entry metadata/retries, and auto uses yt-dlp for native playlist limits.
+[Playback/playlist fixes and validation boundaries](docs/PLAYBACK_REPAIR.md).
+
 Thumbnails use sized memory/disk caches and nearby prefetch. Feeds load continuation
-pages near the end and retain server-provided categories/section labels. Wide cards
+pages near the end and recover temporary errors automatically, keeping visible
+videos and selection. Fresh HTML Home data saves an extra request; overlapping
+pages no longer end the feed immediately. Server categories/section labels remain.
+Wide cards
 get most of the width, with square Music art. `o` opens player controls; **g in mpv**
 opens its window menu. Volume/mute persist. `B` toggles SponsorBlock skipping and `U`
 replays a skipped part; Settings → Playback controls categories and skip/mark/off.
@@ -66,6 +75,9 @@ Run checks with `cargo fmt --all -- --check`,
 `cargo clippy --workspace --all-targets --locked -- -D warnings` and
 `cargo test --workspace --locked`. The separate real-media fixture and opt-in
 live YouTube tests are described in the validation record.
+Run `tools/test-youtube.sh auto` for isolated public browsing, playback and
+two-entry playlist checks; [live test instructions](docs/LIVE_YOUTUBE_TESTS.md)
+describe the required tools, optional public fixture URLs and CI runner.
 
 Generate WQHD captures entirely in Rust:
 
