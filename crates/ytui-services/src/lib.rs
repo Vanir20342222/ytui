@@ -39,14 +39,49 @@ pub fn http_client(proxy: Option<&str>) -> anyhow::Result<reqwest::Client> {
         .timeout(std::time::Duration::from_secs(25))
         .connect_timeout(std::time::Duration::from_secs(10))
         .redirect(reqwest::redirect::Policy::none());
-    if let Some(proxy) = proxy.filter(|p| !p.is_empty()) {
-        let mut proxy = url::Url::parse(proxy).map_err(|_| anyhow::anyhow!("Invalid proxy URL"))?;
-        // Match pinned native/external extraction: SOCKS5 resolves names at the
-        // proxy. Never send a .onion/private destination to the local resolver.
-        if proxy.scheme() == "socks5" {
-            let _ = proxy.set_scheme("socks5h");
-        }
-        builder = builder.no_proxy().proxy(reqwest::Proxy::all(proxy)?);
+    if let Some(proxy) = explicit_proxy(proxy)? {
+        builder = builder.no_proxy().proxy(proxy);
+    }
+    Ok(builder.build()?)
+}
+
+fn explicit_proxy(proxy: Option<&str>) -> anyhow::Result<Option<reqwest::Proxy>> {
+    proxy
+        .filter(|p| !p.is_empty())
+        .map(|proxy| {
+            let mut proxy =
+                url::Url::parse(proxy).map_err(|_| anyhow::anyhow!("Invalid proxy URL"))?;
+            // Explicit SOCKS5 always uses proxy-side DNS, including cover downloads.
+            if proxy.scheme() == "socks5" {
+                let _ = proxy.set_scheme("socks5h");
+            }
+            reqwest::Proxy::all(proxy).map_err(Into::into)
+        })
+        .transpose()
+}
+
+// Only call from a blocking worker. Match the async client's routing and TLS
+// policy; public covers carry no browser authorization or cookie headers.
+pub(crate) fn blocking_http_client(
+    proxy: Option<&str>,
+) -> anyhow::Result<reqwest::blocking::Client> {
+    let mut builder = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(20))
+        .connect_timeout(std::time::Duration::from_secs(10))
+        .redirect(reqwest::redirect::Policy::custom(|attempt| {
+            if attempt.previous().len() > 4 {
+                return attempt.error("Service redirect limit exceeded");
+            }
+            if ytui_core::http_url(attempt.url().as_str()).is_err()
+                || (attempt.previous().iter().any(|url| url.scheme() == "https")
+                    && attempt.url().scheme() != "https")
+            {
+                return attempt.error("Unsafe service redirect");
+            }
+            attempt.follow()
+        }));
+    if let Some(proxy) = explicit_proxy(proxy)? {
+        builder = builder.no_proxy().proxy(proxy);
     }
     Ok(builder.build()?)
 }
@@ -69,11 +104,28 @@ mod proxy_tests {
             .await
             .unwrap();
         assert_eq!(response.text().await.unwrap(), "proxied");
+        let body = tokio::task::spawn_blocking(move || {
+            blocking_http_client(Some(&proxy))
+                .unwrap()
+                .get("http://ytui-proxy-fixture.invalid:2345/check")
+                .send()
+                .unwrap()
+                .text()
+                .unwrap()
+        })
+        .await
+        .unwrap();
+        assert_eq!(body, "proxied");
         server.abort();
     }
     #[tokio::test]
     async fn explicit_socks5_uses_remote_dns_and_does_not_fall_back_to_direct() {
-        for scheme in ["socks5", "socks5h"] {
+        for (scheme, blocking) in [
+            ("socks5", false),
+            ("socks5h", false),
+            ("socks5", true),
+            ("socks5h", true),
+        ] {
             let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
             let proxy = format!("{scheme}://{}", listener.local_addr().unwrap());
             let server = tokio::spawn(async move {
@@ -112,13 +164,30 @@ mod proxy_tests {
                     .await
                     .unwrap();
             });
-            let response = http_client(Some(&proxy))
-                .unwrap()
-                .get("http://ytui-proxy-fixture.invalid:2345/check")
-                .send()
+            let body = if blocking {
+                tokio::task::spawn_blocking(move || {
+                    blocking_http_client(Some(&proxy))
+                        .unwrap()
+                        .get("http://ytui-proxy-fixture.invalid:2345/check")
+                        .send()
+                        .unwrap()
+                        .text()
+                        .unwrap()
+                })
                 .await
-                .unwrap();
-            assert_eq!(response.text().await.unwrap(), "proxied");
+                .unwrap()
+            } else {
+                http_client(Some(&proxy))
+                    .unwrap()
+                    .get("http://ytui-proxy-fixture.invalid:2345/check")
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await
+                    .unwrap()
+            };
+            assert_eq!(body, "proxied");
             server.await.unwrap();
         }
     }

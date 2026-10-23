@@ -1,5 +1,10 @@
 # ytui Rust rewrite plan
 
+M2–M6/M8 alpha.12 networking follow-up fixes details cooldown bypass, redirected
+radio playlists/deadlines, blocking cover proxy routing and stale requests after
+network-setting changes. See [the network review](docs/NETWORK_RELIABILITY_2026-10-23.md)
+for deterministic/actual-tool checks and the separate public-service results.
+
 M5/M7/M8 alpha.12 comfort follow-up adds explicit reviewed LRCLIB lyrics, offline
 LRC/text, timed-line following, initial German UI labels and bilingual Actions
 search. Late diagnostic/cache results cannot reopen dismissed panels. These are

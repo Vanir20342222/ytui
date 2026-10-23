@@ -1,5 +1,13 @@
 # Validation record
 
+## Alpha.12 networking follow-up — 2026-10-23 (M2–M6/M8)
+
+See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): 210 deterministic
+tests and ten actual local media tests pass; strict Clippy and formatting pass.
+Five public checks pass (including actual radio progress); YouTube browsing and
+its independent thumbnail CDN check fail at the cloud proxy tunnel. The earlier
+204-test and archive evidence below belongs to the preceding implementation.
+
 ## Alpha.12 audit implementation — 2026-10-23 (M2–M8)
 
 The full deterministic workspace suite passes **204 tests**, with **25 opt-in

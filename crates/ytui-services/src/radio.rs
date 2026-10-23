@@ -99,6 +99,13 @@ impl Radio {
         }
     }
     async fn json(&self, url: &str) -> Result<Value> {
+        // One deadline includes redirects and the response body, not eight
+        // seconds per hop. Dropping this future cancels losing directory probes.
+        tokio::time::timeout(std::time::Duration::from_secs(8), self.json_inner(url))
+            .await
+            .context("Radio catalog request timed out; check your proxy or VPN")?
+    }
+    async fn json_inner(&self, url: &str) -> Result<Value> {
         let target = http_url(url)?;
         let host = target.host_str().unwrap_or("radio service").to_owned();
         // Public catalog requests have no browser cookies or authorization headers.
@@ -223,56 +230,87 @@ impl Radio {
         }
     }
     pub async fn resolve_playlist(&self, url: &str) -> Result<String> {
+        tokio::time::timeout(
+            std::time::Duration::from_secs(12),
+            self.resolve_playlist_inner(url),
+        )
+        .await
+        .context("Station playlist request timed out; check your proxy or VPN")?
+    }
+    async fn resolve_playlist_inner(&self, url: &str) -> Result<String> {
         let mut url = http_url(url)?;
-        for _ in 0..4 {
+        let mut visited = std::collections::HashSet::new();
+        for depth in 0..=4 {
             let path = url.path().to_ascii_lowercase();
             if !path.ends_with(".m3u") && !path.ends_with(".m3u8") && !path.ends_with(".pls") {
                 return Ok(url.into());
             }
-            // HLS manifests belong to mpv; only resolve ordinary wrapper playlists.
-            let response = self.client.get(url.clone()).send().await?;
-            if response.status().is_redirection() {
-                let location = response
-                    .headers()
-                    .get("location")
-                    .and_then(|v| v.to_str().ok())
-                    .context("Radio redirect has no destination")?;
-                url = url.join(location)?;
-                http_url(url.as_str())?;
-                continue;
-            }
+            ensure!(depth < 4, "Station playlist nesting exceeds four levels");
+            ensure!(
+                visited.insert(url.clone()),
+                "Station playlist contains a cycle"
+            );
+            let response = crate::http::get(
+                url.clone(),
+                |url| Ok(self.client.get(url.clone())),
+                crate::http::Redirects::Public,
+                "Station playlist",
+            )
+            .await?;
             ensure!(
                 response.status().is_success(),
                 "Station playlist returned HTTP {}",
                 response.status()
             );
+            // A redirect can change the extension, directory and origin. Parse
+            // the returned playlist and resolve entries relative to its final URL.
+            let final_url = response.url().clone();
+            let content_type = response
+                .headers()
+                .get(reqwest::header::CONTENT_TYPE)
+                .and_then(|value| value.to_str().ok())
+                .unwrap_or_default()
+                .to_ascii_lowercase();
+            if (content_type.starts_with("audio/") || content_type.starts_with("video/"))
+                && !content_type.contains("mpegurl")
+                && !content_type.contains("scpls")
+            {
+                // Some playlist links redirect straight to an endless audio
+                // stream. Hand that to mpv without trying to read it as text.
+                return Ok(final_url.into());
+            }
             let data = limited_text(response, 128 * 1024).await?;
             if data.contains("#EXT-X-") {
-                return Ok(url.into());
+                return Ok(final_url.into());
             }
+            let pls = final_url.path().to_ascii_lowercase().ends_with(".pls")
+                || data
+                    .trim_start_matches('\u{feff}')
+                    .trim_start()
+                    .to_ascii_lowercase()
+                    .starts_with("[playlist]");
             let target = data
+                .trim_start_matches('\u{feff}')
                 .lines()
                 .map(str::trim)
                 .find_map(|line| {
                     if line.starts_with('#') || line.is_empty() {
                         None
-                    } else if !path.ends_with(".pls") {
+                    } else if !pls {
                         Some(line)
-                    } else if let Some((key, value)) = line.split_once('=') {
-                        if key.to_ascii_lowercase().starts_with("file") {
-                            Some(value)
-                        } else {
-                            None
-                        }
                     } else {
-                        None
+                        let (key, value) = line.split_once('=')?;
+                        let key = key.trim().to_ascii_lowercase();
+                        let index = key.strip_prefix("file")?;
+                        (!index.is_empty() && index.bytes().all(|b| b.is_ascii_digit()))
+                            .then_some(value.trim())
                     }
                 })
                 .context("Station playlist has no supported HTTP(S) stream")?;
-            url = url.join(target)?;
+            url = final_url.join(target)?;
             http_url(url.as_str())?;
         }
-        bail!("Station playlist/redirect nesting exceeds four levels")
+        unreachable!()
     }
 }
 pub fn parse_cliamp(data: &Value) -> Page {
@@ -419,6 +457,8 @@ mod tests {
                 "/redirect.m3u" => (302,"Location: /list.m3u\r\n",String::new()),
                 "/loop.m3u" => (302,"Location: /loop.m3u\r\n",String::new()),
                 "/bad.m3u" => (200,"","file:///synthetic/unsafe\n".to_owned()),
+                "/direct.m3u" => (302,"Location: /audio\r\n",String::new()),
+                "/audio" => (200,"Content-Type: audio/mpeg\r\n","synthetic audio".into()),
                 "/hls.m3u8" => (200,"","#EXTM3U\n#EXT-X-TARGETDURATION:10\nsegment.ts\n".to_owned()),
                 "/json/stations/search" => {
                     let rows=(0..80).map(|n| json!({"stationuuid":n.to_string(),"name":"Fixture radio","url_resolved":"https://example.test/live"})).collect::<Vec<_>>();
@@ -479,6 +519,13 @@ mod tests {
                 .unwrap(),
             format!("{base}/hls.m3u8")
         );
+        assert_eq!(
+            radio
+                .resolve_playlist(&format!("{base}/direct.m3u"))
+                .await
+                .unwrap(),
+            format!("{base}/audio")
+        );
         for request in [
             BrowseRequest::RadioSearch("Jazz & blues".into()),
             BrowseRequest::RadioCountry("de".into()),
@@ -491,6 +538,95 @@ mod tests {
         server.abort();
         let _ = server.await;
     }
+    #[tokio::test]
+    async fn stalled_radio_bodies_have_whole_operation_deadlines() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let task = tokio::spawn(async move {
+            let mut clients = tokio::task::JoinSet::new();
+            for _ in 0..2 {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                clients.spawn(async move {
+                    let mut request = Vec::new();
+                    while !request.ends_with(b"\r\n\r\n") {
+                        request.push(stream.read_u8().await.unwrap());
+                        assert!(request.len() <= 4096);
+                    }
+                    stream
+                        .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\n\r\n")
+                        .await
+                        .unwrap();
+                    std::future::pending::<()>().await;
+                    drop(stream);
+                });
+            }
+            while clients.join_next().await.is_some() {}
+        });
+        let radio = Radio::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            vec![],
+        );
+        let playlist = format!("{base}/stalled.m3u");
+        let result = tokio::time::timeout(std::time::Duration::from_secs(14), async {
+            tokio::join!(radio.json(&base), radio.resolve_playlist(&playlist))
+        })
+        .await;
+        task.abort();
+        let (catalog, stream) = result.expect("Service deadlines must beat the test deadline");
+        assert!(catalog.unwrap_err().to_string().contains("timed out"));
+        assert!(stream.unwrap_err().to_string().contains("timed out"));
+    }
+
+    #[tokio::test]
+    async fn redirected_extensionless_playlists_resolve_against_the_final_location() {
+        let (base, task) = crate::test_http::serve(|target| match target {
+            "/start.pls" => (
+                302,
+                "Location: /moved/catalog?token=fixture\r\n".into(),
+                vec![],
+            ),
+            "/moved/catalog?token=fixture" => {
+                (200, String::new(), b"[playlist]\nFile1=stream\n".to_vec())
+            }
+            _ => (404, String::new(), vec![]),
+        })
+        .await;
+        let radio = Radio::new(
+            reqwest::Client::builder()
+                .no_proxy()
+                .redirect(reqwest::redirect::Policy::none())
+                .build()
+                .unwrap(),
+            vec![],
+        );
+        let result = radio.resolve_playlist(&format!("{base}/start.pls")).await;
+        task.abort();
+        assert_eq!(result.unwrap(), format!("{base}/moved/stream"));
+    }
+
+    #[tokio::test]
+    async fn fourth_nested_playlist_can_point_to_a_stream() {
+        let (base, task) = crate::test_http::serve(|target| {
+            let next = match target {
+                "/1.m3u" => "2.m3u",
+                "/2.m3u" => "3.m3u",
+                "/3.m3u" => "4.m3u",
+                "/4.m3u" => "live",
+                _ => panic!("Must not download the live stream"),
+            };
+            (200, String::new(), next.as_bytes().to_vec())
+        })
+        .await;
+        let radio = Radio::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            vec![],
+        );
+        let result = radio.resolve_playlist(&format!("{base}/1.m3u")).await;
+        task.abort();
+        assert_eq!(result.unwrap(), format!("{base}/live"));
+    }
+
     #[test]
     fn live_and_library_channels_are_distinct() {
         let p = parse_cliamp(

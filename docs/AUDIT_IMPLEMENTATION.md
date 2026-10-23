@@ -5,6 +5,10 @@ Baseline: alpha.11 `e2b01ea`; original requirements/repros are in
 `fix/audit-implementation`, [PR #13](https://github.com/Vanir20342222/ytui/pull/13),
 targeting main. Main has not been silently promoted from alpha.5.
 
+The [networking follow-up](NETWORK_RELIABILITY_2026-10-23.md) records additional
+rate-limit, radio redirect/deadline, cover-proxy and stale-request fixes, with
+210 deterministic passes and public service results (5 pass, 2 tunnel failures).
+
 | Work | Implementation / acceptance |
 | --- | --- |
 | B01 | Queue entries capture audio/video intent at selection. Tabs do not change playback type. Busy commands preserve selection; deferred automatic advance retries and Stop cancels it; stale EOF for another URL is ignored. |

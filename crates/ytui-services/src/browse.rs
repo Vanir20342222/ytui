@@ -494,7 +494,13 @@ impl Browser {
         // reject a playable video without playback context; use it only when the
         // page has no supported metadata, preserving its specific service errors.
         let embedded = if let BrowseRequest::Details(id) = request {
-            self.watch_response(music, id).await.ok()
+            match self.watch_response(music, id).await {
+                Ok(data) => Some(data),
+                // Do not turn a transport failure or server cooldown into an
+                // immediate second request through a different endpoint.
+                Err(error) if error.is::<FeedRetry>() => return Err(error),
+                Err(_) => None,
+            }
         } else {
             None
         };
@@ -598,7 +604,14 @@ impl Browser {
             crate::http::Redirects::SameOrigin,
             "YouTube details",
         )
-        .await?;
+        .await
+        .map_err(|error| {
+            if error.is::<crate::http::TransportError>() {
+                transient(error)
+            } else {
+                error
+            }
+        })?;
         response_status(&response, true)?;
         let html = limited_text(response, 8 * 1024 * 1024).await?;
         let data = extract_assignment(&html, "ytInitialPlayerResponse")
@@ -1422,6 +1435,71 @@ mod request_tests {
             task.abort();
         }
     }
+    #[tokio::test]
+    async fn interrupted_bootstrap_and_api_bodies_retry_then_recover() {
+        for bootstrap in [false, true] {
+            let calls = Arc::new(AtomicUsize::new(0));
+            let observed = calls.clone();
+            let (base, task) = crate::test_http::serve_raw_request(move |request| {
+                let get = request.starts_with("GET");
+                if get == bootstrap && observed.fetch_add(1, Ordering::SeqCst) == 0 {
+                    return b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n{partial".to_vec();
+                }
+                let body = if get { r#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"# }
+                    else { r#"{"contents":[{"videoRenderer":{"videoId":"recovered","title":{"simpleText":"Recovered"}}}]}"# };
+                format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).into_bytes()
+            }).await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let request = BrowseRequest::Search("fixture".into());
+            let error = browser.fetch(false, &request).await.unwrap_err();
+            assert!(error.is::<FeedRetry>(), "{error}");
+            assert_eq!(
+                browser.fetch(false, &request).await.unwrap().items[0].id,
+                "recovered"
+            );
+            task.abort();
+        }
+    }
+
+    #[tokio::test]
+    async fn details_obey_watch_page_rate_limits_without_an_api_fallback() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let observed = calls.clone();
+        let (base, task) = crate::test_http::serve_request(move |request| {
+            observed.fetch_add(1, Ordering::SeqCst);
+            if request.starts_with("GET /watch?") {
+                (429, "Retry-After: 120\r\n".into(), vec![])
+            } else if request.starts_with("GET") {
+                (
+                    200,
+                    String::new(),
+                    br#"ytcfg.set({"INNERTUBE_CLIENT_VERSION":"fixture"});"#.to_vec(),
+                )
+            } else {
+                (
+                    200,
+                    String::new(),
+                    br#"{"videoDetails":{"videoId":"abcdefghijk","title":"Unexpected fallback"}}"#
+                        .to_vec(),
+                )
+            }
+        })
+        .await;
+        let mut browser = Browser::new(client(), None, 0);
+        browser.origins = [base.clone(), base];
+        let result = browser
+            .fetch(false, &BrowseRequest::Details("abcdefghijk".into()))
+            .await;
+        task.abort();
+        let error = result.expect_err("Watch-page cooldown must not be bypassed");
+        assert_eq!(
+            error.downcast_ref::<FeedRetry>().unwrap().after,
+            Duration::from_secs(120)
+        );
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+
     #[tokio::test]
     async fn transient_statuses_retry_after_and_permanent_errors_are_distinguished() {
         for (status, headers, body, retry, minimum) in [

@@ -20,6 +20,7 @@
 | --- | --- |
 | [Validation record](VALIDATION.md) | Dated results; each section identifies its environment |
 | [Single-video sweep](SINGLE_VIDEO_SWEEP.md) | Alpha.11 playback/recovery checks on the target PC |
+| [Networking reliability review](NETWORK_RELIABILITY_2026-10-23.md) | Alpha.12 proxy/redirect/recovery fixes and public-service results |
 | [Network and caching](NETWORK_PERFORMANCE.md) | Alpha.10 provider checks and measured cache performance |
 | [CI playback diagnosis](CI_PLAYBACK_DIAGNOSIS.md) | Package-install timeouts versus real hosted-runner extraction failures |
 | [Live YouTube checks](LIVE_YOUTUBE_TESTS.md) | Opt-in public-service runners and required tools |

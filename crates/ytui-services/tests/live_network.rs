@@ -209,3 +209,47 @@ async fn live_radio_stream_advances_in_mpv() {
         println!("Actual cliamp {kind} playback advanced {position:.3} seconds");
     }
 }
+
+#[tokio::test]
+#[ignore = "public YouTube thumbnail CDN independently of browsing; no cookies"]
+async fn live_public_thumbnail_cdn_and_disk_cache() {
+    let temp = tempfile::tempdir().unwrap();
+    let client = ytui_services::http_client(None).unwrap();
+    let cache = ImageCache::new(client.clone(), temp.path().into());
+    let url = "https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg";
+    let image = cache.load_sized(url, 160, 90).await.unwrap();
+    assert!(image.width() > 0 && image.width() <= 160 && image.height() <= 90);
+    let restored = ImageCache::new(client, temp.path().into())
+        .load_sized(url, 160, 90)
+        .await
+        .unwrap();
+    assert_eq!(restored.as_bytes(), image.as_bytes());
+}
+
+#[tokio::test]
+#[ignore = "public LRCLIB lookup for a fixed public song; no account or playback state"]
+async fn live_public_lyrics_lookup() {
+    let tracks = ytui_services::lyrics::lookup(None, "Never Gonna Give You Up", "Rick Astley")
+        .await
+        .unwrap();
+    assert!(!tracks.is_empty(), "No public song candidates returned");
+}
+
+#[tokio::test]
+#[ignore = "public SponsorBlock API for a fixed public video; no account"]
+async fn live_public_sponsorblock_api() {
+    let media = ytui_core::Media {
+        id: "dQw4w9WgXcQ".into(),
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ".into(),
+        ..Default::default()
+    };
+    let segments = ytui_services::sponsorblock::fetch(&Config::default(), &media)
+        .await
+        .unwrap();
+    // A real 404 is a supported empty result, not a claim that segments exist.
+    assert!(
+        segments
+            .iter()
+            .all(|s| s.start.is_finite() && s.end > s.start)
+    );
+}

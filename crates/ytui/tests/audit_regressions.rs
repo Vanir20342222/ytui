@@ -878,3 +878,52 @@ async fn repeated_disconnect_completes_cleanup_without_leaving_settings_busy() {
     );
     app.shutdown().await;
 }
+
+#[tokio::test]
+async fn network_settings_cancel_old_feed_requests_and_reject_their_results() {
+    use ytui::app::FeedLoad;
+    use ytui_core::{BrowseRequest, Page};
+    let (mut app, _rx, _temp) = fixture();
+    let request = BrowseRequest::Search("kept query".into());
+    app.tabs[1].request = Some(request.clone());
+    app.tabs[1].load = Some(FeedLoad {
+        request,
+        append: false,
+        preserve_selection: true,
+        failures: 3,
+        retry_at: None,
+    });
+    app.tabs[1].loading = true;
+    app.tabs[3].request = Some(BrowseRequest::Cliamp);
+    app.tabs[3].error = Some("Old proxy failed".into());
+    let old_generation = app.tabs[1].generation;
+    let cancel = app.tabs[1].cancel.clone();
+    let kept_title = app.tabs[1].page.items[0].title.clone();
+    let mut config = app.config.clone();
+    config.proxy = Some("http://127.0.0.1:9".into());
+    let operation = app.operations.config(false);
+    app.apply(UiEvent::Config {
+        operation,
+        config: Box::new(config),
+        account: None,
+        result: Ok(()),
+    });
+    assert!(cancel.is_cancelled(), "Old proxy request remains in flight");
+    assert!(
+        app.tabs[3].load.is_some(),
+        "Failed radio tab needs automatic recovery on the new route"
+    );
+    assert!(app.tabs[1].generation > old_generation);
+    app.apply(UiEvent::Page {
+        tab: 1,
+        generation: old_generation,
+        append: false,
+        result: Ok(Page::default()),
+    });
+    assert_eq!(app.tabs[1].page.items[0].title, kept_title);
+    assert!(
+        app.tabs[1].load.is_some(),
+        "Pending feed must remain recoverable"
+    );
+    app.shutdown().await;
+}

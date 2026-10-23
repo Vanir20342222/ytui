@@ -399,13 +399,7 @@ fn tag(request: &WorkerRequest, path: &Path, title: &str) -> Result<()> {
     let mut cover = None;
     if o.thumbnail && !request.job.media.thumbnail.is_empty() {
         ytui_core::http_url(&request.job.media.thumbnail)?;
-        let mut builder =
-            reqwest::blocking::Client::builder().timeout(std::time::Duration::from_secs(20));
-        if let Some(proxy) = &request.config.proxy {
-            builder = builder.proxy(reqwest::Proxy::all(proxy)?);
-        }
-        let mut response = builder
-            .build()?
+        let mut response = crate::blocking_http_client(request.config.proxy.as_deref())?
             .get(&request.job.media.thumbnail)
             .send()?
             .error_for_status()?;

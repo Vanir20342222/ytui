@@ -303,6 +303,7 @@ pub struct App {
     card_requests: std::collections::HashSet<String>,
     card_failures: HashMap<String, (u8, Option<Instant>)>,
     card_generation: u64,
+    card_cancel: CancellationToken,
     card_pending: usize,
     image_key: Option<(String, u16, u16)>,
     image_generation: u64,
@@ -599,6 +600,7 @@ impl App {
             card_requests: std::collections::HashSet::new(),
             card_failures: HashMap::new(),
             card_generation: 0,
+            card_cancel: CancellationToken::new(),
             card_pending: 0,
             image_key: None,
             image_generation: 0,
@@ -1083,6 +1085,8 @@ impl App {
                     Err(e) => self.status = format!("Could not save settings: {e}"),
                     Ok(()) => {
                         let account_changed = self.config.account_index != config.account_index;
+                        let network_changed = self.config.proxy != config.proxy;
+                        let radio_changed = self.config.radio_servers != config.radio_servers;
                         let clipboard_changed =
                             self.config.clipboard_watcher != config.clipboard_watcher;
                         let images_changed = self.config.image_protocol != config.image_protocol;
@@ -1133,6 +1137,43 @@ impl App {
                                     ImageCache::new(client, self.paths.cache.join("images"));
                             }
                             Err(e) => self.status = e.to_string(),
+                        }
+                        if network_changed || radio_changed {
+                            for tab in 1..=3 {
+                                if !network_changed && tab != 3 {
+                                    continue;
+                                }
+                                let view = &mut self.tabs[tab];
+                                view.cancel.cancel();
+                                view.generation = view.generation.wrapping_add(1);
+                                view.loading = false;
+                                if view.error.is_some() && view.load.is_none() {
+                                    view.load = view.request.clone().map(|request| FeedLoad {
+                                        request,
+                                        append: false,
+                                        preserve_selection: true,
+                                        failures: 0,
+                                        retry_at: None,
+                                    });
+                                }
+                                view.error = None;
+                                // Preserve the loaded catalog/selection and pending
+                                // continuation. Reject completions from the old route.
+                                if let Some(load) = &mut view.load {
+                                    load.retry_at = Some(Instant::now());
+                                }
+                            }
+                            if network_changed {
+                                self.card_cancel.cancel();
+                                self.card_cancel = CancellationToken::new();
+                                self.card_generation = self.card_generation.wrapping_add(1);
+                                self.card_requests.clear();
+                                self.card_failures.clear();
+                                self.card_pending = 0;
+                            }
+                            if !self.demo && !self.offline && self.tabs[self.tab].load.is_some() {
+                                self.start_browse(self.tab);
+                            }
                         }
                         self.status =
                             "Settings saved · changes apply to new downloads and playback".into();
@@ -2262,7 +2303,7 @@ impl App {
         });
     }
     fn recover_feed(&mut self) {
-        if self.demo || self.offline || !matches!(self.tab, 1 | 2) {
+        if self.demo || self.offline || !matches!(self.tab, 1..=3) {
             return;
         }
         let view = &self.tabs[self.tab];
@@ -2354,6 +2395,7 @@ impl App {
             let picker = self.picker.clone();
             let demo = self.demo.then(|| self.palette.clone());
             let generation = self.card_generation;
+            let cancel = self.card_cancel.clone();
             self.tasks.spawn(async move {
                 let result = async {
                     let image = if let Some(palette) = demo {
@@ -2362,7 +2404,10 @@ impl App {
                         })
                         .await?
                     } else {
-                        cache.load_sized(&url, width, height).await?
+                        tokio::select! {
+                            _ = cancel.cancelled() => anyhow::bail!("Thumbnail request cancelled"),
+                            image = cache.load_sized(&url, width, height) => image?,
+                        }
                     };
                     tokio::task::spawn_blocking(move || {
                         picker.new_protocol(
