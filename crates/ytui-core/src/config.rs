@@ -228,6 +228,29 @@ impl Default for DownloadOptions {
     }
 }
 impl DownloadOptions {
+    /// Compare the requested files, independently of extraction/retry/rate policy.
+    pub fn same_output(&self, other: &Self) -> bool {
+        self.audio == other.audio
+            && (if self.audio {
+                self.audio_container == other.audio_container
+                    && self.audio_quality == other.audio_quality
+            } else {
+                self.container == other.container && self.quality == other.quality
+            })
+            && self.output_directory() == other.output_directory()
+            && self.filename_template == other.filename_template
+            && self.playlist == other.playlist
+            && self.playlist_items == other.playlist_items
+            && self.subtitles == other.subtitles
+            && self.auto_subtitles == other.auto_subtitles
+            && self.embed_subtitles == other.embed_subtitles
+            && self.metadata == other.metadata
+            && self.thumbnail == other.thumbnail
+            && self.split_chapters == other.split_chapters
+            && self.sponsorblock == other.sponsorblock
+            && self.sponsorblock_api == other.sponsorblock_api
+            && self.sponsorblock_remove == other.sponsorblock_remove
+    }
     pub fn output_directory(&self) -> &std::path::Path {
         if self.audio {
             &self.audio_directory

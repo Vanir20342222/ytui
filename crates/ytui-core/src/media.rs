@@ -40,6 +40,29 @@ pub struct Media {
     pub chapters: Vec<crate::Chapter>,
 }
 impl Media {
+    /// Conservative retained-data estimate for UI windows, including nested text.
+    pub fn retained_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.id.len()
+            + self.title.len()
+            + self.creator.len()
+            + self.url.len()
+            + self.thumbnail.len()
+            + self.section.len()
+            + self.description.len()
+            + self.browse_id.as_ref().map_or(0, String::len)
+            + self.tracks_url.as_ref().map_or(0, String::len)
+            + self
+                .thumbnails
+                .iter()
+                .map(|value| std::mem::size_of::<Thumbnail>() + value.url.len())
+                .sum::<usize>()
+            + self
+                .chapters
+                .iter()
+                .map(|value| std::mem::size_of::<crate::Chapter>() + value.title.len())
+                .sum::<usize>()
+    }
     pub fn collection(&self) -> bool {
         matches!(
             self.kind,
@@ -68,6 +91,22 @@ pub struct Page {
     pub items: Vec<Media>,
     pub continuation: Option<String>,
     pub notice: Option<String>,
+}
+impl Page {
+    pub fn retained_bytes(&self) -> usize {
+        self.items.iter().map(Media::retained_bytes).sum::<usize>()
+            + self.title.len()
+            + self.continuation.as_ref().map_or(0, String::len)
+            + self.notice.as_ref().map_or(0, String::len)
+            + self
+                .categories
+                .iter()
+                .map(|category| {
+                    category.title.len()
+                        + serde_json::to_string(&category.request).map_or(0, |text| text.len())
+                })
+                .sum::<usize>()
+    }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Category {

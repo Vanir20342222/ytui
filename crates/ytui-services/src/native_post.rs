@@ -377,40 +377,11 @@ fn cut(
         } else {
             "m4a"
         };
-        args.extend([
-            "-map".into(),
-            "[a]".into(),
-            "-c:a".into(),
-            match format {
-                "mp3" => "libmp3lame",
-                "flac" => "flac",
-                "wav" => "pcm_s16le",
-                "opus" => "libopus",
-                "vorbis" => "libvorbis",
-                _ => "aac",
-            }
-            .into(),
-        ]);
-        let quality = request
-            .job
-            .options
-            .audio_quality
-            .trim_end_matches(['k', 'K'])
-            .parse::<f64>()?;
-        if !["flac", "wav"].contains(&format) {
-            if quality > 10.0 {
-                args.extend(["-b:a".into(), format!("{quality}k")]);
-            } else if format == "opus" {
-                args.extend(["-b:a".into(), format!("{}k", 256.0 - quality * 16.0)]);
-            } else {
-                let quality = match format {
-                    "mp3" => quality,
-                    "vorbis" => 10.0 - quality,
-                    _ => 4.0 - 3.9 * quality / 10.0,
-                };
-                args.extend(["-q:a".into(), quality.to_string()]);
-            }
-        }
+        args.extend(["-map".into(), "[a]".into()]);
+        args.extend(crate::audio::encoding(
+            format,
+            &request.job.options.audio_quality,
+        )?);
     }
     args.extend([
         "-map_chapters".into(),

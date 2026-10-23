@@ -109,6 +109,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         ),
         Modal::History(_) => (105, 32),
         Modal::Groups(_) => (85, 25),
+        Modal::Outputs { .. } => (105, 28),
         Modal::Text { .. } => (90, 28),
     };
     let rect = centered(area, size.0, size.1);
@@ -394,6 +395,66 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 rect,
                 &mut state,
             );
+        }
+        Modal::Outputs { job, selected } => {
+            if let Some(download) = app.snapshot.downloads.jobs.iter().find(|j| j.id == *job) {
+                let ready = download
+                    .outputs
+                    .iter()
+                    .filter(|path| ytui_services::library::completed_file(download, path).is_some())
+                    .count();
+                let items = download
+                    .outputs
+                    .iter()
+                    .map(|path| {
+                        let available =
+                            ytui_services::library::completed_file(download, path).is_some();
+                        ListItem::new(vec![
+                            Line::styled(
+                                format!(
+                                    "{}  {}",
+                                    if available {
+                                        "Ready"
+                                    } else {
+                                        "Missing / sidecar"
+                                    },
+                                    path.file_name().unwrap_or_default().to_string_lossy()
+                                ),
+                                Style::default().fg(themed(
+                                    app,
+                                    if available {
+                                        app.palette.text
+                                    } else {
+                                        app.palette.muted
+                                    },
+                                )),
+                            ),
+                            Line::styled(
+                                path.parent().unwrap_or(path).display().to_string(),
+                                Style::default().fg(themed(app, app.palette.muted)),
+                            ),
+                        ])
+                    })
+                    .collect::<Vec<_>>();
+                let mut state = ListState::default().with_selected(Some(*selected));
+                f.render_stateful_widget(
+                    List::new(items)
+                        .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                        .highlight_symbol("▸ ")
+                        .block(
+                            panel(
+                                format!(
+                                    " Files · {ready} ready · collection {:?} ",
+                                    download.state
+                                ),
+                                app,
+                            )
+                            .title_bottom(" ↑/↓ select · Enter plays · Esc closes "),
+                        ),
+                    rect,
+                    &mut state,
+                );
+            }
         }
         Modal::Queue(selected) => {
             let items = app

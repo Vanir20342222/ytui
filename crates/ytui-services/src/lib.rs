@@ -1,7 +1,9 @@
+mod audio;
 pub mod auth;
 pub mod browse;
 mod cache;
 pub mod desktop;
+pub mod diagnostics;
 pub mod download;
 pub mod failure;
 mod http;

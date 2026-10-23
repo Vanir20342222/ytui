@@ -26,6 +26,15 @@ macro_rules! entry {
 }
 pub const ENTRIES: &[Entry] = &[
     entry!("Settings", "General settings", "settings"),
+    entry!("Settings", "Setup & tool capabilities", "capabilities"),
+    entry!("Settings", "Inspect thumbnail cache", "thumbnail-cache"),
+    entry!("Settings", "Clear thumbnail cache", "thumbnail-cache-clear"),
+    entry!(
+        "Settings",
+        "Export safe support report",
+        "support-export",
+        &[("New JSON file", "ytui-support.json")]
+    ),
     entry!("Settings", "Playback and SponsorBlock", "playback-settings"),
     entry!("Settings", "Keyboard bindings", "keys"),
     entry!("Settings", "Choose theme", "theme"),
@@ -37,6 +46,11 @@ pub const ENTRIES: &[Entry] = &[
     ),
     entry!("Account", "Connect browser or cookie file", "auth"),
     entry!("Account", "Disconnect saved browser session", "disconnect"),
+    entry!(
+        "Account",
+        "Cancel pending account/settings operation",
+        "cancel-operation"
+    ),
     entry!("Browse", "Choose feed or source", "feeds"),
     entry!("Browse", "Home recommendations", "home"),
     entry!("Browse", "Subscriptions", "subscriptions"),
@@ -92,6 +106,11 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Downloads", "Completed downloads", "downloads completed"),
     entry!("Downloads", "Failed downloads", "downloads failed"),
     entry!("Downloads", "Download statistics", "stats"),
+    entry!(
+        "Downloads",
+        "Files in selected download / playlist",
+        "download-files"
+    ),
     entry!(
         "Downloads",
         "Search download history",

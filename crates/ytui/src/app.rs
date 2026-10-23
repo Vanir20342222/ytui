@@ -34,6 +34,39 @@ use ytui_services::{
 };
 
 pub const TAB_NAMES: [&str; 4] = ["Downloads", "YouTube", "Music", "Cliamp / Radio"];
+fn image_protocol(
+    value: &str,
+    detected: ratatui_image::picker::ProtocolType,
+) -> ratatui_image::picker::ProtocolType {
+    use ratatui_image::picker::ProtocolType;
+    match value {
+        "auto" => detected,
+        "kitty" => ProtocolType::Kitty,
+        "sixel" => ProtocolType::Sixel,
+        "iterm2" => ProtocolType::Iterm2,
+        _ => ProtocolType::Halfblocks,
+    }
+}
+fn image_retry(error: &anyhow::Error, attempts: u8) -> Option<Instant> {
+    let message = error.to_string().to_lowercase();
+    let transient = [
+        "timeout",
+        "timed out",
+        "connection",
+        "temporary",
+        "http 5",
+        "http 429",
+        "error sending",
+    ]
+    .iter()
+    .any(|part| message.contains(part));
+    (transient && attempts <= 5).then(|| {
+        Instant::now()
+            + Duration::from_secs(
+                [2, 5, 15, 30, 60][usize::from(attempts.saturating_sub(1)).min(4)],
+            )
+    })
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum HitTarget {
     SettingSection(usize),
@@ -71,6 +104,47 @@ pub struct TabView {
     pub empty_pages: u8,
     pub seen_tokens: std::collections::HashSet<String>,
 }
+impl TabView {
+    fn bound_memory(&mut self) {
+        let mut bytes = self
+            .page
+            .items
+            .iter()
+            .map(Media::retained_bytes)
+            .sum::<usize>();
+        let mut remove = 0;
+        while self.page.items.len().saturating_sub(remove) > 2000 || bytes > 8 * 1024 * 1024 {
+            let Some(media) = self.page.items.get(remove) else {
+                break;
+            };
+            bytes = bytes.saturating_sub(media.retained_bytes());
+            remove += 1;
+        }
+        if remove > 0 {
+            self.page.items.drain(..remove);
+            self.selected = self.selected.saturating_sub(remove);
+            self.page.notice = Some(
+                "Continuous feed · older items released from memory (2,000 items / 8 MiB window)"
+                    .into(),
+            );
+        }
+        while self.history.len() > 8
+            || self
+                .history
+                .iter()
+                .map(|(_, page, _)| page.retained_bytes())
+                .sum::<usize>()
+                > 12 * 1024 * 1024
+        {
+            self.history.remove(0);
+        }
+        // Cycle detection covers the recent traversal. A bounded set avoids
+        // retaining every continuation token during an arbitrarily long feed.
+        if self.seen_tokens.len() > 256 {
+            self.seen_tokens.clear();
+        }
+    }
+}
 pub enum Modal {
     Actions {
         selected: usize,
@@ -86,6 +160,10 @@ pub enum Modal {
     Watches(usize),
     History(history::View),
     Groups(usize),
+    Outputs {
+        job: uuid::Uuid,
+        selected: usize,
+    },
     Text {
         title: String,
         lines: Vec<String>,
@@ -104,6 +182,7 @@ pub enum UiEvent {
     },
     Prefetched,
     CardImage {
+        generation: u64,
         key: String,
         result: Result<Protocol>,
     },
@@ -112,12 +191,19 @@ pub enum UiEvent {
         result: Result<Protocol>,
     },
     Config {
+        operation: crate::operations::Ticket,
         config: Box<Config>,
         account: Option<Session>,
         result: Result<()>,
     },
-    Auth(Result<Session>),
-    Disconnected(Result<()>),
+    Auth {
+        operation: crate::operations::Ticket,
+        result: Result<Session>,
+    },
+    Disconnected {
+        operation: crate::operations::Ticket,
+        result: Result<()>,
+    },
     Status(String),
     Clipboard {
         generation: u64,
@@ -134,6 +220,7 @@ pub enum UiEvent {
         title: String,
         result: Result<Vec<String>>,
     },
+    CacheCleared(Result<ytui_services::images::CacheStats>),
 }
 pub struct RuntimeHandles {
     pub player: mpsc::Sender<PlayerCommand>,
@@ -145,6 +232,9 @@ pub struct Running {
     pub task: JoinHandle<()>,
 }
 pub struct App {
+    pub operations: crate::operations::Operations,
+    pub pending_operation: Option<(crate::operations::Ticket, String)>,
+    disconnect_pending: bool,
     pub config: Config,
     pub paths: Paths,
     pub snapshot: Snapshot,
@@ -172,16 +262,20 @@ pub struct App {
     pub theme_rx: tokio::sync::watch::Receiver<Palette>,
     theme_cancel: CancellationToken,
     pub picker: Picker,
+    pub detected_image_protocol: ratatui_image::picker::ProtocolType,
     pub image: Option<Protocol>,
     pub image_area: Rect,
     pub card_areas: Vec<(usize, Rect)>,
     pub card_images: HashMap<String, Protocol>,
     card_requests: std::collections::HashSet<String>,
+    card_failures: HashMap<String, (u8, Option<Instant>)>,
+    card_generation: u64,
     card_pending: usize,
     image_key: Option<(String, u16, u16)>,
     image_generation: u64,
     image_cancel: CancellationToken,
     image_due: Instant,
+    image_failures: u8,
     pub image_error: Option<String>,
     pub sidebar_visible: bool,
     pub feeds_focused: bool,
@@ -202,6 +296,27 @@ pub struct App {
     watch_pending: HashMap<uuid::Uuid, (u64, CancellationToken)>,
 }
 impl App {
+    fn continue_disconnect(&mut self) {
+        if self.disconnect_pending && self.pending_operation.is_none() {
+            self.disconnect_pending = false;
+            if let Err(error) = self.command("disconnect") {
+                self.status = error.to_string();
+            }
+        }
+    }
+    fn finish_operation(&mut self, operation: &crate::operations::Ticket) -> bool {
+        if !self.operations.current(operation) {
+            return false;
+        }
+        if self
+            .pending_operation
+            .as_ref()
+            .is_some_and(|(pending, _)| pending.same(operation))
+        {
+            self.pending_operation = None;
+        }
+        true
+    }
     pub fn feed_choices(&self) -> &'static [(&'static str, &'static str, &'static str)] {
         if self.offline {
             return &[
@@ -316,6 +431,12 @@ impl App {
             jobs: job_tx,
             picker,
         } = handles;
+        let detected_image_protocol = picker.protocol_type();
+        let mut picker = picker;
+        picker.set_protocol_type(image_protocol(
+            &config.image_protocol,
+            detected_image_protocol,
+        ));
         let client = ytui_services::http_client(config.proxy.as_deref())?;
         let browser = Browser::new(client.clone(), session.clone(), config.account_index);
         let radio = Radio::new(client.clone(), config.radio_servers.clone())
@@ -328,6 +449,9 @@ impl App {
             theme_cancel.clone(),
         );
         let mut app = Self {
+            operations: Default::default(),
+            pending_operation: None,
+            disconnect_pending: false,
             config,
             paths,
             snapshot,
@@ -361,16 +485,20 @@ impl App {
             theme_rx,
             theme_cancel,
             picker,
+            detected_image_protocol,
             image: None,
             image_area: Rect::default(),
             card_areas: Vec::new(),
             card_images: HashMap::new(),
             card_requests: std::collections::HashSet::new(),
+            card_failures: HashMap::new(),
+            card_generation: 0,
             card_pending: 0,
             image_key: None,
             image_generation: 0,
             image_cancel: CancellationToken::new(),
             image_due: Instant::now(),
+            image_failures: 0,
             image_error: None,
             sidebar_visible: false,
             feeds_focused: false,
@@ -539,9 +667,7 @@ impl App {
                 && !view.page.items.is_empty()
             {
                 view.history.push((old, view.page.clone(), view.selected));
-                if view.history.len() > 30 {
-                    view.history.remove(0);
-                }
+                view.bound_memory();
             }
             view.request = Some(request.clone());
         }
@@ -612,10 +738,35 @@ impl App {
     }
     pub fn apply(&mut self, event: UiEvent) {
         match event {
+            UiEvent::CacheCleared(result) => match result {
+                Ok(stats) => {
+                    self.card_generation = self.card_generation.wrapping_add(1);
+                    self.card_images.clear();
+                    self.card_requests.clear();
+                    self.card_failures.clear();
+                    self.card_pending = 0;
+                    self.selection_changed();
+                    self.status = format!(
+                        "Cleared {} cached thumbnails ({:.1} MiB) · media files unchanged",
+                        stats.files,
+                        stats.disk_bytes as f64 / 1048576.0
+                    );
+                }
+                Err(error) => self.status = format!("Could not clear thumbnails: {error}"),
+            },
             UiEvent::Prefetched => {}
-            UiEvent::CardImage { key, result } => {
+            UiEvent::CardImage {
+                generation,
+                key,
+                result,
+            } => {
+                if generation != self.card_generation {
+                    return;
+                }
                 self.card_pending = self.card_pending.saturating_sub(1);
+                self.card_requests.remove(&key);
                 if let Ok(protocol) = result {
+                    self.card_failures.remove(&key);
                     let visible = self
                         .card_areas
                         .iter()
@@ -638,6 +789,13 @@ impl App {
                         self.card_requests.remove(&old);
                     }
                     self.card_images.insert(key, protocol);
+                } else if let Err(error) = result {
+                    let attempts = self
+                        .card_failures
+                        .get(&key)
+                        .map_or(1, |(n, _)| n.saturating_add(1));
+                    self.card_failures
+                        .insert(key, (attempts, image_retry(&error, attempts)));
                 }
             }
             UiEvent::Page {
@@ -699,6 +857,7 @@ impl App {
                                 });
                             view.page = page;
                         }
+                        view.bound_memory();
                         if tab == self.tab && !append {
                             self.selection_changed();
                         }
@@ -736,98 +895,124 @@ impl App {
                         self.image = Some(p);
                         self.image_error = None;
                     }
-                    Err(_) => {
+                    Err(error) => {
                         self.image = None;
                         self.image_error = Some("Thumbnail unavailable".into());
+                        self.image_failures = self.image_failures.saturating_add(1);
+                        if let Some(due) = image_retry(&error, self.image_failures) {
+                            self.image_key = None;
+                            self.image_due = due;
+                            self.image_error = Some("Thumbnail retry scheduled".into());
+                        }
                     }
                 }
             }
             UiEvent::Config {
+                operation,
                 config,
                 account,
                 result,
-            } => match result {
-                Err(e) => self.status = format!("Could not save settings: {e}"),
-                Ok(()) => {
-                    let account_changed = self.config.account_index != config.account_index;
-                    let clipboard_changed =
-                        self.config.clipboard_watcher != config.clipboard_watcher;
-                    let images_changed = self.config.image_protocol != config.image_protocol;
-                    self.config = *config;
-                    if clipboard_changed {
-                        self.clipboard_cancel.cancel();
-                        self.clipboard_cancel = CancellationToken::new();
-                        self.clipboard_generation += 1;
-                        self.clipboard_monitor = Default::default();
-                        self.clipboard_url = None;
-                        self.clipboard_warned = false;
-                    }
-                    if images_changed {
-                        use ratatui_image::picker::ProtocolType;
-                        self.picker
-                            .set_protocol_type(match self.config.image_protocol.as_str() {
-                                "kitty" => ProtocolType::Kitty,
-                                "sixel" => ProtocolType::Sixel,
-                                "iterm2" => ProtocolType::Iterm2,
-                                _ => ProtocolType::Halfblocks,
-                            });
-                    }
-                    if let Some(account) = account {
-                        self.session = Some(Arc::new(account));
-                    }
-                    let _ = self
-                        .player
-                        .try_send(PlayerCommand::Configure(Box::new(self.config.clone())));
-                    self.theme_cancel.cancel();
-                    self.theme_cancel = CancellationToken::new();
-                    self.theme_rx = theme::watch(
-                        Arc::new(self.config.clone()),
-                        self.paths.clone(),
-                        self.theme_cancel.clone(),
-                    );
-                    match ytui_services::http_client(self.config.proxy.as_deref()) {
-                        Ok(client) => {
-                            self.browser = Browser::new(
-                                client.clone(),
-                                self.session.clone(),
-                                self.config.account_index,
-                            );
-                            self.radio =
-                                Radio::new(client.clone(), self.config.radio_servers.clone())
-                                    .with_cache(self.paths.cache.join("radio"));
-                            self.images = ImageCache::new(client, self.paths.cache.join("images"));
+            } => {
+                if !self.finish_operation(&operation) {
+                    return;
+                }
+                match result {
+                    Err(e) => self.status = format!("Could not save settings: {e}"),
+                    Ok(()) => {
+                        let account_changed = self.config.account_index != config.account_index;
+                        let clipboard_changed =
+                            self.config.clipboard_watcher != config.clipboard_watcher;
+                        let images_changed = self.config.image_protocol != config.image_protocol;
+                        self.config = *config;
+                        if clipboard_changed {
+                            self.clipboard_cancel.cancel();
+                            self.clipboard_cancel = CancellationToken::new();
+                            self.clipboard_generation += 1;
+                            self.clipboard_monitor = Default::default();
+                            self.clipboard_url = None;
+                            self.clipboard_warned = false;
                         }
-                        Err(e) => self.status = e.to_string(),
+                        if images_changed {
+                            self.picker.set_protocol_type(image_protocol(
+                                &self.config.image_protocol,
+                                self.detected_image_protocol,
+                            ));
+                            self.card_generation = self.card_generation.wrapping_add(1);
+                            self.card_images.clear();
+                            self.card_requests.clear();
+                            self.card_failures.clear();
+                            self.card_pending = 0;
+                        }
+                        if let Some(account) = account {
+                            self.session = Some(Arc::new(account));
+                        }
+                        let _ = self
+                            .player
+                            .try_send(PlayerCommand::Configure(Box::new(self.config.clone())));
+                        self.theme_cancel.cancel();
+                        self.theme_cancel = CancellationToken::new();
+                        self.theme_rx = theme::watch(
+                            Arc::new(self.config.clone()),
+                            self.paths.clone(),
+                            self.theme_cancel.clone(),
+                        );
+                        match ytui_services::http_client(self.config.proxy.as_deref()) {
+                            Ok(client) => {
+                                self.browser = Browser::new(
+                                    client.clone(),
+                                    self.session.clone(),
+                                    self.config.account_index,
+                                );
+                                self.radio =
+                                    Radio::new(client.clone(), self.config.radio_servers.clone())
+                                        .with_cache(self.paths.cache.join("radio"));
+                                self.images =
+                                    ImageCache::new(client, self.paths.cache.join("images"));
+                            }
+                            Err(e) => self.status = e.to_string(),
+                        }
+                        self.status =
+                            "Settings saved · changes apply to new downloads and playback".into();
+                        self.selection_changed();
+                        if account_changed {
+                            self.reset_account();
+                        }
                     }
-                    self.status =
-                        "Settings saved · changes apply to new downloads and playback".into();
-                    self.selection_changed();
-                    if account_changed {
+                }
+                self.continue_disconnect();
+            }
+            UiEvent::Auth { operation, result } => {
+                if !self.finish_operation(&operation) {
+                    return;
+                }
+                match result {
+                    Ok(s) => {
+                        self.status = format!("Connected as {}", s.account);
+                        self.session = Some(Arc::new(s));
                         self.reset_account();
                     }
+                    Err(e) => {
+                        self.status = format!(
+                            "Sign-in failed: {}",
+                            ytui_services::process::diagnostic(&e.to_string())
+                        )
+                    }
                 }
-            },
-            UiEvent::Auth(result) => match result {
-                Ok(s) => {
-                    self.status = format!("Connected as {}", s.account);
-                    self.session = Some(Arc::new(s));
-                    self.reset_account();
+                self.continue_disconnect();
+            }
+            UiEvent::Disconnected { operation, result } => {
+                if !self.finish_operation(&operation) {
+                    return;
                 }
-                Err(e) => {
-                    self.status = format!(
-                        "Sign-in failed: {}",
-                        ytui_services::process::diagnostic(&e.to_string())
-                    )
+                match result {
+                    Ok(()) => {
+                        self.session = None;
+                        self.reset_account();
+                        self.status = "Disconnected · browser cookies were left intact".into();
+                    }
+                    Err(e) => self.status = e.to_string(),
                 }
-            },
-            UiEvent::Disconnected(result) => match result {
-                Ok(()) => {
-                    self.session = None;
-                    self.reset_account();
-                    self.status = "Disconnected · browser cookies were left intact".into();
-                }
-                Err(e) => self.status = e.to_string(),
-            },
+            }
             UiEvent::Clipboard { generation, result } => {
                 self.clipboard_pending = false;
                 if generation != self.clipboard_generation || !self.config.clipboard_watcher {
@@ -983,6 +1168,11 @@ impl App {
         }
     }
     pub fn save_config(&mut self, mut c: Config) {
+        if self.pending_operation.is_some() || self.disconnect_pending {
+            self.status = "Account/settings operation in progress · draft retained".into();
+            self.modal = Some(Modal::Form(Box::new(Form::settings(c))));
+            return;
+        }
         c.offline = self.offline;
         if self.demo {
             self.config = c;
@@ -998,6 +1188,9 @@ impl App {
         let account_changed = self.config.account_index != c.account_index;
         let storage_changed = self.config.auth_store != c.auth_store;
         let current = self.session.clone();
+        let operation = self.operations.config(account_changed || storage_changed);
+        self.pending_operation = Some((operation.clone(), "Saving settings…".into()));
+        let operations = self.operations.clone();
         self.tasks.spawn(async move {
             let mut account = None;
             let result = async {
@@ -1012,19 +1205,25 @@ impl App {
                             Some(session),
                             c.account_index,
                         );
-                        candidate.account = browser.validate().await?;
+                        candidate.account = operation.prepare(browser.validate()).await?;
                     }
-                    let store = SessionStore::new(&paths, &c.auth_store);
-                    let saved = candidate.clone();
-                    tokio::task::spawn_blocking(move || store.save(&saved)).await??;
                     account = Some(candidate);
                 }
                 let saved = c.clone();
-                tokio::task::spawn_blocking(move || paths.save_config(&saved)).await??;
+                let session = account.clone();
+                operations
+                    .commit(operation.clone(), move || {
+                        if let Some(session) = session {
+                            SessionStore::new(&paths, &saved.auth_store).save(&session)?;
+                        }
+                        paths.save_config(&saved)
+                    })
+                    .await?;
                 Ok(())
             }
             .await;
             UiEvent::Config {
+                operation,
                 config: Box::new(c),
                 account,
                 result,
@@ -1308,6 +1507,29 @@ impl App {
                 }
                 self.modal = Some(modal);
             }
+            Modal::Outputs { job, selected } => {
+                if let Some(download) = self.snapshot.downloads.jobs.iter().find(|j| j.id == *job) {
+                    match key.code {
+                        KeyCode::Up | KeyCode::Char('k') => *selected = selected.saturating_sub(1),
+                        KeyCode::Down | KeyCode::Char('j') => {
+                            *selected =
+                                (*selected + 1).min(download.outputs.len().saturating_sub(1))
+                        }
+                        KeyCode::Enter => {
+                            if let Some(media) = download.outputs.get(*selected).and_then(|path| {
+                                ytui_services::library::completed_file(download, path)
+                            }) {
+                                self.play(media);
+                                return;
+                            }
+                            self.status =
+                                "This file is missing or is a subtitle/image sidecar".into();
+                        }
+                        _ => {}
+                    }
+                }
+                self.modal = Some(modal);
+            }
             Modal::Queue(index) => match key.code {
                 KeyCode::Up | KeyCode::Char('k') => {
                     *index = index.saturating_sub(1);
@@ -1377,6 +1599,15 @@ impl App {
                         form.cycle_choice(if key.code == KeyCode::Left { -1 } else { 1 });
                     }
                     KeyCode::Enter => {
+                        if matches!(
+                            form.kind,
+                            FormKind::Settings(_) | FormKind::Keys(_) | FormKind::Auth
+                        ) && (self.pending_operation.is_some() || self.disconnect_pending)
+                        {
+                            form.error = Some("Account/settings operation in progress. Cancel it from Actions or wait; this draft is retained.".into());
+                            self.modal = Some(modal);
+                            return;
+                        }
                         let outcome = match &form.kind {
                             FormKind::Download(_, _) => form.download_values().map(|(m, o)| {
                                 self.enqueue_download(m, o);
@@ -1602,6 +1833,7 @@ impl App {
         self.image = None;
         self.image_key = None;
         self.image_error = None;
+        self.image_failures = 0;
         self.image_generation += 1;
         self.image_due = Instant::now();
         self.prefetch_images();
@@ -1622,7 +1854,17 @@ impl App {
         {
             return;
         }
-        let (width, height) = self.thumbnail_size();
+        let (width, height) = self
+            .card_areas
+            .first()
+            .map(|(_, area)| {
+                let (fw, fh) = self.picker.font_size();
+                (
+                    (area.width as u32 * fw as u32).clamp(1, 1280),
+                    (area.height as u32 * fh as u32).clamp(1, 720),
+                )
+            })
+            .unwrap_or_else(|| self.thumbnail_size());
         if width <= 1 || height <= 1 {
             return;
         }
@@ -1694,8 +1936,12 @@ impl App {
     }
     pub fn card_key(&self, media: &Media, area: Rect) -> String {
         format!(
-            "{}:{}:{}:{}",
-            self.palette.name, media.thumbnail, area.width, area.height
+            "{}:{:?}:{}:{}:{}",
+            self.palette.name,
+            self.picker.protocol_type(),
+            media.thumbnail,
+            area.width,
+            area.height
         )
     }
     fn refresh_cards(&mut self) {
@@ -1718,6 +1964,14 @@ impl App {
                 continue;
             }
             let key = self.card_key(&media, area);
+            if self.card_images.contains_key(&key)
+                || self
+                    .card_failures
+                    .get(&key)
+                    .is_some_and(|(_, due)| due.is_none_or(|at| at > Instant::now()))
+            {
+                continue;
+            }
             if !self.card_requests.insert(key.clone()) {
                 continue;
             }
@@ -1730,6 +1984,7 @@ impl App {
             let cache = self.images.clone();
             let picker = self.picker.clone();
             let demo = self.demo.then(|| self.palette.clone());
+            let generation = self.card_generation;
             self.tasks.spawn(async move {
                 let result = async {
                     let image = if let Some(palette) = demo {
@@ -1751,13 +2006,27 @@ impl App {
                     .map_err(anyhow::Error::from)
                 }
                 .await;
-                UiEvent::CardImage { key, result }
+                UiEvent::CardImage {
+                    generation,
+                    key,
+                    result,
+                }
             });
         }
-        // Failed requests are not resubmitted each frame; refresh clears the bounded set.
-        if self.card_requests.len() > 256 {
-            self.card_requests
-                .retain(|k| self.card_images.contains_key(k));
+        // Retain failure backoff only for the visible window once the map fills.
+        if self.card_failures.len() > 256 {
+            let visible = self
+                .card_areas
+                .iter()
+                .filter_map(|(i, rect)| {
+                    self.tabs[self.tab]
+                        .page
+                        .items
+                        .get(*i)
+                        .map(|media| self.card_key(media, *rect))
+                })
+                .collect::<std::collections::HashSet<_>>();
+            self.card_failures.retain(|key, _| visible.contains(key));
         }
     }
     pub fn refresh_image(&mut self) {
@@ -1878,17 +2147,28 @@ impl App {
                         self.dirty = true;
                         self.status = "Explicit yt-dlp fallback selected for this download".into();
                     }
-                } else if let Some(media) = self.selected()
+                } else if let Some(mut media) = self.selected()
                     && !media.collection()
                 {
+                    if self.tab == 2 && media.kind == MediaKind::Video {
+                        media.kind = MediaKind::Song;
+                    }
                     let audio = self.tab == 2
                         || media.kind == MediaKind::Song
                         || media.kind == MediaKind::Station;
-                    self.snapshot.playback.play(media.clone());
-                    self.dirty = true;
-                    let _ = self
+                    if self
                         .player
-                        .try_send(PlayerCommand::PlayFallback { media, audio });
+                        .try_send(PlayerCommand::PlayFallback {
+                            media: media.clone(),
+                            audio,
+                        })
+                        .is_err()
+                    {
+                        self.status = "Player busy · try again".into();
+                        return;
+                    }
+                    self.snapshot.playback.play(media);
+                    self.dirty = true;
                     self.status = "Playing with explicit yt-dlp fallback".into();
                 }
             }
@@ -1959,13 +2239,19 @@ impl App {
             Action::Down => self.move_selection(1),
             Action::Open => {
                 if self.tab == 0 {
-                    if let Some(job) = self.snapshot.downloads.jobs.get(self.download_selected)
-                        && job.state == JobState::Done
-                        && let Some(path) = job.outputs.first()
-                    {
-                        let mut media = job.media.clone();
-                        media.url = path.to_string_lossy().into();
-                        self.play(media);
+                    if let Some(job) = self.snapshot.downloads.jobs.get(self.download_selected) {
+                        if job.outputs.len() == 1 && job.state == JobState::Done {
+                            if let Some(media) =
+                                ytui_services::library::completed_file(job, &job.outputs[0])
+                            {
+                                self.play(media);
+                            }
+                        } else {
+                            self.modal = Some(Modal::Outputs {
+                                job: job.id,
+                                selected: 0,
+                            });
+                        }
                     }
                 } else if let Some(media) = self.selected() {
                     if let Some(id) = media.browse_id {
@@ -2056,6 +2342,10 @@ impl App {
                     return;
                 }
                 self.card_requests.clear();
+                self.card_failures.clear();
+                self.image_key = None;
+                self.image_failures = 0;
+                self.image_due = Instant::now();
                 if self.tab > 0
                     && let Some(req) = self.tabs[self.tab].request.clone()
                 {
@@ -2080,9 +2370,12 @@ impl App {
                 }
             }
             Action::Enqueue => {
-                if let Some(m) = self.selected()
+                if let Some(mut m) = self.selected()
                     && !m.collection()
                 {
+                    if self.tab == 2 && m.kind == MediaKind::Video {
+                        m.kind = MediaKind::Song;
+                    }
                     self.snapshot.playback.push(m);
                     self.status = "Added to playback queue · p to view".into();
                     self.dirty = true;
@@ -2117,14 +2410,20 @@ impl App {
                 self.modal = Some(Modal::Queue(self.snapshot.playback.current.unwrap_or(0)))
             }
             Action::NextTrack => {
+                let previous = self.snapshot.playback.clone();
                 if let Some(m) = self.snapshot.playback.advance(false) {
-                    self.play_existing(m);
+                    if !self.play_existing(m) {
+                        self.snapshot.playback = previous;
+                    }
                     self.dirty = true;
                 }
             }
             Action::PreviousTrack => {
+                let previous = self.snapshot.playback.clone();
                 if let Some(m) = self.snapshot.playback.previous() {
-                    self.play_existing(m);
+                    if !self.play_existing(m) {
+                        self.snapshot.playback = previous;
+                    }
                     self.dirty = true;
                 }
             }
@@ -2211,10 +2510,7 @@ impl App {
         if options.skip_duplicates
             && self.snapshot.downloads.jobs.iter().any(|j| {
                 j.media.url == media.url
-                    && j.options.audio == options.audio
-                    && j.options.playlist == options.playlist
-                    && j.options.playlist_items == options.playlist_items
-                    && j.options.quality == options.quality
+                    && j.options.same_output(&options)
                     && j.state != JobState::Error
                     && j.state != JobState::Cancelled
             })
@@ -2271,13 +2567,19 @@ impl App {
             );
         }
     }
-    pub fn play(&mut self, media: Media) {
+    pub fn play(&mut self, mut media: Media) {
+        if self.tab == 2 && media.kind == MediaKind::Video {
+            media.kind = MediaKind::Song;
+        }
         if self.offline && http_url(&media.url).is_ok() {
             self.status = "Offline mode can play local media only".into();
             return;
         }
         if self.demo {
             self.status = "Playback is disabled for fictional demo content".into();
+            return;
+        }
+        if !self.play_existing(media.clone()) {
             return;
         }
         // Opening a song starts the remaining songs from the current collection.
@@ -2304,7 +2606,6 @@ impl App {
             self.snapshot.playback.play(media.clone());
         }
         self.dirty = true;
-        self.play_existing(media);
     }
     pub fn resume_positions(&self) -> Vec<&ytui_core::playback_history::Position> {
         self.snapshot
@@ -2358,6 +2659,15 @@ impl App {
         self.redraw = true;
     }
     pub fn playback_ended(&mut self, media: &Media) {
+        if !self
+            .snapshot
+            .playback
+            .current
+            .and_then(|index| self.snapshot.playback.items.get(index))
+            .is_some_and(|current| current.url == media.url)
+        {
+            return;
+        }
         if self.config.playback_history && !self.demo {
             self.snapshot.positions.record(
                 media,
@@ -2373,19 +2683,26 @@ impl App {
         }
         self.dirty = true;
     }
-    pub fn play_existing(&mut self, mut media: Media) {
+    pub fn play_existing(&mut self, mut media: Media) -> bool {
         if self.offline && http_url(&media.url).is_ok() {
             self.status = "Queued online media waits for online mode".into();
-            return;
+            return false;
         }
         if http_url(&media.url).is_err()
             && let Ok(path) = std::fs::canonicalize(&media.url)
         {
             media.url = path.to_string_lossy().into();
         }
-        let audio =
-            media.kind == MediaKind::Song || media.kind == MediaKind::Station || self.tab == 2;
-        let _ = self.player.try_send(PlayerCommand::Play { media, audio });
+        let audio = matches!(media.kind, MediaKind::Song | MediaKind::Station);
+        if self
+            .player
+            .try_send(PlayerCommand::Play { media, audio })
+            .is_err()
+        {
+            self.status = "Player is busy; retry playback".into();
+            return false;
+        }
+        true
     }
     pub async fn tick(&mut self) {
         self.recover_feed();
@@ -2605,6 +2922,7 @@ impl App {
         }
     }
     pub async fn shutdown(&mut self) {
+        self.operations.cancel();
         self.desktop_cancel.cancel();
         self.clipboard_cancel.cancel();
         self.theme_cancel.cancel();
@@ -2631,6 +2949,11 @@ impl App {
         }
     }
     fn import_auth(&mut self, browser: String, profile: String, file: String) {
+        if self.pending_operation.is_some() || self.disconnect_pending {
+            self.status =
+                "Account/settings operation in progress · wait or cancel it in Actions".into();
+            return;
+        }
         if self.offline {
             self.status = "Account validation requires online mode".into();
             return;
@@ -2642,36 +2965,45 @@ impl App {
         self.status = "Reading selected profile and validating session…".into();
         let store = SessionStore::new(&self.paths, &self.config.auth_store);
         let config = self.config.clone();
+        let operation = self.operations.account();
+        self.pending_operation = Some((operation.clone(), "Validating selected account…".into()));
+        let operations = self.operations.clone();
         self.tasks.spawn(async move {
             let result = async {
-                let candidate = tokio::task::spawn_blocking(move || {
-                    if file.is_empty() {
-                        auth::import_browser(
-                            &browser,
-                            if profile.is_empty() {
-                                None
+                let candidate = operation
+                    .prepare(async {
+                        tokio::task::spawn_blocking(move || {
+                            if file.is_empty() {
+                                auth::import_browser(
+                                    &browser,
+                                    if profile.is_empty() {
+                                        None
+                                    } else {
+                                        Some(std::path::Path::new(&profile))
+                                    },
+                                )
                             } else {
-                                Some(std::path::Path::new(&profile))
-                            },
-                        )
-                    } else {
-                        auth::import_netscape(std::path::Path::new(&file))
-                    }
-                })
-                .await??;
+                                auth::import_netscape(std::path::Path::new(&file))
+                            }
+                        })
+                        .await?
+                    })
+                    .await?;
                 let api = Browser::new(
                     ytui_services::http_client(config.proxy.as_deref())?,
                     Some(Arc::new(candidate.clone())),
                     config.account_index,
                 );
                 let mut candidate = candidate;
-                candidate.account = api.validate().await?;
+                candidate.account = operation.prepare(api.validate()).await?;
                 let saved = candidate.clone();
-                tokio::task::spawn_blocking(move || store.save(&saved)).await??;
+                operations
+                    .commit(operation.clone(), move || store.save(&saved))
+                    .await?;
                 Ok(candidate)
             }
             .await;
-            UiEvent::Auth(result)
+            UiEvent::Auth { operation, result }
         });
     }
     pub fn open_action(&mut self, index: usize) {
@@ -2908,11 +3240,72 @@ impl App {
                 self.resume_position(position);
             }
             "resume" => self.modal = Some(Modal::Resume(0)),
+            "thumbnail-cache" | "thumbnail-cache-clear" => {
+                let images = self.images.clone();
+                let clear = cmd == "thumbnail-cache-clear";
+                self.status = if clear {
+                    "Clearing thumbnail cache…"
+                } else {
+                    "Inspecting thumbnail cache…"
+                }
+                .into();
+                self.tasks.spawn(async move {
+                    let result = images.inspect(clear).await;
+                    if clear { UiEvent::CacheCleared(result) } else {
+                        UiEvent::Text { title: "Thumbnail cache".into(), result: result.map(|stats| vec![
+                            format!("Disk: {} images · {:.1} MiB / 128 MiB", stats.files, stats.disk_bytes as f64 / 1048576.0),
+                            format!("Decoded memory: {} images · {:.1} MiB / 32 MiB", stats.memory_images, stats.memory_bytes as f64 / 1048576.0),
+                            "Encoded terminal cards are separately limited to visible images.".into(),
+                            "Actions → Clear thumbnail cache removes cached images only.".into(),
+                            "Temporary network failures retry automatically with a bounded backoff.".into(),
+                        ]) }
+                    }
+                });
+            }
+            "capabilities" | "support-export" => {
+                let config = self.config.clone();
+                let error = self.player_status.error.clone().unwrap_or_default();
+                let cancel = self.desktop_cancel.child_token();
+                let output = (cmd == "support-export").then(|| PathBuf::from(&value));
+                ensure!(
+                    output
+                        .as_ref()
+                        .is_none_or(|path| !path.as_os_str().is_empty()),
+                    "Choose a new JSON file"
+                );
+                self.status = "Checking installed tool capabilities…".into();
+                self.tasks.spawn(async move {
+                    let report = ytui_services::diagnostics::Support::collect(
+                        &config,
+                        env!("CARGO_PKG_VERSION"),
+                        env!("YTUI_BUILD_REVISION"),
+                        &error,
+                        cancel,
+                    )
+                    .await;
+                    let result = async {
+                        if let Some(path) = output {
+                            let data = serde_json::to_vec_pretty(&report)?;
+                            tokio::task::spawn_blocking(move || {
+                                ytui_services::paths::atomic_write_new(&path, &data)
+                            })
+                            .await??;
+                        }
+                        Ok(report.lines())
+                    }
+                    .await;
+                    UiEvent::Text {
+                        title: "Setup & capabilities / support report".into(),
+                        result,
+                    }
+                });
+            }
             "log" | "diagnostics" => {
                 let mut lines = vec![
                     format!(
-                        "ytui {} · downloads {} · playback {}",
+                        "ytui {} · build {} · downloads {} · playback {}",
                         env!("CARGO_PKG_VERSION"),
+                        env!("YTUI_BUILD_REVISION"),
                         self.config.download_backend,
                         self.config.playback_backend
                     ),
@@ -2934,6 +3327,10 @@ impl App {
                         .take(30),
                 );
                 if let Some(error) = &self.player_status.error {
+                    lines.push(format!(
+                        "Failure phase: {}",
+                        ytui_services::diagnostics::phase(error)
+                    ));
                     lines.push(ytui_services::process::diagnostic(error));
                 }
                 self.modal = Some(Modal::Text {
@@ -2976,6 +3373,18 @@ impl App {
             }
             "queue" => self.change_tab(0),
             "groups" => self.modal = Some(Modal::Groups(0)),
+            "download-files" => {
+                let job = self
+                    .snapshot
+                    .downloads
+                    .jobs
+                    .get(self.download_selected)
+                    .context("Select a download first")?;
+                self.modal = Some(Modal::Outputs {
+                    job: job.id,
+                    selected: 0,
+                });
+            }
             "download-page" => {
                 ensure!(
                     self.tab == 1 || self.tab == 2,
@@ -3334,15 +3743,33 @@ impl App {
             }
             "disconnect" => {
                 ensure!(!self.demo, "Account access is disabled in demo mode");
+                if let Some((operation, _)) = &self.pending_operation {
+                    operation.cancel_preparation();
+                    self.disconnect_pending = true;
+                    self.status =
+                        "Disconnect queued · waiting for the current storage commit".into();
+                    return Ok(());
+                }
                 let store = SessionStore::new(&self.paths, &self.config.auth_store);
+                let operation = self.operations.account();
+                self.pending_operation = Some((operation.clone(), "Disconnecting account…".into()));
+                let operations = self.operations.clone();
                 self.tasks.spawn(async move {
-                    UiEvent::Disconnected(
-                        tokio::task::spawn_blocking(move || store.disconnect())
-                            .await
-                            .map_err(anyhow::Error::from)
-                            .and_then(|r| r),
-                    )
+                    let result = operations
+                        .commit(operation.clone(), move || store.disconnect())
+                        .await;
+                    UiEvent::Disconnected { operation, result }
                 });
+            }
+            "cancel-operation" => {
+                ensure!(!self.disconnect_pending, "Disconnect is already queued");
+                let (operation, _) = self
+                    .pending_operation
+                    .as_ref()
+                    .context("No account/settings operation is running")?;
+                operation.cancel_preparation();
+                self.status =
+                    "Cancellation requested · an existing storage commit will finish safely".into();
             }
             "stopall" => {
                 for j in &mut self.snapshot.downloads.jobs {

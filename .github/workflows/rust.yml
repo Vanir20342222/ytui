@@ -43,6 +43,8 @@ jobs:
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
+      - name: Verify requested local conversion bitrate
+        run: cargo test -p ytui --test audit_regressions --locked audit_b07_ -- --ignored
       - name: Verify actual mpv external-extraction handoff
         env:
           NO_PROXY: 127.0.0.1,localhost

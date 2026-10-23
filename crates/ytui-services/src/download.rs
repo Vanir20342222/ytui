@@ -498,6 +498,13 @@ async fn convert_local(
     tx: &mpsc::Sender<JobEvent>,
 ) -> Result<()> {
     let input = Path::new(&job.media.url);
+    ensure!(
+        job.options.subtitles.is_empty()
+            && !job.options.thumbnail
+            && job.options.sponsorblock.is_empty()
+            && !job.options.split_chapters,
+        "Local conversion supports format, resolution, audio quality, metadata and filename. Subtitle selection, cover embedding, SponsorBlock and chapter splitting require the original online download; disable those options for local conversion"
+    );
     let stem = input
         .file_stem()
         .context("Input has no filename")?
@@ -507,26 +514,57 @@ async fn convert_local(
     } else {
         job.options.container.as_str()
     };
-    let target = job
-        .options
-        .output_directory()
-        .join(format!("{stem}_converted.{extension}"));
+    let extension = if extension == "vorbis" {
+        "ogg"
+    } else {
+        extension
+    };
+    let filename = if job.options.filename_template == DownloadOptions::default().filename_template
+    {
+        std::path::PathBuf::from(format!("{stem}_converted.{extension}"))
+    } else {
+        let info: yt_dlp_rs::VideoInfo = serde_json::from_value(
+            serde_json::json!({"id":job.id.to_string(),"title":stem,"ext":extension,"url":url::Url::from_file_path(input).map_err(|_| anyhow::anyhow!("Invalid local input path"))?,"webpage_url":job.media.url,"extractor":"local","extractor_key":"Local"}),
+        )?;
+        yt_dlp_rs::output::render_template(&job.options.filename_template, &info)?
+    };
+    ensure!(
+        !filename.is_absolute()
+            && !filename
+                .components()
+                .any(|part| matches!(part, std::path::Component::ParentDir)),
+        "Conversion filename escaped its destination"
+    );
+    let target = job.options.output_directory().join(filename);
     ensure!(
         !target.exists(),
         "Conversion destination already exists; choose another directory or filename"
     );
-    let partial = job
-        .options
-        .output_directory()
-        .join(format!(".{stem}_{}.part.{extension}", job.id));
+    let staging = tempfile::Builder::new()
+        .prefix(".ytui-convert-")
+        .tempdir_in(job.options.output_directory())?;
+    let partial = staging.path().join(format!("media.{extension}"));
     let mut args = vec!["-nostdin".into()];
     if config.offline {
         args.extend(["-protocol_whitelist".into(), "file,pipe".into()]);
     }
     args.extend(["-y".into(), "-i".into(), input.to_string_lossy().into()]);
     if job.options.audio {
-        args.push("-vn".into());
+        args.extend(["-vn".into(), "-map".into(), "0:a:0".into()]);
+        args.extend(crate::audio::encoding(
+            &job.options.audio_container,
+            &job.options.audio_quality,
+        )?);
+    } else if job.options.quality != "best" {
+        args.extend([
+            "-vf".into(),
+            format!("scale=-2:trunc(min(ih\\,{})/2)*2", job.options.quality),
+        ]);
     }
+    args.extend([
+        "-map_metadata".into(),
+        if job.options.metadata { "0" } else { "-1" }.into(),
+    ]);
     args.push(partial.to_string_lossy().into());
     send(tx, job, JobUpdate::Phase(JobState::Converting)).await;
     let result = process::run(
@@ -540,7 +578,11 @@ async fn convert_local(
         "FFmpeg conversion failed: {}",
         process::diagnostic(&result.stderr)
     );
-    ensure!(partial.is_file(), "FFmpeg did not produce an output file");
+    ensure!(
+        partial.metadata().is_ok_and(|m| m.is_file() && m.len() > 0),
+        "FFmpeg did not produce a nonempty output file"
+    );
+    std::fs::create_dir_all(target.parent().context("No conversion output parent")?)?;
     // hard_link atomically refuses to overwrite an unrelated file created concurrently.
     std::fs::hard_link(&partial, &target)?;
     std::fs::remove_file(partial)?;

@@ -1,5 +1,12 @@
 # ytui Rust rewrite plan
 
+M2–M8 audit implementation: account/settings operations now coordinate preparation
+and durable writes; queue intent, image generations/retries, optional cache writes,
+partial-output access, conversion quality and output identity have regression fixes.
+Setup/capability and allowlisted support panels, thumbnail-cache controls and bounded
+feed/history windows are added. See [the implementation tracker](docs/AUDIT_IMPLEMENTATION.md)
+for executed checks, remaining feature work and desktop/live acceptance gates.
+
 M2–M8 full-app audit on alpha.11 (`e2b01ea`):
 [prioritized bug and feature report](docs/APP_AUDIT_2026-10-22.md).
 Nine bug/release entries, separately identified risks and acceptance criteria are

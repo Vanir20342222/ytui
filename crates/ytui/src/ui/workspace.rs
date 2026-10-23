@@ -403,7 +403,14 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
         x += width;
     }
     f.render_widget(
-        Paragraph::new(format!(" {}", app.status)).style(style(app, app.palette.muted)),
+        Paragraph::new(format!(
+            " {}",
+            app.pending_operation
+                .as_ref()
+                .map(|(_, text)| text.as_str())
+                .unwrap_or(&app.status)
+        ))
+        .style(style(app, app.palette.muted)),
         cols[0],
     );
     if !app.config.show_hints {

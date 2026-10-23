@@ -15,6 +15,7 @@ use ytui_services::{
 #[derive(Parser)]
 #[command(
     version,
+    long_version = concat!(env!("CARGO_PKG_VERSION"), " · ", env!("YTUI_BUILD_REVISION")),
     about = "YouTube, Music, downloads and radio in your terminal"
 )]
 pub struct Args {
@@ -32,6 +33,12 @@ pub struct Args {
 }
 #[derive(Subcommand)]
 pub enum Command {
+    /// Export an allowlisted support report; never includes session data or raw errors.
+    Support {
+        /// Create a new JSON file (refuses to overwrite an existing file).
+        #[arg(long)]
+        output: Option<PathBuf>,
+    },
     /// Check installed tools, desktop themes and configuration without reading browser stores.
     Doctor {
         /// Also probe public YouTube, Music and radio requests, without importing a browser session.
@@ -139,6 +146,23 @@ async fn load_session(config: &Config, paths: &Paths) -> Option<Arc<auth::Sessio
 }
 pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<()> {
     match command {
+        Command::Support { output } => {
+            let report = ytui_services::diagnostics::Support::collect(
+                &config,
+                env!("CARGO_PKG_VERSION"),
+                env!("YTUI_BUILD_REVISION"),
+                "",
+                CancellationToken::new(),
+            )
+            .await;
+            let encoded = serde_json::to_vec_pretty(&report)?;
+            if let Some(output) = output {
+                ytui_services::paths::atomic_write_new(&output, &encoded)?;
+                println!("Support report: {}", output.display());
+            } else {
+                println!("{}", String::from_utf8(encoded)?);
+            }
+        }
         Command::PlaybackCheck {
             url,
             audio,

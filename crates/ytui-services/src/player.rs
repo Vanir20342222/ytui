@@ -778,6 +778,9 @@ impl Actor {
                     || self.config.proxy != config.proxy;
                 if changed {
                     self.state.sponsor_enabled = config.playback_sponsorblock == "skip";
+                    self.state.segments.clear();
+                    self.state.last_skip = None;
+                    self.ignore_segments_until = 0.0;
                     if let Some(task) = self.sponsor_task.take() {
                         task.abort();
                     }
@@ -797,6 +800,19 @@ impl Actor {
             }
             PlayerCommand::ToggleSponsorBlock => {
                 self.state.sponsor_enabled = !self.state.sponsor_enabled;
+                if self.state.sponsor_enabled
+                    && self.state.segments.is_empty()
+                    && self.sponsor_task.is_none()
+                    && let Some((media, _, _)) = &self.playing
+                    && crate::sponsorblock::video_id(media).is_some()
+                {
+                    let config = self.config.clone();
+                    let media = media.clone();
+                    self.sponsor_task = Some(tokio::spawn(async move {
+                        crate::sponsorblock::fetch(&config, &media).await
+                    }));
+                    self.state.notice = Some("Loading SponsorBlock segments…".into());
+                }
             }
             PlayerCommand::UndoSkip => {
                 if let Some((from, to)) = self.state.last_skip
@@ -1027,7 +1043,17 @@ impl Actor {
             && let Some(task) = self.sponsor_task.take()
         {
             match task.await {
-                Ok(Ok(segments)) => self.state.segments = segments,
+                Ok(Ok(segments)) => {
+                    self.state.notice = Some(
+                        if segments.is_empty() {
+                            "No matching SponsorBlock segments"
+                        } else {
+                            "SponsorBlock segments loaded · U replays · B toggles skipping"
+                        }
+                        .into(),
+                    );
+                    self.state.segments = segments;
+                }
                 Ok(Err(_)) => {
                     self.state.notice = Some("SponsorBlock unavailable · playback continues".into())
                 }
@@ -1890,6 +1916,68 @@ mod responsiveness_tests {
             legacy_data: root.join("legacy"),
             home: root.into(),
         }
+    }
+    #[tokio::test]
+    async fn sponsorblock_can_be_enabled_after_starting_with_off() {
+        let hits = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let observed = hits.clone();
+        let (base, server) = crate::test_http::serve(move |_| {
+            observed.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            (
+                200,
+                String::new(),
+                br#"[{"category":"sponsor","segment":[2,5]}]"#.to_vec(),
+            )
+        })
+        .await;
+        let temp = tempfile::tempdir().unwrap();
+        let media = Media {
+            url: "https://www.youtube.com/watch?v=BaW_jenozKc".into(),
+            ..Default::default()
+        };
+        let mut config = Config {
+            playback_sponsorblock: "off".into(),
+            ..Default::default()
+        };
+        config.download.sponsorblock_api = base;
+        let mut actor = Actor {
+            config,
+            paths: paths(temp.path()),
+            session: None,
+            full: None,
+            preview: None,
+            state: PlayerStatus {
+                media: Some(media.clone()),
+                sponsor_enabled: false,
+                ..Default::default()
+            },
+            resume_after_preview: false,
+            playing: Some((media, false, false)),
+            reconnect_count: 0,
+            reconnect_at: None,
+            sponsor_task: None,
+            ignore_segments_until: 0.0,
+            streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
+        };
+        actor.handle(PlayerCommand::ToggleSponsorBlock).await;
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while !actor.sponsor_task.as_ref().unwrap().is_finished() {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        actor.tick().await;
+        assert_eq!(hits.load(std::sync::atomic::Ordering::SeqCst), 1);
+        assert!(actor.state.sponsor_enabled);
+        assert_eq!(actor.state.segments.len(), 1);
+        actor.handle(PlayerCommand::ToggleSponsorBlock).await;
+        actor.handle(PlayerCommand::ToggleSponsorBlock).await;
+        assert!(
+            actor.sponsor_task.is_none(),
+            "reuse already fetched segments"
+        );
+        server.abort();
     }
     #[tokio::test]
     async fn stalled_startup_and_decoder_report_errors_but_manual_pause_is_allowed() {

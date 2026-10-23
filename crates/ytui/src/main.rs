@@ -7,7 +7,7 @@ use clap::Parser;
 use crossterm::event::{Event, EventStream, KeyEventKind};
 use futures_util::StreamExt;
 use ratatui::{Terminal, backend::CrosstermBackend};
-use ratatui_image::picker::{Picker, ProtocolType};
+use ratatui_image::picker::Picker;
 use std::{
     io::{self, IsTerminal},
     sync::Arc,
@@ -104,18 +104,22 @@ async fn entry() -> Result<()> {
     let guard = terminal::Guard::enter()?;
     let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
     terminal.clear()?;
-    let mut picker = if config.image_protocol == "auto" {
+    // Query only in Auto, before input starts. Explicit/headless terminal
+    // fixtures must not lose keystrokes to a capability query.
+    let picker = if config.image_protocol == "auto" {
         Picker::from_query_stdio().unwrap_or_else(|_| Picker::from_fontsize((8, 16)))
     } else {
-        Picker::from_fontsize((8, 16))
+        let mut picker = Picker::from_fontsize((8, 16));
+        let terminal = std::env::var("TERM").unwrap_or_default();
+        let program = std::env::var("TERM_PROGRAM").unwrap_or_default();
+        if terminal.contains("ghostty")
+            || terminal.contains("kitty")
+            || program.eq_ignore_ascii_case("ghostty")
+        {
+            picker.set_protocol_type(ratatui_image::picker::ProtocolType::Kitty);
+        }
+        picker
     };
-    picker.set_protocol_type(match config.image_protocol.as_str() {
-        "kitty" => ProtocolType::Kitty,
-        "sixel" => ProtocolType::Sixel,
-        "iterm2" => ProtocolType::Iterm2,
-        "halfblocks" | "none" => ProtocolType::Halfblocks,
-        _ => picker.protocol_type(),
-    });
     let (job_tx, mut job_rx) = mpsc::channel(256);
     let mut app = app::App::new(
         config,

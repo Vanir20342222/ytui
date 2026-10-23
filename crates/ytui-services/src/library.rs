@@ -8,36 +8,14 @@ pub fn catalog(queue: &DownloadQueue, query: &str, audio: Option<bool>) -> Page 
         .jobs
         .iter()
         .rev()
-        .filter(|j| j.state == JobState::Done && audio.is_none_or(|a| a == j.options.audio))
+        .filter(|j| audio.is_none_or(|a| a == j.options.audio))
     {
         for output in &job.outputs {
-            let extension = output
-                .extension()
-                .and_then(|s| s.to_str())
-                .unwrap_or_default()
-                .to_lowercase();
-            if ![
-                "mp4", "mkv", "webm", "mp3", "m4a", "flac", "ogg", "opus", "wav", "aac", "mov",
-                "m4v", "avi", "flv", "ts",
-            ]
-            .contains(&extension.as_str())
-            {
-                continue;
-            }
-            let Ok(path) = std::fs::canonicalize(output) else {
+            let Some(media) = completed_file(job, output) else {
                 continue;
             };
-            if !path.is_file() || !seen.insert(path.clone()) {
+            if !seen.insert(media.url.clone()) {
                 continue;
-            }
-            let mut media = job.media.clone();
-            if job.outputs.len() > 1 {
-                media.title = ytui_core::clean_text(
-                    output
-                        .file_stem()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or(&media.title),
-                );
             }
             if !query.is_empty()
                 && !media.title.to_lowercase().contains(&query)
@@ -45,21 +23,48 @@ pub fn catalog(queue: &DownloadQueue, query: &str, audio: Option<bool>) -> Page 
             {
                 continue;
             }
-            media.id = format!("local:{}:{}", job.id, items.len());
-            media.url = path.to_string_lossy().into();
-            media.thumbnail.clear();
-            media.browse_id = None;
-            media.tracks_url = None;
-            media.live = false;
-            media.kind = if job.options.audio {
-                MediaKind::Song
-            } else {
-                MediaKind::Video
-            };
             items.push(media);
         }
     }
-    Page { title: "Offline downloads".into(), items, notice: Some("Recorded completed media · missing files and subtitle/image sidecars are hidden · no network scan".into()), ..Default::default() }
+    Page { title: "Offline downloads".into(), items, notice: Some("Completed files, including partial collections · missing files and sidecars are hidden".into()), ..Default::default() }
+}
+/// Only a recorded, existing media file can become a playable local item.
+pub fn completed_file(job: &ytui_core::Job, output: &std::path::Path) -> Option<ytui_core::Media> {
+    let extension = output.extension()?.to_str()?.to_ascii_lowercase();
+    if ![
+        "mp4", "mkv", "webm", "mp3", "m4a", "flac", "ogg", "opus", "wav", "aac", "mov", "m4v",
+        "avi", "flv", "ts",
+    ]
+    .contains(&extension.as_str())
+    {
+        return None;
+    }
+    let path = std::fs::canonicalize(output).ok()?;
+    if !path.is_file() {
+        return None;
+    }
+    let mut media = job.media.clone();
+    if job.outputs.len() > 1 {
+        media.title = ytui_core::clean_text(output.file_stem()?.to_str()?);
+    }
+    media.id = format!("local:{}:{}", job.id, path.display());
+    media.url = path.to_string_lossy().into();
+    media.thumbnail.clear();
+    media.thumbnails.clear();
+    media.browse_id = None;
+    media.tracks_url = None;
+    media.live = false;
+    media.section = if job.state == JobState::Done {
+        "Completed download".into()
+    } else {
+        format!("Completed file · collection {:?}", job.state)
+    };
+    media.kind = if job.options.audio {
+        MediaKind::Song
+    } else {
+        MediaKind::Video
+    };
+    Some(media)
 }
 #[cfg(test)]
 mod tests {
