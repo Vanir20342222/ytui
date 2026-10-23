@@ -45,12 +45,16 @@ jobs:
         run: cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
       - name: Verify requested local conversion bitrate
         run: cargo test -p ytui --test audit_regressions --locked audit_b07_ -- --ignored
+      - name: Verify MPRIS on an isolated D-Bus session
+        run: dbus-run-session -- cargo test -p ytui-services --locked live_desktop_mpris -- --ignored
       - name: Verify actual mpv external-extraction handoff
         env:
           NO_PROXY: 127.0.0.1,localhost
         run: cargo test -p ytui-services --locked real_mpv_external_playback_ -- --ignored
       - name: Verify native HLS manifest and request identity in mpv
         run: cargo test -p ytui-services --locked real_mpv_native_hls_ -- --ignored
+      - name: Verify actual mpv HTTP proxy routing
+        run: cargo test -p ytui-services --locked real_mpv_http_proxy_ -- --ignored
       - name: Verify headless playback diagnostic with real mpv
         run: cargo test -p ytui --test downloads --locked real_mpv_playback_check_ -- --ignored
       - name: Verify two real yt-dlp playlist entries with FFmpeg and ffprobe

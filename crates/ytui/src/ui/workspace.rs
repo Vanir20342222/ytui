@@ -408,7 +408,13 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
             app.pending_operation
                 .as_ref()
                 .map(|(_, text)| text.as_str())
-                .unwrap_or(&app.status)
+                .unwrap_or(if app.player_session_pending {
+                    "Updating player account · playback waits for the account handoff"
+                } else if app.collection_pending {
+                    "Loading full collection · Actions → Cancel collection loading"
+                } else {
+                    &app.status
+                })
         ))
         .style(style(app, app.palette.muted)),
         cols[0],
@@ -990,6 +996,15 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                     Block::default().style(Style::default().bg(themed(app, app.palette.surface))),
                     image_area,
                 );
+                if let Some(notice) = app.card_notice(&key) {
+                    f.render_widget(
+                        Paragraph::new(notice)
+                            .centered()
+                            .wrap(Wrap { trim: true })
+                            .style(style(app, app.palette.muted)),
+                        image_area,
+                    );
+                }
             }
             image_area.right() + 2
         } else {

@@ -157,7 +157,10 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
             _ => "Countries: DE,US. Servers: comma-separated HTTP(S) origins; blank discovers.",
         }
     };
-    let message = form.error.as_deref().unwrap_or(default_message);
+    let message = form
+        .error
+        .as_deref()
+        .unwrap_or_else(|| form.explanation().unwrap_or(default_message));
     f.render_widget(
         Paragraph::new(message)
             .wrap(Wrap { trim: true })

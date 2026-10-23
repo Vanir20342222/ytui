@@ -48,7 +48,7 @@ fn image_protocol(
     }
 }
 fn image_retry(error: &anyhow::Error, attempts: u8) -> Option<Instant> {
-    let message = error.to_string().to_lowercase();
+    let message = format!("{error:#}").to_lowercase();
     let transient = [
         "timeout",
         "timed out",
@@ -57,6 +57,7 @@ fn image_retry(error: &anyhow::Error, attempts: u8) -> Option<Instant> {
         "http 5",
         "http 429",
         "error sending",
+        "cannot reach",
     ]
     .iter()
     .any(|part| message.contains(part));
@@ -160,6 +161,15 @@ pub enum Modal {
     Watches(usize),
     History(history::View),
     Groups(usize),
+    Destinations(usize),
+    PlayerSettings {
+        section: usize,
+        selected: usize,
+    },
+    Account {
+        profiles: Vec<auth::BrowserProfile>,
+        selected: usize,
+    },
     Outputs {
         job: uuid::Uuid,
         selected: usize,
@@ -221,6 +231,15 @@ pub enum UiEvent {
         result: Result<Vec<String>>,
     },
     CacheCleared(Result<ytui_services::images::CacheStats>),
+    AccountProfiles(Vec<auth::BrowserProfile>),
+    Collection {
+        generation: u64,
+        source: String,
+        title: String,
+        options: Box<DownloadOptions>,
+        selection: String,
+        result: Result<Vec<Media>>,
+    },
 }
 pub struct RuntimeHandles {
     pub player: mpsc::Sender<PlayerCommand>,
@@ -235,6 +254,11 @@ pub struct App {
     pub operations: crate::operations::Operations,
     pub pending_operation: Option<(crate::operations::Ticket, String)>,
     disconnect_pending: bool,
+    collection_cancel: CancellationToken,
+    collection_generation: u64,
+    pub collection_pending: bool,
+    pending_auto_play: Option<Media>,
+    pub player_session_pending: bool,
     pub config: Config,
     pub paths: Paths,
     pub snapshot: Snapshot,
@@ -296,6 +320,63 @@ pub struct App {
     watch_pending: HashMap<uuid::Uuid, (u64, CancellationToken)>,
 }
 impl App {
+    pub fn card_notice(&self, key: &str) -> Option<&'static str> {
+        self.card_failures.get(key).map(|(_, due)| {
+            if due.is_some() {
+                "Retrying image…"
+            } else {
+                "No image · F5 retries"
+            }
+        })
+    }
+    fn remember_destination(&mut self, options: &DownloadOptions) {
+        let path = options.output_directory();
+        if path.as_os_str().is_empty() {
+            return;
+        }
+        self.snapshot
+            .recent_destinations
+            .retain(|previous| previous != path);
+        self.snapshot.recent_destinations.insert(0, path.to_owned());
+        self.snapshot.recent_destinations.truncate(12);
+    }
+    pub fn playback_choices(&self, section: usize) -> Vec<(String, PlayerCommand)> {
+        match section {
+            0 => self
+                .player_status
+                .catalog
+                .formats
+                .iter()
+                .map(|format| (format.label.clone(), PlayerCommand::Format(format.clone())))
+                .collect(),
+            1 => self
+                .player_status
+                .tracks
+                .iter()
+                .map(|track| {
+                    (
+                        format!("{} {}", if track.selected { "●" } else { "○" }, track.label),
+                        PlayerCommand::SelectTrack {
+                            kind: track.kind.clone(),
+                            id: track.id,
+                        },
+                    )
+                })
+                .collect(),
+            _ => self
+                .player_status
+                .catalog
+                .captions
+                .iter()
+                .map(|caption| {
+                    (
+                        caption.label.clone(),
+                        PlayerCommand::Caption(caption.clone()),
+                    )
+                })
+                .collect(),
+        }
+    }
     fn continue_disconnect(&mut self) {
         if self.disconnect_pending && self.pending_operation.is_none() {
             self.disconnect_pending = false;
@@ -452,6 +533,11 @@ impl App {
             operations: Default::default(),
             pending_operation: None,
             disconnect_pending: false,
+            collection_cancel: CancellationToken::new(),
+            collection_generation: 0,
+            collection_pending: false,
+            pending_auto_play: None,
+            player_session_pending: false,
             config,
             paths,
             snapshot,
@@ -599,6 +685,14 @@ impl App {
         b.state = JobState::Done;
         self.snapshot.downloads.jobs = vec![a, b];
         self.player_status = PlayerStatus {
+            backend: "demo · fictional formats".into(),
+            catalog: ytui_services::formats::Catalog::parse(&serde_json::json!({
+                "formats":[{"format_id":"137","height":1080,"vcodec":"avc1","acodec":"none","ext":"mp4"},{"format_id":"247","height":720,"vcodec":"vp9","acodec":"none","ext":"webm"},{"format_id":"140-de","vcodec":"none","acodec":"aac","language":"de","ext":"m4a"}],
+                "subtitles":{"de":[{"ext":"vtt","url":"https://example.invalid/fictional-caption"}]}
+            })),
+            tracks: ytui_services::formats::tracks(
+                &serde_json::json!([{"id":1,"type":"audio","lang":"en","codec":"aac","selected":true},{"id":2,"type":"audio","lang":"de","codec":"aac"},{"id":1,"type":"sub","lang":"de","codec":"vtt"}]),
+            ),
             title: "Studio Sessions · A quiet evening".into(),
             position: 82.0,
             duration: Some(240.0),
@@ -738,6 +832,38 @@ impl App {
     }
     pub fn apply(&mut self, event: UiEvent) {
         match event {
+            UiEvent::AccountProfiles(profiles) => {
+                if matches!(self.modal, Some(Modal::Account { .. })) {
+                    self.modal = Some(Modal::Account {
+                        profiles,
+                        selected: 0,
+                    });
+                }
+            }
+            UiEvent::Collection {
+                generation,
+                source,
+                title,
+                options,
+                selection,
+                result,
+            } => {
+                if generation != self.collection_generation {
+                    return;
+                }
+                self.collection_pending = false;
+                match result.and_then(|items| {
+                    self.queue_collection(source, title, *options, &selection, items)
+                }) {
+                    Ok(()) => {}
+                    Err(error) => {
+                        self.status = format!(
+                            "Collection was not queued: {}",
+                            ytui_services::process::diagnostic(&error.to_string())
+                        )
+                    }
+                }
+            }
             UiEvent::CacheCleared(result) => match result {
                 Ok(stats) => {
                     self.card_generation = self.card_generation.wrapping_add(1);
@@ -1004,14 +1130,20 @@ impl App {
                 if !self.finish_operation(&operation) {
                     return;
                 }
+                self.session = None;
+                self.reset_account();
                 match result {
                     Ok(()) => {
-                        self.session = None;
-                        self.reset_account();
                         self.status = "Disconnected · browser cookies were left intact".into();
                     }
-                    Err(e) => self.status = e.to_string(),
+                    Err(e) => {
+                        self.status = format!(
+                            "Disconnected in memory; storage cleanup failed: {} · fix storage/unlock keyring and retry before restarting",
+                            ytui_services::process::diagnostic(&e.to_string())
+                        )
+                    }
                 }
+                self.continue_disconnect();
             }
             UiEvent::Clipboard { generation, result } => {
                 self.clipboard_pending = false;
@@ -1122,6 +1254,11 @@ impl App {
         self.redraw = true;
     }
     fn reset_account(&mut self) {
+        self.player_session_pending = true;
+        self.pending_auto_play = None;
+        self.collection_cancel.cancel();
+        self.collection_generation = self.collection_generation.wrapping_add(1);
+        self.collection_pending = false;
         for job in &mut self.snapshot.downloads.jobs {
             if job.state.active() {
                 if let Some(task) = self.running.get(&job.id) {
@@ -1145,9 +1282,7 @@ impl App {
         if let Ok(client) = ytui_services::http_client(self.config.proxy.as_deref()) {
             self.browser = Browser::new(client, self.session.clone(), self.config.account_index);
         }
-        let _ = self
-            .player
-            .try_send(PlayerCommand::Session(self.session.clone()));
+        self.sync_player_session();
         self.snapshot.playback = PlaybackQueue::default();
         self.snapshot.positions.clear_remote();
         for watch in &mut self.snapshot.watches {
@@ -1188,6 +1323,7 @@ impl App {
         let account_changed = self.config.account_index != c.account_index;
         let storage_changed = self.config.auth_store != c.auth_store;
         let current = self.session.clone();
+        let had_session = current.is_some();
         let operation = self.operations.config(account_changed || storage_changed);
         self.pending_operation = Some((operation.clone(), "Saving settings…".into()));
         let operations = self.operations.clone();
@@ -1215,6 +1351,8 @@ impl App {
                     .commit(operation.clone(), move || {
                         if let Some(session) = session {
                             SessionStore::new(&paths, &saved.auth_store).save(&session)?;
+                        } else if storage_changed && !had_session {
+                            SessionStore::new(&paths, &saved.auth_store).suspend_auto_load()?;
                         }
                         paths.save_config(&saved)
                     })
@@ -1389,6 +1527,33 @@ impl App {
                         view.filter = view.filter.next();
                         view.selected = 0;
                     }
+                    KeyCode::Char('r') => {
+                        if let Some(index) = rows.get(view.selected).map(|(index, _)| *index) {
+                            let job = &mut self.snapshot.downloads.jobs[index];
+                            if matches!(
+                                job.state,
+                                JobState::Error | JobState::Cancelled | JobState::Paused
+                            ) {
+                                job.invalidate(JobState::Queued);
+                                job.error = None;
+                                job.attempt = 0;
+                                self.dirty = true;
+                                self.status =
+                                    "Selected entry queued for retry · completed files retained"
+                                        .into();
+                                view.selected = 0;
+                            }
+                        }
+                    }
+                    KeyCode::Char('o') => {
+                        if let Some((_, job)) = rows.get(view.selected) {
+                            self.modal = Some(Modal::Outputs {
+                                job: job.id,
+                                selected: 0,
+                            });
+                            return;
+                        }
+                    }
                     KeyCode::Enter => {
                         if let Some((index, _)) = rows.get(view.selected) {
                             self.tab = 0;
@@ -1507,6 +1672,89 @@ impl App {
                 }
                 self.modal = Some(modal);
             }
+            Modal::Destinations(selected) => {
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *selected = selected.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *selected = (*selected + 1)
+                            .min(self.snapshot.recent_destinations.len().saturating_sub(1))
+                    }
+                    KeyCode::Enter => {
+                        if let Some(path) =
+                            self.snapshot.recent_destinations.get(*selected).cloned()
+                            && let Some(media) = self.selected()
+                        {
+                            let mut options = self.config.download.clone();
+                            options.audio = self.tab == 2 || media.kind == MediaKind::Song;
+                            if options.audio {
+                                options.audio_directory = path;
+                            } else {
+                                options.directory = path;
+                            }
+                            let mut form = Form::download(media, options);
+                            form.select_section(1);
+                            form.selected = 4;
+                            self.modal = Some(Modal::Form(Box::new(form)));
+                            return;
+                        }
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::PlayerSettings { section, selected } => {
+                match key.code {
+                    KeyCode::Left => {
+                        *section = (*section + 2) % 3;
+                        *selected = 0;
+                    }
+                    KeyCode::Right | KeyCode::Tab => {
+                        *section = (*section + 1) % 3;
+                        *selected = 0;
+                    }
+                    KeyCode::Up | KeyCode::Char('k') => *selected = selected.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *selected = (*selected + 1)
+                            .min(self.playback_choices(*section).len().saturating_sub(1))
+                    }
+                    KeyCode::Enter => {
+                        if let Some((_, command)) = self.playback_choices(*section).get(*selected) {
+                            self.status = if self.player.try_send(command.clone()).is_ok() {
+                                "Applying playback selection · position/pause retained"
+                            } else {
+                                "Player busy · try again"
+                            }
+                            .into();
+                            return;
+                        }
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
+            Modal::Account { profiles, selected } => {
+                match key.code {
+                    KeyCode::Up | KeyCode::Char('k') => *selected = selected.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        *selected = (*selected + 1).min(profiles.len())
+                    }
+                    KeyCode::Enter => {
+                        let mut form = Form::auth();
+                        if let Some(profile) = selected
+                            .checked_sub(1)
+                            .and_then(|index| profiles.get(index))
+                        {
+                            form.fields[0].value = Editor::new(profile.browser.clone());
+                            form.fields[1].value = Editor::new(profile.path.display().to_string());
+                            form.selected = 1;
+                        }
+                        self.modal = Some(Modal::Form(Box::new(form)));
+                        return;
+                    }
+                    _ => {}
+                }
+                self.modal = Some(modal);
+            }
             Modal::Outputs { job, selected } => {
                 if let Some(download) = self.snapshot.downloads.jobs.iter().find(|j| j.id == *job) {
                     match key.code {
@@ -1514,6 +1762,29 @@ impl App {
                         KeyCode::Down | KeyCode::Char('j') => {
                             *selected =
                                 (*selected + 1).min(download.outputs.len().saturating_sub(1))
+                        }
+                        KeyCode::Char('o') => {
+                            if let Some(media) = download.outputs.get(*selected).and_then(|path| {
+                                ytui_services::library::completed_file(download, path)
+                            }) {
+                                let path = PathBuf::from(media.url);
+                                self.tasks.spawn(async move {
+                                    UiEvent::Status(
+                                        match ytui_services::desktop::open_file(&path).await {
+                                            Ok(()) => {
+                                                "Open with request sent to the desktop portal"
+                                                    .into()
+                                            }
+                                            Err(error) => format!(
+                                                "Desktop open unavailable: {}",
+                                                ytui_services::process::diagnostic(
+                                                    &error.to_string()
+                                                )
+                                            ),
+                                        },
+                                    )
+                                });
+                            }
                         }
                         KeyCode::Enter => {
                             if let Some(media) = download.outputs.get(*selected).and_then(|path| {
@@ -1545,9 +1816,10 @@ impl App {
                     self.modal = Some(modal);
                 }
                 KeyCode::Enter => {
-                    if let Some(m) = self.snapshot.playback.items.get(*index).cloned() {
+                    if let Some(m) = self.snapshot.playback.items.get(*index).cloned()
+                        && self.play_existing(m)
+                    {
                         self.snapshot.playback.current = Some(*index);
-                        self.play_existing(m);
                         self.dirty = true;
                     }
                 }
@@ -2128,6 +2400,10 @@ impl App {
                 }
             }
             Action::Fallback => {
+                if self.player_session_pending {
+                    self.status = "Updating player account · retry playback shortly".into();
+                    return;
+                }
                 if self.offline {
                     self.status = "Explicit extraction fallback requires online mode".into();
                     return;
@@ -2266,6 +2542,7 @@ impl App {
                     && !media.collection()
                     && media.kind != MediaKind::Station
                     && !self.demo
+                    && !self.player_session_pending
                     && (!self.offline || http_url(&media.url).is_err())
                 {
                     let _ = self.player.try_send(PlayerCommand::Preview(media));
@@ -2338,14 +2615,16 @@ impl App {
                 }
             }
             Action::Refresh => {
-                if self.tab > 0 && self.tabs[self.tab].load.is_some() {
-                    return;
-                }
+                self.card_generation = self.card_generation.wrapping_add(1);
+                self.card_pending = 0;
                 self.card_requests.clear();
                 self.card_failures.clear();
                 self.image_key = None;
                 self.image_failures = 0;
                 self.image_due = Instant::now();
+                if self.tab > 0 && self.tabs[self.tab].load.is_some() {
+                    return;
+                }
                 if self.tab > 0
                     && let Some(req) = self.tabs[self.tab].request.clone()
                 {
@@ -2416,6 +2695,8 @@ impl App {
                         self.snapshot.playback = previous;
                     }
                     self.dirty = true;
+                } else {
+                    self.snapshot.playback = previous;
                 }
             }
             Action::PreviousTrack => {
@@ -2455,6 +2736,7 @@ impl App {
                 self.dirty = true;
             }
             Action::Stop => {
+                self.pending_auto_play = None;
                 let _ = self.player.try_send(PlayerCommand::Stop);
                 self.snapshot.playback.current = None;
                 self.dirty = true;
@@ -2495,6 +2777,92 @@ impl App {
             self.dirty = true;
         }
     }
+    pub fn queue_collection(
+        &mut self,
+        source: String,
+        title: String,
+        mut options: DownloadOptions,
+        selection: &str,
+        items: Vec<Media>,
+    ) -> Result<()> {
+        options.playlist = false;
+        options.playlist_items = None;
+        options.validate()?;
+        ensure!(
+            items.len() <= 2000,
+            "Collection exceeds 2,000 available entries"
+        );
+        let indices = history::selection_indices(selection, items.len())?;
+        ensure!(
+            indices
+                .iter()
+                .all(|index| !items[*index].collection() && http_url(&items[*index].url).is_ok()),
+            "Collection contains unsupported entries; no jobs were queued"
+        );
+        let group = self
+            .snapshot
+            .downloads
+            .jobs
+            .iter()
+            .find(|job| {
+                job.group_source.as_deref() == Some(&source) && job.options.same_output(&options)
+            })
+            .and_then(|job| job.group_id.clone())
+            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        self.remember_destination(&options);
+        let (mut queued, mut ready, mut shared) = (0, 0, 0);
+        for index in indices {
+            let media = &items[index];
+            if let Some(job) = self
+                .snapshot
+                .downloads
+                .jobs
+                .iter_mut()
+                .find(|job| job.media.url == media.url && job.options.same_output(&options))
+            {
+                if job
+                    .outputs
+                    .iter()
+                    .any(|path| ytui_services::library::completed_file(job, path).is_some())
+                {
+                    ready += 1;
+                } else if matches!(
+                    job.state,
+                    JobState::Error | JobState::Cancelled | JobState::Done
+                ) {
+                    job.invalidate(JobState::Queued);
+                    job.error = None;
+                    job.attempt = 0;
+                    queued += 1;
+                }
+                if job.group_id.is_none() || job.group_id.as_ref() == Some(&group) {
+                    job.group_id = Some(group.clone());
+                    job.group_title = Some(title.clone());
+                    job.group_source = Some(source.clone());
+                    job.entry_index = Some(index + 1);
+                } else {
+                    shared += 1;
+                }
+            } else {
+                let mut job = Job::new(media.clone(), options.clone());
+                job.group_id = Some(group.clone());
+                job.group_title = Some(title.clone());
+                job.group_source = Some(source.clone());
+                job.entry_index = Some(index + 1);
+                self.snapshot.downloads.jobs.push(job);
+                queued += 1;
+            }
+        }
+        self.dirty = true;
+        self.modal = Some(Modal::History(history::View {
+            group: Some(group),
+            ..Default::default()
+        }));
+        self.status = format!(
+            "Collection: {queued} queued/retried · {ready} files already ready · {shared} shared in other groups"
+        );
+        Ok(())
+    }
     pub fn enqueue_download(&mut self, mut media: Media, options: DownloadOptions) {
         if self.offline && http_url(&media.url).is_ok() {
             self.status = "Remote downloads wait until online mode".into();
@@ -2518,6 +2886,7 @@ impl App {
             self.status = "This item is already in your download queue/history".into();
             return;
         }
+        self.remember_destination(&options);
         self.snapshot.downloads.jobs.push(Job::new(media, options));
         self.dirty = true;
         self.status = "Added to Downloads · 1 opens the queue".into();
@@ -2616,6 +2985,10 @@ impl App {
             .collect()
     }
     pub fn resume_position(&mut self, position: ytui_core::playback_history::Position) {
+        if self.player_session_pending {
+            self.status = "Updating player account · retry resume shortly".into();
+            return;
+        }
         if self.offline && http_url(&position.media.url).is_ok() {
             self.status = "Resume this online video after restarting without --offline".into();
             return;
@@ -2649,6 +3022,13 @@ impl App {
             && !status.preview
             && !status.buffering
             && let Some(media) = &status.media
+            && !self.player_session_pending
+            && self
+                .snapshot
+                .playback
+                .current
+                .and_then(|index| self.snapshot.playback.items.get(index))
+                .is_some_and(|current| current.url == media.url)
         {
             self.dirty |=
                 self.snapshot
@@ -2678,12 +3058,28 @@ impl App {
                 true,
             );
         }
-        if let Some(media) = self.snapshot.playback.advance(true) {
-            self.play_existing(media);
+        if let Some(media) = self.snapshot.playback.advance(true)
+            && !self.play_existing(media.clone())
+        {
+            self.pending_auto_play = Some(media);
         }
         self.dirty = true;
     }
+    fn sync_player_session(&mut self) {
+        if self.player_session_pending
+            && self
+                .player
+                .try_send(PlayerCommand::Session(self.session.clone()))
+                .is_ok()
+        {
+            self.player_session_pending = false;
+        }
+    }
     pub fn play_existing(&mut self, mut media: Media) -> bool {
+        if self.player_session_pending {
+            self.status = "Updating player account · retry playback shortly".into();
+            return false;
+        }
         if self.offline && http_url(&media.url).is_ok() {
             self.status = "Queued online media waits for online mode".into();
             return false;
@@ -2705,6 +3101,18 @@ impl App {
         true
     }
     pub async fn tick(&mut self) {
+        self.sync_player_session();
+        if let Some(media) = self.pending_auto_play.take()
+            && self
+                .snapshot
+                .playback
+                .current
+                .and_then(|index| self.snapshot.playback.items.get(index))
+                .is_some_and(|current| current.url == media.url)
+            && (self.offline && http_url(&media.url).is_ok() || !self.play_existing(media.clone()))
+        {
+            self.pending_auto_play = Some(media);
+        }
         self.recover_feed();
         self.prefetch_page();
         let finished = self
@@ -2869,7 +3277,13 @@ impl App {
                 if let Some(group) = groups.iter_mut().find(|g| &g.0 == id) {
                     group.2 += 1;
                 } else {
-                    groups.push((id.clone(), job.media.title.clone(), 1));
+                    groups.push((
+                        id.clone(),
+                        job.group_title
+                            .clone()
+                            .unwrap_or_else(|| job.media.title.clone()),
+                        1,
+                    ));
                 }
             }
         }
@@ -2922,6 +3336,7 @@ impl App {
         }
     }
     pub async fn shutdown(&mut self) {
+        self.collection_cancel.cancel();
         self.operations.cancel();
         self.desktop_cancel.cancel();
         self.clipboard_cancel.cancel();
@@ -3060,6 +3475,18 @@ impl App {
                 config.native_js_runtime = Some(path);
                 self.save_config(config);
             }
+            "sponsor-status" => {
+                self.modal = Some(Modal::Text { title: "SponsorBlock & ad handling".into(), offset: 0, lines: vec![
+                    format!("Configured mode: {} · temporary skipping: {}", self.config.playback_sponsorblock, self.player_status.sponsor_enabled),
+                    format!("Categories: {} · fetched marks: {}", self.config.playback_sponsor_categories.join(", "), self.player_status.segments.len()),
+                    self.player_status.notice.clone().unwrap_or_else(|| "No current API result".into()),
+                    "Skip jumps past matching sponsor segments; Mark displays them without seeking; Off makes no startup API request.".into(),
+                    "B toggles skipping for this playback and fetches marks if needed. U replays the last skipped part.".into(),
+                    "An API failure never stops the video. Configure categories/mode in Settings → Playback.".into(),
+                    "mpv plays extracted media directly, without the website's ad UI. SponsorBlock uses public video IDs to mark embedded sponsors.".into(),
+                    "This is not universal browser adblocking or guaranteed removal of server-inserted ads (SSAI).".into(),
+                ] });
+            }
             "tracks" => {
                 let media = self.selected().context("Select a station first")?;
                 let url = media
@@ -3067,6 +3494,12 @@ impl App {
                     .context("This station exposes a live stream only")?;
                 self.change_tab(3);
                 self.navigate(3, BrowseRequest::CliampTracks(url), false);
+            }
+            "player-formats" => {
+                self.modal = Some(Modal::PlayerSettings {
+                    section: 0,
+                    selected: 0,
+                })
             }
             "add-station" => {
                 let name = parts.get(1).context("Provide a station name")?;
@@ -3264,6 +3697,7 @@ impl App {
             }
             "capabilities" | "support-export" => {
                 let config = self.config.clone();
+                let active_backend = self.player_status.backend.clone();
                 let error = self.player_status.error.clone().unwrap_or_default();
                 let cancel = self.desktop_cancel.child_token();
                 let output = (cmd == "support-export").then(|| PathBuf::from(&value));
@@ -3278,11 +3712,12 @@ impl App {
                     let report = ytui_services::diagnostics::Support::collect(
                         &config,
                         env!("CARGO_PKG_VERSION"),
-                        env!("YTUI_BUILD_REVISION"),
+                        env!("YTUI_BUILD_DESCRIPTION"),
                         &error,
                         cancel,
                     )
-                    .await;
+                    .await
+                    .with_active_backend(&active_backend);
                     let result = async {
                         if let Some(path) = output {
                             let data = serde_json::to_vec_pretty(&report)?;
@@ -3305,11 +3740,12 @@ impl App {
                     format!(
                         "ytui {} · build {} · downloads {} · playback {}",
                         env!("CARGO_PKG_VERSION"),
-                        env!("YTUI_BUILD_REVISION"),
+                        env!("YTUI_BUILD_DESCRIPTION"),
                         self.config.download_backend,
                         self.config.playback_backend
                     ),
                     format!("Theme: {} · {}", self.palette.name, self.palette.source),
+                    format!("Active playback backend: {}", self.player_status.backend),
                     "Browser credentials and signed URLs are never included.".into(),
                     String::new(),
                 ];
@@ -3328,7 +3764,7 @@ impl App {
                 );
                 if let Some(error) = &self.player_status.error {
                     lines.push(format!(
-                        "Failure phase: {}",
+                        "Inferred failure phase: {}",
                         ytui_services::diagnostics::phase(error)
                     ));
                     lines.push(ytui_services::process::diagnostic(error));
@@ -3384,6 +3820,85 @@ impl App {
                     job: job.id,
                     selected: 0,
                 });
+            }
+            "download-recent" => self.modal = Some(Modal::Destinations(0)),
+            "download-collection" => {
+                ensure!(
+                    !self.demo && !self.offline,
+                    "Collection expansion requires online mode"
+                );
+                ensure!(
+                    !self.collection_pending,
+                    "A collection is already loading; use Cancel collection loading in Actions"
+                );
+                let tab = if self.tab == 2 { 2 } else { 1 };
+                let selected = self.selected();
+                let (request, title) =
+                    if let Some(media) = selected.filter(|media| media.collection()) {
+                        (
+                            BrowseRequest::Collection(
+                                media
+                                    .browse_id
+                                    .context("This collection has no browse ID")?,
+                            ),
+                            media.title,
+                        )
+                    } else {
+                        (
+                            self.tabs[tab]
+                                .request
+                                .clone()
+                                .filter(|request| matches!(request, BrowseRequest::Collection(_)))
+                                .context("Open a playlist/album/channel first")?,
+                            self.tabs[tab].page.title.clone(),
+                        )
+                    };
+                let source = serde_json::to_string(&request)?;
+                let options = self.config.download.clone();
+                let mut entry_options = options.clone();
+                entry_options.audio = tab == 2;
+                entry_options.playlist = false;
+                entry_options.playlist_items = None;
+                let watch = watch::CollectionWatch {
+                    id: uuid::Uuid::new_v4(),
+                    title: title.clone(),
+                    request,
+                    music: tab == 2,
+                    options,
+                    interval_seconds: 60,
+                    next_check: 0,
+                    enabled: false,
+                    generation: 0,
+                    owner: self.watch_owner(),
+                    seen: None,
+                    failures: 0,
+                    error: None,
+                };
+                self.collection_cancel = CancellationToken::new();
+                self.collection_generation = self.collection_generation.wrapping_add(1);
+                self.collection_pending = true;
+                let cancel = self.collection_cancel.clone();
+                let generation = self.collection_generation;
+                let browser = self.browser.clone();
+                self.status =
+                    "Loading every collection page · no entries queued until expansion succeeds"
+                        .into();
+                self.tasks.spawn(async move {
+                    UiEvent::Collection {
+                        generation,
+                        source,
+                        title,
+                        options: Box::new(entry_options),
+                        selection: value,
+                        result: ytui_services::watch::collect(browser, watch, cancel).await,
+                    }
+                });
+            }
+            "cancel-collection" => {
+                self.collection_cancel.cancel();
+                self.collection_generation = self.collection_generation.wrapping_add(1);
+                self.collection_pending = false;
+                self.status = "Collection loading cancelled · existing downloads retained".into();
             }
             "download-page" => {
                 ensure!(
@@ -3732,7 +4247,24 @@ impl App {
             }
             "auth" => {
                 if value.is_empty() {
-                    self.modal = Some(Modal::Form(Box::new(Form::auth())));
+                    if self.demo {
+                        self.modal = Some(Modal::Form(Box::new(Form::auth())));
+                        return Ok(());
+                    }
+                    let paths = self.paths.clone();
+                    self.modal = Some(Modal::Account {
+                        profiles: Vec::new(),
+                        selected: 0,
+                    });
+                    self.status =
+                        "Discovering profile directories · cookie databases stay closed".into();
+                    self.tasks.spawn(async move {
+                        UiEvent::AccountProfiles(
+                            tokio::task::spawn_blocking(move || auth::profiles(&paths))
+                                .await
+                                .unwrap_or_default(),
+                        )
+                    });
                 } else {
                     self.import_auth(
                         parts.get(1).cloned().unwrap_or_default(),

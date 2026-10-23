@@ -188,7 +188,7 @@ async fn audit_b03_transient_card_error_can_recover_without_manual_refresh() {
     app.apply(UiEvent::CardImage {
         generation: 0,
         key,
-        result: Err(anyhow::anyhow!("temporary timeout")),
+        result: Err(anyhow::anyhow!("request timed out").context("Thumbnail unavailable")),
     });
     tokio::time::sleep(Duration::from_secs(3)).await;
     app.refresh_image();
@@ -569,5 +569,280 @@ async fn long_continuation_feeds_have_bounded_memory_without_stopping_pagination
         assert!(app.tabs[1].selected < app.tabs[1].page.items.len());
     }
     assert!(app.tabs[1].page.items.last().unwrap().id.starts_with("39-"));
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn collection_entries_resume_individually_and_survive_store_restart() {
+    let (mut app, _player, temp) = fixture();
+    app.snapshot.downloads.jobs.clear();
+    let media = (0..3)
+        .map(|index| Media {
+            id: format!("track{index}"),
+            title: format!("Track {index}"),
+            url: format!("https://www.youtube.com/watch?v=abcdefghij{index}"),
+            ..Default::default()
+        })
+        .collect::<Vec<_>>();
+    let options = DownloadOptions {
+        audio: true,
+        backend: Some("native".into()),
+        ..Default::default()
+    };
+    app.queue_collection(
+        "VLfixture".into(),
+        "Three tracks".into(),
+        options.clone(),
+        "all",
+        media.clone(),
+    )
+    .unwrap();
+    let group = app.snapshot.downloads.jobs[0].group_id.clone();
+    for (index, job) in app.snapshot.downloads.jobs.iter_mut().enumerate() {
+        assert!(!job.options.playlist);
+        assert_eq!(job.entry_index, Some(index + 1));
+        if index < 2 {
+            let file = temp.path().join(format!("track{index}.mp3"));
+            std::fs::write(&file, b"fixture").unwrap();
+            job.outputs.push(file);
+            job.state = JobState::Done;
+        } else {
+            job.state = JobState::Error;
+        }
+    }
+    let store = ytui_services::store::Store::open(&app.paths.state).unwrap();
+    store.save(app.snapshot.clone()).await.unwrap();
+    store.close().await.unwrap();
+    let store = ytui_services::store::Store::open(&app.paths.state).unwrap();
+    app.snapshot = store.load().await.unwrap();
+    app.queue_collection(
+        "VLfixture".into(),
+        "Three tracks".into(),
+        options.clone(),
+        "all",
+        media.clone(),
+    )
+    .unwrap();
+    assert_eq!(app.snapshot.downloads.jobs.len(), 3);
+    assert_eq!(app.snapshot.downloads.jobs[0].state, JobState::Done);
+    assert_eq!(app.snapshot.downloads.jobs[1].state, JobState::Done);
+    assert_eq!(app.snapshot.downloads.jobs[2].state, JobState::Queued);
+    assert!(
+        app.snapshot
+            .downloads
+            .jobs
+            .iter()
+            .all(|job| job.group_id == group)
+    );
+    assert!(
+        app.queue_collection(
+            "VLfixture".into(),
+            "Three tracks".into(),
+            options,
+            "1,99",
+            media
+        )
+        .is_err()
+    );
+    assert_eq!(app.snapshot.downloads.jobs.len(), 3);
+    store.close().await.unwrap();
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn browser_profile_selection_reviews_the_path_without_importing_cookies() {
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+    let (mut app, _player, temp) = fixture();
+    app.demo = false;
+    let profile = temp.path().join("Brave-Origin/Default");
+    app.modal = Some(ytui::app::Modal::Account {
+        profiles: vec![],
+        selected: 0,
+    });
+    app.apply(UiEvent::AccountProfiles(vec![
+        ytui_services::auth::BrowserProfile {
+            browser: "brave-origin".into(),
+            path: profile.clone(),
+        },
+    ]));
+    app.key(KeyEvent::new(KeyCode::Down, KeyModifiers::NONE));
+    app.key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+    let Some(ytui::app::Modal::Form(form)) = &app.modal else {
+        panic!("Expected review form")
+    };
+    assert_eq!(form.fields[1].value.text, profile.display().to_string());
+    assert!(app.pending_operation.is_none());
+    assert!(app.session.is_none());
+    app.key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
+    app.apply(UiEvent::AccountProfiles(vec![]));
+    assert!(
+        app.modal.is_none(),
+        "late discovery must not reopen a closed panel"
+    );
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn playback_dialog_selects_reported_formats_tracks_and_captions() {
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+    let (mut app, mut received, _temp) = fixture();
+    app.player_status.catalog = ytui_services::formats::Catalog::parse(
+        &serde_json::json!({"formats":[{"format_id":"137","vcodec":"avc1","acodec":"none","height":1080}],"subtitles":{"de":[{"ext":"vtt","url":"https://example.test/caption"}]}}),
+    );
+    app.player_status.tracks = ytui_services::formats::tracks(
+        &serde_json::json!([{"id":2,"type":"audio","lang":"de","codec":"aac"}]),
+    );
+    for section in 0..3 {
+        app.modal = Some(ytui::app::Modal::PlayerSettings {
+            section,
+            selected: 0,
+        });
+        app.key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+        match (section, received.recv().await.unwrap()) {
+            (0, PlayerCommand::Format(format)) => assert_eq!(format.id, "137"),
+            (1, PlayerCommand::SelectTrack { kind, id }) => {
+                assert_eq!(kind, "audio");
+                assert_eq!(id, 2);
+            }
+            (2, PlayerCommand::Caption(caption)) => assert!(caption.label.contains("de")),
+            _ => panic!("Wrong playback selection command"),
+        }
+    }
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn automatic_queue_advance_waits_for_a_full_player_channel_and_stop_cancels_it() {
+    let (mut app, mut received, _temp) = fixture();
+    let first = Media {
+        url: "https://example.test/first.mp4".into(),
+        ..Default::default()
+    };
+    let second = Media {
+        url: "https://example.test/second.mp4".into(),
+        ..Default::default()
+    };
+    app.snapshot.playback.items = vec![first.clone(), second.clone()];
+    app.snapshot.playback.current = Some(0);
+    for _ in 0..32 {
+        app.player.try_send(PlayerCommand::TogglePause).unwrap();
+    }
+    app.playback_ended(&first);
+    assert_eq!(app.snapshot.playback.current, Some(1));
+    for _ in 0..32 {
+        received.recv().await.unwrap();
+    }
+    app.tick().await;
+    assert!(
+        matches!(received.recv().await, Some(PlayerCommand::Play { media, .. }) if media.url == second.url)
+    );
+    app.action(Action::NextTrack);
+    assert_eq!(
+        app.snapshot.playback.current,
+        Some(1),
+        "next at queue end must preserve the playing selection"
+    );
+    app.snapshot.playback.current = Some(0);
+    for _ in 0..32 {
+        app.player.try_send(PlayerCommand::TogglePause).unwrap();
+    }
+    app.playback_ended(&first);
+    app.action(Action::Stop);
+    for _ in 0..32 {
+        received.recv().await.unwrap();
+    }
+    app.tick().await;
+    assert!(
+        received.try_recv().is_err(),
+        "Stop must cancel deferred auto-play"
+    );
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn recent_destination_history_is_bounded_and_persisted_without_moving_files() {
+    let (mut app, _player, temp) = fixture();
+    app.demo = false;
+    app.snapshot.downloads.jobs.clear();
+    for index in 0..15 {
+        app.enqueue_download(
+            Media {
+                url: format!("https://example.test/{index}.mp4"),
+                ..Default::default()
+            },
+            DownloadOptions {
+                directory: temp.path().join(format!("folder-{index}")),
+                ..Default::default()
+            },
+        );
+    }
+    assert_eq!(app.snapshot.recent_destinations.len(), 12);
+    assert!(app.snapshot.recent_destinations[0].ends_with("folder-14"));
+    let store = ytui_services::store::Store::open(&app.paths.state).unwrap();
+    store.save(app.snapshot.clone()).await.unwrap();
+    let loaded = store.load().await.unwrap();
+    assert_eq!(loaded.recent_destinations, app.snapshot.recent_destinations);
+    assert!(
+        !temp.path().join("folder-14").exists(),
+        "history must not create/move destination contents"
+    );
+    store.close().await.unwrap();
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn disconnect_handoff_waits_for_player_capacity_and_blocks_old_account_playback() {
+    let (mut app, mut received, _temp) = fixture();
+    app.session = Some(Arc::new(synthetic_session()));
+    for _ in 0..32 {
+        app.player.try_send(PlayerCommand::TogglePause).unwrap();
+    }
+    let operation = app.operations.account();
+    app.apply(UiEvent::Disconnected {
+        operation,
+        result: Ok(()),
+    });
+    assert!(app.player_session_pending);
+    assert!(!app.play_existing(Media {
+        url: "https://example.test/new.mp4".into(),
+        ..Default::default()
+    }));
+    for _ in 0..32 {
+        received.recv().await.unwrap();
+    }
+    app.tick().await;
+    assert!(matches!(
+        received.recv().await,
+        Some(PlayerCommand::Session(None))
+    ));
+    assert!(!app.player_session_pending);
+    assert!(app.session.is_none());
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn repeated_disconnect_completes_cleanup_without_leaving_settings_busy() {
+    let (mut app, _player, _temp) = fixture();
+    app.demo = false;
+    app.session = Some(Arc::new(synthetic_session()));
+    let store = ytui_services::auth::SessionStore::new(&app.paths, "file");
+    store.save(&synthetic_session()).unwrap();
+    app.command("disconnect").unwrap();
+    app.command("disconnect").unwrap();
+    tokio::time::timeout(Duration::from_secs(3), async {
+        while app.pending_operation.is_some() {
+            let event = app.tasks.join_next().await.unwrap().unwrap();
+            app.apply(event);
+        }
+    })
+    .await
+    .unwrap();
+    assert!(store.load().unwrap().is_none());
+    assert!(app.session.is_none());
+    app.save_config(app.config.clone());
+    assert!(
+        app.pending_operation.is_some(),
+        "settings must accept another save"
+    );
     app.shutdown().await;
 }

@@ -113,7 +113,12 @@ fn native_worker_survives_replacing_the_running_executable() {
         theme: "ytui-dark".into(),
         playback_backend: "native".into(),
         native_js_runtime: Some(runtime),
-        proxy: Some(proxy.url.clone()),
+        proxy: Some(
+            url::Url::parse(&proxy.url)
+                .unwrap()
+                .origin()
+                .ascii_serialization(),
+        ),
         ..Default::default()
     };
     let path = temp.path().join("config.toml");
@@ -165,7 +170,12 @@ fn doctor_network_returns_failure_when_its_public_probes_are_rejected() {
     let config = Config {
         theme: "ytui-dark".into(),
         auth_store: "file".into(),
-        proxy: Some(proxy.url.clone()),
+        proxy: Some(
+            url::Url::parse(&proxy.url)
+                .unwrap()
+                .origin()
+                .ascii_serialization(),
+        ),
         ..Default::default()
     };
     let config_file = temp.path().join("config.toml");
@@ -203,7 +213,12 @@ fn native_playback_never_invokes_external_extraction_even_for_legacy_auto_config
     // Deliberately deserialize a config predating playback_backend.
     let mut config: Config =
         toml::from_str("download_backend='auto'\nauth_store='file'\ntheme='ytui-dark'").unwrap();
-    config.proxy = Some(proxy.url.clone());
+    config.proxy = Some(
+        url::Url::parse(&proxy.url)
+            .unwrap()
+            .origin()
+            .ascii_serialization(),
+    );
     config.yt_dlp = extractor.display().to_string();
     let config_file = temp.path().join("config.toml");
     std::fs::write(&config_file, toml::to_string(&config).unwrap()).unwrap();

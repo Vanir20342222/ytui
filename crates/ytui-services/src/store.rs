@@ -12,6 +12,7 @@ use ytui_core::{DownloadQueue, Media, PlaybackQueue};
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Snapshot {
+    pub recent_destinations: Vec<PathBuf>,
     pub downloads: DownloadQueue,
     pub playback: PlaybackQueue,
     pub favorites: Vec<Media>,

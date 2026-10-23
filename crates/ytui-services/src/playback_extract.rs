@@ -10,6 +10,7 @@ pub(crate) struct Stream {
     pub url: String,
     pub audio: Option<String>,
     pub headers: Vec<(String, String)>,
+    pub catalog: crate::formats::Catalog,
 }
 pub(crate) fn parse(data: &Value, audio: bool) -> Result<Stream> {
     let has_video = |format: &Value| {
@@ -82,6 +83,7 @@ pub(crate) fn parse(data: &Value, audio: bool) -> Result<Stream> {
         url: url(primary)?,
         audio: extra_audio.map(url).transpose()?,
         headers,
+        catalog: crate::formats::Catalog::parse(data),
     })
 }
 pub(crate) async fn resolve(

@@ -52,6 +52,12 @@ pub struct Job {
     #[serde(default)]
     pub group_id: Option<String>,
     #[serde(default)]
+    pub group_title: Option<String>,
+    #[serde(default)]
+    pub group_source: Option<String>,
+    #[serde(default)]
+    pub entry_index: Option<usize>,
+    #[serde(default)]
     pub not_before: Option<u64>,
     #[serde(default)]
     pub created_at: Option<u64>,
@@ -75,6 +81,9 @@ impl Job {
             error: None,
             attempt: 0,
             group_id: None,
+            group_title: None,
+            group_source: None,
+            entry_index: None,
             not_before: None,
             created_at: Some(crate::schedule::unix_now()),
             completed_at: None,

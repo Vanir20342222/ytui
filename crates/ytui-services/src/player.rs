@@ -38,11 +38,20 @@ pub enum PlayerCommand {
     Preview(Media),
     ClosePreview,
     TogglePause,
+    SetPaused(bool),
+    SetVolume(f64),
+    SetRate(f64),
     Seek(f64),
     Volume(f64),
     Mute,
     SeekTo(f64),
     Quality(String),
+    Format(crate::formats::Format),
+    SelectTrack {
+        kind: String,
+        id: i64,
+    },
+    Caption(crate::formats::Caption),
     Speed(f64),
     CycleAudio,
     CycleSubtitles,
@@ -57,6 +66,11 @@ pub enum PlayerCommand {
 }
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PlayerStatus {
+    pub video_height: Option<u64>,
+    pub video_codec: Option<String>,
+    pub audio_codec: Option<String>,
+    pub catalog: crate::formats::Catalog,
+    pub tracks: Vec<crate::formats::Track>,
     pub title: String,
     pub media: Option<Media>,
     pub position: f64,
@@ -93,6 +107,7 @@ struct Active {
     task: JoinHandle<Result<ProcessResult>>,
     socket: PathBuf,
     backend: watch::Receiver<String>,
+    catalog: watch::Receiver<crate::formats::Catalog>,
     _dir: tempfile::TempDir,
     _cookies: Option<tempfile::NamedTempFile>,
 }
@@ -158,21 +173,27 @@ async fn ipc(path: &Path, args: Value) -> Result<Value> {
     .await
     .context("mpv IPC timed out")?
 }
+const PROPERTY_NAMES: &[&str] = &[
+    "time-pos",
+    "duration",
+    "pause",
+    "volume",
+    "media-title",
+    "mute",
+    "speed",
+    "paused-for-cache",
+    "user-data/ytui/action",
+    "track-list",
+    "metadata",
+    "video-params",
+    "video-codec",
+    "audio-codec",
+];
 async fn properties(path: &Path) -> Result<Value> {
     tokio::time::timeout(Duration::from_millis(90), async {
         let stream = UnixStream::connect(path).await?;
         let (read, mut write) = stream.into_split();
-        let names = [
-            "time-pos",
-            "duration",
-            "pause",
-            "volume",
-            "media-title",
-            "mute",
-            "speed",
-            "paused-for-cache",
-            "user-data/ytui/action",
-        ];
+        let names = PROPERTY_NAMES;
         let mut requests = String::new();
         for (id, name) in names.iter().enumerate() {
             requests.push_str(&format!(
@@ -266,6 +287,15 @@ async fn start(
         streams,
     } = launch;
     let local = Path::new(&media.url).is_file();
+    ensure!(
+        local
+            || !config
+                .proxy
+                .as_deref()
+                .is_some_and(|proxy| url::Url::parse(proxy)
+                    .is_ok_and(|url| url.scheme().starts_with("socks"))),
+        "mpv playback cannot use a SOCKS proxy directly. Use an HTTP(S) proxy or your VPN's system routing; SOCKS browsing/downloads remain supported. No direct connection was attempted"
+    );
     let youtube = if local {
         false
     } else {
@@ -351,6 +381,7 @@ async fn start(
     let cookie_path = cookies.as_ref().map(|f| f.path().to_owned());
     let native_dir = paths.state.join("auth/transient");
     let (backend_tx, backend) = watch::channel(String::new());
+    let (catalog_tx, catalog) = watch::channel(crate::formats::Catalog::default());
     let task = tokio::spawn(async move {
         let fallback_spec = (youtube && config.playback_backend == "auto").then(|| spec.clone());
         let spec = if youtube && config.playback_backend != "yt-dlp" {
@@ -358,6 +389,7 @@ async fn start(
             options.audio = audio;
             if preview {
                 options.quality = "360".into();
+                options.format_selector = None;
             }
             let cache_key = serde_json::to_string(&(
                 &media.url,
@@ -366,6 +398,7 @@ async fn start(
                 &config.proxy,
                 &config.native_js_runtime,
                 &config.ffmpeg,
+                &options.format_selector,
             ))?;
             let resolved = streams
                 .load(cache_key.clone(), Duration::from_secs(120), || {
@@ -394,22 +427,27 @@ async fn start(
                         spec,
                         &config,
                         &media,
-                        audio,
-                        preview,
-                        cookie_path.as_deref(),
-                        token,
+                        External {
+                            audio,
+                            preview,
+                            cookies: cookie_path.as_deref(),
+                            cancel: token,
+                            catalog: Some(catalog_tx.clone()),
+                        },
                     )
                     .await;
                 }
                 Err(error) => return Err(error),
             };
             let _ = backend_tx.send("native Rust".into());
+            let _ = catalog_tx.send(resolved.catalog.clone());
             crate::playback_extract::direct(
                 spec,
                 crate::playback_extract::Stream {
                     url: resolved.url,
                     audio: resolved.audio_url,
                     headers: resolved.headers,
+                    catalog: resolved.catalog,
                 },
                 cookie_path.as_deref(),
             )
@@ -419,10 +457,13 @@ async fn start(
                 spec,
                 &config,
                 &media,
-                audio,
-                preview,
-                cookie_path.as_deref(),
-                token,
+                External {
+                    audio,
+                    preview,
+                    cookies: cookie_path.as_deref(),
+                    cancel: token,
+                    catalog: Some(catalog_tx.clone()),
+                },
             )
             .await;
         } else if !local {
@@ -460,10 +501,13 @@ async fn start(
                 fallback,
                 &config,
                 &media,
-                audio,
-                preview,
-                cookie_path.as_deref(),
-                token,
+                External {
+                    audio,
+                    preview,
+                    cookies: cookie_path.as_deref(),
+                    cancel: token,
+                    catalog: Some(catalog_tx.clone()),
+                },
             )
             .await;
         }
@@ -476,23 +520,37 @@ async fn start(
         task,
         socket,
         backend,
+        catalog,
         _dir: dir,
         _cookies: cookies,
     })
+}
+struct External<'a> {
+    audio: bool,
+    preview: bool,
+    cookies: Option<&'a Path>,
+    cancel: CancellationToken,
+    catalog: Option<watch::Sender<crate::formats::Catalog>>,
 }
 async fn external_playback(
     spec: ProcessSpec,
     config: &Config,
     media: &Media,
-    audio: bool,
-    preview: bool,
-    cookies: Option<&Path>,
-    cancel: CancellationToken,
+    launch: External<'_>,
 ) -> Result<ProcessResult> {
+    let External {
+        audio,
+        preview,
+        cookies,
+        cancel,
+        catalog,
+    } = launch;
     let format = if preview {
         // Muted previews do not need audio or a combined progressive format.
         // Current YouTube responses can contain only separate video/audio.
         "bestvideo[height<=?360]/best[height<=?360]".into()
+    } else if let Some(selector) = &config.download.format_selector {
+        selector.clone()
     } else if audio {
         "bestaudio/best".into()
     } else if config.download.quality == "best" {
@@ -512,6 +570,9 @@ async fn external_playback(
         cancel.clone(),
     )
     .await?;
+    if let Some(catalog) = catalog {
+        let _ = catalog.send(stream.catalog.clone());
+    }
     run_mpv(
         crate::playback_extract::direct(spec, stream, cookies),
         cancel,
@@ -631,6 +692,13 @@ impl Actor {
         position: Option<f64>,
         paused: bool,
     ) {
+        if self
+            .playing
+            .as_ref()
+            .is_none_or(|(current, _, _)| current.url != media.url)
+        {
+            self.config.download.format_selector = None;
+        }
         self.stop().await;
         self.reconnect_count = 0;
         self.resume_after_preview = false;
@@ -743,14 +811,19 @@ impl Actor {
     async fn handle(&mut self, command: PlayerCommand) {
         match command {
             PlayerCommand::Play { media, audio } => {
+                self.config.download.format_selector = None;
                 self.play(media, audio, false, None, false).await
             }
             PlayerCommand::PlayAt {
                 media,
                 audio,
                 seconds,
-            } => self.play(media, audio, false, Some(seconds), false).await,
+            } => {
+                self.config.download.format_selector = None;
+                self.play(media, audio, false, Some(seconds), false).await;
+            }
             PlayerCommand::PlayFallback { media, audio } => {
+                self.config.download.format_selector = None;
                 self.play(media, audio, true, None, false).await
             }
             PlayerCommand::Quality(quality) => {
@@ -760,11 +833,118 @@ impl Actor {
                         .is_ok_and(|v| (144..=8640).contains(&v))
                 {
                     self.config.download.quality = quality;
+                    self.config.download.format_selector = None;
                     if let Some((media, audio, fallback)) = self.playing.clone() {
                         let position = self.state.position;
                         self.play(media, audio, fallback, Some(position), self.state.paused)
                             .await;
                     }
+                }
+            }
+            PlayerCommand::SetPaused(paused) => {
+                if let Some(player) = &self.full {
+                    if player
+                        .command(json!(["set_property", "pause", paused]))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    self.state.paused = paused;
+                }
+            }
+            PlayerCommand::SetVolume(volume) if volume.is_finite() => {
+                let volume = volume.clamp(0.0, 100.0);
+                if let Some(player) = &self.full
+                    && player
+                        .command(json!(["set_property", "volume", volume]))
+                        .await
+                        .is_err()
+                {
+                    return;
+                }
+                self.state.volume = volume;
+            }
+            PlayerCommand::SetRate(rate) if rate.is_finite() => {
+                let rate = rate.clamp(0.25, 4.0);
+                if let Some(player) = &self.full
+                    && player
+                        .command(json!(["set_property", "speed", rate]))
+                        .await
+                        .is_err()
+                {
+                    return;
+                }
+                self.state.speed = rate;
+            }
+            PlayerCommand::Format(format) => {
+                if !self.state.catalog.formats.contains(&format) {
+                    return;
+                }
+                if let Some((media, audio, fallback)) = self.playing.clone() {
+                    let video = if self.config.download.quality == "best" {
+                        "bestvideo".into()
+                    } else {
+                        format!("bestvideo[height<=?{}]", self.config.download.quality)
+                    };
+                    let selector = if format.video {
+                        format!("{}+bestaudio/best", format.id)
+                    } else if audio {
+                        format.id
+                    } else {
+                        format!("{video}+{}/best", format.id)
+                    };
+                    self.config.download.format_selector = Some(selector);
+                    self.play(
+                        media,
+                        audio,
+                        fallback,
+                        Some(self.state.position),
+                        self.state.paused,
+                    )
+                    .await;
+                }
+            }
+            PlayerCommand::SelectTrack { kind, id } => {
+                if self
+                    .state
+                    .tracks
+                    .iter()
+                    .any(|track| track.kind == kind && track.id == id)
+                    && let Some(player) = &self.full
+                {
+                    let result = player
+                        .command(json!([
+                            "set_property",
+                            if kind == "audio" { "aid" } else { "sid" },
+                            id
+                        ]))
+                        .await;
+                    self.state.notice = Some(
+                        if result.is_ok() {
+                            "Track selection requested"
+                        } else {
+                            "Track selection failed · playback continues"
+                        }
+                        .into(),
+                    );
+                }
+            }
+            PlayerCommand::Caption(caption) => {
+                if self.state.catalog.captions.contains(&caption)
+                    && let Some(player) = &self.full
+                {
+                    let result = player
+                        .command(json!(["sub-add", caption.url, "select", caption.label]))
+                        .await;
+                    self.state.notice = Some(
+                        if result.is_ok() {
+                            "Caption requested · check Loaded audio & subtitles for availability"
+                        } else {
+                            "Caption request failed · playback continues"
+                        }
+                        .into(),
+                    );
                 }
             }
             PlayerCommand::Preview(media) => self.preview(media).await,
@@ -912,6 +1092,9 @@ impl Actor {
         }
         let mut event = None;
         if let Some(active) = &mut self.full {
+            if active.catalog.has_changed().unwrap_or(true) {
+                self.state.catalog = active.catalog.borrow_and_update().clone();
+            }
             // has_changed() returns an error once the sender closes, even if
             // its final value was never read. Fast failures still need their
             // actual backend identity to enter native URL renewal.
@@ -1097,6 +1280,21 @@ impl Actor {
             if let Some(title) = v["media-title"].as_str() {
                 self.state.title = ytui_core::clean_text(title);
             }
+            if self
+                .playing
+                .as_ref()
+                .is_some_and(|(media, _, _)| media.live)
+                && let Some(title) = v["metadata"]["icy-title"]
+                    .as_str()
+                    .or_else(|| v["metadata"]["title"].as_str())
+                && !title.trim().is_empty()
+            {
+                self.state.title = ytui_core::clean_text(title);
+            }
+            self.state.tracks = crate::formats::tracks(&v["track-list"]);
+            self.state.video_height = v["video-params"]["h"].as_u64();
+            self.state.video_codec = v["video-codec"].as_str().map(ytui_core::clean_text);
+            self.state.audio_codec = v["audio-codec"].as_str().map(ytui_core::clean_text);
             if self.state.sponsor_enabled
                 && !self.state.paused
                 && !self.state.buffering
@@ -1251,10 +1449,13 @@ printf '%s\n' '{"url":"https://synthetic.test/video.webm","vcodec":"vp9","acodec
                 ..Default::default()
             },
             &media,
-            false,
-            true,
-            None,
-            CancellationToken::new(),
+            External {
+                audio: false,
+                preview: true,
+                cookies: None,
+                cancel: CancellationToken::new(),
+                catalog: None,
+            },
         )
         .await
         .unwrap();
@@ -1306,6 +1507,7 @@ printf '%s\n' '{"url":"https://synthetic.test/video.webm","vcodec":"vp9","acodec
             &config.proxy,
             &config.native_js_runtime,
             &config.ffmpeg,
+            &config.download.format_selector,
         ))
         .unwrap();
         streams
@@ -1314,6 +1516,7 @@ printf '%s\n' '{"url":"https://synthetic.test/video.webm","vcodec":"vp9","acodec
                     url: "https://stream.test/video?sig=synthetic".into(),
                     audio_url: None,
                     headers: vec![],
+                    catalog: Default::default(),
                 })
             })
             .await
@@ -1453,6 +1656,7 @@ printf '%s\n' '{"url":"https://synthetic.test/video.webm","vcodec":"vp9","acodec
             }),
             socket,
             backend: watch::channel(String::new()).1,
+            catalog: watch::channel(crate::formats::Catalog::default()).1,
             _dir: tempfile::tempdir().unwrap(),
             _cookies: None,
         };
@@ -1869,6 +2073,7 @@ sleep 30
                     task,
                     socket: temp.path().join("unused-ipc"),
                     backend: watch::channel(String::new()).1,
+                    catalog: watch::channel(crate::formats::Catalog::default()).1,
                     _dir: tempfile::tempdir().unwrap(),
                     _cookies: None,
                 }),
@@ -2012,6 +2217,7 @@ mod responsiveness_tests {
                     task,
                     socket: temp.path().join("absent-ipc"),
                     backend: watch::channel(String::new()).1,
+                    catalog: watch::channel(crate::formats::Catalog::default()).1,
                     _dir: tempfile::tempdir().unwrap(),
                     _cookies: None,
                 }),
@@ -2095,6 +2301,7 @@ mod responsiveness_tests {
                 }),
                 socket: temp.path().join("unused"),
                 backend,
+                catalog: watch::channel(Default::default()).1,
                 _dir: tempfile::tempdir().unwrap(),
                 _cookies: None,
             });
@@ -2189,6 +2396,7 @@ mod responsiveness_tests {
                 }),
                 socket,
                 backend: watch::channel(String::new()).1,
+                catalog: watch::channel(crate::formats::Catalog::default()).1,
                 _dir: tempfile::tempdir().unwrap(),
                 _cookies: None,
             }),
@@ -2243,7 +2451,7 @@ mod responsiveness_tests {
             let (read, mut write) = stream.into_split();
             let mut lines = BufReader::new(read).lines();
             let mut requests = Vec::new();
-            for _ in 0..9 {
+            for _ in 0..PROPERTY_NAMES.len() {
                 requests.push(
                     serde_json::from_str::<Value>(&lines.next_line().await.unwrap().unwrap())
                         .unwrap(),
@@ -2342,7 +2550,9 @@ mod responsiveness_tests {
             "appearance changes must not refetch SponsorBlock"
         );
         for _ in 0..100 {
-            if args.exists() {
+            if std::fs::read_to_string(&args)
+                .is_ok_and(|content| content.ends_with("https://radio.test/live\n"))
+            {
                 break;
             }
             tokio::time::sleep(Duration::from_millis(10)).await;
@@ -2378,7 +2588,10 @@ mod responsiveness_tests {
         for _ in 0..100 {
             if std::fs::read_to_string(&args)
                 .unwrap_or_default()
-                .contains("--volume=18\n")
+                .ends_with("https://radio.test/live\n")
+                && std::fs::read_to_string(&args)
+                    .unwrap_or_default()
+                    .contains("--volume=18\n")
             {
                 break;
             }
@@ -2400,6 +2613,68 @@ mod responsiveness_tests {
 #[cfg(test)]
 mod real_mpv_tests {
     use super::*;
+    #[tokio::test]
+    #[ignore = "requires actual mpv and FFmpeg; loopback HTTP proxy only"]
+    async fn real_mpv_http_proxy_uses_the_proxy_for_an_unresolvable_host() {
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path().join("proxy-fixture.mp4");
+        let generated = std::process::Command::new("ffmpeg")
+            .args([
+                "-v",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=s=64x64:r=10",
+                "-t",
+                "1",
+                "-c:v",
+                "mpeg4",
+                "-threads",
+                "1",
+                "-movflags",
+                "+faststart",
+            ])
+            .arg(&source)
+            .output()
+            .unwrap();
+        assert!(generated.status.success());
+        let body = std::fs::read(source).unwrap();
+        let hits = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let observed = hits.clone();
+        let (proxy, server) = crate::test_http::serve(move |target| {
+            let target = url::Url::parse(target).unwrap();
+            assert_eq!(target.host_str(), Some("ytui-media-proxy.invalid"));
+            assert_eq!(target.path(), "/fixture.mp4");
+            observed.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            (200, "Content-Type: video/mp4\r\n".into(), body.clone())
+        })
+        .await;
+        let program = std::env::var("YTUI_TEST_MPV").unwrap_or_else(|_| "mpv".into());
+        let result = process::run(
+            ProcessSpec::new(
+                program,
+                vec![
+                    "--no-config".into(),
+                    "--ytdl=no".into(),
+                    "--vo=null".into(),
+                    "--ao=null".into(),
+                    "--length=0.6".into(),
+                    format!("--http-proxy={proxy}"),
+                    "--".into(),
+                    "http://ytui-media-proxy.invalid/fixture.mp4".into(),
+                ],
+                10,
+            ),
+            CancellationToken::new(),
+            |_| {},
+        )
+        .await
+        .unwrap();
+        assert!(result.success, "{}", playback_diagnostic(&result));
+        assert!(hits.load(std::sync::atomic::Ordering::SeqCst) > 0);
+        server.abort();
+    }
     #[tokio::test]
     #[ignore = "requires actual mpv and FFmpeg; native HLS manifest/headers over loopback only"]
     async fn real_mpv_native_hls_handoff_keeps_the_manifest_and_native_identity() {
@@ -2499,6 +2774,7 @@ mod real_mpv_tests {
                 url: source.url,
                 audio: source.audio_url,
                 headers: source.headers,
+                catalog: source.catalog,
             },
             None,
         );
@@ -2693,6 +2969,36 @@ mod real_mpv_tests {
         assert!(actor.state.muted);
         assert_eq!(actor.state.speed, 1.25);
         assert!((actor.state.position - 4.0).abs() < 0.3);
+        let track = actor
+            .state
+            .tracks
+            .iter()
+            .find(|track| track.kind == "audio" && !track.selected)
+            .cloned()
+            .expect("second actual audio track");
+        let previous_position = actor.state.position;
+        actor
+            .handle(PlayerCommand::SelectTrack {
+                kind: track.kind,
+                id: track.id,
+            })
+            .await;
+        actor.tick().await;
+        assert!(actor.state.paused, "track selection lost pause");
+        assert!(
+            (actor.state.position - previous_position).abs() < 0.3,
+            "track selection lost position"
+        );
+        assert_eq!(
+            actor
+                .full
+                .as_ref()
+                .unwrap()
+                .command(json!(["get_property", "aid"]))
+                .await
+                .unwrap(),
+            track.id
+        );
         let audio = actor
             .full
             .as_ref()

@@ -73,3 +73,17 @@ Alpha.5 adds [Actions](screenshots/actions.png),
 [download destination](screenshots/download-destination.png), and
 [download captions](screenshots/download-captions.png). All 50 captures are WQHD.
 The player position/SponsorBlock example is synthetic, not live playback evidence.
+
+Alpha.12 audit panels add [actual formats](screenshots/player-formats.png),
+[account setup](screenshots/account-setup.png), [recorded files](screenshots/download-files.png),
+[capabilities](screenshots/capabilities.png), [cache](screenshots/thumbnail-cache.png),
+[SponsorBlock status](screenshots/sponsorblock-status.png) and
+[recent folders](screenshots/recent-folders.png). The full manifest contains 57
+WQHD captures. Empty/short dialogs size to their content; the format screenshot
+uses explicitly fictional demo metadata. To refresh only these dialogs and diagnostics:
+
+```sh
+cargo build -p ytui --locked --example capture_ui
+cargo build -p ytui --locked
+target/debug/examples/capture_ui --audit-panels-only --binary target/debug/ytui
+```

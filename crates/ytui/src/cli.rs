@@ -15,7 +15,7 @@ use ytui_services::{
 #[derive(Parser)]
 #[command(
     version,
-    long_version = concat!(env!("CARGO_PKG_VERSION"), " · ", env!("YTUI_BUILD_REVISION")),
+    long_version = concat!(env!("CARGO_PKG_VERSION"), " · ", env!("YTUI_BUILD_DESCRIPTION")),
     about = "YouTube, Music, downloads and radio in your terminal"
 )]
 pub struct Args {
@@ -67,8 +67,11 @@ pub enum Command {
         audio: bool,
         #[arg(long, value_parser = ["auto", "native", "yt-dlp"])]
         backend: Option<String>,
+        /// Requested maximum video height, or best. Actual decoded height is reported.
+        #[arg(long)]
+        quality: Option<String>,
         /// Require this many seconds of playback before reporting success.
-        #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u32).range(2..=30))]
+        #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u32).range(2..=3600))]
         seconds: u32,
     },
     /// Explicit control of existing NetworkManager VPN/WireGuard profiles (never runs at startup).
@@ -150,7 +153,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             let report = ytui_services::diagnostics::Support::collect(
                 &config,
                 env!("CARGO_PKG_VERSION"),
-                env!("YTUI_BUILD_REVISION"),
+                env!("YTUI_BUILD_DESCRIPTION"),
                 "",
                 CancellationToken::new(),
             )
@@ -168,11 +171,18 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             audio,
             backend,
             seconds,
+            quality,
         } => {
             ensure!(!config.offline, "Playback checks require network access");
             if let Some(backend) = backend {
                 config.playback_backend = backend;
             }
+            if let Some(quality) = quality {
+                config.download.quality = quality;
+            }
+            config.validate()?;
+            let requested_quality = config.download.quality.clone();
+            let started = tokio::time::Instant::now();
             config.playback_sponsorblock = "off".into();
             let media = Media {
                 url: normalize_media_url(&url)?,
@@ -184,7 +194,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 .commands
                 .send(ytui_services::player::PlayerCommand::Play { media, audio })
                 .await?;
-            let result = tokio::time::timeout(std::time::Duration::from_secs(120), async {
+            let result = tokio::time::timeout(std::time::Duration::from_secs(u64::from(seconds) + 120), async {
                 loop {
                     let state = player.status.borrow_and_update().clone();
                     if let Some(error) = state.error {
@@ -200,6 +210,11 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                             "audio_only": audio,
                             "position": state.position,
                             "duration": state.duration,
+                            "requested_quality": requested_quality,
+                            "decoded_height": state.video_height,
+                            "video_codec": state.video_codec,
+                            "audio_codec": state.audio_codec,
+                            "elapsed_seconds": started.elapsed().as_secs_f64(),
                         }));
                     }
                     tokio::select! {
@@ -216,7 +231,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             player.close().await;
             println!(
                 "{}",
-                result.context("Playback did not advance within 120 seconds")??
+                result.context("Playback did not reach the required progress before its bounded deadline (duration + 120 seconds)")??
             );
         }
         Command::NativeWorker { request } => {

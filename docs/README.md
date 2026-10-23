@@ -4,6 +4,9 @@
 
 | Document | Use it for |
 | --- | --- |
+| [Alpha.12 workflows](AUDIT_FEATURES.md) | New account, collection, format, cache and support panels |
+| [Implementation tracker](AUDIT_IMPLEMENTATION.md) | Audit fixes, executed checks and remaining acceptance |
+| [Candidate release](RELEASE_CANDIDATE.md) | Update, rollback, checksum/license archive and Arch recipe |
 | [Usage and settings](RUST.md) | Build, update, navigation, configuration and backends |
 | [Example configuration](../examples/config.toml) | Editable TOML showing current defaults |
 | [Remaining work](REMAINING_WORK.md) | Unsupported features and release acceptance |

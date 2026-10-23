@@ -36,6 +36,16 @@ pub const ENTRIES: &[Entry] = &[
         &[("New JSON file", "ytui-support.json")]
     ),
     entry!("Settings", "Playback and SponsorBlock", "playback-settings"),
+    entry!(
+        "Player",
+        "SponsorBlock & ad handling status",
+        "sponsor-status"
+    ),
+    entry!(
+        "Player",
+        "Available formats, audio tracks & captions",
+        "player-formats"
+    ),
     entry!("Settings", "Keyboard bindings", "keys"),
     entry!("Settings", "Choose theme", "theme"),
     entry!(
@@ -106,6 +116,22 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Downloads", "Completed downloads", "downloads completed"),
     entry!("Downloads", "Failed downloads", "downloads failed"),
     entry!("Downloads", "Download statistics", "stats"),
+    entry!(
+        "Downloads",
+        "Download to a recent folder",
+        "download-recent"
+    ),
+    entry!(
+        "Downloads",
+        "Download full collection as individual jobs",
+        "download-collection",
+        &[("Available entry indices (all or 1,3:7)", "all")]
+    ),
+    entry!(
+        "Downloads",
+        "Cancel collection loading",
+        "cancel-collection"
+    ),
     entry!(
         "Downloads",
         "Files in selected download / playlist",

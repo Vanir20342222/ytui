@@ -21,9 +21,11 @@ pub struct Support {
     pub os: &'static str,
     pub architecture: &'static str,
     pub playback_backend: String,
+    pub active_backend: Option<&'static str>,
     pub download_backend: String,
     pub proxy_scheme: String,
     pub failure_phase: &'static str,
+    pub failure_phase_source: &'static str,
     pub tools: Vec<Tool>,
 }
 pub fn phase(message: &str) -> &'static str {
@@ -115,6 +117,18 @@ async fn tool(name: &'static str, program: &str, flag: &str, cancel: Cancellatio
     }
 }
 impl Support {
+    pub fn with_active_backend(mut self, backend: &str) -> Self {
+        self.active_backend = [
+            "native Rust",
+            "yt-dlp",
+            "yt-dlp fallback",
+            "direct stream",
+            "local",
+        ]
+        .into_iter()
+        .find(|known| *known == backend);
+        self
+    }
     pub async fn collect(
         config: &Config,
         version: &str,
@@ -162,6 +176,7 @@ impl Support {
             os: std::env::consts::OS,
             architecture: std::env::consts::ARCH,
             playback_backend: config.playback_backend.clone(),
+            active_backend: None,
             download_backend: config.download_backend.clone(),
             proxy_scheme: config
                 .proxy
@@ -170,6 +185,7 @@ impl Support {
                 .map(|url| url.scheme().to_owned())
                 .unwrap_or_else(|| "system/default".into()),
             failure_phase: phase(error),
+            failure_phase_source: "message classification",
             tools: vec![mpv, ffmpeg, ffprobe, external, runtime],
         }
     }
@@ -180,7 +196,11 @@ impl Support {
                 "Playback: {} · Downloads: {} · Proxy: {}",
                 self.playback_backend, self.download_backend, self.proxy_scheme
             ),
-            format!("Failure phase: {}", self.failure_phase),
+            format!(
+                "Active backend: {} · inferred failure phase: {}",
+                self.active_backend.unwrap_or("not active"),
+                self.failure_phase
+            ),
             String::new(),
         ];
         lines.extend(self.tools.iter().map(|tool| {
@@ -191,7 +211,7 @@ impl Support {
                 tool.version.as_deref().unwrap_or("")
             )
         }));
-        lines.extend([String::new(), "Tools must be installed explicitly using your package manager.".into(), "Native playback requires installed Node.js 22+ or pinned Deno 2.9.7.".into(), "FFmpeg/ffprobe handle conversion; mpv handles audio/video output.".into(), "Settings → Tools changes apply to the next playback/download.".into(), "Support export includes this allowlist only; no raw errors, URLs, paths or session data.".into()]);
+        lines.extend([String::new(), "Tools must be installed explicitly using your package manager.".into(), "Native playback requires installed Node.js 22+ or pinned Deno 2.9.7.".into(), "FFmpeg/ffprobe handle conversion; mpv handles audio/video output.".into(), "mpv requires HTTP(S) proxy or OS VPN routing; SOCKS supports browsing/downloads only.".into(), "Settings → Tools changes apply to the next playback/download.".into(), "Support export includes this allowlist only; no raw errors, URLs, paths or session data.".into()]);
         lines
     }
 }

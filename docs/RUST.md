@@ -1,8 +1,13 @@
 # Rust edition
 
-Alpha.11 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
+Alpha.12 provides Downloads, YouTube, Music and Cliamp / Radio in a Rust terminal
 application. mpv plays video in its own window and audio through the shared player.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
+
+The alpha.12 [workflow guide](AUDIT_FEATURES.md) covers the profile chooser,
+collection jobs, available formats/tracks, cache controls, MPRIS and support export.
+Use [candidate/release instructions](RELEASE_CANDIDATE.md) for checksum/rollback
+and exact-SHA Arch builds. Main promotion and target acceptance remain open.
 
 ## Build and run
 
@@ -11,7 +16,7 @@ On CachyOS/Arch:
 ```sh
 sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
-git clone --branch fix/native-playback https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/audit-implementation https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 hash -r
@@ -34,11 +39,11 @@ installed executable:
 ```sh
 cd ~/ytui
 git fetch origin
-git switch fix/native-playback
+git switch fix/audit-implementation
 git pull --ff-only
 ./install.sh
 hash -r
-~/.local/bin/ytui --version             # 0.2.0-alpha.11
+~/.local/bin/ytui --version             # 0.2.0-alpha.12
 type -a ytui ytui-rs
 ```
 

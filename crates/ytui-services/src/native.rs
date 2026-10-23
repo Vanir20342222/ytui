@@ -33,6 +33,8 @@ pub struct Resolved {
     pub audio_url: Option<String>,
     #[serde(default)]
     pub headers: Vec<(String, String)>,
+    #[serde(default)]
+    pub catalog: crate::formats::Catalog,
 }
 pub(crate) fn playback_source(info: &VideoInfo, audio: bool) -> Result<Resolved> {
     // HLS manifests and direct HTTP URLs remain playable by mpv even when the
@@ -43,6 +45,7 @@ pub(crate) fn playback_source(info: &VideoInfo, audio: bool) -> Result<Resolved>
         url: stream.url,
         audio_url: stream.audio,
         headers: stream.headers,
+        catalog: crate::formats::Catalog::parse(&serde_json::to_value(info)?),
     })
 }
 pub fn worker(path: &Path) -> Result<()> {
@@ -92,7 +95,9 @@ pub fn worker(path: &Path) -> Result<()> {
         crate::paths::executable(&request.config.ffmpeg)
             .unwrap_or_else(|| PathBuf::from(&request.config.ffmpeg)),
     );
-    let selector = if o.audio {
+    let selector = if let Some(selector) = &o.format_selector {
+        selector.clone()
+    } else if o.audio {
         "bestaudio/best".into()
     } else if o.quality == "best" {
         "bestvideo+bestaudio/best".into()
@@ -604,6 +609,22 @@ mod tests {
             .unwrap()
             .extend(extra.as_object().unwrap().clone());
         serde_json::from_value(value).unwrap()
+    }
+    #[test]
+    fn reported_format_ids_select_the_actual_video_and_audio_language() {
+        let mut video = info(json!({"formats":[
+            {"format_id":"137","url":"https://media.test/1080.mp4","ext":"mp4","height":1080,"vcodec":"avc1","acodec":"none","stream_kind":"video_only"},
+            {"format_id":"247","url":"https://media.test/720.webm","ext":"webm","height":720,"vcodec":"vp9","acodec":"none","stream_kind":"video_only"},
+            {"format_id":"140-de","url":"https://media.test/de.m4a","ext":"m4a","vcodec":"none","acodec":"aac","language":"de","stream_kind":"audio_only"}
+        ]}));
+        video.select_format(Some("247+140-de/best")).unwrap();
+        let source = playback_source(&video, false).unwrap();
+        assert_eq!(source.url, "https://media.test/720.webm");
+        assert_eq!(
+            source.audio_url.as_deref(),
+            Some("https://media.test/de.m4a")
+        );
+        assert_eq!(source.catalog.formats.len(), 3);
     }
     #[test]
     fn native_hls_keeps_the_manifest_url_and_extractor_request_headers() {

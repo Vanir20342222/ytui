@@ -4,11 +4,11 @@ A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interfa
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
-This is **0.2.0-alpha.11**. Live account and desktop acceptance remains open;
+This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDIT_IMPLEMENTATION.md)). Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
-git clone --branch fix/native-playback https://github.com/Vanir20342222/ytui.git
+git clone --branch fix/audit-implementation https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ytui doctor
@@ -24,7 +24,7 @@ sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
 ```
 
-Until this change reaches main, use the `fix/native-playback` branch.
+Until this change reaches main, use the `fix/audit-implementation` branch.
 Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 
@@ -34,6 +34,8 @@ and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility al
   F6 focuses categories; arrows edit choices; Space toggles; Enter saves; Esc cancels.
 - `F2 → Account`: import a selected local browser session. Personal feeds need sign-in;
   anonymous Home may have no recommendations.
+- `F2 → Player`: actual formats, audio/subtitle choices, SponsorBlock status; `F2 → Settings`: setup, thumbnail cache and safe support export.
+- `F2 → Downloads`: full-collection individual jobs, per-entry retry/files and recent destinations.
 - `u`: explicit local playback resume; `p`: playback queue.
 - `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
 - `ytui doctor --network`: opt-in public provider diagnostics without importing an account.

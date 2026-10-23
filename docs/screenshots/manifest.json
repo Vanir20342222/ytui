@@ -1,6 +1,6 @@
 {
   "source": "Actual Rust executable PTY output captured by native Rust tooling; fictional demo/offline data and generated artwork",
-  "binary": "target/release/ytui",
+  "binary": "target/debug/ytui",
   "size": [
     2560,
     1440
@@ -29,13 +29,16 @@
     "terminal"
   ],
   "captures": [
+    "account-setup.png",
     "actions.png",
     "auth.png",
+    "capabilities.png",
     "categories.png",
     "compact.png",
     "diagnostics.png",
     "download-captions.png",
     "download-destination.png",
+    "download-files.png",
     "download-options.png",
     "downloads.png",
     "feeds.png",
@@ -48,7 +51,9 @@
     "offline.png",
     "playback-queue.png",
     "player-controls.png",
+    "player-formats.png",
     "radio.png",
+    "recent-folders.png",
     "resume.png",
     "search.png",
     "settings.png",
@@ -62,6 +67,7 @@
     "settings/schedule.png",
     "settings/subtitles.png",
     "settings/tools.png",
+    "sponsorblock-status.png",
     "theme-picker.png",
     "themes/catppuccin-latte.png",
     "themes/catppuccin-mocha.png",
@@ -76,6 +82,7 @@
     "themes/tokyo-night.png",
     "themes/ytui-dark.png",
     "themes/ytui-light.png",
+    "thumbnail-cache.png",
     "update.png",
     "watches.png",
     "youtube.png"

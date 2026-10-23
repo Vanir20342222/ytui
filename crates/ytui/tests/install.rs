@@ -71,4 +71,21 @@ fn rust_installation_replaces_launchers_and_preserves_legacy_targets_and_failed_
         }
     }
     assert_eq!(fs::read_to_string(&legacy).unwrap(), original);
+    let old = "#!/bin/sh\nprintf 'ytui 0.1.0-fixture\\n'\n";
+    executable(&bin.join("ytui"), old);
+    assert!(run("install.sh").status.success());
+    assert_eq!(fs::read_to_string(bin.join("ytui.previous")).unwrap(), old);
+    assert!(run("tools/rollback-install.sh").status.success());
+    for name in ["ytui", "ytui-rs"] {
+        assert_eq!(fs::read_to_string(bin.join(name)).unwrap(), old);
+    }
+    assert!(run("tools/rollback-install.sh").status.success());
+    assert!(
+        Command::new(bin.join("ytui"))
+            .arg("--version")
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
 }

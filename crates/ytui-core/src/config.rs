@@ -154,7 +154,11 @@ impl Config {
                 .map_err(|_| anyhow::anyhow!("Proxy must be a valid HTTP(S) or SOCKS URL"))?;
             ensure!(
                 matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h")
-                    && proxy.host_str().is_some(),
+                    && proxy.host_str().is_some()
+                    && proxy.port() != Some(0)
+                    && matches!(proxy.path(), "" | "/")
+                    && proxy.query().is_none()
+                    && proxy.fragment().is_none(),
                 "Proxy must use HTTP(S), socks5 or socks5h and include a host"
             );
         }
@@ -172,6 +176,8 @@ impl Config {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct DownloadOptions {
+    /// Explicit extractor format selector; normally populated from actual formats.
+    pub format_selector: Option<String>,
     pub backend: Option<String>,
     pub audio: bool,
     pub quality: String,
@@ -200,6 +206,7 @@ pub struct DownloadOptions {
 impl Default for DownloadOptions {
     fn default() -> Self {
         Self {
+            format_selector: None,
             backend: None,
             audio: false,
             quality: "1080".into(),
@@ -230,7 +237,8 @@ impl Default for DownloadOptions {
 impl DownloadOptions {
     /// Compare the requested files, independently of extraction/retry/rate policy.
     pub fn same_output(&self, other: &Self) -> bool {
-        self.audio == other.audio
+        self.format_selector == other.format_selector
+            && self.audio == other.audio
             && (if self.audio {
                 self.audio_container == other.audio_container
                     && self.audio_quality == other.audio_quality
@@ -264,6 +272,16 @@ impl DownloadOptions {
                 .as_deref()
                 .is_none_or(|b| b == "auto" || b == "native" || b == "yt-dlp"),
             "Unknown download backend"
+        );
+        ensure!(
+            self.format_selector
+                .as_ref()
+                .is_none_or(|value| !value.is_empty()
+                    && value.len() <= 256
+                    && value
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_-./+[]<>=,?*".contains(&b))),
+            "Invalid explicit format selector"
         );
         ensure!(
             self.quality == "best"

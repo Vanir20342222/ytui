@@ -1,6 +1,6 @@
 # ytui Rust rewrite plan
 
-M2–M8 audit implementation: account/settings operations now coordinate preparation
+M2–M8 alpha.12 audit implementation: account/settings operations now coordinate preparation
 and durable writes; queue intent, image generations/retries, optional cache writes,
 partial-output access, conversion quality and output identity have regression fixes.
 Setup/capability and allowlisted support panels, thumbnail-cache controls and bounded
@@ -11,7 +11,7 @@ M2–M8 full-app audit on alpha.11 (`e2b01ea`):
 [prioritized bug and feature report](docs/APP_AUDIT_2026-10-22.md).
 Nine bug/release entries, separately identified risks and acceptance criteria are
 recorded with executable isolated repros. This is analysis, not their implementation.
-The current development branch is alpha.11; main still ships alpha.5 at audit time.
+At that audit baseline the development branch was alpha.11 and main shipped alpha.5. The alpha.12 implementation is now tracked above.
 
 M2/M8 repository maintenance: removed unused direct dependencies, consolidated
 acceptance-runner reporting, expanded dense Rust blocks and aligned the example

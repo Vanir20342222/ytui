@@ -10,7 +10,15 @@ The detailed feature/verification inventory is [FEATURE_AUDIT.md](FEATURE_AUDIT.
 [PARITY.md](PARITY.md) maps the implemented Rust equivalents. This document
 lists remaining gaps, including options preserved verbatim by migration.
 
-## Current local evidence (alpha.11)
+## Current candidate: alpha.12
+
+[The audit implementation tracker](AUDIT_IMPLEMENTATION.md) supersedes the older
+implementation-gap rows below for formats, account setup, MPRIS, collection groups,
+recent folders, file opening, diagnostics and release tooling. Their live/desktop/
+packaging acceptance remains explicitly separate. Lyrics and German localization
+remain P3; a main merge/tag is still pending the acceptance gates.
+
+## Previous local evidence (alpha.11)
 
 The transition and alpha sections below retain their original results. Later
 target-PC runs verified public native playback/downloads, provider caching, radio

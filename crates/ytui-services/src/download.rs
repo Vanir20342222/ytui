@@ -53,7 +53,12 @@ pub fn args(job: &Job, config: &Config, cookie_file: Option<&Path>) -> Result<Ve
         args.push(value);
     };
     if o.audio {
-        add("--format", "bestaudio/best".into());
+        add(
+            "--format",
+            o.format_selector
+                .clone()
+                .unwrap_or_else(|| "bestaudio/best".into()),
+        );
         args.push("--extract-audio".into());
         args.extend([
             "--audio-format".into(),
@@ -62,7 +67,9 @@ pub fn args(job: &Job, config: &Config, cookie_file: Option<&Path>) -> Result<Ve
             o.audio_quality.clone(),
         ]);
     } else {
-        let format = if o.quality == "best" {
+        let format = if let Some(selector) = &o.format_selector {
+            selector.clone()
+        } else if o.quality == "best" {
             "bv*+ba/b".into()
         } else {
             format!("bv*[height<=?{}]+ba/b[height<=?{}]", o.quality, o.quality)

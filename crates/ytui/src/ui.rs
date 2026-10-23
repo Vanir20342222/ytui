@@ -109,7 +109,39 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         ),
         Modal::History(_) => (105, 32),
         Modal::Groups(_) => (85, 25),
-        Modal::Outputs { .. } => (105, 28),
+        Modal::Destinations(_) => (
+            95,
+            (app.snapshot.recent_destinations.len() as u16)
+                .saturating_add(4)
+                .clamp(8, 22),
+        ),
+        Modal::Outputs { job, .. } => (
+            105,
+            app.snapshot
+                .downloads
+                .jobs
+                .iter()
+                .find(|download| download.id == *job)
+                .map_or(8, |download| {
+                    (download.outputs.len() as u16)
+                        .saturating_mul(2)
+                        .saturating_add(4)
+                        .clamp(8, 28)
+                }),
+        ),
+        Modal::Account { profiles, .. } => (
+            100,
+            (profiles.len() as u16)
+                .saturating_mul(2)
+                .saturating_add(12)
+                .clamp(14, 28),
+        ),
+        Modal::PlayerSettings { section, .. } => (
+            105,
+            (app.playback_choices(*section).len() as u16)
+                .saturating_add(7)
+                .clamp(12, 30),
+        ),
         Modal::Text { .. } => (90, 28),
     };
     let rect = centered(area, size.0, size.1);
@@ -260,7 +292,9 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 .map(|(_, job)| {
                     ListItem::new(vec![
                         Line::from(format!(
-                            "{:?} · {}{}",
+                            "{}{:?} · {}{}",
+                            job.entry_index
+                                .map_or_else(String::new, |index| format!("{index}. ")),
                             job.state,
                             job.media.title,
                             if job.group_id.is_some() {
@@ -289,7 +323,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 chunks[1],
                 &mut state,
             );
-            f.render_widget(Paragraph::new(" ↑/↓ navigate · f filter · Enter shows queue item · g expands group\n F2 → Downloads · Esc closes").style(Style::default().fg(themed(app, app.palette.accent))), chunks[2]);
+            f.render_widget(Paragraph::new(" ↑/↓ navigate · f filter · r retry · o files · Enter queue item · g group\n F2 → Downloads · Esc closes").style(Style::default().fg(themed(app, app.palette.accent))), chunks[2]);
         }
         Modal::Groups(selected) => {
             let groups = app.download_groups();
@@ -396,8 +430,93 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 &mut state,
             );
         }
+        Modal::Destinations(selected) => {
+            let items = if app.snapshot.recent_destinations.is_empty() {
+                vec![ListItem::new(
+                    "No recent folders yet. Choose a destination in download options first.",
+                )]
+            } else {
+                app.snapshot
+                    .recent_destinations
+                    .iter()
+                    .map(|path| ListItem::new(path.display().to_string()))
+                    .collect()
+            };
+            let mut state = ListState::default().with_selected(Some(*selected));
+            f.render_stateful_widget(
+                List::new(items)
+                    .block(panel(
+                        " Recent download folders · Enter reviews options · Esc closes ",
+                        app,
+                    ))
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                rect,
+                &mut state,
+            );
+        }
+        Modal::PlayerSettings { section, selected } => {
+            let block = panel(
+                " Player selection · ←/→ tab · ↑/↓ choose · Enter applies · Esc closes ",
+                app,
+            );
+            let inner = block.inner(rect);
+            f.render_widget(block, rect);
+            let chunks = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]).split(inner);
+            f.render_widget(Paragraph::new(format!(" {} · {}\n Format changes restart this stream at the same position/pause. Loaded tracks switch in place.", ["Available formats", "Loaded audio & subtitles", "Available captions"][*section], app.player_status.backend)).wrap(Wrap { trim: false }), chunks[0]);
+            let choices = app.playback_choices(*section);
+            if choices.is_empty() {
+                f.render_widget(Paragraph::new(" No choices reported by this extractor/player yet. Start playback first.\n Native extraction may expose only a subset; unavailable tracks are never invented.\n Captions require an available VTT/SRT source; DRM streams remain unsupported.").wrap(Wrap { trim: false }), chunks[1]);
+            } else {
+                let mut state = ListState::default().with_selected(Some(*selected));
+                f.render_stateful_widget(
+                    List::new(
+                        choices
+                            .into_iter()
+                            .map(|(label, _)| ListItem::new(label))
+                            .collect::<Vec<_>>(),
+                    )
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                    chunks[1],
+                    &mut state,
+                );
+            }
+        }
+        Modal::Account { profiles, selected } => {
+            let block = panel(
+                " YouTube account · select profile · Enter reviews · Esc closes ",
+                app,
+            );
+            let inner = block.inner(rect);
+            f.render_widget(block, rect);
+            let chunks = Layout::vertical([Constraint::Length(6), Constraint::Min(1)]).split(inner);
+            f.render_widget(Paragraph::new(" Sign in to YouTube in your browser and complete any consent/verification there.\n Choose a profile below, then confirm the import in the next form.\n Discovery reads directory names only; cookies stay on this computer.\n Keyring must be unlocked. File storage is an explicit Settings → Account option.\n Session expired? Reconnect the selected profile; ytui never accepts consent for you.").wrap(Wrap { trim: false }), chunks[0]);
+            let mut items = vec![ListItem::new("Manual profile path / Netscape cookie file…")];
+            items.extend(profiles.iter().map(|profile| {
+                ListItem::new(vec![
+                    Line::from(profile.browser.clone()),
+                    Line::styled(
+                        profile.path.display().to_string(),
+                        Style::default().fg(themed(app, app.palette.muted)),
+                    ),
+                ])
+            }));
+            let mut state = ListState::default().with_selected(Some(*selected));
+            f.render_stateful_widget(
+                List::new(items)
+                    .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
+                    .highlight_symbol("▸ "),
+                chunks[1],
+                &mut state,
+            );
+        }
         Modal::Outputs { job, selected } => {
             if let Some(download) = app.snapshot.downloads.jobs.iter().find(|j| j.id == *job) {
+                if download.outputs.is_empty() {
+                    f.render_widget(Paragraph::new(format!("{}\n{}\n\nRetry/select this job in Downloads or its collection group.", download.media.title, download.error.as_deref().unwrap_or("Waiting for completed files; pending work has not published an output yet."))).wrap(Wrap { trim: true }).block(panel(format!(" Files · collection {:?} · Esc closes ", download.state), app)), rect);
+                    return;
+                }
                 let ready = download
                     .outputs
                     .iter()
@@ -449,7 +568,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                                 ),
                                 app,
                             )
-                            .title_bottom(" ↑/↓ select · Enter plays · Esc closes "),
+                            .title_bottom(" ↑/↓ select · Enter plays · o Open with… · Esc closes "),
                         ),
                     rect,
                     &mut state,

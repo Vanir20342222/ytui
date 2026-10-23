@@ -1,0 +1,38 @@
+name: Reviewed release candidate
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Reviewed full 40-character commit (after target-PC acceptance)'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  linux-x86_64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.revision }}
+          fetch-depth: 1
+      - name: Require exact reviewed commit
+        env:
+          REVIEWED_REVISION: ${{ inputs.revision }}
+        run: |
+          [[ "$REVIEWED_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$REVIEWED_REVISION" ]]
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --workspace --locked
+      - run: tools/package-release.sh dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reviewed-linux-x86_64-candidate
+          path: dist/*
+          if-no-files-found: error

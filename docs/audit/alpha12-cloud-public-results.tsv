@@ -1,0 +1,4 @@
+case	mode	maximum_height	requested_seconds	exit	wall_seconds
+1	video	360	3	1	0
+2	video	360	3	1	0
+3	audio	360	3	1	0

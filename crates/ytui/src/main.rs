@@ -166,6 +166,17 @@ async fn interface(
     job_rx: &mut mpsc::Receiver<ytui_core::JobEvent>,
 ) -> Result<()> {
     let mut events = EventStream::new();
+    let mut desktop_media = if app.demo {
+        None
+    } else {
+        tokio::time::timeout(
+            Duration::from_secs(2),
+            ytui_services::mpris::connect(player.commands.clone(), player.status.clone()),
+        )
+        .await
+        .ok()
+        .and_then(Result::ok)
+    };
     let mut tick = tokio::time::interval(Duration::from_millis(50));
     tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut last_save = Instant::now();
@@ -174,6 +185,9 @@ async fn interface(
     #[cfg(unix)]
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
     while !app.quit {
+        if let Some(bridge) = &desktop_media {
+            bridge.update_queue(&app.snapshot.playback);
+        }
         let frame_interval =
             Duration::from_millis(if app.config.reduced_motion { 100 } else { 16 });
         if app.redraw && last_draw.elapsed() >= frame_interval {
@@ -198,6 +212,18 @@ async fn interface(
             Some(event)=player.events.recv()=>match event{
                 PlayerEvent::Ended(media)=>app.playback_ended(&media),
                 PlayerEvent::Error(message)=>{app.status=message;app.redraw=true;}
+            },
+            Some(event)=async { desktop_media.as_mut().expect("guarded desktop bridge").events.recv().await },if desktop_media.is_some()=>match event {
+                ytui_services::mpris::Event::Next=>app.action(ytui_core::shortcuts::Action::NextTrack),
+                ytui_services::mpris::Event::Previous=>app.action(ytui_core::shortcuts::Action::PreviousTrack),
+                ytui_services::mpris::Event::Play=>{
+                    let index = app.snapshot.playback.current.unwrap_or(0);
+                    if let Some(media)=app.snapshot.playback.items.get(index).cloned()
+                        && app.play_existing(media)
+                    {app.snapshot.playback.current=Some(index);app.dirty=true;}
+                },
+                ytui_services::mpris::Event::Quit=>app.quit=true,
+                ytui_services::mpris::Event::Stop=>app.action(ytui_core::shortcuts::Action::Stop),
             },
             _=tick.tick()=>{
                 app.tick().await;
@@ -331,6 +357,27 @@ mod tests {
                     app::Modal::Queue(0),
                     app::Modal::History(Default::default()),
                     app::Modal::Groups(0),
+                    app::Modal::Destinations(0),
+                    app::Modal::Outputs {
+                        job: a.snapshot.downloads.jobs[0].id,
+                        selected: 0,
+                    },
+                    app::Modal::Account {
+                        profiles: vec![],
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 0,
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 1,
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 2,
+                        selected: 0,
+                    },
                     app::Modal::Resume(0),
                     app::Modal::Watches(0),
                     app::Modal::Text {
@@ -824,6 +871,7 @@ mod tests {
             active: true,
             ..Default::default()
         };
+        a.snapshot.playback.play(media.clone());
         a.player_update(status.clone());
         assert!(a.snapshot.positions.entries.is_empty());
         status.preview = false;

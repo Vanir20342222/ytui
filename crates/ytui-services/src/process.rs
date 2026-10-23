@@ -224,7 +224,7 @@ pub fn diagnostic(raw: &str) -> String {
     let raw = raw.trim().strip_prefix("ytui:").unwrap_or(raw);
     raw.split_whitespace()
         .map(|w| {
-            if w.contains("http://") || w.contains("https://") {
+            if w.contains("://") {
                 "[URL]".to_owned()
             } else if w.len() > 100 {
                 "[redacted]".to_owned()
