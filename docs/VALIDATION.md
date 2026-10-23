@@ -2,8 +2,11 @@
 
 ## Alpha.12 networking follow-up — 2026-10-23 (M2–M6/M8)
 
-See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): 210 deterministic
-tests and ten actual local media tests pass; strict Clippy and formatting pass.
+See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): the second pass
+extends the b973434 fixes with watch cooldown/cancellation, mirror selection,
+scoped disk fallback, discovery caching and redirect upgrade/downgrade handling.
+217 deterministic tests and ten actual local media tests pass; strict Clippy and
+formatting pass.
 Five public checks pass (including actual radio progress); YouTube browsing and
 its independent thumbnail CDN check fail at the cloud proxy tunnel. The earlier
 204-test and archive evidence below belongs to the preceding implementation.

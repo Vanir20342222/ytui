@@ -7,7 +7,9 @@ targeting main. Main has not been silently promoted from alpha.5.
 
 The [networking follow-up](NETWORK_RELIABILITY_2026-10-23.md) records additional
 rate-limit, radio redirect/deadline, cover-proxy and stale-request fixes, with
-210 deterministic passes and public service results (5 pass, 2 tunnel failures).
+217 deterministic passes and public service results (5 pass, 2 tunnel failures).
+The second pass adds background-watch cooldown/cancellation, radio mirror/cache
+isolation, shared discovery and redirect downgrade fixes.
 
 | Work | Implementation / acceptance |
 | --- | --- |
