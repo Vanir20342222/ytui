@@ -41,6 +41,26 @@ be reviewed/remapped in Keyboard bindings. No bottom command line is needed.
 - MPRIS media controls operate the current app/queue. A missing session bus leaves
   terminal controls usable. Actual desktop/Wayland/key/audible acceptance remains
   separate from the private-bus regression.
+- **General settings → General → Language** saves English (`en`), German (`de`)
+  or system language. System checks LC_ALL, LC_MESSAGES, then LANG at startup;
+  other locales use English. Existing configurations keep English. Navigation,
+  all settings/action labels and keyboard-help descriptions are translated before
+  layout; Actions accepts English and German search. Provider content, technical
+  values, diagnostics and some status/guidance prose retain their original text.
+  This is an initial German interface, not a claim that every sentence is translated.
+- **Player → Find lyrics (LRCLIB)** opens a review form prefilled from the playing
+  item (or selection). Edit the song title and artist; Enter sends **only those two
+  fields** to LRCLIB through the configured proxy, without browser cookies/history.
+  Nothing is looked up automatically. Choose a returned candidate and press Enter.
+  Availability/correct matching depends on LRCLIB; an empty/error result leaves
+  playback alone.
+- **Open local lyrics** works offline with UTF-8 LRC/plain text up to 512 KiB.
+  Repeated timestamps and global LRC offsets are supported. Timed lines follow the
+  bound playing item; changing tracks pauses highlighting. Up/Down/PgUp/PgDn scroll
+  manually, **f/Home** follows, Backspace returns to online candidates, Esc closes
+  and cancels a pending lookup. Lyrics are not saved into downloaded media.
+- Asynchronous cache/capability/VPN-list panels have request identities: closing a
+  panel or opening a newer request prevents an old result from reopening it.
 
 SOCKS5/5h uses remote DNS for Rust browsing/downloads. mpv requires HTTP(S) proxy
 or normal OS VPN routing; unsupported SOCKS playback fails before a direct request.

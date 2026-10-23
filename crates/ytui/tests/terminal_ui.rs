@@ -71,3 +71,38 @@ fn real_terminal_opens_every_popup_edits_settings_resizes_and_restores_flags() {
     }
     term.close().unwrap();
 }
+
+#[test]
+fn real_terminal_uses_german_search_settings_and_offline_lyrics() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut term = Capture::with_language(
+        Path::new(env!("CARGO_BIN_EXE_ytui")),
+        temp.path(),
+        false,
+        "de",
+    )
+    .unwrap();
+    term.command("settings", "Allgemeine Einstellungen")
+        .unwrap();
+    assert!(term.text().contains("Sprache"));
+    term.send("\x1b").unwrap();
+    let path = temp.path().join("Offline song.lrc");
+    std::fs::write(&path, "[00:01]Fictional offline lyric").unwrap();
+    term.command(
+        &format!("lyrics-local {}", path.display()),
+        "Fictional offline lyric",
+    )
+    .unwrap();
+    assert!(term.text().contains("Liedtext"));
+    term.send("\x1b").unwrap();
+    term.send(":").unwrap();
+    term.send("Liedtext suchen").unwrap();
+    term.send("\r").unwrap();
+    term.wait_for("an LRCLIB gesendet").unwrap();
+    assert!(term.text().contains("Keine Cookies"));
+    term.send("\x1b").unwrap();
+    term.resize(80, 24).unwrap();
+    term.command("settings", "Allgemeine Einstellungen")
+        .unwrap();
+    term.close().unwrap();
+}

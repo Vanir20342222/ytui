@@ -18,11 +18,25 @@ pub struct Capture {
 }
 impl Capture {
     pub fn new(binary: &Path, root: &Path, offline: bool) -> Result<Self> {
+        Self::with_language(binary, root, offline, "en")
+    }
+    pub fn with_language(
+        binary: &Path,
+        root: &Path,
+        offline: bool,
+        language: &str,
+    ) -> Result<Self> {
+        ensure!(
+            matches!(language, "en" | "de"),
+            "Unsupported fixture language"
+        );
         std::fs::create_dir_all(root)?;
         let config = root.join("config.toml");
         std::fs::write(
             &config,
-            "theme='ytui-dark'\nimage_protocol='halfblocks'\nauth_store='file'\nnotifications=false\n",
+            format!(
+                "theme='ytui-dark'\nimage_protocol='halfblocks'\nauth_store='file'\nnotifications=false\nlanguage='{language}'\n"
+            ),
         )?;
         let pair = native_pty_system().openpty(PtySize {
             rows: 58,

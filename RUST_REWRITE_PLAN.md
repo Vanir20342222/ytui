@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M5/M7/M8 alpha.12 comfort follow-up adds explicit reviewed LRCLIB lyrics, offline
+LRC/text, timed-line following, initial German UI labels and bilingual Actions
+search. Late diagnostic/cache results cannot reopen dismissed panels. These are
+source/UI changes with their own checks; live account/desktop release gates and
+remaining sentence-level localization are tracked in docs/AUDIT_IMPLEMENTATION.md.
+
 M2–M8 alpha.12 audit implementation: account/settings operations now coordinate preparation
 and durable writes; queue intent, image generations/retries, optional cache writes,
 partial-output access, conversion quality and output identity have regression fixes.

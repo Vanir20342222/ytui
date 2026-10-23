@@ -28,15 +28,15 @@ targeting main. Main has not been silently promoted from alpha.5.
 | F07 | Native live stations remain separate from track libraries; ICY/title metadata is surfaced. Existing favorites, reconnect budget, volume persistence and optional cliamp launch are retained. Long station-switch/reconnect and physical audio acceptance remain open. |
 | F09 | MPRIS uses the existing player/queue: Play/Pause/Stop, Next/Previous, seek, absolute volume/rate, metadata and change signals. Queue capabilities are published; private-session D-Bus test passes. Caelestia media-widget/physical key/Wayland acceptance remains open. |
 | F11 | Rust browser expansion supplies independent native per-video jobs without lifting the extractor's collection guard. Native collection CLI/worker stays guarded until actual multi-entry/range/cancel/restart/partial-failure YouTube qualification. |
-| F13 | Recent destination history (bounded/persisted) and explicit recorded-file Open with via desktop portal implemented. Lyrics and German localization remain P3 work after the core acceptance gates; neither is advertised as implemented. |
+| F13 | Recent destinations and explicit portal Open with, reviewed opt-in LRCLIB lookup, offline UTF-8 LRC/text, timed-line following and candidate selection implemented. Initial German navigation/settings/actions/help/lyrics labels plus en/de/system preference and bilingual action search. Raw provider/tool text and some guidance/status prose remain English; full sentence-level localization is not claimed. |
 
 ## Executed evidence
 
-- Latest complete offline checkpoint: **190 passed, 25 opt-in ignored**.
+- Latest complete offline checkpoint: **204 passed, 25 opt-in ignored**.
   This includes real PTY, all themes/layouts/settings sections, new panels,
   account ordering, partial files, collection restart, formats, queue pressure,
-  bounded feeds, cache safety and SponsorBlock API checks. Final delivery checks
-  and artifact evidence are appended below after completion.
+  bounded feeds, cache safety, SponsorBlock API and lyrics/localization checks.
+  Archive/checkpoint evidence is distinguished below by exact source revision.
 - Strict Clippy, Rust formatting, shell syntax and workflow actionlint pass at
   their recorded checkpoints; newly combined delivery changes are rechecked.
 - Nine existing actual local media checks pass; the new actual mpv HTTP proxy
@@ -72,4 +72,44 @@ modifies user media. Fixture/startup success is not a 99% reliability claim.
 5. Review main integration, Arch recipe on Arch, license-only metadata entries,
    release provenance, checksum and update/rollback against a copy of old state.
    See [release/candidate instructions](RELEASE_CANDIDATE.md).
-6. P3: lyrics and complete German localization after those core gates.
+6. Complete remaining German guidance/status prose and target-PC lyric matching/
+   synchronization acceptance; the implemented lookup/local-file workflows are
+   described in [AUDIT_FEATURES.md](AUDIT_FEATURES.md).
+
+## Verified alpha.12 delivery checkpoint: `e9718f9`
+
+- Both GitHub Rust checks passed:
+  [39931230850](https://github.com/Vanir20342222/ytui/actions/runs/39931230850),
+  [39931240506](https://github.com/Vanir20342222/ytui/actions/runs/39931240506).
+- Combined actual local media campaign: **10 passed**; separate private D-Bus
+  MPRIS campaign: **1 passed**. These use generated/loopback media.
+- Two clean-source archive builds on the same compiler/machine were byte-identical;
+  SHA256 verified:
+  `8cc19ce23e37ad9bdc7700b0fec37f0182376b57e32d57f3664f81f43b8cba25`.
+  Both launchers reported full revision
+  `e9718f981ff3b216e42c1866f1c5601c3474e887`; no missing dynamic libraries.
+  The archive contains the license inventory (531 packages; 15 entries provide
+  SPDX metadata only and still require release review). This is same-input archive
+  repeatability, not cross-toolchain binary reproducibility or a published release.
+
+The lyrics/localization follow-up is newer than that artifact. Its own test and
+capture results are recorded below; the checkpoint checksum must
+not be used to identify a later build.
+
+## Lyrics/localization follow-up
+
+The full offline suite passes **204 tests, 0 failed, 25 opt-in ignored**.
+Settings render in English/German across all themes/sizes (2,340 states); lyric
+loading/empty/candidates/text/error adds 650 combinations. Real-executable PTY
+checks cover German search/settings and local lyrics. The four new captures are
+WQHD; the manifest now lists **61 PNGs**. Settings, action search, main German
+navigation and the lyric panel were also visually inspected.
+
+New regressions reject stale/closed lyric and tool-panel responses, bound LRC and
+HTTP bodies, reject redirect/error results without exposing query URLs, preserve
+Unicode/repeated timestamps/global offsets, use offline local files, and prove
+the lookup sends no cookie/auth/history fields. Named pipes are rejected without
+blocking a worker. Compact German buttons adapt to their displayed widths.
+
+No live LRCLIB match, signed-in account, physical output or target desktop result
+is implied by these synthetic/PTY checks.

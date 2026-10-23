@@ -18,6 +18,38 @@ use ytui_services::{
     store::Snapshot,
 };
 
+#[tokio::test]
+async fn completed_tool_panels_never_reopen_after_escape_or_replace_a_newer_request() {
+    use ytui::app::Modal;
+    let (mut app, _rx, _temp) = fixture();
+    app.command("thumbnail-cache").unwrap();
+    let Some(Modal::PendingText { id: old, .. }) = app.modal else {
+        panic!("Expected loading panel")
+    };
+    app.key(crossterm::event::KeyCode::Esc.into());
+    app.apply(UiEvent::Text {
+        id: old,
+        result: Ok(vec!["Old result".into()]),
+    });
+    assert!(app.modal.is_none());
+    app.command("thumbnail-cache").unwrap();
+    let Some(Modal::PendingText { id: new, .. }) = app.modal else {
+        panic!("Expected new loading panel")
+    };
+    assert_ne!(old, new);
+    app.apply(UiEvent::Text {
+        id: old,
+        result: Err(anyhow::anyhow!("Obsolete error")),
+    });
+    assert!(matches!(app.modal, Some(Modal::PendingText { id, .. }) if id == new));
+    app.apply(UiEvent::Text {
+        id: new,
+        result: Ok(vec!["Latest result".into()]),
+    });
+    assert!(matches!(&app.modal, Some(Modal::Text { lines, .. }) if lines == &["Latest result"]));
+    app.shutdown().await;
+}
+
 fn fixture() -> (App, mpsc::Receiver<PlayerCommand>, tempfile::TempDir) {
     let temp = tempfile::tempdir().unwrap();
     let root = temp.path();

@@ -107,47 +107,114 @@ fn legacy_auto_download_config_keeps_native_playback_and_settings_edit_them_sepa
 #[tokio::test]
 async fn every_settings_section_renders_first_and_last_fields_in_all_themes_and_sizes() {
     let (mut app, _temp) = fixture();
-    for theme in ytui_services::theme::THEMES {
-        app.palette = ytui_services::theme::builtin(theme).unwrap();
-        for (cols, rows) in [(35, 12), (80, 24), (120, 40), (180, 50), (212, 58)] {
-            let mut terminal = Terminal::new(TestBackend::new(cols, rows)).unwrap();
-            for (section, (_, indices)) in SETTINGS_SECTIONS.iter().enumerate() {
-                for selected in [indices[0], *indices.last().unwrap()] {
-                    let mut form = Form::settings(app.config.clone());
-                    form.select_section(section);
-                    form.selected = selected;
-                    app.modal = Some(Modal::Form(Box::new(form)));
-                    terminal.draw(|f| ui::render(f, &mut app)).unwrap();
-                    let text = terminal
-                        .backend()
-                        .buffer()
-                        .content
-                        .iter()
-                        .map(|c| c.symbol())
-                        .collect::<String>();
-                    assert!(text.contains("General settings"), "{theme} {cols}x{rows}");
-                    assert!(text.contains("Enter Save"), "Save missing in {section}");
-                    assert_eq!(app.image_area.width, 0);
-                    assert!(
-                        app.hit_targets
+    for language in ["en", "de"] {
+        app.config.language = language.into();
+        for theme in ytui_services::theme::THEMES {
+            app.palette = ytui_services::theme::builtin(theme).unwrap();
+            for (cols, rows) in [(35, 12), (80, 24), (120, 40), (180, 50), (212, 58)] {
+                let mut terminal = Terminal::new(TestBackend::new(cols, rows)).unwrap();
+                for (section, (_, indices)) in SETTINGS_SECTIONS.iter().enumerate() {
+                    for selected in [indices[0], *indices.last().unwrap()] {
+                        let mut form = Form::settings(app.config.clone());
+                        form.select_section(section);
+                        form.selected = selected;
+                        app.modal = Some(Modal::Form(Box::new(form)));
+                        terminal.draw(|f| ui::render(f, &mut app)).unwrap();
+                        let text = terminal
+                            .backend()
+                            .buffer()
+                            .content
                             .iter()
-                            .any(|(_, target)| *target == HitTarget::SettingField(selected)),
-                        "Selected field {selected} is offscreen"
-                    );
-                    if *theme == "terminal" {
+                            .map(|c| c.symbol())
+                            .collect::<String>();
                         assert!(
-                            terminal
-                                .backend()
-                                .buffer()
-                                .content
-                                .iter()
-                                .all(|c| !matches!(c.fg, ratatui::style::Color::Rgb(..)))
+                            text.contains(app.tr("General settings")),
+                            "{language} {theme} {cols}x{rows}"
                         );
+                        assert!(
+                            text.contains(if language == "de" {
+                                "Speichern"
+                            } else {
+                                "Enter Save"
+                            }),
+                            "Save missing in {section}"
+                        );
+                        assert_eq!(app.image_area.width, 0);
+                        assert!(
+                            app.hit_targets
+                                .iter()
+                                .any(|(_, target)| *target == HitTarget::SettingField(selected)),
+                            "Selected field {selected} is offscreen"
+                        );
+                        if *theme == "terminal" {
+                            assert!(
+                                terminal
+                                    .backend()
+                                    .buffer()
+                                    .content
+                                    .iter()
+                                    .all(|c| !matches!(c.fg, ratatui::style::Color::Rgb(..)))
+                            );
+                        }
                     }
                 }
             }
         }
     }
+    app.shutdown().await;
+}
+
+#[test]
+fn language_is_backward_compatible_validated_and_saved_without_changing_other_fields() {
+    let old: Config = toml::from_str("theme = 'ytui-dark'").unwrap();
+    assert_eq!(old.language, "en");
+    let mut form = Form::settings(old.clone());
+    form.fields[54].value = Editor::new("de");
+    let german = form.config_values().unwrap();
+    assert_eq!(german.language, "de");
+    let mut expected = old;
+    expected.language = "de".into();
+    assert_eq!(
+        toml::to_string(&german).unwrap(),
+        toml::to_string(&expected).unwrap()
+    );
+    form.fields[54].value = Editor::new("invalid");
+    assert!(form.config_values().is_err());
+    let matches = ytui::actions::matching_localized("Allgemeine Einstellungen", "de");
+    assert!(
+        matches
+            .iter()
+            .any(|index| ytui::actions::ENTRIES[*index].command == "settings")
+    );
+    assert_eq!(
+        ytui::actions::matching("General settings"),
+        ytui::actions::matching_localized("General settings", "de")
+    );
+}
+
+#[tokio::test]
+async fn german_footer_settings_button_and_action_search_use_the_rendered_targets() {
+    let (mut app, _temp) = fixture();
+    app.config.language = "de".into();
+    let mut terminal = Terminal::new(TestBackend::new(120, 40)).unwrap();
+    terminal.draw(|frame| ui::render(frame, &mut app)).unwrap();
+    let (rect, _) = app
+        .hit_targets
+        .iter()
+        .find(|(_, hit)| *hit == HitTarget::Action(Action::Settings))
+        .unwrap();
+    app.mouse(MouseEvent {
+        kind: MouseEventKind::Down(MouseButton::Left),
+        column: rect.x,
+        row: rect.y,
+        modifiers: KeyModifiers::empty(),
+    });
+    assert!(matches!(app.modal, Some(Modal::Form(_))));
+    app.key(KeyCode::Esc.into());
+    app.action(Action::Command);
+    app.paste("Allgemeine Einstellungen");
+    app.key(KeyCode::Enter.into());
+    assert!(matches!(app.modal, Some(Modal::Form(_))));
     app.shutdown().await;
 }
 #[tokio::test]

@@ -9,6 +9,7 @@ pub struct Config {
     #[serde(skip)]
     pub offline: bool,
     pub theme: String,
+    pub language: String,
     pub theme_provider: String,
     pub image_protocol: String,
     pub thumbnails: bool,
@@ -50,6 +51,7 @@ impl Default for Config {
             version: 1,
             offline: false,
             theme: "system".into(),
+            language: "en".into(),
             theme_provider: "auto".into(),
             image_protocol: "auto".into(),
             thumbnails: true,
@@ -89,6 +91,10 @@ impl Default for Config {
 }
 impl Config {
     pub fn validate(&self) -> Result<()> {
+        ensure!(
+            ["en", "de", "system"].contains(&self.language.as_str()),
+            "language must be en, de or system"
+        );
         ensure!(
             self.version == 1,
             "Unsupported configuration version {}",

@@ -147,6 +147,11 @@ impl TabView {
     }
 }
 pub enum Modal {
+    PendingText {
+        id: uuid::Uuid,
+        title: String,
+    },
+    Lyrics(Box<crate::lyrics::View>),
     Actions {
         selected: usize,
         query: Editor,
@@ -184,6 +189,10 @@ pub struct Input {
     pub editor: Editor,
 }
 pub enum UiEvent {
+    Lyrics {
+        id: uuid::Uuid,
+        result: Result<Vec<ytui_services::lyrics::Track>>,
+    },
     Page {
         tab: usize,
         generation: u64,
@@ -227,7 +236,7 @@ pub enum UiEvent {
         result: Result<Vec<Media>>,
     },
     Text {
-        title: String,
+        id: uuid::Uuid,
         result: Result<Vec<String>>,
     },
     CacheCleared(Result<ytui_services::images::CacheStats>),
@@ -320,6 +329,17 @@ pub struct App {
     watch_pending: HashMap<uuid::Uuid, (u64, CancellationToken)>,
 }
 impl App {
+    fn pending_text(&mut self, title: &str) -> uuid::Uuid {
+        let id = uuid::Uuid::new_v4();
+        self.modal = Some(Modal::PendingText {
+            id,
+            title: title.into(),
+        });
+        id
+    }
+    pub fn tr<'a>(&self, text: &'a str) -> &'a str {
+        crate::i18n::text(&self.config.language, text)
+    }
     pub fn card_notice(&self, key: &str) -> Option<&'static str> {
         self.card_failures.get(key).map(|(_, due)| {
             if due.is_some() {
@@ -832,6 +852,23 @@ impl App {
     }
     pub fn apply(&mut self, event: UiEvent) {
         match event {
+            UiEvent::Lyrics { id, result } => {
+                if let Some(Modal::Lyrics(view)) = &mut self.modal
+                    && view.id == id
+                {
+                    view.loading = false;
+                    match result {
+                        Ok(tracks) => {
+                            view.opened = view.source == "Local file";
+                            view.tracks = tracks;
+                        }
+                        Err(error) => {
+                            view.error =
+                                Some(ytui_services::process::diagnostic(&error.to_string()))
+                        }
+                    }
+                }
+            }
             UiEvent::AccountProfiles(profiles) => {
                 if matches!(self.modal, Some(Modal::Account { .. })) {
                     self.modal = Some(Modal::Account {
@@ -1226,16 +1263,19 @@ impl App {
                 }
                 Err(e) => self.status = ytui_services::process::diagnostic(&e.to_string()),
             },
-            UiEvent::Text { title, result } => match result {
-                Ok(lines) => {
+            UiEvent::Text { id, result } => {
+                if let Some(Modal::PendingText { id: current, title }) = &self.modal
+                    && *current == id
+                {
                     self.modal = Some(Modal::Text {
-                        title,
-                        lines,
+                        title: title.clone(),
+                        lines: result.unwrap_or_else(|error| {
+                            vec![ytui_services::process::diagnostic(&error.to_string())]
+                        }),
                         offset: 0,
-                    })
+                    });
                 }
-                Err(e) => self.status = ytui_services::process::diagnostic(&e.to_string()),
-            },
+            }
             UiEvent::Notification(result) => {
                 self.notification_pending = self.notification_pending.saturating_sub(1);
                 if result.is_err() && !self.notification_warned {
@@ -1426,8 +1466,56 @@ impl App {
             return;
         }
         match &mut modal {
+            Modal::PendingText { .. } => self.modal = Some(modal),
+            Modal::Lyrics(view) => {
+                if !view.loading {
+                    let limit = if view.opened {
+                        view.tracks
+                            .get(view.selected)
+                            .map_or(0, |track| track.lines.len().saturating_sub(1))
+                    } else {
+                        view.tracks.len().saturating_sub(1)
+                    };
+                    match key.code {
+                        KeyCode::Enter if !view.opened && !view.tracks.is_empty() => {
+                            view.opened = true;
+                            view.offset = 0;
+                            view.follow = true;
+                        }
+                        KeyCode::Backspace if view.opened && view.source == "LRCLIB" => {
+                            view.opened = false
+                        }
+                        KeyCode::Char('f') | KeyCode::Home if view.opened => {
+                            view.follow = true;
+                            view.offset = 0;
+                        }
+                        code @ (KeyCode::Up
+                        | KeyCode::Down
+                        | KeyCode::PageUp
+                        | KeyCode::PageDown
+                        | KeyCode::End) => {
+                            let offset = if view.opened {
+                                &mut view.offset
+                            } else {
+                                &mut view.selected
+                            };
+                            *offset = match code {
+                                KeyCode::Up => offset.saturating_sub(1),
+                                KeyCode::Down => (*offset + 1).min(limit),
+                                KeyCode::PageUp => offset.saturating_sub(10),
+                                KeyCode::PageDown => (*offset + 10).min(limit),
+                                _ => limit,
+                            };
+                            view.follow = false;
+                        }
+                        _ => {}
+                    }
+                }
+                self.modal = Some(modal);
+            }
             Modal::Actions { selected, query } => {
-                let matches = crate::actions::matching(&query.text);
+                let matches =
+                    crate::actions::matching_localized(&query.text, &self.config.language);
                 match key.code {
                     KeyCode::Up => *selected = selected.saturating_sub(1),
                     KeyCode::Down => {
@@ -1888,7 +1976,10 @@ impl App {
                             FormKind::Settings(_) => {
                                 form.config_values().map(|c| self.save_config(c))
                             }
-                            FormKind::Action { command, .. } => {
+                            FormKind::Action {
+                                command, media_url, ..
+                            } => {
+                                let lyrics = matches!(*command, "lyrics-find" | "lyrics-local");
                                 let command = format!(
                                     "{} {}",
                                     command,
@@ -1898,7 +1989,13 @@ impl App {
                                         .collect::<Vec<_>>()
                                         .join(" ")
                                 );
-                                self.command(&command)
+                                self.command(&command).map(|()| {
+                                    if lyrics && let Some(Modal::Lyrics(view)) = &mut self.modal {
+                                        // The form may stay open while automatic playback
+                                        // advances. Keep the original selection's identity.
+                                        view.media_url = media_url.clone();
+                                    }
+                                })
                             }
                             FormKind::Auth => {
                                 let browser = form.value(0).to_owned();
@@ -3427,7 +3524,20 @@ impl App {
         };
         self.modal = None;
         if !entry.fields.is_empty() {
-            self.modal = Some(Modal::Form(Box::new(Form::action(entry))));
+            let mut form = Form::action(entry);
+            if matches!(entry.command, "lyrics-find" | "lyrics-local") {
+                let media = self.player_status.media.clone().or_else(|| self.selected());
+                if let FormKind::Action { media_url, .. } = &mut form.kind {
+                    *media_url = media.as_ref().map(|media| media.url.clone());
+                }
+                if entry.command == "lyrics-find"
+                    && let Some(media) = media
+                {
+                    form.fields[0].value = Editor::new(media.title);
+                    form.fields[1].value = Editor::new(media.creator);
+                }
+            }
+            self.modal = Some(Modal::Form(Box::new(form)));
         } else if let Err(e) = self.command(entry.command) {
             self.status = e.to_string();
         }
@@ -3447,6 +3557,50 @@ impl App {
         let value = parts.iter().skip(1).cloned().collect::<Vec<_>>().join(" ");
         let browse_tab = if self.tab == 0 { 1 } else { self.tab };
         match cmd {
+            "lyrics-find" | "lyrics-local" => {
+                let remote = cmd == "lyrics-find";
+                ensure!(
+                    !remote || (!self.offline && !self.demo),
+                    "Online lyrics are unavailable in offline/demo mode; choose a local lyrics file"
+                );
+                ensure!(
+                    !remote || parts.len() == 3,
+                    "Review the song title and artist in Actions → Find lyrics (LRCLIB)"
+                );
+                ensure!(
+                    remote || !value.trim().is_empty(),
+                    "Choose an LRC or text file"
+                );
+                let media_url = self
+                    .player_status
+                    .media
+                    .as_ref()
+                    .map(|m| m.url.clone())
+                    .or_else(|| self.selected().map(|m| m.url));
+                let view = crate::lyrics::View::new(
+                    media_url,
+                    if remote { "LRCLIB" } else { "Local file" },
+                );
+                let id = view.id;
+                let cancel = view.cancel.clone();
+                let proxy = self.config.proxy.clone();
+                let title = parts.get(1).cloned().unwrap_or_default();
+                let artist = parts.get(2).cloned().unwrap_or_default();
+                self.tasks.spawn(async move {
+                    let result = tokio::select! {
+                        _ = cancel.cancelled() => Err(anyhow::anyhow!("Lyrics request cancelled")),
+                        result = async {
+                            if remote {
+                                ytui_services::lyrics::lookup(proxy.as_deref(), &title, &artist).await
+                            } else {
+                                ytui_services::lyrics::local(std::path::Path::new(&value)).await.map(|track| vec![track])
+                            }
+                        } => result,
+                    };
+                    UiEvent::Lyrics { id, result }
+                });
+                self.modal = Some(Modal::Lyrics(Box::new(view)));
+            }
             "hints" => self.action(Action::ToggleHints),
             "categories" => self.action(Action::Categories),
             "download-options" => self.action(Action::Download),
@@ -3682,10 +3836,15 @@ impl App {
                     "Inspecting thumbnail cache…"
                 }
                 .into();
+                let id = if clear {
+                    uuid::Uuid::nil()
+                } else {
+                    self.pending_text("Thumbnail cache")
+                };
                 self.tasks.spawn(async move {
                     let result = images.inspect(clear).await;
                     if clear { UiEvent::CacheCleared(result) } else {
-                        UiEvent::Text { title: "Thumbnail cache".into(), result: result.map(|stats| vec![
+                        UiEvent::Text { id, result: result.map(|stats| vec![
                             format!("Disk: {} images · {:.1} MiB / 128 MiB", stats.files, stats.disk_bytes as f64 / 1048576.0),
                             format!("Decoded memory: {} images · {:.1} MiB / 32 MiB", stats.memory_images, stats.memory_bytes as f64 / 1048576.0),
                             "Encoded terminal cards are separately limited to visible images.".into(),
@@ -3708,6 +3867,7 @@ impl App {
                     "Choose a new JSON file"
                 );
                 self.status = "Checking installed tool capabilities…".into();
+                let id = self.pending_text("Setup & capabilities / support report");
                 self.tasks.spawn(async move {
                     let report = ytui_services::diagnostics::Support::collect(
                         &config,
@@ -3729,10 +3889,7 @@ impl App {
                         Ok(report.lines())
                     }
                     .await;
-                    UiEvent::Text {
-                        title: "Setup & capabilities / support report".into(),
-                        result,
-                    }
+                    UiEvent::Text { id, result }
                 });
             }
             "log" | "diagnostics" => {
@@ -3968,6 +4125,7 @@ impl App {
                         })
                     });
                 } else {
+                    let id = self.pending_text("VPN connections");
                     self.tasks.spawn(async move {
                         let result =
                             ytui_services::vpn::list(&program, cancel)
@@ -3990,10 +4148,7 @@ impl App {
                                     }
                                     lines
                                 });
-                        UiEvent::Text {
-                            title: "VPN connections".into(),
-                            result,
-                        }
+                        UiEvent::Text { id, result }
                     });
                 }
                 self.status = "VPN operation running…".into();

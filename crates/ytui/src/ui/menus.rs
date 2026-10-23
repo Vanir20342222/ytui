@@ -9,7 +9,7 @@ pub(super) fn actions(
 ) -> Vec<(Rect, HitTarget)> {
     let mut hits = Vec::new();
     let block = panel(" Actions · type to filter ", app)
-        .title_bottom(" ↑/↓ choose · Enter open · Esc close ");
+        .title_bottom(translated(app, " ↑/↓ choose · Enter open · Esc close "));
     let inner = block.inner(rect);
     f.render_widget(block, rect);
     let rows = Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).split(inner);
@@ -18,7 +18,7 @@ pub(super) fn actions(
             .style(Style::default().fg(themed(app, app.palette.accent))),
         rows[0],
     );
-    let matches = crate::actions::matching(&query.text);
+    let matches = crate::actions::matching_localized(&query.text, &app.config.language);
     let visible = (rows[1].height / 2).max(1) as usize;
     let start = selected.saturating_sub(visible - 1);
     for (position, index) in matches.iter().enumerate().skip(start).take(visible) {
@@ -48,9 +48,9 @@ pub(super) fn actions(
             ));
         f.render_widget(
             Paragraph::new(vec![
-                Line::from(format!(" {}", entry.title)),
+                Line::from(format!(" {}", app.tr(entry.title))),
                 Line::styled(
-                    format!(" {}", entry.group),
+                    format!(" {}", app.tr(entry.group)),
                     Style::default().fg(themed(app, app.palette.muted)),
                 ),
             ])
@@ -60,7 +60,10 @@ pub(super) fn actions(
         hits.push((row, HitTarget::MenuItem(position)));
     }
     if matches.is_empty() {
-        f.render_widget(Paragraph::new(" No matching action"), rows[1]);
+        f.render_widget(
+            Paragraph::new(translated(app, " No matching action")),
+            rows[1],
+        );
     }
     hits
 }
@@ -70,8 +73,8 @@ pub(super) fn categories(
     selected: usize,
     rect: Rect,
 ) -> Vec<(Rect, HitTarget)> {
-    let block =
-        panel(" Feed categories ", app).title_bottom(" ↑/↓ choose · Enter open · Esc close ");
+    let block = panel(" Feed categories ", app)
+        .title_bottom(translated(app, " ↑/↓ choose · Enter open · Esc close "));
     let inner = block.inner(rect);
     f.render_widget(block, rect);
     let categories = &app.tabs[app.tab].page.categories;
@@ -118,7 +121,7 @@ pub(super) fn search(f: &mut Frame, app: &App, rect: Rect) {
     } else {
         " Search or paste URL "
     };
-    let block = panel(title, app).title_bottom(" Enter search · Esc cancel ");
+    let block = panel(title, app).title_bottom(translated(app, " Enter search · Esc cancel "));
     let inner = block.inner(rect);
     f.render_widget(block, rect);
     let (text, cursor) = viewport(

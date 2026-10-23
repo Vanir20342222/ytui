@@ -33,7 +33,7 @@ impl Field {
     }
 }
 pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
-    ("General", &[15, 16, 17, 34, 38, 50]),
+    ("General", &[54, 15, 16, 17, 34, 38, 50]),
     ("Appearance", &[0, 1, 2, 3]),
     (
         "Downloads",
@@ -53,6 +53,7 @@ pub enum FormKind {
     Action {
         title: &'static str,
         command: &'static str,
+        media_url: Option<String>,
     },
     Keys(Config),
 }
@@ -72,6 +73,9 @@ pub const DOWNLOAD_SECTIONS: &[(&str, &[usize])] = &[
 impl Form {
     pub fn explanation(&self) -> Option<&'static str> {
         Some(match self.fields.get(self.selected)?.label {
+            "Language" => {
+                "en = English; de = Deutsch; system follows LC_ALL, LC_MESSAGES or LANG. Saved changes apply immediately. Tool/provider errors keep their original text."
+            }
             "Video quality" | "Default video quality" => {
                 "Maximum height in pixels, not a guarantee the source offers it. Actual formats are in Actions → Available formats."
             }
@@ -102,7 +106,7 @@ impl Form {
             "Account index" => {
                 "0 selects the primary YouTube account; other indices select available brand channels. Changing a connected account requires validation."
             }
-            "Proxy" => {
+            "Proxy" | "Proxy (optional)" => {
                 "HTTP(S) or SOCKS5 URL. Browsing/downloads support remote SOCKS DNS; mpv requires HTTP(S) or OS VPN routing. Credentials stay out of support exports."
             }
             "Limit KiB/s (0=off)" => {
@@ -127,6 +131,7 @@ impl Form {
             kind: FormKind::Action {
                 title: entry.title,
                 command: entry.command,
+                media_url: None,
             },
             fields: entry
                 .fields
@@ -297,6 +302,7 @@ impl Form {
                 &c.playback_backend,
                 &["native", "auto", "yt-dlp"],
             ),
+            Field::choice("Language", &c.language, &["en", "de", "system"]),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -522,6 +528,7 @@ impl Form {
         };
         c.download_backend = self.value(13).into();
         c.playback_backend = self.value(53).into();
+        c.language = self.value(54).into();
         c.native_js_runtime = if self.value(14).is_empty() {
             None
         } else {

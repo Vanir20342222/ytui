@@ -30,6 +30,7 @@ fn hints(app: &App, entries: &[(Action, &str)], width: u16) -> Line<'static> {
     let mut spans = Vec::new();
     let mut used = 0;
     for (action, label) in entries {
+        let label = app.tr(label);
         let key = key(app, *action);
         let length = key.width() + label.width() + 4;
         if used + length > width as usize {
@@ -126,17 +127,19 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     header(f, app, chunks[0]);
     let tabs = Layout::horizontal([Constraint::Ratio(1, 4); 4]).split(chunks[1]);
     for (index, name) in TAB_NAMES.iter().enumerate() {
+        let name = app.tr(name);
         let active = index == app.tab;
         let name = if area.width < 60 {
             ["Downloads", "YouTube", "Music", "Radio"][index]
         } else {
             name
         };
+        let name = app.tr(name);
         let label = if area.width < 48 {
             format!(
                 "{} {}",
                 index + 1,
-                ["Files", "Videos", "Music", "Radio"][index]
+                app.tr(["Files", "Videos", "Music", "Radio"][index])
             )
         } else {
             format!("{}  {name}", index + 1)
@@ -249,6 +252,7 @@ fn sidebar(f: &mut Frame, app: &mut App, area: Rect) {
     let inner = block.inner(rows[1]);
     f.render_widget(block, rows[1]);
     for (index, name) in TAB_NAMES.iter().enumerate() {
+        let name = app.tr(name);
         let active = app.tab == index;
         let row = Rect::new(inner.x, inner.y + index as u16, inner.width, 1);
         app.hit_targets.push((row, HitTarget::Tab(index)));
@@ -312,6 +316,7 @@ fn sidebar(f: &mut Frame, app: &mut App, area: Rect) {
     {
         let row = Rect::new(inner.x, inner.y + (index - first) as u16, inner.width, 1);
         let active = app.feeds_focused && app.feed_selected == index;
+        let label = app.tr(label);
         f.render_widget(
             Paragraph::new(format!(" {} {label}", if active { "▸" } else { " " })).style(
                 style(
@@ -357,7 +362,7 @@ fn header(f: &mut Frame, app: &App, area: Rect) {
             style(app, app.palette.accent).add_modifier(Modifier::BOLD),
         ),
         Span::styled(
-            format!("· {}", TAB_NAMES[app.tab]),
+            format!("· {}", app.tr(TAB_NAMES[app.tab])),
             style(app, app.palette.muted),
         ),
     ];
@@ -373,7 +378,7 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
     let rows = Layout::vertical([Constraint::Length(1), Constraint::Length(1)]).split(area);
     let cols = Layout::horizontal([
         Constraint::Min(1),
-        Constraint::Length(if area.width >= 80 { 47 } else { 27 }),
+        Constraint::Length(if area.width >= 80 { 62 } else { 37 }),
     ])
     .split(rows[0]);
     let buttons: &[(Action, &str)] = if area.width >= 80 {
@@ -392,7 +397,7 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
     };
     let mut x = cols[1].x;
     for (action, label) in buttons {
-        let label = format!(" {} {label} ", key(app, *action));
+        let label = format!(" {} {} ", key(app, *action), app.tr(label));
         let width = (label.width() as u16).min(cols[1].right().saturating_sub(x));
         let rect = Rect::new(x, cols[1].y, width, 1);
         f.render_widget(
@@ -551,7 +556,7 @@ fn downloads(f: &mut Frame, app: &mut App, area: Rect) {
             label
         };
         summary.push(Span::styled(
-            format!(" {count} {label} "),
+            format!(" {count} {} ", app.tr(label)),
             style(app, color),
         ));
     }
@@ -590,6 +595,7 @@ fn downloads(f: &mut Frame, app: &mut App, area: Rect) {
         );
     let rows = jobs.iter().map(|job| {
         let (label, color) = job_state(app, job);
+        let label = app.tr(label);
         let title = if job.media.title.is_empty() {
             &job.media.url
         } else {
@@ -763,7 +769,7 @@ fn empty(f: &mut Frame, app: &App, area: Rect, title: &str, message: &str) {
     let lines = vec![
         Line::from(""),
         Line::styled(
-            title.to_owned(),
+            app.tr(title).to_owned(),
             style(app, app.palette.text).add_modifier(Modifier::BOLD),
         ),
         Line::from(""),
@@ -1392,7 +1398,8 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
             ];
             let mut x = rows[2].x;
             for (action, label) in controls {
-                let width = label.len() as u16 + 1;
+                let label = app.tr(label);
+                let width = label.width() as u16 + 1;
                 if x + width > rows[2].right() {
                     break;
                 }

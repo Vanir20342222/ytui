@@ -10,6 +10,7 @@ use ratatui::{
     },
 };
 use ratatui_image::Image;
+use std::borrow::Cow;
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 use ytui_core::{JobState, shortcuts::REGISTRY};
 
@@ -39,7 +40,23 @@ fn themed(app: &App, c: (u8, u8, u8)) -> Color {
         Color::Gray
     }
 }
+fn translated<'a>(app: &App, text: &'a str) -> Cow<'a, str> {
+    let core = text.trim();
+    let translation = app.tr(core);
+    if translation == core {
+        return Cow::Borrowed(text);
+    }
+    let start = text.len() - text.trim_start().len();
+    let end = text.trim_end().len();
+    Cow::Owned(format!("{}{}{}", &text[..start], translation, &text[end..]))
+}
 fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
+    let mut title = title.into();
+    for span in &mut title.spans {
+        if let Cow::Owned(translation) = translated(app, &span.content) {
+            span.content = translation.into();
+        }
+    }
     Block::default()
         .title(title)
         .borders(Borders::ALL)
@@ -51,6 +68,7 @@ fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
                 .fg(themed(app, app.palette.text)),
         )
 }
+mod lyrics;
 mod menus;
 mod settings;
 mod workspace;
@@ -81,6 +99,8 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         return;
     };
     let size = match modal {
+        Modal::PendingText { .. } => (90, 12),
+        Modal::Lyrics(_) => (105, 32),
         Modal::Actions { .. } => (96, 32),
         Modal::Categories(_) => (70, 26),
         Modal::Feeds(_) => (64, app.feed_choices().len() as u16 * 3 + 4),
@@ -147,6 +167,14 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
     let rect = centered(area, size.0, size.1);
     f.render_widget(Clear, rect);
     match modal {
+        Modal::PendingText { title, .. } => {
+            f.render_widget(
+                Paragraph::new(app.tr("Loading… Esc closes this panel."))
+                    .block(panel(format!(" {} ", app.tr(title)), app)),
+                rect,
+            );
+        }
+        Modal::Lyrics(view) => lyrics::render(f, app, view, rect),
         Modal::Actions { selected, query } => {
             let hits = menus::actions(f, app, *selected, query, rect);
             app.hit_targets.extend(hits);
@@ -166,9 +194,9 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 .iter()
                 .map(|(label, description, _)| {
                     ListItem::new(vec![
-                        Line::styled(*label, Style::default().add_modifier(Modifier::BOLD)),
+                        Line::styled(app.tr(label), Style::default().add_modifier(Modifier::BOLD)),
                         Line::styled(
-                            *description,
+                            app.tr(description),
                             Style::default().fg(themed(app, app.palette.muted)),
                         ),
                         Line::from(""),
@@ -209,24 +237,27 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         Modal::Help(offset) => {
             let mut lines = vec![
                 Line::styled(
-                    "Make yourself at home",
+                    app.tr("Make yourself at home"),
                     Style::default()
                         .fg(themed(app, app.palette.accent))
                         .add_modifier(Modifier::BOLD),
                 ),
-                Line::from("↑/↓ or PgUp/PgDn scroll · Esc closes · F2 → Keyboard bindings"),
+                Line::from(app.tr("↑/↓ or PgUp/PgDn scroll · Esc closes · F2 → Keyboard bindings")),
                 Line::from(""),
             ];
             for (_, action, _, description) in REGISTRY {
                 let mapped = workspace::key(app, *action);
-                lines.push(Line::from(format!("{mapped:>12}   {description}")));
+                lines.push(Line::from(format!(
+                    "{mapped:>12}   {}",
+                    app.tr(description)
+                )));
             }
             lines.extend([
                 Line::from(""),
-                Line::from("F2 Actions: account, downloads, library, radio, profiles, VPN and diagnostics."),
-                Line::from(", opens General settings. F1 shows or hides the bottom shortcut hints."),
-                Line::from("o opens player controls. G opens settings inside the mpv window."),
-                Line::from("F3 opens server-provided feed categories; scroll to fetch more results."),
+                Line::from(app.tr("F2 Actions: account, downloads, library, radio, profiles, VPN and diagnostics.")),
+                Line::from(app.tr(", opens General settings. F1 shows or hides the bottom shortcut hints.")),
+                Line::from(app.tr("o opens player controls. G opens settings inside the mpv window.")),
+                Line::from(app.tr("F3 opens server-provided feed categories; scroll to fetch more results.")),
             ]);
             f.render_widget(
                 Paragraph::new(lines)
@@ -606,7 +637,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
             f.render_stateful_widget(list, rect, &mut state);
         }
         Modal::Form(form) => {
-            let block = panel(format!(" {} ", form.title()), app).title_bottom(
+            let block = panel(format!(" {} ", app.tr(form.title())), app).title_bottom(
                 Line::from(format!(
                     " {} / {} fields ",
                     form.selected + 1,
@@ -647,7 +678,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 f.render_widget(
                     Paragraph::new(format!(
                         "{:<width$}",
-                        field.label,
+                        app.tr(field.label),
                         width = label_width as usize
                     ))
                     .style(style),
@@ -662,9 +693,9 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 let value_area = Rect::new(row.x + label_width, row.y, width, 1);
                 let text = if field.toggle {
                     if field.value.text == "yes" {
-                        "● on".into()
+                        app.tr("● on").into()
                     } else {
-                        "○ off".into()
+                        app.tr("○ off").into()
                     }
                 } else {
                     text
@@ -680,7 +711,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 .as_deref()
                 .unwrap_or("↑/↓ fields · Space toggles · Enter saves · Esc cancels");
             f.render_widget(
-                Paragraph::new(message)
+                Paragraph::new(app.tr(message))
                     .wrap(Wrap { trim: true })
                     .style(Style::default().fg(themed(
                         app,
@@ -698,11 +729,28 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 "Only the selected profile is read. Sign in to YouTube there first."
             } else if matches!(form.kind, crate::forms::FormKind::Settings(_)) {
                 "Windows: HH:MM-HH:MM (local time); blank=off · rates in total KiB/s"
+            } else if matches!(
+                form.kind,
+                crate::forms::FormKind::Action {
+                    command: "lyrics-find",
+                    ..
+                }
+            ) {
+                "Enter sends only the reviewed title and artist to LRCLIB. No cookies or history."
+            } else if matches!(
+                form.kind,
+                crate::forms::FormKind::Action {
+                    command: "lyrics-local",
+                    ..
+                }
+            ) {
+                "Open a local UTF-8 .lrc or text file up to 512 KiB. No network request."
             } else {
                 "Playlist indices: 1,3:7 · Quality: best or height (e.g. 1080)"
             };
             f.render_widget(
-                Paragraph::new(hint).style(Style::default().fg(themed(app, app.palette.muted))),
+                Paragraph::new(app.tr(hint))
+                    .style(Style::default().fg(themed(app, app.palette.muted))),
                 Rect::new(inner.x + 1, bottom + 2, inner.width.saturating_sub(2), 1),
             );
         }

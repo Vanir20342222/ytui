@@ -4,6 +4,8 @@ pub mod app;
 pub mod cli;
 pub mod editor;
 pub mod forms;
+pub mod i18n;
+pub mod lyrics;
 pub mod operations;
 pub mod terminal;
 pub mod ui;

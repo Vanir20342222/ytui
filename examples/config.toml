@@ -5,6 +5,7 @@
 
 version = 1
 theme = "system"
+language = "en" # en, de, system (LC_ALL / LC_MESSAGES / LANG)
 theme_provider = "auto"
 image_protocol = "auto"
 thumbnails = true

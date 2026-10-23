@@ -27,6 +27,9 @@ struct Args {
     /// Refresh only the audit dialogs, without recapturing every theme/workspace.
     #[arg(long, conflicts_with = "downloads_only")]
     audit_panels_only: bool,
+    /// Refresh German navigation/settings and the local lyrics panel.
+    #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only"])]
+    comfort_panels_only: bool,
     #[arg(long, default_value = "docs/screenshots")]
     output: PathBuf,
     #[arg(
@@ -227,6 +230,35 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.comfort_panels_only {
+        let file = temp.path().join("fictional song.lrc");
+        std::fs::write(
+            &file,
+            "[ar:Fictional studio]\n[00:01]A quiet morning in the city\n[00:06]The sunlight finds an open door\n[00:11]We keep the rhythm of the river\n[00:16]And let the next song carry on\n",
+        )?;
+        capture.command(
+            &format!("lyrics-local {}", file.display()),
+            "A quiet morning",
+        )?;
+        shot(&mut capture, &args.output.join("lyrics.png"), &font)?;
+        capture.close()?;
+        let mut capture =
+            Capture::with_language(&binary, &temp.path().join("german"), false, "de")?;
+        shot(&mut capture, &args.output.join("german-youtube.png"), &font)?;
+        capture.command("settings", "Allgemeine Einstellungen")?;
+        shot(
+            &mut capture,
+            &args.output.join("german-settings.png"),
+            &font,
+        )?;
+        capture.send("\x1b")?;
+        capture.send(":")?;
+        capture.send("Liedtext")?;
+        shot(&mut capture, &args.output.join("german-actions.png"), &font)?;
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
     if args.audit_panels_only {
         for (command, name, expected) in [
             ("player-formats", "player-formats", "Available formats"),

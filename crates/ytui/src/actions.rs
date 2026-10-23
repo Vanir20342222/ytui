@@ -211,6 +211,21 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Radio", "Launch installed cliamp", "launch-cliamp"),
     entry!(
         "Player",
+        "Find lyrics (LRCLIB)",
+        "lyrics-find",
+        &[
+            ("Song title (sent to LRCLIB)", ""),
+            ("Artist (sent to LRCLIB)", "")
+        ]
+    ),
+    entry!(
+        "Player",
+        "Open local lyrics",
+        "lyrics-local",
+        &[("LRC or text file", "")]
+    ),
+    entry!(
+        "Player",
         "Video quality",
         "player-quality",
         &[("Quality: best or height", "1080")]
@@ -310,12 +325,23 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Interface", "Keyboard help", "help"),
 ];
 pub fn matching(query: &str) -> Vec<usize> {
+    matching_localized(query, "en")
+}
+pub fn matching_localized(query: &str, language: &str) -> Vec<usize> {
     let query = query.to_lowercase();
     ENTRIES
         .iter()
         .enumerate()
         .filter(|(_, e)| {
-            let haystack = format!("{} {} {}", e.group, e.title, e.command).to_lowercase();
+            let haystack = format!(
+                "{} {} {} {} {}",
+                e.group,
+                e.title,
+                e.command,
+                crate::i18n::text(language, e.group),
+                crate::i18n::text(language, e.title)
+            )
+            .to_lowercase();
             query.split_whitespace().all(|part| haystack.contains(part))
         })
         .map(|(i, _)| i)

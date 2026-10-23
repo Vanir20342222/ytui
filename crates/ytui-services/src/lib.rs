@@ -10,6 +10,7 @@ pub mod formats;
 mod http;
 pub mod images;
 pub mod library;
+pub mod lyrics;
 pub mod migration;
 pub mod mpris;
 pub mod native;

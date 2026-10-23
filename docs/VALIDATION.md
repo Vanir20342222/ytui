@@ -2,12 +2,17 @@
 
 ## Alpha.12 audit implementation — 2026-10-23 (M2–M8)
 
-The full deterministic workspace suite passes **190 tests**, with **25 opt-in
+The full deterministic workspace suite passes **204 tests**, with **25 opt-in
 checks excluded**. Strict workspace/all-target Clippy, formatting, Bash syntax
 and actionlint pass. The original audit repros are promoted into the normal suite.
 Coverage includes account/config ordering and logout persistence, queue intent
 and pressure, partial outputs, collection restart, formats/languages, cache failure/
 retry/safe clear, bounded feeds and the new popup/theme/resize/PTY paths.
+The comfort follow-up adds lyrics-parser/HTTP/file/privacy checks, request
+identity/closed-panel recovery, bilingual action search and German settings.
+All 55 settings fields remain covered; English/German settings render in 2,340
+theme/size/selection states, and five lyric states in 650 combinations.
+The real executable PTY checks also exercise German search, settings and local lyrics.
 
 Ten actual local media checks pass across the original campaign plus the new
 mpv HTTP-proxy case; a private-session MPRIS test passes separately. These use
@@ -20,7 +25,7 @@ audio URL fail at the inherited proxy tunnel before extraction/playback; these
 remain failed live checks. The older target-PC success reports below retain their
 own source/version scope. No proxy bypass or automatic fallback was enabled.
 
-**57 WQHD PNG captures** cover 13 themes, workspaces/settings and new dialogs,
+**61 WQHD PNG captures** cover 13 themes, workspaces/settings and new dialogs,
 using actual executable PTY output and fictional data. They are not Ghostty device
 screenshots. New dialogs size to their content. The PNG/manifest regression checks
 2560×1440 dimensions and complete registration.
@@ -28,7 +33,8 @@ screenshots. New dialogs size to their content. The PNG/manifest regression chec
 The candidate targets main via PR #13; main is still alpha.5. Source-package/Arch,
 checksum/license archive and executable rollback tooling is provided; a tagged
 release, Arch installation, real copied-state migration/rollback, signed-in journeys
-and desktop/audio acceptance remain gates. Lyrics/German localization remain P3.
+and desktop/audio acceptance remain gates. Lyrics and initial German UI are
+implemented; remaining guidance/status prose is not fully localized.
 See [candidate instructions](RELEASE_CANDIDATE.md) and
 [the feature workflows](AUDIT_FEATURES.md).
 
