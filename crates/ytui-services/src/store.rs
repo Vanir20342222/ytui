@@ -12,6 +12,7 @@ use ytui_core::{DownloadQueue, Media, PlaybackQueue};
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Snapshot {
+    pub recent_destinations: Vec<PathBuf>,
     pub downloads: DownloadQueue,
     pub playback: PlaybackQueue,
     pub favorites: Vec<Media>,
@@ -133,6 +134,10 @@ impl Store {
             })
             .await??;
         }
+        // Closing only this descriptor does not release flock if a concurrent
+        // fork still holds the same open file description before exec. The DB
+        // owner is joined, so explicitly release before acknowledging shutdown.
+        FileExt::unlock(&self._lock)?;
         Ok(())
     }
 }
@@ -189,6 +194,19 @@ pub fn backup_legacy(source: &Path, destination: &Path) -> Result<PathBuf> {
 mod tests {
     use super::*;
     use ytui_core::*;
+    #[tokio::test]
+    async fn close_releases_instance_lock_with_an_inherited_file_description() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store::open(temp.path()).unwrap();
+        // dup() and fork() keep the same open file description alive. A child
+        // racing exec can retain it briefly even with close-on-exec enabled.
+        let inherited = store._lock.try_clone().unwrap();
+        store.close().await.unwrap();
+        let restarted =
+            Store::open(temp.path()).expect("acknowledged shutdown must release the instance lock");
+        drop(inherited);
+        restarted.close().await.unwrap();
+    }
     #[tokio::test]
     async fn persists_paused_intent_recovers_active_and_locks_instances() {
         let d = tempfile::tempdir().unwrap();

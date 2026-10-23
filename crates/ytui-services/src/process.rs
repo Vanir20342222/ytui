@@ -57,7 +57,7 @@ async fn drain(
                         }
                     } else if line.len() < max_line_bytes {
                         line.push(*b);
-                    } else {
+                    } else if !stderr {
                         let _ = tx.send(PipeEvent::Overflow).await;
                         return;
                     }
@@ -114,7 +114,7 @@ pub async fn run(
     let stderr = tokio::spawn(drain(
         child.stderr.take().context("Missing stderr")?,
         true,
-        spec.max_output_bytes.min(8 * 1024 * 1024),
+        spec.max_output_bytes.min(4096),
         tx.clone(),
     ));
     drop(tx);
@@ -123,6 +123,7 @@ pub async fn run(
     let mut lines = Vec::new();
     let mut bytes = 0usize;
     let mut errors = VecDeque::new();
+    let mut last_error = None;
     let mut cancelled = false;
     let mut timed_out = false;
     let mut overflow = false;
@@ -139,7 +140,18 @@ pub async fn run(
             }
             event=rx.recv()=>match event {
                 Some(PipeEvent::Line(is_err,line))=> {
-                    if is_err {errors.push_back(line);if errors.len()>16{errors.pop_front();}}
+                    if is_err {
+                        let mut line = line;
+                        if let Some((boundary, _)) = line.char_indices().find(|(index, _)| *index >= 4096) {
+                            line.truncate(boundary);
+                        }
+                        let level = line.trim_start().to_ascii_lowercase();
+                        if ["error:", "fatal:", "ytui:"].iter().any(|prefix| level.starts_with(prefix)) {
+                            last_error = Some(line.clone());
+                        }
+                        errors.push_back(line);
+                        if errors.len()>16{errors.pop_front();}
+                    }
                     else {
                         on_line(&line);
                         if line.starts_with("YTUI_PROGRESS:") || line.starts_with("YTUI_POST:") { continue; }
@@ -196,6 +208,10 @@ pub async fn run(
     // Terminate any remaining descendants after their owning child exits.
     #[cfg(unix)]
     signal_group(pid, libc::SIGKILL);
+    if let Some(error) = last_error {
+        errors.retain(|line| line != &error);
+        errors.push_front(error);
+    }
     Ok(ProcessResult {
         success: status.success(),
         lines,
@@ -208,7 +224,7 @@ pub fn diagnostic(raw: &str) -> String {
     let raw = raw.trim().strip_prefix("ytui:").unwrap_or(raw);
     raw.split_whitespace()
         .map(|w| {
-            if w.contains("http://") || w.contains("https://") {
+            if w.contains("://") {
                 "[URL]".to_owned()
             } else if w.len() > 100 {
                 "[redacted]".to_owned()
@@ -226,6 +242,20 @@ pub fn diagnostic(raw: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn meaningful_errors_survive_later_warning_noise_and_stderr_stays_bounded() {
+        let result = run(ProcessSpec::new("sh", vec!["-c".into(),
+            "echo 'ERROR: Sign in to confirm you are not a bot' >&2; i=0; while [ $i -lt 40 ]; do printf '%05000d 日本語 warning\\n' 1 >&2; i=$((i+1)); done; exit 1".into()], 5),
+            CancellationToken::new(), |_| {}).await.unwrap();
+        assert!(!result.success);
+        assert!(
+            result
+                .stderr
+                .starts_with("ERROR: Sign in to confirm you are not a bot")
+        );
+        assert!(result.stderr.len() < 70_000);
+        assert!(crate::failure::recovery(&diagnostic(&result.stderr)).is_some());
+    }
     #[tokio::test]
     async fn drains_both_pipes_and_cancels_descendants() {
         let cancel = CancellationToken::new();

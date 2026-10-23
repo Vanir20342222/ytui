@@ -50,5 +50,11 @@ pub async fn collect(
         }
         anyhow::bail!("Collection exceeds the 32-page watch limit; watch was not updated")
     };
-    tokio::select! { biased; _ = cancel.cancelled() => anyhow::bail!("Watch check cancelled"), result = tokio::time::timeout(std::time::Duration::from_secs(120), fetch) => result.map_err(|_| anyhow::anyhow!("Watch catalog check timed out; baseline was not changed"))? }
+    tokio::select! {
+        biased;
+        _ = cancel.cancelled() => anyhow::bail!("Watch check cancelled"),
+        result = tokio::time::timeout(std::time::Duration::from_secs(120), fetch) => {
+            result.map_err(|_| anyhow::anyhow!("Watch catalog check timed out; baseline was not changed"))?
+        }
+    }
 }

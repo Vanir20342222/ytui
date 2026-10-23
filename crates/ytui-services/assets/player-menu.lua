@@ -1,5 +1,6 @@
 -- ytui's mpv window menu. Built-in OSC remains available with the mouse.
 local mp = require 'mp'
+local msg = require 'mp.msg'
 local assdraw = require 'mp.assdraw'
 local visible, selected = false, 1
 local entries = {
@@ -49,4 +50,9 @@ end
 mp.add_key_binding('g','ytui-player-menu',toggle)
 mp.register_script_message('ytui-menu',toggle)
 mp.register_event('file-loaded',function() mp.osd_message('ytui | G: player settings | mouse: playback controls',4) end)
+-- A successful process exit also occurs when a window is closed. Report actual
+-- EOF separately so the terminal queue cannot advance on a user quit.
+mp.register_event('end-file',function(event)
+  if event.reason == 'eof' then msg.warn('YTUI_END_FILE:eof') end
+end)
 mp.observe_property('osd-dimensions','native',render)

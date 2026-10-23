@@ -33,7 +33,7 @@ impl Field {
     }
 }
 pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
-    ("General", &[15, 16, 17, 34, 38, 50]),
+    ("General", &[54, 15, 16, 17, 34, 38, 50]),
     ("Appearance", &[0, 1, 2, 3]),
     (
         "Downloads",
@@ -44,7 +44,7 @@ pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
     ("Schedule", &[18, 19, 20]),
     ("Tools", &[13, 14, 7, 8, 9, 35, 46, 47, 31]),
     ("Radio", &[48, 49]),
-    ("Playback", &[51, 52]),
+    ("Playback", &[53, 51, 52]),
 ];
 pub enum FormKind {
     Download(Media, DownloadOptions),
@@ -53,6 +53,7 @@ pub enum FormKind {
     Action {
         title: &'static str,
         command: &'static str,
+        media_url: Option<String>,
     },
     Keys(Config),
 }
@@ -65,11 +66,55 @@ pub struct Form {
     pub sections_focused: bool,
 }
 pub const DOWNLOAD_SECTIONS: &[(&str, &[usize])] = &[
-    ("Quality & format", &[0, 1, 2, 3, 13, 12]),
+    ("Quality & format", &[0, 1, 2, 3, 13, 12, 14]),
     ("Files & playlist", &[4, 5, 6, 11]),
     ("Captions & metadata", &[7, 8, 9, 10]),
 ];
 impl Form {
+    pub fn explanation(&self) -> Option<&'static str> {
+        Some(match self.fields.get(self.selected)?.label {
+            "Language" => {
+                "en = English; de = Deutsch; system follows LC_ALL, LC_MESSAGES or LANG. Saved changes apply immediately. Tool/provider errors keep their original text."
+            }
+            "Video quality" | "Default video quality" => {
+                "Maximum height in pixels, not a guarantee the source offers it. Actual formats are in Actions → Available formats."
+            }
+            "Audio quality / bitrate" => {
+                "Use 128K/320K for a target bitrate, or 0–10 VBR quality (0 is best). Lossless formats ignore bitrate. Applies to this/new jobs."
+            }
+            "Destination" | "Video directory" | "Audio directory" => {
+                "Directory for this/new jobs. Existing files and queued job destinations are never moved by changing a default."
+            }
+            "Playlist indices" => {
+                "One-based available entries, e.g. 1,3:7. Use whole-collection individual jobs for persistent entry status/retry."
+            }
+            "Subtitle languages" => {
+                "Comma-separated language codes (de,en). Available captions depend on the extractor; automatic captions require the separate toggle."
+            }
+            "Backend (blank=default)" | "Download backend" => {
+                "Native stays in Rust; Auto can invoke installed external yt-dlp for supported limitations. Playback has its own backend setting."
+            }
+            "Playback backend" => {
+                "Native never starts Python yt-dlp. Auto permits fallback. Changes apply to the next playback; tools are never installed automatically."
+            }
+            "Image protocol" => {
+                "Auto uses detected terminal capability. Saved changes rebuild visible cards immediately; Ghostty supports Kitty graphics."
+            }
+            "Auth storage" => {
+                "Keyring needs an unlocked desktop keyring. File is explicit private local storage. Browser cookies are imported only after confirmation."
+            }
+            "Account index" => {
+                "0 selects the primary YouTube account; other indices select available brand channels. Changing a connected account requires validation."
+            }
+            "Proxy" | "Proxy (optional)" => {
+                "HTTP(S) or SOCKS5 URL. Browsing/downloads support remote SOCKS DNS; mpv requires HTTP(S) or OS VPN routing. Credentials stay out of support exports."
+            }
+            "Limit KiB/s (0=off)" => {
+                "Per-job transfer cap in KiB/s; 0 disables this cap. Global/schedule caps may also apply."
+            }
+            _ => return None,
+        })
+    }
     pub fn is_grouped(&self) -> bool {
         matches!(self.kind, FormKind::Settings(_) | FormKind::Download(..))
     }
@@ -86,6 +131,7 @@ impl Form {
             kind: FormKind::Action {
                 title: entry.title,
                 command: entry.command,
+                media_url: None,
             },
             fields: entry
                 .fields
@@ -99,7 +145,9 @@ impl Form {
         }
     }
 
-    pub fn download(media: Media, options: DownloadOptions) -> Self {
+    pub fn download(media: Media, mut options: DownloadOptions) -> Self {
+        options.playlist |=
+            ytui_core::is_playlist_url(&media.url) || options.playlist_items.is_some();
         let o = &options;
         let fields = vec![
             Field::flag("Audio only", o.audio),
@@ -133,6 +181,10 @@ impl Form {
                 &["", "auto", "native", "yt-dlp"],
             ),
             Field::text("Audio quality / bitrate", &o.audio_quality),
+            Field::text(
+                "Exact format selector (optional)",
+                o.format_selector.as_deref().unwrap_or(""),
+            ),
         ];
         Self {
             kind: FormKind::Download(media, options),
@@ -168,12 +220,12 @@ impl Form {
             Field::text("Account index", c.account_index),
             Field::text("Proxy (optional)", c.proxy.clone().unwrap_or_default()),
             Field::choice(
-                "Download / playback backend",
+                "Download backend",
                 &c.download_backend,
                 &["auto", "native", "yt-dlp"],
             ),
             Field::text(
-                "Deno runtime (optional)",
+                "Native JS runtime (blank = auto Node/Deno)",
                 c.native_js_runtime
                     .as_ref()
                     .map(|p| p.display().to_string())
@@ -245,6 +297,12 @@ impl Form {
                 "Playback skip categories",
                 c.playback_sponsor_categories.join(","),
             ),
+            Field::choice(
+                "Playback backend",
+                &c.playback_backend,
+                &["native", "auto", "yt-dlp"],
+            ),
+            Field::choice("Language", &c.language, &["en", "de", "system"]),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -418,6 +476,13 @@ impl Form {
         } else {
             Some(self.value(6).into())
         };
+        ensure!(
+            !ytui_core::is_playlist_url(&media.url) || o.playlist,
+            "This is a playlist link. Enable Whole playlist or use a single-song URL"
+        );
+        if o.playlist_items.is_some() {
+            o.playlist = true;
+        }
         o.subtitles = self
             .value(7)
             .split(',')
@@ -435,6 +500,7 @@ impl Form {
             Some(self.value(12).into())
         };
         o.audio_quality = self.value(13).into();
+        o.format_selector = (!self.value(14).is_empty()).then(|| self.value(14).to_owned());
         o.validate()?;
         Ok((media.clone(), o))
     }
@@ -461,6 +527,8 @@ impl Form {
             Some(self.value(12).into())
         };
         c.download_backend = self.value(13).into();
+        c.playback_backend = self.value(53).into();
+        c.language = self.value(54).into();
         c.native_js_runtime = if self.value(14).is_empty() {
             None
         } else {
@@ -595,5 +663,33 @@ mod tests {
             form.download_values().unwrap().1.directory.to_str(),
             Some("/custom")
         );
+    }
+    #[test]
+    fn playlist_links_enable_collection_download_but_watch_context_does_not() {
+        let mut form = Form::download(
+            Media {
+                url: "https://music.youtube.com/playlist?list=PLsynthetic".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                directory: "/synthetic/downloads".into(),
+                ..Default::default()
+            },
+        );
+        assert_eq!(form.value(5), "yes");
+        assert!(form.download_values().unwrap().1.playlist);
+        form.fields[5].value = Editor::new("no");
+        assert!(form.download_values().is_err());
+        let form = Form::download(
+            Media {
+                url: "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                directory: "/synthetic/downloads".into(),
+                ..Default::default()
+            },
+        );
+        assert_eq!(form.value(5), "no");
     }
 }

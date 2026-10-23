@@ -26,7 +26,26 @@ macro_rules! entry {
 }
 pub const ENTRIES: &[Entry] = &[
     entry!("Settings", "General settings", "settings"),
+    entry!("Settings", "Setup & tool capabilities", "capabilities"),
+    entry!("Settings", "Inspect thumbnail cache", "thumbnail-cache"),
+    entry!("Settings", "Clear thumbnail cache", "thumbnail-cache-clear"),
+    entry!(
+        "Settings",
+        "Export safe support report",
+        "support-export",
+        &[("New JSON file", "ytui-support.json")]
+    ),
     entry!("Settings", "Playback and SponsorBlock", "playback-settings"),
+    entry!(
+        "Player",
+        "SponsorBlock & ad handling status",
+        "sponsor-status"
+    ),
+    entry!(
+        "Player",
+        "Available formats, audio tracks & captions",
+        "player-formats"
+    ),
     entry!("Settings", "Keyboard bindings", "keys"),
     entry!("Settings", "Choose theme", "theme"),
     entry!(
@@ -37,6 +56,11 @@ pub const ENTRIES: &[Entry] = &[
     ),
     entry!("Account", "Connect browser or cookie file", "auth"),
     entry!("Account", "Disconnect saved browser session", "disconnect"),
+    entry!(
+        "Account",
+        "Cancel pending account/settings operation",
+        "cancel-operation"
+    ),
     entry!("Browse", "Choose feed or source", "feeds"),
     entry!("Browse", "Home recommendations", "home"),
     entry!("Browse", "Subscriptions", "subscriptions"),
@@ -92,6 +116,27 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Downloads", "Completed downloads", "downloads completed"),
     entry!("Downloads", "Failed downloads", "downloads failed"),
     entry!("Downloads", "Download statistics", "stats"),
+    entry!(
+        "Downloads",
+        "Download to a recent folder",
+        "download-recent"
+    ),
+    entry!(
+        "Downloads",
+        "Download full collection as individual jobs",
+        "download-collection",
+        &[("Available entry indices (all or 1,3:7)", "all")]
+    ),
+    entry!(
+        "Downloads",
+        "Cancel collection loading",
+        "cancel-collection"
+    ),
+    entry!(
+        "Downloads",
+        "Files in selected download / playlist",
+        "download-files"
+    ),
     entry!(
         "Downloads",
         "Search download history",
@@ -166,6 +211,21 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Radio", "Launch installed cliamp", "launch-cliamp"),
     entry!(
         "Player",
+        "Find lyrics (LRCLIB)",
+        "lyrics-find",
+        &[
+            ("Song title (sent to LRCLIB)", ""),
+            ("Artist (sent to LRCLIB)", "")
+        ]
+    ),
+    entry!(
+        "Player",
+        "Open local lyrics",
+        "lyrics-local",
+        &[("LRC or text file", "")]
+    ),
+    entry!(
+        "Player",
         "Video quality",
         "player-quality",
         &[("Quality: best or height", "1080")]
@@ -206,20 +266,26 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Player", "Stop", "player-stop"),
     entry!(
         "Playback repair",
-        "Retry selection using yt-dlp",
+        "Retry using external yt-dlp (Python)",
         "fallback"
     ),
     entry!(
         "Playback repair",
-        "Select extraction backend",
+        "Select download extraction backend",
         "backend",
         &[("Backend: auto, native or yt-dlp", "auto")]
     ),
     entry!(
         "Playback repair",
-        "Configure installed native Deno runtime",
+        "Select playback backend",
+        "playback-backend",
+        &[("Playback: native, auto or yt-dlp", "native")]
+    ),
+    entry!(
+        "Playback repair",
+        "Configure native JavaScript runtime",
         "native-runtime",
-        &[("Deno 2.9.7 executable", "deno")]
+        &[("Node.js 22+ or Deno 2.9.7 executable", "node")]
     ),
     entry!("Tools", "Diagnostics", "log"),
     entry!("Tools", "Check for updates", "update"),
@@ -259,12 +325,23 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Interface", "Keyboard help", "help"),
 ];
 pub fn matching(query: &str) -> Vec<usize> {
+    matching_localized(query, "en")
+}
+pub fn matching_localized(query: &str, language: &str) -> Vec<usize> {
     let query = query.to_lowercase();
     ENTRIES
         .iter()
         .enumerate()
         .filter(|(_, e)| {
-            let haystack = format!("{} {} {}", e.group, e.title, e.command).to_lowercase();
+            let haystack = format!(
+                "{} {} {} {} {}",
+                e.group,
+                e.title,
+                e.command,
+                crate::i18n::text(language, e.group),
+                crate::i18n::text(language, e.title)
+            )
+            .to_lowercase();
             query.split_whitespace().all(|part| haystack.contains(part))
         })
         .map(|(i, _)| i)

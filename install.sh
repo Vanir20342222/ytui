@@ -27,8 +27,16 @@ mkdir -p -- "$ytui_install_dir"
 ytui_publish_tmp="$(mktemp -d "$ytui_install_dir/.ytui-install.XXXXXX")"
 install -m 755 -- "$ytui_build_dir/release/ytui" "$ytui_publish_tmp/ytui"
 "$ytui_publish_tmp/ytui" --version
+for ytui_launcher in ytui ytui-rs ytui.previous; do
+    [[ ! -d "$ytui_install_dir/$ytui_launcher" ]] || { printf 'Installation target is a directory: %s\n' "$ytui_install_dir/$ytui_launcher" >&2; exit 1; }
+done
+if [[ -f "$ytui_install_dir/ytui" && ! -L "$ytui_install_dir/ytui" ]] && ! cmp -s -- "$ytui_install_dir/ytui" "$ytui_publish_tmp/ytui"; then
+    install -m755 -- "$ytui_install_dir/ytui" "$ytui_publish_tmp/ytui.previous"
+    mv -fT -- "$ytui_publish_tmp/ytui.previous" "$ytui_install_dir/ytui.previous"
+fi
 ln -- "$ytui_publish_tmp/ytui" "$ytui_publish_tmp/ytui-rs"
 # Replace an old launcher/symlink itself, never write through it into a virtualenv.
 mv -fT -- "$ytui_publish_tmp/ytui" "$ytui_install_dir/ytui"
 mv -fT -- "$ytui_publish_tmp/ytui-rs" "$ytui_install_dir/ytui-rs"
 printf 'Installed Rust launchers: %s/ytui and %s/ytui-rs\nRun ytui doctor, then ytui.\n' "$ytui_install_dir" "$ytui_install_dir"
+printf 'Restart running ytui processes to use this build. Previous changed executable: ytui.previous (when available).\n'

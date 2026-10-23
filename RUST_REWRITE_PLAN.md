@@ -1,9 +1,83 @@
 # ytui Rust rewrite plan
 
-Status: PRs #5, #6 and #7 are merged into the PR #4 media branch. Alpha.5 playback/navigation work is on `improve/playback-navigation`. PR #4 and target-machine stable-release gates remain open. Updated: 2026-10-21.
+M2–M6/M8 alpha.12 networking follow-up fixes details cooldown bypass, redirected
+radio playlists/deadlines, blocking cover proxy routing and stale requests after
+network-setting changes. See [the network review](docs/NETWORK_RELIABILITY_2026-10-23.md)
+for deterministic/actual-tool checks and the separate public-service results.
+
+M5/M7/M8 alpha.12 comfort follow-up adds explicit reviewed LRCLIB lyrics, offline
+LRC/text, timed-line following, initial German UI labels and bilingual Actions
+search. Late diagnostic/cache results cannot reopen dismissed panels. These are
+source/UI changes with their own checks; live account/desktop release gates and
+remaining sentence-level localization are tracked in docs/AUDIT_IMPLEMENTATION.md.
+
+M2–M8 alpha.12 audit implementation: account/settings operations now coordinate preparation
+and durable writes; queue intent, image generations/retries, optional cache writes,
+partial-output access, conversion quality and output identity have regression fixes.
+Setup/capability and allowlisted support panels, thumbnail-cache controls and bounded
+feed/history windows are added. See [the implementation tracker](docs/AUDIT_IMPLEMENTATION.md)
+for executed checks, remaining feature work and desktop/live acceptance gates.
+
+M2–M8 full-app audit on alpha.11 (`e2b01ea`):
+[prioritized bug and feature report](docs/APP_AUDIT_2026-10-22.md).
+Nine bug/release entries, separately identified risks and acceptance criteria are
+recorded with executable isolated repros. This is analysis, not their implementation.
+At that audit baseline the development branch was alpha.11 and main shipped alpha.5. The alpha.12 implementation is now tracked above.
+
+M2/M8 repository maintenance: removed unused direct dependencies, consolidated
+acceptance-runner reporting, expanded dense Rust blocks and aligned the example
+configuration/current guides with alpha.11. [The documentation index](docs/README.md)
+separates current guides from dated validation reports. Compilation and syntax
+checks are recorded in docs/VALIDATION.md; no new live acceptance is claimed.
+
+M5/M8 CI follow-up: diagnosed the screenshot's cancellation as a stalled Ubuntu
+package installation, added whole-operation deadlines/official HTTPS mirror
+recovery and seven offline CI-setup regression groups. The public native runner
+passes 3/3 again on the target PC. A separate hosted-runner player-response
+rejection remains a real failed live check; it is not hidden by the setup repair.
+See [CI playback diagnosis](docs/CI_PLAYBACK_DIAGNOSIS.md).
+
+Alpha.11 single-video M2/M4/M8 sweep: reproduced and repaired completion/truncated
+EOF handling, indefinite player stalls, missed native backend notifications,
+worker launches after executable replacement, unavailable external preview
+formats and a shutdown instance-lock race. Full live playback reaches EOF,
+including one muted gpu-next/PipeWire desktop run. See
+[the sweep evidence and rerun commands](docs/SINGLE_VIDEO_SWEEP.md) for the fixed
+public fixture, failure matrix and remaining coverage limits.
+
+Alpha.10 local M2–M6/M8 follow-up: public details/country/Music-source defects are
+fixed; bounded provider and native-resolution caches avoid repeated requests.
+154 offline tests, eight actual-media checks, two Node checks, four live provider
+checks and native playback/download checks pass. Auto/external public suites each
+pass 8/9 with anonymous Music consent still failing. See
+[the target-PC report](docs/NETWORK_PERFORMANCE.md); account/device/reliability
+acceptance remains open.
+
+Local M5/M8 follow-up, 2026-10-22: replaced the PC's stale alpha.7 launchers with
+the completed alpha.9 development build at `7cc5a43`. One public video advanced
+past ten seconds through native Rust and real mpv null outputs; the user requested
+stopping heavy work while gaming, so the release build, solver suite and remaining
+live cases were interrupted. See `docs/NATIVE_PLAYBACK.md` for evidence, rollback
+and the remaining displayed/audio-device/reliability gates.
+
+Historical alpha.9 status: PRs #5–#8 are merged into the PR #4 media branch. Alpha.6 feed recovery is on `improve/feed-recovery` (PR #9); alpha.7 playback/playlist repair and alpha.8 stability follow-up are on `fix/playback-fallback` (PR #10). Alpha.9 native playback follows on `fix/native-playback` (then-draft PR #11). PR #4 and target-machine stable-release gates were open. For the later alpha.11 state, use the follow-ups and current audit above.
 Baseline: `main` at `4bdee78d463740ed959a3e69da7b8c314be992e6`.
 
+Alpha.8 follow-up (M3/M5/M8): reproduced output-retention/empty-file and preview
+state defects, then added regression checks and actionable failure UI.
+See [docs/STABILITY_PASS.md](docs/STABILITY_PASS.md) for evidence and remaining gates.
+
+Alpha.9 follow-up (M3/M5/M8): update the pinned Rust extractor, detect supported
+installed JavaScript runtimes, preserve playable manifests and stream headers,
+and separate native-default playback from download fallback. See
+[docs/NATIVE_PLAYBACK.md](docs/NATIVE_PLAYBACK.md). Local checks do not establish
+the requested 99% live watching success rate.
+
 Publication: the original plan was pushed to `docs/rust-rewrite-plan` (PR #1).
+Live-service validation follow-up (M3/M4/M5/M8): a dedicated public YouTube CI
+workflow and an isolated local runner now exercise real playback and two-entry
+playlist downloads. See [docs/LIVE_YOUTUBE_TESTS.md](docs/LIVE_YOUTUBE_TESTS.md)
+for commands, assertions and environmental evidence; setup is not live success.
 The first implementation was merged from `rewrite/rust` (PR #2); follow-up work lives
 on `rewrite/media-library` (PR #4), including the merged `rewrite/ui-polish` PR #5;
 the provider follow-up PR #6 is merged there, with the Rust-only follow-up on `rewrite/rust-only-settings`;
@@ -26,6 +100,9 @@ Confirmed by the user:
   an **explicit yt-dlp fallback** initially. In the alpha.5 follow-up the user
   confirmed recommending an `auto` mode: Rust first, external yt-dlp for supported
   extractor limitations. Explicit strict-native and yt-dlp modes remain available.
+  The later watching objective supersedes the shared default: playback now defaults
+  to native, with no automatic Python invocation; downloads retain auto. Existing
+  explicit playback overrides remain supported. A 99% claim requires live evidence.
 - Provide Downloads, YouTube, YouTube Music, and Cliamp / Radio tabs.
 - Support browser-cookie sign-in, a configurable video-preview shortcut,
   attractive themes, and automatic system-theme following.
@@ -596,3 +673,35 @@ See [the coordinated playback/navigation plan](docs/PLAYBACK_NAVIGATION_PLAN.md)
 for the user report, confirmed auto fallback change, implementation and evidence.
 The bottom command entry is replaced by Actions/forms. Native upstream restrictions
 and failed live checks remain visible instead of being described as passed features.
+
+### M4/M5 follow-up: automatic feed recovery (alpha.6)
+
+The user reports having to refresh YouTube feeds manually. Transient load and
+continuation failures now retry automatically with bounded request duration and
+backoff, preserving visible content. Fresh HTML Home data avoids an API request;
+client contexts renew, and overlapping pages can advance.
+See [FEED_RECOVERY_PLAN.md](docs/FEED_RECOVERY_PLAN.md) for behavior and checks.
+Successful live account/desktop acceptance remains required.
+
+### M5/M8 follow-up: playback fallback repair (alpha.7)
+
+User reports every video failing after the fallback indicator with mpv 0.41.0 /
+yt-dlp 2026.08.19. External playback now resolves streams directly with yt-dlp,
+forwards the extractor HTTP identity and separate audio, and launches mpv without
+its extraction hook. Capture stdout/stderr and preserve specific extraction/open
+errors. Real mpv loopback split-video/audio and audio-only playback is covered,
+alongside default regressions. See [PLAYBACK_REPAIR.md](docs/PLAYBACK_REPAIR.md)
+and [VALIDATION.md](docs/VALIDATION.md) for actual evidence and live boundaries.
+
+The same follow-up covers M3: dedicated playlist intent, original collection source
+preservation, subset/import/dedupe handling and retained completed files on partial
+failure. Native YouTube playlists request the supported auto fallback before any
+transfer. A real FFmpeg MP3 download/conversion and loopback HTTP-rejection fallback
+complement synthetic three-entry playlist checks. Old jobs whose collection URL was
+already replaced need the original playlist re-added; downloaded files are preserved.
+
+The requested test expansion adds eleven default regressions for failure/retry/
+cancellation/tool metadata and player recovery, plus real M4A/Opus/FLAC conversion
+and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata,
+duplicate invocation and missing output records on hook failure (M3/M8). Final
+counts and reproducible commands are in docs/VALIDATION.md.

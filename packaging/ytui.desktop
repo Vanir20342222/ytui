@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=ytui
+GenericName=Terminal media browser
+Comment=YouTube, Music, downloads and radio
+Exec=ytui
+Icon=multimedia-player
+Terminal=true
+Categories=AudioVideo;Player;Network;
+StartupNotify=false

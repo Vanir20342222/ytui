@@ -9,6 +9,7 @@ pub struct Config {
     #[serde(skip)]
     pub offline: bool,
     pub theme: String,
+    pub language: String,
     pub theme_provider: String,
     pub image_protocol: String,
     pub thumbnails: bool,
@@ -23,6 +24,7 @@ pub struct Config {
     pub retry_delay_seconds: u64,
     pub proxy: Option<String>,
     pub download_backend: String,
+    pub playback_backend: String,
     pub native_js_runtime: Option<PathBuf>,
     pub yt_dlp: String,
     pub ffmpeg: String,
@@ -49,6 +51,7 @@ impl Default for Config {
             version: 1,
             offline: false,
             theme: "system".into(),
+            language: "en".into(),
             theme_provider: "auto".into(),
             image_protocol: "auto".into(),
             thumbnails: true,
@@ -63,6 +66,7 @@ impl Default for Config {
             retry_delay_seconds: 5,
             proxy: None,
             download_backend: "auto".into(),
+            playback_backend: "native".into(),
             native_js_runtime: None,
             yt_dlp: "yt-dlp".into(),
             ffmpeg: "ffmpeg".into(),
@@ -87,6 +91,10 @@ impl Default for Config {
 }
 impl Config {
     pub fn validate(&self) -> Result<()> {
+        ensure!(
+            ["en", "de", "system"].contains(&self.language.as_str()),
+            "language must be en, de or system"
+        );
         ensure!(
             self.version == 1,
             "Unsupported configuration version {}",
@@ -121,6 +129,10 @@ impl Config {
             "download_backend must be auto, native or yt-dlp"
         );
         ensure!(
+            ["auto", "native", "yt-dlp"].contains(&self.playback_backend.as_str()),
+            "playback_backend must be native, auto or yt-dlp"
+        );
+        ensure!(
             ["auto", "caelestia", "omarchy", "portal", "gnome"]
                 .contains(&self.theme_provider.as_str()),
             "Unknown theme provider"
@@ -148,7 +160,11 @@ impl Config {
                 .map_err(|_| anyhow::anyhow!("Proxy must be a valid HTTP(S) or SOCKS URL"))?;
             ensure!(
                 matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h")
-                    && proxy.host_str().is_some(),
+                    && proxy.host_str().is_some()
+                    && proxy.port() != Some(0)
+                    && matches!(proxy.path(), "" | "/")
+                    && proxy.query().is_none()
+                    && proxy.fragment().is_none(),
                 "Proxy must use HTTP(S), socks5 or socks5h and include a host"
             );
         }
@@ -166,6 +182,8 @@ impl Config {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct DownloadOptions {
+    /// Explicit extractor format selector; normally populated from actual formats.
+    pub format_selector: Option<String>,
     pub backend: Option<String>,
     pub audio: bool,
     pub quality: String,
@@ -194,6 +212,7 @@ pub struct DownloadOptions {
 impl Default for DownloadOptions {
     fn default() -> Self {
         Self {
+            format_selector: None,
             backend: None,
             audio: false,
             quality: "1080".into(),
@@ -222,6 +241,30 @@ impl Default for DownloadOptions {
     }
 }
 impl DownloadOptions {
+    /// Compare the requested files, independently of extraction/retry/rate policy.
+    pub fn same_output(&self, other: &Self) -> bool {
+        self.format_selector == other.format_selector
+            && self.audio == other.audio
+            && (if self.audio {
+                self.audio_container == other.audio_container
+                    && self.audio_quality == other.audio_quality
+            } else {
+                self.container == other.container && self.quality == other.quality
+            })
+            && self.output_directory() == other.output_directory()
+            && self.filename_template == other.filename_template
+            && self.playlist == other.playlist
+            && self.playlist_items == other.playlist_items
+            && self.subtitles == other.subtitles
+            && self.auto_subtitles == other.auto_subtitles
+            && self.embed_subtitles == other.embed_subtitles
+            && self.metadata == other.metadata
+            && self.thumbnail == other.thumbnail
+            && self.split_chapters == other.split_chapters
+            && self.sponsorblock == other.sponsorblock
+            && self.sponsorblock_api == other.sponsorblock_api
+            && self.sponsorblock_remove == other.sponsorblock_remove
+    }
     pub fn output_directory(&self) -> &std::path::Path {
         if self.audio {
             &self.audio_directory
@@ -235,6 +278,16 @@ impl DownloadOptions {
                 .as_deref()
                 .is_none_or(|b| b == "auto" || b == "native" || b == "yt-dlp"),
             "Unknown download backend"
+        );
+        ensure!(
+            self.format_selector
+                .as_ref()
+                .is_none_or(|value| !value.is_empty()
+                    && value.len() <= 256
+                    && value
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_-./+[]<>=,?*".contains(&b))),
+            "Invalid explicit format selector"
         );
         ensure!(
             self.quality == "best"

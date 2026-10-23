@@ -22,10 +22,11 @@ directories = "6"
 sha1 = "0.10"
 sha2 = "0.10"
 hex = "0.4"
+httpdate = "1"
 keyring = { version = "3", features = ["sync-secret-service", "vendored"] }
 rookie = { version = "0.5.6", default-features = false }
 libc = "0.2"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 zbus = { version = "4", default-features = false, features = ["tokio"] }
 futures-util = "0.3"
-yt-dlp-rs = { git = "https://github.com/aagedal/yt-dlp-rs", rev = "10223c019ef6ec5552627b90251d8e967404e440" }
+yt-dlp-rs = { git = "https://github.com/aagedal/yt-dlp-rs", rev = "f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab" }

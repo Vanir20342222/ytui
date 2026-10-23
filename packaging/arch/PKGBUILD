@@ -1,0 +1,34 @@
+# Review an immutable release tag before building. Development builds may set
+# _commit to a reviewed 40-character revision; never package an unpinned branch.
+pkgname=ytui
+pkgver=0.2.0alpha12
+pkgrel=1
+pkgdesc='Rust terminal YouTube, Music, downloads and radio client'
+arch=('x86_64' 'aarch64')
+url='https://github.com/Vanir20342222/ytui'
+license=('MIT')
+depends=('mpv' 'ffmpeg' 'nodejs>=22' 'openssl' 'dbus')
+makedepends=('cargo' 'git')
+optdepends=('yt-dlp: explicit playback fallback and automatic download fallback'
+            'wl-clipboard: optional Wayland clipboard import'
+            'cliamp: optional external radio player')
+_commit="${YTUI_COMMIT:?Set YTUI_COMMIT to the reviewed 40-character release revision}"
+[[ "$_commit" =~ ^[0-9a-f]{40}$ ]] || { echo 'YTUI_COMMIT must be a full revision' >&2; return 1; }
+source=("ytui::git+https://github.com/Vanir20342222/ytui.git#commit=$_commit")
+sha256sums=('SKIP') # Git source is fixed to the exact reviewed revision.
+build() {
+  cd "$srcdir/ytui"
+  export CARGO_TARGET_DIR="$srcdir/target"
+  cargo build --release --locked -p ytui
+  [[ "$("$CARGO_TARGET_DIR/release/ytui" --version)" == 'ytui 0.2.0-alpha.12 · '* ]] || { echo 'Revision does not match the recipe version' >&2; return 1; }
+  cargo metadata --locked --format-version 1 > "$srcdir/dependencies.json"
+  cargo run --release --locked -p ytui --example license_bundle -- "$srcdir/dependencies.json" "$srcdir/licenses"
+}
+package() {
+  install -Dm755 "$srcdir/target/release/ytui" "$pkgdir/usr/bin/ytui"
+  ln -s ytui "$pkgdir/usr/bin/ytui-rs"
+  install -Dm644 "$srcdir/ytui/packaging/ytui.desktop" "$pkgdir/usr/share/applications/ytui.desktop"
+  install -Dm644 "$srcdir/ytui/LICENSE" "$pkgdir/usr/share/licenses/ytui/LICENSE"
+  cp -r "$srcdir/licenses" "$pkgdir/usr/share/licenses/ytui/dependencies"
+  install -Dm644 "$srcdir/ytui/docs/RUST.md" "$pkgdir/usr/share/doc/ytui/RUST.md"
+}

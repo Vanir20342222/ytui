@@ -8,7 +8,6 @@ rust-version.workspace = true
 ytui-core = { path = "../ytui-core" }
 ytui-services = { path = "../ytui-services" }
 anyhow.workspace = true
-serde.workspace = true
 serde_json.workspace = true
 toml.workspace = true
 tokio.workspace = true

@@ -1,8 +1,275 @@
-# Validation record — 2026-10-21
+# Validation record
+
+## Alpha.12 networking follow-up — 2026-10-23 (M2–M6/M8)
+
+See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): 210 deterministic
+tests and ten actual local media tests pass; strict Clippy and formatting pass.
+Five public checks pass (including actual radio progress); YouTube browsing and
+its independent thumbnail CDN check fail at the cloud proxy tunnel. The earlier
+204-test and archive evidence below belongs to the preceding implementation.
+
+## Alpha.12 audit implementation — 2026-10-23 (M2–M8)
+
+The full deterministic workspace suite passes **204 tests**, with **25 opt-in
+checks excluded**. Strict workspace/all-target Clippy, formatting, Bash syntax
+and actionlint pass. The original audit repros are promoted into the normal suite.
+Coverage includes account/config ordering and logout persistence, queue intent
+and pressure, partial outputs, collection restart, formats/languages, cache failure/
+retry/safe clear, bounded feeds and the new popup/theme/resize/PTY paths.
+The comfort follow-up adds lyrics-parser/HTTP/file/privacy checks, request
+identity/closed-panel recovery, bilingual action search and German settings.
+All 55 settings fields remain covered; English/German settings render in 2,340
+theme/size/selection states, and five lyric states in 650 combinations.
+The real executable PTY checks also exercise German search, settings and local lyrics.
+
+Ten actual local media checks pass across the original campaign plus the new
+mpv HTTP-proxy case; a private-session MPRIS test passes separately. These use
+synthetic files/loopback, not public YouTube, real cookies or physical output.
+The final combined media/artifact evidence is in
+[the implementation tracker](AUDIT_IMPLEMENTATION.md).
+
+**Public native matrix: 0/3 passed** in this cloud. Two video URLs and one Music
+audio URL fail at the inherited proxy tunnel before extraction/playback; these
+remain failed live checks. The older target-PC success reports below retain their
+own source/version scope. No proxy bypass or automatic fallback was enabled.
+
+**61 WQHD PNG captures** cover 13 themes, workspaces/settings and new dialogs,
+using actual executable PTY output and fictional data. They are not Ghostty device
+screenshots. New dialogs size to their content. The PNG/manifest regression checks
+2560×1440 dimensions and complete registration.
+
+The candidate targets main via PR #13; main is still alpha.5. Source-package/Arch,
+checksum/license archive and executable rollback tooling is provided; a tagged
+release, Arch installation, real copied-state migration/rollback, signed-in journeys
+and desktop/audio acceptance remain gates. Lyrics and initial German UI are
+implemented; remaining guidance/status prose is not fully localized.
+See [candidate instructions](RELEASE_CANDIDATE.md) and
+[the feature workflows](AUDIT_FEATURES.md).
+
+
+## M2/M8 repository cleanup
+
+Removed unused direct `ytui` → `serde` and `ytui-core` → `toml` dependencies;
+their workspace dependencies remain where used and the lockfile retains the same
+package versions. Expanded dense demo/render/CLI/watch blocks without changing
+their control flow or rendered text. The broad-network and single-video runners
+share their failure collection/reporting helper. The example config now documents
+native playback, independent auto downloads and automatic supported JS-runtime
+detection. Current guide versions match alpha.11; a documentation index separates
+usage from dated evidence, and release-gap summaries include the later local runs.
+
+Workspace/all-target offline compilation and strict Clippy, formatting, Bash
+syntax, manifest/example TOML parsing, local documentation links and diff
+whitespace checks pass. No application tests or live services were run for this
+cleanup; earlier acceptance records retain their original scope.
+
+## M5/M8 playback CI follow-up
+
+The screenshot's 25-minute cancellation occurred entirely during Ubuntu package
+installation; no playback ran. A newer GitHub run built successfully but failed
+3/3 native cases during player-response acquisition. Added bounded CI setup,
+one official HTTPS mirror fallback and explicit setup/playback summaries without
+weakening the live assertions. Seven offline installer regression groups pass;
+the identical public native runner passes 3/3 on the PC using optimized alpha.11.
+See [CI_PLAYBACK_DIAGNOSIS.md](CI_PLAYBACK_DIAGNOSIS.md) for run links, commands and
+the remaining hosted-runner extraction failure.
+
+## Alpha.11 single-video sweep (M2/M4/M8)
+
+Defined live player cases now pass after six repair areas: **25 scenario checks**
+across native/auto/external modes, including actual EOF, quality/control/preview
+behavior, renewal/resume, bounded retry, hung startup, missing tools, cancellation
+and one muted displayed gpu-next/PipeWire completion. Both selected CLI suites
+pass **7/7**, using the same public video; completed audio/video files are fully
+decoded with FFmpeg. Eight actual-media regressions pass. Deterministic tests
+reproduced early/near-end quit, truncated EOF, missed closed-channel backend
+updates, deleted executable launch and inherited instance-lock failures before
+their fixes. **158 offline tests pass**, with 22 opt-in checks excluded from that
+run. Formatting, strict all-target Clippy, shell syntax, Lua checks, optimized
+build and installation of both alpha.11 launchers pass. Details and limits:
+[SINGLE_VIDEO_SWEEP.md](SINGLE_VIDEO_SWEEP.md).
+
+## Alpha.10 target-PC network/performance follow-up (M2–M6/M8)
+
+On the actual CachyOS LTS PC: **154 offline tests**, eight actual-media checks,
+two actual Node solver checks and four new live provider/cache checks pass.
+Auto and explicit yt-dlp public suites each pass **8/9**; anonymous Music search
+still requires browser consent. Strict-native video download and the three-case
+native playback corpus pass. Fixed incorrect details rejection, radio country
+names and Music source replacement; added bounded page/radio/native stream
+caching with refresh/cancellation/error invalidation. Live cached searches return
+in about 0.033 ms versus a 1.487-second cold request in the measured run.
+See [NETWORK_PERFORMANCE.md](NETWORK_PERFORMANCE.md) for commands, limits,
+installation/rollback and acceptance that remains open. Earlier sections below
+describe their original cloud environments, not this new local evidence.
 
 Environment: Linux x86_64 cloud workspace, Rust 1.99.1. This is not the user's
-CachyOS desktop. All automated application tests use synthetic/offline data.
+CachyOS desktop. Default tests use synthetic/offline data; explicit live runs are
+recorded separately below.
 
+## Alpha.9 native playback (M3/M5/M8)
+
+**147 default tests pass**, with 18 actual-tool/live checks excluded. Formatting
+and strict Clippy pass. Full GitHub Rust CI
+[39781634440](https://github.com/Vanir20342222/ytui/actions/runs/39781634440) passes
+on code commit `a638d8289c44fb01760fd542b340a69348d55248`, including actual tools
+and optimized build. The isolated installer publishes both alpha.9 launchers;
+installed offline doctor detects Node without opening browser stores.
+Separate actual Node saved-player/permission tests (two),
+mpv native HLS / external split streams / controls tests (three), playback CLI
+progress/failure test, four-format native audio conversion checks (two), and
+actual external two-entry playlist test pass. Native tests never use external
+yt-dlp. Public native playback here fails **0/3 passed** at the inherited proxy
+tunnel. Public native GitHub run [39781157622](https://github.com/Vanir20342222/ytui/actions/runs/39781157622)
+also fails **0/3 passed**: the extractor reports invalid player responses and
+possible IP blocking. This does not establish live watching or the requested 99% reliability;
+see [NATIVE_PLAYBACK.md](NATIVE_PLAYBACK.md) for the dedicated runner and open gates.
+
+## Alpha.8 stability pass (M3/M5/M8)
+
+**139 default tests pass**, with 17 opt-in checks excluded. New regressions cover
+valid output retention before later invalid records, empty-file rejection,
+single-video failure recovery, permanent proxy retry policy, stderr root-cause
+retention/bounds, preview preference isolation, error UI across 13 palettes and
+three sizes, and the network doctor's failure exit status. Four pre-fix failures
+were observed for output retention/empty files and repeated preview close.
+
+Separate actual-tool checks pass: three mpv 0.40 tests with null outputs, two
+FFmpeg/ffprobe tests across four audio formats, and a new genuine yt-dlp 2026.10.21
+two-entry HTML playlist transfer/conversion. Both real MP3 files have distinct
+paths and valid tracks/durations and remain recorded with the original source in
+SQLite. HTML/media are generated locally; this is **not** a YouTube CDN success.
+
+Formatting, strict workspace/all-target Clippy, actionlint, optimized build and
+isolated installation pass. Both launchers report `0.2.0-alpha.8`. Implementation,
+commands and limitations: [STABILITY_PASS.md](STABILITY_PASS.md).
+
+## Public YouTube runner (M3/M4/M5/M8)
+
+The managed workspace still rejects the YouTube HTTPS CONNECT tunnel with proxy
+HTTP 403. A separate GitHub Actions runner reached both YouTube and Music roots
+with **HTTP 200** and ran the actual ytui executable against both services.
+
+- Run [39757202167](https://github.com/Vanir20342222/ytui/actions/runs/39757202167),
+  **auto and explicit external backends: each 2 passed, 7 failed**. Public YouTube and Music
+  searches returned nonempty normalized pages. Details, video/audio/Music playback,
+  video/audio downloads and the two-entry playlist check failed with YouTube's
+  **“Sign in to confirm you're not a bot”** response. This is an actual YouTube
+  rejection, distinct from the workspace's proxy failure. No successful CDN
+  playback/download is claimed. Both modes report the service's bot challenge.
+- The first live run used `BaW_jenozKc`, which returned “This video is unavailable”
+  on that runner. The public fixture was replaced with short `jNQXAC9IVRw` and
+  the checks were repeated. The playlist uses a public upstream yt-dlp fixture.
+- Latest run tools include mpv **0.37.0**, yt-dlp **2026.10.21**, Deno **2.9.8**, FFmpeg **6.1.1**
+  and Rust **1.99.1**. These are not the user's desktop versions.
+- **130 default tests pass**, 16 explicit opt-in tests excluded. Formatting,
+  workspace/all-target strict Clippy, actionlint for both workflows, shell syntax
+  and optimized build pass. A new separate real-mpv 0.40 loopback test passes:
+  the public `playback-check` CLI must observe real progress and also surface a
+  decoder failure. Its offline guard is included in the default CLI checks.
+- The prior Rust workflow never started jobs because GitHub rejected duplicate
+  case-insensitive `NO_PROXY` / `no_proxy` keys. Removing the duplicate allowed
+  both ordinary Rust runs on `ae51307` to **pass** on GitHub.
+- A later CI run caught a race in the existing fake-mpv preview test: it read the
+  argument file after creation but before writing finished. The fixture now
+  publishes it with an atomic rename and waits up to two seconds for publication;
+  mute/length/pause assertions remain unchanged. This is test synchronization,
+  not evidence that preview audio was unmuted in the application.
+
+The public runner does not load cookies, upload media, change VPN settings or
+bypass network policy. The same [local runner](LIVE_YOUTUBE_TESTS.md) can check the
+target PC's normal network. Signed-in feeds and physical display/audio remain
+separate acceptance gates. Failed live cases remain failures, not passing skips.
+
+
+## Alpha.7 playback/playlist repair evidence (M3/M5/M8)
+
+User reports mpv 0.41.0 / yt-dlp 2026.08.19 and fallback followed by `Playback failed`,
+plus playlists saving only the first song. Tool versions are user-provided.
+
+- `cargo test --workspace --locked`: **130 passed**, 9 opt-in tests excluded.
+  Includes all existing UI/theme/settings/actual-PTY tests and new explicit external
+  extraction/headers/arguments/cancellation, visible mpv stdout failures, player
+  error state/events, playlist source/intent/import/dedupe and real-executable
+  multi-output CLI/state fixtures. Extractor responses in these cases are synthetic.
+- Formatting and strict workspace/all-target Clippy pass. Optimized release build
+  and actual isolated `install.sh` pass; both installed names report alpha.7.
+- Separate real mpv 0.40 **two tests passed** with null outputs: generated local
+  controls/menu/quality/SponsorBlock/replay and external-extraction handoff to
+  header-requiring loopback split-video/audio and audio-only streams. A controlled
+  missing-file error verifies stdout diagnostics. The seek assertion waits for the
+  asynchronous decoder update within two seconds; it still requires actual skip.
+  mpv and missing libraries were unpacked from official Debian packages outside
+  the repository. The user's displayed mpv 0.41/device was not tested here.
+- Two separate real FFmpeg/ffprobe tests **passed** across **MP3, M4A/AAC, Opus
+  and FLAC**: Rust downloads generated MP4 audio over loopback, real FFmpeg converts
+  it, ffprobe confirms audio/codec/duration, and source bytes stay unchanged. No yt-dlp executable was available to
+  that test; successful live YouTube audio extraction is not claimed.
+- A loopback HTTP 403 fails strict native and triggers exactly one external fallback
+  in auto; an invalid local destination triggers none. Playlist CLI cases preserve
+  all three outputs, a two-item subset, and partial outputs on later failure, while
+  retaining the original URL in SQLite. Watch-page single-video behavior is checked.
+- Public watch-page probe through the inherited proxy still **failed**: CONNECT
+  tunnel HTTP 403, curl exit 56. No browser cookies, consent actions, VPN mutation or
+  network bypass were used. No successful live YouTube/CDN playback is claimed.
+- CI installs mpv/FFmpeg and runs the real external-handoff and MP3 regressions
+  separately; real-service tests remain opt-in.
+
+Reproduce optional local checks with installed tools:
+
+```sh
+YTUI_TEST_MPV=/usr/bin/mpv cargo test -p ytui-services --locked real_mpv_ -- --ignored
+cargo test -p ytui --test downloads --locked real_ffmpeg_native_audio_ -- --ignored
+cargo test -p ytui --test download_recovery --locked
+```
+
+Additional tests requested after the initial alpha.7 repair add **11 default tests**:
+seven transfer lifecycle checks, three external-metadata/tool checks and one player
+command-channel recovery check. They cover Unicode/space paths, duplicate output
+records, per-track hook identity, hook failure with multiple completed files,
+invalid/missing output records, temporary versus permanent failures, saved-job
+retry, cancellation/stale generations, malformed/unsafe extraction metadata, tool
+permission errors, and recovery through the public Player command channel.
+
+The new assertions reproduced three hook defects: the last entry's metadata was
+used for every file, duplicate reports re-ran hooks, and an early hook failure
+left later completed files unrecorded. Fix: associate each unique output with its
+metadata and register all validated outputs before invoking hooks. A failed hook
+still fails the job; completed media stays recorded.
+
+The actual mpv external-handoff fixture now also fails extraction first, recovers,
+starts paused at one second, opens a muted preview and preserves the prior pause
+state on close. Its loopback HTTP fixture implements byte ranges for genuine seek
+support. No new live YouTube success or browser/device acceptance is claimed.
+
+Implementation and recovery of old first-song jobs: [PLAYBACK_REPAIR.md](PLAYBACK_REPAIR.md).
+
+## Alpha.6 automatic feed recovery evidence (M4/M5)
+
+- `cargo test --workspace --locked`: **106 passed**, 6 opt-in tests excluded.
+  Includes 12 new recovery/provider/controller tests and the real-executable PTY
+  navigation/popup/resize/terminal-restoration test. New recovery states retain
+  content across all 13 themes at two sizes (26 states); existing theme/settings/
+  download-form coverage also passes.
+- Loopback requests exercise fresh embedded WEB/Music Home data, single-use and
+  freshness, bare-shell recovery, one-shot stale-context renewal/TTL, explicit
+  notices, transient/permanent/JSON/API errors, Retry-After seconds and HTTP date,
+  and connection loss. No browser cookies or account credentials are used.
+- Controller events exercise automatic tick retry of the failed continuation
+  without a refresh key, cooldown/hidden/offline behavior, stale-generation
+  rejection, usable existing cards, selected-media/history stability, overlapping
+  pages/token cycles/empty-run limits, viewport prefetch and duplicate Next actions.
+- `cargo fmt --all -- --check`, strict workspace/all-target Clippy and optimized
+  `cargo build --release --locked` pass. Actual `install.sh` into an isolated
+  directory passes; both installed `ytui` and `ytui-rs` report `0.2.0-alpha.6`.
+- Current public **YouTube Home and Music Home CLI probes both failed** at the
+  configured proxy tunnel (`cannot reach … tunnel error: unsuccessful`). No
+  network bypass was attempted. These are failed live probes, not feed success.
+  Signed-in Brave Origin/Proton/Ghostty acceptance remains open.
+
+Implementation/limits: [FEED_RECOVERY_PLAN.md](FEED_RECOVERY_PLAN.md).
+Historical evidence below applies to the earlier feature work; unrelated real
+mpv/FFmpeg/SponsorBlock probes were not repeated for this feed-only change.
 
 ## Alpha.5 playback/navigation evidence
 

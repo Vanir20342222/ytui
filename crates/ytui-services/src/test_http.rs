@@ -19,6 +19,22 @@ pub async fn serve(
 pub async fn serve_request(
     handler: impl Fn(&str) -> (u16, String, Vec<u8>) + Send + 'static,
 ) -> (String, tokio::task::JoinHandle<()>) {
+    serve_raw_request(move |request| {
+        let (status, headers, body) = handler(request);
+        let mut response = format!(
+            "HTTP/1.1 {status} Fixture\r\nContent-Length: {}\r\nConnection: close\r\n{headers}\r\n",
+            body.len()
+        )
+        .into_bytes();
+        response.extend_from_slice(&body);
+        response
+    })
+    .await
+}
+// Raw wire responses allow interrupted-body and malformed-transfer regressions.
+pub async fn serve_raw_request(
+    handler: impl Fn(&str) -> Vec<u8> + Send + 'static,
+) -> (String, tokio::task::JoinHandle<()>) {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());
     let task = tokio::spawn(async move {
@@ -48,14 +64,7 @@ pub async fn serve_request(
                 request.extend_from_slice(&chunk[..count]);
             }
             let request = String::from_utf8_lossy(&request);
-            let (status, headers, body) = handler(&request);
-            let header = format!(
-                "HTTP/1.1 {status} Fixture\r\nContent-Length: {}\r\nConnection: close\r\n{headers}\r\n",
-                body.len()
-            );
-            if stream.write_all(header.as_bytes()).await.is_ok() {
-                let _ = stream.write_all(&body).await;
-            }
+            let _ = stream.write_all(&handler(&request)).await;
         }
     });
     (base, task)

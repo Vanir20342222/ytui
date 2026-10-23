@@ -30,6 +30,7 @@ fn hints(app: &App, entries: &[(Action, &str)], width: u16) -> Line<'static> {
     let mut spans = Vec::new();
     let mut used = 0;
     for (action, label) in entries {
+        let label = app.tr(label);
         let key = key(app, *action);
         let length = key.width() + label.width() + 4;
         if used + length > width as usize {
@@ -115,7 +116,7 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
         Constraint::Min(3),
         Constraint::Length(if area.height < 18 {
             1
-        } else if !compact && app.player_status.active {
+        } else if !compact && (app.player_status.active || app.player_status.error.is_some()) {
             6
         } else {
             3
@@ -126,17 +127,19 @@ fn compact_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     header(f, app, chunks[0]);
     let tabs = Layout::horizontal([Constraint::Ratio(1, 4); 4]).split(chunks[1]);
     for (index, name) in TAB_NAMES.iter().enumerate() {
+        let name = app.tr(name);
         let active = index == app.tab;
         let name = if area.width < 60 {
             ["Downloads", "YouTube", "Music", "Radio"][index]
         } else {
             name
         };
+        let name = app.tr(name);
         let label = if area.width < 48 {
             format!(
                 "{} {}",
                 index + 1,
-                ["Files", "Videos", "Music", "Radio"][index]
+                app.tr(["Files", "Videos", "Music", "Radio"][index])
             )
         } else {
             format!("{}  {name}", index + 1)
@@ -195,7 +198,13 @@ fn wide_workspace(f: &mut Frame, app: &mut App, area: Rect) {
     sidebar(f, app, cols[0]);
     let main = Layout::vertical([
         Constraint::Min(8),
-        Constraint::Length(if app.player_status.active { 6 } else { 3 }),
+        Constraint::Length(
+            if app.player_status.active || app.player_status.error.is_some() {
+                6
+            } else {
+                3
+            },
+        ),
     ])
     .split(cols[1]);
     if app.tab == 0 {
@@ -243,6 +252,7 @@ fn sidebar(f: &mut Frame, app: &mut App, area: Rect) {
     let inner = block.inner(rows[1]);
     f.render_widget(block, rows[1]);
     for (index, name) in TAB_NAMES.iter().enumerate() {
+        let name = app.tr(name);
         let active = app.tab == index;
         let row = Rect::new(inner.x, inner.y + index as u16, inner.width, 1);
         app.hit_targets.push((row, HitTarget::Tab(index)));
@@ -306,6 +316,7 @@ fn sidebar(f: &mut Frame, app: &mut App, area: Rect) {
     {
         let row = Rect::new(inner.x, inner.y + (index - first) as u16, inner.width, 1);
         let active = app.feeds_focused && app.feed_selected == index;
+        let label = app.tr(label);
         f.render_widget(
             Paragraph::new(format!(" {} {label}", if active { "▸" } else { " " })).style(
                 style(
@@ -351,7 +362,7 @@ fn header(f: &mut Frame, app: &App, area: Rect) {
             style(app, app.palette.accent).add_modifier(Modifier::BOLD),
         ),
         Span::styled(
-            format!("· {}", TAB_NAMES[app.tab]),
+            format!("· {}", app.tr(TAB_NAMES[app.tab])),
             style(app, app.palette.muted),
         ),
     ];
@@ -367,7 +378,7 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
     let rows = Layout::vertical([Constraint::Length(1), Constraint::Length(1)]).split(area);
     let cols = Layout::horizontal([
         Constraint::Min(1),
-        Constraint::Length(if area.width >= 80 { 47 } else { 27 }),
+        Constraint::Length(if area.width >= 80 { 62 } else { 37 }),
     ])
     .split(rows[0]);
     let buttons: &[(Action, &str)] = if area.width >= 80 {
@@ -386,7 +397,7 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
     };
     let mut x = cols[1].x;
     for (action, label) in buttons {
-        let label = format!(" {} {label} ", key(app, *action));
+        let label = format!(" {} {} ", key(app, *action), app.tr(label));
         let width = (label.width() as u16).min(cols[1].right().saturating_sub(x));
         let rect = Rect::new(x, cols[1].y, width, 1);
         f.render_widget(
@@ -397,7 +408,20 @@ fn footer(f: &mut Frame, app: &mut App, area: Rect) {
         x += width;
     }
     f.render_widget(
-        Paragraph::new(format!(" {}", app.status)).style(style(app, app.palette.muted)),
+        Paragraph::new(format!(
+            " {}",
+            app.pending_operation
+                .as_ref()
+                .map(|(_, text)| text.as_str())
+                .unwrap_or(if app.player_session_pending {
+                    "Updating player account · playback waits for the account handoff"
+                } else if app.collection_pending {
+                    "Loading full collection · Actions → Cancel collection loading"
+                } else {
+                    &app.status
+                })
+        ))
+        .style(style(app, app.palette.muted)),
         cols[0],
     );
     if !app.config.show_hints {
@@ -532,7 +556,7 @@ fn downloads(f: &mut Frame, app: &mut App, area: Rect) {
             label
         };
         summary.push(Span::styled(
-            format!(" {count} {label} "),
+            format!(" {count} {} ", app.tr(label)),
             style(app, color),
         ));
     }
@@ -571,6 +595,7 @@ fn downloads(f: &mut Frame, app: &mut App, area: Rect) {
         );
     let rows = jobs.iter().map(|job| {
         let (label, color) = job_state(app, job);
+        let label = app.tr(label);
         let title = if job.media.title.is_empty() {
             &job.media.url
         } else {
@@ -675,8 +700,20 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
     let inner = inset(block.inner(area));
     f.render_widget(block, area);
     let (label, color) = job_state(app, job);
-    let mut lines = vec![
-        Line::styled(label, style(app, color).add_modifier(Modifier::BOLD)),
+    let mut lines = vec![Line::styled(
+        label,
+        style(app, color).add_modifier(Modifier::BOLD),
+    )];
+    if let Some(error) = &job.error {
+        if let Some(recovery) = ytui_services::failure::recovery(error) {
+            lines.extend([
+                Line::styled(recovery.title, style(app, app.palette.error)),
+                Line::from(recovery.instruction),
+            ]);
+        }
+        lines.push(Line::styled(error.clone(), style(app, app.palette.error)));
+    }
+    lines.extend([
         Line::from(""),
         Line::styled(
             job.media.title.clone(),
@@ -684,7 +721,7 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
         ),
         Line::styled(job.media.creator.clone(), style(app, app.palette.muted)),
         Line::from(""),
-    ];
+    ]);
     if let Some(value) = job.progress.fraction() {
         lines.push(Line::styled(
             format!(
@@ -723,12 +760,6 @@ fn download_details(f: &mut Frame, app: &App, job: &Job, area: Rect) {
                 .unwrap_or_else(|| job.options.output_directory().display().to_string()),
         ),
     ]);
-    if let Some(error) = &job.error {
-        lines.extend([
-            Line::from(""),
-            Line::styled(error.clone(), style(app, app.palette.error)),
-        ]);
-    }
     f.render_widget(Paragraph::new(lines).wrap(Wrap { trim: true }), inner);
 }
 fn empty(f: &mut Frame, app: &App, area: Rect, title: &str, message: &str) {
@@ -738,7 +769,7 @@ fn empty(f: &mut Frame, app: &App, area: Rect, title: &str, message: &str) {
     let lines = vec![
         Line::from(""),
         Line::styled(
-            title.to_owned(),
+            app.tr(title).to_owned(),
             style(app, app.palette.text).add_modifier(Modifier::BOLD),
         ),
         Line::from(""),
@@ -781,7 +812,17 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         Paragraph::new(format!(
             " {}{}",
             view.page.title,
-            if view.loading { " · Loading…" } else { "" }
+            if view.loading {
+                " · Loading…"
+            } else if view
+                .load
+                .as_ref()
+                .is_some_and(|load| load.retry_at.is_some())
+            {
+                " · Reconnecting automatically…"
+            } else {
+                ""
+            }
         ))
         .style(style(app, app.palette.text).add_modifier(Modifier::BOLD)),
         heading[0],
@@ -825,7 +866,16 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                 "Nothing here yet"
             },
             &format!(
-                "{notice}\n\n{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
+                "{notice}\n\n{}\n{}  Choose another feed\n{}  Search for a video, artist or station\n{}  Refresh this page",
+                if view
+                    .load
+                    .as_ref()
+                    .is_some_and(|load| load.retry_at.is_some())
+                {
+                    "Reconnecting automatically. No refresh needed."
+                } else {
+                    ""
+                },
                 key(app, Action::Feeds),
                 key(app, Action::Search),
                 key(app, Action::Refresh)
@@ -952,6 +1002,15 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                     Block::default().style(Style::default().bg(themed(app, app.palette.surface))),
                     image_area,
                 );
+                if let Some(notice) = app.card_notice(&key) {
+                    f.render_widget(
+                        Paragraph::new(notice)
+                            .centered()
+                            .wrap(Wrap { trim: true })
+                            .style(style(app, app.palette.muted)),
+                        image_area,
+                    );
+                }
             }
             image_area.right() + 2
         } else {
@@ -1127,7 +1186,7 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
 fn playback(f: &mut Frame, app: &mut App, area: Rect) {
     let status = &app.player_status;
     if status.preview {
-        let message = format!(" Muted preview · 10s · {} closes", key(app, Action::Back));
+        let message = format!(" Video preview · 10s · {} closes", key(app, Action::Back));
         let widget = Paragraph::new(message).style(style(app, app.palette.accent));
         f.render_widget(
             if area.height > 1 {
@@ -1140,7 +1199,15 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
         return;
     }
     if area.height == 1 {
-        if status.active {
+        if let Some(error) = &status.error {
+            let title =
+                ytui_services::failure::recovery(error).map_or("Playback failed", |r| r.title);
+            f.render_widget(
+                Paragraph::new(format!(" {} Actions · {title}", key(app, Action::Command)))
+                    .style(style(app, app.palette.error)),
+                area,
+            );
+        } else if status.active {
             let cols = Layout::horizontal([Constraint::Min(1), Constraint::Length(7)]).split(area);
             f.render_widget(
                 Paragraph::new(format!(" ▶ {}", status.title)).style(style(app, app.palette.text)),
@@ -1192,12 +1259,36 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
     let inner = inset(block.inner(area));
     f.render_widget(block, area);
     if let Some(error) = &status.error {
+        let recovery = ytui_services::failure::recovery(error);
+        let title = recovery.map_or("Playback failed", |r| r.title);
+        let instruction = recovery.map_or(
+            "Open Playback repair or Diagnostics in Actions for details.",
+            |r| r.instruction,
+        );
+        let heading = if inner.width < 60 {
+            format!("{} Actions · {title}", key(app, Action::Command))
+        } else {
+            format!(
+                "{title} · {} Actions · {} Settings",
+                key(app, Action::Command),
+                key(app, Action::Settings)
+            )
+        };
+        let mut message = vec![
+            Line::styled(
+                heading,
+                style(app, app.palette.error).add_modifier(Modifier::BOLD),
+            ),
+            Line::from(instruction),
+            Line::styled(error.clone(), style(app, app.palette.muted)),
+        ];
+        if recovery.is_none() {
+            message.swap(1, 2);
+        }
         f.render_widget(
-            Paragraph::new(format!(
-                "{error}\nF2 → Playback repair · Y retry with yt-dlp · , settings"
-            ))
-            .wrap(Wrap { trim: true })
-            .style(style(app, app.palette.error)),
+            Paragraph::new(message)
+                .wrap(Wrap { trim: true })
+                .style(style(app, app.palette.text)),
             inner,
         );
     } else if status.active {
@@ -1307,7 +1398,8 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
             ];
             let mut x = rows[2].x;
             for (action, label) in controls {
-                let width = label.len() as u16 + 1;
+                let label = app.tr(label);
+                let width = label.width() as u16 + 1;
                 if x + width > rows[2].right() {
                     break;
                 }

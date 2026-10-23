@@ -15,6 +15,7 @@ use ytui_services::{
 #[derive(Parser)]
 #[command(
     version,
+    long_version = concat!(env!("CARGO_PKG_VERSION"), " · ", env!("YTUI_BUILD_DESCRIPTION")),
     about = "YouTube, Music, downloads and radio in your terminal"
 )]
 pub struct Args {
@@ -32,6 +33,12 @@ pub struct Args {
 }
 #[derive(Subcommand)]
 pub enum Command {
+    /// Export an allowlisted support report; never includes session data or raw errors.
+    Support {
+        /// Create a new JSON file (refuses to overwrite an existing file).
+        #[arg(long)]
+        output: Option<PathBuf>,
+    },
     /// Check installed tools, desktop themes and configuration without reading browser stores.
     Doctor {
         /// Also probe public YouTube, Music and radio requests, without importing a browser session.
@@ -53,6 +60,20 @@ pub enum Command {
         feed: String,
         query: Option<String>,
     },
+    /// Check actual mpv playback of a public URL without loading browser cookies.
+    PlaybackCheck {
+        url: String,
+        #[arg(long)]
+        audio: bool,
+        #[arg(long, value_parser = ["auto", "native", "yt-dlp"])]
+        backend: Option<String>,
+        /// Requested maximum video height, or best. Actual decoded height is reported.
+        #[arg(long)]
+        quality: Option<String>,
+        /// Require this many seconds of playback before reporting success.
+        #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u32).range(2..=3600))]
+        seconds: u32,
+    },
     /// Explicit control of existing NetworkManager VPN/WireGuard profiles (never runs at startup).
     Vpn {
         #[arg(default_value = "list", value_parser = ["list", "status", "connect", "disconnect"])]
@@ -62,6 +83,7 @@ pub enum Command {
     /// Print cliamp channels or Radio Browser search results.
     Radio {
         query: Option<String>,
+        /// Country name or two-letter country code (for example Germany or DE).
         #[arg(long)]
         country: Option<String>,
         #[arg(long)]
@@ -127,6 +149,91 @@ async fn load_session(config: &Config, paths: &Paths) -> Option<Arc<auth::Sessio
 }
 pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<()> {
     match command {
+        Command::Support { output } => {
+            let report = ytui_services::diagnostics::Support::collect(
+                &config,
+                env!("CARGO_PKG_VERSION"),
+                env!("YTUI_BUILD_DESCRIPTION"),
+                "",
+                CancellationToken::new(),
+            )
+            .await;
+            let encoded = serde_json::to_vec_pretty(&report)?;
+            if let Some(output) = output {
+                ytui_services::paths::atomic_write_new(&output, &encoded)?;
+                println!("Support report: {}", output.display());
+            } else {
+                println!("{}", String::from_utf8(encoded)?);
+            }
+        }
+        Command::PlaybackCheck {
+            url,
+            audio,
+            backend,
+            seconds,
+            quality,
+        } => {
+            ensure!(!config.offline, "Playback checks require network access");
+            if let Some(backend) = backend {
+                config.playback_backend = backend;
+            }
+            if let Some(quality) = quality {
+                config.download.quality = quality;
+            }
+            config.validate()?;
+            let requested_quality = config.download.quality.clone();
+            let started = tokio::time::Instant::now();
+            config.playback_sponsorblock = "off".into();
+            let media = Media {
+                url: normalize_media_url(&url)?,
+                title: "Public playback check".into(),
+                ..Default::default()
+            };
+            let mut player = ytui_services::player::Player::spawn(config, paths, None);
+            player
+                .commands
+                .send(ytui_services::player::PlayerCommand::Play { media, audio })
+                .await?;
+            let result = tokio::time::timeout(std::time::Duration::from_secs(u64::from(seconds) + 120), async {
+                loop {
+                    let state = player.status.borrow_and_update().clone();
+                    if let Some(error) = state.error {
+                        anyhow::bail!("{}", ytui_services::process::diagnostic(&error));
+                    }
+                    if state.active
+                        && !state.paused
+                        && !state.buffering
+                        && state.position >= f64::from(seconds)
+                    {
+                        return Ok(serde_json::json!({
+                            "backend": state.backend,
+                            "audio_only": audio,
+                            "position": state.position,
+                            "duration": state.duration,
+                            "requested_quality": requested_quality,
+                            "decoded_height": state.video_height,
+                            "video_codec": state.video_codec,
+                            "audio_codec": state.audio_codec,
+                            "elapsed_seconds": started.elapsed().as_secs_f64(),
+                        }));
+                    }
+                    tokio::select! {
+                        changed = player.status.changed() => changed.context("Playback worker stopped")?,
+                        event = player.events.recv() => match event {
+                            Some(ytui_services::player::PlayerEvent::Error(error)) => anyhow::bail!("{}", ytui_services::process::diagnostic(&error)),
+                            _ => anyhow::bail!("Playback ended before the required progress"),
+                        },
+                        _ = tokio::signal::ctrl_c() => anyhow::bail!("Playback check interrupted"),
+                    }
+                }
+            })
+            .await;
+            player.close().await;
+            println!(
+                "{}",
+                result.context("Playback did not reach the required progress before its bounded deadline (duration + 120 seconds)")??
+            );
+        }
         Command::NativeWorker { request } => {
             tokio::task::spawn_blocking(move || ytui_services::native::worker(&request)).await??
         }
@@ -155,6 +262,10 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                 config.download_backend
             );
             println!(
+                "Playback backend: {} (native never starts yt-dlp)",
+                config.playback_backend
+            );
+            println!(
                 "yt-dlp-rs revision: {}",
                 ytui_services::native::UPSTREAM_REV
             );
@@ -174,18 +285,16 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
                     }
                 );
             }
-            println!(
-                "Deno runtime: {}",
-                if config
-                    .native_js_runtime
-                    .as_ref()
-                    .is_some_and(|p| p.is_file())
-                {
-                    "configured"
-                } else {
-                    "not configured (native YouTube challenges may fail)"
-                }
-            );
+            match ytui_services::native_runtime::select(&config, CancellationToken::new()).await {
+                Ok(Some(path)) => println!("Native JavaScript runtime: {}", path.display()),
+                Ok(None) => println!(
+                    "Native JavaScript runtime: missing; install Node.js 22+ or Deno 2.9.7 for current YouTube challenges"
+                ),
+                Err(error) => println!(
+                    "Native JavaScript runtime: {}",
+                    ytui_services::process::diagnostic(&error.to_string())
+                ),
+            }
             println!(
                 "Terminal: {} · image mode {}",
                 std::env::var("TERM").unwrap_or_else(|_| "unknown".into()),
@@ -226,25 +335,30 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             if network {
                 let client = ytui_services::http_client(config.proxy.as_deref())?;
                 let browser = Browser::new(client.clone(), None, 0);
+                let mut failures = 0;
                 for (label, music) in [
                     ("YouTube public search", false),
                     ("Music public search", true),
                 ] {
-                    print_probe(
+                    failures += usize::from(!print_probe(
                         label,
                         browser
                             .fetch(music, &BrowseRequest::Search("music".into()))
                             .await,
-                    );
+                    ));
                 }
-                print_probe(
+                failures += usize::from(!print_probe(
                     "Radio catalog/directory",
                     Radio::new(client, config.radio_servers.clone())
                         .fetch(&BrowseRequest::Cliamp, 0)
                         .await,
-                );
+                ));
                 println!(
                     "These public probes do not validate signed-in feeds or media playback. VPN configuration was not changed."
+                );
+                ensure!(
+                    failures == 0,
+                    "{failures} public network probe(s) failed or returned no supported items; see the results above"
                 );
             }
         }
@@ -398,7 +512,7 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             };
             let mut options = config.download.clone();
             options.audio = audio;
-            options.playlist = playlist;
+            options.playlist = playlist || items.is_some() || is_playlist_url(&normalized);
             options.playlist_items = items;
             options.backend = backend;
             if let Some(q) = quality {
@@ -449,10 +563,33 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
             let mut terminal_received = false;
             loop {
                 tokio::select! {
-                    event=rx.recv()=>{let Some(event)=event else{break;};let terminal=matches!(event.update,JobUpdate::Finished|JobUpdate::Failed{..});snapshot.downloads.apply(event);
-                        if terminal{terminal_received=true;let job=snapshot.downloads.jobs.iter().find(|j|j.id==id).context("Download disappeared")?;if job.state==JobState::Done{for p in &job.outputs{println!("Saved {}",p.display());}}else{failure=job.error.clone();}break;}
+                    event = rx.recv() => {
+                        let Some(event) = event else { break; };
+                        let terminal = matches!(event.update, JobUpdate::Finished | JobUpdate::Failed { .. });
+                        snapshot.downloads.apply(event);
+                        if terminal {
+                            terminal_received = true;
+                            let job = snapshot.downloads.jobs.iter()
+                                .find(|j| j.id == id)
+                                .context("Download disappeared")?;
+                            if job.state == JobState::Done {
+                                for path in &job.outputs {
+                                    println!("Saved {}", path.display());
+                                }
+                            } else {
+                                failure = job.error.clone();
+                            }
+                            break;
+                        }
                     },
-                    _=tokio::signal::ctrl_c()=>{interrupted=true;cancel.cancel();if let Some(j)=snapshot.downloads.jobs.iter_mut().find(|j|j.id==id){j.invalidate(JobState::Paused);}break;}
+                    _ = tokio::signal::ctrl_c() => {
+                        interrupted = true;
+                        cancel.cancel();
+                        if let Some(job) = snapshot.downloads.jobs.iter_mut().find(|j| j.id == id) {
+                            job.invalidate(JobState::Paused);
+                        }
+                        break;
+                    }
                 }
             }
             rx.close();
@@ -549,26 +686,33 @@ pub async fn run(command: Command, mut config: Config, paths: Paths) -> Result<(
     Ok(())
 }
 
-fn print_probe(label: &str, result: Result<Page>) {
+fn print_probe(label: &str, result: Result<Page>) -> bool {
     match result {
         Ok(page) if !page.items.is_empty() => {
             println!("{label}: OK ({} items)", page.items.len());
             if let Some(notice) = page.notice {
                 println!("  {}", ytui_services::process::diagnostic(&notice));
             }
+            true
         }
-        Ok(page) => println!(
-            "{label}: EMPTY · {}",
-            ytui_services::process::diagnostic(
-                page.notice
-                    .as_deref()
-                    .unwrap_or("No supported items returned")
-            )
-        ),
-        Err(error) => println!(
-            "{label}: FAILED · {}",
-            ytui_services::process::diagnostic(&error.to_string())
-        ),
+        Ok(page) => {
+            println!(
+                "{label}: EMPTY · {}",
+                ytui_services::process::diagnostic(
+                    page.notice
+                        .as_deref()
+                        .unwrap_or("No supported items returned")
+                )
+            );
+            false
+        }
+        Err(error) => {
+            println!(
+                "{label}: FAILED · {}",
+                ytui_services::process::diagnostic(&error.to_string())
+            );
+            false
+        }
     }
 }
 pub fn executable(program: &str) -> Option<PathBuf> {

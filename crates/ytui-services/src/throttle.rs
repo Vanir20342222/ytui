@@ -54,6 +54,7 @@ mod tests {
     use super::*;
     fn progress(bytes: u64, stream: Option<u8>, fragment: Option<u32>) -> DownloadProgress {
         DownloadProgress {
+            fragment: None,
             attempt: 1,
             downloaded_bytes: bytes,
             total_bytes: None,

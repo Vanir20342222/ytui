@@ -57,7 +57,63 @@ pub struct ImageCache {
     flights: Arc<Mutex<HashMap<String, Weak<tokio::sync::Mutex<()>>>>>,
     writes: Arc<AtomicUsize>,
 }
+#[derive(Clone, Debug, Default)]
+pub struct CacheStats {
+    pub files: usize,
+    pub disk_bytes: u64,
+    pub memory_images: usize,
+    pub memory_bytes: usize,
+}
+fn owned_cache_file(entry: &std::fs::DirEntry) -> bool {
+    let name = entry.file_name();
+    let name = name.to_string_lossy();
+    name.len() == 64
+        && name.bytes().all(|b| b.is_ascii_hexdigit())
+        && entry.file_type().is_ok_and(|kind| kind.is_file())
+}
 impl ImageCache {
+    pub async fn inspect(&self, clear: bool) -> Result<CacheStats> {
+        // Wait for current fetch/write operations and prevent new writes while
+        // clearing. The semaphore is shared by every clone of this cache.
+        let _permit = self.permits.acquire_many(4).await?;
+        let dir = self.dir.clone();
+        let mut stats = tokio::task::spawn_blocking(move || {
+            let mut stats = CacheStats::default();
+            match std::fs::symlink_metadata(&dir) {
+                Ok(metadata) => ensure!(
+                    metadata.is_dir() && !metadata.file_type().is_symlink(),
+                    "Cache directory must not be a symlink"
+                ),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(stats),
+                Err(error) => return Err(error.into()),
+            }
+            for entry in std::fs::read_dir(&dir)? {
+                let entry = entry?;
+                if !owned_cache_file(&entry) {
+                    continue;
+                }
+                let metadata = entry.metadata()?;
+                if clear {
+                    std::fs::remove_file(entry.path())?;
+                }
+                stats.files += 1;
+                stats.disk_bytes = stats.disk_bytes.saturating_add(metadata.len());
+            }
+            Ok::<_, anyhow::Error>(stats)
+        })
+        .await??;
+        let mut memory = self.memory.lock().unwrap();
+        stats.memory_images = memory.images.len();
+        stats.memory_bytes = memory
+            .images
+            .values()
+            .map(|(_, image)| image.as_bytes().len())
+            .sum();
+        if clear {
+            *memory = Memory::default();
+        }
+        Ok(stats)
+    }
     pub fn new(client: reqwest::Client, dir: PathBuf) -> Self {
         Self {
             client,
@@ -120,7 +176,11 @@ impl ImageCache {
         )
         .await
         .context("Thumbnail unavailable")?;
-        ensure!(response.status().is_success(), "Thumbnail unavailable");
+        ensure!(
+            response.status().is_success(),
+            "Thumbnail HTTP {}",
+            response.status().as_u16()
+        );
         let mut bytes = Vec::new();
         while let Some(chunk) = response.chunk().await? {
             ensure!(
@@ -130,14 +190,15 @@ impl ImageCache {
             bytes.extend_from_slice(&chunk);
         }
         let image = decode(bytes, width, height).await?;
+        // Displaying a valid image must not depend on an optional disk cache.
+        self.memory.lock().unwrap().insert(key, image.clone());
         let saved = image.clone();
-        tokio::task::spawn_blocking(move || {
+        let _ = tokio::task::spawn_blocking(move || {
             let mut bytes = Cursor::new(Vec::new());
             saved.write_to(&mut bytes, image::ImageFormat::Png)?;
             atomic_write(&path, bytes.get_ref())
         })
-        .await??;
-        self.memory.lock().unwrap().insert(key, image.clone());
+        .await;
         // A directory scan on every cache hit made navigating large feeds expensive.
         if self
             .writes
@@ -154,6 +215,7 @@ impl ImageCache {
             std::fs::create_dir_all(&dir)?;
             let mut files = std::fs::read_dir(dir)?
                 .flatten()
+                .filter(owned_cache_file)
                 .filter_map(|e| {
                     let m = e.metadata().ok()?;
                     m.is_file()
@@ -236,6 +298,39 @@ pub fn thumbnail_url(media: &ytui_core::Media, width: u32, height: u32) -> Strin
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn cache_inspection_and_clear_preserve_foreign_files_and_symlinks() {
+        let temp = tempfile::tempdir().unwrap();
+        let dir = temp.path().join("images");
+        std::fs::create_dir(&dir).unwrap();
+        let key = "a".repeat(64);
+        std::fs::write(dir.join(&key), b"cached").unwrap();
+        std::fs::write(dir.join("my-video.mp4"), b"original").unwrap();
+        let outside = temp.path().join("outside");
+        std::fs::write(&outside, b"original").unwrap();
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&outside, dir.join("b".repeat(64))).unwrap();
+        let cache = ImageCache::new(crate::http_client(None).unwrap(), dir.clone());
+        assert_eq!(cache.inspect(false).await.unwrap().files, 1);
+        assert_eq!(cache.inspect(true).await.unwrap().disk_bytes, 6);
+        assert!(!dir.join(key).exists());
+        assert_eq!(
+            std::fs::read(dir.join("my-video.mp4")).unwrap(),
+            b"original"
+        );
+        assert_eq!(std::fs::read(outside).unwrap(), b"original");
+        #[cfg(unix)]
+        {
+            let link = temp.path().join("linked-cache");
+            std::os::unix::fs::symlink(&dir, &link).unwrap();
+            assert!(
+                ImageCache::new(crate::http_client(None).unwrap(), link)
+                    .inspect(true)
+                    .await
+                    .is_err()
+            );
+        }
+    }
     #[tokio::test]
     async fn thumbnail_decode_cache_and_size_limits_work_without_provider_access() {
         fn png(w: u32, h: u32) -> Vec<u8> {

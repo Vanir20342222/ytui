@@ -358,6 +358,9 @@ impl SessionStore {
         Ok(keyring::Entry::new("ytui-rust", "youtube-session")?)
     }
     pub fn load(&self) -> Result<Option<Session>> {
+        if self.dir.join("disconnected").exists() {
+            return Ok(None);
+        }
         let data = if self.mode == "file" {
             match std::fs::read_to_string(self.dir.join("session.json")) {
                 Ok(v) => Some(v),
@@ -366,7 +369,10 @@ impl SessionStore {
             }
         } else {
             match self.entry()?.get_password() {
-                Ok(v) => Some(v),
+                Ok(v) => {
+                    let _ = self.mark_keyring();
+                    Some(v)
+                }
                 Err(keyring::Error::NoEntry) => None,
                 Err(_) => bail!(
                     "Desktop keyring unavailable. Unlock it, or explicitly choose auth_store = 'file' in rust.toml."
@@ -380,21 +386,40 @@ impl SessionStore {
         let data = serde_json::to_string(session)?;
         if self.mode == "file" {
             private_dir(&self.dir)?;
-            atomic_write(&self.dir.join("session.json"), data.as_bytes())
+            atomic_write(&self.dir.join("session.json"), data.as_bytes())?;
         } else {
-            self.entry()?.set_password(&data).map_err(|_|anyhow::anyhow!("Could not store the session in the desktop keyring; existing credentials were left intact"))
+            self.mark_keyring()?;
+            self.entry()?.set_password(&data).map_err(|_|anyhow::anyhow!("Could not store the session in the desktop keyring; existing credentials were left intact"))?;
+        }
+        match std::fs::remove_file(self.dir.join("disconnected")) {
+            Ok(()) => Ok(()),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            Err(error) => Err(error.into()),
         }
     }
+    fn mark_keyring(&self) -> Result<()> {
+        private_dir(&self.dir)?;
+        atomic_write(&self.dir.join("keyring-used"), b"1")
+    }
+    /// Prevent automatic restoration until an explicit successful import/save.
+    /// Contains no session data and also works while the keyring is unavailable.
+    pub fn suspend_auto_load(&self) -> Result<()> {
+        private_dir(&self.dir)?;
+        atomic_write(&self.dir.join("disconnected"), b"1")
+    }
     pub fn disconnect(&self) -> Result<()> {
+        self.suspend_auto_load()?;
         if self.dir.join("session.json").exists() {
             std::fs::remove_file(self.dir.join("session.json"))?;
+        }
+        if self.mode == "file" && !self.dir.join("keyring-used").exists() {
+            return Ok(());
         }
         match self
             .entry()
             .and_then(|e| e.delete_credential().map_err(Into::into))
         {
             Ok(()) => {}
-            Err(_) if self.mode == "file" => {}
             Err(e)
                 if matches!(
                     e.downcast_ref::<keyring::Error>(),
@@ -402,12 +427,41 @@ impl SessionStore {
                 ) => {}
             Err(e) => return Err(e),
         };
+        let _ = std::fs::remove_file(self.dir.join("keyring-used"));
         Ok(())
     }
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn file_logout_stays_isolated_and_blocks_restoration_until_explicit_save() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = SessionStore {
+            mode: "file".into(),
+            dir: temp.path().join("auth"),
+        };
+        store.save(&fixture()).unwrap();
+        assert!(store.load().unwrap().is_some());
+        assert!(
+            !store.dir.join("keyring-used").exists(),
+            "file storage must not enlist the desktop keyring"
+        );
+        store.disconnect().unwrap();
+        assert!(store.load().unwrap().is_none());
+        // Even another storage mode must respect logout before it attempts any
+        // keyring access. This test never contacts a real credential backend.
+        let other = SessionStore {
+            mode: "keyring".into(),
+            dir: store.dir.clone(),
+        };
+        assert!(other.load().unwrap().is_none());
+        std::fs::write(store.dir.join("session.json"), b"stale invalid session").unwrap();
+        assert!(store.load().unwrap().is_none());
+        store.save(&fixture()).unwrap();
+        assert!(!store.dir.join("disconnected").exists());
+        assert!(store.load().unwrap().is_some());
+    }
     fn fixture() -> Session {
         Session::new(vec![
             Cookie {

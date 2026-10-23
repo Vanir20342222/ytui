@@ -52,6 +52,12 @@ pub struct Job {
     #[serde(default)]
     pub group_id: Option<String>,
     #[serde(default)]
+    pub group_title: Option<String>,
+    #[serde(default)]
+    pub group_source: Option<String>,
+    #[serde(default)]
+    pub entry_index: Option<usize>,
+    #[serde(default)]
     pub not_before: Option<u64>,
     #[serde(default)]
     pub created_at: Option<u64>,
@@ -59,7 +65,8 @@ pub struct Job {
     pub completed_at: Option<u64>,
 }
 impl Job {
-    pub fn new(mut media: Media, options: DownloadOptions) -> Self {
+    pub fn new(mut media: Media, mut options: DownloadOptions) -> Self {
+        options.playlist |= crate::is_playlist_url(&media.url) || options.playlist_items.is_some();
         if options.audio {
             media.kind = crate::MediaKind::Song;
         }
@@ -74,6 +81,9 @@ impl Job {
             error: None,
             attempt: 0,
             group_id: None,
+            group_title: None,
+            group_source: None,
+            entry_index: None,
             not_before: None,
             created_at: Some(crate::schedule::unix_now()),
             completed_at: None,
@@ -128,7 +138,14 @@ impl DownloadQueue {
                 }
             }
             JobUpdate::Metadata(mut media) => {
-                if media.url.is_empty() {
+                // Per-entry metadata must not replace the collection source. A
+                // retry/resume would otherwise download only the last seen song.
+                if job.options.playlist {
+                    return true;
+                }
+                // Keep the submitted source for retry, including Music/watch
+                // context. Extractor canonical URLs describe metadata, not intent.
+                if !job.media.url.is_empty() {
                     media.url = job.media.url.clone();
                 }
                 if media.thumbnail.is_empty() {
@@ -213,6 +230,77 @@ mod tests {
             update: JobUpdate::Metadata(Box::default())
         }));
         assert!(q.jobs.is_empty());
+    }
+    #[test]
+    fn playlist_source_survives_entry_metadata_and_restart() {
+        let source = "https://music.youtube.com/playlist?list=PLsynthetic";
+        let mut job = Job::new(
+            Media {
+                url: source.into(),
+                title: "My playlist".into(),
+                ..Default::default()
+            },
+            DownloadOptions {
+                audio: true,
+                ..Default::default()
+            },
+        );
+        assert!(job.options.playlist);
+        job.state = JobState::Downloading;
+        let id = job.id;
+        let mut queue = DownloadQueue { jobs: vec![job] };
+        for track in 1..=3 {
+            assert!(queue.apply(JobEvent {
+                id,
+                generation: 0,
+                update: JobUpdate::Metadata(Box::new(Media {
+                    id: format!("song-{track}"),
+                    url: format!("https://music.youtube.com/watch?v=song{track}"),
+                    title: format!("Song {track}"),
+                    ..Default::default()
+                }))
+            }));
+        }
+        queue.jobs[0].restart_recovery();
+        assert_eq!(queue.jobs[0].media.url, source);
+        assert_eq!(queue.jobs[0].media.title, "My playlist");
+        assert_eq!(queue.jobs[0].state, JobState::Queued);
+        assert!(
+            !Job::new(
+                Media {
+                    url: "https://www.youtube.com/watch?v=synthetic00&list=PLsynthetic".into(),
+                    ..Default::default()
+                },
+                DownloadOptions::default()
+            )
+            .options
+            .playlist
+        );
+    }
+    #[test]
+    fn music_source_survives_canonical_entry_metadata_for_retry() {
+        let source = "https://music.youtube.com/watch?v=abcdefghijk";
+        let mut job = Job::new(
+            Media {
+                url: source.into(),
+                ..Default::default()
+            },
+            DownloadOptions::default(),
+        );
+        job.state = JobState::Resolving;
+        let id = job.id;
+        let mut queue = DownloadQueue { jobs: vec![job] };
+        queue.apply(JobEvent {
+            id,
+            generation: 0,
+            update: JobUpdate::Metadata(Box::new(Media {
+                url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+                title: "Resolved title".into(),
+                ..Default::default()
+            })),
+        });
+        assert_eq!(queue.jobs[0].media.url, source);
+        assert_eq!(queue.jobs[0].media.title, "Resolved title");
     }
     #[test]
     fn pause_and_retry_reject_previous_attempt_results() {

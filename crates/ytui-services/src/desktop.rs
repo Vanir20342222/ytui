@@ -21,6 +21,34 @@ pub fn local_minute() -> u16 {
     }
     0
 }
+/// Explicit user action only. The desktop owns the launched application; it is
+/// not a child process that ytui's process-group cleanup could terminate.
+pub async fn open_file(path: &std::path::Path) -> Result<()> {
+    let file = std::fs::File::open(path)?;
+    ensure!(
+        file.metadata()?.is_file(),
+        "Select a completed regular file"
+    );
+    tokio::time::timeout(Duration::from_secs(3), async {
+        let connection = zbus::Connection::session().await?;
+        let portal = zbus::Proxy::new(
+            &connection,
+            "org.freedesktop.portal.Desktop",
+            "/org/freedesktop/portal/desktop",
+            "org.freedesktop.portal.OpenURI",
+        )
+        .await?;
+        let options: HashMap<&str, zbus::zvariant::Value<'_>> =
+            HashMap::from([("ask", zbus::zvariant::Value::Bool(true))]);
+        let _: zbus::zvariant::OwnedObjectPath = portal
+            .call("OpenFile", &("", zbus::zvariant::Fd::from(&file), options))
+            .await?;
+        Ok::<_, anyhow::Error>(())
+    })
+    .await
+    .context("Desktop open request timed out")??;
+    Ok(())
+}
 
 pub fn clipboard_reader() -> Result<ProcessSpec> {
     let (program, args) =

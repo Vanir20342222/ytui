@@ -36,9 +36,15 @@ in every theme. Built-in RGB text, muted text and selected text must reach contr
 not certify arbitrary user palettes, terminal ANSI colors or real desktop themes.
 
 The nine settings categories additionally render their first and last selected
-fields in all 13 themes and five sizes: 1,170 settings states. The three download
+fields in English and German, all 13 themes and five sizes: 2,340 settings states.
+German Save/Cancel buttons use compact labels when necessary. The three download
 form categories add 390 states. Keyboard/mouse
 editing, invalid-save recovery, cancellation and persistence have separate tests.
+
+The lyrics panel's loading, empty, candidates, open text and error states render in
+both languages, all 13 themes and five sizes (650 states). Media titles/lyrics are
+not translated. Actual track matching and stale/closed-request handling have
+separate interaction checks.
 
 Other WQHD views: [Downloads](screenshots/downloads.png),
 [YouTube](screenshots/youtube.png), [Music](screenshots/music.png),
@@ -73,3 +79,23 @@ Alpha.5 adds [Actions](screenshots/actions.png),
 [download destination](screenshots/download-destination.png), and
 [download captions](screenshots/download-captions.png). All 50 captures are WQHD.
 The player position/SponsorBlock example is synthetic, not live playback evidence.
+
+Alpha.12 audit panels add [actual formats](screenshots/player-formats.png),
+[account setup](screenshots/account-setup.png), [recorded files](screenshots/download-files.png),
+[capabilities](screenshots/capabilities.png), [cache](screenshots/thumbnail-cache.png),
+[SponsorBlock status](screenshots/sponsorblock-status.png) and
+[recent folders](screenshots/recent-folders.png). The full manifest contains 57
+WQHD captures at the first audit checkpoint. Empty/short dialogs size to their content; the format screenshot
+uses explicitly fictional demo metadata. To refresh only these dialogs and diagnostics:
+
+```sh
+cargo build -p ytui --locked --example capture_ui
+cargo build -p ytui --locked
+target/debug/examples/capture_ui --audit-panels-only --binary target/debug/ytui
+```
+
+The comfort follow-up adds [German navigation](screenshots/german-youtube.png),
+[German settings](screenshots/german-settings.png),
+[German action search](screenshots/german-actions.png) and
+[local lyrics](screenshots/lyrics.png); the manifest now contains **61 WQHD captures**.
+Refresh these four with `--comfort-panels-only`.

@@ -7,7 +7,7 @@ use clap::Parser;
 use crossterm::event::{Event, EventStream, KeyEventKind};
 use futures_util::StreamExt;
 use ratatui::{Terminal, backend::CrosstermBackend};
-use ratatui_image::picker::{Picker, ProtocolType};
+use ratatui_image::picker::Picker;
 use std::{
     io::{self, IsTerminal},
     sync::Arc,
@@ -63,6 +63,7 @@ async fn entry() -> Result<()> {
                 !matches!(
                     &command,
                     cli::Command::Browse { .. }
+                        | cli::Command::PlaybackCheck { .. }
                         | cli::Command::Radio { .. }
                         | cli::Command::Auth {
                             command: cli::AuthCommand::Import { .. }
@@ -103,18 +104,22 @@ async fn entry() -> Result<()> {
     let guard = terminal::Guard::enter()?;
     let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
     terminal.clear()?;
-    let mut picker = if config.image_protocol == "auto" {
+    // Query only in Auto, before input starts. Explicit/headless terminal
+    // fixtures must not lose keystrokes to a capability query.
+    let picker = if config.image_protocol == "auto" {
         Picker::from_query_stdio().unwrap_or_else(|_| Picker::from_fontsize((8, 16)))
     } else {
-        Picker::from_fontsize((8, 16))
+        let mut picker = Picker::from_fontsize((8, 16));
+        let terminal = std::env::var("TERM").unwrap_or_default();
+        let program = std::env::var("TERM_PROGRAM").unwrap_or_default();
+        if terminal.contains("ghostty")
+            || terminal.contains("kitty")
+            || program.eq_ignore_ascii_case("ghostty")
+        {
+            picker.set_protocol_type(ratatui_image::picker::ProtocolType::Kitty);
+        }
+        picker
     };
-    picker.set_protocol_type(match config.image_protocol.as_str() {
-        "kitty" => ProtocolType::Kitty,
-        "sixel" => ProtocolType::Sixel,
-        "iterm2" => ProtocolType::Iterm2,
-        "halfblocks" | "none" => ProtocolType::Halfblocks,
-        _ => picker.protocol_type(),
-    });
     let (job_tx, mut job_rx) = mpsc::channel(256);
     let mut app = app::App::new(
         config,
@@ -161,6 +166,17 @@ async fn interface(
     job_rx: &mut mpsc::Receiver<ytui_core::JobEvent>,
 ) -> Result<()> {
     let mut events = EventStream::new();
+    let mut desktop_media = if app.demo {
+        None
+    } else {
+        tokio::time::timeout(
+            Duration::from_secs(2),
+            ytui_services::mpris::connect(player.commands.clone(), player.status.clone()),
+        )
+        .await
+        .ok()
+        .and_then(Result::ok)
+    };
     let mut tick = tokio::time::interval(Duration::from_millis(50));
     tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut last_save = Instant::now();
@@ -169,6 +185,9 @@ async fn interface(
     #[cfg(unix)]
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
     while !app.quit {
+        if let Some(bridge) = &desktop_media {
+            bridge.update_queue(&app.snapshot.playback);
+        }
         let frame_interval =
             Duration::from_millis(if app.config.reduced_motion { 100 } else { 16 });
         if app.redraw && last_draw.elapsed() >= frame_interval {
@@ -193,6 +212,18 @@ async fn interface(
             Some(event)=player.events.recv()=>match event{
                 PlayerEvent::Ended(media)=>app.playback_ended(&media),
                 PlayerEvent::Error(message)=>{app.status=message;app.redraw=true;}
+            },
+            Some(event)=async { desktop_media.as_mut().expect("guarded desktop bridge").events.recv().await },if desktop_media.is_some()=>match event {
+                ytui_services::mpris::Event::Next=>app.action(ytui_core::shortcuts::Action::NextTrack),
+                ytui_services::mpris::Event::Previous=>app.action(ytui_core::shortcuts::Action::PreviousTrack),
+                ytui_services::mpris::Event::Play=>{
+                    let index = app.snapshot.playback.current.unwrap_or(0);
+                    if let Some(media)=app.snapshot.playback.items.get(index).cloned()
+                        && app.play_existing(media)
+                    {app.snapshot.playback.current=Some(index);app.dirty=true;}
+                },
+                ytui_services::mpris::Event::Quit=>app.quit=true,
+                ytui_services::mpris::Event::Stop=>app.action(ytui_core::shortcuts::Action::Stop),
             },
             _=tick.tick()=>{
                 app.tick().await;
@@ -326,6 +357,27 @@ mod tests {
                     app::Modal::Queue(0),
                     app::Modal::History(Default::default()),
                     app::Modal::Groups(0),
+                    app::Modal::Destinations(0),
+                    app::Modal::Outputs {
+                        job: a.snapshot.downloads.jobs[0].id,
+                        selected: 0,
+                    },
+                    app::Modal::Account {
+                        profiles: vec![],
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 0,
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 1,
+                        selected: 0,
+                    },
+                    app::Modal::PlayerSettings {
+                        section: 2,
+                        selected: 0,
+                    },
                     app::Modal::Resume(0),
                     app::Modal::Watches(0),
                     app::Modal::Text {
@@ -641,6 +693,40 @@ mod tests {
         a.shutdown().await;
     }
     #[tokio::test]
+    async fn playback_failures_explain_recovery_and_keep_remapped_actions_visible_in_all_themes() {
+        let (mut a, _rx, _temp) = fixture().await;
+        a.tab = 1;
+        a.config.keybindings.insert("f8".into(), "command".into());
+        a.config.keybindings.insert("f9".into(), "settings".into());
+        a.player_status.error =
+            Some("yt-dlp failed: ERROR: Sign in to confirm you are not a bot".into());
+        for theme in ytui_services::theme::THEMES {
+            a.palette = ytui_services::theme::builtin(theme).unwrap();
+            for (width, height) in [(35, 12), (80, 24), (180, 50)] {
+                let mut terminal = Terminal::new(TestBackend::new(width, height)).unwrap();
+                terminal.draw(|f| ui::render(f, &mut a)).unwrap();
+                let text = terminal
+                    .backend()
+                    .buffer()
+                    .content
+                    .iter()
+                    .map(|c| c.symbol())
+                    .collect::<String>();
+                assert!(
+                    text.contains("f8 Actions"),
+                    "{theme} {width}x{height} hides recovery actions"
+                );
+                if width >= 80 {
+                    assert!(text.contains("YouTube requires verification"));
+                    assert!(text.contains("f9 Settings"));
+                    assert!(text.contains("Open Account"));
+                    assert!(!text.contains("Y retry with yt-dlp"));
+                }
+            }
+        }
+        a.shutdown().await;
+    }
+    #[tokio::test]
     async fn download_counts_and_player_time_stay_readable_in_small_and_light_layouts() {
         use ytui_core::JobState;
         let (mut a, _rx, _temp) = fixture().await;
@@ -694,7 +780,7 @@ mod tests {
             .iter()
             .map(|c| c.symbol())
             .collect::<String>();
-        assert!(text.contains("Muted preview"));
+        assert!(text.contains("Video preview"));
         assert!(text.contains("esc closes"));
         a.shutdown().await;
     }
@@ -785,6 +871,7 @@ mod tests {
             active: true,
             ..Default::default()
         };
+        a.snapshot.playback.play(media.clone());
         a.player_update(status.clone());
         assert!(a.snapshot.positions.entries.is_empty());
         status.preview = false;

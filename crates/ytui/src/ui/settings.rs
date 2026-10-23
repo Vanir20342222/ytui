@@ -4,7 +4,7 @@ use crate::{app::HitTarget, forms::Form};
 pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(Rect, HitTarget)> {
     let mut hits = Vec::new();
     f.render_widget(Clear, rect);
-    let block = panel(format!(" {} ", form.title()), app);
+    let block = panel(format!(" {} ", app.tr(form.title())), app);
     let inner = block.inner(rect);
     f.render_widget(block, rect);
     let chunks = Layout::vertical([
@@ -14,6 +14,7 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
     ])
     .split(inner);
     let (title, indices) = form.sections()[form.section];
+    let title = app.tr(title);
     f.render_widget(
         Paragraph::new(format!(
             " {title}  ·  {} / {}",
@@ -45,6 +46,7 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
                 break;
             }
             let active = index == form.section;
+            let name = app.tr(name);
             f.render_widget(
                 Paragraph::new(format!("{} {name}", if active { "›" } else { " " })).style(
                     Style::default()
@@ -102,7 +104,7 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
             ));
         let label_width = if row.width > 60 { 31 } else { row.width / 2 };
         f.render_widget(
-            Paragraph::new(field.label).style(style),
+            Paragraph::new(app.tr(field.label)).style(style),
             Rect::new(row.x, row.y, label_width.saturating_sub(1), 1),
         );
         let value_area = Rect::new(
@@ -118,9 +120,9 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
         );
         let text = if field.toggle {
             if field.value.text == "yes" {
-                "● on".into()
+                app.tr("● on").into()
             } else {
-                "○ off".into()
+                app.tr("○ off").into()
             }
         } else if !field.choices.is_empty() {
             format!("‹ {text} ›")
@@ -157,9 +159,12 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
             _ => "Countries: DE,US. Servers: comma-separated HTTP(S) origins; blank discovers.",
         }
     };
-    let message = form.error.as_deref().unwrap_or(default_message);
+    let message = form
+        .error
+        .as_deref()
+        .unwrap_or_else(|| form.explanation().unwrap_or(default_message));
     f.render_widget(
-        Paragraph::new(message)
+        Paragraph::new(app.tr(message))
             .wrap(Wrap { trim: true })
             .style(Style::default().fg(themed(
                 app,
@@ -172,8 +177,8 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
         Rect::new(footer.x + 1, footer.y, footer.width.saturating_sub(2), 2),
     );
     let buttons = Layout::horizontal([
-        Constraint::Length(14),
-        Constraint::Length(16),
+        Constraint::Length(19),
+        Constraint::Length(18),
         Constraint::Min(0),
     ])
     .split(Rect::new(
@@ -182,23 +187,34 @@ pub(super) fn render(f: &mut Frame, app: &App, form: &Form, rect: Rect) -> Vec<(
         footer.width.saturating_sub(2),
         1,
     ));
+    let save = app.tr(if download {
+        "[Enter Start]"
+    } else {
+        "[Enter Save]"
+    });
+    let save = if save.width() > buttons[0].width as usize {
+        app.tr(if download { "[Start]" } else { "[Save]" })
+    } else {
+        save
+    };
+    let cancel = app.tr("[Esc Cancel]");
+    let cancel = if cancel.width() > buttons[1].width as usize {
+        app.tr("[Cancel]")
+    } else {
+        cancel
+    };
     f.render_widget(
-        Paragraph::new(if download {
-            "[Enter Start]"
-        } else {
-            "[Enter Save]"
-        })
-        .style(Style::default().fg(themed(app, app.palette.accent))),
+        Paragraph::new(save).style(Style::default().fg(themed(app, app.palette.accent))),
         buttons[0],
     );
     f.render_widget(
-        Paragraph::new("[Esc Cancel]").style(Style::default().fg(themed(app, app.palette.muted))),
+        Paragraph::new(cancel).style(Style::default().fg(themed(app, app.palette.muted))),
         buttons[1],
     );
     hits.push((buttons[0], HitTarget::SettingsSave));
     hits.push((buttons[1], HitTarget::SettingsCancel));
     f.render_widget(
-        Paragraph::new("PgUp/PgDn sections · F6 focus · ↑/↓ fields · Space toggle")
+        Paragraph::new(app.tr("PgUp/PgDn sections · F6 focus · ↑/↓ fields · Space toggle"))
             .style(Style::default().fg(themed(app, app.palette.muted))),
         Rect::new(
             footer.x + 1,

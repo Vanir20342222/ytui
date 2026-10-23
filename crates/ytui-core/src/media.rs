@@ -40,6 +40,29 @@ pub struct Media {
     pub chapters: Vec<crate::Chapter>,
 }
 impl Media {
+    /// Conservative retained-data estimate for UI windows, including nested text.
+    pub fn retained_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.id.len()
+            + self.title.len()
+            + self.creator.len()
+            + self.url.len()
+            + self.thumbnail.len()
+            + self.section.len()
+            + self.description.len()
+            + self.browse_id.as_ref().map_or(0, String::len)
+            + self.tracks_url.as_ref().map_or(0, String::len)
+            + self
+                .thumbnails
+                .iter()
+                .map(|value| std::mem::size_of::<Thumbnail>() + value.url.len())
+                .sum::<usize>()
+            + self
+                .chapters
+                .iter()
+                .map(|value| std::mem::size_of::<crate::Chapter>() + value.title.len())
+                .sum::<usize>()
+    }
     pub fn collection(&self) -> bool {
         matches!(
             self.kind,
@@ -68,6 +91,22 @@ pub struct Page {
     pub items: Vec<Media>,
     pub continuation: Option<String>,
     pub notice: Option<String>,
+}
+impl Page {
+    pub fn retained_bytes(&self) -> usize {
+        self.items.iter().map(Media::retained_bytes).sum::<usize>()
+            + self.title.len()
+            + self.continuation.as_ref().map_or(0, String::len)
+            + self.notice.as_ref().map_or(0, String::len)
+            + self
+                .categories
+                .iter()
+                .map(|category| {
+                    category.title.len()
+                        + serde_json::to_string(&category.request).map_or(0, |text| text.len())
+                })
+                .sum::<usize>()
+    }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Category {
@@ -123,6 +162,17 @@ pub fn http_url(raw: &str) -> anyhow::Result<Url> {
 pub fn youtube_host(host: &str) -> bool {
     host == "youtube.com" || host.ends_with(".youtube.com") || host == "youtu.be"
 }
+/// A dedicated playlist link requests the collection; a watch link with list=
+/// remains a single video unless playlist intent is explicitly selected.
+pub fn is_playlist_url(raw: &str) -> bool {
+    http_url(raw).is_ok_and(|url| {
+        youtube_host(url.host_str().unwrap_or_default())
+            && url.path().trim_end_matches('/') == "/playlist"
+            && url
+                .query_pairs()
+                .any(|(key, value)| key == "list" && !value.is_empty())
+    })
+}
 /// Preserve real playlist context, but never expand an auto-generated mix implicitly.
 pub fn normalize_media_url(raw: &str) -> anyhow::Result<String> {
     let raw = raw.trim();
@@ -143,7 +193,11 @@ pub fn normalize_media_url(raw: &str) -> anyhow::Result<String> {
         let mix = pairs
             .iter()
             .any(|(k, v)| k == "list" && v.starts_with("RD"));
-        if mix {
+        let has_video = pairs
+            .iter()
+            .any(|(key, value)| key == "v" && !value.is_empty())
+            || (url.host_str() == Some("youtu.be") && !url.path().trim_matches('/').is_empty());
+        if mix && has_video {
             url.query_pairs_mut().clear().extend_pairs(
                 pairs
                     .iter()
@@ -236,6 +290,22 @@ mod tests {
         );
         assert!(http_url("file:///etc/passwd").is_err());
         assert!(!youtube_host("youtube.com.evil.test"));
+    }
+    #[test]
+    fn dedicated_playlists_and_watch_context_have_distinct_intent() {
+        for host in ["www.youtube.com", "music.youtube.com"] {
+            let playlist = format!("https://{host}/playlist?list=PLsynthetic");
+            assert!(is_playlist_url(&playlist));
+            assert!(!is_playlist_url(&format!(
+                "https://{host}/watch?v=synthetic00&list=PLsynthetic"
+            )));
+            let mix = format!("https://{host}/playlist?list=RDsynthetic");
+            assert_eq!(normalize_media_url(&mix).unwrap(), mix);
+        }
+        assert!(!is_playlist_url(
+            "https://youtube.com.evil.test/playlist?list=PLsynthetic"
+        ));
+        assert!(!is_playlist_url("https://www.youtube.com/playlist?list="));
     }
     #[test]
     fn repeat_and_removal_preserve_queue_position() {

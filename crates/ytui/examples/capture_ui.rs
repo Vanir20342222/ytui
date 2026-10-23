@@ -24,6 +24,12 @@ struct Args {
     /// Refresh only the three existing download-form screenshots.
     #[arg(long)]
     downloads_only: bool,
+    /// Refresh only the audit dialogs, without recapturing every theme/workspace.
+    #[arg(long, conflicts_with = "downloads_only")]
+    audit_panels_only: bool,
+    /// Refresh German navigation/settings and the local lyrics panel.
+    #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only"])]
+    comfort_panels_only: bool,
     #[arg(long, default_value = "docs/screenshots")]
     output: PathBuf,
     #[arg(
@@ -189,6 +195,33 @@ async fn seed_offline(root: &Path) -> Result<()> {
     store.close().await?;
     Ok(())
 }
+fn write_manifest(args: &Args) -> Result<()> {
+    let mut captures = Vec::new();
+    let mut dirs = vec![args.output.clone()];
+    while let Some(dir) = dirs.pop() {
+        for entry in std::fs::read_dir(dir)? {
+            let path = entry?.path();
+            if path.is_dir() {
+                dirs.push(path);
+            } else if path.extension().is_some_and(|e| e == "png") {
+                ensure!(
+                    image::image_dimensions(&path)? == (2560, 1440),
+                    "Not WQHD: {}",
+                    path.display()
+                );
+                captures.push(path.strip_prefix(&args.output)?.display().to_string());
+            }
+        }
+    }
+    captures.sort();
+    let manifest = serde_json::json!({"source":"Actual Rust executable PTY output captured by native Rust tooling; fictional demo/offline data and generated artwork","binary":args.binary,"size":[2560,1440],"terminal":[212,58],"compact_terminal":[80,24],"themes":ytui_services::theme::THEMES,"captures":captures,"real_desktop_capture":false});
+    std::fs::write(
+        args.output.join("manifest.json"),
+        format!("{}\n", serde_json::to_string_pretty(&manifest)?),
+    )?;
+    println!("{} WQHD screenshots captured with Rust", captures.len());
+    Ok(())
+}
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -197,6 +230,80 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.comfort_panels_only {
+        let file = temp.path().join("fictional song.lrc");
+        std::fs::write(
+            &file,
+            "[ar:Fictional studio]\n[00:01]A quiet morning in the city\n[00:06]The sunlight finds an open door\n[00:11]We keep the rhythm of the river\n[00:16]And let the next song carry on\n",
+        )?;
+        capture.command(
+            &format!("lyrics-local {}", file.display()),
+            "A quiet morning",
+        )?;
+        shot(&mut capture, &args.output.join("lyrics.png"), &font)?;
+        capture.close()?;
+        let mut capture =
+            Capture::with_language(&binary, &temp.path().join("german"), false, "de")?;
+        shot(&mut capture, &args.output.join("german-youtube.png"), &font)?;
+        capture.command("settings", "Allgemeine Einstellungen")?;
+        shot(
+            &mut capture,
+            &args.output.join("german-settings.png"),
+            &font,
+        )?;
+        capture.send("\x1b")?;
+        capture.send(":")?;
+        capture.send("Liedtext")?;
+        shot(&mut capture, &args.output.join("german-actions.png"), &font)?;
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
+    if args.audit_panels_only {
+        for (command, name, expected) in [
+            ("player-formats", "player-formats", "Available formats"),
+            (
+                "sponsor-status",
+                "sponsorblock-status",
+                "SponsorBlock & ad handling",
+            ),
+            (
+                "download-recent",
+                "recent-folders",
+                "Recent download folders",
+            ),
+            ("capabilities", "capabilities", "Setup & capabilities"),
+            ("log", "diagnostics", "Diagnostics"),
+            ("thumbnail-cache", "thumbnail-cache", "Thumbnail cache"),
+        ] {
+            capture.command(command, expected)?;
+            shot(
+                &mut capture,
+                &args.output.join(format!("{name}.png")),
+                &font,
+            )?;
+            capture.send("\x1b")?;
+        }
+        capture.close()?;
+        let offline = temp.path().join("offline");
+        seed_offline(&offline).await?;
+        let mut capture = Capture::new(&binary, &offline, true)?;
+        for (command, name, expected) in [
+            ("download-files", "download-files", "Files ·"),
+            ("auth", "account-setup", "YouTube account"),
+        ] {
+            capture.command(command, expected)?;
+            shot(
+                &mut capture,
+                &args.output.join(format!("{name}.png")),
+                &font,
+            )?;
+            capture.send("\x1b")?;
+        }
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
     if args.downloads_only {
         capture.command(
             "add https://www.youtube.com/watch?v=fixture1234",
@@ -216,6 +323,7 @@ async fn main() -> Result<()> {
         }
         capture.send("\x1b")?;
         capture.close()?;
+        write_manifest(&args)?;
         println!("3 WQHD download-form screenshots refreshed");
         return Ok(());
     }
@@ -272,6 +380,19 @@ async fn main() -> Result<()> {
         ("groups", "groups", "Download groups"),
         ("log", "diagnostics", "Diagnostics"),
         ("update", "update", "Update ytui"),
+        ("player-formats", "player-formats", "Available formats"),
+        (
+            "sponsor-status",
+            "sponsorblock-status",
+            "SponsorBlock & ad handling",
+        ),
+        (
+            "download-recent",
+            "recent-folders",
+            "Recent download folders",
+        ),
+        ("capabilities", "capabilities", "Setup & capabilities"),
+        ("thumbnail-cache", "thumbnail-cache", "Thumbnail cache"),
         (
             "add https://www.youtube.com/watch?v=fixture1234",
             "download-options",
@@ -364,34 +485,17 @@ async fn main() -> Result<()> {
         )?;
         capture.send("\x1b")?;
     }
+    capture.command("download-files", "Files ·")?;
+    shot(&mut capture, &args.output.join("download-files.png"), &font)?;
+    capture.send("\x1b")?;
+    capture.command("auth", "YouTube account")?;
+    shot(&mut capture, &args.output.join("account-setup.png"), &font)?;
+    capture.send("\x1b")?;
     capture.close()?;
     std::fs::copy(
         args.output.join("themes/ytui-light.png"),
         args.output.join("light.png"),
     )?;
-    let mut captures = Vec::new();
-    let mut dirs = vec![args.output.clone()];
-    while let Some(dir) = dirs.pop() {
-        for entry in std::fs::read_dir(dir)? {
-            let path = entry?.path();
-            if path.is_dir() {
-                dirs.push(path);
-            } else if path.extension().is_some_and(|e| e == "png") {
-                ensure!(
-                    image::image_dimensions(&path)? == (2560, 1440),
-                    "Not WQHD: {}",
-                    path.display()
-                );
-                captures.push(path.strip_prefix(&args.output)?.display().to_string());
-            }
-        }
-    }
-    captures.sort();
-    let manifest = serde_json::json!({"source":"Actual Rust executable PTY output captured by native Rust tooling; fictional demo/offline data and generated artwork","binary":args.binary,"size":[2560,1440],"terminal":[212,58],"compact_terminal":[80,24],"themes":ytui_services::theme::THEMES,"captures":captures,"real_desktop_capture":false});
-    std::fs::write(
-        args.output.join("manifest.json"),
-        format!("{}\n", serde_json::to_string_pretty(&manifest)?),
-    )?;
-    println!("{} WQHD screenshots captured with Rust", captures.len());
+    write_manifest(&args)?;
     Ok(())
 }
