@@ -23,7 +23,7 @@ isolation, shared discovery and redirect downgrade fixes.
 | B06 | Cancellable preparation, operation IDs, serialized blocking commits, busy draft retention and deferred Disconnect. Synthetic concurrent-store/restart, repeated Disconnect and committed-settings/Disconnect regressions pass. File-only logout does not enlist the keyring; a durable logout marker blocks automatic restoration after failed cleanup. Player account handoff waits for channel capacity before allowing new playback. Live keyring/browser acceptance remains open. |
 | B07 | Shared codecs/bitrate/VBR, metadata/template/height options, private staging and cleanup. Unsupported local thumbnail/caption/SponsorBlock/chapter options fail explicitly. Actual 320K regression and existing real-media checks pass. |
 | B08 | Duplicate identity compares requested output format, quality, selector, destination and postprocessing; transport/backend policy is excluded. |
-| B09/F12 | Alpha.12 source, commit-aware launcher versions, candidate main PR, checksum/license archive tooling, exact-SHA Arch recipe, executable backup/rollback and manual candidate workflow. Main merge, accepted release tag, Arch installation and real copied-data rollback are still gates. |
+| B09/F12 | Alpha.12 source, commit-aware launcher versions, candidate main PR, checksum/license archive tooling, exact-SHA Arch recipe, executable backup/rollback and manual candidate workflow. Main integration is reviewed in PR_REVIEW_2026-10-24.md. An accepted release tag, Arch installation and real copied-data rollback remain gates. |
 | R01/F08 | Off → B fetches marks; category changes discard stale marks. Loopback API regression, overlaps/replay and real mpv controls pass. Status panel explains mark/skip/off, API recovery and the limits of ad handling. |
 | R02 | Forward pagination continues with a 2,000-item / 8-MiB estimated media window. Back history: eight pages / 12 MiB per tab; continuation-token memory bounded. Prefetch uses actual card dimensions. Long synthetic feed passes. Older released items require navigating back/reloading their feed. |
 | R03 | Explicit HTTP and SOCKS5/5h clients tested with an unresolvable `.invalid` destination and loopback proxies; SOCKS uses remote DNS consistently. Actual mpv HTTP proxy playback passes. mpv SOCKS is explicitly rejected before launch, with HTTP/VPN guidance, rather than silently connecting directly. HTTPS proxy auth/tunnels and actual Proton network remain target checks. |
@@ -77,7 +77,7 @@ modifies user media. Fixture/startup success is not a 99% reliability claim.
    control/fault sweep. Record failures and actual decoded output separately.
 4. Real YouTube full-collection expansion, selected ranges, cancellation/restart,
    unavailable entries and shared-group cases. The native extraction guard stays.
-5. Review main integration, Arch recipe on Arch, license-only metadata entries,
+5. Review the Arch recipe on Arch, license-only metadata entries,
    release provenance, checksum and update/rollback against a copy of old state.
    See [release/candidate instructions](RELEASE_CANDIDATE.md).
 6. Complete remaining German guidance/status prose and target-PC lyric matching/
