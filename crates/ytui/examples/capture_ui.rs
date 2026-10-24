@@ -30,6 +30,9 @@ struct Args {
     /// Refresh German navigation/settings and the local lyrics panel.
     #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only"])]
     comfort_panels_only: bool,
+    /// Capture the local saved shelf and sleep-timer form without public access.
+    #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only", "comfort_panels_only"])]
+    library_panels_only: bool,
     #[arg(long, default_value = "docs/screenshots")]
     output: PathBuf,
     #[arg(
@@ -230,6 +233,54 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.library_panels_only {
+        capture.close()?;
+        let root = temp.path().join("saved-library");
+        std::fs::create_dir_all(&root)?;
+        let mut snapshot = Snapshot::default();
+        for (id, title, kind) in [
+            (
+                "fictional01",
+                "City walks · Morning light",
+                MediaKind::Video,
+            ),
+            (
+                "fictional02",
+                "Studio sessions · A quiet evening",
+                MediaKind::Song,
+            ),
+            (
+                "fictional03",
+                "Making things · Small weekend projects",
+                MediaKind::Video,
+            ),
+        ] {
+            snapshot.saved_media.toggle(Media {
+                id: id.into(),
+                title: title.into(),
+                creator: "Fictional studio".into(),
+                url: format!("https://www.youtube.com/watch?v={id}"),
+                kind,
+                duration: Some(240),
+                ..Default::default()
+            })?;
+        }
+        let store = Store::open(&root.join("state"))?;
+        store.save(snapshot).await?;
+        store.close().await?;
+        let mut capture = Capture::new(&binary, &root, true)?;
+        capture.command("saved", "City walks")?;
+        capture.command("sleep 30m", "Sleep timer set")?;
+        shot(&mut capture, &args.output.join("saved-media.png"), &font)?;
+        capture.send(":")?;
+        capture.send("Set sleep timer")?;
+        capture.send("\r")?;
+        capture.wait_for("Duration (e.g. 30m)")?;
+        shot(&mut capture, &args.output.join("sleep-timer.png"), &font)?;
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
     if args.comfort_panels_only {
         let file = temp.path().join("fictional song.lrc");
         std::fs::write(

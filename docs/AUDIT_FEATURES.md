@@ -3,6 +3,15 @@
 Press **F2** for Actions; **`,`** opens general settings. All global shortcuts can
 be reviewed/remapped in Keyboard bindings. No bottom command line is needed.
 
+- **S / Library → Save or remove selected video/song locally** toggles a local
+  bookmark. **Saved locally** in Library or the feed picker opens it; **/** filters
+  titles, creators and video IDs. Reviewing works offline; playback needs a
+  connection. These entries survive restart/account disconnect.
+- **o → Set sleep timer** accepts `30m`, `1h` or `90s`, up to 24 hours. Its countdown
+  appears in the player strip. Status/cancel actions share that menu; expiry stops
+  playback and queue advance, retaining the queue and keeping ytui open. It resets
+  after restarting the app. See [research and verification](FEATURE_RESEARCH_2026-10-24.md).
+
 - **Account → Connect browser** discovers profile directories, then opens a review
   form. Enter in that form explicitly imports/validates the chosen profile.
   Complete YouTube/Music consent or bot verification in the browser first.

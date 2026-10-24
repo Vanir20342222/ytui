@@ -745,6 +745,22 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 }
             ) {
                 "Open a local UTF-8 .lrc or text file up to 512 KiB. No network request."
+            } else if matches!(
+                form.kind,
+                crate::forms::FormKind::Action {
+                    command: "sleep",
+                    ..
+                }
+            ) {
+                "30m / 1h / 90s · max 24h · Stops playback; keeps queue · Session only"
+            } else if matches!(
+                form.kind,
+                crate::forms::FormKind::Action {
+                    command: "saved",
+                    ..
+                }
+            ) {
+                "Search local titles, artists or video IDs · Blank shows all saved media"
             } else {
                 "Playlist indices: 1,3:7 · Quality: best or height (e.g. 1080)"
             };

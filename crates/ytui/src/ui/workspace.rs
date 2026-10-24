@@ -1210,7 +1210,14 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
         } else if status.active {
             let cols = Layout::horizontal([Constraint::Min(1), Constraint::Length(7)]).split(area);
             f.render_widget(
-                Paragraph::new(format!(" ▶ {}", status.title)).style(style(app, app.palette.text)),
+                Paragraph::new(format!(
+                    " ▶ {}{}",
+                    status.title,
+                    app.sleep_label()
+                        .map(|label| format!(" · {label}"))
+                        .unwrap_or_default()
+                ))
+                .style(style(app, app.palette.text)),
                 cols[0],
             );
             f.render_widget(
@@ -1218,6 +1225,11 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
                     .right_aligned()
                     .style(style(app, app.palette.accent)),
                 cols[1],
+            );
+        } else if let Some(label) = app.sleep_label() {
+            f.render_widget(
+                Paragraph::new(format!(" {label}")).style(style(app, app.palette.accent)),
+                area,
             );
         } else {
             f.render_widget(
@@ -1242,7 +1254,10 @@ fn playback(f: &mut Frame, app: &mut App, area: Rect) {
         " Player "
     };
     let mut block = panel(title, app);
-    if status.active && area.width >= 75 {
+    if let Some(label) = app.sleep_label() {
+        block = block.title_bottom(Line::from(format!(" {label} ")).left_aligned());
+    }
+    if status.active && area.width >= if app.sleep_label().is_some() { 100 } else { 75 } {
         block = block.title_bottom(
             Line::from(format!(
                 " shuffle {} · repeat {:?} ",

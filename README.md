@@ -6,6 +6,7 @@ CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 
 This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDIT_IMPLEMENTATION.md)). Live account and desktop acceptance remains open;
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
+[Research and usage](docs/FEATURE_RESEARCH_2026-10-24.md) cover the local saved shelf and sleep timer.
 
 ```bash
 git clone https://github.com/Vanir20342222/ytui.git
@@ -37,6 +38,8 @@ and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility al
 - `F2 → Player`: actual formats, audio/subtitle choices, SponsorBlock status; `F2 → Settings`: setup, thumbnail cache and safe support export.
 - `F2 → Downloads`: full-collection individual jobs, per-entry retry/files and recent destinations.
 - `u`: explicit local playback resume; `p`: playback queue.
+- `S`: save/remove a video or song locally; **Library → Saved locally** opens the shelf and `/` searches it.
+- **o → Set sleep timer** stops playback after e.g. `30m` while keeping the queue; cancel it from the same menu.
 - `ytui --demo`: fictional catalog for UI review; `ytui --offline`: local library.
 - `ytui doctor --network`: opt-in public provider diagnostics without importing an account.
 - `ytui playback-check URL --backend native`: check three seconds of actual mpv playback without browser cookies.

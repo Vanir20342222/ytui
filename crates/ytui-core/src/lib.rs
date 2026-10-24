@@ -1,5 +1,6 @@
 pub mod chapters;
 pub mod config;
+pub mod saved;
 pub use chapters::Chapter;
 pub mod history;
 pub mod media;

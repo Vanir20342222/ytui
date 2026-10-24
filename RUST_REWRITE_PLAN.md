@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M4/M5/M7/M8 researched feature follow-up: a bounded, searchable local saved-media
+shelf and session sleep timer are implemented with remappable actions, persistence,
+queue-pressure/EOF guards, English/German labels and actual mpv/PTY checks.
+[Research, usage and evidence](docs/FEATURE_RESEARCH_2026-10-24.md) record the
+source inspiration, limits and verification separately from live-service gates.
+
 M2–M8 PR integration review (2026-10-24): the user authorized checking and merging
 all PRs. The audit report is merged, the networking commit pushed after PR #13's
 merge is included, and import/collection regressions are repaired. See

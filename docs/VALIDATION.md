@@ -1,5 +1,13 @@
 # Validation record
 
+## Researched saved-media/sleep features — 2026-10-24 (M4/M5/M7/M8)
+
+[Research, usage and verification](FEATURE_RESEARCH_2026-10-24.md) record the new
+local saved shelf and session timer: 254 deterministic passes, 29 opt-in ignored,
+11 actual local media passes and one private D-Bus MPRIS pass. Theme/language/size
+rendering covers 390 feature states; real PTY interaction and restart persistence
+are exercised. Formatting, strict Clippy and the 63-entry WQHD manifest pass.
+
 ## PR integration review — 2026-10-24 (M2–M8)
 
 [The PR review](PR_REVIEW_2026-10-24.md) records all PR dispositions and the

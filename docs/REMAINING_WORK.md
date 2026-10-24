@@ -20,6 +20,11 @@ LRCLIB/local LRC lyrics and initial German navigation/settings/actions/help;
 remaining status/guidance prose is not fully localized. The alpha candidate is
 integrated on main; a tagged stable release still requires the acceptance gates.
 
+The [researched feature follow-up](FEATURE_RESEARCH_2026-10-24.md) adds a local
+saved-video/song shelf and session sleep timer. Saved links can be reviewed
+offline and survive account disconnect; they require a connection to play.
+This does not implement named local playlists or remote account mutations.
+
 ## Previous local evidence (alpha.11)
 
 The transition and alpha sections below retain their original results. Later

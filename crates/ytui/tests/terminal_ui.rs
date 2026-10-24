@@ -106,3 +106,37 @@ fn real_terminal_uses_german_search_settings_and_offline_lyrics() {
         .unwrap();
     term.close().unwrap();
 }
+
+#[test]
+fn real_terminal_opens_sleep_timer_and_local_saved_shelf_offline() {
+    let temp = tempfile::tempdir().unwrap();
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    runtime.block_on(async {
+        let store = ytui_services::store::Store::open(&temp.path().join("state")).unwrap();
+        let mut snapshot = ytui_services::store::Snapshot::default();
+        snapshot
+            .saved_media
+            .toggle(ytui_core::Media {
+                url: "https://youtu.be/abcdefghijk".into(),
+                title: "PTY saved fixture".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        store.save(snapshot).await.unwrap();
+        store.close().await.unwrap();
+    });
+    let mut term = Capture::new(Path::new(env!("CARGO_BIN_EXE_ytui")), temp.path(), true).unwrap();
+    term.command("saved", "PTY saved fixture").unwrap();
+    term.send("S").unwrap();
+    term.wait_for("Removed from saved shelf").unwrap();
+    term.command("sleep 30m", "Sleep timer set").unwrap();
+    term.command("sleep", "Sleep timer").unwrap();
+    term.send("\x1b").unwrap();
+    term.command("sleep off", "Sleep timer cancelled").unwrap();
+    term.close().unwrap();
+    runtime.block_on(async {
+        let store = ytui_services::store::Store::open(&temp.path().join("state")).unwrap();
+        assert!(store.load().await.unwrap().saved_media.entries.is_empty());
+        store.close().await.unwrap();
+    });
+}

@@ -576,11 +576,17 @@ mod tests {
             a.feed_choices()
                 .iter()
                 .all(|(_, _, command)| command.starts_with("offline")
-                    || ["resume", "watches"].contains(command))
+                    || ["resume", "watches", "saved"].contains(command))
         );
         a.key(KeyCode::F(8).into());
-        a.key(KeyCode::Down.into());
-        a.key(KeyCode::Down.into());
+        let resume_index = a
+            .feed_choices()
+            .iter()
+            .position(|(_, _, command)| *command == "resume")
+            .unwrap();
+        for _ in 0..resume_index {
+            a.key(KeyCode::Down.into());
+        }
         a.key(KeyCode::Enter.into());
         assert!(matches!(a.modal, Some(app::Modal::Resume(0))));
         assert!(rx.try_recv().is_err());
