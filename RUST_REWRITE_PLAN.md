@@ -1,9 +1,18 @@
 # ytui Rust rewrite plan
 
+M2–M8 PR integration review (2026-10-24): the user authorized checking and merging
+all PRs. The audit report is merged, the networking commit pushed after PR #13's
+merge is included, and import/collection regressions are repaired. See
+[the integration report](docs/PR_REVIEW_2026-10-24.md) for review dispositions,
+fourteen new tests and source-versus-live acceptance evidence.
+
 M2–M6/M8 alpha.12 networking follow-up fixes details cooldown bypass, redirected
 radio playlists/deadlines, blocking cover proxy routing and stale requests after
 network-setting changes. See [the network review](docs/NETWORK_RELIABILITY_2026-10-23.md)
 for deterministic/actual-tool checks and the separate public-service results.
+The second pass extends this to background watches, radio mirror selection,
+provider-scoped disk fallback, cached discovery and redirect upgrade/downgrade
+chains, with 217 deterministic passes and ten actual local media passes.
 
 M5/M7/M8 alpha.12 comfort follow-up adds explicit reviewed LRCLIB lyrics, offline
 LRC/text, timed-line following, initial German UI labels and bilingual Actions

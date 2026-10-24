@@ -17,8 +17,8 @@ implementation-gap rows below for formats, account setup, MPRIS, collection grou
 recent folders, file opening, diagnostics and release tooling. Their live/desktop/
 packaging acceptance remains explicitly separate. The follow-up adds reviewed
 LRCLIB/local LRC lyrics and initial German navigation/settings/actions/help;
-remaining status/guidance prose is not fully localized. A main merge/tag is still
-pending the acceptance gates.
+remaining status/guidance prose is not fully localized. The alpha candidate is
+integrated on main; a tagged stable release still requires the acceptance gates.
 
 ## Previous local evidence (alpha.11)
 

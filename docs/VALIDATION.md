@@ -1,9 +1,21 @@
 # Validation record
 
+## PR integration review — 2026-10-24 (M2–M8)
+
+[The PR review](PR_REVIEW_2026-10-24.md) records all PR dispositions and the
+additional import/collection fixes. Fourteen new regressions exercise output
+identity, failed-import retry, file/JSON boundaries, pagination, cancellation and
+complete collection-memory accounting. Full workspace: 231 passed, 28 opt-in
+ignored; strict all-target Clippy and formatting pass. Actual media/desktop and
+public-network results are recorded separately in that report.
+
 ## Alpha.12 networking follow-up — 2026-10-23 (M2–M6/M8)
 
-See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): 210 deterministic
-tests and ten actual local media tests pass; strict Clippy and formatting pass.
+See [the networking review](NETWORK_RELIABILITY_2026-10-23.md): the second pass
+extends the b973434 fixes with watch cooldown/cancellation, mirror selection,
+scoped disk fallback, discovery caching and redirect upgrade/downgrade handling.
+217 deterministic tests and ten actual local media tests pass; strict Clippy and
+formatting pass.
 Five public checks pass (including actual radio progress); YouTube browsing and
 its independent thumbnail CDN check fail at the cloud proxy tunnel. The earlier
 204-test and archive evidence below belongs to the preceding implementation.
@@ -38,7 +50,7 @@ using actual executable PTY output and fictional data. They are not Ghostty devi
 screenshots. New dialogs size to their content. The PNG/manifest regression checks
 2560×1440 dimensions and complete registration.
 
-The candidate targets main via PR #13; main is still alpha.5. Source-package/Arch,
+At that checkpoint the candidate targeted main via PR #13, which has since merged. Source-package/Arch,
 checksum/license archive and executable rollback tooling is provided; a tagged
 release, Arch installation, real copied-state migration/rollback, signed-in journeys
 and desktop/audio acceptance remain gates. Lyrics and initial German UI are

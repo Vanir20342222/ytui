@@ -927,3 +927,78 @@ async fn network_settings_cancel_old_feed_requests_and_reject_their_results() {
     );
     app.shutdown().await;
 }
+
+fn network_watch() -> ytui_core::watch::CollectionWatch {
+    ytui_core::watch::CollectionWatch {
+        id: uuid::Uuid::new_v4(),
+        title: "Network fixture".into(),
+        request: ytui_core::BrowseRequest::Collection("VLfixture".into()),
+        music: false,
+        options: DownloadOptions::default(),
+        interval_seconds: 60,
+        next_check: 0,
+        enabled: true,
+        generation: 0,
+        owner: "anonymous".into(),
+        seen: Some(vec!["baseline".into()]),
+        failures: 0,
+        error: None,
+    }
+}
+
+#[tokio::test]
+async fn proxy_changes_reject_background_watch_results_without_erasing_the_baseline() {
+    let (mut app, _rx, _temp) = fixture();
+    let watch = network_watch();
+    let id = watch.id;
+    app.snapshot.watches.push(watch);
+    let mut config = app.config.clone();
+    config.proxy = Some("http://127.0.0.1:9".into());
+    let operation = app.operations.config(false);
+    app.apply(UiEvent::Config {
+        operation,
+        config: Box::new(config),
+        account: None,
+        result: Ok(()),
+    });
+    app.apply(UiEvent::Watch {
+        id,
+        generation: 0,
+        result: Ok(vec![Media {
+            id: "obsolete".into(),
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            ..Default::default()
+        }]),
+    });
+    assert_eq!(
+        app.snapshot.watches[0].seen.as_ref().unwrap(),
+        &["baseline"]
+    );
+    assert!(app.snapshot.watches[0].enabled);
+    assert!(app.snapshot.watches[0].generation > 0);
+    app.shutdown().await;
+}
+
+#[tokio::test]
+async fn background_watch_obeys_provider_retry_after() {
+    let (mut app, _rx, _temp) = fixture();
+    let watch = network_watch();
+    let id = watch.id;
+    app.snapshot.watches.push(watch);
+    let now = ytui_core::schedule::unix_now();
+    app.apply(UiEvent::Watch {
+        id,
+        generation: 0,
+        result: Err(ytui_services::browse::FeedRetry::new(
+            "Rate limited",
+            Duration::from_secs(3600),
+        )
+        .into()),
+    });
+    assert!(app.snapshot.watches[0].next_check >= now + 3600);
+    assert_eq!(
+        app.snapshot.watches[0].seen.as_ref().unwrap(),
+        &["baseline"]
+    );
+    app.shutdown().await;
+}

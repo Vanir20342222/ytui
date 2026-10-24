@@ -18,6 +18,7 @@
 
 | Document | Scope |
 | --- | --- |
+| [PR integration review](PR_REVIEW_2026-10-24.md) | PR dispositions, additional fixes and final integration checks |
 | [Validation record](VALIDATION.md) | Dated results; each section identifies its environment |
 | [Single-video sweep](SINGLE_VIDEO_SWEEP.md) | Alpha.11 playback/recovery checks on the target PC |
 | [Networking reliability review](NETWORK_RELIABILITY_2026-10-23.md) | Alpha.12 proxy/redirect/recovery fixes and public-service results |

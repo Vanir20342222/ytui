@@ -1164,6 +1164,17 @@ impl App {
                                 }
                             }
                             if network_changed {
+                                // Background watches hold cloned providers too. Cancel
+                                // their old route and reject even already-queued results,
+                                // retaining baselines and enabled/paused intent.
+                                for (_, token) in self.watch_pending.values() {
+                                    token.cancel();
+                                }
+                                self.watch_pending.clear();
+                                for watch in &mut self.snapshot.watches {
+                                    watch.generation = watch.generation.wrapping_add(1);
+                                }
+                                self.dirty = true;
                                 self.card_cancel.cancel();
                                 self.card_cancel = CancellationToken::new();
                                 self.card_generation = self.card_generation.wrapping_add(1);
@@ -1289,7 +1300,15 @@ impl App {
                     }
                     Err(e) => {
                         let message = ytui_services::process::diagnostic(&e.to_string());
-                        watch.failed(message.clone(), schedule::unix_now());
+                        let now = schedule::unix_now();
+                        watch.failed(message.clone(), now);
+                        if let Some(retry) = e.downcast_ref::<ytui_services::browse::FeedRetry>() {
+                            let seconds = retry
+                                .after
+                                .as_secs()
+                                .saturating_add(u64::from(retry.after.subsec_nanos() > 0));
+                            watch.next_check = watch.next_check.max(now.saturating_add(seconds));
+                        }
                         self.status = format!("Watch check failed · {message}");
                     }
                 }

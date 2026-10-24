@@ -36,7 +36,7 @@ fn destination(start: &Url, current: &Url, location: &str, policy: Redirects) ->
     let next = current.join(location).context("Invalid service redirect")?;
     http_url(next.as_str()).context("Unsafe service redirect")?;
     ensure!(
-        start.scheme() != "https" || next.scheme() == "https",
+        (start.scheme() != "https" && current.scheme() != "https") || next.scheme() == "https",
         "Service redirect would downgrade HTTPS"
     );
     if matches!(policy, Redirects::SameOrigin) && start.origin() != next.origin() {
@@ -122,6 +122,28 @@ mod tests {
         assert!(!error.contains("synthetic-secret"));
         assert!(destination(&start, &start, "http://radio.test/", Redirects::Public).is_err());
         assert!(destination(&start, &start, "https://radio.test/", Redirects::Public).is_ok());
+    }
+
+    #[test]
+    fn public_redirects_cannot_downgrade_after_upgrading_to_https() {
+        let start = Url::parse("http://radio.test/list.m3u").unwrap();
+        let secure = destination(
+            &start,
+            &start,
+            "https://radio.test/list.m3u",
+            Redirects::Public,
+        )
+        .unwrap();
+        assert!(
+            destination(
+                &start,
+                &secure,
+                "http://radio.test/stream",
+                Redirects::Public
+            )
+            .is_err()
+        );
+        assert!(destination(&start, &secure, "/stream", Redirects::Public).is_ok());
     }
 
     #[tokio::test]

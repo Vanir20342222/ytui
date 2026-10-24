@@ -10,6 +10,8 @@ pub struct Radio {
     pub servers: Vec<String>,
     cache: Option<std::path::PathBuf>,
     catalog: String,
+    discovery_endpoint: String,
+    discovery: std::sync::Arc<crate::cache::ResponseCache<Vec<String>>>,
     pages: std::sync::Arc<crate::cache::ResponseCache<Page>>,
 }
 impl Radio {
@@ -19,6 +21,8 @@ impl Radio {
             servers,
             cache: None,
             catalog: "https://radio.cliamp.stream/stations".into(),
+            discovery_endpoint: "https://all.api.radio-browser.info/json/servers".into(),
+            discovery: std::sync::Arc::new(crate::cache::ResponseCache::new(1, 4096)),
             pages: std::sync::Arc::new(crate::cache::ResponseCache::new(32, 4 * 1024 * 1024)),
         }
     }
@@ -45,6 +49,7 @@ impl Radio {
         ))
     }
     pub fn invalidate_page(&self, request: &BrowseRequest, offset: usize) {
+        self.discovery.clear();
         if let Ok(key) = self.page_key(request, offset) {
             self.pages.invalidate(&key);
         }
@@ -68,9 +73,11 @@ impl Radio {
     }
     async fn fetch_cached(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
         use sha2::{Digest, Sha256};
+        // Provider identity matters for disk fallback as well as memory hits.
+        // Old unscoped cache files are left intact but cannot cross directories.
         let key = hex::encode(Sha256::digest(format!(
-            "{}:{offset}",
-            serde_json::to_string(request)?
+            "v2:{}",
+            self.page_key(request, offset)?
         )));
         let path = self.cache.as_ref().map(|p| p.join(key));
         match self.fetch_live(request, offset).await {
@@ -130,6 +137,64 @@ impl Radio {
         serde_json::from_str(&limited_text(response, 8 * 1024 * 1024).await?)
             .with_context(|| format!("{host} returned an invalid radio catalog"))
     }
+    async fn directory_servers(&self) -> Result<Vec<String>> {
+        // Reuse discovery across queries, continuations and concurrent callers.
+        // Explicit Refresh invalidates it; new proxy settings create a new Radio.
+        self.discovery
+            .load(
+                self.discovery_endpoint.clone(),
+                std::time::Duration::from_secs(300),
+                || async {
+                    let data = self.json(&self.discovery_endpoint).await.ok();
+                    let mut servers = Vec::new();
+                    if let Some(rows) = data.as_ref().and_then(Value::as_array) {
+                        for name in rows
+                            .iter()
+                            .filter_map(|row| row.get("name").and_then(Value::as_str))
+                        {
+                            let valid = name.len() <= 253
+                                && name.strip_suffix(".api.radio-browser.info").is_some_and(
+                                    |prefix| {
+                                        !prefix.is_empty()
+                                            && prefix.split('.').all(|label| {
+                                                !label.is_empty()
+                                                    && label.len() <= 63
+                                                    && !label.starts_with('-')
+                                                    && !label.ends_with('-')
+                                                    && label.bytes().all(|b| {
+                                                        b.is_ascii_alphanumeric() || b == b'-'
+                                                    })
+                                            })
+                                    },
+                                );
+                            if !valid {
+                                continue;
+                            }
+                            let url = format!("https://{name}");
+                            if !servers.contains(&url) {
+                                servers.push(url);
+                            }
+                            if servers.len() == 4 {
+                                break;
+                            }
+                        }
+                    }
+                    // Discovery can return stale mirrors. Keep independent known mirrors
+                    // even when discovery itself succeeded, without duplicating requests.
+                    for server in [
+                        "https://de1.api.radio-browser.info",
+                        "https://nl1.api.radio-browser.info",
+                        "https://at1.api.radio-browser.info",
+                    ] {
+                        if !servers.iter().any(|url| url == server) {
+                            servers.push(server.into());
+                        }
+                    }
+                    Ok(servers)
+                },
+            )
+            .await
+    }
     async fn fetch_live(&self, request: &BrowseRequest, offset: usize) -> Result<Page> {
         match request {
             BrowseRequest::Cliamp => {
@@ -152,26 +217,7 @@ impl Radio {
             | BrowseRequest::RadioCountry(_)
             | BrowseRequest::RadioTag(_) => {
                 let servers = if self.servers.is_empty() {
-                    let mut discovered = self
-                        .json("https://all.api.radio-browser.info/json/servers")
-                        .await
-                        .ok()
-                        .and_then(|v| v.as_array().cloned())
-                        .unwrap_or_default()
-                        .into_iter()
-                        .filter_map(|v| v.get("name").and_then(Value::as_str).map(str::to_owned))
-                        .filter(|s| s.ends_with(".api.radio-browser.info") && !s.contains('/'))
-                        .take(4)
-                        .map(|s| format!("https://{s}"))
-                        .collect::<Vec<_>>();
-                    if discovered.is_empty() {
-                        discovered = vec![
-                            "https://de1.api.radio-browser.info".into(),
-                            "https://nl1.api.radio-browser.info".into(),
-                            "https://at1.api.radio-browser.info".into(),
-                        ];
-                    }
-                    discovered
+                    self.directory_servers().await?
                 } else {
                     self.servers.clone()
                 };
@@ -208,10 +254,22 @@ impl Radio {
                     pending.push(async move { self.json(url.as_str()).await });
                 }
                 let mut errors = Vec::new();
+                let mut empty = None;
                 while let Some(result) = pending.next().await {
                     match result {
                         Ok(data) if data.is_array() => {
                             let mut page = parse_radio_browser(&data);
+                            if page.items.is_empty() {
+                                if data.as_array().is_some_and(Vec::is_empty) {
+                                    // A healthy mirror may have newer index data.
+                                    empty = Some(page);
+                                } else {
+                                    errors.push(
+                                        "Directory returned no supported station entries".into(),
+                                    );
+                                }
+                                continue;
+                            }
                             if data.as_array().is_some_and(|rows| rows.len() == 80) {
                                 page.continuation = Some((offset + 80).to_string());
                             }
@@ -220,6 +278,9 @@ impl Radio {
                         Ok(_) => errors.push("Unexpected directory response format".into()),
                         Err(error) => errors.push(error.to_string()),
                     }
+                }
+                if let Some(page) = empty {
+                    return Ok(page);
                 }
                 bail!(
                     "Radio Browser is unavailable on all directory servers: {}",
@@ -649,10 +710,6 @@ mod cache_tests {
         let port = listener.local_addr().unwrap().port();
         drop(listener);
         let request = BrowseRequest::RadioSearch("fixture".into());
-        let key = hex::encode(Sha256::digest(format!(
-            "{}:0",
-            serde_json::to_string(&request).unwrap()
-        )));
         let page = Page {
             title: "Radio Browser".into(),
             items: vec![Media {
@@ -665,11 +722,15 @@ mod cache_tests {
             }],
             ..Default::default()
         };
-        crate::paths::atomic_write(&t.path().join(key), &serde_json::to_vec(&page).unwrap())
-            .unwrap();
         let client = reqwest::Client::builder().no_proxy().build().unwrap();
         let radio = Radio::new(client, vec![format!("http://127.0.0.1:{port}")])
             .with_cache(t.path().into());
+        let key = hex::encode(Sha256::digest(format!(
+            "v2:{}",
+            radio.page_key(&request, 0).unwrap()
+        )));
+        crate::paths::atomic_write(&t.path().join(key), &serde_json::to_vec(&page).unwrap())
+            .unwrap();
         let restored = radio.fetch(&request, 0).await.unwrap();
         assert_eq!(restored.items.len(), 1);
         assert!(restored.title.contains("cached"));
@@ -681,6 +742,166 @@ mod cache_tests {
 mod outage_tests {
     use super::*;
     use serde_json::json;
+    #[tokio::test]
+    async fn discovery_is_shared_cached_refreshable_and_keeps_fallback_mirrors() {
+        use std::sync::{
+            Arc,
+            atomic::{AtomicUsize, Ordering},
+        };
+        let calls = Arc::new(AtomicUsize::new(0));
+        let count = calls.clone();
+        let (endpoint, task) = crate::test_http::serve(move |_| {
+            count.fetch_add(1, Ordering::SeqCst);
+            (
+                200,
+                String::new(),
+                json!([
+                    {"name":"stale.api.radio-browser.info"},
+                    {"name":"stale.api.radio-browser.info"},
+                    {"name":"user@evil.api.radio-browser.info"},
+                    {"name":"bad:443.api.radio-browser.info"},
+                    {"name":"-bad.api.radio-browser.info"},
+                    {"name":"evil.test"}
+                ])
+                .to_string()
+                .into_bytes(),
+            )
+        })
+        .await;
+        let mut radio = Radio::new(
+            reqwest::Client::builder().no_proxy().build().unwrap(),
+            vec![],
+        );
+        radio.discovery_endpoint = endpoint;
+        let clone = radio.clone();
+        let (a, b) = tokio::join!(radio.directory_servers(), clone.directory_servers());
+        let servers = a.unwrap();
+        assert_eq!(servers, b.unwrap());
+        assert_eq!(
+            servers,
+            [
+                "https://stale.api.radio-browser.info",
+                "https://de1.api.radio-browser.info",
+                "https://nl1.api.radio-browser.info",
+                "https://at1.api.radio-browser.info"
+            ]
+        );
+        radio.directory_servers().await.unwrap();
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+        radio.invalidate_page(&BrowseRequest::RadioSearch("fixture".into()), 0);
+        radio.directory_servers().await.unwrap();
+        assert_eq!(calls.load(Ordering::SeqCst), 2);
+        task.abort();
+    }
+
+    #[tokio::test]
+    async fn empty_directory_results_are_valid_but_malformed_rows_are_errors() {
+        for (body, valid) in [
+            ("[]", true),
+            (
+                r#"[{"name":"Unsupported","url_resolved":"file:///invalid"}]"#,
+                false,
+            ),
+        ] {
+            let (base, task) =
+                crate::test_http::serve(move |_| (200, String::new(), body.as_bytes().to_vec()))
+                    .await;
+            let radio = Radio::new(
+                reqwest::Client::builder().no_proxy().build().unwrap(),
+                vec![base],
+            );
+            let result = radio
+                .fetch(&BrowseRequest::RadioSearch("fixture".into()), 0)
+                .await;
+            task.abort();
+            if valid {
+                assert!(result.unwrap().items.is_empty());
+            } else {
+                assert!(
+                    result
+                        .unwrap_err()
+                        .to_string()
+                        .contains("no supported station entries")
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn empty_or_malformed_fast_mirror_cannot_hide_a_healthy_mirror() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        for fast_body in [
+            "[]",
+            r#"[{"name":"broken","url_resolved":"file:///invalid"}]"#,
+        ] {
+            let (fast, fast_task) = crate::test_http::serve(move |_| {
+                (200, String::new(), fast_body.as_bytes().to_vec())
+            })
+            .await;
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let slow = format!("http://{}", listener.local_addr().unwrap());
+            let slow_task = tokio::spawn(async move {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut request = Vec::new();
+                while !request.ends_with(b"\r\n\r\n") {
+                    request.push(stream.read_u8().await.unwrap());
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+                let body =
+                    r#"[{"name":"Healthy station","url_resolved":"https://station.test/live"}]"#;
+                let response = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                    body.len()
+                );
+                let _ = stream.write_all(response.as_bytes()).await;
+            });
+            let radio = Radio::new(
+                reqwest::Client::builder().no_proxy().build().unwrap(),
+                vec![fast, slow],
+            );
+            let result = radio
+                .fetch(&BrowseRequest::RadioSearch("fixture".into()), 0)
+                .await;
+            fast_task.abort();
+            slow_task.abort();
+            let page = result.unwrap();
+            assert_eq!(
+                page.items.len(),
+                1,
+                "Fast mirror suppressed the healthy station"
+            );
+            assert_eq!(page.items[0].title, "Healthy station");
+        }
+    }
+
+    #[tokio::test]
+    async fn disk_fallback_is_scoped_to_the_configured_directory() {
+        let cache = tempfile::tempdir().unwrap();
+        let (base, server) = crate::test_http::serve(|_| {
+            (
+                200,
+                String::new(),
+                br#"[{"name":"Old directory","url_resolved":"https://station.test/live"}]"#
+                    .to_vec(),
+            )
+        })
+        .await;
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
+        let radio = Radio::new(client.clone(), vec![base]).with_cache(cache.path().into());
+        let request = BrowseRequest::RadioSearch("fixture".into());
+        radio.fetch(&request, 0).await.unwrap();
+        let unavailable = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = format!("http://{}", unavailable.local_addr().unwrap());
+        drop(unavailable);
+        let changed = Radio::new(client, vec![address]).with_cache(cache.path().into());
+        let result = changed.fetch(&request, 0).await;
+        server.abort();
+        assert!(
+            result.is_err(),
+            "Different directory silently reused old stations"
+        );
+    }
+
     #[tokio::test]
     async fn country_names_and_codes_use_the_matching_directory_filter() {
         let (base, task) = crate::test_http::serve_request(|request| {

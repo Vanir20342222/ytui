@@ -3,7 +3,50 @@
 This follow-up reviews alpha.12 on `fix/audit-implementation`, starting at
 `504585f`. It covers provider requests, redirects, proxy routing, feed recovery,
 thumbnail and cover fetching, settings changes, and media handoff. It is not a
-claim that every video, account, VPN region or station works.
+claim that every video, account, VPN region or station works. The second pass
+below extends the original `b973434` fixes and records its own validation.
+
+## Second pass after b973434
+
+Five additional defects were reproduced with failing regressions, then fixed:
+
+- Background collection watches used only their normal exponential backoff,
+  ignoring a longer provider `Retry-After`. They now honour the longer delay,
+  round partial seconds up and saturate timestamp arithmetic.
+- Proxy changes left background watch results eligible to alter the stored
+  baseline or enqueue downloads. Pending watch requests are now cancelled and
+  generations advanced, without clearing baselines, cooldowns or enabled/paused
+  intent. Results queued by the previous provider are ignored.
+- A quick empty or malformed radio mirror won the race against a healthy mirror.
+  A supported nonempty response now wins; a legitimate empty response is retained
+  only if no mirror returns stations. Nonempty arrays with no supported stations
+  count as errors. A true empty search remains a valid result. Empty searches may
+  consequently wait for slower mirrors, bounded by each request's deadline.
+- Disk fallback keys omitted directory identity. Switching directories during an
+  outage could silently show stations from the previous provider. Versioned keys
+  now include provider identity. Existing files are left intact; old unscoped
+  catalogs need one successful online refresh to repopulate the scoped cache.
+- An HTTP → HTTPS → HTTP redirect chain could downgrade after upgrading because
+  only the initial scheme was checked. The current hop is now checked too,
+  matching the blocking cover client's policy.
+
+Radio discovery now shares in-flight requests and caches its bounded server list
+for five minutes across searches and continuation pages. Explicit Refresh clears
+this cache; replacing the provider after a proxy change also starts fresh.
+Discovery hostnames are validated, duplicates removed, and known mirrors remain
+available even if discovery returned stale servers. At most four discovered plus
+three known unique servers are queried. Discovery failure uses the known list
+for that cache interval, with explicit Refresh available for earlier rediscovery.
+
+Validation for this pass: **217 deterministic tests passed, 28 opt-in ignored**;
+strict all-target Clippy, formatting and whitespace checks passed. **Ten actual
+local media checks passed again.** The seven public checks again produce **five
+passes and two failures**: station playback advances 3.036 seconds and a library
+track 3.107 seconds; catalogs, directory filters/pagination, lyrics and SponsorBlock
+pass. YouTube browsing and the thumbnail CDN still fail at the inherited proxy
+tunnel before a service response. The earlier playback and target-PC gates below
+are unchanged. Seven additional deterministic tests cover these defects, valid
+empty results and shared/cached/refreshed discovery with malformed hostnames.
 
 ## Reproduced bugs and repairs
 
@@ -21,7 +64,7 @@ already classifies transfer errors as retryable. A new wire-level regression
 truncates both bootstrap and API responses and verifies recovery on the next
 request. This is additional coverage, not a newly repaired defect.
 
-## Checks run
+## First-pass checks (b973434)
 
 - Full deterministic workspace suite: **210 passed, 0 failed, 28 opt-in ignored**.
 - Strict all-target workspace Clippy, formatting and diff whitespace checks pass.

@@ -1610,3 +1610,7 @@ mod category_tests {
         assert_eq!(page.continuation.as_deref(), Some("next"));
     }
 }
+
+#[cfg(test)]
+#[path = "collection_tests.rs"]
+mod collection_tests;
