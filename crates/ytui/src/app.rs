@@ -267,6 +267,7 @@ pub struct App {
     collection_generation: u64,
     pub collection_pending: bool,
     pending_auto_play: Option<Media>,
+    pub sleep_timer: crate::sleep::SleepTimer,
     pub player_session_pending: bool,
     pub config: Config,
     pub paths: Paths,
@@ -433,6 +434,11 @@ impl App {
                     "offline audio",
                 ),
                 (
+                    "Saved locally",
+                    "Your local video and song bookmarks",
+                    "saved",
+                ),
+                (
                     "Continue watching",
                     "Your locally saved playback positions",
                     "resume",
@@ -446,6 +452,11 @@ impl App {
         }
         match self.tab {
             0 => &[
+                (
+                    "Saved locally",
+                    "Your local video and song bookmarks",
+                    "saved",
+                ),
                 (
                     "Completed downloads",
                     "Search and filter your download history",
@@ -470,6 +481,11 @@ impl App {
             ],
             2 => &[
                 ("Music home", "Recommendations from YouTube Music", "home"),
+                (
+                    "Saved locally",
+                    "Your local video and song bookmarks",
+                    "saved",
+                ),
                 ("Your library", "Saved albums and playlists", "library"),
                 ("Saved albums", "Albums in your Music library", "albums"),
                 ("Artists", "Artists in your Music library", "artists"),
@@ -497,6 +513,11 @@ impl App {
             ],
             _ => &[
                 ("For you", "Your YouTube home feed", "home"),
+                (
+                    "Saved locally",
+                    "Your local video and song bookmarks",
+                    "saved",
+                ),
                 (
                     "Subscriptions",
                     "Latest from channels you follow",
@@ -558,6 +579,7 @@ impl App {
             collection_generation: 0,
             collection_pending: false,
             pending_auto_play: None,
+            sleep_timer: Default::default(),
             player_session_pending: false,
             config,
             paths,
@@ -767,12 +789,17 @@ impl App {
         if tab == 0 {
             return;
         }
-        if self.offline && !matches!(request, BrowseRequest::OfflineLibrary { .. }) {
+        if self.offline
+            && !matches!(
+                request,
+                BrowseRequest::OfflineLibrary { .. } | BrowseRequest::SavedMedia { .. }
+            )
+        {
             self.status =
                 "Offline mode · use :offline or restart without --offline for online feeds".into();
             return;
         }
-        if self.demo {
+        if self.demo && !matches!(request, BrowseRequest::SavedMedia { .. }) {
             self.status = "Demo catalog · Network actions are disabled".into();
             return;
         }
@@ -820,6 +847,9 @@ impl App {
         let generation = view.generation;
         view.loading = true;
         view.error = None;
+        let language = self.config.language.clone();
+        let saved = matches!(request, BrowseRequest::SavedMedia { .. })
+            .then(|| self.snapshot.saved_media.clone());
         let browser = self.browser.clone();
         let radio = self.radio.clone();
         let favorites = self.snapshot.favorites.clone();
@@ -837,7 +867,12 @@ impl App {
         };
         self.tasks.spawn(async move {
             let fetch=async move {
-                if let BrowseRequest::OfflineLibrary { query, audio } = &request {
+                if let BrowseRequest::SavedMedia { query } = &request {
+                    let mut page = saved.context("Missing saved shelf")?.catalog(query);
+                    page.title = crate::i18n::text(&language, &page.title).into();
+                    page.notice = page.notice.map(|text| crate::i18n::text(&language, &text).into());
+                    Ok(page)
+                } else if let BrowseRequest::OfflineLibrary { query, audio } = &request {
                     let queue = downloads.context("Missing offline queue snapshot")?;
                     let query = query.clone(); let audio = *audio;
                     tokio::task::spawn_blocking(move || ytui_services::library::catalog(&queue, &query, audio)).await.map_err(anyhow::Error::from)
@@ -1833,7 +1868,7 @@ impl App {
                             && let Some(media) = self.selected()
                         {
                             let mut options = self.config.download.clone();
-                            options.audio = self.tab == 2 || media.kind == MediaKind::Song;
+                            options.audio = self.selection_is_audio(&media);
                             if options.audio {
                                 options.audio_directory = path;
                             } else {
@@ -2561,6 +2596,9 @@ impl App {
                 }
             }
             Action::Fallback => {
+                if self.tab != 0 && self.enforce_sleep_timer(Instant::now()) {
+                    return;
+                }
                 if self.player_session_pending {
                     self.status = "Updating player account · retry playback shortly".into();
                     return;
@@ -2587,12 +2625,10 @@ impl App {
                 } else if let Some(mut media) = self.selected()
                     && !media.collection()
                 {
-                    if self.tab == 2 && media.kind == MediaKind::Video {
+                    if media.kind == MediaKind::Video && self.selection_is_audio(&media) {
                         media.kind = MediaKind::Song;
                     }
-                    let audio = self.tab == 2
-                        || media.kind == MediaKind::Song
-                        || media.kind == MediaKind::Station;
+                    let audio = self.selection_is_audio(&media);
                     if self
                         .player
                         .try_send(PlayerCommand::PlayFallback {
@@ -2705,6 +2741,7 @@ impl App {
                     && !self.demo
                     && !self.player_session_pending
                     && (!self.offline || http_url(&media.url).is_err())
+                    && !self.enforce_sleep_timer(Instant::now())
                 {
                     let _ = self.player.try_send(PlayerCommand::Preview(media));
                 }
@@ -2712,7 +2749,7 @@ impl App {
             Action::Download => {
                 if let Some(media) = self.selected() {
                     let mut o = self.config.download.clone();
-                    o.audio = self.tab == 2;
+                    o.audio = self.selection_is_audio(&media);
                     if media.collection() {
                         o.playlist = true;
                     }
@@ -2813,7 +2850,7 @@ impl App {
                 if let Some(mut m) = self.selected()
                     && !m.collection()
                 {
-                    if self.tab == 2 && m.kind == MediaKind::Video {
+                    if m.kind == MediaKind::Video && self.selection_is_audio(&m) {
                         m.kind = MediaKind::Song;
                     }
                     self.snapshot.playback.push(m);
@@ -2895,6 +2932,11 @@ impl App {
                     Repeat::One => Repeat::Off,
                 };
                 self.dirty = true;
+            }
+            Action::SaveMedia => {
+                if let Err(error) = self.command("save-media") {
+                    self.status = error.to_string();
+                }
             }
             Action::Stop => {
                 self.pending_auto_play = None;
@@ -3056,6 +3098,19 @@ impl App {
         if query.is_empty() {
             return;
         }
+        if matches!(
+            self.tabs[self.tab].request,
+            Some(BrowseRequest::SavedMedia { .. })
+        ) {
+            self.navigate(
+                self.tab,
+                BrowseRequest::SavedMedia {
+                    query: query.into(),
+                },
+                false,
+            );
+            return;
+        }
         if self.offline {
             if normalize_media_url(query).is_ok() {
                 self.status = "Remote URLs require online mode".into();
@@ -3097,8 +3152,16 @@ impl App {
             );
         }
     }
+    fn selection_is_audio(&self, media: &Media) -> bool {
+        matches!(media.kind, MediaKind::Song | MediaKind::Station)
+            || (self.tab == 2
+                && !matches!(
+                    self.tabs[self.tab].request,
+                    Some(BrowseRequest::SavedMedia { .. })
+                ))
+    }
     pub fn play(&mut self, mut media: Media) {
-        if self.tab == 2 && media.kind == MediaKind::Video {
+        if media.kind == MediaKind::Video && self.selection_is_audio(&media) {
             media.kind = MediaKind::Song;
         }
         if self.offline && http_url(&media.url).is_ok() {
@@ -3200,6 +3263,9 @@ impl App {
         self.redraw = true;
     }
     pub fn playback_ended(&mut self, media: &Media) {
+        if self.enforce_sleep_timer(Instant::now()) {
+            return;
+        }
         if !self
             .snapshot
             .playback
@@ -3237,6 +3303,9 @@ impl App {
         }
     }
     pub fn play_existing(&mut self, mut media: Media) -> bool {
+        if self.enforce_sleep_timer(Instant::now()) {
+            return false;
+        }
         if self.player_session_pending {
             self.status = "Updating player account · retry playback shortly".into();
             return false;
@@ -3261,7 +3330,44 @@ impl App {
         }
         true
     }
+    pub fn sleep_label(&self) -> Option<String> {
+        if self.sleep_timer.stopping() {
+            return Some(self.tr("Sleep timer · stopping playback").into());
+        }
+        self.sleep_timer.remaining(Instant::now()).map(|seconds| {
+            format!(
+                "{} {:02}:{:02}:{:02}",
+                self.tr("Sleep"),
+                seconds / 3600,
+                seconds / 60 % 60,
+                seconds % 60
+            )
+        })
+    }
+    pub fn enforce_sleep_timer(&mut self, now: Instant) -> bool {
+        if !self.sleep_timer.due(now) {
+            return false;
+        }
+        self.pending_auto_play = None;
+        self.snapshot.playback.current = None;
+        self.dirty = true;
+        self.redraw = true;
+        match self.player.try_send(PlayerCommand::Stop) {
+            Ok(()) => {
+                self.sleep_timer.cancel();
+                self.status = "Sleep timer finished · playback stopped".into();
+            }
+            Err(mpsc::error::TrySendError::Full(_)) => {}
+            Err(mpsc::error::TrySendError::Closed(_)) => {
+                self.sleep_timer.cancel();
+                self.status = "Sleep timer could not reach player · open Diagnostics".into();
+            }
+        }
+        true
+    }
     pub async fn tick(&mut self) {
+        self.enforce_sleep_timer(Instant::now());
+        self.redraw |= self.sleep_timer.needs_redraw(Instant::now());
         self.sync_player_session();
         if let Some(media) = self.pending_auto_play.take()
             && self
@@ -3782,6 +3888,48 @@ impl App {
                     self.action(action);
                 }
             }
+            "save-media" => {
+                ensure!(!self.demo, "Saving fictional demo content is disabled");
+                let media = self.selected().context("Select a video or song first")?;
+                let saved = self.snapshot.saved_media.toggle(media)?;
+                self.dirty = true;
+                self.status = if saved {
+                    "Saved locally"
+                } else {
+                    "Removed from saved shelf"
+                }
+                .into();
+                if let Some(BrowseRequest::SavedMedia { query }) =
+                    self.tabs[self.tab].request.clone()
+                {
+                    self.navigate(self.tab, BrowseRequest::SavedMedia { query }, false);
+                }
+            }
+            "saved" => {
+                ensure!(value.len() <= 1024, "Saved search is limited to 1024 bytes");
+                if self.tab == 0 || self.tab == 3 {
+                    self.tab = 1;
+                }
+                self.navigate(self.tab, BrowseRequest::SavedMedia { query: value }, false);
+            }
+            "sleep" if value == "off" => {
+                self.sleep_timer.cancel();
+                self.status = "Sleep timer cancelled".into();
+            }
+            "sleep" if value.is_empty() => {
+                self.modal = Some(Modal::Text { title: self.tr("Sleep timer").into(), offset: 0,
+                    lines: vec![self.sleep_label().unwrap_or_else(|| self.tr("Sleep timer is off").into()),
+                        self.tr("Set or cancel the timer in Actions → Player. Playback stops without quitting ytui; the queue stays saved. The timer lasts for this session only.").into()] });
+            }
+            "sleep" => {
+                let seconds = schedule::delay_seconds(&value)?;
+                self.sleep_timer
+                    .arm(Duration::from_secs(seconds), Instant::now())?;
+                self.status = format!(
+                    "Sleep timer set · {}",
+                    self.sleep_label().unwrap_or_default()
+                );
+            }
             "quit" | "q" => self.quit = true,
             "feeds" => self.modal = Some(Modal::Feeds(0)),
             "watch" | "watches" if value.is_empty() || value == "list" => {
@@ -4144,7 +4292,7 @@ impl App {
                 for media in media {
                     let before = self.snapshot.downloads.jobs.len();
                     let mut options = self.config.download.clone();
-                    options.audio = self.tab == 2;
+                    options.audio = self.selection_is_audio(&media);
                     self.enqueue_download(media, options);
                     if self.snapshot.downloads.jobs.len() > before {
                         self.snapshot.downloads.jobs.last_mut().unwrap().group_id =

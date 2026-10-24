@@ -73,6 +73,9 @@ pub const DOWNLOAD_SECTIONS: &[(&str, &[usize])] = &[
 impl Form {
     pub fn explanation(&self) -> Option<&'static str> {
         Some(match self.fields.get(self.selected)?.label {
+            "Duration (e.g. 30m)" => {
+                "Use 30m, 1h or 90s, up to 24 hours. Stops playback and queue advance without quitting ytui. Pausing or changing tracks does not reset the timer; restarting ytui clears it."
+            }
             "Language" => {
                 "en = English; de = Deutsch; system follows LC_ALL, LC_MESSAGES or LANG. Saved changes apply immediately. Tool/provider errors keep their original text."
             }

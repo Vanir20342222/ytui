@@ -116,6 +116,9 @@ pub struct Category {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum BrowseRequest {
+    SavedMedia {
+        query: String,
+    },
     MusicSearch {
         query: String,
         category: String,

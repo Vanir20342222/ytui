@@ -12,6 +12,7 @@ use ytui_core::{DownloadQueue, Media, PlaybackQueue};
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Snapshot {
+    pub saved_media: ytui_core::saved::SavedMedia,
     pub recent_destinations: Vec<PathBuf>,
     pub downloads: DownloadQueue,
     pub playback: PlaybackQueue,
@@ -194,6 +195,30 @@ pub fn backup_legacy(source: &Path, destination: &Path) -> Result<PathBuf> {
 mod tests {
     use super::*;
     use ytui_core::*;
+    #[tokio::test]
+    async fn saved_media_survives_restart_and_old_snapshots_default_to_empty() {
+        let old: Snapshot =
+            serde_json::from_str(r#"{"favorites":[],"positions":{"entries":[]}}"#).unwrap();
+        assert!(old.saved_media.entries.is_empty());
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store::open(temp.path()).unwrap();
+        let mut snapshot = old;
+        snapshot
+            .saved_media
+            .toggle(Media {
+                url: "https://youtu.be/abcdefghijk".into(),
+                title: "Saved fixture".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        store.save(snapshot).await.unwrap();
+        store.close().await.unwrap();
+        let store = Store::open(temp.path()).unwrap();
+        let restored = store.load().await.unwrap();
+        assert_eq!(restored.saved_media.entries[0].title, "Saved fixture");
+        assert!(restored.downloads.jobs.is_empty());
+        store.close().await.unwrap();
+    }
     #[tokio::test]
     async fn close_releases_instance_lock_with_an_inherited_file_description() {
         let temp = tempfile::tempdir().unwrap();

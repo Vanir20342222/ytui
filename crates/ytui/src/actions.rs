@@ -90,6 +90,21 @@ pub const ENTRIES: &[Entry] = &[
     entry!("Music", "Search artists", "artists", &[("Search", "")]),
     entry!("Music", "Search videos", "videos", &[("Search", "")]),
     entry!("Music", "Search playlists", "playlists", &[("Search", "")]),
+    entry!(
+        "Library",
+        "Save / remove selected video or song locally",
+        "save-media"
+    ),
+    entry!("Library", "Saved locally", "saved"),
+    entry!("Library", "Search saved media", "saved", &[("Search", "")]),
+    entry!(
+        "Player",
+        "Set sleep timer",
+        "sleep",
+        &[("Duration (e.g. 30m)", "30m")]
+    ),
+    entry!("Player", "Sleep timer status", "sleep"),
+    entry!("Player", "Cancel sleep timer", "sleep off"),
     entry!("Library", "Downloaded videos", "offline video"),
     entry!("Library", "Downloaded music", "offline audio"),
     entry!("Library", "Continue watching", "resume"),

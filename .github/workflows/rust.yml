@@ -57,6 +57,8 @@ jobs:
         run: cargo test -p ytui-services --locked real_mpv_http_proxy_ -- --ignored
       - name: Verify headless playback diagnostic with real mpv
         run: cargo test -p ytui --test downloads --locked real_mpv_playback_check_ -- --ignored
+      - name: Verify sleep timer with actual mpv and local audio
+        run: cargo test -p ytui --test saved_sleep_ui --locked real_mpv_sleep_timer -- --ignored
       - name: Verify two real yt-dlp playlist entries with FFmpeg and ffprobe
         run: cargo test -p ytui --test downloads --locked real_ytdlp_playlist_ -- --ignored
       - run: cargo build --release --locked

@@ -9,3 +9,5 @@ pub mod lyrics;
 pub mod operations;
 pub mod terminal;
 pub mod ui;
+
+pub mod sleep;

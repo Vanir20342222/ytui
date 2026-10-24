@@ -1,5 +1,9 @@
 # UI themes and WQHD captures
 
+The gallery now includes [Saved locally](screenshots/saved-media.png) and
+[the sleep-timer form](screenshots/sleep-timer.png), generated from actual PTY
+output with fictional offline data. Run `cargo run -p ytui --example capture_ui -- --library-panels-only` to refresh these two captures.
+
 The layout follows Lazygit/Lazydocker's pane-based approach: status, workspaces
 and feeds on the left, a large card catalog and smaller details pane on the right,
 focused borders, an interactive player strip and optional shortcut hints.

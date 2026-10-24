@@ -19,6 +19,7 @@ pub enum Action {
     NextPage,
     Enqueue,
     Favorite,
+    SaveMedia,
     Theme,
     Settings,
     PlaybackQueue,
@@ -69,6 +70,12 @@ impl Action {
     }
 }
 pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
+    (
+        "S",
+        Action::SaveMedia,
+        "save_media",
+        "Save / remove video or song locally",
+    ),
     (
         "f1",
         Action::ToggleHints,

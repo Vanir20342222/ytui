@@ -4,6 +4,7 @@
 
 | Document | Use it for |
 | --- | --- |
+| [Researched library/playback features](FEATURE_RESEARCH_2026-10-24.md) | Saved-media shelf, sleep timer, sources and verification |
 | [Alpha.12 workflows](AUDIT_FEATURES.md) | New account, collection, format, cache and support panels |
 | [Implementation tracker](AUDIT_IMPLEMENTATION.md) | Audit fixes, executed checks and remaining acceptance |
 | [Candidate release](RELEASE_CANDIDATE.md) | Update, rollback, checksum/license archive and Arch recipe |
