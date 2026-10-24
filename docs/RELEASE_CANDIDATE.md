@@ -1,9 +1,9 @@
 # Alpha.12 candidate: update, package and rollback (M8)
 
-Development branch: `fix/audit-implementation`, [PR #13](https://github.com/Vanir20342222/ytui/pull/13).
-This is a candidate, not an accepted/tagged stable release. `main` remains alpha.5
-until the integration PR is accepted. See [the audit tracker](AUDIT_IMPLEMENTATION.md)
-for the remaining public-account/desktop/reliability gates.
+The alpha.12 candidate is integrated on `main` through [PR #13](https://github.com/Vanir20342222/ytui/pull/13)
+and the subsequent integration review. This remains an untagged alpha; see
+[the audit tracker](AUDIT_IMPLEMENTATION.md) for public-account/desktop/reliability
+gates and [the PR review](PR_REVIEW_2026-10-24.md) for the final integration checks.
 
 ## Update this candidate
 
@@ -11,7 +11,7 @@ Close existing ytui processes first. Review the new source, then:
 
 ```sh
 git fetch origin
-git switch fix/audit-implementation
+git switch main
 git pull --ff-only
 ./install-rust.sh
 hash -r
@@ -23,7 +23,7 @@ ytui doctor
 `--version` now includes the build revision. Both launchers must agree. A source
 archive without Git metadata reports `unknown`, unless the packager explicitly
 sets `YTUI_BUILD_REVISION` to the reviewed full revision. Default installation
-continues to follow main; do not mistake an unmerged candidate for main.
+follows main; an alpha merge does not publish a tagged stable release.
 
 A changed existing regular launcher is saved as `~/.local/bin/ytui.previous`.
 Reinstalling the identical binary preserves that previous snapshot. Legacy

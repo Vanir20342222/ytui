@@ -8,7 +8,7 @@ This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDI
 [remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
 
 ```bash
-git clone --branch fix/audit-implementation https://github.com/Vanir20342222/ytui.git
+git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 ytui doctor
@@ -24,7 +24,7 @@ sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
 ```
 
-Until this change reaches main, use the `fix/audit-implementation` branch.
+Use `main` for the integrated Rust application.
 Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 

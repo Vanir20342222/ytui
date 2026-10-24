@@ -2,8 +2,10 @@
 
 Baseline: alpha.11 `e2b01ea`; original requirements/repros are in
 [the app audit](APP_AUDIT_2026-10-22.md). Implementation is on
-`fix/audit-implementation`, [PR #13](https://github.com/Vanir20342222/ytui/pull/13),
-targeting main. Main has not been silently promoted from alpha.5.
+[PR #13](https://github.com/Vanir20342222/ytui/pull/13) merged into main.
+The user subsequently authorized reviewing and merging all PRs; the
+[integration review](PR_REVIEW_2026-10-24.md) records the audit PR merge, delivery
+of the later networking commit, additional fixes and final checks.
 
 The [networking follow-up](NETWORK_RELIABILITY_2026-10-23.md) records additional
 rate-limit, radio redirect/deadline, cover-proxy and stale-request fixes, with

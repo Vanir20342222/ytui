@@ -21,18 +21,7 @@ pub async fn collect(
                 "Collection exceeds the 2,000-entry watch limit; no new downloads were queued"
             );
             for media in &page.items {
-                bytes = bytes.saturating_add(
-                    media.title.len()
-                        + media.creator.len()
-                        + media.url.len()
-                        + media.thumbnail.len()
-                        + media.description.len()
-                        + media
-                            .chapters
-                            .iter()
-                            .map(|c| c.title.len() + 32)
-                            .sum::<usize>(),
-                );
+                bytes = bytes.saturating_add(media.retained_bytes());
             }
             ensure!(
                 bytes <= 16 * 1024 * 1024,

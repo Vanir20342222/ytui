@@ -7,7 +7,7 @@ CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
 The alpha.12 [workflow guide](AUDIT_FEATURES.md) covers the profile chooser,
 collection jobs, available formats/tracks, cache controls, MPRIS and support export.
 Use [candidate/release instructions](RELEASE_CANDIDATE.md) for checksum/rollback
-and exact-SHA Arch builds. Main promotion and target acceptance remain open.
+and exact-SHA Arch builds. The candidate is integrated on main; target acceptance remains open.
 
 ## Build and run
 
@@ -16,7 +16,7 @@ On CachyOS/Arch:
 ```sh
 sudo pacman -S --needed base-devel rustup openssl mpv ffmpeg nodejs
 rustup default stable
-git clone --branch fix/audit-implementation https://github.com/Vanir20342222/ytui.git
+git clone https://github.com/Vanir20342222/ytui.git
 cd ytui
 ./install.sh
 hash -r
@@ -33,13 +33,12 @@ requires that tool and its supported JavaScript runtime.
 
 ### Updating an older Rust alpha
 
-Changes on this branch are not yet on main. Pulling source does not replace your
-installed executable:
+Update from main. Pulling source does not replace your installed executable:
 
 ```sh
 cd ~/ytui
 git fetch origin
-git switch fix/audit-implementation
+git switch main
 git pull --ff-only
 ./install.sh
 hash -r
