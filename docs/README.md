@@ -7,6 +7,7 @@
 | [Usage and settings](RUST.md) | Build, update, navigation, configuration and backends |
 | [Example configuration](../examples/config.toml) | Editable TOML showing current defaults |
 | [Remaining work](REMAINING_WORK.md) | Unsupported features and release acceptance |
+| [App audit and implementation backlog](APP_AUDIT_2026-10-22.md) | Alpha.11 bugs, executable repros, priorities and feature acceptance |
 | [Parity](PARITY.md) | Rust implementation compared with the former Python app |
 | [Themes and screenshots](UI_THEMES.md) | Theme gallery and capture instructions |
 
