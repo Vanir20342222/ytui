@@ -606,3 +606,23 @@ the gap inventory. Before declaring the Rust edition stable:
 
 These are release gates, not completed tests. The branch is reviewable and runnable,
 but this record does not claim that all upstream/API/platform bugs are fixed.
+
+
+## Native playback/startup follow-up — 26 October 2026 (M4/M5/M8)
+
+[The startup report](PLAYBACK_STARTUP_2026-10-26.md) records the exact screenshot
+recording, native extractor pin, bounded candidate validation and memory-only
+selection/queue preparation. Actual imported-session playback reaches full EOF;
+first progress is 9.13 s cold, 0.49 s on replay, and 0.88 s after a separate 12 s
+preparation wait. The public ten-second corpus is 3/3 including decoded 1080p,
+and a native authenticated audio download produces one fully decoded file.
+Anonymous playback of the exact album track still requires sign-in.
+
+The full workspace checkpoint is 282 passed / 30 ignored; later canonical-URL
+and Node-engine changes have focused updated service/runtime checks. Six final
+mpv/FFmpeg service checks, two actual Node vectors, isolated-bus MPRIS, formatting
+and strict all-target Clippy pass. The report preserves the initial MPRIS setup
+failure and solver-shim failure separately from corrected runs. Previous twelve
+local-media checks and three other screenshot-song startup cases remain dated
+supporting evidence. No audible/device, active VPN-loss or 99% reliability claim
+is inferred from these checks.

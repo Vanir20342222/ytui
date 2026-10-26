@@ -12,6 +12,11 @@ lists remaining gaps, including options preserved verbatim by migration.
 
 ## Current candidate: alpha.12
 
+[Native startup repair](PLAYBACK_STARTUP_2026-10-26.md) adds bounded format
+validation and selection/queue preparation after the reported album-track failure.
+Cold extraction, consent/service limits and broad watching acceptance remain
+explicit; cached replay timings are not cold-start or reliability claims.
+
 [Recovery fixes after local acceptance](RECOVERY_FIXES_2026-10-26.md) repair
 rate-limit retries, live EOF/backend/control recovery and archived-live metadata.
 The new loopback real-player fixture is separate from active VPN-loss/recovery,

@@ -17,36 +17,75 @@ pub fn supported(version: &str) -> bool {
         || line == "deno 2.9.7 (stable, release)"
         || (line.starts_with("deno 2.9.7 (stable, release, ") && line.ends_with(')'))
 }
-async fn check(path: &std::path::Path, cancel: CancellationToken) -> Result<bool> {
+async fn check(path: &std::path::Path, cancel: CancellationToken) -> Result<Option<PathBuf>> {
     let mut spec = ProcessSpec::new(path.to_string_lossy(), vec!["--version".into()], 4);
     spec.max_output_bytes = 4096;
-    let result = process::run(spec, cancel, |_| {}).await?;
-    Ok(result.success && supported(&result.lines.join("\n")))
+    let result = process::run(spec, cancel.clone(), |_| {}).await?;
+    let version = result.lines.join("\n");
+    if !result.success || !supported(&version) {
+        return Ok(None);
+    }
+    if version.trim_start().starts_with('v') {
+        // Upstream solves in a private directory. A version-manager shim may
+        // work here but lose its project configuration there. Ask this exact
+        // Node for its engine; do not switch the user's selected version.
+        let mut spec = ProcessSpec::new(
+            path.to_string_lossy(),
+            vec!["-p".into(), "process.execPath".into()],
+            4,
+        );
+        spec.max_output_bytes = 4096;
+        let result = process::run(spec, cancel, |_| {}).await?;
+        let engine = result.lines.first().map(PathBuf::from);
+        ensure!(
+            result.success
+                && engine
+                    .as_ref()
+                    .is_some_and(|engine| engine.is_absolute() && engine.is_file()),
+            "The selected Node.js runtime could not report its executable path. Select the installed Node engine in Settings → Tools"
+        );
+        return Ok(engine);
+    }
+    Ok(Some(path.to_owned()))
 }
 pub async fn select(config: &Config, cancel: CancellationToken) -> Result<Option<PathBuf>> {
     if let Some(path) = &config.native_js_runtime {
         let path = executable(&path.to_string_lossy()).ok_or_else(|| anyhow::anyhow!("Configured native JavaScript runtime was not found. Select installed Node.js 22+ or Deno 2.9.7 in Settings → Tools, or clear the field for automatic detection"))?;
+        let engine = check(&path, cancel).await?;
         ensure!(
-            check(&path, cancel).await?,
+            engine.is_some(),
             "Native YouTube solving requires Node.js 22+ or Deno 2.9.7. The configured runtime is unsupported; update it or clear the field for automatic detection"
         );
-        return Ok(Some(path));
+        return Ok(engine);
     }
     candidates(
-        ["node", "deno"]
-            .into_iter()
-            .filter_map(executable)
-            .collect(),
+        runtime_candidates(std::env::var_os("PATH").as_deref()),
         cancel,
     )
     .await
+}
+fn runtime_candidates(path: Option<&std::ffi::OsStr>) -> Vec<PathBuf> {
+    let Some(path) = path else {
+        return Vec::new();
+    };
+    let directories = std::env::split_paths(path).take(128).collect::<Vec<_>>();
+    let mut candidates = Vec::new();
+    for name in ["node", "deno"] {
+        for directory in &directories {
+            let candidate = directory.join(name);
+            if candidate.is_file() && !candidates.contains(&candidate) {
+                candidates.push(candidate);
+            }
+        }
+    }
+    candidates
 }
 async fn candidates(paths: Vec<PathBuf>, cancel: CancellationToken) -> Result<Option<PathBuf>> {
     for path in paths {
         let result = check(&path, cancel.clone()).await;
         ensure!(!cancel.is_cancelled(), "Operation cancelled");
-        if result.unwrap_or(false) {
-            return Ok(Some(path));
+        if let Ok(Some(engine)) = result {
+            return Ok(Some(engine));
         }
     }
     Ok(None)
@@ -58,7 +97,16 @@ mod tests {
     use std::os::unix::fs::PermissionsExt;
     fn tool(root: &std::path::Path, name: &str, body: &str) -> PathBuf {
         let path = root.join(name);
-        std::fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+        std::fs::write(
+            &path,
+            format!(
+                r#"#!/bin/sh
+if [ "$1" = -p ]; then printf '%s\n' "$0"; exit 0; fi
+{body}
+"#
+            ),
+        )
+        .unwrap();
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
         path
     }
@@ -107,6 +155,46 @@ mod tests {
             select(&config, CancellationToken::new()).await.unwrap(),
             Some(node)
         );
+    }
+    #[tokio::test]
+    async fn an_unconfigured_shim_does_not_hide_a_supported_later_node() {
+        let temp = tempfile::tempdir().unwrap();
+        let shim = temp.path().join("shim");
+        let system = temp.path().join("system");
+        std::fs::create_dir_all(&shim).unwrap();
+        std::fs::create_dir_all(&system).unwrap();
+        tool(&shim, "node", "echo 'No version configured' >&2; exit 1");
+        let node = tool(&system, "node", "echo v26.8.1");
+        let path = std::env::join_paths([shim.clone(), system.clone(), shim]).unwrap();
+        assert_eq!(
+            candidates(runtime_candidates(Some(&path)), CancellationToken::new())
+                .await
+                .unwrap(),
+            Some(node)
+        );
+    }
+    #[tokio::test]
+    async fn a_configured_node_shim_keeps_its_engine_when_the_solver_changes_directory() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = tool(temp.path(), "node-engine", "echo v26.8.1");
+        let shim = temp.path().join("node-shim");
+        std::fs::write(&shim, format!("#!/bin/sh\nif [ \"$1\" = --version ]; then echo v26.8.1; else printf '%s\\n' '{}'; fi\n", engine.display())).unwrap();
+        std::fs::set_permissions(&shim, std::fs::Permissions::from_mode(0o755)).unwrap();
+        for explicit in [false, true] {
+            let config = Config {
+                native_js_runtime: Some(shim.clone()),
+                ..Default::default()
+            };
+            let selected = if explicit {
+                select(&config, CancellationToken::new()).await.unwrap()
+            } else {
+                candidates(vec![shim.clone()], CancellationToken::new())
+                    .await
+                    .unwrap()
+            };
+            assert_eq!(selected, Some(engine.clone()));
+            assert_eq!(config.native_js_runtime.as_ref(), Some(&shim));
+        }
     }
     #[tokio::test]
     async fn runtime_probe_cancellation_reaps_the_process() {

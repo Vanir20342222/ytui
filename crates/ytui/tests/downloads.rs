@@ -105,7 +105,7 @@ fn native_worker_survives_replacing_the_running_executable() {
     let ready = temp.path().join("runtime-ready");
     let release = temp.path().join("runtime-release");
     let runtime = temp.path().join("node");
-    std::fs::write(&runtime, format!("#!/bin/sh\ntouch '{}'\nwhile [ ! -f '{}' ]; do sleep 0.01; done\nprintf 'v26.8.1\\n'\n", ready.display(), release.display())).unwrap();
+    std::fs::write(&runtime, format!("#!/bin/sh\nif [ \"$1\" = -p ]; then printf '%s\\n' \"$0\"; exit 0; fi\ntouch '{}'\nwhile [ ! -f '{}' ]; do sleep 0.01; done\nprintf 'v26.8.1\\n'\n", ready.display(), release.display())).unwrap();
     std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o755)).unwrap();
     let proxy = Server::with_status(b"Synthetic proxy rejection".to_vec(), 403);
     let config = Config {

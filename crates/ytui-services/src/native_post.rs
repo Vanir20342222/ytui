@@ -645,6 +645,7 @@ mod real_media_tests {
             cookies: None,
             resolve: false,
             staging: None,
+            player_clients: None,
         };
         request.job.options.split_chapters = true;
         let split_source = temp.path().join("split.mp4");

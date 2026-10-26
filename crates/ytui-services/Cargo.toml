@@ -29,4 +29,4 @@ libc = "0.2"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 zbus = { version = "4", default-features = false, features = ["tokio"] }
 futures-util = "0.3"
-yt-dlp-rs = { git = "https://github.com/aagedal/yt-dlp-rs", rev = "f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab" }
+yt-dlp-rs = { git = "https://github.com/aagedal/yt-dlp-rs", rev = "93d561be519b2e46189ede4a8441a143892fd35b" }
