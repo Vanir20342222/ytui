@@ -2,10 +2,13 @@
 
 A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interface
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
-CachyOS + Caelestia + Ghostty + Brave Origin is the primary desktop target.
+Omarchy + Ghostty + Brave Origin is the current desktop target; CachyOS/Caelestia
+remain historical compatibility targets.
 
-This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDIT_IMPLEMENTATION.md)). Live account and desktop acceptance remains open;
-[remaining work](docs/REMAINING_WORK.md) lists unsupported features and service limits.
+This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDIT_IMPLEMENTATION.md)).
+[Local acceptance](docs/LOCAL_ACCEPTANCE_2026-10-26.md) records verified target-PC
+playback, account and desktop cases; [remaining work](docs/REMAINING_WORK.md) tracks
+broader service/device acceptance and unsupported features.
 [Research and usage](docs/FEATURE_RESEARCH_2026-10-24.md) cover the local saved shelf and sleep timer.
 
 ```bash

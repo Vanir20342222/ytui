@@ -475,3 +475,5 @@
 
 "30m / 1h / 90s · max 24h · Stops playback; keeps queue · Session only" = "30m / 1h / 90s · max. 24h · Stoppt Wiedergabe · Warteschlange bleibt"
 "Search local titles, artists or video IDs · Blank shows all saved media" = "Lokale Titel, Künstler oder Video-IDs suchen · Leer zeigt alle Medien"
+
+"Service rate limit" = "Anfragelimit des Dienstes"

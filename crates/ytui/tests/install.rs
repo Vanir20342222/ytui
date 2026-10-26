@@ -6,7 +6,9 @@ use std::{
     process::Command,
 };
 fn executable(path: &Path, content: &str) {
-    fs::write(path, content).unwrap();
+    // Replace the inode just as the installer does: some kernels still reject
+    // truncating a recently executed binary after its process has been reaped.
+    ytui_services::paths::atomic_write(path, content.as_bytes()).unwrap();
     fs::set_permissions(path, fs::Permissions::from_mode(0o755)).unwrap();
 }
 #[test]

@@ -568,6 +568,11 @@ pub async fn resolve(
 /// Auto mode falls back for extractor limitations, without changing the explicit
 /// native mode or retrying cancellations/local publication failures externally.
 pub fn fallback_eligible(message: &str) -> bool {
+    // A known service cooldown outranks an accompanying extractor-limitation
+    // message. Do not make another immediate request through a second backend.
+    if crate::failure::rate_limited(message) {
+        return false;
+    }
     let message = message.to_lowercase();
     [
         "unsupported youtube",
