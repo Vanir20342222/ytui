@@ -1,5 +1,13 @@
 # ytui Rust rewrite plan
 
+M2–M8 target-PC acceptance (2026-10-26): installed main `c6cf246` as alpha.12,
+verified native video/audio/Music, explicit Brave Origin account feeds/expiry,
+an authenticated two-file playlist, Ghostty thumbnails/Omarchy palette and muted
+desktop EOF. The native corpus remains 2/3 (HTTP 429); anonymous Music/playlist
+failures remain visible. An installer-test fixture write was repaired; 254
+default and eleven local-media checks pass. See
+[the local evidence and limits](docs/LOCAL_ACCEPTANCE_2026-10-26.md).
+
 M4/M5/M7/M8 researched feature follow-up: a bounded, searchable local saved-media
 shelf and session sleep timer are implemented with remappable actions, persistence,
 queue-pressure/EOF guards, English/German labels and actual mpv/PTY checks.

@@ -12,6 +12,13 @@ lists remaining gaps, including options preserved verbatim by migration.
 
 ## Current candidate: alpha.12
 
+[The October 26 target-PC report](LOCAL_ACCEPTANCE_2026-10-26.md) adds actual
+Brave Origin import/feeds/expiry, authenticated two-file playlist, Ghostty
+thumbnails/Omarchy palette and native desktop completion evidence. The current
+host runs restored Omarchy. Anonymous Music/playlist failures, a 2/3 native
+corpus with HTTP 429, human audio acceptance, active-stream VPN recovery and
+representative reliability remain open; older results below retain their dates.
+
 [The audit implementation tracker](AUDIT_IMPLEMENTATION.md) supersedes the older
 implementation-gap rows below for formats, account setup, MPRIS, collection groups,
 recent folders, file opening, diagnostics and release tooling. Their live/desktop/

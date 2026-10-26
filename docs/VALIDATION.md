@@ -1,5 +1,15 @@
 # Validation record
 
+## Target-PC acceptance — 2026-10-26 (M2–M8)
+
+[Local results and boundaries](LOCAL_ACCEPTANCE_2026-10-26.md): installed main
+`c6cf246`, 254 default tests and eleven actual local-media checks pass. Native
+video/audio/Music, Brave Origin import/feeds/expiry, an authenticated two-output
+playlist, real Ghostty thumbnails and muted desktop EOF pass. The native corpus
+is still 2/3 due to HTTP 429; anonymous Music browsing and playlist checks fail.
+Proton VPN was explicitly connected for validation and restored to Disconnected.
+Human audibility, active-session reconnects and broader reliability remain open.
+
 ## Researched saved-media/sleep features — 2026-10-24 (M4/M5/M7/M8)
 
 [Research, usage and verification](FEATURE_RESEARCH_2026-10-24.md) record the new
