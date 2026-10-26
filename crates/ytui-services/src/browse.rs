@@ -568,10 +568,23 @@ impl Browser {
                     } else {
                         MediaKind::Video
                     },
-                    live: details
-                        .get("isLiveContent")
-                        .and_then(Value::as_bool)
-                        .unwrap_or(false),
+                    live: {
+                        // isLiveContent also remains true on archived broadcasts.
+                        // Only a current-live signal may enable reconnect semantics.
+                        let broadcast = data
+                            .pointer("/microformat/playerMicroformatRenderer/liveBroadcastDetails");
+                        let ended = broadcast
+                            .and_then(|v| v.get("endTimestamp"))
+                            .and_then(Value::as_str)
+                            .is_some_and(|v| !v.is_empty());
+                        !ended
+                            && details.get("isUpcoming").and_then(Value::as_bool) != Some(true)
+                            && broadcast
+                                .and_then(|v| v.get("isLiveNow"))
+                                .and_then(Value::as_bool)
+                                .or_else(|| details.get("isLive").and_then(Value::as_bool))
+                                .unwrap_or(false)
+                    },
                     ..Default::default()
                 }],
                 ..Default::default()
@@ -1459,6 +1472,35 @@ mod request_tests {
                 "recovered"
             );
             task.abort();
+        }
+    }
+
+    #[tokio::test]
+    async fn archived_and_upcoming_broadcast_details_are_not_current_live_streams() {
+        for (flags, broadcast, expected) in [
+            (
+                json!({}),
+                json!({"isLiveNow":false,"endTimestamp":"2020-01-01T00:00:00Z"}),
+                false,
+            ),
+            (json!({}), json!({}), false),
+            (json!({"isUpcoming":true}), json!({"isLiveNow":true}), false),
+            (json!({"isLive":true}), json!({}), true),
+            (json!({}), json!({"isLiveNow":true}), true),
+        ] {
+            let (base, task) = crate::test_http::serve_request(move |_| {
+                let mut details = json!({"videoId":"abcdefghijk","title":"Broadcast fixture","isLiveContent":true,"lengthSeconds":"60"});
+                for (name,value) in flags.as_object().unwrap() { details[name] = value.clone(); }
+                let data = json!({"videoDetails":details,"microformat":{"playerMicroformatRenderer":{"liveBroadcastDetails":broadcast}},"playabilityStatus":{"status":"OK"}});
+                (200, String::new(), format!("var ytInitialPlayerResponse = {data};").into_bytes())
+            }).await;
+            let mut browser = Browser::new(client(), None, 0);
+            browser.origins = [base.clone(), base];
+            let result = browser
+                .fetch(false, &BrowseRequest::Details("abcdefghijk".into()))
+                .await;
+            task.abort();
+            assert_eq!(result.unwrap().items[0].live, expected);
         }
     }
 

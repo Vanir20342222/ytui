@@ -1,5 +1,14 @@
 # Validation record
 
+## Recovery after local acceptance — 2026-10-26 (M2/M5/M6/M8)
+
+[Recovery fixes](RECOVERY_FIXES_2026-10-26.md) add ten deterministic regressions
+and one actual mpv stream-reconnect fixture. Cloud workspace: 264 ordinary tests,
+12 actual local-media tests and one private D-Bus MPRIS check pass; 30 opt-in
+cases are excluded from the ordinary run. Formatting and strict Clippy pass.
+This includes the user's unmodified `ebbae44` fixture fix; the accepted target-PC
+results below retain their original application checkpoint and scope.
+
 ## Target-PC acceptance — 2026-10-26 (M2–M8)
 
 [Local results and boundaries](LOCAL_ACCEPTANCE_2026-10-26.md): installed main

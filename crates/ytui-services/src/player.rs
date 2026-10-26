@@ -625,6 +625,9 @@ struct Actor {
     streams: Arc<crate::cache::ResponseCache<crate::native::Resolved>>,
 }
 fn native_stream_retryable(message: &str) -> bool {
+    if crate::failure::rate_limited(message) {
+        return false;
+    }
     let lower = message.to_lowercase();
     if [
         "not a bot",
@@ -851,6 +854,8 @@ impl Actor {
                         return;
                     }
                     self.state.paused = paused;
+                } else if self.reconnect_at.is_some() {
+                    self.state.paused = paused;
                 }
             }
             PlayerCommand::SetVolume(volume) if volume.is_finite() => {
@@ -1066,6 +1071,20 @@ impl Actor {
                         }
                         self.state.error = None;
                     }
+                } else if self.reconnect_at.is_some() {
+                    // IPC is unavailable during backoff. Preserve user intent so
+                    // the replacement process starts with these controls applied.
+                    match command {
+                        PlayerCommand::TogglePause => self.state.paused = !self.state.paused,
+                        PlayerCommand::Volume(delta) if delta.is_finite() => {
+                            self.state.volume = (self.state.volume + delta).clamp(0.0, 100.0)
+                        }
+                        PlayerCommand::Mute => self.state.muted = !self.state.muted,
+                        PlayerCommand::Speed(delta) if delta.is_finite() => {
+                            self.state.speed = (self.state.speed + delta).clamp(0.25, 4.0)
+                        }
+                        _ => {}
+                    }
                 }
             }
         }
@@ -1133,16 +1152,38 @@ impl Actor {
             };
             self.state.buffering = false;
             self.state.active = false;
-            if self.playing.as_ref().is_some_and(|(m, _, _)| m.live) && self.reconnect_count < 3 {
-                self.reconnect_count += 1;
-                self.reconnect_at = Some(
-                    tokio::time::Instant::now() + Duration::from_secs(1 << self.reconnect_count),
-                );
-                self.state.buffering = true;
-                self.state.error = Some(format!(
-                    "Radio disconnected · reconnecting ({}/3)",
-                    self.reconnect_count
-                ));
+            if self.playing.as_ref().is_some_and(|(m, _, _)| m.live) {
+                let service = if self
+                    .playing
+                    .as_ref()
+                    .is_some_and(|(m, _, _)| m.kind == ytui_core::MediaKind::Station)
+                {
+                    "Radio"
+                } else {
+                    "Live stream"
+                };
+                if self.reconnect_count < 3 && !crate::failure::rate_limited(&message) {
+                    self.reconnect_count += 1;
+                    self.reconnect_at = Some(
+                        tokio::time::Instant::now()
+                            + Duration::from_secs(1 << self.reconnect_count),
+                    );
+                    self.state.buffering = true;
+                    self.state.error = Some(format!(
+                        "{service} disconnected · reconnecting ({}/3)",
+                        self.reconnect_count
+                    ));
+                } else {
+                    // A live EOF is a disconnect, never completion of a queue item.
+                    self.state.error = Some(if crate::failure::rate_limited(&message) {
+                        format!("{service} rate limit · wait before retrying. {message}")
+                    } else {
+                        format!("{service} disconnected · reconnect limit reached (3/3). {message}")
+                    });
+                    event = Some(PlayerEvent::Error(
+                        self.state.error.clone().unwrap_or_default(),
+                    ));
+                }
             } else if !success
                 && self.config.playback_backend != "yt-dlp"
                 && self.state.backend == "native Rust"
@@ -1189,9 +1230,13 @@ impl Actor {
             .is_some_and(|when| tokio::time::Instant::now() >= when)
         {
             self.reconnect_at = None;
-            if let Some((media, audio, _)) = &self.playing {
+            if let Some((media, audio, fallback)) = &self.playing {
+                let mut config = self.config.clone();
+                if *fallback {
+                    config.playback_backend = "yt-dlp".into();
+                }
                 match start(
-                    &self.config,
+                    &config,
                     &self.paths,
                     self.session.as_deref(),
                     media,
@@ -3489,3 +3534,7 @@ mod real_mpv_tests {
         server.abort();
     }
 }
+
+#[cfg(test)]
+#[path = "recovery_tests.rs"]
+mod recovery_tests;

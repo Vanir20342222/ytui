@@ -4,6 +4,25 @@ pub struct Recovery {
     pub title: &'static str,
     pub instruction: &'static str,
 }
+/// Shared by recovery guidance and retry policy; status/transport spellings differ.
+pub(crate) fn rate_limited(message: &str) -> bool {
+    let text = message.to_ascii_lowercase();
+    [
+        "http error 429",
+        "http 429",
+        "http/1.1 429",
+        "http/2 429",
+        "server returned 429",
+        "status client error (429",
+        "status code 429",
+        "status 429",
+        "too many requests",
+        "rate limit",
+        "rate-limited",
+    ]
+    .iter()
+    .any(|part| text.contains(part))
+}
 pub fn recovery(message: &str) -> Option<Recovery> {
     let text = message.to_lowercase();
     let has = |patterns: &[&str]| patterns.iter().any(|p| text.contains(p));
@@ -44,14 +63,13 @@ pub fn recovery(message: &str) -> Option<Recovery> {
             "Access denied",
             "Check the path or device shown in Diagnostics: download folder permissions, tool executables or mpv audio/video access.",
         )
-    } else if has(&[
-        "http error 429",
-        "http 429",
-        "too many requests",
-        "rate limit",
-    ]) {
+    } else if rate_limited(&text) {
         (
-            "YouTube rate limit",
+            if text.contains("youtube") {
+                "YouTube rate limit"
+            } else {
+                "Service rate limit"
+            },
             "Wait for the service cooldown before retrying. Repeated refreshes will not help.",
         )
     } else if has(&[
@@ -154,7 +172,9 @@ mod tests {
                 "No supported JavaScript runtime could be found",
                 "YouTube JavaScript runtime is missing",
             ),
-            ("HTTP Error 429: Too Many Requests", "YouTube rate limit"),
+            ("HTTP Error 429: Too Many Requests", "Service rate limit"),
+            ("YouTube rate limit", "YouTube rate limit"),
+            ("Radio server returned 429", "Service rate limit"),
             (
                 "Browser session has expired; import it again",
                 "YouTube sign-in needs attention",

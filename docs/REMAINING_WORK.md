@@ -12,6 +12,11 @@ lists remaining gaps, including options preserved verbatim by migration.
 
 ## Current candidate: alpha.12
 
+[Recovery fixes after local acceptance](RECOVERY_FIXES_2026-10-26.md) repair
+rate-limit retries, live EOF/backend/control recovery and archived-live metadata.
+The new loopback real-player fixture is separate from active VPN-loss/recovery,
+human audibility and the remaining anonymous-service acceptance on the actual PC.
+
 [The October 26 target-PC report](LOCAL_ACCEPTANCE_2026-10-26.md) adds actual
 Brave Origin import/feeds/expiry, authenticated two-file playlist, Ghostty
 thumbnails/Omarchy palette and native desktop completion evidence. The current

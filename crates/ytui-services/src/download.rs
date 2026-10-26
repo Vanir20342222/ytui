@@ -204,7 +204,7 @@ pub fn parse_progress(line: &str) -> Option<JobUpdate> {
 }
 pub fn transient(error: &str) -> bool {
     let e = error.to_ascii_lowercase();
-    [
+    ([
         "timed out",
         "timeout",
         "connection",
@@ -219,6 +219,7 @@ pub fn transient(error: &str) -> bool {
     ]
     .iter()
     .any(|s| e.contains(s))
+        || crate::failure::rate_limited(error))
         && ![
             "private video",
             "video unavailable",
@@ -453,13 +454,21 @@ async fn execute_inner(
             bail!("{}", process::diagnostic(&error));
         }
         send(tx, job, JobUpdate::Retrying(attempt + 1)).await;
-        let delay = config
-            .retry_delay_seconds
-            .saturating_mul(1u64 << attempt.min(6))
-            .min(300);
+        let delay = retry_delay(config.retry_delay_seconds, attempt, &error);
         tokio::select! {_=cancel.cancelled()=>bail!("Operation cancelled"),_=tokio::time::sleep(Duration::from_secs(delay))=>{}}
     }
     bail!("Download retry budget exhausted")
+}
+
+fn retry_delay(base: u64, attempt: u32, error: &str) -> u64 {
+    let backoff = base.saturating_mul(1u64 << attempt.min(6)).min(300);
+    // CLI/worker errors do not expose an HTTP Retry-After header. Use a
+    // conservative minimum, while keeping the wait cancellable and bounded.
+    if crate::failure::rate_limited(error) {
+        backoff.max(60)
+    } else {
+        backoff
+    }
 }
 
 fn valid_output(path: &Path) -> bool {
@@ -638,5 +647,100 @@ mod tests {
         assert!(!transient(
             "Native postprocessing failed: connection closed"
         ));
+    }
+}
+
+#[cfg(test)]
+mod rate_limit_tests {
+    use super::*;
+    #[test]
+    fn rate_limit_backoff_has_a_floor_and_keeps_normal_retry_bounds() {
+        for message in [
+            "HTTP error 429",
+            "Server returned 429",
+            "HTTP/2 429 Too Many Requests",
+            "Too Many Requests",
+        ] {
+            assert!(transient(message));
+            assert_eq!(retry_delay(0, 0, message), 60);
+            assert_eq!(retry_delay(5, 4, message), 80);
+            assert_eq!(retry_delay(300, 10, message), 300);
+        }
+        assert_eq!(retry_delay(5, 0, "Connection reset"), 5);
+        assert_eq!(retry_delay(0, 0, "HTTP error 503"), 0);
+        assert!(!transient(
+            "HTTP error 429: Sign in to confirm you're not a bot"
+        ));
+    }
+    #[tokio::test]
+    async fn rate_limited_download_waits_and_cancellation_interrupts_the_cooldown() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let attempts = temp.path().join("attempts");
+        let extractor = temp.path().join("extractor");
+        std::fs::write(&extractor, format!("#!/bin/sh\nprintf 'attempt\\n' >> '{}'\necho 'ERROR: HTTP Error 429: Too Many Requests' >&2\nexit 1\n", attempts.display())).unwrap();
+        std::fs::set_permissions(&extractor, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let paths = Paths {
+            config_override: None,
+            config: temp.path().join("config"),
+            state: temp.path().join("state"),
+            cache: temp.path().join("cache"),
+            xdg_state: temp.path().join("xdg"),
+            legacy_data: temp.path().join("legacy"),
+            home: temp.path().into(),
+        };
+        paths.create().unwrap();
+        let options = ytui_core::DownloadOptions {
+            directory: temp.path().join("downloads"),
+            ..Default::default()
+        };
+        let job = Job::new(
+            Media {
+                url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+                ..Default::default()
+            },
+            options,
+        );
+        let config = Config {
+            download_backend: "yt-dlp".into(),
+            yt_dlp: extractor.to_string_lossy().into(),
+            max_retries: 1,
+            retry_delay_seconds: 0,
+            ..Default::default()
+        };
+        let cancel = CancellationToken::new();
+        let token = cancel.clone();
+        let (tx, mut rx) = mpsc::channel(32);
+        let task = tokio::spawn(execute(job, config, paths, None, token, tx));
+        let observed = tokio::time::timeout(Duration::from_secs(3), async {
+            while let Some(event) = rx.recv().await {
+                if matches!(event.update, JobUpdate::Retrying(_)) {
+                    return true;
+                }
+            }
+            false
+        })
+        .await;
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        let count = std::fs::read_to_string(&attempts)
+            .unwrap_or_default()
+            .lines()
+            .count();
+        cancel.cancel();
+        tokio::time::timeout(Duration::from_secs(2), task)
+            .await
+            .expect("Cooldown cancellation stalled")
+            .unwrap();
+        assert!(
+            observed.unwrap_or(false),
+            "Retry cooldown was never entered"
+        );
+        assert_eq!(count, 1, "Download retried HTTP 429 immediately");
+        while let Ok(event) = rx.try_recv() {
+            assert!(!matches!(
+                event.update,
+                JobUpdate::Finished | JobUpdate::Failed { .. }
+            ));
+        }
     }
 }

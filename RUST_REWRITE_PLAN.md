@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M2/M5/M6/M8 local-acceptance follow-up: preserve `ebbae44` and the target-PC
+report, then repair rate-limit retry/fallback policy, live EOF recovery, explicit
+backend retention, outage-time controls and archived-broadcast classification.
+[Recovery evidence](docs/RECOVERY_FIXES_2026-10-26.md) records cloud fixture checks
+separately from the user's accepted Omarchy results and remaining PC journeys.
+
 M2–M8 target-PC acceptance (2026-10-26): installed main `c6cf246` as alpha.12,
 verified native video/audio/Music, explicit Brave Origin account feeds/expiry,
 an authenticated two-file playlist, Ghostty thumbnails/Omarchy palette and muted
@@ -111,8 +117,9 @@ docs/VALIDATION.md for actual behavior, evidence and incomplete acceptance gates
 
 Replace the Python/Textual application with a dependable Rust terminal application
 for browsing YouTube, downloading media, listening to YouTube Music, and radio.
-The primary acceptance environment is **CachyOS + Caelestia + Ghostty**, with
-**Brave Origin** as the user's browser. UI behavior and
+The current acceptance environment is **Omarchy + Ghostty**, with
+**Brave Origin** as the user's browser. CachyOS/Caelestia is the historical target;
+see docs/LOCAL_ACCEPTANCE_2026-10-26.md for the change and qualified local results. UI behavior and
 downloads are the user's biggest current frustrations.
 
 Confirmed by the user:

@@ -6,7 +6,8 @@ baseline defects, milestones, migration requirements, and acceptance checks.
 
 - The initial planning change is documentation only. Do not claim the Rust rewrite
   or any planned feature is implemented until there is working code and evidence.
-- Target CachyOS + Caelestia + Ghostty with Brave Origin first. The user confirmed
+- Current target: Omarchy + Ghostty + Brave Origin, per docs/LOCAL_ACCEPTANCE_2026-10-26.md.
+  CachyOS + Caelestia is the historical target. The user confirmed
   a terminal app with mpv playback, short muted previews on `v`, native radio with
   optional cliamp launch, and permits yt-dlp/FFmpeg as external tools.
 - Reference milestone IDs in changes and update completion evidence in the plan.
