@@ -350,6 +350,7 @@ async fn execute_inner(
                     cookies: cookies.as_ref().map(|f| f.path().to_owned()),
                     resolve: false,
                     staging: None,
+                    player_clients: None,
                 },
                 &paths.state.join("auth/transient"),
                 cancel.clone(),

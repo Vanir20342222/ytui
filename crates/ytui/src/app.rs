@@ -267,6 +267,8 @@ pub struct App {
     collection_generation: u64,
     pub collection_pending: bool,
     pending_auto_play: Option<Media>,
+    playback_prepare: Option<(String, Instant, bool)>,
+    playback_prepare_not_before: Instant,
     pub sleep_timer: crate::sleep::SleepTimer,
     pub player_session_pending: bool,
     pub config: Config,
@@ -579,6 +581,8 @@ impl App {
             collection_generation: 0,
             collection_pending: false,
             pending_auto_play: None,
+            playback_prepare: None,
+            playback_prepare_not_before: Instant::now(),
             sleep_timer: Default::default(),
             player_session_pending: false,
             config,
@@ -1389,6 +1393,7 @@ impl App {
         self.redraw = true;
     }
     fn reset_account(&mut self) {
+        self.playback_prepare = None;
         self.player_session_pending = true;
         self.pending_auto_play = None;
         self.collection_cancel.cancel();
@@ -2292,6 +2297,9 @@ impl App {
         self.redraw = true;
     }
     fn selection_changed(&mut self) {
+        if self.playback_prepare.take().is_some() {
+            let _ = self.player.try_send(PlayerCommand::CancelPrepare);
+        }
         self.image_cancel.cancel();
         self.image_cancel = CancellationToken::new();
         self.image = None;
@@ -2355,6 +2363,93 @@ impl App {
             tokio::select! {_=cancel.cancelled()=>{},_=work=>{}};
             UiEvent::Prefetched
         });
+    }
+    fn prefetch_playback(&mut self, now: Instant) {
+        if self.demo
+            || self.offline
+            || self.player_session_pending
+            || self.sleep_timer.stopping()
+            || self.config.playback_backend == "yt-dlp"
+        {
+            return;
+        }
+        let selected = (matches!(self.tab, 1 | 2)
+            && !self.feeds_focused
+            && self.modal.is_none()
+            && self.input.is_none())
+        .then(|| self.selected())
+        .flatten()
+        .filter(|media| !media.collection() && !media.live)
+        .map(|media| {
+            let audio = self.selection_is_audio(&media);
+            (media, audio)
+        });
+        let current_url = self.player_status.media.as_ref().map(|media| &media.url);
+        let candidate = selected
+            .filter(|(media, _)| Some(&media.url) != current_url)
+            .or_else(|| {
+                if !self.player_status.active || self.snapshot.playback.shuffle {
+                    return None;
+                }
+                let mut queue = self.snapshot.playback.clone();
+                let media = queue.advance(true)?;
+                if Some(&media.url) == current_url {
+                    return None;
+                }
+                let audio = media.kind == MediaKind::Song;
+                Some((media, audio))
+            })
+            .filter(|(media, _)| ytui_services::sponsorblock::video_id(media).is_some());
+        let Some((media, audio)) = candidate else {
+            if self.playback_prepare.take().is_some() {
+                let _ = self.player.try_send(PlayerCommand::CancelPrepare);
+            }
+            return;
+        };
+        let key = serde_json::to_string(&(
+            &media.url,
+            audio,
+            &self.config.proxy,
+            &self.config.download.quality,
+            &self.config.native_js_runtime,
+            &self.config.ffmpeg,
+            &self.config.playback_backend,
+            self.config.account_index,
+            self.session.as_ref().map(|session| session.imported_at),
+        ))
+        .unwrap_or_default();
+        if self
+            .playback_prepare
+            .as_ref()
+            .is_none_or(|(previous, _, _)| previous != &key)
+        {
+            if self.playback_prepare.is_some() {
+                let _ = self.player.try_send(PlayerCommand::CancelPrepare);
+            }
+            self.playback_prepare = Some((
+                key.clone(),
+                (now + Duration::from_millis(750)).max(self.playback_prepare_not_before),
+                false,
+            ));
+            return;
+        }
+        let Some((_, due, sent)) = self.playback_prepare.as_ref() else {
+            return;
+        };
+        if now < *due {
+            return;
+        }
+        // Refresh the cheap cache lookup periodically; never enqueue every tick.
+        if self
+            .player
+            .try_send(PlayerCommand::Prepare { media, audio })
+            .is_ok()
+        {
+            self.playback_prepare_not_before = now + Duration::from_secs(3);
+            self.playback_prepare = Some((key, now + Duration::from_secs(45), true));
+        } else if !sent {
+            self.playback_prepare = Some((key, now + Duration::from_millis(250), false));
+        }
     }
     fn recover_feed(&mut self) {
         if self.demo || self.offline || !matches!(self.tab, 1..=3) {
@@ -3380,6 +3475,7 @@ impl App {
         {
             self.pending_auto_play = Some(media);
         }
+        self.prefetch_playback(Instant::now());
         self.recover_feed();
         self.prefetch_page();
         let finished = self
@@ -4805,4 +4901,133 @@ fn demo_art(palette: &Palette, index: usize, width: u32, height: u32) -> image::
         blend(palette.background, palette.accent, 0.08 + y / 800.0)
     });
     image::DynamicImage::ImageRgb8(image)
+}
+
+#[cfg(test)]
+mod playback_preparation_tests {
+    use super::*;
+    fn fixture() -> (App, mpsc::Receiver<PlayerCommand>, tempfile::TempDir) {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path();
+        let paths = Paths {
+            config_override: None,
+            config: root.join("config"),
+            state: root.join("state"),
+            cache: root.join("cache"),
+            xdg_state: root.join("xdg"),
+            legacy_data: root.join("legacy"),
+            home: root.into(),
+        };
+        let (player, rx) = mpsc::channel(4);
+        let (jobs, _) = mpsc::channel(4);
+        let mut app = App::new(
+            Config {
+                auth_store: "file".into(),
+                notifications: false,
+                ..Default::default()
+            },
+            paths,
+            Snapshot::default(),
+            None,
+            RuntimeHandles {
+                player,
+                jobs,
+                picker: Picker::from_fontsize((8, 16)),
+            },
+            false,
+            true,
+        )
+        .unwrap();
+        app.offline = false;
+        app.tab = 2;
+        app.tabs[2].page.items = vec![Media {
+            url: "https://www.youtube.com/watch?v=abcdefghijk".into(),
+            kind: MediaKind::Song,
+            ..Default::default()
+        }];
+        (app, rx, temp)
+    }
+    #[tokio::test]
+    async fn selection_preparation_is_debounced_bounded_and_never_starts_playback() {
+        let (mut app, mut rx, _temp) = fixture();
+        let now = Instant::now();
+        app.prefetch_playback(now);
+        app.prefetch_playback(now + Duration::from_millis(700));
+        assert!(rx.try_recv().is_err());
+        app.prefetch_playback(now + Duration::from_millis(750));
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::Prepare { audio: true, .. }
+        ));
+        for _ in 0..100 {
+            app.prefetch_playback(now + Duration::from_secs(2));
+        }
+        assert!(rx.try_recv().is_err());
+        app.selection_changed();
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::CancelPrepare
+        ));
+        app.shutdown().await;
+    }
+    #[tokio::test]
+    async fn moving_between_items_does_not_start_extractors_more_often_than_the_budget() {
+        let (mut app, mut rx, _temp) = fixture();
+        let now = Instant::now();
+        app.prefetch_playback(now);
+        app.prefetch_playback(now + Duration::from_millis(750));
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::Prepare { .. }
+        ));
+        app.tabs[2].page.items[0].url = "https://www.youtube.com/watch?v=01234567890".into();
+        app.selection_changed();
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::CancelPrepare
+        ));
+        app.prefetch_playback(now + Duration::from_secs(1));
+        app.prefetch_playback(now + Duration::from_secs(2));
+        assert!(rx.try_recv().is_err());
+        app.prefetch_playback(now + Duration::from_millis(3750));
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::Prepare { .. }
+        ));
+        app.shutdown().await;
+    }
+    #[tokio::test]
+    async fn preparation_respects_offline_demo_account_handoff_and_next_queue_intent() {
+        let (mut app, mut rx, _temp) = fixture();
+        let now = Instant::now();
+        for condition in 0..3 {
+            app.offline = condition == 0;
+            app.demo = condition == 1;
+            app.player_session_pending = condition == 2;
+            app.prefetch_playback(now);
+            app.prefetch_playback(now + Duration::from_secs(1));
+            assert!(rx.try_recv().is_err());
+        }
+        app.offline = false;
+        app.demo = false;
+        app.player_session_pending = false;
+        app.tab = 0;
+        let current = Media {
+            url: "https://www.youtube.com/watch?v=01234567890".into(),
+            ..Default::default()
+        };
+        let next = app.tabs[2].page.items[0].clone();
+        app.snapshot.playback.items = vec![current.clone(), next];
+        app.snapshot.playback.current = Some(0);
+        app.player_status.active = true;
+        app.player_status.media = Some(current);
+        app.prefetch_playback(now);
+        app.prefetch_playback(now + Duration::from_secs(1));
+        assert!(matches!(
+            rx.try_recv().unwrap(),
+            PlayerCommand::Prepare { audio: true, .. }
+        ));
+        assert_eq!(app.snapshot.playback.current, Some(0));
+        app.shutdown().await;
+    }
 }

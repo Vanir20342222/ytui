@@ -124,6 +124,7 @@ pub async fn run(
     let mut bytes = 0usize;
     let mut errors = VecDeque::new();
     let mut last_error = None;
+    let mut cooldown_error = None;
     let mut cancelled = false;
     let mut timed_out = false;
     let mut overflow = false;
@@ -146,6 +147,9 @@ pub async fn run(
                             line.truncate(boundary);
                         }
                         let level = line.trim_start().to_ascii_lowercase();
+                        if crate::failure::rate_limited(&line) && cooldown_error.is_none() {
+                            cooldown_error = Some(line.clone());
+                        }
                         if ["error:", "fatal:", "ytui:"].iter().any(|prefix| level.starts_with(prefix)) {
                             last_error = Some(line.clone());
                         }
@@ -209,6 +213,10 @@ pub async fn run(
     #[cfg(unix)]
     signal_group(pid, libc::SIGKILL);
     if let Some(error) = last_error {
+        errors.retain(|line| line != &error);
+        errors.push_front(error);
+    }
+    if let Some(error) = cooldown_error {
         errors.retain(|line| line != &error);
         errors.push_front(error);
     }
@@ -316,6 +324,17 @@ mod ownership_tests {
 #[cfg(test)]
 mod boundary_tests {
     use super::*;
+    #[tokio::test]
+    async fn stderr_saturation_cannot_hide_a_cooldown_behind_a_format_error() {
+        let result = run(ProcessSpec::new("sh", vec!["-c".into(),
+            "printf 'ERROR: HTTP error 429: Too Many Requests\\n' >&2; i=0; while [ $i -lt 64 ]; do printf 'WARNING: skipped candidate\\n' >&2; i=$((i+1)); done; printf 'ERROR: Requested format is not available\\n' >&2; exit 1".into()], 3),
+            CancellationToken::new(), |_| {}).await.unwrap();
+        assert!(!result.success);
+        assert!(result.stderr.lines().next().unwrap().contains("429"));
+        assert!(crate::failure::rate_limited(&result.stderr));
+        assert!(!crate::native::fallback_eligible(&result.stderr));
+        assert!(result.stderr.lines().count() <= 18);
+    }
     #[tokio::test]
     async fn environment_is_literal_and_oversized_single_lines_fail() {
         let mut spec = ProcessSpec::new(

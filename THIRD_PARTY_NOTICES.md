@@ -5,8 +5,8 @@ Cargo.lock and each dependency's packaged license. No external executables are
 bundled by install.sh or its install-rust.sh compatibility alias.
 
 - aagedal/yt-dlp-rs: native extraction/transfer library, Unlicense, pinned to
-  f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab. Its bundled EJS assets have separate
-  notices at https://github.com/aagedal/yt-dlp-rs/tree/f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab/vendor/ejs.
+  93d561be519b2e46189ede4a8441a143892fd35b. Its bundled EJS assets have separate
+  notices at https://github.com/aagedal/yt-dlp-rs/tree/93d561be519b2e46189ede4a8441a143892fd35b/vendor/ejs.
 - rookie 0.5.6: MIT. Its crate manifest omits a license field; the distributed
   MIT-LICENSE.txt was inspected. Copyright (c) 2023–2024 thewh1teagle and others.
 - Ratatui, ratatui-image and Crossterm: MIT.

@@ -11,13 +11,13 @@ use std::{
 };
 use tokio_util::sync::CancellationToken;
 use yt_dlp_rs::{
-    AudioOptions, CookieJar, DownloadOptions, DownloadPhase, DownloadProgress, HttpOptions,
-    PlaylistSelection, PostprocessOptions, SubtitleEmbedding, SubtitleFile, SubtitleOptions,
-    VideoInfo, VideoMode, VideoOptions, YoutubeDl, YoutubeOptions,
+    AudioOptions, CheckFormats, CookieJar, DownloadOptions, DownloadPhase, DownloadProgress,
+    HttpOptions, PlaylistSelection, PostprocessOptions, SubtitleEmbedding, SubtitleFile,
+    SubtitleOptions, VideoInfo, VideoMode, VideoOptions, YoutubeDl, YoutubeOptions,
 };
 use ytui_core::{Config, Job};
 
-pub const UPSTREAM_REV: &str = "f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab";
+pub const UPSTREAM_REV: &str = "93d561be519b2e46189ede4a8441a143892fd35b";
 #[derive(Clone, Serialize, Deserialize)]
 pub struct WorkerRequest {
     pub job: Job,
@@ -26,6 +26,8 @@ pub struct WorkerRequest {
     pub resolve: bool,
     #[serde(default)]
     pub staging: Option<PathBuf>,
+    #[serde(default)]
+    pub player_clients: Option<Vec<String>>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Resolved {
@@ -50,6 +52,24 @@ pub(crate) fn playback_source(info: &VideoInfo, audio: bool) -> Result<Resolved>
 }
 pub fn worker(path: &Path) -> Result<()> {
     let request: WorkerRequest = serde_json::from_slice(&std::fs::read(path)?)?;
+    // Never read the dependency's default shared cache from an isolated worker.
+    yt_dlp_rs::cache::configure(None);
+    let extractor_args = request
+        .player_clients
+        .as_ref()
+        .map(|clients| {
+            let args = [
+                ("player_client".into(), clients.clone()),
+                (
+                    "player_skip".into(),
+                    vec!["initial_data".into(), "configs".into()],
+                ),
+            ]
+            .into();
+            [("youtube".into(), args)].into()
+        })
+        .unwrap_or_default();
+    yt_dlp_rs::manifest_args::set_extractor_args(extractor_args);
     let o = &request.job.options;
     if !request.resolve
         && o.playlist
@@ -83,6 +103,9 @@ pub fn worker(path: &Path) -> Result<()> {
             }),
             include_translated_subtitles: o.auto_subtitles,
             no_playlist: request.resolve || !o.playlist,
+            mark_watched: false,
+            get_comments: false,
+            ..Default::default()
         },
         HttpOptions {
             cookies,
@@ -94,7 +117,12 @@ pub fn worker(path: &Path) -> Result<()> {
     .with_ffmpeg(
         crate::paths::executable(&request.config.ffmpeg)
             .unwrap_or_else(|| PathBuf::from(&request.config.ffmpeg)),
-    );
+    )
+    .with_check_formats(if request.resolve {
+        CheckFormats::Never
+    } else {
+        CheckFormats::Default
+    });
     let selector = if let Some(selector) = &o.format_selector {
         selector.clone()
     } else if o.audio {
@@ -107,6 +135,28 @@ pub fn worker(path: &Path) -> Result<()> {
             o.quality, o.quality
         )
     };
+    if request.resolve {
+        let info = client
+            .extract_result_unselected(&request.job.media.url)?
+            .into_entries()
+            .into_iter()
+            .next()
+            .context("Native extractor returned no media")?;
+        let verify = ytui_core::http_url(&request.job.media.url)
+            .is_ok_and(|url| ytui_core::youtube_host(url.host_str().unwrap_or_default()));
+        let resolved = crate::native_playback::resolve(
+            &client,
+            info,
+            &selector,
+            o.audio,
+            o.format_selector.is_some(),
+            request.config.proxy.as_deref(),
+            verify,
+        )?;
+        println!("YTUI_RESOLVED:{}", serde_json::to_string(&resolved)?);
+        std::io::stdout().flush()?;
+        return Ok(());
+    }
     let mut extracted =
         client.extract_result_with_format(&request.job.media.url, Some(&selector))?;
     if !o.playlist
@@ -120,15 +170,6 @@ pub fn worker(path: &Path) -> Result<()> {
     }
     let infos = extracted.into_entries();
     ensure!(!infos.is_empty(), "Native extractor returned no media");
-    if request.resolve {
-        let info = &infos[0];
-        println!(
-            "YTUI_RESOLVED:{}",
-            serde_json::to_string(&playback_source(info, o.audio)?)?
-        );
-        std::io::stdout().flush()?;
-        return Ok(());
-    }
     let owned_stage = if request.staging.is_none() {
         Some(
             tempfile::Builder::new()
@@ -513,25 +554,40 @@ pub async fn run(
     }
 }
 pub async fn resolve(
-    job: Job,
-    config: Config,
-    cookies: Option<PathBuf>,
+    mut request: WorkerRequest,
     dir: &Path,
     cancel: CancellationToken,
 ) -> Result<Resolved> {
-    let result = run(
-        WorkerRequest {
-            job,
-            config,
-            cookies,
-            resolve: true,
-            staging: None,
-        },
-        dir,
-        cancel,
-        |_| {},
-    )
-    .await?;
+    ensure!(
+        request.resolve,
+        "A playback resolution cannot start a download"
+    );
+    // A Music URL identifies the same recording, but otherwise makes upstream
+    // query an additional Music client even for audio-only playback.
+    request.job.media.url = playback_url(&request.job.media);
+    request.player_clients = (!request.job.media.live
+        && request.config.account_index == 0
+        && request.job.options.format_selector.is_none()
+        && crate::sponsorblock::video_id(&request.job.media).is_some())
+    .then(|| {
+        vec![
+            if request.cookies.is_some() {
+                "tv_samsung"
+            } else {
+                "visionos"
+            }
+            .to_owned(),
+        ]
+    });
+    let mut result = run(request.clone(), dir, cancel.clone(), |_| {}).await?;
+    if request.player_clients.is_some()
+        && retry_with_default_clients(&result)
+        && !cancel.is_cancelled()
+    {
+        let mut request = request;
+        request.player_clients = None;
+        result = run(request, dir, cancel, |_| {}).await?;
+    }
     let reason = result
         .stderr
         .lines()
@@ -563,6 +619,42 @@ pub async fn resolve(
         }
     }
     bail!("Native backend did not return a playback stream")
+}
+
+fn playback_url(media: &ytui_core::Media) -> String {
+    crate::sponsorblock::video_id(media)
+        .map(|id| format!("https://www.youtube.com/watch?v={id}"))
+        .unwrap_or_else(|| media.url.clone())
+}
+
+fn retry_with_default_clients(result: &ProcessResult) -> bool {
+    if result.success || crate::failure::rate_limited(&result.stderr) {
+        return false;
+    }
+    let message = result.stderr.to_ascii_lowercase();
+    if [
+        "not a bot",
+        "sign in",
+        "private video",
+        "video is unavailable",
+        "permission denied",
+        "proxy",
+        "tunnel",
+    ]
+    .iter()
+    .any(|part| message.contains(part))
+    {
+        return false;
+    }
+    fallback_eligible(&message)
+        || [
+            "requested format",
+            "format selection failed",
+            "all player responses are invalid",
+            "failed to extract any player response",
+        ]
+        .iter()
+        .any(|part| message.contains(part))
 }
 
 /// Auto mode falls back for extractor limitations, without changing the explicit
@@ -601,6 +693,56 @@ pub fn fallback_eligible(message: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn music_playback_keeps_the_exact_recording_without_a_second_service_context() {
+        let media = |url: &str| ytui_core::Media {
+            url: url.into(),
+            ..Default::default()
+        };
+        for url in [
+            "https://music.youtube.com/watch?v=K8v_DaCcORQ",
+            "https://youtu.be/K8v_DaCcORQ",
+            "https://www.youtube.com/watch?v=K8v_DaCcORQ&list=public-context",
+        ] {
+            assert_eq!(
+                playback_url(&media(url)),
+                "https://www.youtube.com/watch?v=K8v_DaCcORQ"
+            );
+        }
+        assert_eq!(
+            playback_url(&media("https://radio.invalid/live")),
+            "https://radio.invalid/live"
+        );
+    }
+    #[test]
+    fn the_wider_native_client_pass_is_bounded_to_compatible_failures() {
+        let failed = |message: &str| ProcessResult {
+            success: false,
+            lines: vec![],
+            stderr: message.into(),
+        };
+        for message in [
+            "HTTP error 429: Requested format is not available",
+            "Sign in to confirm you are not a bot",
+            "Private video",
+            "Proxy connection failed",
+            "permission denied",
+        ] {
+            assert!(!retry_with_default_clients(&failed(message)), "{message}");
+        }
+        for message in [
+            "Requested format is not available",
+            "All player responses are invalid",
+            "Native stream HTTP error 403",
+        ] {
+            assert!(retry_with_default_clients(&failed(message)), "{message}");
+        }
+        assert!(!retry_with_default_clients(&ProcessResult {
+            success: true,
+            lines: vec![],
+            stderr: String::new()
+        }));
+    }
     fn info(extra: serde_json::Value) -> VideoInfo {
         let mut value = json!({"id":"fixture","title":"Fixture","ext":"mp4","url":"https://media.test/video.mp4","webpage_url":"https://www.youtube.com/watch?v=abcdefghijk","extractor":"youtube","extractor_key":"Youtube"});
         value

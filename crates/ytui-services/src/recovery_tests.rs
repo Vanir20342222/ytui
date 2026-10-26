@@ -46,6 +46,8 @@ fn actor(root: &Path, live: bool) -> Actor {
         sponsor_task: None,
         ignore_segments_until: 0.0,
         streams: Arc::new(crate::cache::ResponseCache::new(16, 512 * 1024)),
+        preparation: None,
+        prepare_backoff: None,
     }
 }
 async fn finished(actor: &mut Actor, success: bool, message: &str) {
@@ -382,4 +384,124 @@ async fn real_mpv_stream_reconnect_retains_controls_and_never_emits_queue_comple
     player.close().await;
     server.abort();
     result.expect("Live reconnect fixture timed out").unwrap();
+}
+
+#[tokio::test]
+async fn prepared_extraction_is_promoted_without_a_second_resolve_and_stop_cancels_it() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut actor = actor(temp.path(), false);
+    let mpv = temp.path().join("mpv-prepared");
+    crate::paths::atomic_write(&mpv, b"#!/bin/sh\nsleep 30\n").unwrap();
+    std::fs::set_permissions(&mpv, std::fs::Permissions::from_mode(0o700)).unwrap();
+    actor.config.mpv = mpv.display().to_string();
+    actor.config.native_js_runtime = Some("/must-not-run-a-second-extraction".into());
+    let media = actor.playing.as_ref().unwrap().0.clone();
+    let options = actor.config.download.clone();
+    let key = crate::playback_cache::key(&actor.config, &media, &options).unwrap();
+    let release = Arc::new(tokio::sync::Notify::new());
+    let ready = release.clone();
+    let preparation = crate::playback_cache::Preparation::spawn(key, move |_| async move {
+        ready.notified().await;
+        Ok(crate::native::Resolved {
+            url: "https://cdn.invalid/prepared".into(),
+            audio_url: None,
+            headers: vec![],
+            catalog: Default::default(),
+        })
+    });
+    let cancel = preparation.cancel.clone();
+    actor.preparation = Some(preparation);
+    actor.play(media, false, false, None, false).await;
+    assert!(actor.preparation.is_none());
+    assert!(actor.full.is_some());
+    assert!(!cancel.is_cancelled());
+    release.notify_one();
+    let full = actor.full.as_mut().unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while full.backend.borrow_and_update().is_empty() {
+            full.backend.changed().await.unwrap();
+        }
+    })
+    .await
+    .unwrap();
+    assert_eq!(&*full.backend.borrow(), "native Rust");
+    assert!(!cancel.is_cancelled());
+    actor.stop().await;
+    assert!(cancel.is_cancelled());
+}
+
+#[tokio::test]
+async fn speculative_rate_limits_cool_down_without_playback_errors_or_external_fallback() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut actor = actor(temp.path(), false);
+    actor.preparation = Some(crate::playback_cache::Preparation::spawn(
+        "fixture".into(),
+        |_| async { anyhow::bail!("HTTP Error 429: Too Many Requests") },
+    ));
+    while !actor.preparation.as_ref().unwrap().is_finished() {
+        tokio::task::yield_now().await;
+    }
+    actor.tick().await;
+    assert!(actor.state.error.is_none());
+    assert!(actor.prepare_backoff.is_some());
+    actor
+        .handle(PlayerCommand::Prepare {
+            media: actor.playing.as_ref().unwrap().0.clone(),
+            audio: false,
+        })
+        .await;
+    assert!(actor.preparation.is_none());
+}
+
+#[tokio::test]
+async fn session_handoff_and_configuration_cancel_preparation_before_replacing_cache() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut actor = actor(temp.path(), false);
+    for command in [
+        PlayerCommand::Session(None),
+        PlayerCommand::Configure(Box::default()),
+    ] {
+        let preparation =
+            crate::playback_cache::Preparation::spawn("fixture".into(), |cancel| async move {
+                cancel.cancelled().await;
+                anyhow::bail!("cancelled")
+            });
+        let cancel = preparation.cancel.clone();
+        actor.preparation = Some(preparation);
+        actor.handle(command).await;
+        assert!(cancel.is_cancelled());
+        assert!(actor.preparation.is_none());
+    }
+}
+
+#[tokio::test]
+async fn an_expired_account_fails_before_extraction_instead_of_becoming_a_format_error() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut actor = actor(temp.path(), false);
+    actor.session = Some(Arc::new(Session {
+        cookies: vec![crate::auth::Cookie {
+            domain: ".youtube.com".into(),
+            path: "/".into(),
+            secure: true,
+            expires: Some(1),
+            name: "SAPISID".into(),
+            value: "synthetic-expired".into(),
+            http_only: false,
+        }],
+        account: "Synthetic account".into(),
+        imported_at: 0,
+    }));
+    actor.config.native_js_runtime = Some("/must-not-probe-any-runtime".into());
+    let media = actor.playing.as_ref().unwrap().0.clone();
+    actor.play(media, false, false, None, false).await;
+    assert!(actor.full.is_none());
+    assert!(
+        actor
+            .state
+            .error
+            .as_deref()
+            .unwrap()
+            .contains("session expired")
+    );
+    assert!(!temp.path().join("state/auth/transient").exists());
 }

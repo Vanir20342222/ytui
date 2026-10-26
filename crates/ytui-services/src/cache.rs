@@ -39,7 +39,7 @@ impl<T: Clone + Serialize> ResponseCache<T> {
             max_bytes,
         }
     }
-    fn get(&self, key: &str) -> Option<T> {
+    pub(crate) fn get(&self, key: &str) -> Option<T> {
         let mut state = self.state.lock().unwrap();
         state.clock += 1;
         let clock = state.clock;
@@ -67,6 +67,18 @@ impl<T: Clone + Serialize> ResponseCache<T> {
         F: FnOnce() -> Fut,
         Fut: Future<Output = Result<T>>,
     {
+        self.load_with_ttl(key, |_| ttl, fetch).await
+    }
+    pub async fn load_with_ttl<F, Fut>(
+        &self,
+        key: String,
+        ttl: impl FnOnce(&T) -> Duration,
+        fetch: F,
+    ) -> Result<T>
+    where
+        F: FnOnce() -> Fut,
+        Fut: Future<Output = Result<T>>,
+    {
         if let Some(value) = self.get(&key) {
             return Ok(value);
         }
@@ -87,6 +99,7 @@ impl<T: Clone + Serialize> ResponseCache<T> {
         }
         let epoch = self.state.lock().unwrap().epoch;
         let value = fetch().await?;
+        let ttl = ttl(&value);
         let bytes = serde_json::to_vec(&value)?.len() + key.len();
         let mut state = self.state.lock().unwrap();
         if state.epoch == epoch && bytes <= self.max_bytes && self.capacity > 0 {

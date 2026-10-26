@@ -33,13 +33,26 @@ pub async fn select(config: &Config, cancel: CancellationToken) -> Result<Option
         return Ok(Some(path));
     }
     candidates(
-        ["node", "deno"]
-            .into_iter()
-            .filter_map(executable)
-            .collect(),
+        runtime_candidates(std::env::var_os("PATH").as_deref()),
         cancel,
     )
     .await
+}
+fn runtime_candidates(path: Option<&std::ffi::OsStr>) -> Vec<PathBuf> {
+    let Some(path) = path else {
+        return Vec::new();
+    };
+    let directories = std::env::split_paths(path).take(128).collect::<Vec<_>>();
+    let mut candidates = Vec::new();
+    for name in ["node", "deno"] {
+        for directory in &directories {
+            let candidate = directory.join(name);
+            if candidate.is_file() && !candidates.contains(&candidate) {
+                candidates.push(candidate);
+            }
+        }
+    }
+    candidates
 }
 async fn candidates(paths: Vec<PathBuf>, cancel: CancellationToken) -> Result<Option<PathBuf>> {
     for path in paths {
@@ -105,6 +118,23 @@ mod tests {
         config.native_js_runtime = Some(node.clone());
         assert_eq!(
             select(&config, CancellationToken::new()).await.unwrap(),
+            Some(node)
+        );
+    }
+    #[tokio::test]
+    async fn an_unconfigured_shim_does_not_hide_a_supported_later_node() {
+        let temp = tempfile::tempdir().unwrap();
+        let shim = temp.path().join("shim");
+        let system = temp.path().join("system");
+        std::fs::create_dir_all(&shim).unwrap();
+        std::fs::create_dir_all(&system).unwrap();
+        tool(&shim, "node", "echo 'No version configured' >&2; exit 1");
+        let node = tool(&system, "node", "echo v26.8.1");
+        let path = std::env::join_paths([shim.clone(), system.clone(), shim]).unwrap();
+        assert_eq!(
+            candidates(runtime_candidates(Some(&path)), CancellationToken::new())
+                .await
+                .unwrap(),
             Some(node)
         );
     }
