@@ -173,6 +173,12 @@ its result must pass before runtime qualification. Fixture activities now launch
 with a debug-only offline UI flag to suppress ambient feed requests. Only the
 explicit public test invokes real YouTube extraction.
 
+Run `40586469283` passed EOF continuation and the initial controller Previous, but
+controller Next disappeared after the source changed. A basic ForwardingPlayer
+forwarded ExoPlayer's unmodified command-change events, overriding the augmented
+getter. The adapter now uses Media3's ForwardingSimpleBasePlayer, which keeps
+state and listener events consistent; the full controller regression remains.
+
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as
 passes. The accelerated hosted emulator supplied the successful runtime evidence.

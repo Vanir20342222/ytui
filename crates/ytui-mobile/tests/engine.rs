@@ -138,8 +138,15 @@ async fn playback_history_commits_only_accepted_navigation_and_preserves_forward
         .request(json!({"op":"history_list"}))
         .await
         .unwrap();
-    assert_eq!(history.as_array().unwrap().len(), 3);
+    assert_eq!(history.as_array().unwrap().len(), 4);
     assert_eq!(history[0]["url"], d.url);
+    assert!(
+        history
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|m| m["url"] == c.url)
+    );
     let mut config = e.request(json!({"op":"settings"})).await.unwrap();
     config["playback_history"] = json!(false);
     e.request(json!({"op":"save_settings","config":config}))

@@ -20,6 +20,7 @@ pub struct MobileState {
     pub queue: Vec<Media>,
     pub positions: HashMap<String, u64>,
     pub playback: ytui_core::PlaybackQueue,
+    pub recent: Vec<Media>,
 }
 struct PlaybackContext {
     id: String,
@@ -326,18 +327,18 @@ impl Engine {
                     Ok(json!({"committed":chosen.is_some()}))
                 })
             }
-            "history_list" => Ok(json!(
-                self.state
-                    .lock()
-                    .expect("state")
-                    .playback
-                    .items
-                    .iter()
-                    .rev()
-                    .collect::<Vec<_>>()
-            )),
+            "history_list" => {
+                let state = self.state.lock().expect("state");
+                let recent = if state.recent.is_empty() {
+                    &state.playback.items
+                } else {
+                    &state.recent
+                };
+                Ok(json!(recent.iter().rev().collect::<Vec<_>>()))
+            }
             "history_clear" => self.mutate(|state| {
                 state.playback = Default::default();
+                state.recent.clear();
                 state.positions.clear();
                 Ok(json!([]))
             }),
@@ -371,6 +372,10 @@ impl Engine {
                 ensure!(media.retained_bytes() <= 256 * 1024, "Media is too large");
                 ytui_core::http_url(&media.url)?;
                 self.mutate(|state| {
+                    if state.recent.is_empty() {
+                        state.recent = state.playback.items.clone();
+                    }
+                    let accepted = media.clone();
                     let timeline = &mut state.playback;
                     let requested = r["index"].as_u64().and_then(|n| usize::try_from(n).ok());
                     let same = |i: usize| {
@@ -398,6 +403,16 @@ impl Engine {
                     while timeline.items.len() > 100 || bytes > 2 * 1024 * 1024 {
                         bytes = bytes.saturating_sub(timeline.items.remove(0).retained_bytes());
                         timeline.current = timeline.current.map(|i| i.saturating_sub(1));
+                    }
+                    state.recent.retain(|m| m.url != accepted.url);
+                    state.recent.push(accepted);
+                    let mut bytes = state
+                        .recent
+                        .iter()
+                        .map(Media::retained_bytes)
+                        .sum::<usize>();
+                    while state.recent.len() > 100 || bytes > 2 * 1024 * 1024 {
+                        bytes = bytes.saturating_sub(state.recent.remove(0).retained_bytes());
                     }
                     Ok(json!({"recorded":true}))
                 })

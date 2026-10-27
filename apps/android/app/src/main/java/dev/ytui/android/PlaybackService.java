@@ -69,41 +69,42 @@ public final class PlaybackService extends MediaSessionService {
     session =
         new MediaSession.Builder(
                 this,
-                new ForwardingPlayer(player) {
+                new ForwardingSimpleBasePlayer(player) {
                   @Override
-                  public Commands getAvailableCommands() {
-                    return super.getAvailableCommands()
+                  protected State getState() {
+                    State state = super.getState();
+                    return state
                         .buildUpon()
-                        .add(Player.COMMAND_SEEK_TO_NEXT)
-                        .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
-                        .add(Player.COMMAND_SEEK_TO_PREVIOUS)
-                        .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                        .setAvailableCommands(
+                            state
+                                .availableCommands
+                                .buildUpon()
+                                .add(Player.COMMAND_SEEK_TO_NEXT)
+                                .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                                .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                                .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                                .build())
                         .build();
                   }
 
                   @Override
-                  public boolean isCommandAvailable(int command) {
-                    return getAvailableCommands().contains(command);
-                  }
-
-                  @Override
-                  public void seekToNext() {
-                    PlaybackService.this.next();
-                  }
-
-                  @Override
-                  public void seekToNextMediaItem() {
-                    PlaybackService.this.next();
-                  }
-
-                  @Override
-                  public void seekToPrevious() {
-                    PlaybackService.this.previous();
-                  }
-
-                  @Override
-                  public void seekToPreviousMediaItem() {
-                    PlaybackService.this.navigate(true);
+                  protected com.google.common.util.concurrent.ListenableFuture<?> handleSeek(
+                      int index, long position, int command) {
+                    switch (command) {
+                      case Player.COMMAND_SEEK_TO_NEXT:
+                      case Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM:
+                        PlaybackService.this.next();
+                        break;
+                      case Player.COMMAND_SEEK_TO_PREVIOUS:
+                        PlaybackService.this.previous();
+                        break;
+                      case Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM:
+                        PlaybackService.this.navigate(true);
+                        break;
+                      default:
+                        return super.handleSeek(index, position, command);
+                    }
+                    return com.google.common.util.concurrent.Futures.immediateVoidFuture();
                   }
                 })
             .setSessionActivity(
@@ -429,6 +430,7 @@ public final class PlaybackService extends MediaSessionService {
                       .put("op", "history_record")
                       .put("media", started.getJSONObject("media"))
                       .put("index", started.optInt("history_index", -1)));
+              MediaBridge.event("history_updated", "");
             } catch (Exception error) {
               MediaBridge.event("error", "Could not save the playback queue/history");
             }

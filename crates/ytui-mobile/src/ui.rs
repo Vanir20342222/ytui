@@ -728,6 +728,9 @@ impl MobileApp {
                     "history_cleared" => {
                         self.request(ctx, json!({"op":"history_list"}), Kind::History);
                     }
+                    "history_updated" if self.history_open => {
+                        self.request(ctx, json!({"op":"history_list"}), Kind::History);
+                    }
                     "shared" => {
                         if let Some(raw) = event["text"].as_str()
                             && let Ok(url) = ytui_core::http_url(raw.trim())
