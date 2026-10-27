@@ -137,9 +137,13 @@ public final class ExportRuntimeTest {
               MediaRuntimeTest.status().optString("title").equals("Exported media")
                   && MediaRuntimeTest.status().optDouble("position") > 0.5
                   && MediaRuntimeTest.status().optBoolean("playing"));
+      AudioTap.levels = 0;
+      AudioTap.enabled = true;
+      MediaRuntimeTest.await("Exported audio produced no decoded PCM", () -> AudioTap.levels != 0);
       assertTrue(MediaRuntimeTest.status().isNull("error"));
       MediaRuntimeTest.command("stop");
     } finally {
+      AudioTap.enabled = false;
       for (String id : new String[] {videoId, audioId}) if (id != null) OfflineStore.remove(id);
       for (File file : new File[] {video, audio, exported, song, cancelled}) file.delete();
     }

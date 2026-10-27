@@ -265,8 +265,32 @@ impl Engine {
                 let i = r["index"].as_u64().context("Missing queue index")? as usize;
                 self.mutate(|state| {
                     ensure!(i < state.queue.len(), "Queue index is out of bounds");
+                    ensure!(
+                        r["url"]
+                            .as_str()
+                            .is_none_or(|url| state.queue[i].url == url),
+                        "The queue changed; review its current order"
+                    );
                     state.queue.remove(i);
-                    Ok(json!({"removed":true}))
+                    Ok(json!({"removed":true,"items":state.queue}))
+                })
+            }
+            "queue_move" => {
+                let from = r["from"].as_u64().context("Missing source index")? as usize;
+                let to = r["to"].as_u64().context("Missing destination index")? as usize;
+                let expected = r["url"].as_str().context("Missing queue item URL")?;
+                self.mutate(|state| {
+                    ensure!(
+                        from < state.queue.len() && to < state.queue.len(),
+                        "Queue index is out of bounds"
+                    );
+                    ensure!(
+                        state.queue[from].url == expected,
+                        "The queue changed; review its current order"
+                    );
+                    let media = state.queue.remove(from);
+                    state.queue.insert(to, media);
+                    Ok(json!({"items":state.queue}))
                 })
             }
             "position" => {

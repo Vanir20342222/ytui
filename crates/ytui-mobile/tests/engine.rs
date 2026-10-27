@@ -55,6 +55,49 @@ async fn mobile_queue_saved_and_resume_are_durable_and_checked() {
     );
 }
 #[tokio::test]
+async fn queue_reordering_is_durable_and_stale_actions_cannot_remove_the_wrong_item() {
+    let (e, root) = engine();
+    let a = media("abcdefghijk");
+    let b = media("lmnopqrstuv");
+    let c = media("zyxwvutsrqp");
+    for item in [&a, &b, &c] {
+        e.request(json!({"op":"enqueue","media":item}))
+            .await
+            .unwrap();
+    }
+    let changed = e
+        .request(json!({"op":"queue_move","from":2,"to":0,"url":c.url}))
+        .await
+        .unwrap();
+    assert_eq!(changed["items"][0]["url"], c.url);
+    e.request(json!({"op":"queue_commit","url":c.url}))
+        .await
+        .unwrap();
+    assert!(
+        e.request(json!({"op":"queue_remove","index":1,"url":a.url}))
+            .await
+            .is_err()
+    );
+    assert!(
+        e.request(json!({"op":"queue_move","from":0,"to":99,"url":a.url}))
+            .await
+            .is_err()
+    );
+    let restored = Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap();
+    let queue = restored.request(json!({"op":"queue"})).await.unwrap();
+    assert_eq!(queue[0]["url"], a.url);
+    assert_eq!(queue[1]["url"], b.url);
+    // A failed persistence attempt must not move the visible in-memory queue.
+    std::fs::remove_file(root.path().join("files/library.json")).unwrap();
+    std::fs::create_dir(root.path().join("files/library.json")).unwrap();
+    assert!(
+        e.request(json!({"op":"queue_move","from":0,"to":1,"url":a.url}))
+            .await
+            .is_err()
+    );
+    assert_eq!(e.request(json!({"op":"queue"})).await.unwrap(), queue);
+}
+#[tokio::test]
 async fn failed_disk_write_never_publishes_an_in_memory_queue_change() {
     let (e, root) = engine();
     std::fs::create_dir(root.path().join("files/library.json")).unwrap();

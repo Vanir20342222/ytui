@@ -37,7 +37,11 @@ accepts a video or dedicated playlist link, with audio-only and quality choices.
 A watch link with `list=` keeps single-video intent. Tap the current player
 to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, queue
 and visualizer controls. Tablet layouts keep catalog and player side by side.
-Android Back closes overlays before putting the app in the background.
+Android Back closes overlays, then returns to the previous feed with its scroll
+position, before putting the app in the background. Each tab retains up to twelve
+navigation steps and 2 MiB of cached previous pages; evicted pages reload
+automatically. Disconnecting clears account navigation history. The queue's
+arrow buttons reorder items; edits are saved before their result is shown.
 
 For a completed offline download, open **Actions → Export file…** and choose a
 destination in Android's document picker. Original MP4/M4A/WebM containers are

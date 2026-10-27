@@ -118,12 +118,32 @@ pass locally. The added device test downloads separate generated tracks, closes
 both source servers, muxes and actually decodes an exported file, verifies a
 foreground audio export is byte-for-byte identical, and checks cancellation.
 Its actual hosted result must pass before claiming export runtime acceptance.
+The first export run (`40576469530`) exposed AAC priming samples with negative
+timestamps: the mux loop treated them as EOS and wrote zero audio samples.
+It now identifies EOS by track index, shifts every track by the same time origin
+and rejects an output with any empty track. The device regression retains both
+track checks and additionally requires decoded PCM from the exported file.
 
 The vendored player fixtures' public client keys are sanitized. Both exact Node
 challenge vectors still pass. Secret scanning now checks all fetched history;
 see [the provenance/security review](../SECURITY_REVIEW_2026-10-27.md) for the
 specific legacy public-fixture baseline and the API permission limit on closing
 GitHub's historical alerts.
+
+## Navigation and queue follow-up
+
+Back now restores per-tab pages and scroll positions; older evicted pages reload
+automatically, and account changes clear private navigation history. Each tab's
+history is bounded to twelve steps and 2 MiB of page data. Late replies cannot
+overwrite a restored feed. The virtualized queue has touch reorder buttons,
+durable edits and identity checks that prevent a stale remove/reorder action from
+changing the wrong entry after the decoder consumes an item. Failed writes leave
+the engine and UI queue unchanged; dismissed loading queues stay closed.
+
+The full local workspace checkpoint passed **296 tests, 0 failures, 31 ignored**,
+followed by the additional passing queue-dismissal regression. The focused mobile
+suite now passes **23 tests** and strict Clippy; the next complete hosted run must
+qualify the resulting **297-test** workspace and updated APK.
 
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as

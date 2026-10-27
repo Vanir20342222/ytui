@@ -35,8 +35,8 @@ enum Kind {
         download: bool,
         resume: bool,
     },
-    Saved,
     Queue,
+    QueueChanged,
     Popup(String),
     Account,
     Ignore,
@@ -60,6 +60,40 @@ struct Feed {
     failures: u8,
     retry_at: Option<std::time::Instant>,
     scroll_offset: f32,
+    restore_scroll: Option<f32>,
+    history: std::collections::VecDeque<Navigation>,
+}
+struct Navigation {
+    request: BrowseRequest,
+    page: Option<Page>,
+    scroll_offset: f32,
+}
+impl Feed {
+    fn remember(&mut self) {
+        let Some(request) = self.request.clone() else {
+            return;
+        };
+        let page = std::mem::take(&mut self.page);
+        self.history.push_back(Navigation {
+            request,
+            page: ((!page.items.is_empty() || !self.loading && self.error.is_none())
+                && page.retained_bytes() <= 2 * 1024 * 1024)
+                .then_some(page),
+            scroll_offset: self.scroll_offset,
+        });
+        while self.history.len() > 12 {
+            self.history.pop_front();
+        }
+        let mut retained = 0;
+        for entry in self.history.iter_mut().rev() {
+            if let Some(page) = &entry.page {
+                retained += page.retained_bytes();
+                if retained > 2 * 1024 * 1024 {
+                    entry.page = None;
+                }
+            }
+        }
+    }
 }
 pub struct MobileApp {
     engine: Arc<Engine>,
@@ -78,6 +112,7 @@ pub struct MobileApp {
     pub downloads: Value,
     player_open: bool,
     queue_open: bool,
+    queue_pending: bool,
     queue: Vec<Media>,
     queue_selection: Option<String>,
     popup: Option<(String, String)>,
@@ -128,6 +163,7 @@ impl MobileApp {
             downloads: json!([]),
             player_open: false,
             queue_open: false,
+            queue_pending: false,
             queue: Vec::new(),
             queue_selection: None,
             popup: None,
@@ -223,7 +259,9 @@ impl MobileApp {
         feed.last_attempt = Some((query.clone(), append));
         if !append {
             if feed.request.as_ref() != Some(&query) {
+                feed.remember();
                 feed.scroll_offset = 0.0;
+                feed.restore_scroll = None;
             }
             feed.generation += 1;
             feed.last_token = None;
@@ -239,6 +277,31 @@ impl MobileApp {
         feed.error = None;
         let generation = feed.generation;
         self.pending_feed[tab]=Some(self.request(ctx,json!({"op":"browse","tab":tab,"request":query,"offset":if append {self.feeds[tab].page.items.len()} else {0}}),Kind::Feed{tab,generation,append}));
+    }
+    fn navigate_back(&mut self, ctx: &egui::Context) -> bool {
+        let Some(previous) = self.feeds[self.tab].history.pop_back() else {
+            return false;
+        };
+        if let Some(id) = self.pending_feed[self.tab].take() {
+            self.engine.cancel(id);
+        }
+        let feed = &mut self.feeds[self.tab];
+        feed.generation += 1;
+        feed.loading = false;
+        feed.error = None;
+        feed.retry_at = None;
+        feed.failures = 0;
+        feed.last_token = None;
+        feed.last_attempt = Some((previous.request.clone(), false));
+        feed.request = Some(previous.request.clone());
+        feed.scroll_offset = previous.scroll_offset;
+        let reload = previous.page.is_none();
+        feed.restore_scroll = reload.then_some(previous.scroll_offset);
+        feed.page = previous.page.unwrap_or_default();
+        if reload {
+            self.navigate(ctx, previous.request, false);
+        }
+        true
     }
     pub fn change_tab(&mut self, ctx: &egui::Context, tab: usize) {
         if tab > 3 {
@@ -371,6 +434,9 @@ impl MobileApp {
                                 feed.page.notice = page.notice;
                             } else {
                                 feed.page = page;
+                                if let Some(offset) = feed.restore_scroll.take() {
+                                    feed.scroll_offset = offset;
+                                }
                             }
                             // Bounded retained window while preserving continuation for long feeds.
                             if feed.page.items.len() > 2000 {
@@ -516,17 +582,26 @@ impl MobileApp {
                     }
                     .into();
                 }
-                (Kind::Queue, Ok(value)) => {
-                    self.queue = serde_json::from_value(value).unwrap_or_default();
-                    self.queue_open = true;
+                (Kind::Queue, result) => {
+                    self.queue_pending = false;
+                    match result {
+                        Ok(value) => self.queue = serde_json::from_value(value).unwrap_or_default(),
+                        Err(error) => self.status = error,
+                    }
                 }
-                (Kind::Saved, Ok(value)) => {
-                    if let Ok(items) = serde_json::from_value(value) {
-                        self.feeds[self.tab].page = Page {
-                            title: "Saved locally".into(),
-                            items,
-                            ..Default::default()
-                        };
+                (Kind::QueueChanged, result) => {
+                    self.queue_pending = false;
+                    match result {
+                        Ok(value) => {
+                            self.queue =
+                                serde_json::from_value(value["items"].clone()).unwrap_or_default()
+                        }
+                        Err(error) => {
+                            self.status = error;
+                            if self.queue_open {
+                                self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+                            }
+                        }
                     }
                 }
                 (Kind::Popup(title), Ok(value)) => {
@@ -551,6 +626,8 @@ impl MobileApp {
                         let feed = &mut self.feeds[tab];
                         feed.generation += 1;
                         feed.page = Page::default();
+                        feed.history.clear();
+                        feed.restore_scroll = None;
                         feed.request = None;
                         feed.loading = false;
                         feed.error = None;
@@ -664,7 +741,7 @@ impl MobileApp {
                             self.queue_open = false;
                         } else if self.player_open {
                             self.player_open = false;
-                        } else {
+                        } else if !self.navigate_back(ctx) {
                             self.effects
                                 .push(Effect::Command(json!({"op":"background"})));
                         }
@@ -885,27 +962,37 @@ impl MobileApp {
                 .show(ctx, |ui| {
                     egui::ScrollArea::vertical()
                         .max_height(500.0)
-                        .show(ui, |ui| {
-                            for (i, media) in self.queue.clone().iter().enumerate() {
+                        .show_rows(ui, 56.0, self.queue.len(), |ui, range| {
+                            let count = self.queue.len();
+                            for i in range {
+                                let media = self.queue[i].clone();
                                 ui.horizontal(|ui| {
-                                    if ui.button(&media.title).clicked() {
+                                    let width = (ui.available_width() - 176.0).max(48.0);
+                                    if ui.add_sized([width,48.0],egui::Button::new(&media.title).truncate()).clicked() {
                                         self.queue_selection = Some(media.url.clone());
                                         self.resolve(ctx, media.clone(), false, false, false);
                                         self.queue_open = false;
                                     }
-                                    if ui.button("Remove").clicked() {
+                                    let mut target = None;
+                                    if ui.add_enabled(!self.queue_pending && i>0,egui::Button::new("↑")).clicked() {target=Some(i-1);}
+                                    if ui.add_enabled(!self.queue_pending && i+1<count,egui::Button::new("↓")).clicked() {target=Some(i+1);}
+                                    if let Some(to) = target {
+                                        self.queue_pending=true;
+                                        self.request(ctx,json!({"op":"queue_move","from":i,"to":to,"url":media.url}),Kind::QueueChanged);
+                                    }
+                                    if ui.add_enabled(!self.queue_pending,egui::Button::new("×")).clicked() {
+                                        self.queue_pending=true;
                                         self.request(
                                             ctx,
-                                            json!({"op":"queue_remove","index":i}),
-                                            Kind::Ignore,
+                                            json!({"op":"queue_remove","index":i,"url":media.url}),
+                                            Kind::QueueChanged,
                                         );
-                                        self.queue.remove(i);
                                     }
                                 });
                             }
                         });
                 });
-            self.queue_open = open;
+            self.queue_open &= open;
         }
         if let Some((title, text)) = self.popup.clone() {
             let mut open = true;
@@ -959,6 +1046,11 @@ impl MobileApp {
     fn command(&mut self, op: &str) {
         self.effects.push(Effect::Command(json!({"op":op})));
     }
+    fn open_queue(&mut self, ctx: &egui::Context) {
+        self.queue_open = true;
+        self.queue_pending = true;
+        self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+    }
     fn catalog(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
         if self.tab == 0 {
             self.download_list(ui);
@@ -1008,7 +1100,17 @@ impl MobileApp {
                     }
                 });
             });
-        ui.label(RichText::new(&self.feeds[self.tab].page.title).color(c(self.palette.accent)));
+        ui.horizontal(|ui| {
+            if !self.feeds[self.tab].history.is_empty() && ui.button("Back").clicked() {
+                self.navigate_back(ctx);
+            }
+            ui.add(
+                egui::Label::new(
+                    RichText::new(&self.feeds[self.tab].page.title).color(c(self.palette.accent)),
+                )
+                .truncate(),
+            );
+        });
         if let Some(error) = self.feeds[self.tab].error.clone() {
             ui.colored_label(
                 c(self.palette.error),
@@ -1287,7 +1389,7 @@ impl MobileApp {
         }
         ui.horizontal_wrapped(|ui| {
             if ui.button("Queue").clicked() {
-                self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+                self.open_queue(ctx);
             }
             if ui.button("Shuffle").clicked() {
                 self.command("shuffle");
@@ -1621,8 +1723,8 @@ impl MobileApp {
         if ui.button("Connect YouTube account").clicked(){self.effects.push(Effect::Login);self.menu_open=false;}
         if ui.button("Import cookie file").clicked(){self.effects.push(Effect::Pick("cookies".into()));}
         if ui.button("Disconnect account").clicked(){self.account_generation+=1; self.playback_generation+=1; self.request(ctx,json!({"op":"disconnect"}),Kind::Account);self.effects.push(Effect::Command(json!({"op":"disconnect"})));}
-        if ui.button("Saved media").clicked(){self.request(ctx,json!({"op":"saved"}),Kind::Saved);}
-        if ui.button("Playback queue").clicked(){self.request(ctx,json!({"op":"queue"}),Kind::Queue);}
+        if ui.button("Saved media").clicked(){self.navigate(ctx,BrowseRequest::Favorites,false);self.menu_open=false;}
+        if ui.button("Playback queue").clicked(){self.open_queue(ctx);self.menu_open=false;}
         if ui.button("Refresh feed").clicked()&& let Some(req)=self.feeds[self.tab].request.clone(){self.navigate(ctx,req,false);}
         if ui.button("About / mobile parity").clicked(){self.popup=Some(("About ytui Android".into(),"Rust UI and engine · Media3 playback\nNative YouTube signature challenges may still fail.\nAndroid cannot access other browsers' private cookies.\nLinux desktop services and external cliamp are not Android services.\nSee docs/android/PARITY.md for platform differences and qualification gates.".into()));}
     });
@@ -2000,6 +2102,108 @@ mod tests {
         assert!(app.effects.is_empty());
         app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
         assert!(matches!(app.effects.as_slice(),[Effect::Command(v)] if v["op"]=="background"));
+    }
+    #[test]
+    fn back_restores_feed_position_rejects_late_replies_and_disconnect_clears_private_history() {
+        let (mut app, ctx, _root) = test_app();
+        app.tab = 1;
+        let feed = &mut app.feeds[1];
+        feed.request = Some(BrowseRequest::Home);
+        feed.page.title = "Home".into();
+        feed.page.items.push(Media {
+            title: "Previous card".into(),
+            ..Default::default()
+        });
+        feed.scroll_offset = 640.0;
+        feed.remember();
+        feed.request = Some(BrowseRequest::Search("new search".into()));
+        feed.generation = 4;
+        feed.loading = true;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(app.effects.is_empty());
+        assert_eq!(app.feeds[1].page.title, "Home");
+        assert_eq!(app.feeds[1].scroll_offset, 640.0);
+        assert!(!app.feeds[1].loading);
+        deliver(
+            &app,
+            Kind::Feed {
+                tab: 1,
+                generation: 4,
+                append: false,
+            },
+            Ok(serde_json::to_value(Page::default()).unwrap()),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.feeds[1].page.items[0].title, "Previous card");
+        // An evicted history page reloads automatically, then restores the offset.
+        app.feeds[1].remember();
+        app.feeds[1].history.back_mut().unwrap().page = None;
+        app.feeds[1].request = Some(BrowseRequest::Search("another page".into()));
+        assert!(app.navigate_back(&ctx));
+        app.feeds[1].scroll_offset = 0.0;
+        let generation = app.feeds[1].generation;
+        deliver(
+            &app,
+            Kind::Feed {
+                tab: 1,
+                generation,
+                append: false,
+            },
+            Ok(serde_json::to_value(Page {
+                title: "Reloaded Home".into(),
+                ..Default::default()
+            })
+            .unwrap()),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.feeds[1].scroll_offset, 640.0);
+        app.feeds[1].remember();
+        deliver(&app, Kind::Account, Ok(json!({"connected":false})), None);
+        app.poll(&ctx);
+        assert!(app.feeds[1].history.is_empty());
+        assert!(app.feeds[1].page.items.is_empty());
+    }
+    #[test]
+    fn navigation_retains_recent_pages_with_a_bounded_memory_and_depth_budget() {
+        let mut feed = Feed::default();
+        for i in 0..40 {
+            feed.request = Some(BrowseRequest::Search(i.to_string()));
+            feed.page.items = (0..4)
+                .map(|_| Media {
+                    title: "x".repeat(125_000),
+                    ..Default::default()
+                })
+                .collect();
+            feed.remember();
+        }
+        assert_eq!(feed.history.len(), 12);
+        assert!(
+            feed.history
+                .iter()
+                .filter_map(|n| n.page.as_ref())
+                .map(Page::retained_bytes)
+                .sum::<usize>()
+                <= 2 * 1024 * 1024
+        );
+        assert!(feed.history.back().unwrap().page.is_some());
+        assert!(feed.history.front().unwrap().page.is_none());
+    }
+    #[test]
+    fn dismissing_a_loading_queue_cannot_be_undone_by_its_reply() {
+        let (mut app, ctx, _root) = test_app();
+        app.open_queue(&ctx);
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.queue_open);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        while !app.tasks.is_empty() {
+            app.poll(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(!app.queue_open);
+        assert!(!app.queue_pending);
     }
     #[test]
     fn every_music_style_renders_and_pause_reduced_motion_and_cancel_preserve_state() {

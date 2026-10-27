@@ -76,6 +76,9 @@ public final class OfflineExport extends Worker {
       MediaBridge.event("notice", "Offline media exported");
       return Result.success();
     } catch (Exception error) {
+      // Stack locations and exception class only: never log signed URLs or URI grants.
+      android.util.Log.e(
+          "YtuiExport", error.getClass().getName() + " " + Arrays.toString(error.getStackTrace()));
       state(
           getApplicationContext(),
           getId().toString(),
@@ -242,6 +245,8 @@ public final class OfflineExport extends Worker {
     List<int[]> maps = new ArrayList<>();
     MediaMuxer muxer = new MediaMuxer(output.getAbsolutePath(), plan.container);
     boolean started = false;
+    int trackCount = 0;
+    Set<Integer> populatedTracks = new HashSet<>();
     try {
       for (Download part : plan.parts) {
         CachedInput input = new CachedInput(part);
@@ -256,6 +261,7 @@ public final class OfflineExport extends Worker {
           String mime = format.getString(MediaFormat.KEY_MIME);
           if (mime != null && (mime.startsWith("audio/") || mime.startsWith("video/"))) {
             map[i] = muxer.addTrack(format);
+            trackCount++;
             extractor.selectTrack(i);
             if (mime.startsWith("video/") && format.containsKey(MediaFormat.KEY_ROTATION))
               muxer.setOrientationHint(format.getInteger(MediaFormat.KEY_ROTATION));
@@ -267,13 +273,20 @@ public final class OfflineExport extends Worker {
       started = true;
       ByteBuffer buffer = ByteBuffer.allocateDirect(8 * 1024 * 1024);
       MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+      long origin = 0;
+      for (MediaExtractor extractor : extractors) {
+        if (extractor.getSampleTrackIndex() >= 0)
+          origin = Math.min(origin, extractor.getSampleTime());
+      }
       while (true) {
         check(cancelled);
         int next = -1;
         long timestamp = Long.MAX_VALUE;
         for (int i = 0; i < extractors.size(); i++) {
           long time = extractors.get(i).getSampleTime();
-          if (time >= 0 && time < timestamp) {
+          // AAC priming samples have valid negative timestamps. Only the track
+          // index signals EOS; dropping priming must not drop the entire track.
+          if (extractors.get(i).getSampleTrackIndex() >= 0 && time < timestamp) {
             next = i;
             timestamp = time;
           }
@@ -291,10 +304,13 @@ public final class OfflineExport extends Worker {
                 : 0;
         if ((extractor.getSampleFlags() & MediaExtractor.SAMPLE_FLAG_ENCRYPTED) != 0)
           throw new IOException("Encrypted sample");
-        info.set(0, size, timestamp, flags);
+        info.set(0, size, timestamp - origin, flags);
+        populatedTracks.add(maps.get(next)[extractor.getSampleTrackIndex()]);
         muxer.writeSampleData(maps.get(next)[extractor.getSampleTrackIndex()], buffer, info);
         extractor.advance();
       }
+      if (populatedTracks.size() != trackCount)
+        throw new IOException("An exported track has no samples");
       muxer.stop();
       started = false;
     } finally {
