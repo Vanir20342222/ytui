@@ -27,6 +27,14 @@ public final class MediaBridge {
 
   static void attach(Context ctx) {
     context = (android.app.Application) ctx.getApplicationContext();
+    main.post(
+        () -> {
+          try {
+            OfflineStore.manager();
+          } catch (Exception error) {
+            event("error", "Offline library could not be restored");
+          }
+        });
     try {
       NetworkSettings.apply(
           new JSONObject(NativeBridge.request("{\"op\":\"settings\"}")).getJSONObject("data"));
