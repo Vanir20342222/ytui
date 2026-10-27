@@ -1,5 +1,15 @@
 # Validation record
 
+## Audio-reactive players — 2026-10-27 (M5/M6/M7/M8)
+
+Neon VU and Pulse Orbit add pane/fullscreen presentations using optional real
+mpv level telemetry. 273 workspace tests pass (31 opt-in excluded); strict
+Clippy, formatting and workflow syntax pass. An actual mpv/FFmpeg stereo-tone
+fixture verifies level separation, pause, meter removal/re-enabling and resume
+without a second player launch. CI includes that fixture. All built-in themes
+and four terminal sizes are covered; four WQHD PTY captures use fictional demo
+levels. [Details and limits](VINYL_PLAYER.md#audio-reactive-views--2026-10-27).
+
 ## Vinyl music player — 2026-10-27 (M5/M6/M7/M8)
 
 [Usage, captures and scope](VINYL_PLAYER.md): 270 workspace tests pass (30 opt-in

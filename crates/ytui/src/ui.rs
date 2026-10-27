@@ -72,6 +72,7 @@ mod lyrics;
 mod menus;
 mod settings;
 pub mod vinyl;
+mod visualizer;
 mod workspace;
 pub use workspace::render;
 fn time(seconds: f64) -> String {

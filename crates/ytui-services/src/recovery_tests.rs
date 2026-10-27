@@ -66,6 +66,7 @@ async fn finished(actor: &mut Actor, success: bool, message: &str) {
     }
     actor.full = Some(Active {
         progress_at: tokio::time::Instant::now(),
+        meter_enabled: None,
         last_position: None,
         cancel: CancellationToken::new(),
         task,

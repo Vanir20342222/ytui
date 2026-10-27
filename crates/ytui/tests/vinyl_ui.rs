@@ -64,7 +64,7 @@ fn legacy_config_and_settings_style_roundtrip_and_validate() {
     let c: Config = toml::from_str("theme='ytui-dark'").unwrap();
     assert_eq!(c.music_player_style, "classic");
     let mut f = Form::settings(c);
-    for style in ["classic", "vinyl", "vinyl-fullscreen"] {
+    for style in ytui_core::MUSIC_PLAYER_STYLES.iter().copied() {
         f.fields[55].value = Editor::new(style);
         let c = f.config_values().unwrap();
         assert_eq!(
@@ -173,4 +173,58 @@ async fn artwork_is_cached_for_the_playing_song_independently_of_browse_selectio
         app.tasks.is_empty(),
         "Browsing caused a new playing-art request"
     );
+}
+
+#[tokio::test]
+async fn new_visualizers_render_all_themes_and_sizes_and_exit_to_their_panes() {
+    let (mut app, _temp) = fixture();
+    app.tab = 2;
+    for theme in ytui_services::theme::THEMES {
+        app.palette = ytui_services::theme::builtin(theme).unwrap();
+        for (style, label) in [
+            ("vu", "Neon VU"),
+            ("vu-fullscreen", "Neon VU"),
+            ("orbit", "Pulse Orbit"),
+            ("orbit-fullscreen", "Pulse Orbit"),
+        ] {
+            app.config.music_player_style = style.into();
+            for (w, h) in [(35, 12), (80, 24), (120, 40), (212, 58)] {
+                assert!(
+                    render(&mut app, w, h).contains(label),
+                    "{theme} {style} {w}x{h}"
+                );
+            }
+            if style.ends_with("-fullscreen") {
+                app.action(Action::Back);
+                assert_eq!(
+                    app.config.music_player_style,
+                    style.trim_end_matches("-fullscreen")
+                );
+            }
+        }
+    }
+}
+#[tokio::test]
+async fn visualizers_freeze_levels_and_motion_and_never_invent_missing_audio() {
+    let (mut app, _temp) = fixture();
+    app.tab = 2;
+    app.config.music_player_style = "orbit-fullscreen".into();
+    app.tick().await;
+    app.player_status.paused = true;
+    let before = render(&mut app, 120, 40);
+    app.player_status.audio_levels = Some(ytui_services::visualizer::AudioLevels::default());
+    app.tick().await;
+    assert_eq!(before, render(&mut app, 120, 40));
+    app.player_status.audio_levels = None;
+    assert!(render(&mut app, 120, 40).contains("Audio meter unavailable"));
+    app.config.music_player_style = "classic".into();
+    for expected in ytui_core::MUSIC_PLAYER_STYLES
+        .iter()
+        .cycle()
+        .skip(1)
+        .take(ytui_core::MUSIC_PLAYER_STYLES.len())
+    {
+        app.action(Action::MusicPlayerStyle);
+        assert_eq!(&app.config.music_player_style, expected);
+    }
 }
