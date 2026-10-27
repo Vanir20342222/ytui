@@ -1,0 +1,29 @@
+# Pinned PUBLIC upstream fixtures/client constants introduced by 36fd7b7.
+# Every flagged file was verified byte-for-byte against upstream f67d96b.
+# See docs/SECURITY_REVIEW_2026-10-27.md. Exact historical fingerprints only;
+# no file, directory, provider or future-commit blanket exclusions.
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/src/extractor/dailymotion.rs:generic-api-key:132
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/client_cert/combined.pem:private-key:11
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/client_cert/encrypted-key.pem:private-key:1
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/client_cert/key.pem:private-key:1
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/hls/aes-fmp4/index.m3u8:generic-api-key:11
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/hls/aes-range/index.m3u8:generic-api-key:12
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/hls/aes-ts/index.m3u8:generic-api-key:10
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/cases.json:generic-api-key:2
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/cases.json:generic-api-key:3
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/cases.json:generic-api-key:4
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/cases.json:generic-api-key:5
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:17
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:23
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:35
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:48
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:5
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/expected.json:generic-api-key:56
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/blogger/routes.json:generic-api-key:4
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/youtube-js/player.js:gcp-api-key:5817
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/youtube-js/player.js:gcp-api-key:6503
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/sites/youtube-js/player.js:generic-api-key:8572
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/templates/README.md:generic-api-key:59
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/youtube/challenges/player-74edf1a3.js:gcp-api-key:5817
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/youtube/challenges/player-74edf1a3.js:gcp-api-key:6503
+36fd7b7da7ddfd7b585591b12443732fe67b0264:vendor/yt-dlp-rs/tests/fixtures/youtube/challenges/player-74edf1a3.js:generic-api-key:8572
