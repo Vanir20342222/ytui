@@ -455,12 +455,7 @@ impl Engine {
             .to_owned();
         let cookies = self.session.lock().expect("session").clone();
         let cookie_dir = self.cache.join("transient-auth");
-        static EXTRACTORS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
-        let permit = EXTRACTORS
-            .get_or_init(|| Arc::new(tokio::sync::Semaphore::new(2)))
-            .clone()
-            .acquire_owned()
-            .await?;
+        let permit = extractor_slots().acquire_owned().await?;
         let data = tokio::task::spawn_blocking(move || -> Result<Value> {
             let _permit = permit;
             let cookie_file = if let Some(session) = cookies {
@@ -498,6 +493,12 @@ impl Engine {
         stream(&data, audio)
     }
 }
+fn extractor_slots() -> Arc<tokio::sync::Semaphore> {
+    static EXTRACTORS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
+    EXTRACTORS
+        .get_or_init(|| Arc::new(tokio::sync::Semaphore::new(2)))
+        .clone()
+}
 fn mobile_format(audio: bool, quality: &str) -> Result<String> {
     if audio {
         return Ok("bestaudio/best".into());
@@ -517,6 +518,53 @@ fn mobile_format(audio: bool, quality: &str) -> Result<String> {
 #[cfg(test)]
 mod format_tests {
     use super::*;
+    #[tokio::test]
+    async fn cancelled_and_dropped_resolve_requests_release_ids_without_starting_network() {
+        let dir = tempfile::tempdir().unwrap();
+        let engine =
+            Arc::new(Engine::new(&dir.path().join("files"), &dir.path().join("cache")).unwrap());
+        // Hold both actual extraction permits. Requests can register but cannot start an extractor.
+        let slots = extractor_slots();
+        let _permits = slots.acquire_many_owned(2).await.unwrap();
+        for id in [77u64, 78] {
+            let pending = engine.clone();
+            let task = tokio::spawn(async move {
+                pending.request(json!({"op":"resolve","request_id":id,"media":{"url":"https://www.youtube.com/watch?v=abcdefghijk","title":"Synthetic"}})).await
+            });
+            tokio::time::timeout(std::time::Duration::from_secs(2), async {
+                while !engine.cancellations.lock().unwrap().contains_key(&id) {
+                    tokio::task::yield_now().await;
+                }
+            })
+            .await
+            .unwrap();
+            assert!(
+                engine
+                    .request(json!({"op":"settings","request_id":id}))
+                    .await
+                    .is_err()
+            );
+            if id == 77 {
+                engine.cancel(id);
+                assert!(
+                    tokio::time::timeout(std::time::Duration::from_secs(2), task)
+                        .await
+                        .unwrap()
+                        .unwrap()
+                        .is_err()
+                );
+            } else {
+                task.abort();
+                assert!(task.await.unwrap_err().is_cancelled());
+            }
+            assert!(
+                engine
+                    .request(json!({"op":"settings","request_id":id}))
+                    .await
+                    .is_ok()
+            );
+        }
+    }
     #[test]
     fn phone_quality_prefers_compatible_video_and_honors_the_selected_cap() {
         let formats = vec![

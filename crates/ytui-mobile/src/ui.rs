@@ -84,6 +84,7 @@ pub struct MobileApp {
     feed_menu: bool,
     network_enabled: bool,
     pending_feed: [Option<u64>; 4],
+    pending_playback: Option<u64>,
     images: HashMap<String, egui::TextureHandle>,
     image_order: std::collections::VecDeque<String>,
     image_pending: HashSet<String>,
@@ -131,6 +132,7 @@ impl MobileApp {
             feed_menu: false,
             network_enabled,
             pending_feed: [None; 4],
+            pending_playback: None,
             images: HashMap::new(),
             image_order: Default::default(),
             image_pending: HashSet::new(),
@@ -299,8 +301,14 @@ impl MobileApp {
         .into();
         if !download {
             self.playback_generation += 1;
+            if let Some(old) = self.pending_playback.take() {
+                self.engine.cancel(old);
+            }
         }
-        self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume});
+        let id=self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume});
+        if !download {
+            self.pending_playback = Some(id);
+        }
     }
     fn poll(&mut self, ctx: &egui::Context) {
         for _ in 0..4 {
@@ -308,6 +316,9 @@ impl MobileApp {
                 return;
             };
             self.tasks.remove(&reply.id);
+            if self.pending_playback == Some(reply.id) {
+                self.pending_playback = None;
+            }
             if let Kind::Resolve {
                 account_generation,
                 playback_generation,

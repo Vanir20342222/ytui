@@ -575,6 +575,7 @@ public final class PlaybackService extends MediaSessionService {
     worker.execute(
         () -> {
           try {
+            if (version != generation || current != this) return;
             JSONObject media =
                 rpc(new JSONObject().put("op", "queue_peek").put("shuffle", shuffle));
             if (media.length() == 0) return;

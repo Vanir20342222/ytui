@@ -342,8 +342,14 @@ async fn pausing_blocked_transfer_keeps_files_and_rejects_late_generation_events
         cancel.clone(),
         tx,
     ));
-    tokio::time::timeout(Duration::from_secs(2), async {
+    // Process scheduling on loaded runners is not the cancellation latency contract.
+    // Keep the separate two-second cancellation deadline below unchanged.
+    tokio::time::timeout(Duration::from_secs(10), async {
         while !fixture.root().join("ready").exists() {
+            assert!(
+                !worker.is_finished(),
+                "Extractor fixture exited before signalling ready"
+            );
             tokio::time::sleep(Duration::from_millis(5)).await;
         }
     })
