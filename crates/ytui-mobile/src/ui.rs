@@ -130,6 +130,8 @@ pub struct MobileApp {
     dark: bool,
     safe_top: f32,
     safe_bottom: f32,
+    safe_left: f32,
+    safe_right: f32,
     phase: f32,
     last_frame: std::time::Instant,
     visual_levels: [f32; 3],
@@ -181,6 +183,8 @@ impl MobileApp {
             dark: true,
             safe_top: 0.0,
             safe_bottom: 0.0,
+            safe_left: 0.0,
+            safe_right: 0.0,
             phase: 0.0,
             last_frame: std::time::Instant::now(),
             visual_levels: [0.0; 3],
@@ -646,6 +650,10 @@ impl MobileApp {
         ctx.request_repaint();
     }
     pub fn platform_status(&mut self, ctx: &egui::Context, value: Value) {
+        self.safe_left =
+            value["inset_left"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
+        self.safe_right =
+            value["inset_right"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
         self.safe_top = value["inset_top"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
         self.safe_bottom =
             value["inset_bottom"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
@@ -829,6 +837,18 @@ impl MobileApp {
         if self.safe_bottom > 0.0 {
             egui::TopBottomPanel::bottom("safe-bottom")
                 .exact_height(self.safe_bottom)
+                .show(ctx, |_| {});
+        }
+        if self.safe_left > 0.0 {
+            egui::SidePanel::left("safe-left")
+                .exact_width(self.safe_left)
+                .resizable(false)
+                .show(ctx, |_| {});
+        }
+        if self.safe_right > 0.0 {
+            egui::SidePanel::right("safe-right")
+                .exact_width(self.safe_right)
+                .resizable(false)
                 .show(ctx, |_| {});
         }
         egui::TopBottomPanel::top("header").show(ctx, |ui| {
@@ -1037,7 +1057,9 @@ impl MobileApp {
         let mut rect = ctx.content_rect();
         rect.min.y += self.safe_top;
         rect.max.y -= self.safe_bottom;
-        if rect.height() < 100.0 {
+        rect.min.x += self.safe_left;
+        rect.max.x -= self.safe_right;
+        if rect.height() < 100.0 || rect.width() < 100.0 {
             ctx.content_rect()
         } else {
             rect
@@ -2077,9 +2099,13 @@ mod tests {
         );
         app.safe_top = 32.0;
         app.safe_bottom = 24.0;
+        app.safe_left = 12.0;
+        app.safe_right = 20.0;
         let safe = app.safe_rect(&ctx);
         assert_eq!(safe.top(), 32.0);
         assert_eq!(safe.bottom(), 891.0);
+        assert_eq!(safe.left(), 12.0);
+        assert_eq!(safe.right(), 392.0);
         app.add_download = true;
         app.download_draft_original = Some(app.config.clone());
         let original = app.config.download.audio;

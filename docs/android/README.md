@@ -27,8 +27,9 @@ release keystore and release process. No private signing key is checked in.
 
 ## Navigate
 
-First installations default to 1080p with H.264 preference for mobile decoding;
-existing choices are preserved. Choose Best explicitly for unrestricted formats.
+First installations default to 1080p with H.264/AAC preference for mobile decoding
+and portable file export; audio-only playback still selects the best audio.
+Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
 Use the bottom tabs for Downloads, YouTube, Music and Radio. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
 server responses. The top **Menu** and **Settings** provide touch controls.

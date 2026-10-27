@@ -19,7 +19,7 @@ public final class MediaBridge {
   static Surface surface;
   static int textureId;
   static volatile int videoWidth = 1280, videoHeight = 720;
-  static volatile int topInset, bottomInset;
+  static volatile int topInset, bottomInset, leftInset, rightInset;
   static volatile boolean uiVisible;
 
   static void notifyUi() {
@@ -62,7 +62,11 @@ public final class MediaBridge {
   public static String snapshot() {
     try {
       JSONObject value =
-          new JSONObject().put("inset_top", topInset).put("inset_bottom", bottomInset);
+          new JSONObject()
+              .put("inset_top", topInset)
+              .put("inset_bottom", bottomInset)
+              .put("inset_left", leftInset)
+              .put("inset_right", rightInset);
       value.put(
           "dark",
           (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)

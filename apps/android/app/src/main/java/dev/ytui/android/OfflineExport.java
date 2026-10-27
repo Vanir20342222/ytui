@@ -174,8 +174,7 @@ public final class OfflineExport extends Worker {
             .allMatch(
                 m ->
                     Arrays.asList("video/avc", "video/hevc", "video/av01", "audio/mp4a-latm")
-                            .contains(m)
-                        || (android.os.Build.VERSION.SDK_INT >= 29 && m.equals("audio/opus"))))
+                        .contains(m)))
       throw new UnsupportedOperationException(
           "This codec combination cannot be exported by Android; choose another download quality");
     return new Plan(

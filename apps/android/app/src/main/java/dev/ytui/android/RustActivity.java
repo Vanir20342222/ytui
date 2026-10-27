@@ -33,9 +33,13 @@ public final class RustActivity extends GameActivity {
                             | android.view.WindowInsets.Type.displayCutout());
                 MediaBridge.topInset = bars.top;
                 MediaBridge.bottomInset = bars.bottom;
+                MediaBridge.leftInset = bars.left;
+                MediaBridge.rightInset = bars.right;
               } else {
                 MediaBridge.topInset = insets.getSystemWindowInsetTop();
                 MediaBridge.bottomInset = insets.getSystemWindowInsetBottom();
+                MediaBridge.leftInset = insets.getSystemWindowInsetLeft();
+                MediaBridge.rightInset = insets.getSystemWindowInsetRight();
               }
               return insets;
             });

@@ -537,9 +537,9 @@ fn mobile_format(audio: bool, quality: &str) -> Result<String> {
         ["360", "480", "720", "1080"].contains(&quality),
         "Invalid quality"
     );
-    // H.264 is hardware-decodable on API 26 devices. Preserve a bounded VP9/muxed fallback.
+    // H.264/AAC decodes and exports on API 26. Keep bounded codec fallbacks.
     Ok(format!(
-        "bestvideo[height<={quality}][vcodec^=avc1]+bestaudio/bestvideo[height<={quality}][vcodec!^=av01]+bestaudio/best[height<={quality}]"
+        "bestvideo[height<={quality}][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<={quality}][vcodec^=avc1]+bestaudio/bestvideo[height<={quality}][vcodec!^=av01]+bestaudio/best[height<={quality}]"
     ))
 }
 #[cfg(test)]
@@ -600,20 +600,28 @@ mod format_tests {
             json!({"format_id":"1080","url":"https://media.test/1080","ext":"mp4","height":1080,"vcodec":"avc1.640028","acodec":"none"}),
             json!({"format_id":"av1","url":"https://media.test/av1","ext":"mp4","height":1080,"vcodec":"av01.0.08M.08","acodec":"none"}),
             json!({"format_id":"4k","url":"https://media.test/4k","ext":"mp4","height":2160,"vcodec":"av01.0.12M.08","acodec":"none"}),
+            json!({"format_id":"opus","url":"https://media.test/opus","ext":"webm","vcodec":"none","acodec":"opus"}),
         ];
-        for (quality, expected) in [("720", 1), ("1080", 2), ("best", 4)] {
+        for (quality, expected, sound) in [("720", 1, 0), ("1080", 2, 0), ("best", 4, 5)] {
             let selector =
                 yt_dlp_rs::format_select::parse(&mobile_format(false, quality).unwrap()).unwrap();
             let selected = selector
                 .select(&formats, &Default::default(), None)
                 .unwrap();
-            assert_eq!(selected[0].formats, vec![expected, 0]);
+            assert_eq!(selected[0].formats, vec![expected, sound]);
         }
         assert!(mobile_format(false, "invalid").is_err());
         let audio = yt_dlp_rs::format_select::parse(&mobile_format(true, "1080").unwrap()).unwrap();
         assert_eq!(
             audio.select(&formats, &Default::default(), None).unwrap()[0].formats,
-            vec![0]
+            vec![5]
+        );
+        let fallback =
+            yt_dlp_rs::format_select::parse(&mobile_format(false, "1080").unwrap()).unwrap();
+        let no_aac = formats[1..].to_vec();
+        assert_eq!(
+            fallback.select(&no_aac, &Default::default(), None).unwrap()[0].formats,
+            vec![1, 4]
         );
     }
 }

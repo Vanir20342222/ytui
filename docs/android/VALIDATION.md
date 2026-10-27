@@ -124,6 +124,12 @@ It now identifies EOS by track index, shifts every track by the same time origin
 and rejects an output with any empty track. The device regression retains both
 track checks and additionally requires decoded PCM from the exported file.
 
+Android's platform MP4 writer does not accept Opus. Normal capped video modes
+therefore prefer H.264/AAC, retaining bounded codec fallbacks; unrestricted Best
+and audio-only keep their existing best-format behavior. Selector tests include
+both AAC and higher-ranked Opus, and verify that missing AAC still resolves.
+Unsupported export combinations are rejected before the document picker.
+
 The vendored player fixtures' public client keys are sanitized. Both exact Node
 challenge vectors still pass. Secret scanning now checks all fetched history;
 see [the provenance/security review](../SECURITY_REVIEW_2026-10-27.md) for the
@@ -144,6 +150,9 @@ The full local workspace checkpoint passed **296 tests, 0 failures, 31 ignored**
 followed by the additional passing queue-dismissal regression. The focused mobile
 suite now passes **23 tests** and strict Clippy; the next complete hosted run must
 qualify the resulting **297-test** workspace and updated APK.
+Safe-area contracts also include left/right display cutouts for phone landscape;
+headless geometry checks cover all four edges. Physical rotation acceptance
+remains separate.
 
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as
