@@ -21,6 +21,9 @@ use ytui_services::store::{Snapshot, Store};
 struct Args {
     #[arg(long, default_value = "target/debug/ytui")]
     binary: PathBuf,
+    /// Capture the music vinyl pane and fullscreen using fictional demo artwork.
+    #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only", "comfort_panels_only", "library_panels_only"])]
+    vinyl_only: bool,
     /// Refresh only the three existing download-form screenshots.
     #[arg(long)]
     downloads_only: bool,
@@ -233,6 +236,24 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.vinyl_only {
+        capture.send("3")?;
+        capture.command("music-player-style", "Vinyl")?;
+        shot(
+            &mut capture,
+            &args.output.join("music-vinyl-pane.png"),
+            &font,
+        )?;
+        capture.command("music-player-style", "Vinyl")?;
+        shot(
+            &mut capture,
+            &args.output.join("music-vinyl-fullscreen.png"),
+            &font,
+        )?;
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
     if args.library_panels_only {
         capture.close()?;
         let root = temp.path().join("saved-library");

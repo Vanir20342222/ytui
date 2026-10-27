@@ -1,5 +1,14 @@
 # Validation record
 
+## Vinyl music player — 2026-10-27 (M5/M6/M7/M8)
+
+[Usage, captures and scope](VINYL_PLAYER.md): 270 workspace tests pass (30 opt-in
+excluded), including six new rotation/UI/config/cache regressions. All built-in
+themes and four terminal sizes render the new pane/fullscreen modes; formatting
+and strict Clippy pass. Two WQHD native PTY captures use fictional demo artwork.
+This is presentation validation; no fresh public-media or target-PC acceptance
+is claimed.
+
 ## Recovery after local acceptance — 2026-10-26 (M2/M5/M6/M8)
 
 [Recovery fixes](RECOVERY_FIXES_2026-10-26.md) add ten deterministic regressions

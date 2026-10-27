@@ -34,7 +34,7 @@ impl Field {
 }
 pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
     ("General", &[54, 15, 16, 17, 34, 38, 50]),
-    ("Appearance", &[0, 1, 2, 3]),
+    ("Appearance", &[0, 1, 2, 3, 55]),
     (
         "Downloads",
         &[39, 40, 41, 42, 37, 43, 44, 4, 5, 6, 45, 21, 32, 33, 30],
@@ -306,6 +306,11 @@ impl Form {
                 &["native", "auto", "yt-dlp"],
             ),
             Field::choice("Language", &c.language, &["en", "de", "system"]),
+            Field::choice(
+                "Music player style",
+                &c.music_player_style,
+                &["classic", "vinyl", "vinyl-fullscreen"],
+            ),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -607,6 +612,7 @@ impl Form {
             .filter(|v| !v.is_empty())
             .map(str::to_owned)
             .collect();
+        c.music_player_style = self.value(55).into();
         c.validate()?;
         Ok(c)
     }

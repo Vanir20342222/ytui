@@ -33,6 +33,7 @@ Pulling source alone does not replace an installed binary: rerun `./install.sh`
 and check `~/.local/bin/ytui --version`. `install-rust.sh` is a compatibility alias.
 
 - `1`–`4`: Downloads, YouTube, Music, Radio. `b`: feeds; `/`: search; `?`: help.
+- `F4` in Music/Radio cycles classic → vinyl pane → vinyl fullscreen; `Esc` exits fullscreen. Choose a persistent default in General settings → Appearance → Music player style. The record spins during playback and freezes for pause/buffering; Reduced motion disables rotation.
 - `Enter`: play/open; `v`: short muted mpv preview; `d`: download options.
 - `,`: general settings window; `F2`: searchable Actions; `F1`: toggle bottom hints. PgUp/PgDn changes sections;
   F6 focuses categories; arrows edit choices; Space toggles; Enter saves; Esc cancels.
