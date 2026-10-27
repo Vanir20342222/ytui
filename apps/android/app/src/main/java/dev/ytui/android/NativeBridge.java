@@ -14,6 +14,8 @@ public final class NativeBridge {
 
   public static native void cancel(long id);
 
+  public static native void activateContext(String id);
+
   public static native void frameAvailable();
 
   public static native long uiGeneration();

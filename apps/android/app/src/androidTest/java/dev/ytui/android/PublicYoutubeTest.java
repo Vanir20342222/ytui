@@ -32,7 +32,7 @@ public final class PublicYoutubeTest {
             && (host.equals("youtu.be")
                 || host.equals("youtube.com")
                 || host.endsWith(".youtube.com")));
-    try (ActivityScenario<RustActivity> activity = ActivityScenario.launch(RustActivity.class)) {
+    try (ActivityScenario<RustActivity> activity = RuntimeTest.launchOffline()) {
       JSONObject media =
           new JSONObject()
               .put("url", url)

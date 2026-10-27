@@ -98,6 +98,224 @@ async fn queue_reordering_is_durable_and_stale_actions_cannot_remove_the_wrong_i
     assert_eq!(e.request(json!({"op":"queue"})).await.unwrap(), queue);
 }
 #[tokio::test]
+async fn playback_history_commits_only_accepted_navigation_and_preserves_forward_tracks() {
+    let (e, root) = engine();
+    let a = media("abcdefghijk");
+    let b = media("lmnopqrstuv");
+    let c = media("zyxwvutsrqp");
+    for m in [&a, &b, &c] {
+        e.request(json!({"op":"history_record","media":m}))
+            .await
+            .unwrap();
+    }
+    let previous = e
+        .request(json!({"op":"history_peek","direction":"previous"}))
+        .await
+        .unwrap();
+    assert_eq!(previous["media"]["url"], b.url);
+    // Merely resolving a previous item cannot move the durable cursor.
+    assert_eq!(
+        e.request(json!({"op":"history_peek","direction":"previous"}))
+            .await
+            .unwrap(),
+        previous
+    );
+    e.request(json!({"op":"history_record","media":b,"index":previous["index"]}))
+        .await
+        .unwrap();
+    assert_eq!(
+        e.request(json!({"op":"history_peek","direction":"next"}))
+            .await
+            .unwrap()["media"]["url"],
+        c.url
+    );
+    let d = media("newtrack123");
+    e.request(json!({"op":"history_record","media":d}))
+        .await
+        .unwrap();
+    let restored = Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap();
+    let history = restored
+        .request(json!({"op":"history_list"}))
+        .await
+        .unwrap();
+    assert_eq!(history.as_array().unwrap().len(), 3);
+    assert_eq!(history[0]["url"], d.url);
+    let mut config = e.request(json!({"op":"settings"})).await.unwrap();
+    config["playback_history"] = json!(false);
+    e.request(json!({"op":"save_settings","config":config}))
+        .await
+        .unwrap();
+    assert_eq!(
+        e.request(json!({"op":"history_record","media":a}))
+            .await
+            .unwrap()["recorded"],
+        false
+    );
+    assert_eq!(
+        e.request(json!({"op":"history_peek","direction":"previous"}))
+            .await
+            .unwrap(),
+        json!({})
+    );
+    e.request(json!({"op":"enqueue","media":a})).await.unwrap();
+    e.request(json!({"op":"position","url":a.url,"milliseconds":2000}))
+        .await
+        .unwrap();
+    e.request(json!({"op":"history_clear"})).await.unwrap();
+    assert_eq!(
+        e.request(json!({"op":"history_list"})).await.unwrap(),
+        json!([])
+    );
+    assert_eq!(
+        e.request(json!({"op":"position","url":a.url}))
+            .await
+            .unwrap()["milliseconds"],
+        0
+    );
+    assert_eq!(
+        e.request(json!({"op":"queue"}))
+            .await
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+}
+
+async fn cliamp_context_fixture() -> (
+    String,
+    tokio::sync::oneshot::Receiver<()>,
+    tokio::sync::oneshot::Sender<()>,
+    tokio::task::JoinHandle<()>,
+) {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let proxy = format!("http://{}", listener.local_addr().unwrap());
+    let (started, ready) = tokio::sync::oneshot::channel();
+    let (release, wait) = tokio::sync::oneshot::channel();
+    let server = tokio::spawn(async move {
+        let (mut stream, _) = listener.accept().await.unwrap();
+        let mut request = Vec::new();
+        while !request.ends_with(b"\r\n\r\n") {
+            request.push(stream.read_u8().await.unwrap());
+            assert!(request.len() < 8192);
+        }
+        assert!(String::from_utf8_lossy(&request).contains("radio.cliamp.stream/library"));
+        let _ = started.send(());
+        let _ = wait.await;
+        let body = json!({"name":"Offline fixture","tracks":[
+            {"id":"first","title":"First","url":"https://media.test/first.mp3"},
+            {"id":"second","title":"Second","url":"https://media.test/second.mp3"},
+            {"id":"third","title":"Third","url":"https://media.test/third.mp3"}
+        ]})
+        .to_string();
+        stream.write_all(format!("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len()).as_bytes()).await.unwrap();
+    });
+    (proxy, ready, release, server)
+}
+
+#[tokio::test]
+async fn collection_tail_is_automatic_but_cannot_consume_or_replace_the_manual_queue() {
+    let (e, _root) = engine();
+    let (proxy, _ready, release, server) = cliamp_context_fixture().await;
+    let mut config = e.request(json!({"op":"settings"})).await.unwrap();
+    config["proxy"] = json!(proxy);
+    e.request(json!({"op":"save_settings","config":config}))
+        .await
+        .unwrap();
+    e.activate_context(Some("collection-one".into()));
+    release.send(()).unwrap();
+    let result=tokio::time::timeout(std::time::Duration::from_secs(3),e.request(json!({"op":"prepare_context","context_id":"collection-one","request":ytui_core::BrowseRequest::CliampTracks("http://radio.cliamp.stream/library".into()),"source_id":"first"}))).await.unwrap().unwrap();
+    assert_eq!(result["count"], 2);
+    server.await.unwrap();
+    let manual = media("manual12345");
+    e.request(json!({"op":"enqueue","media":manual}))
+        .await
+        .unwrap();
+    assert_eq!(
+        e.request(json!({"op":"queue_peek","context_id":"collection-one"}))
+            .await
+            .unwrap()["url"],
+        manual.url
+    );
+    e.request(json!({"op":"queue_commit","url":manual.url}))
+        .await
+        .unwrap();
+    assert_eq!(
+        e.request(json!({"op":"queue_peek","context_id":"wrong"}))
+            .await
+            .unwrap(),
+        json!({})
+    );
+    e.activate_context(Some("collection-one".into())); // Pausing/restoring cannot reset its tail.
+    let next = e
+        .request(json!({"op":"queue_peek","context_id":"collection-one"}))
+        .await
+        .unwrap();
+    assert_eq!(next["url"], "https://media.test/second.mp3");
+    assert_eq!(next["context_entry"], true);
+    assert_eq!(e.request(json!({"op":"queue_commit","context_id":"collection-one","context_entry":true,"url":"https://wrong.test"})).await.unwrap()["committed"],false);
+    e.request(json!({"op":"queue_commit","context_id":"collection-one","context_entry":true,"url":next["url"]})).await.unwrap();
+    assert_eq!(
+        e.request(json!({"op":"queue_peek","context_id":"collection-one"}))
+            .await
+            .unwrap()["url"],
+        "https://media.test/third.mp3"
+    );
+    assert_eq!(
+        e.request(json!({"op":"prepare_context","context_id":"collection-one"}))
+            .await
+            .unwrap()["count"],
+        1
+    );
+    e.request(json!({"op":"disconnect"})).await.unwrap();
+    assert_eq!(
+        e.request(json!({"op":"queue_peek","context_id":"collection-one"}))
+            .await
+            .unwrap(),
+        json!({})
+    );
+}
+
+#[tokio::test]
+async fn a_late_collection_response_cannot_restore_an_obsolete_playback_context() {
+    let (e, _root) = engine();
+    let e = std::sync::Arc::new(e);
+    let (proxy, ready, release, server) = cliamp_context_fixture().await;
+    let mut config = e.request(json!({"op":"settings"})).await.unwrap();
+    config["proxy"] = json!(proxy);
+    e.request(json!({"op":"save_settings","config":config}))
+        .await
+        .unwrap();
+    e.activate_context(Some("old".into()));
+    let pending = e.clone();
+    let task = tokio::spawn(async move {
+        pending.request(json!({"op":"prepare_context","context_id":"old","request":ytui_core::BrowseRequest::CliampTracks("http://radio.cliamp.stream/library".into()),"source_id":"first"})).await
+    });
+    tokio::time::timeout(std::time::Duration::from_secs(3), ready)
+        .await
+        .unwrap()
+        .unwrap();
+    e.activate_context(Some("new".into()));
+    release.send(()).unwrap();
+    assert_eq!(task.await.unwrap().unwrap()["prepared"], false);
+    server.await.unwrap();
+    assert_eq!(
+        e.request(json!({"op":"prepare_context","context_id":"old"}))
+            .await
+            .unwrap()["prepared"],
+        false
+    );
+    assert_eq!(
+        e.request(json!({"op":"queue_peek","context_id":"new"}))
+            .await
+            .unwrap(),
+        json!({})
+    );
+}
+
+#[tokio::test]
 async fn failed_disk_write_never_publishes_an_in_memory_queue_change() {
     let (e, root) = engine();
     std::fs::create_dir(root.path().join("files/library.json")).unwrap();

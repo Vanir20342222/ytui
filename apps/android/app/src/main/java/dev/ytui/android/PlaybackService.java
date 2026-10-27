@@ -15,12 +15,15 @@ import org.json.*;
 
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class PlaybackService extends MediaSessionService {
-  static PlaybackService current;
+  static volatile PlaybackService current;
   ExoPlayer player;
   MediaSession session;
   final ExecutorService worker = Executors.newFixedThreadPool(3);
   final Handler handler = new Handler(Looper.getMainLooper());
-  long generation = 0, skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
+  final Set<Long> contextJobs = ConcurrentHashMap.newKeySet();
+  volatile long generation = 0;
+  long skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
+  boolean pendingStart, navigationPending, contextReady;
   String sponsorMode = "skip";
   String error = "", streamTitle = "", captionText = "", pendingQueueUrl = "", errorTrace = "";
   JSONObject previewRestore;
@@ -64,7 +67,45 @@ public final class PlaybackService extends MediaSessionService {
     player.setVolume(prefs.getFloat("volume", 0.7f));
     player.setPlaybackSpeed(prefs.getFloat("speed", 1f));
     session =
-        new MediaSession.Builder(this, player)
+        new MediaSession.Builder(
+                this,
+                new ForwardingPlayer(player) {
+                  @Override
+                  public Commands getAvailableCommands() {
+                    return super.getAvailableCommands()
+                        .buildUpon()
+                        .add(Player.COMMAND_SEEK_TO_NEXT)
+                        .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                        .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                        .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                        .build();
+                  }
+
+                  @Override
+                  public boolean isCommandAvailable(int command) {
+                    return getAvailableCommands().contains(command);
+                  }
+
+                  @Override
+                  public void seekToNext() {
+                    PlaybackService.this.next();
+                  }
+
+                  @Override
+                  public void seekToNextMediaItem() {
+                    PlaybackService.this.next();
+                  }
+
+                  @Override
+                  public void seekToPrevious() {
+                    PlaybackService.this.previous();
+                  }
+
+                  @Override
+                  public void seekToPreviousMediaItem() {
+                    PlaybackService.this.navigate(true);
+                  }
+                })
             .setSessionActivity(
                 PendingIntent.getActivity(
                     this,
@@ -169,17 +210,8 @@ public final class PlaybackService extends MediaSessionService {
             if (playing
                 && player.isPlaying()
                 && player.getPlaybackState() == Player.STATE_READY
-                && !pendingQueueUrl.isEmpty()) {
-              String started = pendingQueueUrl;
-              pendingQueueUrl = "";
-              currentRequest.remove("queued");
-              worker.execute(
-                  () -> {
-                    try {
-                      rpc(new JSONObject().put("op", "queue_commit").put("url", started));
-                    } catch (Exception ignored) {
-                    }
-                  });
+                && pendingStart) {
+              recordStarted();
             }
             publish();
           }
@@ -264,6 +296,9 @@ public final class PlaybackService extends MediaSessionService {
     }
     generation++;
     currentRequest = request;
+    pendingStart = !request.optBoolean("preview");
+    navigationPending = false;
+    contextReady = false;
     error = "";
     errorTrace = "";
     streamTitle = "";
@@ -367,6 +402,77 @@ public final class PlaybackService extends MediaSessionService {
     publish();
   }
 
+  void recordStarted() {
+    if (!pendingStart || !player.isPlaying() || currentRequest.optBoolean("preview")) return;
+    pendingStart = false;
+    try {
+      JSONObject started = new JSONObject(currentRequest.toString());
+      JSONObject identity = currentRequest;
+      String contextId = started.isNull("context_id") ? "" : started.optString("context_id");
+      NativeBridge.activateContext(contextId);
+      cancelContextJobs();
+      String queuedUrl = pendingQueueUrl;
+      pendingQueueUrl = "";
+      currentRequest.remove("queued");
+      MediaBridge.playbackStore.execute(
+          () -> {
+            try {
+              if (!queuedUrl.isEmpty())
+                rpc(
+                    new JSONObject()
+                        .put("op", "queue_commit")
+                        .put("url", queuedUrl)
+                        .put("context_id", contextId)
+                        .put("context_entry", started.optBoolean("context_entry")));
+              rpc(
+                  new JSONObject()
+                      .put("op", "history_record")
+                      .put("media", started.getJSONObject("media"))
+                      .put("index", started.optInt("history_index", -1)));
+            } catch (Exception error) {
+              MediaBridge.event("error", "Could not save the playback queue/history");
+            }
+          });
+      JSONObject collection = started.optJSONObject("context");
+      if (collection != null && contextId.equals(collection.optString("context_id")))
+        worker.execute(
+            () -> {
+              long requestId =
+                  java.util.UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+              contextJobs.add(requestId);
+              try {
+                collection.put("request_id", requestId);
+                JSONObject response = rpc(collection);
+                if (response.optBoolean("prepared") && response.optInt("count") > 0)
+                  handler.post(
+                      () -> {
+                        if (current != this || currentRequest != identity) return;
+                        contextReady = true;
+                        if (player.getPlaybackState() == Player.STATE_ENDED
+                            && !pausedByUser
+                            && !navigationPending) {
+                          contextReady = false;
+                          next();
+                        }
+                      });
+              } catch (Exception error) {
+                if (!contextJobs.contains(requestId)) return;
+                try {
+                  if (rpc(new JSONObject().put("op", "context_status").put("context_id", contextId))
+                      .optBoolean("active"))
+                    MediaBridge.event(
+                        "error", "Could not prepare the remaining songs in this collection");
+                } catch (Exception ignored) {
+                }
+              } finally {
+                contextJobs.remove(requestId);
+              }
+            });
+    } catch (JSONException error) {
+      MediaBridge.event("error", "Could not record the started media");
+    }
+  }
+
   void finishPreview() {
     JSONObject restore = previewRestore;
     long position = previewPosition;
@@ -448,10 +554,14 @@ public final class PlaybackService extends MediaSessionService {
         generation++;
         previewRestore = null;
         currentRequest.remove("preview");
+        currentRequest.put("context_id", command.opt("context_id"));
+        currentRequest.put("context", command.opt("context"));
+        pendingStart = true;
         pausedByUser = false;
         player.setVolume(prefs.getFloat("volume", 0.7f));
         player.seekTo(0);
         player.play();
+        if (player.isPlaying()) recordStarted();
         break;
       case "volume":
         if (currentRequest.optBoolean("preview")) break;
@@ -469,7 +579,7 @@ public final class PlaybackService extends MediaSessionService {
         next();
         break;
       case "previous":
-        player.seekTo(0);
+        previous();
         break;
       case "repeat":
         player.setRepeatMode(
@@ -623,29 +733,102 @@ public final class PlaybackService extends MediaSessionService {
   }
 
   void next() {
+    navigate(false);
+  }
+
+  void previous() {
+    if (!isLive() && player.getCurrentPosition() > 3000) player.seekTo(0);
+    else navigate(true);
+  }
+
+  void afterPlaybackStored(Runnable action) {
+    MediaBridge.playbackStore.execute(
+        () -> {
+          if (current != this) return;
+          try {
+            worker.execute(action);
+          } catch (RejectedExecutionException ignored) {
+          }
+        });
+  }
+
+  void navigate(boolean previous) {
     boolean shuffle = player.getShuffleModeEnabled();
+    String contextId =
+        currentRequest.isNull("context_id") ? "" : currentRequest.optString("context_id");
     long version = ++generation;
-    worker.execute(
+    navigationPending = true;
+    afterPlaybackStored(
         () -> {
           try {
             if (version != generation || current != this) return;
             JSONObject media =
-                rpc(new JSONObject().put("op", "queue_peek").put("shuffle", shuffle));
-            if (media.length() == 0) return;
+                previous
+                    ? new JSONObject()
+                    : rpc(new JSONObject().put("op", "queue_peek").put("shuffle", shuffle));
+            boolean queued = media.length() > 0;
+            int historyIndex = -1;
+            if (media.length() == 0) {
+              JSONObject history =
+                  rpc(
+                      new JSONObject()
+                          .put("op", "history_peek")
+                          .put("direction", previous ? "previous" : "next"));
+              if (history.has("media")) {
+                media = history.getJSONObject("media");
+                historyIndex = history.getInt("index");
+              } else if (!previous) {
+                media =
+                    rpc(
+                        new JSONObject()
+                            .put("op", "queue_peek")
+                            .put("shuffle", shuffle)
+                            .put("context_id", contextId));
+                queued = media.length() > 0;
+              }
+            }
+            if (media.length() == 0) {
+              handler.post(
+                  () -> {
+                    if (version != generation || current != this) return;
+                    navigationPending = false;
+                    if (previous && !isLive()) player.seekTo(0);
+                    else if (contextReady
+                        && player.getPlaybackState() == Player.STATE_ENDED
+                        && !pausedByUser) {
+                      contextReady = false;
+                      next();
+                    }
+                  });
+              return;
+            }
             boolean audio = PlaybackPolicy.audioOnly(media.optString("kind"));
-            JSONObject stream =
-                rpc(new JSONObject().put("op", "resolve").put("media", media).put("audio", audio));
-            JSONObject request =
-                new JSONObject()
-                    .put("media", media)
-                    .put("stream", stream)
-                    .put("audio", audio)
-                    .put("queued", true);
+            JSONObject request;
+            try {
+              request =
+                  OfflineStore.offlineRequest(
+                      OfflineStore.id(new JSONObject().put("media", media)));
+            } catch (Exception notCached) {
+              JSONObject stream =
+                  rpc(
+                      new JSONObject()
+                          .put("op", "resolve")
+                          .put("media", media)
+                          .put("audio", audio));
+              request =
+                  new JSONObject().put("media", media).put("stream", stream).put("audio", audio);
+            }
+            request
+                .put("queued", queued)
+                .put("history_index", historyIndex)
+                .put("context_id", contextId)
+                .put("context_entry", media.optBoolean("context_entry"));
+            JSONObject ready = request;
             handler.post(
                 () -> {
                   if (version != generation || current != this) return;
                   try {
-                    play(request);
+                    play(ready);
                   } catch (Exception error) {
                     this.error = "Could not start the next queued item";
                     publish();
@@ -655,6 +838,7 @@ public final class PlaybackService extends MediaSessionService {
             handler.post(
                 () -> {
                   if (version == generation && current == this) {
+                    navigationPending = false;
                     this.error = "Could not play the next queued item";
                     publish();
                   }
@@ -665,11 +849,21 @@ public final class PlaybackService extends MediaSessionService {
 
   void stopAndClear() {
     generation++;
+    NativeBridge.activateContext("");
+    cancelContextJobs();
+    pendingStart = false;
+    navigationPending = false;
     player.stop();
     player.clearMediaItems();
     currentRequest = new JSONObject();
     publish();
     stopSelf();
+  }
+
+  void cancelContextJobs() {
+    Long[] jobs = contextJobs.toArray(new Long[0]);
+    contextJobs.removeAll(Arrays.asList(jobs));
+    for (long id : jobs) NativeBridge.cancel(id);
   }
 
   final Runnable ticker =
@@ -784,6 +978,8 @@ public final class PlaybackService extends MediaSessionService {
 
   @Override
   public void onDestroy() {
+    NativeBridge.activateContext("");
+    cancelContextJobs();
     current = null;
     handler.removeCallbacksAndMessages(null);
     worker.shutdownNow();

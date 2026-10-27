@@ -19,6 +19,8 @@ public final class RustActivity extends GameActivity {
   @Override
   protected void onCreate(Bundle state) {
     reference = new java.lang.ref.WeakReference<>(this);
+    MediaBridge.offlineUi =
+        BuildConfig.DEBUG && getIntent().getBooleanExtra("ytui.offline-ui", false);
     super.onCreate(state);
     if (state != null) exportDownload = state.getString("ytui-export-download");
     OfflineStore.resetSnapshotClient();

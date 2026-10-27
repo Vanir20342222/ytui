@@ -34,9 +34,11 @@ enum Kind {
         preview: bool,
         download: bool,
         resume: bool,
+        context: Option<Value>,
     },
     Queue,
     QueueChanged,
+    History,
     Popup(String),
     Account,
     Ignore,
@@ -115,6 +117,8 @@ pub struct MobileApp {
     queue_pending: bool,
     queue: Vec<Media>,
     queue_selection: Option<String>,
+    history_open: bool,
+    recent: Vec<Media>,
     popup: Option<(String, String)>,
     feed_menu: bool,
     add_download: bool,
@@ -146,7 +150,11 @@ impl MobileApp {
     pub fn new(engine: Arc<Engine>, ctx: &egui::Context) -> Self {
         Self::with_network(engine, ctx, true)
     }
-    fn with_network(engine: Arc<Engine>, ctx: &egui::Context, network_enabled: bool) -> Self {
+    pub(crate) fn with_network(
+        engine: Arc<Engine>,
+        ctx: &egui::Context,
+        network_enabled: bool,
+    ) -> Self {
         let (tx, rx) = mpsc::channel();
         let mut app = Self {
             engine,
@@ -168,6 +176,8 @@ impl MobileApp {
             queue_pending: false,
             queue: Vec::new(),
             queue_selection: None,
+            history_open: false,
+            recent: Vec::new(),
             popup: None,
             feed_menu: false,
             add_download: false,
@@ -379,7 +389,10 @@ impl MobileApp {
                 self.engine.cancel(old);
             }
         }
-        let id=self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume});
+        let context = (!download && !preview && !queued)
+            .then(|| self.collection_context(&media))
+            .flatten();
+        let id=self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume,context});
         if !download {
             self.pending_playback = Some(id);
         }
@@ -553,6 +566,7 @@ impl MobileApp {
                         download,
                         resume,
                         queued,
+                        context,
                         ..
                     },
                     Ok(stream),
@@ -573,7 +587,7 @@ impl MobileApp {
                             media.thumbnail = thumbnail.into();
                         }
                     }
-                    let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume,"queued":queued});
+                    let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume,"queued":queued,"context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context});
                     self.effects.push(if download {
                         Effect::Download(request)
                     } else {
@@ -607,6 +621,9 @@ impl MobileApp {
                             }
                         }
                     }
+                }
+                (Kind::History, Ok(value)) => {
+                    self.recent = serde_json::from_value(value).unwrap_or_default()
                 }
                 (Kind::Popup(title), Ok(value)) => {
                     self.popup = Some((
@@ -708,6 +725,9 @@ impl MobileApp {
                     "show_player" => {
                         self.player_open = true;
                     }
+                    "history_cleared" => {
+                        self.request(ctx, json!({"op":"history_list"}), Kind::History);
+                    }
                     "shared" => {
                         if let Some(raw) = event["text"].as_str()
                             && let Ok(url) = ytui_core::http_url(raw.trim())
@@ -747,6 +767,8 @@ impl MobileApp {
                             self.popup = None;
                         } else if self.queue_open {
                             self.queue_open = false;
+                        } else if self.history_open {
+                            self.history_open = false;
                         } else if self.player_open {
                             self.player_open = false;
                         } else if !self.navigate_back(ctx) {
@@ -1014,6 +1036,41 @@ impl MobileApp {
                 });
             self.queue_open &= open;
         }
+        if self.history_open {
+            let mut open = true;
+            egui::Window::new("Recently played")
+                .constrain_to(self.safe_rect(ctx))
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    if ui.button("Clear history and resume positions").clicked() {
+                        self.command("history_clear");
+                    }
+                    if self.recent.is_empty() {
+                        ui.label("Local playback history is empty.");
+                    }
+                    egui::ScrollArea::vertical().max_height(500.0).show_rows(
+                        ui,
+                        64.0,
+                        self.recent.len(),
+                        |ui, range| {
+                            for i in range {
+                                let media = self.recent[i].clone();
+                                if ui
+                                    .add_sized(
+                                        [ui.available_width(), 48.0],
+                                        egui::Button::new(&media.title).truncate(),
+                                    )
+                                    .clicked()
+                                {
+                                    self.resolve(ctx, media, false, false, false);
+                                    self.history_open = false;
+                                }
+                            }
+                        },
+                    );
+                });
+            self.history_open &= open;
+        }
         if let Some((title, text)) = self.popup.clone() {
             let mut open = true;
             egui::Window::new(title)
@@ -1072,6 +1129,28 @@ impl MobileApp {
         self.queue_open = true;
         self.queue_pending = true;
         self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+    }
+    fn collection_context(&self, media: &Media) -> Option<Value> {
+        if !matches!(self.tab, 2 | 3) || media.live || media.collection() {
+            return None;
+        }
+        let request = self.feeds[self.tab].request.as_ref()?;
+        if !matches!(
+            request,
+            BrowseRequest::Collection(_)
+                | BrowseRequest::Details(_)
+                | BrowseRequest::CliampTracks(_)
+        ) || !self.feeds[self.tab]
+            .page
+            .items
+            .iter()
+            .any(|m| m.url == media.url)
+        {
+            return None;
+        }
+        Some(
+            json!({"op":"prepare_context","context_id":uuid::Uuid::new_v4().to_string(),"request":request,"source_url":media.url,"source_id":media.id,"music":self.tab==2}),
+        )
     }
     fn catalog(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
         if self.tab == 0 {
@@ -1327,7 +1406,8 @@ impl MobileApp {
                     self.command("preview_end");
                 }
                 if ui.button("Play full").clicked() {
-                    self.command("preview_play_full");
+                    let context=self.player.get("media").and_then(|m|serde_json::from_value::<Media>(m.clone()).ok()).and_then(|media|self.collection_context(&media));
+                    self.effects.push(Effect::Command(json!({"op":"preview_play_full","context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context})));
                 }
             });
             return;
@@ -1636,7 +1716,7 @@ impl MobileApp {
                 ui.checkbox(&mut self.config.reduced_motion, "Reduced motion");
                 ui.checkbox(
                     &mut self.config.playback_history,
-                    "Save local resume positions",
+                    "Local playback history and resume",
                 );
                 egui::ComboBox::from_label("Music player")
                     .selected_text(&self.config.music_player_style)
@@ -1747,6 +1827,7 @@ impl MobileApp {
         if ui.button("Disconnect account").clicked(){self.account_generation+=1; self.playback_generation+=1; self.request(ctx,json!({"op":"disconnect"}),Kind::Account);self.effects.push(Effect::Command(json!({"op":"disconnect"})));}
         if ui.button("Saved media").clicked(){self.navigate(ctx,BrowseRequest::Favorites,false);self.menu_open=false;}
         if ui.button("Playback queue").clicked(){self.open_queue(ctx);self.menu_open=false;}
+        if ui.button("Recently played").clicked(){self.history_open=true;self.request(ctx,json!({"op":"history_list"}),Kind::History);self.menu_open=false;}
         if ui.button("Refresh feed").clicked()&& let Some(req)=self.feeds[self.tab].request.clone(){self.navigate(ctx,req,false);}
         if ui.button("About / mobile parity").clicked(){self.popup=Some(("About ytui Android".into(),"Rust UI and engine · Media3 playback\nNative YouTube signature challenges may still fail.\nAndroid cannot access other browsers' private cookies.\nLinux desktop services and external cliamp are not Android services.\nSee docs/android/PARITY.md for platform differences and qualification gates.".into()));}
     });
@@ -2013,6 +2094,7 @@ mod tests {
                     preview: false,
                     download: false,
                     resume: false,
+                    context: None,
                 },
                 Ok(json!({"url":"https://media.test/old"})),
                 None,
@@ -2031,6 +2113,7 @@ mod tests {
                 preview: false,
                 download: false,
                 resume: false,
+                context: None,
             },
             Ok(json!({"url":"https://media.test/current"})),
             None,
@@ -2278,6 +2361,36 @@ mod tests {
         );
     }
     #[test]
+    fn collection_continuation_is_scoped_to_the_selected_finite_music_or_radio_feed() {
+        let (mut app, _ctx, _root) = test_app();
+        app.tab = 2;
+        let mut song = Media {
+            id: "fixture-song".into(),
+            url: "https://media.test/song".into(),
+            kind: ytui_core::MediaKind::Song,
+            ..Default::default()
+        };
+        app.feeds[2].request = Some(BrowseRequest::Collection("fixture-album".into()));
+        app.feeds[2].page.items.push(song.clone());
+        let context = app.collection_context(&song).unwrap();
+        assert_eq!(context["source_id"], song.id);
+        assert_eq!(context["music"], true);
+        assert_ne!(
+            context["context_id"],
+            app.collection_context(&song).unwrap()["context_id"]
+        );
+        app.feeds[2].request = Some(BrowseRequest::Home);
+        assert!(app.collection_context(&song).is_none());
+        app.tab = 3;
+        app.feeds[3].request = Some(BrowseRequest::CliampTracks(
+            "https://radio.cliamp.stream/library".into(),
+        ));
+        app.feeds[3].page.items.push(song.clone());
+        assert_eq!(app.collection_context(&song).unwrap()["music"], false);
+        song.live = true;
+        assert!(app.collection_context(&song).is_none());
+    }
+    #[test]
     fn phone_tablet_and_all_theme_layouts_render_without_network() {
         let (mut app, ctx, _root) = test_app();
         for name in ytui_core::theme::THEMES {
@@ -2300,10 +2413,12 @@ mod tests {
                 }
             }
         }
-        for open in 0..3 {
+        for open in 0..5 {
             app.settings_open = open == 0;
             app.menu_open = open == 1;
             app.player_open = open == 2;
+            app.queue_open = open == 3;
+            app.history_open = open == 4;
             let _ = ctx.run(
                 egui::RawInput {
                     screen_rect: Some(egui::Rect::from_min_size(

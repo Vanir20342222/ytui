@@ -120,6 +120,7 @@ fn android_main(app: AndroidApp) {
             initialize(&root, &root.join("cache"))?;
         }
         let engine = ENGINE.get().context("No engine")?.clone();
+        let offline_ui = bridge_call("uiMode", None).is_ok_and(|mode| mode == "offline");
         let options = eframe::NativeOptions {
             android_app: Some(app),
             renderer: eframe::Renderer::Glow,
@@ -133,7 +134,7 @@ fn android_main(app: AndroidApp) {
                 *CONTEXT.lock().expect("context") = Some(cc.egui_ctx.clone());
                 UI_GENERATION.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 Ok(Box::new(AndroidUi {
-                    app: ui::MobileApp::new(engine.clone(), &cc.egui_ctx),
+                    app: ui::MobileApp::with_network(engine.clone(), &cc.egui_ctx, !offline_ui),
                     last: std::time::Instant::now(),
                 }))
             }),

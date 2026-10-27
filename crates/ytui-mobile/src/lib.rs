@@ -19,6 +19,12 @@ pub struct MobileState {
     pub saved: Vec<Media>,
     pub queue: Vec<Media>,
     pub positions: HashMap<String, u64>,
+    pub playback: ytui_core::PlaybackQueue,
+}
+struct PlaybackContext {
+    id: String,
+    items: std::collections::VecDeque<Media>,
+    prepared: bool,
 }
 pub struct Engine {
     settings_commit: Mutex<()>,
@@ -31,6 +37,7 @@ pub struct Engine {
     radio: Mutex<Radio>,
     images: Mutex<ImageCache>,
     cancellations: Mutex<HashMap<u64, CancellationToken>>,
+    playback_context: Mutex<Option<PlaybackContext>>,
 }
 impl Engine {
     pub fn new(root: &Path, cache: &Path) -> Result<Self> {
@@ -64,7 +71,22 @@ impl Engine {
             ),
             images: Mutex::new(ImageCache::new(client, cache.join("images"))),
             cancellations: Mutex::new(HashMap::new()),
+            playback_context: Mutex::new(None),
         })
+    }
+    pub fn activate_context(&self, id: Option<String>) {
+        let mut active = self.playback_context.lock().expect("playback context");
+        if id
+            .as_deref()
+            .is_some_and(|id| active.as_ref().is_some_and(|c| c.id == id))
+        {
+            return;
+        }
+        *active = id.map(|id| PlaybackContext {
+            id,
+            items: Default::default(),
+            prepared: false,
+        });
     }
     pub async fn thumbnail(
         &self,
@@ -244,23 +266,142 @@ impl Engine {
                 } else {
                     0
                 };
-                Ok(state
+                let explicit = state
                     .queue
                     .get(index)
                     .map(serde_json::to_value)
-                    .transpose()?
+                    .transpose()?;
+                drop(state);
+                if let Some(media) = explicit {
+                    return Ok(media);
+                }
+                let context = self.playback_context.lock().expect("playback context");
+                if let Some(context) = context
+                    .as_ref()
+                    .filter(|c| Some(c.id.as_str()) == r["context_id"].as_str())
+                    && let Some(media) = context.items.get(
+                        if r["shuffle"].as_bool().unwrap_or(false) && !context.items.is_empty() {
+                            (uuid::Uuid::new_v4().as_u128() % context.items.len() as u128) as usize
+                        } else {
+                            0
+                        },
+                    )
+                {
+                    let mut value = serde_json::to_value(media)?;
+                    value["context_entry"] = json!(true);
+                    return Ok(value);
+                }
+                Ok(json!({}))
+            }
+            "queue_commit" => {
+                if r["context_entry"].as_bool().unwrap_or(false) {
+                    let mut context = self.playback_context.lock().expect("playback context");
+                    let committed = if let Some(context) = context
+                        .as_mut()
+                        .filter(|c| Some(c.id.as_str()) == r["context_id"].as_str())
+                    {
+                        if let Some(index) = context
+                            .items
+                            .iter()
+                            .position(|m| Some(m.url.as_str()) == r["url"].as_str())
+                        {
+                            context.items.remove(index);
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
+                    };
+                    return Ok(json!({"committed":committed}));
+                }
+                self.mutate(|state| {
+                    let chosen = state
+                        .queue
+                        .iter()
+                        .position(|m| Some(m.url.as_str()) == r["url"].as_str());
+                    if let Some(index) = chosen {
+                        state.queue.remove(index);
+                    }
+                    Ok(json!({"committed":chosen.is_some()}))
+                })
+            }
+            "history_list" => Ok(json!(
+                self.state
+                    .lock()
+                    .expect("state")
+                    .playback
+                    .items
+                    .iter()
+                    .rev()
+                    .collect::<Vec<_>>()
+            )),
+            "history_clear" => self.mutate(|state| {
+                state.playback = Default::default();
+                state.positions.clear();
+                Ok(json!([]))
+            }),
+            "history_peek" => {
+                if !self.config.lock().expect("config").playback_history {
+                    return Ok(json!({}));
+                }
+                let state = self.state.lock().expect("state");
+                let timeline = &state.playback;
+                let target = timeline.current.and_then(|index| {
+                    if r["direction"] == "previous" {
+                        index.checked_sub(1)
+                    } else {
+                        index.checked_add(1)
+                    }
+                });
+                Ok(target
+                    .and_then(|index| {
+                        timeline
+                            .items
+                            .get(index)
+                            .map(|media| json!({"media":media,"index":index}))
+                    })
                     .unwrap_or_else(|| json!({})))
             }
-            "queue_commit" => self.mutate(|state| {
-                let chosen = state
-                    .queue
-                    .iter()
-                    .position(|m| Some(m.url.as_str()) == r["url"].as_str());
-                if let Some(index) = chosen {
-                    state.queue.remove(index);
+            "history_record" => {
+                if !self.config.lock().expect("config").playback_history {
+                    return Ok(json!({"recorded":false}));
                 }
-                Ok(json!({"committed":chosen.is_some()}))
-            }),
+                let media: Media = serde_json::from_value(r["media"].clone())?;
+                ensure!(media.retained_bytes() <= 256 * 1024, "Media is too large");
+                ytui_core::http_url(&media.url)?;
+                self.mutate(|state| {
+                    let timeline = &mut state.playback;
+                    let requested = r["index"].as_u64().and_then(|n| usize::try_from(n).ok());
+                    let same = |i: usize| {
+                        timeline
+                            .items
+                            .get(i)
+                            .is_some_and(|old| old.url == media.url)
+                    };
+                    if let Some(index) = requested.filter(|i| same(*i)) {
+                        timeline.current = Some(index);
+                        timeline.items[index] = media;
+                    } else if timeline.current.is_none_or(|i| !same(i)) {
+                        if let Some(i) = timeline.current {
+                            timeline.items.truncate(i.saturating_add(1));
+                        }
+                        timeline.play(media);
+                    } else if let Some(index) = timeline.current {
+                        timeline.items[index] = media;
+                    }
+                    let mut bytes = timeline
+                        .items
+                        .iter()
+                        .map(Media::retained_bytes)
+                        .sum::<usize>();
+                    while timeline.items.len() > 100 || bytes > 2 * 1024 * 1024 {
+                        bytes = bytes.saturating_sub(timeline.items.remove(0).retained_bytes());
+                        timeline.current = timeline.current.map(|i| i.saturating_sub(1));
+                    }
+                    Ok(json!({"recorded":true}))
+                })
+            }
             "queue_remove" => {
                 let i = r["index"].as_u64().context("Missing queue index")? as usize;
                 self.mutate(|state| {
@@ -342,6 +483,7 @@ impl Engine {
                 )?;
                 let session = Arc::new(session);
                 *self.session.lock().expect("session") = Some(session.clone());
+                self.activate_context(None);
                 *self.browser.lock().expect("browser") =
                     Browser::new(client, Some(session), config.account_index);
                 Ok(json!({"connected":true}))
@@ -375,6 +517,7 @@ impl Engine {
                     &serde_json::to_vec(session.as_ref())?,
                 )?;
                 *self.session.lock().expect("session") = Some(session.clone());
+                self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();
                 *self.browser.lock().expect("browser") = Browser::new(
                     ytui_providers::http_client(config.proxy.as_deref())?,
@@ -391,6 +534,7 @@ impl Engine {
                     Err(e) => return Err(e.into()),
                 };
                 *self.session.lock().expect("session") = None;
+                self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();
                 *self.browser.lock().expect("browser") = Browser::new(
                     ytui_providers::http_client(config.proxy.as_deref())?,
@@ -400,6 +544,100 @@ impl Engine {
                 Ok(json!({"connected":false}))
             }
             "resolve" => self.resolve(r).await,
+            "context_status" => {
+                let active = self.playback_context.lock().expect("playback context");
+                Ok(
+                    json!({"active":active.as_ref().is_some_and(|c|Some(c.id.as_str())==r["context_id"].as_str())}),
+                )
+            }
+            "prepare_context" => {
+                let id = r["context_id"]
+                    .as_str()
+                    .context("Missing playback context")?;
+                if let Some(context) = self
+                    .playback_context
+                    .lock()
+                    .expect("playback context")
+                    .as_ref()
+                    .filter(|c| c.id == id && c.prepared)
+                {
+                    return Ok(json!({"prepared":true,"count":context.items.len()}));
+                }
+                if self
+                    .playback_context
+                    .lock()
+                    .expect("playback context")
+                    .as_ref()
+                    .is_none_or(|c| c.id != id)
+                {
+                    return Ok(json!({"prepared":false}));
+                }
+                let query: BrowseRequest = serde_json::from_value(r["request"].clone())?;
+                ensure!(
+                    matches!(
+                        query,
+                        BrowseRequest::Collection(_)
+                            | BrowseRequest::Details(_)
+                            | BrowseRequest::CliampTracks(_)
+                    ),
+                    "This feed is not a finite playback collection"
+                );
+                let items = if matches!(query, BrowseRequest::CliampTracks(_)) {
+                    let radio = self.radio.lock().expect("radio").clone();
+                    radio.fetch(&query, 0).await?.items
+                } else {
+                    let browser = self.browser.lock().expect("browser").clone();
+                    ytui_providers::watch::collect(
+                        browser,
+                        ytui_core::watch::CollectionWatch {
+                            id: uuid::Uuid::new_v4(),
+                            title: "Playback collection".into(),
+                            request: query,
+                            music: r["music"].as_bool().unwrap_or(false),
+                            options: Default::default(),
+                            interval_seconds: 1800,
+                            next_check: 0,
+                            enabled: true,
+                            generation: 0,
+                            owner: "mobile".into(),
+                            seen: None,
+                            failures: 0,
+                            error: None,
+                        },
+                        CancellationToken::new(),
+                    )
+                    .await?
+                };
+                let selected = items
+                    .iter()
+                    .position(|m| {
+                        Some(m.url.as_str()) == r["source_url"].as_str()
+                            || !m.id.is_empty() && Some(m.id.as_str()) == r["source_id"].as_str()
+                    })
+                    .context("Selected song is no longer present in the collection")?;
+                let tail = items
+                    .into_iter()
+                    .skip(selected + 1)
+                    .filter(|m| !m.live && !m.collection())
+                    .collect::<std::collections::VecDeque<_>>();
+                ensure!(
+                    tail.len() <= 2000
+                        && tail.iter().map(Media::retained_bytes).sum::<usize>()
+                            <= 16 * 1024 * 1024,
+                    "Playback collection exceeds the memory budget"
+                );
+                let mut active = self.playback_context.lock().expect("playback context");
+                if let Some(context) = active.as_mut().filter(|c| c.id == id) {
+                    if !context.prepared {
+                        context.items = tail;
+                        context.prepared = true;
+                    }
+                    let count = context.items.len();
+                    Ok(json!({"prepared":true,"count":count}))
+                } else {
+                    Ok(json!({"prepared":false}))
+                }
+            }
             "collection" | "enqueue_collection" => {
                 let music = r["music"].as_bool().unwrap_or(false);
                 let request: BrowseRequest = serde_json::from_value(r["request"].clone())?;
@@ -747,6 +985,28 @@ mod android {
         objects::{JClass, JString},
         sys::{jlong, jstring},
     };
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_ytui_android_NativeBridge_activateContext(
+        mut env: JNIEnv,
+        _class: JClass,
+        id: JString,
+    ) {
+        let result = (|| -> Result<()> {
+            let id: String = env.get_string(&id)?.into();
+            ensure!(id.len() <= 128, "Invalid playback context");
+            ENGINE
+                .get()
+                .context("Engine is not initialized")?
+                .activate_context((!id.is_empty()).then_some(id));
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = env.throw_new(
+                "java/lang/IllegalArgumentException",
+                "Invalid playback context",
+            );
+        }
+    }
     #[unsafe(no_mangle)]
     pub extern "system" fn Java_dev_ytui_android_NativeBridge_init(
         mut env: JNIEnv,

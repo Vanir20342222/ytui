@@ -44,6 +44,15 @@ navigation steps and 2 MiB of cached previous pages; evicted pages reload
 automatically. Disconnecting clears account navigation history. The queue's
 arrow buttons reorder items; edits are saved before their result is shown.
 
+Music albums/playlists and cliamp track libraries continue automatically after
+the selected song. The full finite collection prepares in the background; manual
+queue entries play first. Menu → Recently played opens local playback history.
+Previous restarts a track after three seconds, otherwise returns to the prior
+played item; Next follows the manual queue, forward history, then collection.
+Notification/media-session controls use those same actions. History is local and
+can be disabled or cleared with resume positions. A stopped/killed process does
+not retain derived collection context; select the collection again to rebuild it.
+
 For a completed offline download, open **Actions → Export file…** and choose a
 destination in Android's document picker. Original MP4/M4A/WebM containers are
 copied without re-encoding; compatible separate video/audio tracks are combined

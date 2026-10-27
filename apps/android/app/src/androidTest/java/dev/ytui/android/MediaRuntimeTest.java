@@ -90,7 +90,7 @@ public final class MediaRuntimeTest {
     }
     long firstGeneration;
     long cleanShutdowns = NativeBridge.uiShutdowns();
-    try (ActivityScenario<RustActivity> scenario = ActivityScenario.launch(RustActivity.class)) {
+    try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline()) {
       JSONObject request =
           new JSONObject()
               .put(
@@ -185,7 +185,7 @@ public final class MediaRuntimeTest {
     assertTrue(
         "Activity teardown blocked the Android main looper",
         alive.await(5, java.util.concurrent.TimeUnit.SECONDS));
-    try (ActivityScenario<RustActivity> reopened = ActivityScenario.launch(RustActivity.class)) {
+    try (ActivityScenario<RustActivity> reopened = RuntimeTest.launchOffline()) {
       await(
           "Rust UI did not restart in the existing app process",
           () -> NativeBridge.uiGeneration() > firstGeneration);

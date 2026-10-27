@@ -52,7 +52,7 @@ public final class ExportRuntimeTest {
     File cancelled = new File(context.getCacheDir(), "cancelled-export.mp4");
     cancelled.delete();
     String videoId = null, audioId = null;
-    try (ActivityScenario<RustActivity> scenario = ActivityScenario.launch(RustActivity.class);
+    try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline();
         MediaRuntimeTest.FixtureServer videos = new MediaRuntimeTest.FixtureServer(video);
         MediaRuntimeTest.FixtureServer audios = new MediaRuntimeTest.FixtureServer(audio)) {
       JSONObject paired =

@@ -7,7 +7,7 @@ public-provider checks and hardware acceptance are recorded separately.
 
 ## Passed checks
 
-- Final local Rust workspace suite: **293 passed, 0 failed, 31 explicitly ignored**.
+- Qualified export/navigation checkpoint: **297 passed, 0 failed, 31 explicitly ignored**.
   Formatting and strict all-target workspace Clippy passed. ARM64 Android-specific
   JNI/GLES code also passed strict cross-target Clippy.
 - Mobile checks cover all 13 theme entries at 360×800, 412×915 and 1280×800 logical
@@ -18,7 +18,7 @@ public-provider checks and hardware acceptance are recorded separately.
   failed-write rollback; native format selection and SponsorBlock-off privacy.
   These are headless Rust UI checks, not hardware performance measurements.
 - Desktop saved-player Node challenge vectors: **2 passed**. Hosted
-  [Rust run 40543256434](https://github.com/Vanir20342222/ytui/actions/runs/40543256434)
+  [Rust run 40579287156](https://github.com/Vanir20342222/ytui/actions/runs/40579287156)
   passed desktop/shared checks, real FFmpeg/mpv/local-playlist checks and release
   build after the monorepo move. Desktop launchers/state paths are unchanged.
 - Complete local Android build: ARM64 and x86-64 native libraries, dependency
@@ -26,14 +26,17 @@ public-provider checks and hardware acceptance are recorded separately.
   and Android Lint with **0 errors**. APK inspection passed signing, ZIP and
   **16 KiB ELF** alignment, both ABIs, JNI/GameActivity symbols and bundled notices.
 - Accelerated API 35
-  [Android run 40543256859](https://github.com/Vanir20342222/ytui/actions/runs/40543256859)
-  passed **5 device tests, 0 failures**. The separate opt-in public YouTube case
+  [Android run 40579287370](https://github.com/Vanir20342222/ytui/actions/runs/40579287370)
+  passed **6 device tests, 0 failures, zero Rust panics**. The separate opt-in public YouTube case
   was explicitly skipped in this default, account-free run. Passed device checks:
   - Generated MP4 actually decodes into the Rust GLES surface and produces PCM
     levels; pause and volume persistence across stream changes work.
   - Short muted preview restores the previous media/position/preferences on EOS.
   - Actual loopback HTTP download plays from private offline cache after its
     server is closed.
+  - Separate video/audio tracks export from cache into a playable MP4 with both
+    tracks and decoded PCM. Foreground M4A export is byte-for-byte identical;
+    cancellation does not create an output file.
   - Closing/reopening the Rust UI in the same process recreates the UI and leaves
     Android's main loop responsive.
   - JNI contracts/direct-buffer bounds and empty audio EOS input are checked.
@@ -47,19 +50,13 @@ local test media, not evidence of public YouTube playback or audible output.
 
 ## Development APK
 
-The earlier five-test checkpoint is source `aad9486` (PR merge revision `0d98630`);
-log review subsequently exposed a caught shutdown panic, described below. It is
-retained only as historical evidence. The clean-shutdown follow-up at `fa48079`
-passed [Android run 40547062980](https://github.com/Vanir20342222/ytui/actions/runs/40547062980)
-and Rust run `40547062981`: **5 device tests passed**, both exit hooks completed,
-and the panic-log gate recorded **zero Rust panics**. Its newer APK supersedes
-the first checkpoint below; the export follow-up needs its own runtime result.
-[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40543256859/artifacts/12750509647).
+Qualified checkpoint: source `07fc290` (PR merge revision `b4fa78f`).
+[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40579287370/artifacts/12768717641).
 The ZIP contains `outputs/apk/debug/app-debug.apk` and `SHA256-and-checks.txt`.
 The APK's SHA256 is:
 
 ```text
-e3b472dc6f3c1caf18b7b5baa864397191214482079d6a2108f423cf42c62a5d
+fb8ed1d65e39b2ccda06c3b4ba46ae5d34751f164fc2a152169629d2314aa26e
 ```
 
 Artifacts expire after 30 days. This debug APK is not a stable signed release;
@@ -117,7 +114,7 @@ Five Java unit tests/lint, instrumentation assembly and focused Rust/Clippy chec
 pass locally. The added device test downloads separate generated tracks, closes
 both source servers, muxes and actually decodes an exported file, verifies a
 foreground audio export is byte-for-byte identical, and checks cancellation.
-Its actual hosted result must pass before claiming export runtime acceptance.
+Run `40579287370` passed this entire export regression after the fix below.
 The first export run (`40576469530`) exposed AAC priming samples with negative
 timestamps: the mux loop treated them as EOS and wrote zero audio samples.
 It now identifies EOS by track index, shifts every track by the same time origin
@@ -146,13 +143,35 @@ durable edits and identity checks that prevent a stale remove/reorder action fro
 changing the wrong entry after the decoder consumes an item. Failed writes leave
 the engine and UI queue unchanged; dismissed loading queues stay closed.
 
-The full local workspace checkpoint passed **296 tests, 0 failures, 31 ignored**,
-followed by the additional passing queue-dismissal regression. The focused mobile
-suite now passes **23 tests** and strict Clippy; the next complete hosted run must
-qualify the resulting **297-test** workspace and updated APK.
+The full local and hosted checkpoint passed **297 tests, 0 failures, 31 ignored**.
+The focused mobile suite at that checkpoint passed **23 tests** and strict Clippy.
 Safe-area contracts also include left/right display cutouts for phone landscape;
 headless geometry checks cover all four edges. Physical rotation acceptance
 remains separate.
+
+## Playback continuation/history follow-up (runtime qualification pending)
+
+Finite Music albums/playlists and cliamp track libraries now prepare their full
+remaining collection in the background after the first decoder start. Manual
+queue entries take priority. A new selection, disconnect or stopped service
+invalidates obsolete collection work; pause/preview/reconnect cannot reset a
+prepared tail. The derived context is not persisted after process death; explicit
+queue entries and local playback history remain durable.
+
+Previous/forward history commits only after playback starts, and writes stay in
+decoder order across service/Activity recreation. Failed candidates stay queued.
+The recently-played window can replay entries or clear history/resume positions
+without deleting saved items or queued tracks. Android MediaSession navigation
+forwards to these same controls.
+
+New core tests cover manual priority, cached collection continuation, stale
+responses, failed navigation, private context clearing and durable history. The
+focused suite passes **27 tests**. Java compilation/unit tests/lint also pass.
+The added emulator case exercises actual EOF continuation, MediaController
+Previous/Next, forward history, manual priority and unavailable-track retention;
+its result must pass before runtime qualification. Fixture activities now launch
+with a debug-only offline UI flag to suppress ambient feed requests. Only the
+explicit public test invokes real YouTube extraction.
 
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as

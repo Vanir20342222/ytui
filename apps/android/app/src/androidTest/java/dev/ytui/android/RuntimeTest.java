@@ -12,6 +12,14 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public final class RuntimeTest {
+  static androidx.test.core.app.ActivityScenario<RustActivity> launchOffline() {
+    android.content.Intent intent =
+        new android.content.Intent(
+                InstrumentationRegistry.getInstrumentation().getTargetContext(), RustActivity.class)
+            .putExtra("ytui.offline-ui", true);
+    return androidx.test.core.app.ActivityScenario.launch(intent);
+  }
+
   @Test
   public void rustJniLoadsAndReturnsBoundedContracts() throws Exception {
     JSONObject settings = new JSONObject(NativeBridge.request("{\"op\":\"settings\"}"));

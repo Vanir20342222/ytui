@@ -14,6 +14,9 @@ public final class MediaBridge {
   static android.app.Application context;
   static final Handler main = new Handler(Looper.getMainLooper());
   static final ConcurrentLinkedQueue<JSONObject> events = new ConcurrentLinkedQueue<>();
+  // Keep accepted starts ordered across Activity and service recreation.
+  static final java.util.concurrent.ExecutorService playbackStore =
+      java.util.concurrent.Executors.newSingleThreadExecutor();
   static volatile String playerSnapshot = "{}";
   static SurfaceTexture texture;
   static Surface surface;
@@ -21,6 +24,11 @@ public final class MediaBridge {
   static volatile int videoWidth = 1280, videoHeight = 720;
   static volatile int topInset, bottomInset, leftInset, rightInset;
   static volatile boolean uiVisible;
+  static volatile boolean offlineUi;
+
+  public static String uiMode() {
+    return offlineUi ? "offline" : "network";
+  }
 
   static void notifyUi() {
     if (uiVisible) NativeBridge.frameAvailable();
@@ -172,6 +180,17 @@ public final class MediaBridge {
               case "download_export":
                 if (RustActivity.current() != null)
                   RustActivity.current().exportDownload(request.getString("id"));
+                break;
+              case "history_clear":
+                playbackStore.execute(
+                    () -> {
+                      try {
+                        PlaybackService.rpcArray(new JSONObject().put("op", "history_clear"));
+                        event("history_cleared", "");
+                      } catch (Exception error) {
+                        event("error", "Could not clear playback history");
+                      }
+                    });
                 break;
               case "open":
                 context.startActivity(
