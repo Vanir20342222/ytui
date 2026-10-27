@@ -1,9 +1,11 @@
 # Vinyl music player (M5/M6/M7/M8)
 
-Music and Cliamp/Radio offer three persistent presentation modes:
+Music and Cliamp/Radio offer persistent presentation modes:
 
 - `classic`: existing catalog and selected-item detail view.
 - `vinyl`: catalog alongside a sleeve/record panel for the playing song or station.
+- `vu` / `vu-fullscreen`: Neon VU stereo LED towers and a peak marker, driven by mpv audio levels.
+- `orbit` / `orbit-fullscreen`: Pulse Orbit rings that expand with RMS level and a rotating peak highlight.
 - `vinyl-fullscreen`: sleeve/record fills the terminal, with the existing transport
   and progress bar below it.
 
@@ -56,3 +58,34 @@ These are fictional demo data and generated covers rendered through half blocks,
 not target-PC Ghostty screenshots. The stills illustrate layout; motion is covered
 by deterministic clock/state tests. Actual desktop image-protocol and active
 network-recovery acceptance remain separately recorded in VALIDATION.md.
+
+## Audio-reactive views — 2026-10-27
+
+Neon VU and Pulse Orbit use an optional transparent mpv `astats` filter, enabled
+only for audio playback with either new style selected. Levels travel over the
+existing IPC socket; no microphone, desktop-loopback capture or second extractor
+is used. Switching to classic/vinyl removes the filter without restarting media.
+Failed filter initialization is attempted once per metering session/process and leaves
+playback running with an unavailable label. A reconnect creates a fresh attempt.
+
+The VU scale is -60..0 dBFS with an overall peak marker; mono duplicates its
+channel. These are source levels before final output volume/mute. The towers
+are stereo level displays, **not frequency bands**. Orbit maps RMS/peak to ring
+size/highlight, with the same pause/buffer/reduced-motion freeze behavior.
+Synthetic demo levels are explicitly fictional; missing real metrics never
+produce a simulated music response.
+
+A new opt-in actual mpv/FFmpeg fixture generates a stereo tone, verifies measured
+channel separation, pauses, switches styles/removes/re-enables metering, resumes
+and confirms the player launched exactly once. UI tests cover all new modes in
+every theme and four sizes, plus frozen state and absent telemetry.
+
+```sh
+cargo test -p ytui-services --locked real_mpv_audio_meter -- --ignored
+cargo run -p ytui --example capture_ui --locked -- --visualizers-only
+```
+
+![Neon VU](screenshots/neon-vu-fullscreen.png)
+![Pulse Orbit](screenshots/pulse-orbit-fullscreen.png)
+
+The new WQHD captures use the real executable with fictional demo levels.

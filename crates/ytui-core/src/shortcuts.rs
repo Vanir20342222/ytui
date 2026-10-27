@@ -75,7 +75,7 @@ pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
         "f4",
         Action::MusicPlayerStyle,
         "music_player_style",
-        "Cycle music player: classic / vinyl / fullscreen",
+        "Cycle music player: classic / vinyl / VU / orbit",
     ),
     (
         "S",

@@ -24,6 +24,9 @@ struct Args {
     /// Capture the music vinyl pane and fullscreen using fictional demo artwork.
     #[arg(long, conflicts_with_all = ["downloads_only", "audit_panels_only", "comfort_panels_only", "library_panels_only"])]
     vinyl_only: bool,
+    /// Capture both audio-reactive styles using explicit fictional demo levels.
+    #[arg(long, conflicts_with_all = ["vinyl_only", "downloads_only", "audit_panels_only", "comfort_panels_only", "library_panels_only"])]
+    visualizers_only: bool,
     /// Refresh only the three existing download-form screenshots.
     #[arg(long)]
     downloads_only: bool,
@@ -236,6 +239,27 @@ async fn main() -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Cannot load font: {e}"))?;
     let temp = tempfile::tempdir()?;
     let mut capture = Capture::new(&binary, &temp.path().join("demo"), false)?;
+    if args.visualizers_only {
+        capture.send("3")?;
+        capture.command("music-player-style", "Vinyl")?;
+        capture.command("music-player-style", "Vinyl")?;
+        for (name, label) in [
+            ("neon-vu-pane", "Neon VU"),
+            ("neon-vu-fullscreen", "Neon VU"),
+            ("pulse-orbit-pane", "Pulse Orbit"),
+            ("pulse-orbit-fullscreen", "Pulse Orbit"),
+        ] {
+            capture.command("music-player-style", label)?;
+            shot(
+                &mut capture,
+                &args.output.join(format!("{name}.png")),
+                &font,
+            )?;
+        }
+        capture.close()?;
+        write_manifest(&args)?;
+        return Ok(());
+    }
     if args.vinyl_only {
         capture.send("3")?;
         capture.command("music-player-style", "Vinyl")?;

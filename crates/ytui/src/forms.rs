@@ -309,7 +309,7 @@ impl Form {
             Field::choice(
                 "Music player style",
                 &c.music_player_style,
-                &["classic", "vinyl", "vinyl-fullscreen"],
+                ytui_core::MUSIC_PLAYER_STYLES,
             ),
         ];
         Self {

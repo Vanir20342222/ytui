@@ -1,5 +1,10 @@
 # ytui Rust rewrite plan
 
+M5/M6/M7/M8 audio-reactive views (2026-10-27): Neon VU and Pulse Orbit add
+pane/fullscreen styles, optional mpv astats telemetry, paused/reduced-motion
+freeze and a real stereo-tone/player-switch fixture. See the audio-reactive
+section in [the player guide](docs/VINYL_PLAYER.md).
+
 M5/M6/M7/M8 vinyl player follow-up (2026-10-27): selectable sleeve/record views
 for Music and Cliamp/Radio, pane/full-terminal layouts, remappable F4, cached
 playing artwork and pause/buffer/reduced-motion-aware rotation. See

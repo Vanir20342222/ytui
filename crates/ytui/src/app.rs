@@ -281,6 +281,7 @@ pub struct App {
     pub palette: Palette,
     pub player_status: PlayerStatus,
     pub vinyl_motion: crate::ui::vinyl::Motion,
+    pub visual_levels: Option<ytui_services::visualizer::AudioLevels>,
     pub demo: bool,
     pub offline: bool,
     pub quit: bool,
@@ -606,6 +607,7 @@ impl App {
             dirty: false,
             redraw: true,
             vinyl_motion: Default::default(),
+            visual_levels: None,
             tasks: JoinSet::new(),
             running: HashMap::new(),
             job_tx,
@@ -731,6 +733,11 @@ impl App {
         b.state = JobState::Done;
         self.snapshot.downloads.jobs = vec![a, b];
         self.player_status = PlayerStatus {
+            audio_levels: Some(ytui_services::visualizer::AudioLevels {
+                left: 0.72,
+                right: 0.55,
+                peak: 0.86,
+            }),
             backend: "demo · fictional formats".into(),
             catalog: ytui_services::formats::Catalog::parse(&serde_json::json!({
                 "formats":[{"format_id":"137","height":1080,"vcodec":"avc1","acodec":"none","ext":"mp4"},{"format_id":"247","height":720,"vcodec":"vp9","acodec":"none","ext":"webm"},{"format_id":"140-de","vcodec":"none","acodec":"aac","language":"de","ext":"m4a"}],
@@ -2705,12 +2712,12 @@ impl App {
             Action::MusicPlayerStyle => {
                 if matches!(self.tab, 2 | 3) {
                     let mut config = self.config.clone();
-                    config.music_player_style = match config.music_player_style.as_str() {
-                        "classic" => "vinyl",
-                        "vinyl" => "vinyl-fullscreen",
-                        _ => "classic",
-                    }
-                    .into();
+                    let styles = ytui_core::MUSIC_PLAYER_STYLES;
+                    let index = styles
+                        .iter()
+                        .position(|s| *s == config.music_player_style)
+                        .unwrap_or(0);
+                    config.music_player_style = styles[(index + 1) % styles.len()].into();
                     self.save_config(config);
                 } else {
                     self.status = "Music player styles are available in Music and Radio".into();
@@ -2845,9 +2852,13 @@ impl App {
                 }
             }
             Action::Back => {
-                if self.vinyl_enabled() && self.config.music_player_style == "vinyl-fullscreen" {
+                if self.vinyl_enabled() && self.config.music_player_style.ends_with("-fullscreen") {
                     let mut config = self.config.clone();
-                    config.music_player_style = "vinyl".into();
+                    config.music_player_style = self
+                        .config
+                        .music_player_style
+                        .trim_end_matches("-fullscreen")
+                        .into();
                     self.save_config(config);
                 } else if self.player_status.preview {
                     let _ = self.player.try_send(PlayerCommand::ClosePreview);
@@ -3433,6 +3444,9 @@ impl App {
             && !self.player_status.paused
             && !self.player_status.buffering
             && !self.config.reduced_motion;
+        if spinning || self.visual_levels.is_none() {
+            self.visual_levels = self.player_status.audio_levels;
+        }
         self.vinyl_motion.update(Instant::now(), spinning);
         self.redraw |= spinning;
         self.enforce_sleep_timer(Instant::now());

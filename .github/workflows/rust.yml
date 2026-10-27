@@ -53,6 +53,8 @@ jobs:
         run: cargo test -p ytui-services --locked real_mpv_external_playback_ -- --ignored
       - name: Verify native HLS manifest and request identity in mpv
         run: cargo test -p ytui-services --locked real_mpv_native_hls_ -- --ignored
+      - name: Verify audio-reactive meters and live style changes with actual mpv
+        run: cargo test -p ytui-services --locked real_mpv_audio_meter -- --ignored
       - name: Verify live reconnect controls with actual mpv and loopback HTTP
         env:
           NO_PROXY: 127.0.0.1,localhost

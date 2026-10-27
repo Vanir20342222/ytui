@@ -2,6 +2,16 @@ use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::PathBuf};
 
+pub const MUSIC_PLAYER_STYLES: &[&str] = &[
+    "classic",
+    "vinyl",
+    "vinyl-fullscreen",
+    "vu",
+    "vu-fullscreen",
+    "orbit",
+    "orbit-fullscreen",
+];
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
@@ -94,7 +104,7 @@ impl Default for Config {
 impl Config {
     pub fn validate(&self) -> Result<()> {
         ensure!(
-            ["classic", "vinyl", "vinyl-fullscreen"].contains(&self.music_player_style.as_str()),
+            MUSIC_PLAYER_STYLES.contains(&self.music_player_style.as_str()),
             "Unknown music player style"
         );
         ensure!(
