@@ -132,6 +132,22 @@ public final class MediaRuntimeTest {
                   && status().optDouble("position") > 0.1);
       assertEquals(0.23, status().getDouble("volume"), 0.01);
       assertTrue(status().isNull("error"));
+      JSONObject preview = new JSONObject(request.toString()).put("preview", true);
+      preview.getJSONObject("media").put("title", "Short muted preview");
+      MediaBridge.execute(new JSONObject().put("op", "play").put("request", preview).toString());
+      await(
+          "Preview did not start",
+          () -> status().optBoolean("preview") && status().optBoolean("playing"));
+      MediaBridge.execute("{\"op\":\"volume\",\"value\":0.8}");
+      await("Preview was not muted", () -> status().optDouble("actual_volume", -1) == 0);
+      assertEquals(0.23, status().getDouble("volume"), 0.01);
+      await(
+          "Short preview EOS failed to restore the prior media",
+          () ->
+              !status().optBoolean("preview")
+                  && status().optString("title").equals("Second stream")
+                  && status().optBoolean("playing"));
+      assertEquals(0.23, status().getDouble("actual_volume"), 0.01);
       try (FixtureServer server = new FixtureServer(media)) {
         request.getJSONObject("stream").put("url", server.url());
         request.getJSONObject("media").put("url", server.url()).put("title", "Offline fixture");

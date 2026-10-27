@@ -198,3 +198,24 @@ async fn imported_palette_is_private_durable_and_invalid_import_does_not_replace
         );
     }
 }
+
+#[tokio::test]
+async fn disabled_sponsorblock_does_not_contact_the_api() {
+    let (e, _root) = engine();
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let mut config = e.request(json!({"op":"settings"})).await.unwrap();
+    config["playback_sponsorblock"] = json!("off");
+    config["proxy"] = json!(format!("http://{}", listener.local_addr().unwrap()));
+    e.request(json!({"op":"save_settings","config":config}))
+        .await
+        .unwrap();
+    let result = tokio::time::timeout(
+        std::time::Duration::from_secs(2),
+        e.request(json!({"op":"sponsor","media":media("abcdefghijk")})),
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    assert_eq!(result, json!([]));
+    assert!(listener.into_std().unwrap().accept().is_err());
+}

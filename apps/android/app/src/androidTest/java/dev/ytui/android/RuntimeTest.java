@@ -89,8 +89,9 @@ public final class RuntimeTest {
     assertEquals(wanted.length(), responses.length());
     for (int i = 0; i < wanted.length(); i++) {
       JSONObject want = wanted.getJSONObject(i), response = responses.getJSONObject(i);
-      assertEquals(want.getString("type"), response.getString("type"));
+      assertEquals("result", response.getString("type"));
       JSONObject values = want.getJSONObject("challenges"), actual = response.getJSONObject("data");
+      assertEquals(values.length(), actual.length());
       java.util.Iterator<String> names = values.keys();
       while (names.hasNext()) {
         String key = names.next();

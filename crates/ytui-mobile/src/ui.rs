@@ -82,6 +82,8 @@ pub struct MobileApp {
     queue_selection: Option<String>,
     popup: Option<(String, String)>,
     feed_menu: bool,
+    add_download: bool,
+    download_draft_original: Option<Config>,
     network_enabled: bool,
     pending_feed: [Option<u64>; 4],
     pending_playback: Option<u64>,
@@ -130,6 +132,8 @@ impl MobileApp {
             queue_selection: None,
             popup: None,
             feed_menu: false,
+            add_download: false,
+            download_draft_original: None,
             network_enabled,
             pending_feed: [None; 4],
             pending_playback: None,
@@ -286,7 +290,7 @@ impl MobileApp {
         }
         if media.collection() {
             if download {
-                self.effects.push(Effect::Command(json!({"op":"download_playlist","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2,"audio":audio})));
+                self.effects.push(Effect::Command(json!({"op":"download_playlist","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2||ytui_core::http_url(&media.url).is_ok_and(|url|url.host_str()==Some("music.youtube.com")),"audio":audio,"quality":self.config.download.quality})));
                 self.status = "Preparing the complete playlist in the background…".into();
             } else {
                 self.navigate(ctx, BrowseRequest::Collection(media.id.clone()), false);
@@ -470,7 +474,7 @@ impl MobileApp {
                 }
                 (
                     Kind::Resolve {
-                        media,
+                        mut media,
                         audio,
                         preview,
                         download,
@@ -484,6 +488,17 @@ impl MobileApp {
                         && (!audio || self.config.music_player_style.ends_with("-fullscreen"))
                     {
                         self.player_open = true;
+                    }
+                    if media.title == media.url {
+                        if let Some(title) = stream["title"].as_str().filter(|s| !s.is_empty()) {
+                            media.title = title.into();
+                        }
+                        if let Some(creator) = stream["creator"].as_str() {
+                            media.creator = creator.into();
+                        }
+                        if let Some(thumbnail) = stream["thumbnail"].as_str() {
+                            media.thumbnail = thumbnail.into();
+                        }
                     }
                     let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume,"queued":queued});
                     self.effects.push(if download {
@@ -606,6 +621,19 @@ impl MobileApp {
                         self.player_open = true;
                     }
                     "shared" => {
+                        if let Some(raw) = event["text"].as_str()
+                            && let Ok(url) = ytui_core::http_url(raw.trim())
+                            && ytui_core::youtube_host(url.host_str().unwrap_or_default())
+                        {
+                            self.change_tab(
+                                ctx,
+                                if url.host_str() == Some("music.youtube.com") {
+                                    2
+                                } else {
+                                    1
+                                },
+                            );
+                        }
                         self.query = event["text"].as_str().unwrap_or_default().trim().to_owned();
                     }
                     "tracks" => {
@@ -615,7 +643,12 @@ impl MobileApp {
                         ));
                     }
                     "back" => {
-                        if self.settings_open {
+                        if self.add_download {
+                            self.add_download = false;
+                            if let Some(original) = self.download_draft_original.take() {
+                                self.config = original;
+                            }
+                        } else if self.settings_open {
                             self.settings_open = false;
                             if let Some(original) = self.settings_original.take() {
                                 self.config = original;
@@ -695,8 +728,16 @@ impl MobileApp {
         style.visuals.window_fill = c(self.palette.surface);
         style.visuals.override_text_color = Some(c(self.palette.text));
         style.visuals.selection.bg_fill = c(self.palette.selection);
-        style.visuals.widgets.inactive.bg_fill = c(self.palette.surface);
+        style.visuals.widgets.inactive.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.inactive.weak_bg_fill = c(self.palette.selection);
+        style.visuals.widgets.inactive.bg_stroke =
+            egui::Stroke::new(1.0_f32, c(self.palette.muted));
+        style.visuals.widgets.hovered.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.hovered.weak_bg_fill = c(self.palette.selection);
+        style.visuals.widgets.hovered.bg_stroke =
+            egui::Stroke::new(1.5_f32, c(self.palette.accent));
         style.visuals.widgets.active.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.active.bg_stroke = egui::Stroke::new(2.0_f32, c(self.palette.accent));
         ctx.set_style(style);
         let width = ctx.content_rect().width();
         let tablet = width >= 700.0;
@@ -813,15 +854,20 @@ impl MobileApp {
         if self.menu_open {
             self.menu(ctx);
         }
+        if self.add_download {
+            self.download_form(ctx);
+        }
         if self.feed_menu {
             self.feeds(ctx);
         }
         if self.player_open {
             let mut open = true;
+            let safe = self.safe_rect(ctx);
             egui::Window::new("Now playing")
                 .open(&mut open)
-                .default_pos(ctx.content_rect().left_top() + Vec2::splat(8.0))
-                .default_size((width - 16.0, ctx.content_rect().height() - 32.0))
+                .constrain_to(safe)
+                .default_pos(safe.left_top() + Vec2::splat(8.0))
+                .default_size((safe.width() - 16.0, safe.height() - 16.0))
                 .vscroll(true)
                 .show(ctx, |ui| {
                     self.player_panel(ctx, ui, true);
@@ -831,6 +877,7 @@ impl MobileApp {
         if self.queue_open {
             let mut open = true;
             egui::Window::new("Playback queue")
+                .constrain_to(self.safe_rect(ctx))
                 .open(&mut open)
                 .show(ctx, |ui| {
                     egui::ScrollArea::vertical()
@@ -859,13 +906,16 @@ impl MobileApp {
         }
         if let Some((title, text)) = self.popup.clone() {
             let mut open = true;
-            egui::Window::new(title).open(&mut open).show(ctx, |ui| {
-                egui::ScrollArea::vertical()
-                    .max_height(500.0)
-                    .show(ui, |ui| {
-                        ui.label(text);
-                    });
-            });
+            egui::Window::new(title)
+                .constrain_to(self.safe_rect(ctx))
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical()
+                        .max_height(500.0)
+                        .show(ui, |ui| {
+                            ui.label(text);
+                        });
+                });
             if !open {
                 self.popup = None;
             }
@@ -885,6 +935,23 @@ impl MobileApp {
         self.effects.push(Effect::Command(
             json!({"op":"theme","light":self.palette.light,"background":self.palette.background}),
         ));
+    }
+    pub fn wants_audio_frames(&self) -> bool {
+        matches!(self.tab, 2 | 3)
+            && self.player["playing"].as_bool().unwrap_or(false)
+            && !self.config.reduced_motion
+            && (self.config.music_player_style.starts_with("vu")
+                || self.config.music_player_style.starts_with("orbit"))
+    }
+    fn safe_rect(&self, ctx: &egui::Context) -> egui::Rect {
+        let mut rect = ctx.content_rect();
+        rect.min.y += self.safe_top;
+        rect.max.y -= self.safe_bottom;
+        if rect.height() < 100.0 {
+            ctx.content_rect()
+        } else {
+            rect
+        }
     }
     fn command(&mut self, op: &str) {
         self.effects.push(Effect::Command(json!({"op":op})));
@@ -906,26 +973,10 @@ impl MobileApp {
             if ui.button("Search").clicked() || enter {
                 let query = self.query.trim().to_owned();
                 if ytui_core::http_url(&query).is_ok() {
-                    let kind = if self.tab == 3 {
-                        ytui_core::MediaKind::Station
-                    } else if self.tab == 2 {
-                        ytui_core::MediaKind::Song
-                    } else {
-                        ytui_core::MediaKind::Video
-                    };
-                    self.resolve(
-                        ctx,
-                        Media {
-                            url: query.clone(),
-                            title: query,
-                            kind,
-                            live: self.tab == 3,
-                            ..Default::default()
-                        },
-                        false,
-                        false,
-                        false,
-                    );
+                    match linked_media(&query, self.tab) {
+                        Ok(media) => self.resolve(ctx, media, false, false, false),
+                        Err(error) => self.status = error.to_string(),
+                    }
                 } else if !query.is_empty() {
                     self.navigate(
                         ctx,
@@ -1105,6 +1156,12 @@ impl MobileApp {
             .unwrap_or("Choose a song or station")
             .to_owned();
         ui.heading(title);
+        if let Some(creator) = self.player["media"]["creator"]
+            .as_str()
+            .filter(|s| !s.is_empty())
+        {
+            ui.label(RichText::new(creator).color(c(self.palette.muted)));
+        }
         if let Some(error) = self.player["error"].as_str() {
             ui.colored_label(c(self.palette.error), error);
         }
@@ -1136,16 +1193,58 @@ impl MobileApp {
         } else if matches!(self.tab, 2 | 3) {
             self.visualizer(ui, if expanded { 280.0 } else { 220.0 });
         }
+        if self.player["preview"].as_bool().unwrap_or(false) {
+            ui.label("Muted preview");
+            ui.horizontal(|ui| {
+                if ui.button("End preview").clicked() {
+                    self.command("preview_end");
+                }
+                if ui.button("Play full").clicked() {
+                    self.command("preview_play_full");
+                }
+            });
+            return;
+        }
         let duration = self.player["duration"].as_f64().unwrap_or(0.0).max(0.0);
         let mut position = self.player["position"].as_f64().unwrap_or(0.0);
-        if duration > 0.0
-            && ui
-                .add(egui::Slider::new(&mut position, 0.0..=duration).text("seconds"))
-                .drag_stopped()
-        {
-            self.effects
-                .push(Effect::Command(json!({"op":"seek","seconds":position})));
+        if duration > 0.0 {
+            ui.horizontal(|ui| {
+                ui.label(timestamp(position));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(timestamp(duration));
+                });
+            });
+            ui.spacing_mut().slider_width = ui.available_width();
+            let response = ui.add(
+                egui::Slider::new(&mut position, 0.0..=duration)
+                    .show_value(false)
+                    .handle_shape(egui::style::HandleShape::Circle),
+            );
+            if let Some(segments) = self.player["segments"].as_array() {
+                let rail = response.rect.shrink2(egui::vec2(18.0, 0.0));
+                for segment in segments {
+                    let a = (segment["start"].as_f64().unwrap_or(0.0) / duration).clamp(0.0, 1.0)
+                        as f32;
+                    let b =
+                        (segment["end"].as_f64().unwrap_or(0.0) / duration).clamp(0.0, 1.0) as f32;
+                    if b > a {
+                        ui.painter().rect_filled(
+                            egui::Rect::from_min_max(
+                                egui::pos2(rail.left() + rail.width() * a, rail.center().y - 2.0),
+                                egui::pos2(rail.left() + rail.width() * b, rail.center().y + 2.0),
+                            ),
+                            1.0,
+                            c(self.palette.warning),
+                        );
+                    }
+                }
+            }
+            if response.drag_stopped() || response.clicked() {
+                self.effects
+                    .push(Effect::Command(json!({"op":"seek","seconds":position})));
+            }
         }
+        ui.spacing_mut().slider_width = (ui.available_width() - 148.0).max(80.0);
         ui.horizontal_wrapped(|ui| {
             for (label, op) in [
                 ("Previous", "previous"),
@@ -1160,14 +1259,24 @@ impl MobileApp {
             }
         });
         if ui
-            .add(egui::Slider::new(&mut self.volume, 0.0..=1.0).text("Volume"))
+            .add(
+                egui::Slider::new(&mut self.volume, 0.0..=1.0)
+                    .text("Volume")
+                    .handle_shape(egui::style::HandleShape::Circle)
+                    .custom_formatter(|v, _| format!("{:.0}%", v * 100.0)),
+            )
             .changed()
         {
             self.effects
                 .push(Effect::Command(json!({"op":"volume","value":self.volume})));
         }
         if ui
-            .add(egui::Slider::new(&mut self.speed, 0.25..=4.0).text("Speed"))
+            .add(
+                egui::Slider::new(&mut self.speed, 0.25..=4.0)
+                    .text("Speed")
+                    .handle_shape(egui::style::HandleShape::Circle)
+                    .custom_formatter(|v, _| format!("{v:.2}x")),
+            )
             .changed()
         {
             self.effects
@@ -1224,6 +1333,32 @@ impl MobileApp {
             if current != self.config.music_player_style {
                 self.save_settings(ctx);
             }
+        }
+        let segments = self.player["segments"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
+        if !segments.is_empty() {
+            ui.menu_button("SponsorBlock sections", |ui| {
+                for segment in &segments {
+                    let start = segment["start"].as_f64().unwrap_or(0.0);
+                    let end = segment["end"].as_f64().unwrap_or(0.0);
+                    if ui
+                        .button(format!(
+                            "Watch {} ({}–{})",
+                            segment["category"].as_str().unwrap_or("section"),
+                            timestamp(start),
+                            timestamp(end)
+                        ))
+                        .clicked()
+                    {
+                        self.effects.push(Effect::Command(
+                            json!({"op":"sponsor_watch","start":start,"end":end}),
+                        ));
+                        ui.close();
+                    }
+                }
+            });
         }
         if ui.button("Replay skipped segment").clicked() {
             self.command("sponsor_replay");
@@ -1316,10 +1451,16 @@ impl MobileApp {
                 let pixels = pixels.div_ceil(64) * 64;
                 let art_key = format!("{}#art-{pixels}", media.thumbnail);
                 if let Some(image) = self.images.get(&art_key) {
+                    let [w, h] = image.size();
+                    let (u, v) = if w > h {
+                        ((1.0 - h as f32 / w as f32) * 0.5, 0.0)
+                    } else {
+                        (0.0, (1.0 - w as f32 / h as f32) * 0.5)
+                    };
                     p.image(
                         image.id(),
                         sleeve,
-                        egui::Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
+                        egui::Rect::from_min_max(egui::pos2(u, v), egui::pos2(1.0 - u, 1.0 - v)),
                         Color32::WHITE,
                     );
                 } else {
@@ -1348,6 +1489,7 @@ impl MobileApp {
         let mut saved = false;
         let mut open = true;
         egui::Window::new("Settings")
+            .constrain_to(self.safe_rect(ctx))
             .open(&mut open)
             .vscroll(true)
             .default_width(380.0)
@@ -1430,6 +1572,7 @@ impl MobileApp {
     fn feeds(&mut self, ctx: &egui::Context) {
         let mut open = true;
         egui::Window::new("Feeds and library")
+            .constrain_to(self.safe_rect(ctx))
             .open(&mut open)
             .show(ctx, |ui| {
                 let choices = if self.tab == 3 {
@@ -1467,9 +1610,10 @@ impl MobileApp {
     }
     fn menu(&mut self, ctx: &egui::Context) {
         let mut open = true;
-        egui::Window::new("Actions").open(&mut open).show(ctx,|ui|{
+        egui::Window::new("Actions").constrain_to(self.safe_rect(ctx)).open(&mut open).show(ctx,|ui|{
             if ui.button("Look up lyrics for this song").clicked()&& let Some(media)=self.player.get("media"){self.request(ctx,json!({"op":"lyrics","media":media}),Kind::Popup("Lyrics".into()));}
             if ui.button("Sleep timer: 30 minutes").clicked(){self.effects.push(Effect::Command(json!({"op":"sleep","seconds":1800})));}
+            if ui.button("Cancel sleep timer").clicked(){self.command("sleep_cancel");}
 
         if ui.button("Connect YouTube account").clicked(){self.effects.push(Effect::Login);self.menu_open=false;}
         if ui.button("Import cookie file").clicked(){self.effects.push(Effect::Pick("cookies".into()));}
@@ -1481,8 +1625,56 @@ impl MobileApp {
     });
         self.menu_open &= open;
     }
+    fn download_form(&mut self, ctx: &egui::Context) {
+        self.download_draft_original
+            .get_or_insert_with(|| self.config.clone());
+        let mut open = true;
+        egui::Window::new("Add download")
+            .constrain_to(self.safe_rect(ctx))
+            .open(&mut open)
+            .vscroll(true)
+            .show(ctx, |ui| {
+                ui.label("Video or playlist URL");
+                ui.add_sized(
+                    [ui.available_width(), 48.0],
+                    egui::TextEdit::singleline(&mut self.query)
+                        .hint_text("https://www.youtube.com/…"),
+                );
+                ui.checkbox(&mut self.config.download.audio, "Audio only");
+                egui::ComboBox::from_label("Maximum quality")
+                    .selected_text(&self.config.download.quality)
+                    .show_ui(ui, |ui| {
+                        for q in ["1080", "720", "480", "360", "best"] {
+                            ui.selectable_value(&mut self.config.download.quality, q.into(), q);
+                        }
+                    });
+                if ui.button("Download").clicked() {
+                    match linked_media(
+                        self.query.trim(),
+                        if self.config.download.audio { 2 } else { 1 },
+                    ) {
+                        Ok(media) => {
+                            self.resolve(ctx, media, false, true, false);
+                            self.add_download = false;
+                        }
+                        Err(error) => self.status = error.to_string(),
+                    }
+                }
+            });
+        self.add_download &= open;
+        if !self.add_download
+            && let Some(original) = self.download_draft_original.take()
+        {
+            self.config = original;
+        }
+    }
     fn download_list(&mut self, ui: &mut egui::Ui) {
-        ui.heading("Offline downloads");
+        ui.horizontal(|ui| {
+            ui.heading("Offline downloads");
+            if ui.button("Add URL").clicked() {
+                self.add_download = true;
+            }
+        });
         let items = self.downloads.as_array().cloned().unwrap_or_default();
         if items.is_empty() {
             ui.label("Download a video, song or playlist from its More menu.");
@@ -1538,6 +1730,44 @@ fn progress(player: &Value) -> f32 {
     }
 }
 
+fn linked_media(raw: &str, tab: usize) -> Result<Media> {
+    let url = ytui_core::normalize_media_url(raw)?;
+    let parsed = ytui_core::http_url(&url)?;
+    let playlist = ytui_core::is_playlist_url(&url);
+    let id = if playlist {
+        parsed
+            .query_pairs()
+            .find(|(key, _)| key == "list")
+            .map(|(_, value)| value.into_owned())
+            .unwrap_or_default()
+    } else {
+        String::new()
+    };
+    Ok(Media {
+        url: url.clone(),
+        title: url,
+        id,
+        kind: if playlist {
+            ytui_core::MediaKind::Playlist
+        } else if tab == 3 {
+            ytui_core::MediaKind::Station
+        } else if tab == 2 {
+            ytui_core::MediaKind::Song
+        } else {
+            ytui_core::MediaKind::Video
+        },
+        live: tab == 3,
+        ..Default::default()
+    })
+}
+fn timestamp(seconds: f64) -> String {
+    let n = seconds.max(0.0) as u64;
+    if n >= 3600 {
+        format!("{}:{:02}:{:02}", n / 3600, n / 60 % 60, n % 60)
+    } else {
+        format!("{}:{:02}", n / 60, n % 60)
+    }
+}
 fn lyric_text(value: &Value) -> String {
     let Some(tracks) = value.as_array() else {
         return "No lyrics returned".into();
@@ -1612,6 +1842,27 @@ mod tests {
                 result,
             })
             .unwrap();
+    }
+    #[test]
+    fn pasted_playlist_links_expand_but_watch_links_keep_single_video_intent() {
+        let playlist =
+            linked_media("https://music.youtube.com/playlist?list=PLsynthetic", 2).unwrap();
+        assert!(playlist.collection());
+        assert_eq!(playlist.id, "PLsynthetic");
+        assert!(
+            !linked_media(
+                "https://www.youtube.com/watch?v=abcdefghijk&list=PLsynthetic",
+                1
+            )
+            .unwrap()
+            .collection()
+        );
+        assert_eq!(
+            linked_media("youtu.be/abcdefghijk", 2).unwrap().kind,
+            ytui_core::MediaKind::Song
+        );
+        assert!(linked_media("file:///private/media", 1).is_err());
+        assert!(linked_media("https://name:secret@youtube.com/playlist?list=PLx", 1).is_err());
     }
     #[test]
     fn stale_playback_and_account_replies_cannot_start_media() {
@@ -1700,6 +1951,32 @@ mod tests {
         );
         app.poll(&ctx);
         assert_eq!(app.feeds[1].page.items.len(), 1);
+    }
+    #[test]
+    fn modal_geometry_respects_system_bars_and_download_cancel_restores_preferences() {
+        let (mut app, ctx, _root) = test_app();
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    Vec2::new(412.0, 915.0),
+                )),
+                ..Default::default()
+            },
+            |ctx| app.frame(ctx),
+        );
+        app.safe_top = 32.0;
+        app.safe_bottom = 24.0;
+        let safe = app.safe_rect(&ctx);
+        assert_eq!(safe.top(), 32.0);
+        assert_eq!(safe.bottom(), 891.0);
+        app.add_download = true;
+        app.download_draft_original = Some(app.config.clone());
+        let original = app.config.download.audio;
+        app.config.download.audio = !original;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.add_download);
+        assert_eq!(app.config.download.audio, original);
     }
     #[test]
     fn android_back_closes_overlays_before_backgrounding() {

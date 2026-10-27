@@ -32,7 +32,9 @@ existing choices are preserved. Choose Best explicitly for unrestricted formats.
 Use the bottom tabs for Downloads, YouTube, Music and Radio. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
 server responses. The top **Menu** and **Settings** provide touch controls.
-Tap a card's play, preview, queue, download or save action. Tap the current player
+Tap a card's play, preview, queue, download or save action. Downloads → Add URL
+accepts a video or dedicated playlist link, with audio-only and quality choices.
+A watch link with `list=` keeps single-video intent. Tap the current player
 to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, queue
 and visualizer controls. Tablet layouts keep catalog and player side by side.
 Android Back closes overlays before putting the app in the background.
@@ -108,3 +110,12 @@ separate; the desktop installer/tests remain unchanged in behavior.
   adapter; other platforms retain upstream behavior.
 - `vendor/yt-dlp-rs`: pinned upstream source with a documented isolated-JS runtime
   callback; desktop Node/Deno behavior is retained. See its `YTUI_PATCH.md`.
+
+## Explicit public YouTube acceptance
+
+Use the Android workflow's **Run workflow → public_url** input for a public video
+URL, for example `https://www.youtube.com/watch?v=jNQXAC9IVRw`. This invokes the
+actual Rust extractor/Android JS bridge and requires three seconds of real Media3
+playback. It imports no cookies. Default CI skips that separate live check;
+rate limits, account/consent requirements and runner connectivity remain failures
+in an opted-in run, not evidence of working public playback.

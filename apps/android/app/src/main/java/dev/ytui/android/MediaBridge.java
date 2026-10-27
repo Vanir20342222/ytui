@@ -20,6 +20,12 @@ public final class MediaBridge {
   static int textureId;
   static volatile int videoWidth = 1280, videoHeight = 720;
   static volatile int topInset, bottomInset;
+  static volatile boolean uiVisible;
+
+  static void notifyUi() {
+    if (uiVisible) NativeBridge.frameAvailable();
+  }
+
   static final java.util.concurrent.atomic.AtomicLong videoFrames =
       new java.util.concurrent.atomic.AtomicLong();
   static final java.util.concurrent.atomic.AtomicBoolean frameReady =
@@ -61,7 +67,15 @@ public final class MediaBridge {
           "dark",
           (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
               == Configuration.UI_MODE_NIGHT_YES);
-      value.put("player", new JSONObject(playerSnapshot));
+      JSONObject player = new JSONObject(playerSnapshot);
+      if (AudioTap.enabled) {
+        long packed = AudioTap.levels;
+        player
+            .put("left", (packed & 65535) / 65535.0)
+            .put("right", ((packed >>> 16) & 65535) / 65535.0)
+            .put("peak", ((packed >>> 32) & 65535) / 65535.0);
+      }
+      value.put("player", player);
       JSONArray downloads = OfflineStore.changedSnapshot();
       if (downloads != null) value.put("downloads", downloads);
       JSONArray pending = new JSONArray();
@@ -207,7 +221,7 @@ public final class MediaBridge {
             t -> {
               videoFrames.incrementAndGet();
               frameReady.set(true);
-              NativeBridge.frameAvailable();
+              notifyUi();
             });
         Surface ready = surface;
         main.post(

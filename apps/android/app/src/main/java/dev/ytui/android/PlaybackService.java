@@ -21,6 +21,7 @@ public final class PlaybackService extends MediaSessionService {
   final ExecutorService worker = Executors.newFixedThreadPool(3);
   final Handler handler = new Handler(Looper.getMainLooper());
   long generation = 0, skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
+  String sponsorMode = "skip";
   String error = "", streamTitle = "", captionText = "", pendingQueueUrl = "", errorTrace = "";
   JSONObject previewRestore;
   long previewPosition;
@@ -128,7 +129,9 @@ public final class PlaybackService extends MediaSessionService {
           @Override
           public void onPlaybackStateChanged(int state) {
             if (state == Player.STATE_ENDED) {
-              if (isLive()) {
+              if (currentRequest.optBoolean("preview")) {
+                finishPreview();
+              } else if (isLive()) {
                 if (reconnectCount < 3) reconnect();
                 else {
                   error = "Live stream disconnected; reconnect limit reached";
@@ -336,24 +339,7 @@ public final class PlaybackService extends MediaSessionService {
       player.setVolume(0f);
       handler.postDelayed(
           () -> {
-            if (version == generation) {
-              JSONObject restore = previewRestore;
-              long position = previewPosition;
-              boolean playing = previewPlaying;
-              previewRestore = null;
-              if (restore != null) {
-                try {
-                  play(restore);
-                  player.seekTo(position);
-                  if (!playing) player.pause();
-                } catch (Exception error) {
-                  player.pause();
-                }
-              } else {
-                player.pause();
-                player.setVolume(prefs.getFloat("volume", 0.7f));
-              }
-            }
+            if (version == generation) finishPreview();
           },
           10000);
     } else player.setVolume(prefs.getFloat("volume", 0.7f));
@@ -373,11 +359,36 @@ public final class PlaybackService extends MediaSessionService {
             JSONArray marks = rpcArray(new JSONObject().put("op", "sponsor").put("media", media));
             handler.post(
                 () -> {
-                  if (version == generation) sponsors = marks;
+                  if (version == generation && !"off".equals(sponsorMode)) sponsors = marks;
                 });
           } catch (Exception ignored) {
           }
         });
+    publish();
+  }
+
+  void finishPreview() {
+    JSONObject restore = previewRestore;
+    long position = previewPosition;
+    boolean wasPlaying = previewPlaying;
+    previewRestore = null;
+    try {
+      if (restore != null) {
+        play(restore);
+        player.seekTo(position);
+        pausedByUser = !wasPlaying;
+        if (!wasPlaying) player.pause();
+      } else {
+        generation++;
+        currentRequest.remove("preview");
+        pausedByUser = true;
+        player.pause();
+        player.setVolume(prefs.getFloat("volume", 0.7f));
+      }
+    } catch (Exception error) {
+      player.pause();
+      this.error = "Could not restore playback after preview";
+    }
     publish();
   }
 
@@ -430,12 +441,26 @@ public final class PlaybackService extends MediaSessionService {
       case "seek":
         player.seekTo((long) (command.optDouble("seconds") * 1000));
         break;
+      case "preview_end":
+        finishPreview();
+        break;
+      case "preview_play_full":
+        generation++;
+        previewRestore = null;
+        currentRequest.remove("preview");
+        pausedByUser = false;
+        player.setVolume(prefs.getFloat("volume", 0.7f));
+        player.seekTo(0);
+        player.play();
+        break;
       case "volume":
+        if (currentRequest.optBoolean("preview")) break;
         float volume = (float) Math.max(0, Math.min(1, command.optDouble("value", 0.7)));
         player.setVolume(volume);
         prefs.edit().putFloat("volume", volume).apply();
         break;
       case "speed":
+        if (currentRequest.optBoolean("preview")) break;
         float speed = (float) Math.max(0.25, Math.min(4, command.optDouble("value", 1)));
         player.setPlaybackSpeed(speed);
         prefs.edit().putFloat("speed", speed).apply();
@@ -455,6 +480,13 @@ public final class PlaybackService extends MediaSessionService {
       case "shuffle":
         player.setShuffleModeEnabled(!player.getShuffleModeEnabled());
         break;
+      case "sponsor_watch":
+        skipUntil = (long) (command.optDouble("end") * 1000) + 1;
+        player.seekTo((long) (command.optDouble("start") * 1000));
+        break;
+      case "sleep_cancel":
+        sleepDeadline = 0;
+        break;
       case "sponsor_replay":
         if (lastSkipped >= 0) {
           skipUntil = player.getCurrentPosition() + 1000;
@@ -464,7 +496,28 @@ public final class PlaybackService extends MediaSessionService {
       case "settings":
         JSONObject config = command.optJSONObject("config");
         if (config != null) {
-          skipSponsors = "skip".equals(config.optString("playback_sponsorblock"));
+          String previousMode = sponsorMode;
+          sponsorMode = config.optString("playback_sponsorblock", "skip");
+          skipSponsors = "skip".equals(sponsorMode);
+          if ("off".equals(sponsorMode)) sponsors = new JSONArray();
+          else if (!previousMode.equals(sponsorMode)) {
+            JSONObject media = currentRequest.optJSONObject("media");
+            long version = generation;
+            if (media != null)
+              worker.execute(
+                  () -> {
+                    try {
+                      JSONArray marks =
+                          rpcArray(new JSONObject().put("op", "sponsor").put("media", media));
+                      handler.post(
+                          () -> {
+                            if (version == generation && !"off".equals(sponsorMode))
+                              sponsors = marks;
+                          });
+                    } catch (Exception ignored) {
+                    }
+                  });
+          }
           historyEnabled = config.optBoolean("playback_history", true);
           AudioTap.enabled =
               config.optString("music_player_style").startsWith("vu")
@@ -687,7 +740,9 @@ public final class PlaybackService extends MediaSessionService {
               .put("video_height", player.getVideoSize().height)
               .put("captions", captionText)
               .put("segments", sponsors)
-              .put("volume", player.getVolume())
+              .put("volume", prefs.getFloat("volume", 0.7f))
+              .put("actual_volume", player.getVolume())
+              .put("preview", currentRequest.optBoolean("preview"))
               .put("speed", player.getPlaybackParameters().speed)
               .put("error", error.isEmpty() ? JSONObject.NULL : error)
               .put("error_trace", errorTrace);
@@ -723,6 +778,7 @@ public final class PlaybackService extends MediaSessionService {
       }
       status.put("tracks", tracks);
       MediaBridge.playerSnapshot = status.toString();
+      MediaBridge.notifyUi();
     } catch (JSONException ignored) {
     }
   }

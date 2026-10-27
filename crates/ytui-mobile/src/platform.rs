@@ -146,7 +146,12 @@ struct AndroidUi {
 }
 impl eframe::App for AndroidUi {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.last.elapsed() > std::time::Duration::from_millis(150) {
+        let interval = if self.app.wants_audio_frames() {
+            32
+        } else {
+            150
+        };
+        if self.last.elapsed() > std::time::Duration::from_millis(interval) {
             if let Ok(raw) = bridge_call("snapshot", None)
                 && let Ok(value) = serde_json::from_str(&raw)
             {

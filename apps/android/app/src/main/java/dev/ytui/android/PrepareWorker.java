@@ -96,7 +96,8 @@ public final class PrepareWorker extends Worker {
                 new JSONObject()
                     .put("op", "resolve")
                     .put("media", media)
-                    .put("audio", request.optBoolean("audio")));
+                    .put("audio", request.optBoolean("audio"))
+                    .put("quality", request.optString("quality", "1080")));
         if (isStopped()) return Result.retry();
         if (resolved.optBoolean("ok")
             && (media.optBoolean("live") || resolved.getJSONObject("data").optBoolean("live"))) {

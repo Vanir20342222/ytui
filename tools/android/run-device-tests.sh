@@ -16,4 +16,8 @@ collect_evidence() {
     adb pull /sdcard/Android/data/dev.ytui.android/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
 }
 trap collect_evidence EXIT
-apps/android/gradlew -p apps/android --no-daemon -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true :app:connectedDebugAndroidTest
+arguments=(-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true)
+if [[ -n "${YTUI_ANDROID_PUBLIC_URL:-}" ]]; then
+    arguments+=("-Pandroid.testInstrumentationRunnerArguments.youtubeUrl=$YTUI_ANDROID_PUBLIC_URL")
+fi
+apps/android/gradlew -p apps/android --no-daemon "${arguments[@]}" :app:connectedDebugAndroidTest

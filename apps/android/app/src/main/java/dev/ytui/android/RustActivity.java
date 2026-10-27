@@ -62,6 +62,19 @@ public final class RustActivity extends GameActivity {
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    MediaBridge.uiVisible = true;
+    MediaBridge.notifyUi();
+  }
+
+  @Override
+  protected void onStop() {
+    MediaBridge.uiVisible = false;
+    super.onStop();
+  }
+
+  @Override
   protected void onDestroy() {
     if (reference.get() == this) reference.clear();
     super.onDestroy();

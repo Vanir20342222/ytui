@@ -93,6 +93,28 @@ sideloadable **development** APK plus reports. The accelerated API 35 job runs:
 These checks have been added to the repository; their CI results must be read
 before describing them as passed. They do not replace real provider acceptance.
 
+## Latest runtime checkpoint
+
+Run `40536947562` passed four of five device tests, including actual video/PCM,
+pause, persistent volume across streams, loopback download, offline decoding with
+the server closed, UI destruction/recreation in the same process, JNI boundaries,
+empty audio EOS input and JavaScript sandbox API isolation. The remaining saved
+player vector test incorrectly expected each response's `type` to equal `n`/`sig`;
+EJS uses `type: result` and orders responses by request. The assertion is corrected
+and still requires the exact complete expected solution map. A fresh run must pass
+before the entire solver test is reported successful.
+
+The final UI follow-up uses system-inset bounds for windows, visible theme-colored
+rails, clock-style progress labels, bounded/resolution-specific artwork, direct
+URL/playlist download forms, preview EOS restoration/mute isolation, actual audio
+sampling at visualizer frame rate, SponsorBlock timeline marks/replay and an off
+mode that performs no API request. The local checks and new CI head qualify these
+changes separately from the checkpoint above.
+
+A public-only, opt-in instrumentation case now exercises actual native extraction
+and three seconds of playback. The regular offline fixture suite explicitly skips
+that case; see the workflow `public_url` input. Record its actual result separately.
+
 ## Device acceptance still required
 
 On both requested devices: install/update signing identity, search soft keyboard,

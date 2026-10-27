@@ -413,6 +413,9 @@ impl Engine {
                 }
             }
             "sponsor" => {
+                if self.config.lock().expect("config").playback_sponsorblock == "off" {
+                    return Ok(json!([]));
+                }
                 let media: Media = serde_json::from_value(r["media"].clone())?;
                 let config = self.config.lock().expect("config").clone();
                 Ok(json!(
@@ -665,7 +668,7 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
         }
     }
     Ok(
-        json!({"url":url,"audio_url":audio_url,"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","catalog":ytui_providers::formats::Catalog::parse(data)}),
+        json!({"url":url,"audio_url":audio_url,"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
     )
 }
 pub(crate) fn runtime() -> &'static tokio::runtime::Runtime {
