@@ -62,7 +62,11 @@ public final class ScriptRuntime {
       }
     } catch (Exception error) {
       throw new IllegalStateException(
-          "Isolated YouTube solver unavailable or timed out; update Android System WebView", error);
+          "Isolated YouTube solver unavailable or timed out; update Android System WebView. Main"
+              + " thread: "
+              + java.util.Arrays.toString(
+                  android.os.Looper.getMainLooper().getThread().getStackTrace()),
+          error);
     } finally {
       if (isolate != null) isolate.close();
       if (file != null && !file.delete()) file.deleteOnExit();

@@ -31,6 +31,14 @@ public final class MediaRuntimeTest {
   static void await(String message, Check check) throws Exception {
     long deadline = android.os.SystemClock.elapsedRealtime() + 60000;
     while (!check.ready()) {
+      if (!status().isNull("error"))
+        throw new AssertionError(
+            message
+                + ": "
+                + MediaBridge.playerSnapshot
+                + " Main thread: "
+                + java.util.Arrays.toString(
+                    android.os.Looper.getMainLooper().getThread().getStackTrace()));
       if (android.os.SystemClock.elapsedRealtime() > deadline)
         throw new AssertionError(message + ": " + MediaBridge.playerSnapshot);
       Thread.sleep(100);

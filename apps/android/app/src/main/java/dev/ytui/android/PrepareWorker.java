@@ -98,7 +98,11 @@ public final class PrepareWorker extends Worker {
                     .put("media", media)
                     .put("audio", request.optBoolean("audio")));
         if (isStopped()) return Result.retry();
-        if (!resolved.optBoolean("ok")) {
+        if (resolved.optBoolean("ok")
+            && (media.optBoolean("live") || resolved.getJSONObject("data").optBoolean("live"))) {
+          failed++;
+          MediaBridge.event("error", "Skipped a live entry: recording is not supported");
+        } else if (!resolved.optBoolean("ok")) {
           String error = resolved.optString("error").toLowerCase(java.util.Locale.ROOT);
           if (PreparationPolicy.rateLimited(error)) {
             status(

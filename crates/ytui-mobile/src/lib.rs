@@ -39,6 +39,10 @@ impl Engine {
         let config: Config = read_json(&root.join("config.json"))?.unwrap_or_else(|| Config {
             auth_store: "file".into(),
             notifications: true,
+            download: ytui_core::DownloadOptions {
+                quality: "1080".into(),
+                ..Default::default()
+            },
             ..Default::default()
         });
         config.validate()?;
@@ -372,7 +376,7 @@ impl Engine {
                 Ok(json!({"connected":false}))
             }
             "resolve" => self.resolve(r).await,
-            "collection" => {
+            "collection" | "enqueue_collection" => {
                 let music = r["music"].as_bool().unwrap_or(false);
                 let request: BrowseRequest = serde_json::from_value(r["request"].clone())?;
                 let browser = self.browser.lock().expect("browser").clone();
@@ -391,10 +395,22 @@ impl Engine {
                     failures: 0,
                     error: None,
                 };
-                Ok(json!(
+                let items =
                     ytui_providers::watch::collect(browser, watch, CancellationToken::new())
-                        .await?
-                ))
+                        .await?;
+                if op == "enqueue_collection" {
+                    self.mutate(|state| {
+                        ensure!(
+                            state.queue.len() + items.len() <= 500,
+                            "This collection exceeds the 500-item mobile queue budget"
+                        );
+                        let count = items.len();
+                        state.queue.extend(items);
+                        Ok(json!({"added":count}))
+                    })
+                } else {
+                    Ok(json!(items))
+                }
             }
             "sponsor" => {
                 let media: Media = serde_json::from_value(r["media"].clone())?;
@@ -430,9 +446,13 @@ impl Engine {
             let url = radio.resolve_playlist(url.as_str()).await?;
             return Ok(json!({"url":url,"headers":{},"audio_url":null}));
         }
-        let proxy = self.config.lock().expect("config").proxy.clone();
+        let config = self.config.lock().expect("config").clone();
+        let proxy = config.proxy;
         let audio = r["audio"].as_bool().unwrap_or(false);
-        let quality = r["quality"].as_str().unwrap_or("best").to_owned();
+        let quality = r["quality"]
+            .as_str()
+            .unwrap_or(&config.download.quality)
+            .to_owned();
         let cookies = self.session.lock().expect("session").clone();
         let cookie_dir = self.cache.join("transient-auth");
         static EXTRACTORS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
@@ -469,23 +489,57 @@ impl Engine {
                     ..Default::default()
                 },
             )?;
-            let format = if audio {
-                "bestaudio/best".to_owned()
-            } else if quality == "best" {
-                "bestvideo+bestaudio/best".to_owned()
-            } else {
-                ensure!(
-                    ["360", "480", "720", "1080"].contains(&quality.as_str()),
-                    "Invalid quality"
-                );
-                format!("bestvideo[height<={quality}]+bestaudio/best[height<={quality}]")
-            };
+            let format = mobile_format(audio, &quality)?;
             Ok(serde_json::to_value(
                 client.extract_info_with_format(&media.url, Some(&format))?,
             )?)
         })
         .await??;
         stream(&data, audio)
+    }
+}
+fn mobile_format(audio: bool, quality: &str) -> Result<String> {
+    if audio {
+        return Ok("bestaudio/best".into());
+    }
+    if quality == "best" {
+        return Ok("bestvideo+bestaudio/best".into());
+    }
+    ensure!(
+        ["360", "480", "720", "1080"].contains(&quality),
+        "Invalid quality"
+    );
+    // H.264 is hardware-decodable on API 26 devices. Preserve a bounded VP9/muxed fallback.
+    Ok(format!(
+        "bestvideo[height<={quality}][vcodec^=avc1]+bestaudio/bestvideo[height<={quality}][vcodec!^=av01]+bestaudio/best[height<={quality}]"
+    ))
+}
+#[cfg(test)]
+mod format_tests {
+    use super::*;
+    #[test]
+    fn phone_quality_prefers_compatible_video_and_honors_the_selected_cap() {
+        let formats = vec![
+            json!({"format_id":"audio","url":"https://media.test/a","ext":"m4a","vcodec":"none","acodec":"mp4a.40.2"}),
+            json!({"format_id":"720","url":"https://media.test/720","ext":"mp4","height":720,"vcodec":"avc1.64001F","acodec":"none"}),
+            json!({"format_id":"1080","url":"https://media.test/1080","ext":"mp4","height":1080,"vcodec":"avc1.640028","acodec":"none"}),
+            json!({"format_id":"av1","url":"https://media.test/av1","ext":"mp4","height":1080,"vcodec":"av01.0.08M.08","acodec":"none"}),
+            json!({"format_id":"4k","url":"https://media.test/4k","ext":"mp4","height":2160,"vcodec":"av01.0.12M.08","acodec":"none"}),
+        ];
+        for (quality, expected) in [("720", 1), ("1080", 2), ("best", 4)] {
+            let selector =
+                yt_dlp_rs::format_select::parse(&mobile_format(false, quality).unwrap()).unwrap();
+            let selected = selector
+                .select(&formats, &Default::default(), None)
+                .unwrap();
+            assert_eq!(selected[0].formats, vec![expected, 0]);
+        }
+        assert!(mobile_format(false, "invalid").is_err());
+        let audio = yt_dlp_rs::format_select::parse(&mobile_format(true, "1080").unwrap()).unwrap();
+        assert_eq!(
+            audio.select(&formats, &Default::default(), None).unwrap()[0].formats,
+            vec![0]
+        );
     }
 }
 struct RequestRegistration<'a> {
@@ -563,7 +617,7 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
         }
     }
     Ok(
-        json!({"url":url,"audio_url":audio_url,"headers":headers,"catalog":ytui_providers::formats::Catalog::parse(data)}),
+        json!({"url":url,"audio_url":audio_url,"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","catalog":ytui_providers::formats::Catalog::parse(data)}),
     )
 }
 pub(crate) fn runtime() -> &'static tokio::runtime::Runtime {

@@ -28,6 +28,7 @@ enum Kind {
     Resolve {
         account_generation: u64,
         playback_generation: u64,
+        queued: bool,
         media: Box<Media>,
         audio: bool,
         preview: bool,
@@ -268,6 +269,11 @@ impl MobileApp {
             media.kind,
             ytui_core::MediaKind::Song | ytui_core::MediaKind::Station
         ) || self.config.download.audio && download;
+        if download && media.live {
+            self.status =
+                "Live recording is not available; play or queue the station instead".into();
+            return;
+        }
         if media.collection() {
             if download {
                 self.effects.push(Effect::Command(json!({"op":"download_playlist","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2,"audio":audio})));
@@ -286,7 +292,11 @@ impl MobileApp {
         if !download {
             self.playback_generation += 1;
         }
-        self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,media:Box::new(media),audio,preview,download,resume});
+        let queued = !download
+            && !preview
+            && self.queue_open
+            && self.queue.iter().any(|item| item.url == media.url);
+        self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume});
     }
     fn poll(&mut self, ctx: &egui::Context) {
         for _ in 0..4 {
@@ -387,6 +397,7 @@ impl MobileApp {
                 (Kind::ImportedTheme, Ok(value)) => {
                     if let Ok(palette) = serde_json::from_value(value) {
                         self.palette = palette;
+                        self.theme_bars();
                     }
                     self.request(ctx, json!({"op":"settings"}), Kind::Settings);
                     self.settings_original = None;
@@ -394,6 +405,7 @@ impl MobileApp {
                 (Kind::Theme, Ok(value)) => {
                     if let Ok(palette) = serde_json::from_value(value) {
                         self.palette = palette;
+                        self.theme_bars();
                     }
                 }
                 (Kind::Image(url), _result) => {
@@ -448,6 +460,7 @@ impl MobileApp {
                         preview,
                         download,
                         resume,
+                        queued,
                         ..
                     },
                     Ok(stream),
@@ -457,7 +470,7 @@ impl MobileApp {
                     {
                         self.player_open = true;
                     }
-                    let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume});
+                    let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume,"queued":queued});
                     self.effects.push(if download {
                         Effect::Download(request)
                     } else {
@@ -754,6 +767,21 @@ impl MobileApp {
                 ui.add(egui::ProgressBar::new(progress).fill(c(self.palette.accent)));
             });
         }
+        if !tablet
+            && has_media
+            && matches!(self.tab, 2 | 3)
+            && self.config.music_player_style != "classic"
+            && !self.config.music_player_style.ends_with("-fullscreen")
+        {
+            egui::TopBottomPanel::bottom("music-presentation")
+                .default_height(160.0)
+                .min_height(96.0)
+                .max_height(240.0)
+                .resizable(true)
+                .show(ctx, |ui| {
+                    self.visualizer(ui, ui.available_height().max(80.0));
+                });
+        }
         egui::CentralPanel::default().show(ctx, |ui| {
             if tablet && matches!(self.tab, 2 | 3) {
                 ui.columns(2, |cols| {
@@ -834,6 +862,12 @@ impl MobileApp {
                 std::time::Duration::from_secs(1)
             },
         );
+    }
+    fn theme_bars(&mut self) {
+        #[cfg(target_os = "android")]
+        self.effects.push(Effect::Command(
+            json!({"op":"theme","light":self.palette.light,"background":self.palette.background}),
+        ));
     }
     fn command(&mut self, op: &str) {
         self.effects.push(Effect::Command(json!({"op":op})));
@@ -1016,11 +1050,8 @@ impl MobileApp {
                                         self.resolve(ctx, media.clone(), true, false, false);
                                     }
                                     if ui.button("+").clicked() {
-                                        self.request(
-                                            ctx,
-                                            json!({"op":"enqueue","media":media}),
-                                            Kind::Ignore,
-                                        );
+                                        self.status="Adding to the queue…".into();
+                                        self.request(ctx,if media.collection(){json!({"op":"enqueue_collection","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2})}else{json!({"op":"enqueue","media":media})},Kind::Ignore);
                                     }
                                     ui.menu_button("More", |ui| {
                                         if ui.button("Download").clicked() {
@@ -1064,8 +1095,14 @@ impl MobileApp {
             && self.player["title"].as_str().is_some()
         {
             let w = ui.available_width();
-            let (rect, _) =
-                ui.allocate_exact_size(Vec2::new(w, w * 9.0 / 16.0), egui::Sense::click());
+            let width = self.player["video_width"].as_f64().unwrap_or(0.0);
+            let height = self.player["video_height"].as_f64().unwrap_or(0.0);
+            let aspect = if width > 0.0 && height > 0.0 {
+                (width / height).clamp(0.25, 4.0) as f32
+            } else {
+                16.0 / 9.0
+            };
+            let (rect, _) = ui.allocate_exact_size(Vec2::new(w, w / aspect), egui::Sense::click());
             #[cfg(target_os = "android")]
             crate::platform::paint_video(ui, rect);
             #[cfg(not(target_os = "android"))]
@@ -1570,6 +1607,7 @@ mod tests {
                 Kind::Resolve {
                     account_generation: account,
                     playback_generation: playback,
+                    queued: false,
                     media: Box::default(),
                     audio: true,
                     preview: false,
@@ -1587,6 +1625,7 @@ mod tests {
             Kind::Resolve {
                 account_generation: 3,
                 playback_generation: 5,
+                queued: false,
                 media: Box::default(),
                 audio: true,
                 preview: false,

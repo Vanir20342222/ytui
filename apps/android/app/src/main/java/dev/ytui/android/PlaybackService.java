@@ -21,7 +21,7 @@ public final class PlaybackService extends MediaSessionService {
   final ExecutorService worker = Executors.newFixedThreadPool(3);
   final Handler handler = new Handler(Looper.getMainLooper());
   long generation = 0, skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
-  String error = "", streamTitle = "", captionText = "";
+  String error = "", streamTitle = "", captionText = "", pendingQueueUrl = "", errorTrace = "";
   JSONObject previewRestore;
   long previewPosition;
   boolean previewPlaying;
@@ -76,6 +76,19 @@ public final class PlaybackService extends MediaSessionService {
     player.addListener(
         new Player.Listener() {
           @Override
+          public void onVideoSizeChanged(VideoSize size) {
+            if (size.width < 1 || size.height < 1) return;
+            MediaBridge.videoWidth = Math.max(1, size.width);
+            MediaBridge.videoHeight = Math.max(1, size.height);
+            synchronized (MediaBridge.class) {
+              if (MediaBridge.texture != null)
+                MediaBridge.texture.setDefaultBufferSize(
+                    MediaBridge.videoWidth, MediaBridge.videoHeight);
+            }
+            publish();
+          }
+
+          @Override
           public void onCues(androidx.media3.common.text.CueGroup cues) {
             StringBuilder text = new StringBuilder();
             for (androidx.media3.common.text.Cue cue : cues.cues) {
@@ -90,6 +103,15 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onPlayerError(PlaybackException e) {
+            StringBuilder trace = new StringBuilder();
+            Throwable cause = e;
+            for (int i = 0; cause != null && i < 4; i++, cause = cause.getCause()) {
+              trace.append(cause.getClass().getName()).append("\n");
+              StackTraceElement[] stack = cause.getStackTrace();
+              for (int j = 0; j < Math.min(stack.length, 8); j++)
+                trace.append(stack[j]).append("\n");
+            }
+            errorTrace = trace.toString();
             if (isLive() && !rateLimited(e) && reconnectCount < 3) {
               reconnect();
             } else {
@@ -141,6 +163,17 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onIsPlayingChanged(boolean playing) {
+            if (playing && !pendingQueueUrl.isEmpty()) {
+              String started = pendingQueueUrl;
+              pendingQueueUrl = "";
+              worker.execute(
+                  () -> {
+                    try {
+                      rpc(new JSONObject().put("op", "queue_commit").put("url", started));
+                    } catch (Exception ignored) {
+                    }
+                  });
+            }
             publish();
           }
         });
@@ -168,6 +201,10 @@ public final class PlaybackService extends MediaSessionService {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int id) {
+    if (intent == null) {
+      stopSelf(id);
+      return START_NOT_STICKY;
+    }
     if (intent != null && "play".equals(intent.getAction())) {
       android.app.NotificationManager notifications =
           getSystemService(android.app.NotificationManager.class);
@@ -221,12 +258,15 @@ public final class PlaybackService extends MediaSessionService {
     generation++;
     currentRequest = request;
     error = "";
+    errorTrace = "";
     streamTitle = "";
     captionText = "";
     skipUntil = 0;
     lastSkipped = -1;
     sponsors = new JSONArray();
     JSONObject stream = request.getJSONObject("stream"), media = request.getJSONObject("media");
+    if (stream.optBoolean("live")) media.put("live", true);
+    pendingQueueUrl = request.optBoolean("queued") ? media.optString("url") : "";
     DefaultHttpDataSource.Factory http =
         new DefaultHttpDataSource.Factory()
             .setConnectTimeoutMs(10000)
@@ -509,7 +549,10 @@ public final class PlaybackService extends MediaSessionService {
                   handler.post(
                       () -> {
                         if (version == generation && current == this) {
-                          if (reconnectCount < 3) reconnect();
+                          if (PreparationPolicy.rateLimited(String.valueOf(e.getMessage()))) {
+                            error = "Service rate limit; wait before reconnecting";
+                            publish();
+                          } else if (reconnectCount < 3) reconnect();
                           else {
                             error = "Live stream reconnect limit reached";
                             publish();
@@ -536,30 +579,28 @@ public final class PlaybackService extends MediaSessionService {
             JSONObject stream =
                 rpc(new JSONObject().put("op", "resolve").put("media", media).put("audio", audio));
             JSONObject request =
-                new JSONObject().put("media", media).put("stream", stream).put("audio", audio);
+                new JSONObject()
+                    .put("media", media)
+                    .put("stream", stream)
+                    .put("audio", audio)
+                    .put("queued", true);
             handler.post(
                 () -> {
-                  if (version == generation)
-                    try {
-                      play(request);
-                      worker.execute(
-                          () -> {
-                            try {
-                              rpc(
-                                  new JSONObject()
-                                      .put("op", "queue_commit")
-                                      .put("url", media.optString("url")));
-                            } catch (Exception ignored) {
-                            }
-                          });
-                    } catch (Exception ignored) {
-                    }
+                  if (version != generation || current != this) return;
+                  try {
+                    play(request);
+                  } catch (Exception error) {
+                    this.error = "Could not start the next queued item";
+                    publish();
+                  }
                 });
-          } catch (Exception e) {
+          } catch (Exception error) {
             handler.post(
                 () -> {
-                  error = "Could not play the next queued item";
-                  publish();
+                  if (version == generation && current == this) {
+                    this.error = "Could not play the next queued item";
+                    publish();
+                  }
                 });
           }
         });
@@ -637,11 +678,14 @@ public final class PlaybackService extends MediaSessionService {
               .put("position", player.getCurrentPosition() / 1000.0)
               .put("duration", Math.max(0, player.getDuration()) / 1000.0)
               .put("video", !currentRequest.optBoolean("audio", true))
+              .put("video_width", player.getVideoSize().width)
+              .put("video_height", player.getVideoSize().height)
               .put("captions", captionText)
               .put("segments", sponsors)
               .put("volume", player.getVolume())
               .put("speed", player.getPlaybackParameters().speed)
-              .put("error", error.isEmpty() ? JSONObject.NULL : error);
+              .put("error", error.isEmpty() ? JSONObject.NULL : error)
+              .put("error_trace", errorTrace);
       if (AudioTap.enabled) {
         long packed = AudioTap.levels;
         status

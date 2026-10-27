@@ -18,6 +18,7 @@ public final class MediaBridge {
   static SurfaceTexture texture;
   static Surface surface;
   static int textureId;
+  static volatile int videoWidth = 1280, videoHeight = 720;
   static volatile int topInset, bottomInset;
   static final java.util.concurrent.atomic.AtomicLong videoFrames =
       new java.util.concurrent.atomic.AtomicLong();
@@ -75,6 +76,39 @@ public final class MediaBridge {
             JSONObject request = new JSONObject(raw);
             String op = request.optString("op");
             switch (op) {
+              case "theme":
+                {
+                  RustActivity activity = RustActivity.current();
+                  if (activity != null) {
+                    boolean light = request.optBoolean("light");
+                    org.json.JSONArray rgb = request.getJSONArray("background");
+                    int color =
+                        android.graphics.Color.rgb(rgb.getInt(0), rgb.getInt(1), rgb.getInt(2));
+                    activity.getWindow().setStatusBarColor(color);
+                    activity.getWindow().setNavigationBarColor(color);
+                    if (android.os.Build.VERSION.SDK_INT >= 30) {
+                      android.view.WindowInsetsController controller =
+                          activity.getWindow().getInsetsController();
+                      if (controller != null) {
+                        int flags =
+                            android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                                | android.view.WindowInsetsController
+                                    .APPEARANCE_LIGHT_NAVIGATION_BARS;
+                        controller.setSystemBarsAppearance(light ? flags : 0, flags);
+                      }
+                    } else {
+                      android.view.View decor = activity.getWindow().getDecorView();
+                      int flags =
+                          android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                              | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                      decor.setSystemUiVisibility(
+                          light
+                              ? decor.getSystemUiVisibility() | flags
+                              : decor.getSystemUiVisibility() & ~flags);
+                    }
+                  }
+                  break;
+                }
               case "background":
                 if (RustActivity.current() != null) RustActivity.current().moveTaskToBack(true);
                 break;
@@ -159,7 +193,7 @@ public final class MediaBridge {
         if (texture != null) texture.release();
         textureId = id;
         texture = new SurfaceTexture(id);
-        texture.setDefaultBufferSize(1920, 1080);
+        texture.setDefaultBufferSize(videoWidth, videoHeight);
         surface = new Surface(texture);
         texture.setOnFrameAvailableListener(
             t -> {

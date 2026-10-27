@@ -77,6 +77,9 @@ public final class OfflineStore {
   }
 
   static void add(JSONObject request) throws Exception {
+    if (request.getJSONObject("media").optBoolean("live")
+        || request.getJSONObject("stream").optBoolean("live"))
+      throw new IllegalArgumentException("Live recording is not available");
     manager();
     JSONObject stream = request.getJSONObject("stream");
     String id = id(request);
