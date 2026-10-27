@@ -25,6 +25,11 @@ macro_rules! entry {
     };
 }
 pub const ENTRIES: &[Entry] = &[
+    entry!(
+        "Player",
+        "Cycle music player style (Music / Radio)",
+        "music-player-style"
+    ),
     entry!("Settings", "General settings", "settings"),
     entry!("Settings", "Setup & tool capabilities", "capabilities"),
     entry!("Settings", "Inspect thumbnail cache", "thumbnail-cache"),

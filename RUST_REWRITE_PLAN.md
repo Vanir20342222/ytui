@@ -1,5 +1,10 @@
 # ytui Rust rewrite plan
 
+M5/M6/M7/M8 vinyl player follow-up (2026-10-27): selectable sleeve/record views
+for Music and Cliamp/Radio, pane/full-terminal layouts, remappable F4, cached
+playing artwork and pause/buffer/reduced-motion-aware rotation. See
+[vinyl player usage and validation](docs/VINYL_PLAYER.md).
+
 M2/M5/M6/M8 local-acceptance follow-up: preserve `ebbae44` and the target-PC
 report, then repair rate-limit retry/fallback policy, live EOF recovery, explicit
 backend retention, outage-time controls and archived-broadcast classification.

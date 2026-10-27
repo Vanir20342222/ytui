@@ -40,6 +40,7 @@ pub enum Action {
     Resume,
     Feeds,
     ToggleHints,
+    MusicPlayerStyle,
     PlayerMenu,
     Categories,
     Tracks,
@@ -70,6 +71,12 @@ impl Action {
     }
 }
 pub const REGISTRY: &[(&str, Action, &str, &str)] = &[
+    (
+        "f4",
+        Action::MusicPlayerStyle,
+        "music_player_style",
+        "Cycle music player: classic / vinyl / fullscreen",
+    ),
     (
         "S",
         Action::SaveMedia,

@@ -9,6 +9,7 @@ language = "en" # en, de, system (LC_ALL / LC_MESSAGES / LANG)
 theme_provider = "auto"
 image_protocol = "auto"
 thumbnails = true
+music_player_style = "classic" # classic, vinyl, vinyl-fullscreen (Music / Radio only)
 reduced_motion = false
 playback_history = true
 show_hints = true

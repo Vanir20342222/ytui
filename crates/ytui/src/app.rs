@@ -280,6 +280,7 @@ pub struct App {
     pub status: String,
     pub palette: Palette,
     pub player_status: PlayerStatus,
+    pub vinyl_motion: crate::ui::vinyl::Motion,
     pub demo: bool,
     pub offline: bool,
     pub quit: bool,
@@ -604,6 +605,7 @@ impl App {
             launch_cliamp: false,
             dirty: false,
             redraw: true,
+            vinyl_motion: Default::default(),
             tasks: JoinSet::new(),
             running: HashMap::new(),
             job_tx,
@@ -737,6 +739,13 @@ impl App {
             tracks: ytui_services::formats::tracks(
                 &serde_json::json!([{"id":1,"type":"audio","lang":"en","codec":"aac","selected":true},{"id":2,"type":"audio","lang":"de","codec":"aac"},{"id":1,"type":"sub","lang":"de","codec":"vtt"}]),
             ),
+            media: Some(Media {
+                title: "Studio Sessions · A quiet evening".into(),
+                creator: "Studio Sessions".into(),
+                thumbnail: "demo://art/1".into(),
+                kind: MediaKind::Song,
+                ..Default::default()
+            }),
             title: "Studio Sessions · A quiet evening".into(),
             position: 82.0,
             duration: Some(240.0),
@@ -2497,6 +2506,11 @@ impl App {
             self.card_failures.retain(|key, _| visible.contains(key));
         }
     }
+    pub fn image_matches(&self, thumbnail: &str) -> bool {
+        self.image_key.as_ref().is_some_and(|(url, w, h)| {
+            url == thumbnail && *w == self.image_area.width && *h == self.image_area.height
+        })
+    }
     pub fn refresh_image(&mut self) {
         self.refresh_cards();
         if self.offline
@@ -2509,7 +2523,12 @@ impl App {
         {
             return;
         }
-        let Some(media) = self.selected() else {
+        let media = if self.vinyl_enabled() {
+            self.player_status.media.clone()
+        } else {
+            self.selected()
+        };
+        let Some(media) = media else {
             return;
         };
         if media.thumbnail.is_empty() {
@@ -2529,9 +2548,21 @@ impl App {
         self.image_generation += 1;
         let generation = self.image_generation;
         let cache = self.images.clone();
-        let demo_fixture = self
-            .demo
-            .then(|| (self.palette.clone(), self.tabs[self.tab].selected));
+        let demo_fixture = self.demo.then(|| {
+            (
+                self.palette.clone(),
+                if self.vinyl_enabled() {
+                    media
+                        .thumbnail
+                        .rsplit('/')
+                        .next()
+                        .and_then(|n| n.parse().ok())
+                        .unwrap_or(0)
+                } else {
+                    self.tabs[self.tab].selected
+                },
+            )
+        });
         let picker = self.picker.clone();
         let area = Rect::new(0, 0, self.image_area.width, self.image_area.height);
         let cancel = self.image_cancel.clone();
@@ -2548,6 +2579,9 @@ impl App {
             let result=tokio::select!{_=cancel.cancelled()=>Err(anyhow::anyhow!("Image request cancelled")),r=work=>r};
             UiEvent::Image { generation, result }
         });
+    }
+    pub fn vinyl_enabled(&self) -> bool {
+        matches!(self.tab, 2 | 3) && self.config.music_player_style != "classic"
     }
     pub fn action(&mut self, action: Action) {
         if self.feeds_focused {
@@ -2663,6 +2697,20 @@ impl App {
                     selected: 0,
                     query: Editor::new("Player"),
                 })
+            }
+            Action::MusicPlayerStyle => {
+                if matches!(self.tab, 2 | 3) {
+                    let mut config = self.config.clone();
+                    config.music_player_style = match config.music_player_style.as_str() {
+                        "classic" => "vinyl",
+                        "vinyl" => "vinyl-fullscreen",
+                        _ => "classic",
+                    }
+                    .into();
+                    self.save_config(config);
+                } else {
+                    self.status = "Music player styles are available in Music and Radio".into();
+                }
             }
             Action::ToggleHints => {
                 let mut config = self.config.clone();
@@ -2793,7 +2841,11 @@ impl App {
                 }
             }
             Action::Back => {
-                if self.player_status.preview {
+                if self.vinyl_enabled() && self.config.music_player_style == "vinyl-fullscreen" {
+                    let mut config = self.config.clone();
+                    config.music_player_style = "vinyl".into();
+                    self.save_config(config);
+                } else if self.player_status.preview {
                     let _ = self.player.try_send(PlayerCommand::ClosePreview);
                 } else if self.tab > 0
                     && let Some((request, page, selected)) = self.tabs[self.tab].history.pop()
@@ -3240,6 +3292,12 @@ impl App {
         );
     }
     pub fn player_update(&mut self, status: PlayerStatus) {
+        if self.vinyl_enabled()
+            && self.player_status.media.as_ref().map(|m| &m.thumbnail)
+                != status.media.as_ref().map(|m| &m.thumbnail)
+        {
+            self.selection_changed();
+        }
         if !self.demo
             && self.config.playback_history
             && status.active
@@ -3366,6 +3424,13 @@ impl App {
         true
     }
     pub async fn tick(&mut self) {
+        let spinning = self.vinyl_enabled()
+            && self.player_status.active
+            && !self.player_status.paused
+            && !self.player_status.buffering
+            && !self.config.reduced_motion;
+        self.vinyl_motion.update(Instant::now(), spinning);
+        self.redraw |= spinning;
         self.enforce_sleep_timer(Instant::now());
         self.redraw |= self.sleep_timer.needs_redraw(Instant::now());
         self.sync_player_session();
@@ -3771,6 +3836,7 @@ impl App {
                 });
                 self.modal = Some(Modal::Lyrics(Box::new(view)));
             }
+            "music-player-style" => self.action(Action::MusicPlayerStyle),
             "hints" => self.action(Action::ToggleHints),
             "categories" => self.action(Action::Categories),
             "download-options" => self.action(Action::Download),

@@ -71,6 +71,7 @@ fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
 mod lyrics;
 mod menus;
 mod settings;
+pub mod vinyl;
 mod workspace;
 pub use workspace::render;
 fn time(seconds: f64) -> String {

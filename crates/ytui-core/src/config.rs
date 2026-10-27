@@ -13,6 +13,7 @@ pub struct Config {
     pub theme_provider: String,
     pub image_protocol: String,
     pub thumbnails: bool,
+    pub music_player_style: String,
     pub reduced_motion: bool,
     pub playback_history: bool,
     pub show_hints: bool,
@@ -55,6 +56,7 @@ impl Default for Config {
             theme_provider: "auto".into(),
             image_protocol: "auto".into(),
             thumbnails: true,
+            music_player_style: "classic".into(),
             reduced_motion: false,
             playback_history: true,
             show_hints: true,
@@ -91,6 +93,10 @@ impl Default for Config {
 }
 impl Config {
     pub fn validate(&self) -> Result<()> {
+        ensure!(
+            ["classic", "vinyl", "vinyl-fullscreen"].contains(&self.music_player_style.as_str()),
+            "Unknown music player style"
+        );
         ensure!(
             ["en", "de", "system"].contains(&self.language.as_str()),
             "language must be en, de or system"

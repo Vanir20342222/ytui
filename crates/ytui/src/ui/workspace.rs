@@ -75,7 +75,11 @@ pub fn render(f: &mut Frame, app: &mut App) {
         return;
     }
     app.sidebar_visible = area.width >= 140 && area.height >= 26;
-    if app.sidebar_visible {
+    if app.vinyl_enabled() && app.config.music_player_style == "vinyl-fullscreen" {
+        let rows = Layout::vertical([Constraint::Min(1), Constraint::Length(6)]).split(area);
+        super::vinyl::render(f, app, rows[0]);
+        playback(f, app, rows[1]);
+    } else if app.sidebar_visible {
         wide_workspace(f, app, area);
     } else {
         app.feeds_focused = false;
@@ -853,6 +857,10 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         )),
         Rect::new(chunks[0].x, chunks[0].y + 1, chunks[0].width, 1),
     );
+    if app.vinyl_enabled() && (area.width < 70 || view.page.items.is_empty()) {
+        super::vinyl::render(f, app, chunks[1]);
+        return;
+    }
     if view.page.items.is_empty() {
         empty(
             f,
@@ -883,9 +891,15 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         );
         return;
     }
-    let wide = area.width >= 100 && area.height >= 17;
+    let wide = (area.width >= 100 && area.height >= 17) || app.vinyl_enabled();
     let cols = Layout::horizontal([
-        Constraint::Percentage(if wide { 74 } else { 100 }),
+        Constraint::Percentage(if app.vinyl_enabled() {
+            58
+        } else if wide {
+            74
+        } else {
+            100
+        }),
         Constraint::Min(0),
     ])
     .split(chunks[1]);
@@ -1068,6 +1082,10 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
     }
 }
 fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
+    if app.vinyl_enabled() {
+        super::vinyl::render(f, app, area);
+        return;
+    }
     let block = panel(" In focus ", app);
     let inner = inset(block.inner(area));
     f.render_widget(block, area);
