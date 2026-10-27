@@ -179,6 +179,15 @@ forwarded ExoPlayer's unmodified command-change events, overriding the augmented
 getter. The adapter now uses Media3's ForwardingSimpleBasePlayer, which keeps
 state and listener events consistent; the full controller regression remains.
 
+Run `40588666075` passed the complete EOF/controller/history test. The stream
+switch test then exposed an older notification race: each Play replaced the
+active MediaStyle notification with a non-media preparing placeholder. System UI
+removed the session and sent Stop after the new stream started. The provider is
+now configured once; foreground entry reuses an existing notification or creates
+a MediaStyle placeholder with the session token. Remote pause/resume also updates
+the application's user intent, and remote Stop clears pending continuation.
+These changes must pass the full device suite before qualification.
+
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as
 passes. The accelerated hosted emulator supplied the successful runtime evidence.

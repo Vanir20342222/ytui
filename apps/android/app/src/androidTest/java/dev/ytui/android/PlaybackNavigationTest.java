@@ -138,6 +138,18 @@ public final class PlaybackNavigationTest {
               .buildAsync()
               .get(10, TimeUnit.SECONDS);
       try {
+        MediaBridge.main.post(controller::pause);
+        MediaRuntimeTest.await(
+            "Remote pause did not update user intent",
+            () ->
+                MediaRuntimeTest.status().optBoolean("paused")
+                    && !MediaRuntimeTest.status().optBoolean("playing"));
+        MediaBridge.main.post(controller::play);
+        MediaRuntimeTest.await(
+            "Remote resume failed",
+            () ->
+                !MediaRuntimeTest.status().optBoolean("paused")
+                    && MediaRuntimeTest.status().optBoolean("playing"));
         remote(controller, true);
         playing("First");
         MediaRuntimeTest.await(

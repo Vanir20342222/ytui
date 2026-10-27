@@ -39,6 +39,16 @@ public final class PlaybackService extends MediaSessionService {
   public void onCreate() {
     super.onCreate();
     current = this;
+    android.app.NotificationManager notifications =
+        getSystemService(android.app.NotificationManager.class);
+    notifications.createNotificationChannel(
+        new android.app.NotificationChannel(
+            "ytui-playback", "ytui playback", android.app.NotificationManager.IMPORTANCE_LOW));
+    setMediaNotificationProvider(
+        new DefaultMediaNotificationProvider.Builder(this)
+            .setNotificationId(4)
+            .setChannelId("ytui-playback")
+            .build());
     prefs = getSharedPreferences("player", MODE_PRIVATE);
     player =
         new ExoPlayer.Builder(
@@ -70,6 +80,20 @@ public final class PlaybackService extends MediaSessionService {
         new MediaSession.Builder(
                 this,
                 new ForwardingSimpleBasePlayer(player) {
+                  @Override
+                  protected com.google.common.util.concurrent.ListenableFuture<?>
+                      handleSetPlayWhenReady(boolean ready) {
+                    pausedByUser = !ready;
+                    if (ready && player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
+                    return super.handleSetPlayWhenReady(ready);
+                  }
+
+                  @Override
+                  protected com.google.common.util.concurrent.ListenableFuture<?> handleStop() {
+                    stopAndClear();
+                    return com.google.common.util.concurrent.Futures.immediateVoidFuture();
+                  }
+
                   @Override
                   protected State getState() {
                     State state = super.getState();
@@ -248,23 +272,29 @@ public final class PlaybackService extends MediaSessionService {
     if (intent != null && "play".equals(intent.getAction())) {
       android.app.NotificationManager notifications =
           getSystemService(android.app.NotificationManager.class);
-      notifications.createNotificationChannel(
-          new android.app.NotificationChannel(
-              "ytui-playback", "ytui playback", android.app.NotificationManager.IMPORTANCE_LOW));
-      setMediaNotificationProvider(
-          new DefaultMediaNotificationProvider.Builder(this)
-              .setNotificationId(4)
-              .setChannelId("ytui-playback")
-              .build());
       // Android's foreground deadline starts before decoder/buffering completion.
-      android.app.Notification preparing =
-          new android.app.Notification.Builder(this, "ytui-playback")
-              .setSmallIcon(R.drawable.ic_ytui)
-              .setContentTitle("ytui")
-              .setContentText("Preparing playback")
-              .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
-              .setOngoing(true)
-              .build();
+      // Reuse an existing media notification. Replacing it with a non-media
+      // placeholder makes System UI remove the session and issue a delayed Stop.
+      android.app.Notification preparing = null;
+      for (android.service.notification.StatusBarNotification active :
+          notifications.getActiveNotifications()) {
+        if (active.getId() == 4) {
+          preparing = active.getNotification();
+          break;
+        }
+      }
+      if (preparing == null)
+        preparing =
+            new android.app.Notification.Builder(this, "ytui-playback")
+                .setSmallIcon(R.drawable.ic_ytui)
+                .setContentTitle("ytui")
+                .setContentText("Preparing playback")
+                .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
+                .setStyle(
+                    new android.app.Notification.MediaStyle()
+                        .setMediaSession(session.getPlatformToken()))
+                .setOngoing(true)
+                .build();
       startForeground(4, preparing);
     }
     int result = super.onStartCommand(intent, flags, id);
@@ -926,6 +956,9 @@ public final class PlaybackService extends MediaSessionService {
           new JSONObject()
               .put("title", media == null ? "" : media.optString("title"))
               .put("playing", player.isPlaying())
+              .put("playback_state", player.getPlaybackState())
+              .put("play_when_ready", player.getPlayWhenReady())
+              .put("suppression", player.getPlaybackSuppressionReason())
               .put("paused", pausedByUser)
               .put("buffering", player.getPlaybackState() == Player.STATE_BUFFERING)
               .put("position", player.getCurrentPosition() / 1000.0)
