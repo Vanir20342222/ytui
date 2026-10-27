@@ -1,0 +1,32 @@
+[package]
+name = "yt-dlp-rs"
+version = "0.2.0-alpha.1"
+edition = "2024"
+license = "Unlicense"
+description = "An incremental, native Rust adaptation of yt-dlp"
+
+[dependencies]
+aes = "0.9"
+base64 = "0.22"
+cbc = "0.2"
+clap = { version = "4.6", features = ["derive"] }
+cookie = "0.18"
+cookie_store = { version = "0.22", default-features = false }
+httpdate = "1"
+log = { version = "0.4", features = ["std"] }
+icu_normalizer = "2.3"
+icu_properties = "2.3"
+percent-encoding = "2.3"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "cookies", "socks"] }
+roxmltree = "0.21"
+scraper = { version = "0.24", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tempfile = "3"
+thiserror = "2"
+url = { version = "2", features = ["serde"] }
+
+
+[dev-dependencies]
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }

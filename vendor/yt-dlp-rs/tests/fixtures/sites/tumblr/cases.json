@@ -1,0 +1,5 @@
+[
+ {"url": "http://tatiana.tumblr.com/post/54196191430/orphan-black-dvd", "args": ["-J"]},
+ {"url": "https://www.tumblr.com/linker/1111", "args": ["--print", "%(id)s|%(webpage_url)s"]},
+ {"url": "http://tatiana.tumblr.com/post/54196191430", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

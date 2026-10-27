@@ -1,0 +1,117 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"83367677\", \"title\": \"A Giant Python & The Door\", \"url\": \"http://media.ebaumsworld.com/2014/01/83367677/python.mp4\", \"description\": \"This is how nightmares start...\", \"thumbnail\": \"http://media.ebaumsworld.com/2014/01/83367677/python.jpg\", \"uploader\": \"jihadpizza\", \"webpage_url\": \"http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/\", \"original_url\": \"http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/\", \"webpage_url_basename\": \"83367677\", \"webpage_url_domain\": \"ebaumsworld.com\", \"extractor\": \"EbaumsWorld\", \"extractor_key\": \"EbaumsWorld\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://media.ebaumsworld.com/2014/01/83367677/python.jpg\", \"id\": \"0\"}], \"display_id\": \"83367677\", \"fulltitle\": \"A Giant Python & The Door\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"A Giant Python & The Door [83367677].mp4\", \"filename\": \"A Giant Python & The Door [83367677].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[EbaumsWorld] Extracting URL: http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+    "[EbaumsWorld] 83367677: Downloading XML",
+    "[info] Available formats for 83367677:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | http  | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(uploader)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "83367677|A Giant Python & The Door|This is how nightmares start...|http://media.ebaumsworld.com/2014/01/83367677/python.jpg|jihadpizza|mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[EbaumsWorld] Extracting URL: http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/",
+    "[EbaumsWorld] 83367677: Downloading XML",
+    "[info] 83367677: Downloading 1 format(s): 0",
+    "[download] Destination: 83367677.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "83367677.mp4": 792
+   }
+  },
+  {
+   "url": "https://ebaumsworld.com/videos/x/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"EbaumsWorld video #2\", \"url\": \"http://media.ebaumsworld.com/2.mp4\", \"description\": null, \"thumbnail\": \"x\", \"uploader\": \"u\", \"webpage_url\": \"https://ebaumsworld.com/videos/x/2\", \"original_url\": \"https://ebaumsworld.com/videos/x/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"ebaumsworld.com\", \"extractor\": \"EbaumsWorld\", \"extractor_key\": \"EbaumsWorld\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"x\", \"id\": \"0\"}], \"display_id\": \"2\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"EbaumsWorld video #2 [2].mp4\", \"filename\": \"EbaumsWorld video #2 [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ebaumsworld.com/videos/x/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 'NoneType' object has no attribute 'text'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ebaumsworld.com/videos/x/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 'NoneType' object has no attribute 'text'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ebaumsworld.com/videos/x/6",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [EbaumsWorld] 6: Unable to download XML: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

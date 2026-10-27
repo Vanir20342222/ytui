@@ -1,0 +1,55 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"post\", \"title\": \"Blog post\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/embed/BaW_jenozKc?rel=0&start=5\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/watch?v=9bZkp7q19f0\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://blog.example.test/post\", \"original_url\": \"https://blog.example.test/post\", \"webpage_url_basename\": \"post\", \"webpage_url_domain\": \"blog.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 3, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "--flat-playlist",
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/embed/BaW_jenozKc?rel=0&start=5\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null, \"id\": \"BaW_jenozKc\", \"webpage_url\": \"https://www.youtube.com/embed/BaW_jenozKc?rel=0&start=5\", \"original_url\": \"https://www.youtube.com/embed/BaW_jenozKc?rel=0&start=5\", \"webpage_url_basename\": \"BaW_jenozKc\", \"webpage_url_domain\": \"youtube.com\", \"playlist_count\": 3, \"playlist\": \"Blog post\", \"playlist_id\": \"post\", \"playlist_title\": \"Blog post\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/post\", \"n_entries\": 3, \"playlist_index\": 1, \"__last_playlist_index\": 3, \"playlist_autonumber\": 1, \"release_year\": null}",
+    "{\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null, \"id\": \"dQw4w9WgXcQ\", \"webpage_url\": \"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\", \"original_url\": \"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\", \"webpage_url_basename\": \"dQw4w9WgXcQ\", \"webpage_url_domain\": \"youtube-nocookie.com\", \"playlist_count\": 3, \"playlist\": \"Blog post\", \"playlist_id\": \"post\", \"playlist_title\": \"Blog post\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/post\", \"n_entries\": 3, \"playlist_index\": 2, \"__last_playlist_index\": 3, \"playlist_autonumber\": 2, \"release_year\": null}",
+    "{\"ie_key\": \"Youtube\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/watch?v=9bZkp7q19f0\", \"extractor\": \"youtube\", \"extractor_key\": \"Youtube\", \"__x_forwarded_for_ip\": null, \"id\": \"9bZkp7q19f0\", \"webpage_url\": \"https://www.youtube.com/watch?v=9bZkp7q19f0\", \"original_url\": \"https://www.youtube.com/watch?v=9bZkp7q19f0\", \"webpage_url_basename\": \"watch\", \"webpage_url_domain\": \"youtube.com\", \"playlist_count\": 3, \"playlist\": \"Blog post\", \"playlist_id\": \"post\", \"playlist_title\": \"Blog post\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/post\", \"n_entries\": 3, \"playlist_index\": 3, \"__last_playlist_index\": 3, \"playlist_autonumber\": 3, \"release_year\": null}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(playlist_index)s|%(id)s|%(url)s|%(ie_key)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1|BaW_jenozKc|https://www.youtube.com/embed/BaW_jenozKc?rel=0&start=5|Youtube",
+    "2|dQw4w9WgXcQ|https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ|Youtube",
+    "3|9bZkp7q19f0|https://www.youtube.com/watch?v=9bZkp7q19f0|Youtube"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

@@ -1,0 +1,59 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"487\", \"url\": \"http://stream.thisamericanlife.org/487/stream/487_64k.m3u8\", \"protocol\": \"m3u8_native\", \"ext\": \"m4a\", \"acodec\": \"aac\", \"vcodec\": \"none\", \"abr\": 64, \"title\": \"487: Harper High School, Part One\", \"description\": \"We spent five months at Harper High School.\", \"thumbnail\": \"http://www.thisamericanlife.test/487.jpg\", \"webpage_url\": \"http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one\", \"original_url\": \"http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one\", \"webpage_url_basename\": \"harper-high-school-part-one\", \"webpage_url_domain\": \"thisamericanlife.org\", \"extractor\": \"ThisAmericanLife\", \"extractor_key\": \"ThisAmericanLife\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://www.thisamericanlife.test/487.jpg\", \"id\": \"0\"}], \"display_id\": \"487\", \"fulltitle\": \"487: Harper High School, Part One\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 64, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"487\\uff1a Harper High School, Part One [487].m4a\", \"filename\": \"487\\uff1a Harper High School, Part One [487].m4a\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[ThisAmericanLife] Extracting URL: http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one",
+    "[ThisAmericanLife] 487: Downloading webpage",
+    "[info] Available formats for 487:",
+    "ID EXT RESOLUTION | TBR PROTO | VCODEC     ACODEC ABR",
+    "-----------------------------------------------------",
+    "0  m4a audio only | 64k m3u8  | audio only aac    64k"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(ext)s|%(protocol)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "487|487: Harper High School, Part One|We spent five months at Harper High School.|http://www.thisamericanlife.test/487.jpg|m4a|m3u8_native"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.thisamericanlife.org/play_full.php?play=2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [ThisAmericanLife] 2: Unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

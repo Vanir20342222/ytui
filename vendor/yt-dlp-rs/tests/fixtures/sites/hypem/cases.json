@@ -1,0 +1,11 @@
+[
+ {"url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME", "args": ["-j"]},
+ {"url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME", "args": ["-F"]},
+ {"url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME", "args": ["--print", "%(id)s|%(title)s|%(track)s|%(uploader)s|%(duration)s|%(timestamp)s|%(upload_date)s|%(ext)s|%(format_id)s"]},
+ {"url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://hypem.com/track/2bare", "args": ["-j"]},
+ {"url": "https://hypem.com/track/3none", "args": ["-j"]},
+ {"url": "https://hypem.com/track/4emty", "args": ["-j"]},
+ {"url": "https://hypem.com/track/5nokey", "args": ["-j"]},
+ {"url": "https://hypem.com/track/6dead", "args": ["-j"]}
+]

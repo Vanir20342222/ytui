@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji", "args": ["-j"]},
+ {"url": "https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(age_limit)s"]},
+ {"url": "https://breitbart.com/videos/v/plain", "args": ["-j"]},
+ {"url": "https://www.breitbart.com/videos/v/bare", "args": ["-j"]},
+ {"url": "https://www.breitbart.com/videos/v/gone", "args": ["-j"]}
+]

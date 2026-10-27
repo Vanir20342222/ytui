@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://api.godresource.com/api/Streams/A01mTKjyf6w",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"streamUrl\": \"https://gr.test/hls/master.m3u8\", \"isLive\": false, \"title\": \"Victory Over Trials\", \"thumbnail\": \"https://gr.test/t.jpg\", \"views\": 12, \"channelName\": \"Pastor Mark\", \"channelId\": 9, \"streamDateCreated\": \"2024-05-24T22:42:50\", \"streamDataModified\": \"2024-05-25 01:02:03\"}"
+  },
+  {
+   "url": "https://api.godresource.com/api/Streams/b2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"streamUrl\": \"https://gr.test/v.mp4\", \"views\": \"12\", \"thumbnail\": \"bad\"}"
+  },
+  {
+   "url": "https://api.godresource.com/api/Streams/c3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"streamUrl\": \"https://gr.test/v.flv\"}"
+  },
+  {
+   "url": "https://api.godresource.com/api/Streams/d4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"x\"}"
+  },
+  {
+   "url": "https://gr.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://gr.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://gr.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://gr.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://gr.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+[
+ {"url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html", "args": ["-j"]},
+ {"url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html", "args": ["-F"]},
+ {"url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s"]},
+ {"url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html", "args": ["--no-progress", "-f", "http-mp4", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.bild.de/x/plain-2,auto=true.bild.html", "args": ["-j"]}
+]

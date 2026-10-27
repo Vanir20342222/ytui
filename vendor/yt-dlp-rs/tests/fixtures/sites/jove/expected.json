@@ -1,0 +1,110 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.jove.com/video/2744/electrode-positioning",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2744\", \"title\": \"Electrode Positioning & Montage\", \"url\": \"https://jove.test/v.mp4\", \"thumbnail\": \"https://jove.test/t.jpg\", \"description\": \"A summary\", \"upload_date\": \"20110523\", \"comment_count\": 3, \"webpage_url\": \"http://www.jove.com/video/2744/electrode-positioning\", \"original_url\": \"http://www.jove.com/video/2744/electrode-positioning\", \"webpage_url_basename\": \"electrode-positioning\", \"webpage_url_domain\": \"jove.com\", \"extractor\": \"Jove\", \"extractor_key\": \"Jove\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://jove.test/t.jpg\", \"id\": \"0\"}], \"display_id\": \"2744\", \"fulltitle\": \"Electrode Positioning & Montage\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Electrode Positioning & Montage [2744].mp4\", \"filename\": \"Electrode Positioning & Montage [2744].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.jove.com/video/2744/electrode-positioning",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(upload_date)s|%(comment_count)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "2744|Electrode Positioning & Montage|A summary|https://jove.test/t.jpg|20110523|3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.jove.com/video/2744/electrode-positioning",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Jove] Extracting URL: http://www.jove.com/video/2744/electrode-positioning",
+    "[Jove] 2744: Downloading webpage",
+    "[Jove] 2744: Downloading chapters XML",
+    "[info] 2744: Downloading 1 format(s): 0",
+    "[download] Destination: 2744.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "2744.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.jove.com/video/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Jove] 2: Failed to get the video URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://jove.com/video/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3\", \"title\": \"Jove video #3\", \"url\": \"https://jove.test/v.mp4\", \"thumbnail\": null, \"description\": null, \"upload_date\": null, \"comment_count\": 0, \"webpage_url\": \"https://jove.com/video/3\", \"original_url\": \"https://jove.com/video/3\", \"webpage_url_basename\": \"3\", \"webpage_url_domain\": \"jove.com\", \"extractor\": \"Jove\", \"extractor_key\": \"Jove\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"3\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Jove video #3 [3].mp4\", \"filename\": \"Jove video #3 [3].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Jove] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract publish date; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://jove.com/video/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [Jove] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract publish date; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Jove] unable to extract comment count; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://jove.com/video/5",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Jove] 5: Unable to extract chapters id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

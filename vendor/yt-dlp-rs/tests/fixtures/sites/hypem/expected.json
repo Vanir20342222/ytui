@@ -1,0 +1,129 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"1v6ga\", \"url\": \"https://cdn.hypem.test/1v6ga.mp3\", \"ext\": \"mp3\", \"title\": \"Tame & Wild\", \"uploader\": \"BODYWORK\", \"duration\": 233, \"timestamp\": 1371810457, \"track\": \"Tame & Wild\", \"webpage_url\": \"http://hypem.com/track/1v6ga/BODYWORK+-+TAME\", \"original_url\": \"http://hypem.com/track/1v6ga/BODYWORK+-+TAME\", \"webpage_url_basename\": \"BODYWORK+-+TAME\", \"webpage_url_domain\": \"hypem.com\", \"extractor\": \"Hypem\", \"extractor_key\": \"Hypem\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"1v6ga\", \"fulltitle\": \"Tame & Wild\", \"duration_string\": \"3:53\", \"upload_date\": \"20130621\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Tame & Wild [1v6ga].mp3\", \"filename\": \"Tame & Wild [1v6ga].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Hypem] Extracting URL: http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+    "[Hypem] 1v6ga: Downloading webpage",
+    "[Hypem] 1v6ga: Downloading metadata",
+    "[info] Available formats for 1v6ga:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "------------------------------------------",
+    "0  mp3 unknown    | https | unknown mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(track)s|%(uploader)s|%(duration)s|%(timestamp)s|%(upload_date)s|%(ext)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1v6ga|Tame & Wild|Tame & Wild|BODYWORK|233|1371810457|20130621|mp3|0"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Hypem] Extracting URL: http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+    "[Hypem] 1v6ga: Downloading webpage",
+    "[Hypem] 1v6ga: Downloading metadata",
+    "[info] 1v6ga: Downloading 1 format(s): 0",
+    "[download] Destination: 1v6ga.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "1v6ga.mp3": 1290
+   }
+  },
+  {
+   "url": "https://hypem.com/track/2bare",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"other\", \"url\": \"https://cdn.hypem.test/1v6ga.mp3\", \"ext\": \"mp3\", \"title\": \"Bare\", \"uploader\": null, \"timestamp\": null, \"track\": \"Bare\", \"webpage_url\": \"https://hypem.com/track/2bare\", \"original_url\": \"https://hypem.com/track/2bare\", \"webpage_url_basename\": \"2bare\", \"webpage_url_domain\": \"hypem.com\", \"extractor\": \"Hypem\", \"extractor_key\": \"Hypem\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"other\", \"fulltitle\": \"Bare\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Bare [other].mp3\", \"filename\": \"Bare [other].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://hypem.com/track/3none",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Hypem] 3none: Unable to extract tracks; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://hypem.com/track/4emty",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: list index out of range"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://hypem.com/track/5nokey",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 5noke: An extractor error has occurred. (caused by KeyError('key')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://hypem.com/track/6dead",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Hypem] 6dead: Unable to download JSON metadata: HTTP Error 403: Forbidden (caused by <HTTPError 403: Forbidden>)"
+   ],
+   "files": {}
+  }
+ ]
+}

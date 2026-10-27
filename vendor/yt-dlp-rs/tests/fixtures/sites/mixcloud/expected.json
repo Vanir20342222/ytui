@@ -1,0 +1,70 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.mixcloud.com/dholbach/cryptkeeper/",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"dholbach_cryptkeeper\", \"formats\": [{\"format_id\": \"http\", \"url\": \"https://stream.mixcloud.com/a/cryptkeeper.m4a\", \"vcodec\": \"none\", \"downloader_options\": {\"http_chunk_size\": 5242880}, \"protocol\": \"https\", \"ext\": \"m4a\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http - audio only\"}, {\"format_id\": \"hls-128\", \"format_index\": null, \"url\": \"https://audio.mixcloud.com/hls/hls/128.m3u8\", \"manifest_url\": \"https://audio.mixcloud.com/hls/master.m3u8\", \"tbr\": 128.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"vcodec\": \"none\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-128 - audio only\"}], \"comments\": [{\"text\": \"nice\", \"author\": \"Fan\", \"author_id\": \"fan1\", \"timestamp\": 1420070400}], \"title\": \"Cryptkeeper\", \"description\": \"A great mix\", \"thumbnail\": \"https://thumbnailer.mixcloud.com/unsafe/1024x1024/x.jpg\", \"timestamp\": 1311703800, \"duration\": 3723, \"uploader\": \"Daniel Holbach\", \"uploader_id\": \"dholbach\", \"uploader_url\": \"https://www.mixcloud.com/dholbach/\", \"view_count\": 99, \"like_count\": 10, \"repost_count\": 2, \"comment_count\": 2, \"tags\": [\"House\"], \"artists\": [\"Artist A\"], \"webpage_url\": \"http://www.mixcloud.com/dholbach/cryptkeeper/\", \"original_url\": \"http://www.mixcloud.com/dholbach/cryptkeeper/\", \"webpage_url_basename\": \"cryptkeeper\", \"webpage_url_domain\": \"mixcloud.com\", \"extractor\": \"mixcloud\", \"extractor_key\": \"Mixcloud\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://thumbnailer.mixcloud.com/unsafe/1024x1024/x.jpg\", \"id\": \"0\"}], \"display_id\": \"dholbach_cryptkeeper\", \"fulltitle\": \"Cryptkeeper\", \"duration_string\": \"1:02:03\", \"upload_date\": \"20110726\", \"release_year\": null, \"artist\": \"Artist A\", \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"hls-128\", \"url\": \"https://audio.mixcloud.com/hls/hls/128.m3u8\", \"manifest_url\": \"https://audio.mixcloud.com/hls/master.m3u8\", \"tbr\": 128.0, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"has_drm\": false, \"vcodec\": \"none\", \"acodec\": \"mp4a.40.2\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128.0, \"resolution\": \"audio only\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-128 - audio only\", \"_filename\": \"Cryptkeeper [dholbach_cryptkeeper].mp4\", \"filename\": \"Cryptkeeper [dholbach_cryptkeeper].mp4\", \"__write_download_archive\": false}], \"format_id\": \"hls-128\", \"format_index\": null, \"url\": \"https://audio.mixcloud.com/hls/hls/128.m3u8\", \"manifest_url\": \"https://audio.mixcloud.com/hls/master.m3u8\", \"tbr\": 128.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"vcodec\": \"none\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-128 - audio only\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [mixcloud] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.mixcloud.com/dholbach/gone/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [mixcloud] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies",
+    "ERROR: [mixcloud] Track not found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.mixcloud.com/dholbach/blocked/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [mixcloud] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies",
+    "ERROR: [mixcloud] Track unavailable in your country due to licensing restrictions"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.mixcloud.com/dholbach/cryptkeeper/",
+   "args": [
+    "-f",
+    "http",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[mixcloud] Extracting URL: http://www.mixcloud.com/dholbach/cryptkeeper/",
+    "[mixcloud] dholbach_cryptkeeper: Downloading JSON metadata",
+    "[mixcloud] dholbach_cryptkeeper: Downloading m3u8 information",
+    "[info] dholbach_cryptkeeper: Downloading 1 format(s): http",
+    "[download] Destination: dholbach_cryptkeeper.m4a",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [mixcloud] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {
+    "dholbach_cryptkeeper.m4a": 15
+   }
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+[
+ {"url": "https://oslo.kommunetv.no/archive/921", "args": ["-j"]},
+ {"url": "https://oslo.kommunetv.no/archive/921", "args": ["-F"]},
+ {"url": "https://bergen.kommunetv.no/archive/2", "args": ["-j"]},
+ {"url": "https://oslo.kommunetv.no/archive/3", "args": ["-j"]},
+ {"url": "https://oslo.kommunetv.no/archive/4", "args": ["-j"]}
+]

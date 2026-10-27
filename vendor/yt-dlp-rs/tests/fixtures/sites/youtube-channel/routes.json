@@ -1,0 +1,49 @@
+{
+ "routes": [
+  {
+   "url": "https://www.youtube.com/@Chan/videos",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "videos.html"
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/about",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "videos.html"
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/streams",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "videos.html"
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/shorts",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "shorts.html"
+  },
+  {
+   "url": "https://www.youtube.com/@Solo/videos",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "solo.html"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false",
+   "request_body": [
+    "TOKENV"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "continuation.json"
+  }
+ ]
+}

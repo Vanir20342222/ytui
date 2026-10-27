@@ -1,0 +1,52 @@
+{
+ "routes": [
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc&bpctr=9999999999&has_verified=1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "watch.html"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+   "request_headers": {
+    "X-YouTube-Client-Name": "7"
+   },
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "tv.json"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+   "request_headers": {
+    "X-YouTube-Client-Name": "101"
+   },
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "visionos.json"
+  },
+  {
+   "url": "https://www.youtube.com/s/player/74edf1a3/player_ias.vflset/en_US/base.js",
+   "headers": {
+    "Content-Type": "text/javascript"
+   },
+   "body_file": "player.js"
+  },
+  {
+   "url": "https://rr2.googlevideo.test/videoplayback?itag=136&client=tv&n=9nRTxrbM1f0yHg",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://rr2.googlevideo.test/videoplayback?itag=140&client=tv&sig=NJAJEij0EwRgIhAI0KExTgjfPk-MPM9MAdzyyPRt=BM8-XO5tm5hzMCSVpAiEAv7eP3CURqZNSPow8BXXAoazVoXgeMP7gH9BdylHCwgw=gwzl",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body_file": "a.m4a"
+  }
+ ]
+}

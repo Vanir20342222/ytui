@@ -1,0 +1,9 @@
+[
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["-j"]},
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["-F"]},
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["--list-subs"]},
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["--print", "%(format_id)s|%(protocol)s|%(ext)s|%(vcodec)s|%(acodec)s|%(language)s"]},
+ {"url": "https://media.example.test/vod/live.ism/Manifest", "args": ["-j"]},
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["--no-progress", "-f", "video-400", "-o", "v.%(ext)s"]},
+ {"url": "https://media.example.test/vod/clip.ism/Manifest", "args": ["--no-progress", "-f", "audio_eng-128", "-o", "a.%(ext)s"]}
+]

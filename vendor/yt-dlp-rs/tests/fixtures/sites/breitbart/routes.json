@@ -1,0 +1,74 @@
+{
+ "routes": [
+  {
+   "url": "https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>ignored</title>\n<meta property=\"og:title\" content=\"Watch &ndash; Clyburn: Statues\">\n<meta property=\"og:description\" content=\"Clyburn &amp; statues\">\n<meta property=\"og:image\" content=\"https://breitbart.test/t.jpg\">\n<meta name=\"rating\" content=\"RTA-5042-1996-1400-1577-RTA\">\n</head><body></body></html>"
+  },
+  {
+   "url": "https://breitbart.com/videos/v/plain",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>  Plain\n title </title></head><body></body></html>"
+  },
+  {
+   "url": "https://www.breitbart.com/videos/v/bare",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>nothing</body></html>"
+  },
+  {
+   "url": "https://www.breitbart.com/videos/v/gone",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Gone</title></head></html>"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/5cOz1yup.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/plain.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/bare.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  }
+ ]
+}

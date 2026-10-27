@@ -1,0 +1,6 @@
+[
+ {"url": "http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html", "args": ["-j"]},
+ {"url": "http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://v.ku6.com/show/b2.html", "args": ["-j"]},
+ {"url": "https://v.ku6.com/show/c3.html", "args": ["-j"]}
+]

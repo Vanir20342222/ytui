@@ -1,0 +1,2811 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "manual-query",
+      "player": "player-manual-query.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en-US",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=json3&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=srv1&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=srv2&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=srv3&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=ttml&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=srt&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?dup=one&dup=two&lang=en&fmt=vtt&keep=a%2Fb&space=a+b&reserved=%26%3D%2B%3F",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "fr",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=json3",
+                "ext": "json3",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=srv1",
+                "ext": "srv1",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=srv2",
+                "ext": "srv2",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=srv3",
+                "ext": "srv3",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=ttml",
+                "ext": "ttml",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=srt",
+                "ext": "srt",
+                "name": "Français"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&fmt=vtt",
+                "ext": "vtt",
+                "name": "Français"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "manual-translations",
+      "player": "player-manual-translations.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [
+          {
+            "language": "und",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=json3",
+                "ext": "json3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv1",
+                "ext": "srv1",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv2",
+                "ext": "srv2",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv3",
+                "ext": "srv3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=ttml",
+                "ext": "ttml",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srt",
+                "ext": "srt",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=vtt",
+                "ext": "vtt",
+                "name": "Unknown"
+              }
+            ]
+          }
+        ],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "manual-translations-translated",
+      "player": "player-manual-translations.json",
+      "translated_manual": true,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [
+          {
+            "language": "en-en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English from English"
+              }
+            ]
+          },
+          {
+            "language": "fr-en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=json3",
+                "ext": "json3",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv1",
+                "ext": "srv1",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv2",
+                "ext": "srv2",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv3",
+                "ext": "srv3",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=ttml",
+                "ext": "ttml",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srt",
+                "ext": "srt",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=vtt",
+                "ext": "vtt",
+                "name": "French from English"
+              }
+            ]
+          },
+          {
+            "language": "und",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=json3",
+                "ext": "json3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv1",
+                "ext": "srv1",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv2",
+                "ext": "srv2",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv3",
+                "ext": "srv3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=ttml",
+                "ext": "ttml",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srt",
+                "ext": "srt",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=vtt",
+                "ext": "vtt",
+                "name": "Unknown"
+              }
+            ]
+          }
+        ],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "asr-translations",
+      "player": "player-asr-translations.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "en-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English (Original)"
+              }
+            ]
+          },
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "fr",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=json3",
+                "ext": "json3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv1",
+                "ext": "srv1",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv2",
+                "ext": "srv2",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv3",
+                "ext": "srv3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=ttml",
+                "ext": "ttml",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srt",
+                "ext": "srt",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=vtt",
+                "ext": "vtt",
+                "name": "French"
+              }
+            ]
+          }
+        ],
+        "audio_language": "en",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "asr-translations-translated",
+      "player": "player-asr-translations.json",
+      "translated_manual": true,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "en-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English (Original)"
+              }
+            ]
+          },
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "fr",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=json3",
+                "ext": "json3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv1",
+                "ext": "srv1",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv2",
+                "ext": "srv2",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srv3",
+                "ext": "srv3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=ttml",
+                "ext": "ttml",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=srt",
+                "ext": "srt",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr&fmt=vtt",
+                "ext": "vtt",
+                "name": "French"
+              }
+            ]
+          }
+        ],
+        "audio_language": "en",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "asr-unlisted",
+      "player": "player-asr-unlisted.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&tlang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "yue-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=json3",
+                "ext": "json3",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv1",
+                "ext": "srv1",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv2",
+                "ext": "srv2",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv3",
+                "ext": "srv3",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=ttml",
+                "ext": "ttml",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srt",
+                "ext": "srt",
+                "name": "Cantonese (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=vtt",
+                "ext": "vtt",
+                "name": "Cantonese (Original)"
+              }
+            ]
+          },
+          {
+            "language": "yue",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=json3",
+                "ext": "json3",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv1",
+                "ext": "srv1",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv2",
+                "ext": "srv2",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srv3",
+                "ext": "srv3",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=ttml",
+                "ext": "ttml",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=srt",
+                "ext": "srt",
+                "name": "Cantonese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=yue&fmt=vtt",
+                "ext": "vtt",
+                "name": "Cantonese"
+              }
+            ]
+          }
+        ],
+        "audio_language": "yue",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "asr-not-translatable",
+      "player": "player-asr-not-translatable.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "ja",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=json3",
+                "ext": "json3",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=srv1",
+                "ext": "srv1",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=srv2",
+                "ext": "srv2",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=srv3",
+                "ext": "srv3",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=ttml",
+                "ext": "ttml",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=srt",
+                "ext": "srt",
+                "name": "Japanese"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=ja&fmt=vtt",
+                "ext": "vtt",
+                "name": "Japanese"
+              }
+            ]
+          }
+        ],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "names-runs",
+      "player": "player-names-runs.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "First"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "First"
+              }
+            ]
+          },
+          {
+            "language": "de",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "Deutsch"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "Deutsch"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "token-xpe",
+      "player": "player-token-xpe.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": true
+          }
+        ],
+        "warning": false,
+        "policy_skip": true
+      }
+    },
+    {
+      "name": "token-xpe-translated",
+      "player": "player-token-xpe.json",
+      "translated_manual": true,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": true
+          }
+        ],
+        "warning": true,
+        "policy_skip": true
+      }
+    },
+    {
+      "name": "token-xpv",
+      "player": "player-token-xpv.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": true
+          }
+        ],
+        "warning": false,
+        "policy_skip": true
+      }
+    },
+    {
+      "name": "token-xpv-translated",
+      "player": "player-token-xpv.json",
+      "translated_manual": true,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": true
+          }
+        ],
+        "warning": true,
+        "policy_skip": true
+      }
+    },
+    {
+      "name": "token-after-first",
+      "player": "player-token-after-first.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": true
+      }
+    },
+    {
+      "name": "comma-exp",
+      "player": "player-comma-exp.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&exp=xpe%2Cxpv&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "duplicate-lang-query",
+      "player": "player-duplicate-lang-query.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "en-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English (Original)"
+              }
+            ]
+          },
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "fr",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=json3",
+                "ext": "json3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=srv1",
+                "ext": "srv1",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=srv2",
+                "ext": "srv2",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=srv3",
+                "ext": "srv3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=ttml",
+                "ext": "ttml",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=srt",
+                "ext": "srt",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=fr&lang=en&tlang=fr&fmt=vtt",
+                "ext": "vtt",
+                "name": "French"
+              }
+            ]
+          }
+        ],
+        "audio_language": "en",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "relative-base",
+      "player": "player-relative-base.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "http://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "de",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=de&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "missing-name-manual",
+      "player": "player-missing-name-manual.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": null
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "missing-name-asr",
+      "player": "player-missing-name-asr.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [
+          {
+            "language": "en-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "None (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "None (Original)"
+              }
+            ]
+          },
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": null
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": null
+              }
+            ]
+          }
+        ],
+        "audio_language": "en",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "manual-translations-via-list",
+      "player": "player-manual-translations.json",
+      "translated_manual": true,
+      "translated_via": "list",
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [
+          {
+            "language": "en-en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English from English"
+              }
+            ]
+          },
+          {
+            "language": "fr-en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=json3",
+                "ext": "json3",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv1",
+                "ext": "srv1",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv2",
+                "ext": "srv2",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srv3",
+                "ext": "srv3",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=ttml",
+                "ext": "ttml",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=srt",
+                "ext": "srt",
+                "name": "French from English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=fr-en&fmt=vtt",
+                "ext": "vtt",
+                "name": "French from English"
+              }
+            ]
+          },
+          {
+            "language": "und",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=json3",
+                "ext": "json3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv1",
+                "ext": "srv1",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv2",
+                "ext": "srv2",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srv3",
+                "ext": "srv3",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=ttml",
+                "ext": "ttml",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=srt",
+                "ext": "srt",
+                "name": "Unknown"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&tlang=und&fmt=vtt",
+                "ext": "vtt",
+                "name": "Unknown"
+              }
+            ]
+          }
+        ],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    },
+    {
+      "name": "manual-and-asr",
+      "player": "player-manual-and-asr.json",
+      "translated_manual": false,
+      "expected": {
+        "subtitles": [
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          }
+        ],
+        "automatic_captions": [
+          {
+            "language": "en-orig",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+                "ext": "json3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+                "ext": "srv1",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+                "ext": "srv2",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+                "ext": "srv3",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+                "ext": "ttml",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+                "ext": "srt",
+                "name": "English (Original)"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+                "ext": "vtt",
+                "name": "English (Original)"
+              }
+            ]
+          },
+          {
+            "language": "en",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+                "ext": "json3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+                "ext": "srv1",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+                "ext": "srv2",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+                "ext": "srv3",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+                "ext": "ttml",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+                "ext": "srt",
+                "name": "English"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+                "ext": "vtt",
+                "name": "English"
+              }
+            ]
+          },
+          {
+            "language": "fr",
+            "formats": [
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+                "ext": "json3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+                "ext": "srv1",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+                "ext": "srv2",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+                "ext": "srv3",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+                "ext": "ttml",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+                "ext": "srt",
+                "name": "French"
+              },
+              {
+                "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+                "ext": "vtt",
+                "name": "French"
+              }
+            ]
+          }
+        ],
+        "audio_language": "en",
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "missing-manual-language",
+      "player": "player-missing-manual-language.json",
+      "translated_manual": false,
+      "native_policy": "Malformed missing-language tracks outside native strict player contract; source skips manual track",
+      "expected": {
+        "subtitles": [],
+        "automatic_captions": [],
+        "audio_language": null,
+        "token_requests": [
+          {
+            "required": false
+          }
+        ],
+        "warning": false,
+        "policy_skip": false
+      }
+    }
+  ],
+  "selection_cases": [
+    {
+      "name": "precedence-False-False",
+      "subtitles": [
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        }
+      ],
+      "automatic_captions": [
+        {
+          "language": "en-orig",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English (Original)"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+              "ext": "json3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+              "ext": "srv1",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+              "ext": "srv2",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+              "ext": "srv3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+              "ext": "ttml",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+              "ext": "srt",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+              "ext": "vtt",
+              "name": "French"
+            }
+          ]
+        }
+      ],
+      "write_manual": false,
+      "write_auto": false,
+      "languages": "en",
+      "format": "vtt",
+      "expected": {
+        "selected": [],
+        "warning": false
+      }
+    },
+    {
+      "name": "precedence-True-False",
+      "subtitles": [
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        }
+      ],
+      "automatic_captions": [
+        {
+          "language": "en-orig",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English (Original)"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+              "ext": "json3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+              "ext": "srv1",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+              "ext": "srv2",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+              "ext": "srv3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+              "ext": "ttml",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+              "ext": "srt",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+              "ext": "vtt",
+              "name": "French"
+            }
+          ]
+        }
+      ],
+      "write_manual": true,
+      "write_auto": false,
+      "languages": "en",
+      "format": "vtt",
+      "expected": {
+        "selected": [
+          {
+            "language": "en",
+            "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+            "ext": "vtt",
+            "name": "English"
+          }
+        ],
+        "warning": false
+      }
+    },
+    {
+      "name": "precedence-False-True",
+      "subtitles": [
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        }
+      ],
+      "automatic_captions": [
+        {
+          "language": "en-orig",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English (Original)"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+              "ext": "json3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+              "ext": "srv1",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+              "ext": "srv2",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+              "ext": "srv3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+              "ext": "ttml",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+              "ext": "srt",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+              "ext": "vtt",
+              "name": "French"
+            }
+          ]
+        }
+      ],
+      "write_manual": false,
+      "write_auto": true,
+      "languages": "en",
+      "format": "vtt",
+      "expected": {
+        "selected": [
+          {
+            "language": "en",
+            "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+            "ext": "vtt",
+            "name": "English"
+          }
+        ],
+        "warning": false
+      }
+    },
+    {
+      "name": "precedence-True-True",
+      "subtitles": [
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        }
+      ],
+      "automatic_captions": [
+        {
+          "language": "en-orig",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English (Original)"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+              "ext": "json3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+              "ext": "srv1",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+              "ext": "srv2",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+              "ext": "srv3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+              "ext": "ttml",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+              "ext": "srt",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+              "ext": "vtt",
+              "name": "French"
+            }
+          ]
+        }
+      ],
+      "write_manual": true,
+      "write_auto": true,
+      "languages": "en",
+      "format": "vtt",
+      "expected": {
+        "selected": [
+          {
+            "language": "en",
+            "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+            "ext": "vtt",
+            "name": "English"
+          }
+        ],
+        "warning": false
+      }
+    },
+    {
+      "name": "normal-prefix-before-auto-exact",
+      "subtitles": [
+        {
+          "language": "en-US",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        }
+      ],
+      "automatic_captions": [
+        {
+          "language": "en-orig",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English (Original)"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English (Original)"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=json3",
+              "ext": "json3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv1",
+              "ext": "srv1",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv2",
+              "ext": "srv2",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srv3",
+              "ext": "srv3",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=ttml",
+              "ext": "ttml",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=srt",
+              "ext": "srt",
+              "name": "English"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&fmt=vtt",
+              "ext": "vtt",
+              "name": "English"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "formats": [
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=json3",
+              "ext": "json3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv1",
+              "ext": "srv1",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv2",
+              "ext": "srv2",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srv3",
+              "ext": "srv3",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=ttml",
+              "ext": "ttml",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=srt",
+              "ext": "srt",
+              "name": "French"
+            },
+            {
+              "url": "https://www.youtube.com/api/timedtext?lang=en&kind=asr&tlang=fr&fmt=vtt",
+              "ext": "vtt",
+              "name": "French"
+            }
+          ]
+        }
+      ],
+      "write_manual": true,
+      "write_auto": true,
+      "languages": null,
+      "format": "vtt",
+      "expected": {
+        "selected": [
+          {
+            "language": "en-US",
+            "url": "https://www.youtube.com/api/timedtext?lang=en&fmt=vtt",
+            "ext": "vtt",
+            "name": "English"
+          }
+        ],
+        "warning": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# Android / desktop parity and remaining work (M9)
+
+Implementation does not establish live-service acceptance. Android is a preview;
+Nothing Phone (3a) and Galaxy Tab S9 hardware have not been available in this
+workspace. The desktop app and its existing private state remain separate.
+
+| Area | Android implementation | Qualification / remaining work |
+| --- | --- | --- |
+| Application UI | Rust egui, touch controls, phone bottom tabs and tablet split pane | Physical phone/tablet keyboard, rotation, cutouts, gestures and accessibility review required; no screen-reader parity claim |
+| Themes | 13 theme entries including system; shared dark/light palettes and document import | System light/dark maps to ytui dark/light; GNOME/Omarchy/Caelestia services are Linux-only, import their files instead |
+| Browsing | Shared Rust YouTube/Music feeds, search, categories, shelves, continuations, bounded transient retries | Personalized/anonymous live feeds must pass on devices/network; no generated catalog substituted for provider failure |
+| Images | Sized bounded disk/memory cache, virtualized rows and bounded async decode | Cold-cache images necessarily need a first fetch; device rendering/jank/memory measurements required |
+| Native extraction | Pinned Rust extractor; Android isolated offline EJS batch, same strict output checks | Android System WebView feature support, real public/native corpus, account/429/consent acceptance required; no Python fallback on mobile |
+| Playback | Media3 hardware decoder, Rust GLES surface/caption overlay, split audio/video, seek, pause, volume, speed, tracks, quality by re-resolution | Device codecs, live reconnect, background/notification controls, interruptions and audible output require hardware/live checks; no claim of full YouTube player parity |
+| Music/radio | Native channel/station providers, queue advancement, vinyl and PCM-reactive VU/Orbit, persistent player volume | Real stations/ICY metadata, actual sound, battery and long-running behavior need qualification; external desktop cliamp binary cannot be launched on Android |
+| Library | Private durable saved items, queue and local resume; peek/commit after resolution | Desktop-to-mobile library transfer, rich local collection editing, previous-track history are future work |
+| Queue | FIFO or randomized selection, successful-start commit, repeat-one | Automatic recommendations/radio when a user queue ends and reorder gestures are not implemented |
+| Downloads | Media3 durable private cache, paired video/audio, play offline, pause/remove/refresh failed stream; background playlist preparation for every collected item | No MP3/FLAC/Opus transcoding, cut/split/chapter edits, destination picker/export, scheduling or desktop output templates yet; cached media is app-private, not a user-exported music file |
+| Playlist preparation | Bounded collection expansion, checkpoint file and per-entry progress, cooldown, download-index acknowledgement before advancing | Cancel/remove preparation is supported; retry currently creates a new preparation job (URL-keyed downloads deduplicate), failed-entry-only retry and retention cleanup need work |
+| Account | Explicit isolated sign-in page or scoped cookie-document import, app-private session and disconnect | Sign-in may be rejected by Google; Android cannot import another app's encrypted private browser DB; no OAuth/secure-keystore-backed cookie encryption claim |
+| SponsorBlock | Shared public-ID API, marks, automatic skipping and replay, settings | Live timing, seeks and replay need media/device acceptance; it does not block YouTube UI/network ads globally |
+| Lyrics | Shared explicit read-only lyrics lookup | Synced lyric display/editor/offset and local sidecar parity not implemented |
+| Settings | Rust appearance/player/network/account controls, validated private config | Desktop-specific backend/tool paths are not offered as mobile capabilities; complete advanced desktop forms/profile parity remains open |
+| Background | MediaSession foreground playback, download service, WorkManager preparation | OS power limits/Android 15 service limits and OEM battery management apply; real lockscreen/headset/Bluetooth/service recreation gates remain |
+| Linux integration | Desktop continues using mpv, MPRIS, browser import and desktop themes | MPRIS, system keyring, NetworkManager, Proton control, external cliamp and executable launch are intentionally desktop-only |
+
+Before promoting this preview, finish outstanding mobile capability gaps, qualify
+all three target usage modes (phone, tablet, desktop), configure a stable release
+signing identity and retain the existing desktop release gates. Do not mark M9
+complete based on compilation or simulated UI frames.

@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at%3A%2F%2Fposter.bsky.social%2Fapp.bsky.feed.post%2F3l4omssdl632g&depth=0&parentHeight=0",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "video.json"
+  },
+  {
+   "url": "https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at%3A%2F%2Fposter.bsky.social%2Fapp.bsky.feed.post%2F3extpost00001&depth=0&parentHeight=0",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "external.json"
+  },
+  {
+   "url": "https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at%3A%2F%2Fposter.bsky.social%2Fapp.bsky.feed.post%2F3textonly0001&depth=0&parentHeight=0",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "text.json"
+  },
+  {
+   "url": "https://plc.directory/did:plc:abcdefghijklmnop",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"service\": [{\"id\": \"#atproto_pds\", \"type\": \"AtprotoPersonalDataServer\", \"serviceEndpoint\": \"https://amanita.us-east.host.bsky.network\"}]}"
+  },
+  {
+   "url": "https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/720p/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://media.example.test/clip.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom"
+  },
+  {
+   "url": "https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aabcdefghijklmnop&cid=bafkreivid",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-bsky"
+  }
+ ]
+}

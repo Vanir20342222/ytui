@@ -1,0 +1,47 @@
+{
+ "routes": [
+  {
+   "url": "http://www.ebaumsworld.com/video/player/83367677",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config><file>http://media.ebaumsworld.com/2014/01/83367677/python.mp4</file><title>A Giant Python &amp; The Door</title><description>This is how nightmares start...</description><image>http://media.ebaumsworld.com/2014/01/83367677/python.jpg</image><username>jihadpizza</username></config>"
+  },
+  {
+   "url": "http://media.ebaumsworld.com/2014/01/83367677/python.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "media.mp4"
+  },
+  {
+   "url": "http://www.ebaumsworld.com/video/player/2",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><file>http://media.ebaumsworld.com/2.mp4</file><title></title><description/><image>x</image><username>u</username></config>"
+  },
+  {
+   "url": "http://www.ebaumsworld.com/video/player/3",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><title>t</title></config>"
+  },
+  {
+   "url": "http://www.ebaumsworld.com/video/player/4",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><file>http://media.ebaumsworld.com/2.mp4</file><title>t</title><description>d</description><image>i</image></config>"
+  },
+  {
+   "url": "http://www.ebaumsworld.com/video/player/6",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "x"
+  }
+ ]
+}

@@ -1,0 +1,122 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://vk.com/video-77521_162222515",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"-77521_162222515\", \"formats\": [{\"format_id\": \"rtmp\", \"url\": \"rtmp://vkvd.test/live/stream\", \"ext\": \"flv\", \"protocol\": \"rtmp\", \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"rtmp - unknown\"}, {\"format_id\": \"url240\", \"url\": \"https://vkvd.test/v-240.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 240, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"240p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url240 - 240p\"}, {\"format_id\": \"cache480\", \"url\": \"https://vkvd.test/c-480.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 480, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"480p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"cache480 - 480p\"}, {\"format_id\": \"hls-1500\", \"format_index\": null, \"url\": \"https://vkvd.test/hls-720.m3u8\", \"manifest_url\": \"https://vkvd.test/video.m3u8\", \"tbr\": 1500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.64001f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-1500 - 1280x720\"}, {\"format_id\": \"url720\", \"url\": \"https://vkvd.test/v-720.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url720 - 720p\"}], \"subtitles\": {\"ru\": [{\"ext\": \"vtt\", \"url\": \"https://vkvd.test/ru.vtt\"}], \"en\": [{\"ext\": \"srt\", \"url\": \"https://vkvd.test/en.srt\"}]}, \"title\": \"Elvis & friends\", \"duration\": 230, \"like_count\": 77, \"comment_count\": 5, \"description\": \"First line\\nsecond\", \"thumbnail\": \"https://sun9.userapi.test/thumb.jpg\", \"uploader\": \"Elvis Presley & co\", \"uploader_id\": \"-77521\", \"chapters\": [{\"title\": \"Start & intro\", \"start_time\": 0, \"end_time\": 60}, {\"title\": \"Song\", \"start_time\": 60, \"end_time\": 230}], \"timestamp\": 1370131200, \"view_count\": 12345, \"is_live\": false, \"_format_sort_fields\": [\"res\", \"source\"], \"webpage_url\": \"https://vk.com/video-77521_162222515\", \"original_url\": \"https://vk.com/video-77521_162222515\", \"webpage_url_basename\": \"video-77521_162222515\", \"webpage_url_domain\": \"vk.com\", \"extractor\": \"vk\", \"extractor_key\": \"VK\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://sun9.userapi.test/thumb.jpg\", \"id\": \"0\"}], \"display_id\": \"-77521_162222515\", \"fulltitle\": \"Elvis & friends\", \"duration_string\": \"3:50\", \"upload_date\": \"20130602\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"url720\", \"url\": \"https://vkvd.test/v-720.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url720 - 720p\", \"_filename\": \"Elvis & friends [-77521_162222515].mp4\", \"filename\": \"Elvis & friends [-77521_162222515].mp4\", \"__write_download_archive\": false}], \"format_id\": \"url720\", \"url\": \"https://vkvd.test/v-720.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url720 - 720p\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/videos-77521?z=video-77521_162222515%2Fclub77521",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[vk] Extracting URL: https://vk.com/videos-77521?z=video-77521_162222515%2Fclub77521",
+    "[vk] -77521_162222515: Downloading JSON metadata",
+    "[vk] -77521_162222515: Downloading m3u8 information",
+    "[info] Available subtitles for -77521_162222515:",
+    "Language Formats",
+    "ru       vtt",
+    "en       srt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=7&hash=abc",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"-1_7\", \"formats\": [{\"format_id\": \"url360\", \"url\": \"https://vkvd.test/e-360.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"360p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url360 - 360p\"}], \"subtitles\": {}, \"title\": \"Embedded clip\", \"timestamp\": 1600000000, \"view_count\": null, \"is_live\": false, \"_format_sort_fields\": [\"res\", \"source\"], \"webpage_url\": \"https://vk.com/video_ext.php?oid=-1&id=7&hash=abc\", \"original_url\": \"https://vk.com/video_ext.php?oid=-1&id=7&hash=abc\", \"webpage_url_basename\": \"video_ext.php\", \"webpage_url_domain\": \"vk.com\", \"extractor\": \"vk\", \"extractor_key\": \"VK\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"-1_7\", \"fulltitle\": \"Embedded clip\", \"upload_date\": \"20200913\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"url360\", \"url\": \"https://vkvd.test/e-360.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"360p\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url360 - 360p\", \"_filename\": \"Embedded clip [-1_7].mp4\", \"filename\": \"Embedded clip [-1_7].mp4\", \"__write_download_archive\": false}], \"format_id\": \"url360\", \"url\": \"https://vkvd.test/e-360.mp4\", \"ext\": \"mp4\", \"source_preference\": 1, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"360p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"url360 - 360p\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=8",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [vk] 8: Video -1_8 is no longer available, because it has been deleted."
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=9",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [vk] 9: Video is private"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/video1_3?list=ln-abc",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [vk] Access denied"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/clip1_4",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [vk] This video is only available for registered users. Use --cookies, --cookies-from-browser, --username and --password, --netrc-cmd, or --netrc (vk) to provide account credentials. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vk.com/video-77521_162222515",
+   "args": [
+    "--no-progress",
+    "-f",
+    "url720",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[vk] Extracting URL: https://vk.com/video-77521_162222515",
+    "[vk] -77521_162222515: Downloading JSON metadata",
+    "[vk] -77521_162222515: Downloading m3u8 information",
+    "[info] -77521_162222515: Downloading 1 format(s): url720",
+    "[download] Destination: -77521_162222515.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "-77521_162222515.mp4": 15
+   }
+  }
+ ]
+}

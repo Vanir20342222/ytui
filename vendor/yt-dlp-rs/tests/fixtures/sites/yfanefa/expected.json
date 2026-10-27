@@ -1,0 +1,75 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.yfanefa.com/record/2717",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"record-2717\", \"title\": \"Bridlington\", \"formats\": [{\"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://yf.test/hls/video.m3u8\", \"manifest_url\": \"https://yf.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\"}], \"thumbnail\": \"https://yf.test/p.jpg\", \"duration\": 1234, \"webpage_url\": \"https://www.yfanefa.com/record/2717\", \"original_url\": \"https://www.yfanefa.com/record/2717\", \"webpage_url_basename\": \"2717\", \"webpage_url_domain\": \"yfanefa.com\", \"extractor\": \"yfanefa\", \"extractor_key\": \"Yfanefa\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://yf.test/p.jpg\", \"id\": \"0\"}], \"display_id\": \"record-2717\", \"fulltitle\": \"Bridlington\", \"duration_string\": \"20:34\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://yf.test/hls/video.m3u8\", \"manifest_url\": \"https://yf.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\", \"_filename\": \"Bridlington [record-2717].mp4\", \"filename\": \"Bridlington [record-2717].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [yfanefa] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://yfanefa.com/news/x/y/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"news-x-y\", \"title\": \"OG\", \"formats\": [{\"url\": \"https://yf.test/v.mp4?sig=1\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://yfanefa.com/news/x/y/\", \"original_url\": \"https://yfanefa.com/news/x/y/\", \"webpage_url_basename\": \"y\", \"webpage_url_domain\": \"yfanefa.com\", \"extractor\": \"yfanefa\", \"extractor_key\": \"Yfanefa\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"news-x-y\", \"fulltitle\": \"OG\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://yf.test/v.mp4?sig=1\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"OG [news-x-y].mp4\", \"filename\": \"OG [news-x-y].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://yfanefa.com/news/x/y/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[yfanefa] Extracting URL: https://yfanefa.com/news/x/y/",
+    "[yfanefa] news/x/y/: Downloading webpage",
+    "[info] news-x-y: Downloading 1 format(s): 0",
+    "[download] Destination: news-x-y.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "news-x-y.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.yfanefa.com/record/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: record/3: An extractor error has occurred. (caused by KeyError('url')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.yfanefa.com/record/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [yfanefa] record/4: Unable to extract player options; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

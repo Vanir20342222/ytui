@@ -1,0 +1,89 @@
+{
+ "routes": [
+  {
+   "url": "https://api.bitchute.com/api/beta/video/media",
+   "request_body": [
+    "\"video_id\": \"UGlrF9o9b-Q\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"media_url\": \"https://seed305.bitchute.com/abc/UGlrF9o9b-Q.mp4\"}"
+  },
+  {
+   "url": "https://api.bitchute.com/api/beta/video",
+   "request_body": [
+    "\"video_id\": \"UGlrF9o9b-Q\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"video_name\": \"This is a test video\", \"description\": \"<p>Desc</p>\", \"thumbnail_url\": \"https://static-3.bitchute.test/thumb.jpg\", \"channel\": {\"channel_id\": \"chan1\", \"channel_name\": \"Old name\", \"channel_url\": \"/channel/chan1/\"}, \"profile_id\": \"prof0\", \"date_published\": \"2023-05-26T12:00:00.000Z\", \"duration\": \"1:02:03\", \"hashtags\": [\"news\", \"\"], \"view_count\": \"77\", \"state_id\": \"on_demand\"}"
+  },
+  {
+   "url": "https://api.bitchute.com/api/beta/channel",
+   "request_body": [
+    "\"channel_id\": \"chan1\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"channel_id\": \"chan1\", \"channel_name\": \"Real channel\", \"url_slug\": \"realslug\", \"profile_name\": \"Uploader\", \"profile_id\": \"prof1\"}"
+  },
+  {
+   "url": "https://seed305.bitchute.com/abc/UGlrF9o9b-Q.mp4",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "gone"
+  },
+  {
+   "url": "https://seed122.bitchute.com/abc/UGlrF9o9b-Q.mp4",
+   "headers": {
+    "Content-Type": "video/mp4",
+    "Content-Length": "17"
+   },
+   "body": "0000ftypisom-bitc"
+  },
+  {
+   "url": "https://api.bitchute.com/api/beta/video/media",
+   "request_body": [
+    "\"video_id\": \"geo1\""
+   ],
+   "status": 403,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"errors\": [{\"context\": \"reason\", \"message\": \"This video is not available in your location\"}, {\"context\": \"other\", \"message\": \"x\"}]}"
+  },
+  {
+   "url": "https://api.bitchute.com/api/beta/video/media",
+   "request_body": [
+    "\"video_id\": \"nometa\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"media_url\": \"https://cdn.bitchute.test/nometa.mp4\"}"
+  },
+  {
+   "url": "https://api.bitchute.com/api/beta/video",
+   "request_body": [
+    "\"video_id\": \"nometa\""
+   ],
+   "status": 500,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://cdn.bitchute.test/nometa.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom"
+  }
+ ]
+}

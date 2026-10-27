@@ -1,0 +1,72 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"123456\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://fathom.test/hls/video.m3u8\", \"manifest_url\": \"https://fathom.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"title\": \"Fathom Demo\", \"duration\": 1234.5, \"timestamp\": 1722440652, \"webpage_url\": \"https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s\", \"original_url\": \"https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s\", \"webpage_url_basename\": \"G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s\", \"webpage_url_domain\": \"fathom.video\", \"extractor\": \"Fathom\", \"extractor_key\": \"Fathom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"123456\", \"fulltitle\": \"Fathom Demo\", \"duration_string\": \"20:34\", \"upload_date\": \"20240731\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://fathom.test/hls/video.m3u8\", \"manifest_url\": \"https://fathom.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Fathom Demo [123456].mp4\", \"filename\": \"Fathom Demo [123456].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Fathom] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(upload_date)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "123456|Fathom Demo|1234.5|1722440652|20240731"
+   ],
+   "stderr": [
+    "WARNING: [Fathom] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.fathom.video/share/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"s2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://fathom.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://www.fathom.video/share/b2\", \"original_url\": \"https://www.fathom.video/share/b2\", \"webpage_url_basename\": \"b2\", \"webpage_url_domain\": \"fathom.video\", \"extractor\": \"Fathom\", \"extractor_key\": \"Fathom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"s2\", \"fulltitle\": null, \"title\": \"Fathom video #s2\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://fathom.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Fathom video #s2 [s2].mp4\", \"filename\": \"Fathom video #s2 [s2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://fathom.video/share/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: c3: An extractor error has occurred. (caused by KeyError('call')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://fathom.video/share/d4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 'NoneType' object is not subscriptable"
+   ],
+   "files": {}
+  }
+ ]
+}

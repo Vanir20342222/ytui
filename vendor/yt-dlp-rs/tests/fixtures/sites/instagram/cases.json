@@ -1,0 +1,8 @@
+[
+ {"url": "https://instagram.com/p/aye83DjauH/?foo=bar#abc", "args": ["-J"]},
+ {"url": "https://www.instagram.com/reel/aye83DjauH/", "args": ["-F"]},
+ {"url": "https://www.instagram.com/p/CarouSel01/", "args": ["-J"]},
+ {"url": "https://www.instagram.com/p/PhotoOnly1/", "args": ["-j"]},
+ {"url": "https://www.instagram.com/p/RestrictD1/", "args": ["-j"]},
+ {"url": "https://www.instagram.com/p/aye83DjauH/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

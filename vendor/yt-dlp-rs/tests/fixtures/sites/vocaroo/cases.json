@@ -1,0 +1,10 @@
+[
+ {"url": "https://vocaroo.com/1de8yA3LNe77", "args": ["-j"]},
+ {"url": "https://vocaroo.com/1de8yA3LNe77", "args": ["-F"]},
+ {"url": "https://vocaroo.com/1de8yA3LNe77", "args": ["--print", "%(id)s|%(title)s|%(fulltitle)s|%(timestamp)s|%(upload_date)s|%(ext)s"]},
+ {"url": "https://vocaroo.com/1de8yA3LNe77", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://vocaroo.com/1de8yA3LNe77", "args": ["-v", "-s"]},
+ {"url": "https://voca.ro/embed/12WqtjLnpj6g", "args": ["-j"]},
+ {"url": "https://vocaroo.com/abcdefghij", "args": ["-j"]},
+ {"url": "https://vocaroo.com/abcd1234", "args": ["--print", "%(id)s|%(url)s|%(timestamp)s"]}
+]

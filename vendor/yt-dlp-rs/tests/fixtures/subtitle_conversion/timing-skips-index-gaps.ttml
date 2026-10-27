@@ -1,0 +1,1 @@
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div><p end="1">missing begin</p><p begin="0" end="0">missing duration</p><p begin="1" dur="2">third</p><p begin="2" end="0" dur="2">zero end uses duration</p><p begin="1f" end="2">unsupported frames</p><p begin="2" end="1">reversed accepted</p></div></body></tt>

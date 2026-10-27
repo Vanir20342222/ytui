@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://www.facebook.com/watch/?v=1234567890",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "watch.html"
+  },
+  {
+   "url": "https://www.facebook.com/watch/?v=1234567890&_rdr",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "watch.html"
+  },
+  {
+   "url": "https://www.facebook.com/someone/videos/1234567890/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "watch.html"
+  },
+  {
+   "url": "https://www.facebook.com/someone/videos/999/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "login.html"
+  },
+  {
+   "url": "https://video.xx.fbcdn.net/v/prog-hd.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-fbhd"
+  }
+ ]
+}

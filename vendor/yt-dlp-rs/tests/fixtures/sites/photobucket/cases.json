@@ -1,0 +1,7 @@
+[
+ {"url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0", "args": ["-j"]},
+ {"url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0", "args": ["-F"]},
+ {"url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0", "args": ["--print", "%(id)s|%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(ext)s|%(thumbnail)s"]},
+ {"url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "http://s1.photobucket.com/user/x/media/broken_ab.flv.html", "args": ["-j"]}
+]

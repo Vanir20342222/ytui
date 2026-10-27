@@ -1,0 +1,58 @@
+[
+ [
+  "{file: 'a.mp4', title: \"T\"}",
+  "{\"file\": \"a.mp4\", \"title\": \"T\"}"
+ ],
+ [
+  "{'file': '//cdn.invalid/a.mp4', width: 640, height: 0x168, bitrate: 012}",
+  "{\"file\": \"//cdn.invalid/a.mp4\", \"width\": 640, \"height\": 360, \"bitrate\": 10}"
+ ],
+ [
+  "{sources: [{file: \"a.mp4\", label: '720p'},], tracks: [], }",
+  "{\"sources\": [{\"file\": \"a.mp4\", \"label\": \"720p\"}], \"tracks\": [] }"
+ ],
+ [
+  "{a: undefined, b: void 0, c: true, d: null, e: !0, f: !!1}",
+  "{\"a\": null, \"b\": null, \"c\": true, \"d\": null, \"e\": 0, \"f\": 1}"
+ ],
+ [
+  "{/* comment */ a: 1, // line\n b: 'x\\'y', c: \"q\\\"r\", d: 'tab\\there'}",
+  "{ \"a\": 1,  \"b\": \"x'y\", \"c\": \"q\\\"r\", \"d\": \"tab\\there\"}"
+ ],
+ [
+  "{a: `tmpl ${'x'} and ${1}`, b: 'a\\x41b', c: 'line\\\ncont'}",
+  "{\"a\": \"tmpl x and 1\", \"b\": \"a\\u0041b\", \"c\": \"linecont\"}"
+ ],
+ [
+  "{10: 'n', 0x1F: 'h', 017: 'o', e5: 1e5, x: 1.5e-3, y: .5}",
+  "{\"10\": \"n\", \"31\": \"h\", \"15\": \"o\", \"e5\": 1e5, \"x\": 1.5e-3, \"y\": .5}"
+ ],
+ [
+  "{a: new Array(1, 2), b: Array(3), c: new Date('2020-01-01'), d: new Foo(1)}",
+  "{\"a\": [1, 2], \"b\": [3], \"c\": \"2020-01-01\", \"d\": \"new Foo(1)\"}"
+ ],
+ [
+  "{a: parseInt('42'), b: (function(x){return x})('v'), c: new Map([['k', 1]])}",
+  "{\"a\": 42, \"c\": {\"k\": 1}}"
+ ],
+ [
+  "{\"already\": \"json\", \"n\": [1, 2, {\"x\": null}]}",
+  "{\"already\": \"json\", \"n\": [1, 2, {\"x\": null}]}"
+ ],
+ [
+  "{a: 'it\\'s', b: \"\\u00e9\", c: '\\/path', d: '\\n'}",
+  "{\"a\": \"it's\", \"b\": \"\\u00e9\", \"c\": \"/path\", \"d\": \"\\n\"}"
+ ],
+ [
+  "{title: 'Unicode: café ☃', image: \"//i.invalid/p.jpg\"}",
+  "{\"title\": \"Unicode: café ☃\", \"image\": \"//i.invalid/p.jpg\"}"
+ ],
+ [
+  "[1, 2, 3,]",
+  "[1, 2, 3]"
+ ],
+ [
+  "{a: {b: {c: 'd'}}, $x: 1, _y: 2, Infinity: NaN}",
+  "{\"a\": {\"b\": {\"c\": \"d\"}}, \"$x\": 1, \"_y\": 2, \"Infinity\": \"NaN\"}"
+ ]
+]

@@ -1,0 +1,6 @@
+[
+ {"url": "http://www.mixcloud.com/dholbach/cryptkeeper/", "args": ["-J"]},
+ {"url": "https://www.mixcloud.com/dholbach/gone/", "args": ["-j"]},
+ {"url": "https://www.mixcloud.com/dholbach/blocked/", "args": ["-j"]},
+ {"url": "http://www.mixcloud.com/dholbach/cryptkeeper/", "args": ["-f", "http", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

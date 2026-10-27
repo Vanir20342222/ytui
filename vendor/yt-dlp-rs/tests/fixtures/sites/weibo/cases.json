@@ -1,0 +1,7 @@
+[
+ {"url": "https://weibo.com/7827771738/N4xlMvjhI", "args": ["-J"]},
+ {"url": "https://weibo.com/1234/Mix5000", "args": ["-J"]},
+ {"url": "https://m.weibo.cn/status/4189191225395228", "args": ["-J"]},
+ {"url": "https://weibo.com/tv/show/1034:4797699866951785?from=old_pc_videoshow", "args": ["--print", "%(id)s|%(title)s|%(webpage_url)s"]},
+ {"url": "https://weibo.com/7827771738/N4xlMvjhI", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

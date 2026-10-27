@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://api.livestreamfails.com/clip/39084",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 39084, \"label\": \"Fall, then rise\", \"sourceId\": \"ScrapeSource\", \"createdAt\": \"2022-03-13T19:47:15.000Z\", \"videoId\": \"ex.mp4\", \"imageId\": \"i1.jpg\", \"streamer\": {\"label\": \"Ash, Gamer\"}}"
+  },
+  {
+   "url": "https://livestreamfails-video-prod.b-cdn.net/video/ex.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "media.mp4"
+  },
+  {
+   "url": "https://api.livestreamfails.com/clip/2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"videoId\": \"noext\", \"imageId\": null, \"createdAt\": null}"
+  },
+  {
+   "url": "https://livestreamfails-video-prod.b-cdn.net/video/noext",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "media.mp4"
+  },
+  {
+   "url": "https://api.livestreamfails.com/clip/3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"label\": \"x\"}"
+  },
+  {
+   "url": "https://api.livestreamfails.com/clip/4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"label\": \"y\", \"videoId\": \"v4.mp4\", \"imageId\": \"\", \"streamer\": null, \"sourceId\": 7}"
+  }
+ ]
+}

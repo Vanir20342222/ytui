@@ -1,0 +1,74 @@
+{
+ "routes": [
+  {
+   "url": "https://dal.walla.co.il/media/3611585?origin=player.maariv.co.il",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"title\": \"\\u05ea\\u05d2\\u05d5\\u05d1\\u05d4\", \"upload_date\": \"2023-11-14 10:42:00\", \"video\": {\"url\": \"https://maariv.test/hls/master.m3u8\", \"duration\": \"199\", \"stream_urls\": [{\"stream_url\": \"https://maariv.test/v_1280x720.mp4\"}, {\"stream_url\": \"nope\"}, {\"stream_url\": \"https://maariv.test/v-480p.mp4\"}]}}}"
+  },
+  {
+   "url": "https://dal.walla.co.il/media/2?origin=player.maariv.co.il",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"video\": {\"url\": \"https://maariv.test/hls/missing.m3u8\", \"stream_urls\": []}}}"
+  },
+  {
+   "url": "https://dal.walla.co.il/media/3?origin=player.maariv.co.il",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"title\": \"HTTP\", \"video\": {\"stream_urls\": [{\"stream_url\": \"https://maariv.test/v_1280x720.mp4\"}]}}}"
+  },
+  {
+   "url": "https://dal.walla.co.il/media/4?origin=player.maariv.co.il",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://page.test/m.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>M</title></head><body><iframe width=1 src=\"https://player.maariv.co.il/public/player.html?player=x&media=3\"></iframe></body></html>"
+  },
+  {
+   "url": "https://maariv.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://maariv.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://maariv.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://maariv.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://maariv.test/v_1280x720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

@@ -1,0 +1,86 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"uploader\": \"ethmusic\", \"uploader_id\": \"52984226\", \"uploader_url\": \"https://soundcloud.com/ethmusic\", \"timestamp\": 1383583279, \"title\": \"Lostin Powers - She so Heavy\", \"track\": \"Lostin Powers - She so Heavy\", \"description\": \"Some description\", \"duration\": 213.671, \"webpage_url\": \"https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy\", \"license\": \"all-rights-reserved\", \"view_count\": 12345, \"like_count\": 67, \"comment_count\": 8, \"repost_count\": 9, \"modified_timestamp\": 1672628645, \"genres\": [\"Dance\"], \"tags\": [\"house\", \"deep house\", \"tech\"], \"artists\": [\"Lostin Powers\"], \"id\": \"123998367\", \"thumbnails\": [{\"id\": \"mini\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-mini.jpg\", \"width\": 16, \"height\": 16, \"resolution\": \"16x16\"}, {\"id\": \"tiny\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-tiny.jpg\", \"width\": 20, \"height\": 20, \"resolution\": \"20x20\"}, {\"id\": \"small\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-small.jpg\", \"width\": 32, \"height\": 32, \"resolution\": \"32x32\"}, {\"id\": \"badge\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-badge.jpg\", \"width\": 47, \"height\": 47, \"resolution\": \"47x47\"}, {\"id\": \"t67x67\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-t67x67.jpg\", \"width\": 67, \"height\": 67, \"resolution\": \"67x67\"}, {\"id\": \"large\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-large.jpg\", \"width\": 100, \"height\": 100, \"resolution\": \"100x100\"}, {\"id\": \"t300x300\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-t300x300.jpg\", \"width\": 300, \"height\": 300, \"resolution\": \"300x300\"}, {\"id\": \"crop\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-crop.jpg\", \"width\": 400, \"height\": 400, \"resolution\": \"400x400\"}, {\"id\": \"t500x500\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-t500x500.jpg\", \"width\": 500, \"height\": 500, \"resolution\": \"500x500\"}, {\"id\": \"original\", \"url\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-original.jpg\", \"preference\": 10}], \"formats\": [{\"format_id\": \"hls_mp3_1_0\", \"url\": \"https://cf-hls-media.sndcdn.com/playlist/x.128.mp3/playlist.m3u8?Policy=1\", \"ext\": \"mp3\", \"acodec\": \"mp3\", \"vcodec\": \"none\", \"abr\": 128, \"protocol\": \"m3u8_native\", \"container\": null, \"quality\": -1, \"format_note\": null, \"preference\": null, \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 3418736, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls_mp3_1_0 - audio only\"}, {\"format_id\": \"http_mp3_1_0\", \"url\": \"https://cf-media.sndcdn.com/x.128.mp3?Policy=2\", \"ext\": \"mp3\", \"acodec\": \"mp3\", \"vcodec\": \"none\", \"abr\": 128, \"protocol\": \"http\", \"container\": null, \"quality\": -1, \"format_note\": null, \"preference\": null, \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 3418736, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http_mp3_1_0 - audio only\"}, {\"format_id\": \"hls_opus_0_0\", \"url\": \"https://cf-hls-opus-media.sndcdn.com/playlist/z.64.opus/playlist.m3u8?Policy=4\", \"ext\": \"opus\", \"acodec\": \"opus\", \"vcodec\": \"none\", \"abr\": 64, \"protocol\": \"m3u8_native\", \"container\": null, \"quality\": -1, \"format_note\": null, \"preference\": null, \"audio_ext\": \"opus\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 64, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 1709368, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls_opus_0_0 - audio only\"}, {\"format_id\": \"hls_aac_160k\", \"url\": \"https://cf-hls-media.sndcdn.com/playlist/y.aac/playlist.m3u8?Policy=3\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"abr\": 160, \"protocol\": \"m3u8_native\", \"container\": \"m4a_dash\", \"quality\": 0, \"format_note\": null, \"preference\": null, \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 160, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 4273420, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls_aac_160k - audio only\"}], \"original_url\": \"https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy\", \"webpage_url_basename\": \"lostin-powers-she-so-heavy\", \"webpage_url_domain\": \"soundcloud.com\", \"extractor\": \"soundcloud\", \"extractor_key\": \"Soundcloud\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://i1.sndcdn.com/artworks-000071811455-l4hrpp-original.jpg\", \"display_id\": \"123998367\", \"fulltitle\": \"Lostin Powers - She so Heavy\", \"duration_string\": \"3:33\", \"upload_date\": \"20131104\", \"modified_date\": \"20230102\", \"release_year\": null, \"artist\": \"Lostin Powers\", \"genre\": \"Dance\", \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"hls_aac_160k\", \"url\": \"https://cf-hls-media.sndcdn.com/playlist/y.aac/playlist.m3u8?Policy=3\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"abr\": 160, \"protocol\": \"m3u8_native\", \"container\": \"m4a_dash\", \"quality\": 0, \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 160, \"resolution\": \"audio only\", \"filesize_approx\": 4273420, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls_aac_160k - audio only\", \"_filename\": \"Lostin Powers - She so Heavy [123998367].m4a\", \"filename\": \"Lostin Powers - She so Heavy [123998367].m4a\", \"__write_download_archive\": false}], \"format_id\": \"hls_aac_160k\", \"url\": \"https://cf-hls-media.sndcdn.com/playlist/y.aac/playlist.m3u8?Policy=3\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"abr\": 160, \"protocol\": \"m3u8_native\", \"container\": \"m4a_dash\", \"quality\": 0, \"format_note\": null, \"preference\": null, \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 160, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 4273420, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls_aac_160k - audio only\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[soundcloud] Downloading main page",
+    "[soundcloud] Downloading JS asset",
+    "[soundcloud] Extracting URL: https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy",
+    "[soundcloud] ethmusic/lostin-powers-she-so-heavy: Downloading info JSON",
+    "[soundcloud] 123998367: Downloading hls_mp3 format info JSON",
+    "[soundcloud] 123998367: Downloading http_mp3 format info JSON",
+    "[soundcloud] 123998367: Downloading hls_aac format info JSON",
+    "[soundcloud] 123998367: Downloading hls_opus format info JSON",
+    "[soundcloud] 123998367: Checking thumbnail extension",
+    "[info] Available formats for 123998367:",
+    "ID           EXT  RESOLUTION | FILESIZE  TBR PROTO | VCODEC     ACODEC     ABR MORE INFO",
+    "----------------------------------------------------------------------------------------",
+    "hls_mp3_1_0  mp3  audio only | ≈3.26MiB 128k m3u8  | audio only mp3       128k",
+    "http_mp3_1_0 mp3  audio only | ≈3.26MiB 128k http  | audio only mp3       128k",
+    "hls_opus_0_0 opus audio only | ≈1.63MiB  64k m3u8  | audio only opus       64k",
+    "hls_aac_160k m4a  audio only | ≈4.08MiB 160k m3u8  | audio only mp4a.40.2 160k m4a_dash"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://api.soundcloud.com/tracks/123998367",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(uploader_id)s|%(tags)s|%(genres)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "123998367|Lostin Powers - She so Heavy|52984226|['house', 'deep house', 'tech']|['Dance']|https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy",
+   "args": [
+    "-f",
+    "http_mp3_1_0",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[soundcloud] Downloading main page",
+    "[soundcloud] Downloading JS asset",
+    "[soundcloud] Extracting URL: https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy",
+    "[soundcloud] ethmusic/lostin-powers-she-so-heavy: Downloading info JSON",
+    "[soundcloud] 123998367: Downloading hls_mp3 format info JSON",
+    "[soundcloud] 123998367: Downloading http_mp3 format info JSON",
+    "[soundcloud] 123998367: Downloading hls_aac format info JSON",
+    "[soundcloud] 123998367: Downloading hls_opus format info JSON",
+    "[soundcloud] 123998367: Checking thumbnail extension",
+    "[info] 123998367: Downloading 1 format(s): http_mp3_1_0",
+    "[download] Destination: 123998367.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "123998367.mp3": 18
+   }
+  }
+ ]
+}

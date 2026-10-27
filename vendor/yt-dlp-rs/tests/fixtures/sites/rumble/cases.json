@@ -1,0 +1,7 @@
+[
+ {"url": "https://rumble.com/embed/vb0ofn", "args": ["-J"]},
+ {"url": "https://rumble.com/embed/vb0ofn", "args": ["-F"]},
+ {"url": "https://rumble.com/vdmum1-moose-the-dog.html", "args": ["-j"]},
+ {"url": "https://rumble.com/embed/vgone1", "args": ["-j"]},
+ {"url": "https://rumble.com/embed/vb0ofn", "args": ["-f", "mp4-360p", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,54 @@
+{
+ "routes": [
+  {
+   "url": "http://www.godtube.com/resource/mediaplayer/0wwwuv.xml",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><file>http://cdn.godtube.test/0wwWUv.mp4</file><author>Nikki Strebeck</author><date>2013-04-25T14:31:00-04:00</date><duration>3:30</duration><image>http://cdn.godtube.test/0wwWUv.jpg</image></config>"
+  },
+  {
+   "url": "http://www.godtube.com/media/xml/?v=0wwWUv",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<media><title>Bold &amp; Beautiful</title></media>"
+  },
+  {
+   "url": "http://cdn.godtube.test/0wwWUv.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "http://www.godtube.com/resource/mediaplayer/bare1.xml",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><file>http://cdn.godtube.test/0wwWUv.mp4</file><author/><date>nonsense</date><duration></duration><image>x.jpg</image></config>"
+  },
+  {
+   "url": "http://www.godtube.com/media/xml/?v=Bare1",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<media><title/></media>"
+  },
+  {
+   "url": "http://www.godtube.com/resource/mediaplayer/nofile.xml",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<config><author>a</author></config>"
+  },
+  {
+   "url": "http://www.godtube.com/resource/mediaplayer/gone.xml",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "x"
+  }
+ ]
+}

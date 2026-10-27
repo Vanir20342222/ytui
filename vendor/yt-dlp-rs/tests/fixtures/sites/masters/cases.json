@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html", "args": ["-j"]},
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html", "args": ["--list-subs"]},
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html", "args": ["--list-thumbnails"]},
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html", "args": ["--print", "%(id)s|%(title)s|%(upload_date)s|%(thumbnail)s"]},
+ {"url": "https://masters.com/en_US/watch/2021-13-40/2/x.html", "args": ["-j"]},
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/3/x.html", "args": ["-j"]},
+ {"url": "https://www.masters.com/en_US/watch/2022-04-07/4/x.html", "args": ["-j"]}
+]

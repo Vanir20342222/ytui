@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.fc-zenit.ru/video/41044/", "args": ["-j"]},
+ {"url": "https://www.fc-zenit.ru/video/41044/", "args": ["-F"]},
+ {"url": "https://www.fc-zenit.ru/video/41044/", "args": ["--print", "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(tags)s|%(format_id)s|%(height)s"]},
+ {"url": "https://www.fc-zenit.ru/video/41044/", "args": ["--no-progress", "-f", "720", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.fc-zenit.ru/video/2", "args": ["-j"]},
+ {"url": "https://www.fc-zenit.ru/video/3", "args": ["-j"]}
+]

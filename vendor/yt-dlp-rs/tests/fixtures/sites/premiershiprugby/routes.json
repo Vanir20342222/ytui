@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://article-cms-api.incrowdsports.com/v2/articles/slug/full-match-harlequins-v-newcastle-falcons?clientId=PRL",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"article\": {\"heroMedia\": {\"title\": \"Full Match: Harlequins v Newcastle Falcons\", \"content\": {\"videoLink\": \"https://prl.test/hls/master.m3u8\", \"sourceSystemId\": \"0_mbkb7ldt\", \"videoThumbnail\": \"https://prl.test/t.jpg\", \"metadata\": {\"msDuration\": 6093500}}}, \"tags\": [\"video\"], \"categories\": [{\"text\": \"Full Match\"}, {\"x\": 1}, {\"text\": \"Harlequins\"}]}}}"
+  },
+  {
+   "url": "https://article-cms-api.incrowdsports.com/v2/articles/slug/plain?clientId=PRL",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"article\": {\"heroMedia\": {\"content\": {\"videoLink\": \"https://prl.test/hls/video.m3u8\", \"sourceSystemId\": \"s2\", \"metadata\": {\"msDuration\": \"abc\"}}}}}}"
+  },
+  {
+   "url": "https://article-cms-api.incrowdsports.com/v2/articles/slug/no-hero?clientId=PRL",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"article\": {}}}"
+  },
+  {
+   "url": "https://article-cms-api.incrowdsports.com/v2/articles/slug/no-data?clientId=PRL",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://article-cms-api.incrowdsports.com/v2/articles/slug/no-id?clientId=PRL",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"article\": {\"heroMedia\": {\"content\": {\"videoLink\": \"https://prl.test/hls/video.m3u8\"}}}}}"
+  },
+  {
+   "url": "https://prl.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://prl.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://prl.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://prl.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

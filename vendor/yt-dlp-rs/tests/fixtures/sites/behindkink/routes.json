@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"What are you passionate about &ndash; Marley Blaze\">\n<meta property=\"og:description\" content=\"Marley Blaze talks about her passion.\">\n<meta property=\"og:image\" content=\"http://www.behindkink.com/wp-content/uploads/2014/12/thumb.jpg\"></head>\n<body><video><source src=\"http://www.behindkink.com/videos/37127_MB_1_x.mp4\" type=\"video/mp4\"></video></body></html>"
+  },
+  {
+   "url": "http://www.behindkink.com/videos/37127_MB_1_x.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://behindkink.com/2015/01/02/bare",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><source src=\"http://www.behindkink.com/videos/plain.mp4\"></html>"
+  },
+  {
+   "url": "https://behindkink.com/2015/01/03/none",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>nothing</html>"
+  }
+ ]
+}

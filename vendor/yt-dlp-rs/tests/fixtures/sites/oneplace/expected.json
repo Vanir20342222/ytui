@@ -1,0 +1,103 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"958461\", \"url\": \"https://cdn.oneplace.test/ep1.mp3\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"title\": \"Living Victoriously in the Last Days\", \"description\": \"Paul tells us how to live in these days.\", \"webpage_url\": \"https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461\", \"original_url\": \"https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461\", \"webpage_url_basename\": \"living-in-the-last-days-part-2-958461\", \"webpage_url_domain\": \"oneplace.com\", \"extractor\": \"OnePlacePodcast\", \"extractor_key\": \"OnePlacePodcast\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"958461\", \"fulltitle\": \"Living Victoriously in the Last Days\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Living Victoriously in the Last Days [958461].mp3\", \"filename\": \"Living Victoriously in the Last Days [958461].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[OnePlacePodcast] Extracting URL: https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+    "[OnePlacePodcast] 958461: Downloading webpage",
+    "[info] Available formats for 958461:",
+    "ID EXT RESOLUTION | PROTO | VCODEC     ACODEC",
+    "---------------------------------------------",
+    "0  mp3 audio only | https | audio only mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "958461|Living Victoriously in the Last Days|Paul tells us how to live in these days.|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[OnePlacePodcast] Extracting URL: https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+    "[OnePlacePodcast] 958461: Downloading webpage",
+    "[info] 958461: Downloading 1 format(s): 0",
+    "[download] Destination: 958461.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "958461.mp3": 778
+   }
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/meta-only-2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"url\": \"https://cdn.oneplace.test/ep1.mp3\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"title\": \"Meta title only\", \"description\": null, \"webpage_url\": \"https://www.oneplace.com/ministries/x/listen/meta-only-2\", \"original_url\": \"https://www.oneplace.com/ministries/x/listen/meta-only-2\", \"webpage_url_basename\": \"meta-only-2\", \"webpage_url_domain\": \"oneplace.com\", \"extractor\": \"OnePlacePodcast\", \"extractor_key\": \"OnePlacePodcast\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Meta title only\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Meta title only [2].mp3\", \"filename\": \"Meta title only [2].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/og-3",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3\", \"url\": \"https://cdn.oneplace.test/ep1.mp3\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"title\": \"Second & OG\", \"description\": null, \"webpage_url\": \"https://www.oneplace.com/ministries/x/listen/og-3\", \"original_url\": \"https://www.oneplace.com/ministries/x/listen/og-3\", \"webpage_url_basename\": \"og-3\", \"webpage_url_domain\": \"oneplace.com\", \"extractor\": \"OnePlacePodcast\", \"extractor_key\": \"OnePlacePodcast\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"3\", \"fulltitle\": \"Second & OG\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Second & OG [3].mp3\", \"filename\": \"Second & OG [3].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/none-4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [OnePlacePodcast] 4: Unable to extract media url; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+[
+ {"url": "https://kick.com/xqc/videos/8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea", "args": ["-J"]},
+ {"url": "https://kick.com/mxddy?clip=clip_01GYXVB5Y8PWAPWCWMSBCFB05X", "args": ["--print", "%(id)s|%(title)s|%(channel)s|%(channel_id)s|%(uploader)s|%(uploader_id)s|%(timestamp)s|%(release_timestamp)s|%(duration)s|%(thumbnail)s|%(categories)s|%(view_count)s|%(like_count)s|%(concurrent_view_count)s|%(age_limit)s|%(is_live)s|%(description)s|%(format_id)s"]},
+ {"url": "https://kick.com/buddha", "args": ["--print", "%(id)s|%(channel)s|%(channel_id)s|%(uploader)s|%(uploader_id)s|%(timestamp)s|%(release_timestamp)s|%(duration)s|%(thumbnail)s|%(categories)s|%(view_count)s|%(like_count)s|%(concurrent_view_count)s|%(age_limit)s|%(is_live)s|%(description)s|%(format_id)s"]},
+ {"url": "https://kick.com/offline", "args": ["-j"]}
+]

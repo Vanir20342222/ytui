@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>window.initialStoreTree = {\"resources\": {\"posts\": {\"1\": {\"slug\": \"other\", \"ID\": 1}, \"2\": {\"slug\": \"thisisacoup-episode-four-surrender-or-die\", \"ID\": 46214, \"fov_videoid\": \"46214183\", \"title\": \"#ThisIsACoup &ndash; Episode Four: Surrender or Die\", \"excerpt\": \"Why Greek leaders capitulated.\", \"date\": \"2015-12-13T16:48:13\", \"comments_number\": \"5\"}}}}; other();</script></body></html>"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/v2/media/46214183",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"JW title\", \"playlist\": [{\"title\": \"JW title\", \"mediaid\": \"46214183\", \"image\": \"https://cdn.jwplayer.com/v2/media/46214183/poster.jpg\", \"duration\": 66, \"pubdate\": 1484000000, \"description\": \"JW description\", \"sources\": [{\"file\": \"https://cdn.jwplayer.com/videos/46214183-1.mp4\", \"type\": \"video/mp4\", \"height\": 360, \"width\": 640, \"label\": \"360p\", \"bitrate\": 600000}]}]}"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/videos/46214183-1.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://theintercept.com/fieldofvision/missing",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><script>initialStoreTree = {\"resources\": {\"posts\": {\"1\": {\"slug\": \"x\"}}}}</script></html>"
+  }
+ ]
+}

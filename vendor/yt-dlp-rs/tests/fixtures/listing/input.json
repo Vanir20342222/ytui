@@ -1,0 +1,66 @@
+{
+  "id": "listing-fixture",
+  "title": "Synthetic adaptive-only listing",
+  "url": "http://example.invalid/unselected",
+  "webpage_url": "http://example.invalid/page",
+  "extractor": "fixture",
+  "extractor_key": "Fixture",
+  "direct": false,
+  "ext": "mp4",
+  "formats": [
+    {
+      "format_id": "a64",
+      "url": "http://example.invalid/a64",
+      "ext": "m4a",
+      "stream_kind": "audio_only",
+      "tbr": 64,
+      "filesize": 1024,
+      "language": "en",
+      "format_note": "Low audio",
+      "acodec": "mp4a.40.2",
+      "vcodec": "none",
+      "abr": 64
+    },
+    {
+      "format_id": "a128",
+      "url": "http://example.invalid/a128",
+      "ext": "m4a",
+      "stream_kind": "audio_only",
+      "tbr": 128,
+      "filesize": null,
+      "language": "nb",
+      "format_note": "Main audio",
+      "acodec": "mp4a.40.2",
+      "vcodec": "none",
+      "abr": 128
+    },
+    {
+      "format_id": "v360",
+      "url": "http://example.invalid/v360",
+      "ext": "mp4",
+      "stream_kind": "video_only",
+      "tbr": 400,
+      "filesize": 2048,
+      "language": null,
+      "format_note": "Low video",
+      "acodec": "none",
+      "vcodec": "avc1.42001e",
+      "height": 360,
+      "width": 640
+    },
+    {
+      "format_id": "v720",
+      "url": "http://example.invalid/v720",
+      "ext": "mp4",
+      "stream_kind": "video_only",
+      "tbr": 1000,
+      "filesize": 4096,
+      "language": null,
+      "format_note": "High video",
+      "acodec": "none",
+      "vcodec": "avc1.42001e",
+      "height": 720,
+      "width": 1280
+    }
+  ]
+}

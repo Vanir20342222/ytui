@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.youtube.com/@Chan/videos", "args": ["-J", "--flat-playlist"]},
+ {"url": "https://www.youtube.com/@Chan/videos", "args": ["--flat-playlist", "--print", "%(id)s|%(title)s|%(duration)s|%(view_count)s|%(live_status)s|%(url)s"]},
+ {"url": "https://www.youtube.com/@Chan/shorts", "args": ["-J", "--flat-playlist"]},
+ {"url": "https://www.youtube.com/@Solo", "args": ["--flat-playlist", "--print", "%(playlist_id)s|%(playlist_title)s|%(id)s|%(title)s"]},
+ {"url": "https://www.youtube.com/@Chan/about", "args": ["-J", "--flat-playlist"]},
+ {"url": "https://www.youtube.com/@Chan/streams", "args": ["--flat-playlist", "--print", "id"]}
+]

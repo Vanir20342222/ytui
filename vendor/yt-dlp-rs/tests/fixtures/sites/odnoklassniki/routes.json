@@ -1,0 +1,77 @@
+{
+ "routes": [
+  {
+   "url": "https://ok.ru/video/20079905452",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"ya:ovs:upload_date\" content=\"2015-11-02T13:42:21+03:00\"><meta property=\"ya:ovs:adult\" content=\"false\"></head><body><div data-module=\"OKVideo\" data-options=\"{&quot;flashvars&quot;: {&quot;metadata&quot;: {&quot;provider&quot;: &quot;UPLOADED_ODKL&quot;, &quot;movie&quot;: {&quot;title&quot;: &quot;Девушки поют &amp;amp; танцуют&quot;, &quot;poster&quot;: &quot;https://iv.okcdn.test/poster.jpg&quot;, &quot;duration&quot;: &quot;1250&quot;, &quot;subtitleTracks&quot;: [{&quot;url&quot;: &quot;https://vd.mycdn.test/sub.vtt&quot;, &quot;language&quot;: &quot;ru&quot;}, {&quot;url&quot;: &quot;&quot;}, &quot;bad&quot;]}, &quot;author&quot;: {&quot;id&quot;: &quot;54111&quot;, &quot;name&quot;: &quot;ОК тест&quot;}, &quot;likeCount&quot;: &quot;12&quot;, &quot;videos&quot;: [{&quot;name&quot;: &quot;mobile&quot;, &quot;url&quot;: &quot;https://vd.mycdn.test/?expires=1&amp;type=4&amp;id=1&quot;}, {&quot;name&quot;: &quot;hd&quot;, &quot;url&quot;: &quot;https://vd.mycdn.test/?expires=1&amp;type=3&amp;id=1&quot;}, {&quot;name&quot;: &quot;x&quot;, &quot;url&quot;: null}], &quot;hlsManifestUrl&quot;: &quot;https://vd.mycdn.test/video.m3u8?type=2&quot;, &quot;rtmpUrl&quot;: &quot;rtmp://vd.mycdn.test/live&quot;}, &quot;videoId&quot;: &quot;20079905452&quot;}, &quot;x&quot;: &quot;20079905452&quot;}\" data-x=\"1\"></div></body></html>"
+  },
+  {
+   "url": "https://ok.ru/videoembed/555-1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head></head><body><div data-module=\"OKVideo\" data-options=\"{&quot;flashvars&quot;: {&quot;metadataUrl&quot;: &quot;https%3A%2F%2Fok.ru%2Fdk%3Fcmd%3DvideoPlayerMetadata%26mid%3D555&quot;, &quot;location&quot;: &quot;AUTOPLAY&quot;}, &quot;movieId&quot;: &quot;555-1&quot;}\" data-x=\"1\"></div></body></html>"
+  },
+  {
+   "url": "https://ok.ru/dk?cmd=videoPlayerMetadata&mid=555",
+   "request_body": [
+    "st.location=AUTOPLAY"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"provider\": \"USER_YOUTUBE\", \"movie\": {\"title\": \"From YouTube\", \"contentId\": \"https://media.example.test/yt-copy.mp4\", \"duration\": 10}, \"author\": {\"name\": \"yt\"}}"
+  },
+  {
+   "url": "https://ok.ru/video/777",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head></head><body><div data-module=\"OKVideo\" data-options=\"{&quot;isExternalPlayer&quot;: true, &quot;url&quot;: &quot;https://www.example.test/external.mp4&quot;, &quot;id&quot;: &quot;777&quot;}\" data-x=\"1\"></div></body></html>"
+  },
+  {
+   "url": "https://ok.ru/video/888",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><div class=\"vp_video_stub_txt\">Video has been blocked</div></html>"
+  },
+  {
+   "url": "https://ok.ru/video/999",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><div class=\"x\">Access to this video is restricted</div></html>"
+  },
+  {
+   "url": "https://vd.mycdn.test/video.m3u8?type=2",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x360\nhttps://vd.mycdn.test/360.m3u8?type=1\n"
+  },
+  {
+   "url": "https://vd.mycdn.test/360.m3u8?type=1",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\nseg.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://media.example.test/yt-copy.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-copy"
+  },
+  {
+   "url": "https://vd.mycdn.test/?expires=1&type=3&id=1",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-ok"
+  }
+ ]
+}

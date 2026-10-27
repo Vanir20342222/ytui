@@ -1,0 +1,40 @@
+{
+ "routes": [
+  {
+   "url": "http://www.historicfilms.com/tapes/4728",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "4728.html"
+  },
+  {
+   "url": "http://www.historicfilms.com/video/GP7-1_4728_web.mov",
+   "headers": {
+    "Content-Type": "video/quicktime"
+   },
+   "body_file": "media.mov"
+  },
+  {
+   "url": "https://historicfilms.com/play9",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><meta property=\"og:image\" content=\"http://www.historicfilms.com/og/9.jpg\"></head><body><script>var player = {tapeId: \"T9\"};</script></body></html>"
+  },
+  {
+   "url": "https://historicfilms.com/tapes/10",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>none</title></head></html>"
+  },
+  {
+   "url": "https://historicfilms.com/tapes/11",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "missing"
+  }
+ ]
+}

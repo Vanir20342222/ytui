@@ -1,0 +1,83 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"46214183\", \"title\": \"#ThisIsACoup &ndash; Episode Four: Surrender or Die\", \"description\": \"Why Greek leaders capitulated.\", \"thumbnail\": \"https://cdn.jwplayer.com/v2/media/46214183/poster.jpg\", \"timestamp\": 1450025293, \"duration\": 66.0, \"subtitles\": {}, \"alt_title\": null, \"genre\": null, \"channel\": null, \"season_number\": null, \"episode_number\": null, \"release_year\": null, \"age_limit\": null, \"formats\": [{\"url\": \"https://cdn.jwplayer.com/videos/46214183-1.mp4\", \"width\": 640, \"height\": 360, \"tbr\": 600, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"360p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 4950000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"360p - 640x360\"}], \"original_url\": \"https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/\", \"webpage_url\": \"https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/\", \"webpage_url_basename\": \"thisisacoup-episode-four-surrender-or-die\", \"webpage_url_domain\": \"theintercept.com\", \"extractor\": \"JWPlatform\", \"extractor_key\": \"JWPlatform\", \"display_id\": \"thisisacoup-episode-four-surrender-or-die\", \"comment_count\": 5, \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cdn.jwplayer.com/v2/media/46214183/poster.jpg\", \"id\": \"0\"}], \"fulltitle\": \"#ThisIsACoup &ndash; Episode Four: Surrender or Die\", \"duration_string\": \"1:06\", \"upload_date\": \"20151213\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.jwplayer.com/videos/46214183-1.mp4\", \"width\": 640, \"height\": 360, \"tbr\": 600, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"360p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 4950000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"360p - 640x360\", \"_filename\": \"#ThisIsACoup &ndash; Episode Four\\uff1a Surrender or Die [46214183].mp4\", \"filename\": \"#ThisIsACoup &ndash; Episode Four\\uff1a Surrender or Die [46214183].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[TheIntercept] Extracting URL: https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+    "[TheIntercept] thisisacoup-episode-four-surrender-or-die: Downloading webpage",
+    "[JWPlatform] Extracting URL: jwplatform:46214183",
+    "[JWPlatform] 46214183: Downloading JSON metadata",
+    "[info] Available formats for 46214183:",
+    "ID   EXT RESOLUTION | FILESIZE  TBR PROTO | VCODEC  ACODEC",
+    "-----------------------------------------------------------",
+    "360p mp4 640x360    | ≈4.72MiB 600k https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(description)s|%(timestamp)s|%(comment_count)s|%(extractor)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "46214183|thisisacoup-episode-four-surrender-or-die|#ThisIsACoup &ndash; Episode Four: Surrender or Die|Why Greek leaders capitulated.|1450025293|5|JWPlatform|https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[TheIntercept] Extracting URL: https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/",
+    "[TheIntercept] thisisacoup-episode-four-surrender-or-die: Downloading webpage",
+    "[JWPlatform] Extracting URL: jwplatform:46214183",
+    "[JWPlatform] 46214183: Downloading JSON metadata",
+    "[info] 46214183: Downloading 1 format(s): 360p",
+    "[download] Destination: 46214183.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "46214183.mp4": 792
+   }
+  },
+  {
+   "url": "https://theintercept.com/fieldofvision/missing",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [TheIntercept] missing: Unable to find the current post; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

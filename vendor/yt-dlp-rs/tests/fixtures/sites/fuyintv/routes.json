@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://www.fuyin.tv/api/api/tv.movie/url?urlid=44129",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"title\": \"\\u7b2c1\\u96c6\", \"url\": \"https://fy.test/v.m3u8x\"}}"
+  },
+  {
+   "url": "https://www.fuyin.tv/html/2733/44129.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"description\" content=\"福音 &amp; 视频\"></head></html>"
+  },
+  {
+   "url": "https://www.fuyin.tv/api/api/tv.movie/url?urlid=2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"url\": \"https://fy.test/v.mp4\"}}"
+  },
+  {
+   "url": "https://www.fuyin.tv/api/api/tv.movie/url?urlid=3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"title\": \"x\"}}"
+  },
+  {
+   "url": "https://www.fuyin.tv/api/api/tv.movie/url?urlid=4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"title\": null, \"url\": \"https://fy.test/v.mp4\"}}"
+  },
+  {
+   "url": "https://www.fuyin.tv/html/1/4.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><title>x</title></html>"
+  },
+  {
+   "url": "https://www.fuyin.tv/html/1/3.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html></html>"
+  },
+  {
+   "url": "https://fy.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

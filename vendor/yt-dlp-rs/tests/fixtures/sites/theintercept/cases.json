@@ -1,0 +1,7 @@
+[
+ {"url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/", "args": ["-j"]},
+ {"url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/", "args": ["-F"]},
+ {"url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(description)s|%(timestamp)s|%(comment_count)s|%(extractor)s|%(webpage_url)s"]},
+ {"url": "https://theintercept.com/fieldofvision/thisisacoup-episode-four-surrender-or-die/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://theintercept.com/fieldofvision/missing", "args": ["-j"]}
+]

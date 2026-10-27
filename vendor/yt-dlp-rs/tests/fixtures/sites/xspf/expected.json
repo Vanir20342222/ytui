@@ -1,0 +1,178 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"show\", \"_type\": \"playlist\", \"entries\": [{\"id\": \"show\", \"title\": \"First & best\", \"description\": \"About it\", \"thumbnail\": \"https://media.example.test/a.jpg\", \"duration\": 10.5, \"formats\": [{\"url\": \"https://cdn.example.test/a-lo.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Lo\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Lo - unknown\"}, {\"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 1, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 1, \"thumbnails\": [{\"url\": \"https://media.example.test/a.jpg\", \"id\": \"0\"}], \"display_id\": \"show\", \"fulltitle\": \"First & best\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\", \"_filename\": \"First & best [show].mp4\", \"filename\": \"First & best [show].mp4\", \"__write_download_archive\": false}], \"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\"}, {\"id\": \"show\", \"title\": \"show\", \"description\": null, \"thumbnail\": null, \"formats\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 2, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 2, \"display_id\": \"show\", \"fulltitle\": \"show\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"show [show].mp4\", \"filename\": \"show [show].mp4\", \"__write_download_archive\": false}], \"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"original_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"show\", \"title\": \"First & best\", \"description\": \"About it\", \"thumbnail\": \"https://media.example.test/a.jpg\", \"duration\": 10.5, \"formats\": [{\"url\": \"https://cdn.example.test/a-lo.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Lo\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Lo - unknown\"}, {\"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 1, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 1, \"thumbnails\": [{\"url\": \"https://media.example.test/a.jpg\", \"id\": \"0\"}], \"display_id\": \"show\", \"fulltitle\": \"First & best\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\", \"_filename\": \"First & best [show].mp4\", \"filename\": \"First & best [show].mp4\", \"_type\": \"video\"}",
+    "{\"id\": \"show\", \"title\": \"show\", \"description\": null, \"thumbnail\": null, \"formats\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 2, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 2, \"display_id\": \"show\", \"fulltitle\": \"show\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"show [show].mp4\", \"filename\": \"show [show].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "-s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/lists/show.xspf",
+    "[generic] show: Downloading webpage",
+    "[generic] show: Extracting information",
+    "[download] Downloading playlist: show",
+    "[generic] Playlist show: Downloading 2 items of 2",
+    "[download] Downloading item 1 of 2",
+    "[info] show: Downloading 1 format(s): Hi",
+    "[download] Downloading item 2 of 2",
+    "[info] show: Downloading 1 format(s): 0",
+    "[download] Finished downloading playlist: show"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/lists/show.xspf",
+    "[generic] show: Downloading webpage",
+    "[generic] show: Extracting information",
+    "[download] Downloading playlist: show",
+    "[generic] Playlist show: Downloading 2 items of 2",
+    "[download] Downloading item 1 of 2",
+    "[info] Available formats for show:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "Lo mp4 unknown    | https | unknown unknown",
+    "Hi mp4 1280x720   | https | unknown unknown",
+    "[download] Downloading item 2 of 2",
+    "[info] Available formats for show:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | https | unknown unknown",
+    "[download] Finished downloading playlist: show"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"show\", \"_type\": \"playlist\", \"entries\": [{\"id\": \"show\", \"title\": \"First & best\", \"description\": \"About it\", \"thumbnail\": \"https://media.example.test/a.jpg\", \"duration\": 10.5, \"formats\": [{\"url\": \"https://cdn.example.test/a-lo.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Lo\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Lo - unknown\"}, {\"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 1, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 1, \"thumbnails\": [{\"url\": \"https://media.example.test/a.jpg\", \"id\": \"0\"}], \"display_id\": \"show\", \"fulltitle\": \"First & best\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\", \"_filename\": \"First & best [show].mp4\", \"filename\": \"First & best [show].mp4\", \"__write_download_archive\": false}], \"url\": \"https://media.example.test/lists/media/a.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"Hi\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"Hi - 1280x720\"}, {\"id\": \"show\", \"title\": \"show\", \"description\": null, \"thumbnail\": null, \"formats\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"playlist_count\": 2, \"playlist\": \"show\", \"playlist_id\": \"show\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/lists/show.xspf\", \"n_entries\": 2, \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 2, \"__last_playlist_index\": 2, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 2, \"display_id\": \"show\", \"fulltitle\": \"show\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"show [show].mp4\", \"filename\": \"show [show].mp4\", \"__write_download_archive\": false}], \"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/lists/show.xspf\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://media.example.test/lists/show.xspf\", \"original_url\": \"https://media.example.test/lists/show.xspf\", \"webpage_url_basename\": \"show.xspf\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "--print",
+    "%(playlist_index)s|%(id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(format_id)s|%(width)s|%(manifest_url)s|%(playlist_title)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1|show|First & best|About it|10.5|https://media.example.test/a.jpg|Hi|1280|https://media.example.test/lists/show.xspf|NA",
+    "2|show|show|NA|NA|NA|0|NA|https://media.example.test/lists/show.xspf|NA"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(playlist_index)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/lists/show.xspf",
+    "[generic] show: Downloading webpage",
+    "[generic] show: Extracting information",
+    "[download] Downloading playlist: show",
+    "[generic] Playlist show: Downloading 2 items of 2",
+    "[download] Downloading item 1 of 2",
+    "[info] show: Downloading 1 format(s): Hi",
+    "[download] Destination: 1.mp4",
+    "[download] Download completed",
+    "[download] Downloading item 2 of 2",
+    "[info] show: Downloading 1 format(s): 0",
+    "[download] Destination: 2.mp4",
+    "[download] Download completed",
+    "[download] Finished downloading playlist: show"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "1.mp4": 792,
+    "2.mp4": 792
+   }
+  },
+  {
+   "url": "https://media.example.test/plain.xml",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"plain\", \"title\": \"plain\", \"description\": null, \"thumbnail\": null, \"formats\": [{\"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/plain.xml\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"playlist_count\": 1, \"playlist\": \"plain\", \"playlist_id\": \"plain\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://media.example.test/plain.xml\", \"n_entries\": 1, \"webpage_url\": \"https://media.example.test/plain.xml\", \"webpage_url_basename\": \"plain.xml\", \"webpage_url_domain\": \"media.example.test\", \"playlist_index\": 1, \"__last_playlist_index\": 1, \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist_autonumber\": 1, \"display_id\": \"plain\", \"fulltitle\": \"plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://media.example.test/b.mp4\", \"manifest_url\": \"https://media.example.test/plain.xml\", \"format_id\": \"0\", \"width\": null, \"height\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"plain [plain].mp4\", \"filename\": \"plain [plain].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/empty.xspf",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"empty\", \"_type\": \"playlist\", \"entries\": [], \"webpage_url\": \"https://media.example.test/empty.xspf\", \"original_url\": \"https://media.example.test/empty.xspf\", \"webpage_url_basename\": \"empty.xspf\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 0, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

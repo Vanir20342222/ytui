@@ -1,0 +1,86 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://cjsw.com/program/freshly-squeezed/episode/20170620",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"91d9f016-a2e7-46c5-8dcb-7cbcd7437c41\", \"title\": \"Freshly Squeezed \\u2013 Episode June 20, 2017\", \"description\": \"A great show & more\", \"formats\": [{\"url\": \"https://cjsw.test/audio/91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3?x=1\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\"}], \"series\": \"Freshly Squeezed\", \"episode_id\": \"20170620\", \"webpage_url\": \"http://cjsw.com/program/freshly-squeezed/episode/20170620\", \"original_url\": \"http://cjsw.com/program/freshly-squeezed/episode/20170620\", \"webpage_url_basename\": \"20170620\", \"webpage_url_domain\": \"cjsw.com\", \"extractor\": \"CJSW\", \"extractor_key\": \"CJSW\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"91d9f016-a2e7-46c5-8dcb-7cbcd7437c41\", \"fulltitle\": \"Freshly Squeezed \\u2013 Episode June 20, 2017\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cjsw.test/audio/91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3?x=1\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Freshly Squeezed \\u2013 Episode June 20, 2017 [91d9f016-a2e7-46c5-8dcb-7cbcd7437c41].mp3\", \"filename\": \"Freshly Squeezed \\u2013 Episode June 20, 2017 [91d9f016-a2e7-46c5-8dcb-7cbcd7437c41].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://cjsw.com/program/freshly-squeezed/episode/20170620",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(series)s|%(episode_id)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "91d9f016-a2e7-46c5-8dcb-7cbcd7437c41|Freshly Squeezed – Episode June 20, 2017|A great show & more|Freshly Squeezed|20170620|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://cjsw.com/program/freshly-squeezed/episode/20170620",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[CJSW] Extracting URL: http://cjsw.com/program/freshly-squeezed/episode/20170620",
+    "[CJSW] 20170620: Downloading webpage",
+    "[info] 91d9f016-a2e7-46c5-8dcb-7cbcd7437c41: Downloading 1 format(s): 0",
+    "[download] Destination: 91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3": 778
+   }
+  },
+  {
+   "url": "https://www.cjsw.com/program/road-pops/episode/20170707/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"road-pops/20170707\", \"title\": \"Road \\\"Pops\\\"\", \"description\": null, \"formats\": [{\"url\": \"https://cjsw.test/audio/road\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\"}], \"series\": \"road-pops\", \"episode_id\": \"20170707\", \"webpage_url\": \"https://www.cjsw.com/program/road-pops/episode/20170707/\", \"original_url\": \"https://www.cjsw.com/program/road-pops/episode/20170707/\", \"webpage_url_basename\": \"20170707\", \"webpage_url_domain\": \"cjsw.com\", \"extractor\": \"CJSW\", \"extractor_key\": \"CJSW\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"road-pops/20170707\", \"fulltitle\": \"Road \\\"Pops\\\"\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cjsw.test/audio/road\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Road \\uff02Pops\\uff02 [road-pops\\u29f820170707].mp3\", \"filename\": \"Road \\uff02Pops\\uff02 [road-pops\\u29f820170707].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://cjsw.com/program/none/episode/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CJSW] 3: Unable to extract audio url; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cjsw.com/program/untitled/episode/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CJSW] 4: Unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

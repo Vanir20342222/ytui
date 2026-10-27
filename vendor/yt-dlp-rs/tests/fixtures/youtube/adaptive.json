@@ -1,0 +1,70 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Saved adaptive fixture",
+    "lengthSeconds": "1",
+    "isLiveContent": false
+  },
+  "streamingData": {
+    "formats": [
+      {
+        "itag": 18,
+        "url": "{{ORIGIN}}/media/muxed.mp4",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "width": 640,
+        "height": 360,
+        "contentLength": "5",
+        "bitrate": 400000,
+        "audioQuality": "AUDIO_QUALITY_LOW"
+      }
+    ],
+    "adaptiveFormats": [
+      {
+        "itag": 137,
+        "url": "{{ORIGIN}}/media/video.mp4",
+        "mimeType": "video/mp4; codecs=\"avc1.640028\"",
+        "width": 1920,
+        "height": 1080,
+        "contentLength": "7",
+        "bitrate": 2200000,
+        "averageBitrate": 2000000
+      },
+      {
+        "itag": 139,
+        "url": "{{ORIGIN}}/media/audio-low.m4a",
+        "mimeType": "audio/mp4; codecs=\"mp4a.40.5\"",
+        "contentLength": "3",
+        "bitrate": 48000,
+        "audioQuality": "AUDIO_QUALITY_LOW"
+      },
+      {
+        "itag": 140,
+        "url": "{{ORIGIN}}/media/audio.m4a",
+        "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
+        "contentLength": "4",
+        "bitrate": 128000,
+        "audioQuality": "AUDIO_QUALITY_MEDIUM"
+      },
+      {
+        "itag": 248,
+        "url": "{{ORIGIN}}/media/video.webm",
+        "mimeType": "video/webm; codecs=\"vp9\"",
+        "width": 1280,
+        "height": 720,
+        "contentLength": "6",
+        "bitrate": 1000000
+      },
+      {
+        "itag": 251,
+        "url": "{{ORIGIN}}/media/audio.webm",
+        "mimeType": "audio/webm; codecs=\"opus\"",
+        "contentLength": "2",
+        "bitrate": 96000,
+        "audioQuality": "AUDIO_QUALITY_MEDIUM"
+      }
+    ]
+  }
+}

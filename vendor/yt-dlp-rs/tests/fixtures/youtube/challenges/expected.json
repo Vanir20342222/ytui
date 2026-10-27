@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "player_id": "74edf1a3",
+  "player_file": "player-74edf1a3.js",
+  "player_url": "https://www.youtube.com/s/player/74edf1a3/player_ias.vflset/en_US/base.js",
+  "player_sha3_512": "1fd297295bdaca4b870512d9c2d8246dce31450c6fbb059a5ce081deafbe7c10673c9ab73df6e002bb5a6070b0face3872f4463c4fb57f362cfe6cb62527c2f8",
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "vectors_source": "https://github.com/yt-dlp/yt-dlp/blob/897341241f2bfb2439fe0367f4c7c9ccd29a3828/test/test_jsc/test_ejs_integration.py",
+  "normalization": "Exact challenge and solution strings; no URL or timestamp normalization.",
+  "requests": [
+    {
+      "type": "n",
+      "challenges": {
+        "IlLiA21ny7gqA2m4p37": "9nRTxrbM1f0yHg",
+        "eabGFpsUKuWHXGh6FR4": "izmYqDEY6kl7Sg",
+        "eabGF/ps%UK=uWHXGh6FR4": "LACmqlhaBpiPlgE-a"
+      }
+    },
+    {
+      "type": "sig",
+      "challenges": {
+        "NJAJEij0EwRgIhAI0KExTgjfPk-MPM9MAdzyyPRt=BM8-XO5tm5hlMCSVpAiEAv7eP3CURqZNSPow8BXXAoazVoXgeMP7gH9BdylHCwgw=gwzz": "NJAJEij0EwRgIhAI0KExTgjfPk-MPM9MAdzyyPRt=BM8-XO5tm5hzMCSVpAiEAv7eP3CURqZNSPow8BXXAoazVoXgeMP7gH9BdylHCwgw=gwzl",
+        "\u0000\u0001\u0002%\u0003\u0004\u0005\u0006\u0007\b\t\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019 !\"#$%&'()0123456789@ABCDEFGHI": "\u0000\u0001\u0002%\u0003\u0004\u0005\u0006\u0007\b\t\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019 !\"#$%&'()0123456789@ABIDEFGHC"
+      }
+    }
+  ]
+}

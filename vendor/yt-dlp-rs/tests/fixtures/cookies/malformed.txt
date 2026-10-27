@@ -1,0 +1,4 @@
+# Netscape HTTP Cookie File
+invalid
+.example.test	TRUE	/	FALSE	not-a-date	bad	value
+.example.test	TRUE	/	FALSE	0	good	value

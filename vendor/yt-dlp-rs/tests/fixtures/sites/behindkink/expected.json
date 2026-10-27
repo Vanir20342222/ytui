@@ -1,0 +1,87 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"37127\", \"display_id\": \"what-are-you-passionate-about-marley-blaze\", \"url\": \"http://www.behindkink.com/videos/37127_MB_1_x.mp4\", \"title\": \"What are you passionate about \\u2013 Marley Blaze\", \"thumbnail\": \"http://www.behindkink.com/wp-content/uploads/2014/12/thumb.jpg\", \"description\": \"Marley Blaze talks about her passion.\", \"upload_date\": \"20141205\", \"age_limit\": 18, \"webpage_url\": \"http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/\", \"original_url\": \"http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/\", \"webpage_url_basename\": \"what-are-you-passionate-about-marley-blaze\", \"webpage_url_domain\": \"behindkink.com\", \"extractor\": \"BehindKink\", \"extractor_key\": \"BehindKink\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://www.behindkink.com/wp-content/uploads/2014/12/thumb.jpg\", \"id\": \"0\"}], \"fulltitle\": \"What are you passionate about \\u2013 Marley Blaze\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"What are you passionate about \\u2013 Marley Blaze [37127].mp4\", \"filename\": \"What are you passionate about \\u2013 Marley Blaze [37127].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(upload_date)s|%(age_limit)s|%(thumbnail)s|%(description)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "37127|what-are-you-passionate-about-marley-blaze|What are you passionate about – Marley Blaze|20141205|18|http://www.behindkink.com/wp-content/uploads/2014/12/thumb.jpg|Marley Blaze talks about her passion."
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[BehindKink] Extracting URL: http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/",
+    "[BehindKink] what-are-you-passionate-about-marley-blaze: Downloading webpage",
+    "[info] 37127: Downloading 1 format(s): 0",
+    "[download] Destination: 37127.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {
+    "37127.mp4": 792
+   }
+  },
+  {
+   "url": "https://behindkink.com/2015/01/02/bare",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"plain.mp4\", \"display_id\": \"bare\", \"url\": \"http://www.behindkink.com/videos/plain.mp4\", \"title\": \"BehindKink video #plain.mp4\", \"thumbnail\": null, \"description\": null, \"upload_date\": \"20150102\", \"age_limit\": 18, \"webpage_url\": \"https://behindkink.com/2015/01/02/bare\", \"original_url\": \"https://behindkink.com/2015/01/02/bare\", \"webpage_url_basename\": \"bare\", \"webpage_url_domain\": \"behindkink.com\", \"extractor\": \"BehindKink\", \"extractor_key\": \"BehindKink\", \"playlist\": null, \"playlist_index\": null, \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"BehindKink video #plain.mp4 [plain.mp4].mp4\", \"filename\": \"BehindKink video #plain.mp4 [plain.mp4].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work.",
+    "WARNING: [BehindKink] unable to extract OpenGraph title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [BehindKink] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [BehindKink] unable to extract OpenGraph description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://behindkink.com/2015/01/03/none",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work.",
+    "ERROR: [BehindKink] none: Unable to extract video URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

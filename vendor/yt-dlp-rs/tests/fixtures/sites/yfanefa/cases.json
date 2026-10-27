@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.yfanefa.com/record/2717", "args": ["-j"]},
+ {"url": "https://yfanefa.com/news/x/y/", "args": ["-j"]},
+ {"url": "https://yfanefa.com/news/x/y/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.yfanefa.com/record/3", "args": ["-j"]},
+ {"url": "https://www.yfanefa.com/record/4", "args": ["-j"]}
+]

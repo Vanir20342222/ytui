@@ -1,0 +1,64 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"6850898786781339649\", \"formats\": [{\"url\": \"https://dms.licdn.test/playlist/360.mp4\", \"ext\": \"mp4\", \"tbr\": 600.0, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}, {\"url\": \"https://dms.licdn.test/playlist/720.mp4\", \"ext\": \"mp4\", \"tbr\": 2195.042, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"1\", \"format\": \"1 - unknown\"}], \"title\": \"Mishal K. on LinkedIn: #toronto\", \"like_count\": 44, \"uploader\": \"Mishal K.\", \"thumbnail\": \"https://media.licdn.test/thumb.jpg\", \"description\": \"Post text\", \"subtitles\": {\"en\": [{\"url\": \"https://dms.licdn.test/captions.vtt\", \"ext\": \"vtt\"}]}, \"webpage_url\": \"https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20\", \"original_url\": \"https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20\", \"webpage_url_basename\": \"mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20\", \"webpage_url_domain\": \"linkedin.com\", \"extractor\": \"LinkedIn\", \"extractor_key\": \"LinkedIn\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://media.licdn.test/thumb.jpg\", \"id\": \"0\"}], \"display_id\": \"6850898786781339649\", \"fulltitle\": \"Mishal K. on LinkedIn: #toronto\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://dms.licdn.test/playlist/720.mp4\", \"ext\": \"mp4\", \"tbr\": 2195.042, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"1\", \"format\": \"1 - unknown\", \"_filename\": \"Mishal K. on LinkedIn\\uff1a #toronto [6850898786781339649].mp4\", \"filename\": \"Mishal K. on LinkedIn\\uff1a #toronto [6850898786781339649].mp4\", \"__write_download_archive\": false}], \"url\": \"https://dms.licdn.test/playlist/720.mp4\", \"ext\": \"mp4\", \"tbr\": 2195.042, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"1\", \"format\": \"1 - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.linkedin.com/feed/update/urn:li:activity:7016901149999955968/",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"7016901149999955968\", \"formats\": [{\"url\": \"https://dms.licdn.test/v.mp4\", \"ext\": \"mp4\", \"tbr\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"title\": \"Only title\", \"like_count\": null, \"uploader\": null, \"thumbnail\": null, \"description\": null, \"subtitles\": {}, \"webpage_url\": \"https://www.linkedin.com/feed/update/urn:li:activity:7016901149999955968/\", \"original_url\": \"https://www.linkedin.com/feed/update/urn:li:activity:7016901149999955968/\", \"webpage_url_basename\": \"urn:li:activity:7016901149999955968\", \"webpage_url_domain\": \"linkedin.com\", \"extractor\": \"LinkedIn\", \"extractor_key\": \"LinkedIn\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"7016901149999955968\", \"fulltitle\": \"Only title\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://dms.licdn.test/v.mp4\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Only title [7016901149999955968].mp4\", \"filename\": \"Only title [7016901149999955968].mp4\", \"__write_download_archive\": false}], \"url\": \"https://dms.licdn.test/v.mp4\", \"ext\": \"mp4\", \"tbr\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [LinkedIn] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.linkedin.com/feed/update/urn:li:activity:1/",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [LinkedIn] 1: Unable to extract video; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[LinkedIn] Extracting URL: https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20",
+    "[LinkedIn] 6850898786781339649: Downloading webpage",
+    "[info] 6850898786781339649: Downloading 1 format(s): 1",
+    "[download] Destination: 6850898786781339649.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "6850898786781339649.mp4": 15
+   }
+  }
+ ]
+}

@@ -1,0 +1,109 @@
+[
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"VideoObject\",\"name\":\"LD &amp; Video\",\"description\":\"D\",\"contentUrl\":\"https://e.invalid/a.mp4\",\"thumbnailUrl\":[\"//e.invalid/t.jpg\",\"bad\"],\"uploadDate\":\"2024-01-02T03:04:05Z\",\"duration\":\"PT1M2.5S\",\"author\":{\"@type\":\"Person\",\"name\":\"Ann\"},\"contentSize\":\"123.9\",\"bitrate\":\"500\",\"width\":640,\"height\":\"360\",\"keywords\":\"a, b\",\"encodingFormat\":\"video/mp4\"}</script>",
+  {
+   "url": "https://e.invalid/a.mp4",
+   "ext": "mp4",
+   "title": "LD & Video",
+   "description": "D",
+   "thumbnails": [
+    {
+     "url": "https://e.invalid/t.jpg"
+    }
+   ],
+   "duration": 62.5,
+   "timestamp": 1704164645,
+   "uploader": "Ann",
+   "filesize": 123,
+   "tbr": 500,
+   "width": 640,
+   "height": 360,
+   "tags": [
+    "a",
+    " b"
+   ]
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"AudioObject\",\"name\":\"Song\",\"contentUrl\":\"http://e.invalid/s.mp3\",\"bitrate\":128,\"byArtist\":{\"name\":\"Band\"},\"interactionStatistic\":[{\"@type\":\"InteractionCounter\",\"interactionType\":{\"@type\":\"ListenAction\"},\"userInteractionCount\":\"1.234\"},{\"@type\":\"InteractionCounter\",\"interactionType\":\"http://schema.org/LikeAction\",\"userInteractionCount\":5}]}</script>",
+  {
+   "url": "http://e.invalid/s.mp3",
+   "title": "Song",
+   "thumbnails": [],
+   "artist": "Band",
+   "tbr": 128,
+   "view_count": 1234,
+   "vcodec": "none",
+   "abr": 128,
+   "like_count": 5
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebPage\",\"name\":\"Page\"},{\"@type\":\"VideoObject\",\"name\":\"G\",\"embedUrl\":\"https://e.invalid/e\",\"aggregateRating\":{\"ratingValue\":\"4.5\"}}]}</script>",
+  {
+   "average_rating": 4.5,
+   "title": "G",
+   "thumbnails": []
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"TVEpisode\",\"name\":\"Ep\",\"episodeNumber\":\"3\",\"partOfSeason\":{\"@type\":\"TVSeason\",\"name\":\"S1\",\"seasonNumber\":1},\"partOfSeries\":{\"@type\":\"TVSeries\",\"name\":\"Show\"},\"video\":{\"@type\":\"VideoObject\",\"contentUrl\":\"https://e.invalid/ep.mp4\",\"name\":\"Ep video\"}}</script>",
+  {
+   "episode": "Ep",
+   "episode_number": 3,
+   "title": "Ep video",
+   "season": "S1",
+   "season_number": 1,
+   "series": "Show",
+   "url": "https://e.invalid/ep.mp4",
+   "thumbnails": []
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"NewsArticle\",\"headline\":\"H\",\"datePublished\":\"2024-03-04T05:06:07.123+02:00\",\"articleBody\":\"\",\"description\":\"Fallback\",\"video\":[{\"@type\":\"VideoObject\",\"contentUrl\":\"https://e.invalid/n.mp4\"}]}</script>",
+  {
+   "url": "https://e.invalid/n.mp4",
+   "thumbnails": []
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Movie\",\"name\":\"M\",\"duration\":\"PT2H\",\"dateCreated\":\"2020-01-01\"}</script>",
+  {
+   "title": "M",
+   "duration": 7200,
+   "timestamp": 1577836800
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">[{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"O\"},{\"@context\":\"https://schema.org\",\"@type\":\"VideoObject\",\"name\":\"Second\",\"contentUrl\":\"rtmp://e.invalid/x\",\"hasPart\":[{\"@type\":\"Clip\",\"name\":\"One\",\"startOffset\":0,\"endOffset\":10},{\"@type\":\"Clip\",\"name\":\"Two\",\"startOffset\":10}],\"duration\":\"PT20S\"}]</script>",
+  {
+   "url": "rtmp://e.invalid/x",
+   "title": "Second",
+   "thumbnails": [],
+   "duration": 20,
+   "chapters": [
+    {
+     "title": "One",
+     "start_time": 0,
+     "end_time": 10
+    },
+    {
+     "title": "Two",
+     "start_time": 10,
+     "end_time": 20
+    }
+   ]
+  }
+ ],
+ [
+  "<script type=\"application/ld+json\">{\"@type\":\"VideoObject\",\"name\":\"No context\"}</script><script type=\"application/ld+json\">{\"@context\":\"x\",\"@type\":\"VideoObject\",\"name\":\"bad json\",}</script>",
+  {}
+ ],
+ [
+  "<script type=application/ld+json>{\"@context\":\"x\",\"@type\":[\"Thing\",\"VideoObject\"],\"name\":\"Line\nbreak\",\"contentUrl\":\"a.mp4\"}</script>",
+  {
+   "title": "Line\nbreak",
+   "thumbnails": []
+  }
+ ]
+]

@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head>\n<meta property=\"og:title\" content=\"China, Indonesia vow\">\n<meta property=\"og:description\" content=\"Maritime &amp; more\">\n<meta property=\"og:image\" content=\"https://cgtn.test/t.jpg\">\n</head><body><div data-video =\"https://cgtn.test/hls/video.m3u8\"></div>\n<span class=\"date\"> 11:30, 06-Jun-2021 </span><span class=\"section\">\n <b>China</b> </span><div class=\"news-author-name\"> CGTN </div></body></html>"
+  },
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/Bare-x1/index.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div data-video =\"https://cgtn.test/hls/video.m3u8\"></div></body></html>"
+  },
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/None-x2/index.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>nothing</body></html>"
+  },
+  {
+   "url": "https://cgtn.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  }
+ ]
+}

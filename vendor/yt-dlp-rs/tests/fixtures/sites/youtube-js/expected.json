@@ -1,0 +1,117 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc",
+   "args": [
+    "-F"
+   ],
+   "requires": [
+    "deno"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[youtube] Extracting URL: https://www.youtube.com/watch?v=BaW_jenozKc",
+    "[youtube] BaW_jenozKc: Downloading webpage",
+    "[youtube] BaW_jenozKc: Downloading tv samsung player API JSON",
+    "[youtube] BaW_jenozKc: Downloading visionos player API JSON",
+    "[youtube] BaW_jenozKc: Downloading player 74edf1a3-main",
+    "[youtube] [jsc:deno] Solving JS challenges using deno",
+    "[info] Available formats for BaW_jenozKc:",
+    "ID      EXT  RESOLUTION FPS CH | FILESIZE  TBR PROTO | VCODEC       VBR ACODEC      ABR ASR MORE INFO",
+    "------------------------------------------------------------------------------------------------------------------",
+    "251-drc webm audio only      2 |  778.00B 100k https | audio only       opus       100k 48k medium, DRC, webm_dash",
+    "140     m4a  audio only      2 |  778.00B 200k https | audio only       mp4a.40.2  200k 44k medium, m4a_dash",
+    "18      mp4  640x360     30  2 |  792.00B 100k https | avc1.42001E      mp4a.40.2       44k 360p",
+    "136     mp4  1280x720    30    |  792.00B 200k https | avc1.4d401f 200k video only          720p, mp4_dash",
+    "137     mp4  1920x1080   30    |  792.00B  90k https | avc1.640028  90k video only          1080p, mp4_dash"
+   ],
+   "stderr": [
+    "WARNING: [youtube] BaW_jenozKc: Some tv_samsung client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc",
+   "args": [
+    "--print",
+    "%(formats.:.url)j"
+   ],
+   "requires": [
+    "deno"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[\"https://rr1.googlevideo.test/videoplayback?itag=251&client=visionos\", \"https://rr2.googlevideo.test/videoplayback?itag=140&client=tv&sig=NJAJEij0EwRgIhAI0KExTgjfPk-MPM9MAdzyyPRt=BM8-XO5tm5hzMCSVpAiEAv7eP3CURqZNSPow8BXXAoazVoXgeMP7gH9BdylHCwgw=gwzl\", \"https://rr1.googlevideo.test/videoplayback?itag=18&client=visionos\", \"https://rr2.googlevideo.test/videoplayback?itag=136&client=tv&n=9nRTxrbM1f0yHg\", \"https://rr1.googlevideo.test/videoplayback?itag=137&client=visionos\"]"
+   ],
+   "stderr": [
+    "WARNING: [youtube] BaW_jenozKc: Some tv_samsung client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc",
+   "args": [
+    "--no-progress",
+    "-f",
+    "136",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "requires": [
+    "deno"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[youtube] Extracting URL: https://www.youtube.com/watch?v=BaW_jenozKc",
+    "[youtube] BaW_jenozKc: Downloading webpage",
+    "[youtube] BaW_jenozKc: Downloading tv samsung player API JSON",
+    "[youtube] BaW_jenozKc: Downloading visionos player API JSON",
+    "[youtube] BaW_jenozKc: Downloading player 74edf1a3-main",
+    "[youtube] [jsc:deno] Solving JS challenges using deno",
+    "[info] BaW_jenozKc: Downloading 1 format(s): 136",
+    "[download] Destination: BaW_jenozKc.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [youtube] BaW_jenozKc: Some tv_samsung client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details"
+   ],
+   "files": {
+    "BaW_jenozKc.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc",
+   "args": [
+    "--no-progress",
+    "-f",
+    "140",
+    "--fixup",
+    "never",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "requires": [
+    "deno"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[youtube] Extracting URL: https://www.youtube.com/watch?v=BaW_jenozKc",
+    "[youtube] BaW_jenozKc: Downloading webpage",
+    "[youtube] BaW_jenozKc: Downloading tv samsung player API JSON",
+    "[youtube] BaW_jenozKc: Downloading visionos player API JSON",
+    "[youtube] BaW_jenozKc: Downloading player 74edf1a3-main",
+    "[youtube] [jsc:deno] Solving JS challenges using deno",
+    "[info] BaW_jenozKc: Downloading 1 format(s): 140",
+    "[download] Destination: BaW_jenozKc.m4a",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [youtube] BaW_jenozKc: Some tv_samsung client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details"
+   ],
+   "files": {
+    "BaW_jenozKc.m4a": 778
+   }
+  }
+ ]
+}

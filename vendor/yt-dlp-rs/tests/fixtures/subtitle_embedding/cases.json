@@ -1,0 +1,4823 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "container-mp4",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mp4-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt",
+              "subs/movie.fr.srt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra",
+              "-metadata:s:s:1",
+              "handler_name=Français",
+              "-metadata:s:s:1",
+              "title=Français"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mov",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mov",
+        "filepath": "movie.mov"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mov",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mov",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mov\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mov",
+            "movie.mov"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mov-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mov",
+        "filepath": "movie.mov"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mov",
+              "subs/movie.en.vtt",
+              "subs/movie.fr.srt"
+            ],
+            "output": "movie.temp.mov",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra",
+              "-metadata:s:s:1",
+              "handler_name=Français",
+              "-metadata:s:s:1",
+              "title=Français"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mov\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mov",
+            "movie.mov"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-m4a",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "m4a",
+        "filepath": "movie.m4a"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.m4a",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.m4a",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.m4a\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-m4a-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "m4a",
+        "filepath": "movie.m4a"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.m4a",
+              "subs/movie.en.vtt",
+              "subs/movie.fr.srt"
+            ],
+            "output": "movie.temp.m4a",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra",
+              "-metadata:s:s:1",
+              "handler_name=Français",
+              "-metadata:s:s:1",
+              "title=Français"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.m4a\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-webm",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.webm",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.webm",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.webm\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.webm",
+            "movie.webm"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-webm-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.webm",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.webm",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [
+          "Only WebVTT subtitles can be embedded in webm files"
+        ],
+        "messages": [
+          "Embedding subtitles in \"movie.webm\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.webm",
+            "movie.webm"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mkv",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mkv",
+        "filepath": "movie.mkv"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mkv",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mkv\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mkv",
+            "movie.mkv"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mkv-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mkv",
+        "filepath": "movie.mkv"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mkv",
+              "subs/movie.en.vtt",
+              "subs/movie.fr.srt"
+            ],
+            "output": "movie.temp.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra",
+              "-metadata:s:s:1",
+              "handler_name=Français",
+              "-metadata:s:s:1",
+              "title=Français"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mkv\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mkv",
+            "movie.mkv"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mka",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mka",
+        "filepath": "movie.mka"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mka",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mka",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mka\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mka",
+            "movie.mka"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "container-mka-mixed",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mka",
+        "filepath": "movie.mka"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt",
+          "name": "Français"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mka",
+              "subs/movie.en.vtt",
+              "subs/movie.fr.srt"
+            ],
+            "output": "movie.temp.mka",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=English",
+              "-metadata:s:s:0",
+              "title=English",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra",
+              "-metadata:s:s:1",
+              "handler_name=Français",
+              "-metadata:s:s:1",
+              "title=Français"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mka\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt",
+          "subs/movie.fr.srt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mka",
+            "movie.mka"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-en-US",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en-US",
+          "ext": "vtt",
+          "filepath": "subs/movie.en-US.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en-US.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en-US.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en-US.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-eng",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "eng",
+          "ext": "vtt",
+          "filepath": "subs/movie.eng.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.eng.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.eng.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.eng.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-fra",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "fra",
+          "ext": "vtt",
+          "filepath": "subs/movie.fra.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.fra.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=fra"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.fra.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.fra.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-deu",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "deu",
+          "ext": "vtt",
+          "filepath": "subs/movie.deu.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.deu.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=deu"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.deu.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.deu.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-zho",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "zho",
+          "ext": "vtt",
+          "filepath": "subs/movie.zho.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.zho.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=zho"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.zho.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.zho.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-sco",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "sco",
+          "ext": "vtt",
+          "filepath": "subs/movie.sco.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.sco.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=srd"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.sco.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.sco.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-EN",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "EN",
+          "ext": "vtt",
+          "filepath": "subs/movie.EN.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.EN.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=EN"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.EN.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.EN.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-FR-ca",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "FR-ca",
+          "ext": "vtt",
+          "filepath": "subs/movie.FR-ca.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.FR-ca.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=FR-ca"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.FR-ca.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.FR-ca.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-und",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "und",
+          "ext": "vtt",
+          "filepath": "subs/movie.und.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.und.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=und"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.und.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.und.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-zz",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "zz",
+          "ext": "vtt",
+          "filepath": "subs/movie.zz.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.zz.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=zz"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.zz.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.zz.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-x",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "x",
+          "ext": "vtt",
+          "filepath": "subs/movie.x.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.x.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=x"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.x.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.x.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "language-empty",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "",
+          "ext": "vtt",
+          "filepath": "subs/movie..vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie..vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language="
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie..vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie..vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "name-absent",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "name-empty",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": ""
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "name-unicode",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "Français 第二行"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=Français 第二行",
+              "-metadata:s:s:0",
+              "title=Français 第二行"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "name-punctuation",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "<b>& \"quoted\" = title"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=<b>& \"quoted\" = title",
+              "-metadata:s:s:0",
+              "title=<b>& \"quoted\" = title"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "json-skipped",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "json",
+          "filepath": "subs/movie.en.json"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [
+          "JSON subtitles cannot be embedded"
+        ],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "missing-skipped",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "missing": true
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [
+          "Skipping embedding en subtitle because the file is missing"
+        ],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "webm-no-vtt",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "subs/movie.en.srt"
+        },
+        {
+          "language": "fr",
+          "ext": "ass",
+          "filepath": "subs/movie.fr.ass"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [
+          "Only WebVTT subtitles can be embedded in webm files"
+        ],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "webm-warning-once",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "subs/movie.en.srt"
+        },
+        {
+          "language": "fr",
+          "ext": "ass",
+          "filepath": "subs/movie.fr.ass"
+        },
+        {
+          "language": "de",
+          "ext": "lrc",
+          "filepath": "subs/movie.de.lrc"
+        },
+        {
+          "language": "es",
+          "ext": "vtt",
+          "filepath": "subs/movie.es.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.webm",
+              "subs/movie.es.vtt"
+            ],
+            "output": "movie.temp.webm",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=spa"
+            ]
+          }
+        ],
+        "warnings": [
+          "Only WebVTT subtitles can be embedded in webm files"
+        ],
+        "messages": [
+          "Embedding subtitles in \"movie.webm\""
+        ],
+        "delete": [
+          "subs/movie.es.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.es.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.webm",
+            "movie.webm"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "json-and-webm-warning",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "json",
+          "filepath": "subs/movie.en.json"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "subs/movie.fr.srt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [
+          "JSON subtitles cannot be embedded",
+          "Only WebVTT subtitles can be embedded in webm files"
+        ],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "mp4-ass-warning-once",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "subs/movie.en.ass"
+        },
+        {
+          "language": "fr",
+          "ext": "ass",
+          "filepath": "subs/movie.fr.ass"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.ass",
+              "subs/movie.fr.ass"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-map",
+              "2:0",
+              "-metadata:s:s:1",
+              "language=fra"
+            ]
+          }
+        ],
+        "warnings": [
+          "ASS subtitles cannot be properly embedded in mp4 files; expect issues"
+        ],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.ass",
+          "subs/movie.fr.ass"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.ass",
+          "subs/movie.fr.ass"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "mp4-missing-ass-no-warning",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "subs/movie.en.ass",
+          "missing": true
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [
+          "Skipping embedding en subtitle because the file is missing"
+        ],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "empty-subtitles",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "There aren't any subtitles to embed"
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "absent-subtitles",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": null,
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "There aren't any subtitles to embed"
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "unsupported-container",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "avi",
+        "filepath": "movie.avi"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Subtitles can only be embedded in mp4, mov, m4a, webm, mkv, mka files"
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "uppercase-container-skip",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "MP4",
+        "filepath": "movie.MP4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Subtitles can only be embedded in mp4, mov, m4a, webm, mkv, mka files"
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "filename-no-extension",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp",
+            "movie"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "filename-nonmatching-extension",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.final"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.final",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.final",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.final\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.final",
+            "movie.final"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "explicit-already-have",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "already_have_subtitle": true,
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": true,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "explicit-not-already-have",
+      "args": [
+        "--embed-subs",
+        "--write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "already_have_subtitle": false,
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-explicit-manual-write",
+      "args": [
+        "--embed-subs",
+        "--write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": true,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-explicit-no-manual-write",
+      "args": [
+        "--embed-subs",
+        "--no-write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-auto-only",
+      "args": [
+        "--embed-subs",
+        "--write-auto-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": false,
+        "write_automatic": true,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-auto-and-manual",
+      "args": [
+        "--embed-subs",
+        "--write-auto-subs",
+        "--write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": true,
+        "already_have_subtitle": true,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-manual-no-write-last",
+      "args": [
+        "--embed-subs",
+        "--write-subs",
+        "--no-write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-manual-write-last",
+      "args": [
+        "--embed-subs",
+        "--no-write-subs",
+        "--write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": true,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-auto-no-write-last",
+      "args": [
+        "--embed-subs",
+        "--write-auto-subs",
+        "--no-write-auto-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-keep",
+      "args": [
+        "--embed-subs",
+        "-k"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": true,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {
+          "subs/movie.en.vtt": ""
+        }
+      }
+    },
+    {
+      "name": "flags-keep-no-keep-last",
+      "args": [
+        "--embed-subs",
+        "-k",
+        "--no-keep-video"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-no-keep-keep-last",
+      "args": [
+        "--embed-subs",
+        "--no-keep-video",
+        "-k"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": true,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {
+          "subs/movie.en.vtt": ""
+        }
+      }
+    },
+    {
+      "name": "flags-no-embed-last",
+      "args": [
+        "--embed-subs",
+        "--no-embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": false,
+        "write_subtitles": false,
+        "write_automatic": false,
+        "already_have_subtitle": null,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-embed-last",
+      "args": [
+        "--no-embed-subs",
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-write-without-embed",
+      "args": [
+        "--write-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": false,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": null,
+        "keep_video": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [],
+        "delete": [],
+        "deleted_by_run_pp": [],
+        "replacements": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-audio-video-and-conversion",
+      "args": [
+        "-x",
+        "--recode-video",
+        "mkv",
+        "--convert-subs",
+        "srt",
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "newline-name",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "first\nsecond"
+        }
+      ],
+      "native_policy": "Native metadata controls are rejected before process execution; source builds a literal argv value containing the newline.",
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=first\nsecond",
+              "-metadata:s:s:0",
+              "title=first\nsecond"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "newline-language",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en\n",
+          "ext": "vtt",
+          "filepath": "subs/movie.en\n.vtt"
+        }
+      ],
+      "native_policy": "Native language metadata controls are rejected; source maps the first two characters and emits eng.",
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en\n.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en\n.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en\n.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "oversized-name",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt",
+          "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      ],
+      "native_policy": "Native metadata fields have bounded lengths; source run constructs this oversized argv value.",
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng",
+              "-metadata:s:s:0",
+              "handler_name=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "-metadata:s:s:0",
+              "title=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "json3-not-json-skip",
+      "args": [
+        "--embed-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "json3",
+          "filepath": "subs/movie.en.json3"
+        }
+      ],
+      "native_policy": "Native supports a bounded subtitle format subset; source planning treats json3 as eligible outside WebM. Captured calls do not establish actual FFmpeg support.",
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.json3"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.json3"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.json3"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "flags-compat-no-keep-subs",
+      "args": [
+        "--embed-subs",
+        "--write-subs",
+        "--compat-options",
+        "no-keep-subs"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": false,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [
+          "subs/movie.en.vtt"
+        ],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {}
+      },
+      "native_policy": "Native does not implement --compat-options; upstream no-keep-subs overrides explicit manual-write retention unless -k suppresses planned deletions."
+    },
+    {
+      "name": "flags-compat-no-keep-subs-and-k",
+      "args": [
+        "--embed-subs",
+        "--write-subs",
+        "--compat-options",
+        "no-keep-subs",
+        "-k"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "subs/movie.en.vtt"
+        }
+      ],
+      "expected": {
+        "enabled": true,
+        "write_subtitles": true,
+        "write_automatic": false,
+        "already_have_subtitle": false,
+        "keep_video": true,
+        "calls": [
+          {
+            "inputs": [
+              "movie.mp4",
+              "subs/movie.en.vtt"
+            ],
+            "output": "movie.temp.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy",
+              "-c:s",
+              "mov_text",
+              "-map",
+              "-0:s",
+              "-map",
+              "1:0",
+              "-metadata:s:s:0",
+              "language=eng"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Embedding subtitles in \"movie.mp4\""
+        ],
+        "delete": [
+          "subs/movie.en.vtt"
+        ],
+        "deleted_by_run_pp": [],
+        "replacements": [
+          [
+            "movie.temp.mp4",
+            "movie.mp4"
+          ]
+        ],
+        "files_to_move": {
+          "subs/movie.en.vtt": ""
+        }
+      },
+      "native_policy": "Native does not implement --compat-options; upstream no-keep-subs overrides explicit manual-write retention unless -k suppresses planned deletions."
+    }
+  ],
+  "language_cases": [
+    {
+      "input": "aa",
+      "expected": "aar"
+    },
+    {
+      "input": "ab",
+      "expected": "abk"
+    },
+    {
+      "input": "ae",
+      "expected": "ave"
+    },
+    {
+      "input": "af",
+      "expected": "afr"
+    },
+    {
+      "input": "ak",
+      "expected": "aka"
+    },
+    {
+      "input": "am",
+      "expected": "amh"
+    },
+    {
+      "input": "an",
+      "expected": "arg"
+    },
+    {
+      "input": "ar",
+      "expected": "ara"
+    },
+    {
+      "input": "as",
+      "expected": "asm"
+    },
+    {
+      "input": "av",
+      "expected": "ava"
+    },
+    {
+      "input": "ay",
+      "expected": "aym"
+    },
+    {
+      "input": "az",
+      "expected": "aze"
+    },
+    {
+      "input": "ba",
+      "expected": "bak"
+    },
+    {
+      "input": "be",
+      "expected": "bel"
+    },
+    {
+      "input": "bg",
+      "expected": "bul"
+    },
+    {
+      "input": "bh",
+      "expected": "bih"
+    },
+    {
+      "input": "bi",
+      "expected": "bis"
+    },
+    {
+      "input": "bm",
+      "expected": "bam"
+    },
+    {
+      "input": "bn",
+      "expected": "ben"
+    },
+    {
+      "input": "bo",
+      "expected": "bod"
+    },
+    {
+      "input": "br",
+      "expected": "bre"
+    },
+    {
+      "input": "bs",
+      "expected": "bos"
+    },
+    {
+      "input": "ca",
+      "expected": "cat"
+    },
+    {
+      "input": "ce",
+      "expected": "che"
+    },
+    {
+      "input": "ch",
+      "expected": "cha"
+    },
+    {
+      "input": "co",
+      "expected": "cos"
+    },
+    {
+      "input": "cr",
+      "expected": "cre"
+    },
+    {
+      "input": "cs",
+      "expected": "ces"
+    },
+    {
+      "input": "cu",
+      "expected": "chu"
+    },
+    {
+      "input": "cv",
+      "expected": "chv"
+    },
+    {
+      "input": "cy",
+      "expected": "cym"
+    },
+    {
+      "input": "da",
+      "expected": "dan"
+    },
+    {
+      "input": "de",
+      "expected": "deu"
+    },
+    {
+      "input": "dv",
+      "expected": "div"
+    },
+    {
+      "input": "dz",
+      "expected": "dzo"
+    },
+    {
+      "input": "ee",
+      "expected": "ewe"
+    },
+    {
+      "input": "el",
+      "expected": "ell"
+    },
+    {
+      "input": "en",
+      "expected": "eng"
+    },
+    {
+      "input": "eo",
+      "expected": "epo"
+    },
+    {
+      "input": "es",
+      "expected": "spa"
+    },
+    {
+      "input": "et",
+      "expected": "est"
+    },
+    {
+      "input": "eu",
+      "expected": "eus"
+    },
+    {
+      "input": "fa",
+      "expected": "fas"
+    },
+    {
+      "input": "ff",
+      "expected": "ful"
+    },
+    {
+      "input": "fi",
+      "expected": "fin"
+    },
+    {
+      "input": "fj",
+      "expected": "fij"
+    },
+    {
+      "input": "fo",
+      "expected": "fao"
+    },
+    {
+      "input": "fr",
+      "expected": "fra"
+    },
+    {
+      "input": "fy",
+      "expected": "fry"
+    },
+    {
+      "input": "ga",
+      "expected": "gle"
+    },
+    {
+      "input": "gd",
+      "expected": "gla"
+    },
+    {
+      "input": "gl",
+      "expected": "glg"
+    },
+    {
+      "input": "gn",
+      "expected": "grn"
+    },
+    {
+      "input": "gu",
+      "expected": "guj"
+    },
+    {
+      "input": "gv",
+      "expected": "glv"
+    },
+    {
+      "input": "ha",
+      "expected": "hau"
+    },
+    {
+      "input": "he",
+      "expected": "heb"
+    },
+    {
+      "input": "iw",
+      "expected": "heb"
+    },
+    {
+      "input": "hi",
+      "expected": "hin"
+    },
+    {
+      "input": "ho",
+      "expected": "hmo"
+    },
+    {
+      "input": "hr",
+      "expected": "hrv"
+    },
+    {
+      "input": "ht",
+      "expected": "hat"
+    },
+    {
+      "input": "hu",
+      "expected": "hun"
+    },
+    {
+      "input": "hy",
+      "expected": "hye"
+    },
+    {
+      "input": "hz",
+      "expected": "her"
+    },
+    {
+      "input": "ia",
+      "expected": "ina"
+    },
+    {
+      "input": "id",
+      "expected": "ind"
+    },
+    {
+      "input": "in",
+      "expected": "ind"
+    },
+    {
+      "input": "ie",
+      "expected": "ile"
+    },
+    {
+      "input": "ig",
+      "expected": "ibo"
+    },
+    {
+      "input": "ii",
+      "expected": "iii"
+    },
+    {
+      "input": "ik",
+      "expected": "ipk"
+    },
+    {
+      "input": "io",
+      "expected": "ido"
+    },
+    {
+      "input": "is",
+      "expected": "isl"
+    },
+    {
+      "input": "it",
+      "expected": "ita"
+    },
+    {
+      "input": "iu",
+      "expected": "iku"
+    },
+    {
+      "input": "ja",
+      "expected": "jpn"
+    },
+    {
+      "input": "jv",
+      "expected": "jav"
+    },
+    {
+      "input": "ka",
+      "expected": "kat"
+    },
+    {
+      "input": "kg",
+      "expected": "kon"
+    },
+    {
+      "input": "ki",
+      "expected": "kik"
+    },
+    {
+      "input": "kj",
+      "expected": "kua"
+    },
+    {
+      "input": "kk",
+      "expected": "kaz"
+    },
+    {
+      "input": "kl",
+      "expected": "kal"
+    },
+    {
+      "input": "km",
+      "expected": "khm"
+    },
+    {
+      "input": "kn",
+      "expected": "kan"
+    },
+    {
+      "input": "ko",
+      "expected": "kor"
+    },
+    {
+      "input": "kr",
+      "expected": "kau"
+    },
+    {
+      "input": "ks",
+      "expected": "kas"
+    },
+    {
+      "input": "ku",
+      "expected": "kur"
+    },
+    {
+      "input": "kv",
+      "expected": "kom"
+    },
+    {
+      "input": "kw",
+      "expected": "cor"
+    },
+    {
+      "input": "ky",
+      "expected": "kir"
+    },
+    {
+      "input": "la",
+      "expected": "lat"
+    },
+    {
+      "input": "lb",
+      "expected": "ltz"
+    },
+    {
+      "input": "lg",
+      "expected": "lug"
+    },
+    {
+      "input": "li",
+      "expected": "lim"
+    },
+    {
+      "input": "ln",
+      "expected": "lin"
+    },
+    {
+      "input": "lo",
+      "expected": "lao"
+    },
+    {
+      "input": "lt",
+      "expected": "lit"
+    },
+    {
+      "input": "lu",
+      "expected": "lub"
+    },
+    {
+      "input": "lv",
+      "expected": "lav"
+    },
+    {
+      "input": "mg",
+      "expected": "mlg"
+    },
+    {
+      "input": "mh",
+      "expected": "mah"
+    },
+    {
+      "input": "mi",
+      "expected": "mri"
+    },
+    {
+      "input": "mk",
+      "expected": "mkd"
+    },
+    {
+      "input": "ml",
+      "expected": "mal"
+    },
+    {
+      "input": "mn",
+      "expected": "mon"
+    },
+    {
+      "input": "mr",
+      "expected": "mar"
+    },
+    {
+      "input": "ms",
+      "expected": "msa"
+    },
+    {
+      "input": "mt",
+      "expected": "mlt"
+    },
+    {
+      "input": "my",
+      "expected": "mya"
+    },
+    {
+      "input": "na",
+      "expected": "nau"
+    },
+    {
+      "input": "nb",
+      "expected": "nob"
+    },
+    {
+      "input": "nd",
+      "expected": "nde"
+    },
+    {
+      "input": "ne",
+      "expected": "nep"
+    },
+    {
+      "input": "ng",
+      "expected": "ndo"
+    },
+    {
+      "input": "nl",
+      "expected": "nld"
+    },
+    {
+      "input": "nn",
+      "expected": "nno"
+    },
+    {
+      "input": "no",
+      "expected": "nor"
+    },
+    {
+      "input": "nr",
+      "expected": "nbl"
+    },
+    {
+      "input": "nv",
+      "expected": "nav"
+    },
+    {
+      "input": "ny",
+      "expected": "nya"
+    },
+    {
+      "input": "oc",
+      "expected": "oci"
+    },
+    {
+      "input": "oj",
+      "expected": "oji"
+    },
+    {
+      "input": "om",
+      "expected": "orm"
+    },
+    {
+      "input": "or",
+      "expected": "ori"
+    },
+    {
+      "input": "os",
+      "expected": "oss"
+    },
+    {
+      "input": "pa",
+      "expected": "pan"
+    },
+    {
+      "input": "pe",
+      "expected": "per"
+    },
+    {
+      "input": "pi",
+      "expected": "pli"
+    },
+    {
+      "input": "pl",
+      "expected": "pol"
+    },
+    {
+      "input": "ps",
+      "expected": "pus"
+    },
+    {
+      "input": "pt",
+      "expected": "por"
+    },
+    {
+      "input": "qu",
+      "expected": "que"
+    },
+    {
+      "input": "rm",
+      "expected": "roh"
+    },
+    {
+      "input": "rn",
+      "expected": "run"
+    },
+    {
+      "input": "ro",
+      "expected": "ron"
+    },
+    {
+      "input": "ru",
+      "expected": "rus"
+    },
+    {
+      "input": "rw",
+      "expected": "kin"
+    },
+    {
+      "input": "sa",
+      "expected": "san"
+    },
+    {
+      "input": "sc",
+      "expected": "srd"
+    },
+    {
+      "input": "sd",
+      "expected": "snd"
+    },
+    {
+      "input": "se",
+      "expected": "sme"
+    },
+    {
+      "input": "sg",
+      "expected": "sag"
+    },
+    {
+      "input": "si",
+      "expected": "sin"
+    },
+    {
+      "input": "sk",
+      "expected": "slk"
+    },
+    {
+      "input": "sl",
+      "expected": "slv"
+    },
+    {
+      "input": "sm",
+      "expected": "smo"
+    },
+    {
+      "input": "sn",
+      "expected": "sna"
+    },
+    {
+      "input": "so",
+      "expected": "som"
+    },
+    {
+      "input": "sq",
+      "expected": "sqi"
+    },
+    {
+      "input": "sr",
+      "expected": "srp"
+    },
+    {
+      "input": "ss",
+      "expected": "ssw"
+    },
+    {
+      "input": "st",
+      "expected": "sot"
+    },
+    {
+      "input": "su",
+      "expected": "sun"
+    },
+    {
+      "input": "sv",
+      "expected": "swe"
+    },
+    {
+      "input": "sw",
+      "expected": "swa"
+    },
+    {
+      "input": "ta",
+      "expected": "tam"
+    },
+    {
+      "input": "te",
+      "expected": "tel"
+    },
+    {
+      "input": "tg",
+      "expected": "tgk"
+    },
+    {
+      "input": "th",
+      "expected": "tha"
+    },
+    {
+      "input": "ti",
+      "expected": "tir"
+    },
+    {
+      "input": "tk",
+      "expected": "tuk"
+    },
+    {
+      "input": "tl",
+      "expected": "tgl"
+    },
+    {
+      "input": "tn",
+      "expected": "tsn"
+    },
+    {
+      "input": "to",
+      "expected": "ton"
+    },
+    {
+      "input": "tr",
+      "expected": "tur"
+    },
+    {
+      "input": "ts",
+      "expected": "tso"
+    },
+    {
+      "input": "tt",
+      "expected": "tat"
+    },
+    {
+      "input": "tw",
+      "expected": "twi"
+    },
+    {
+      "input": "ty",
+      "expected": "tah"
+    },
+    {
+      "input": "ug",
+      "expected": "uig"
+    },
+    {
+      "input": "uk",
+      "expected": "ukr"
+    },
+    {
+      "input": "ur",
+      "expected": "urd"
+    },
+    {
+      "input": "uz",
+      "expected": "uzb"
+    },
+    {
+      "input": "ve",
+      "expected": "ven"
+    },
+    {
+      "input": "vi",
+      "expected": "vie"
+    },
+    {
+      "input": "vo",
+      "expected": "vol"
+    },
+    {
+      "input": "wa",
+      "expected": "wln"
+    },
+    {
+      "input": "wo",
+      "expected": "wol"
+    },
+    {
+      "input": "xh",
+      "expected": "xho"
+    },
+    {
+      "input": "yi",
+      "expected": "yid"
+    },
+    {
+      "input": "ji",
+      "expected": "yid"
+    },
+    {
+      "input": "yo",
+      "expected": "yor"
+    },
+    {
+      "input": "za",
+      "expected": "zha"
+    },
+    {
+      "input": "zh",
+      "expected": "zho"
+    },
+    {
+      "input": "zu",
+      "expected": "zul"
+    },
+    {
+      "input": "en-US",
+      "expected": "eng"
+    },
+    {
+      "input": "eng",
+      "expected": "eng"
+    },
+    {
+      "input": "fra",
+      "expected": "fra"
+    },
+    {
+      "input": "deu",
+      "expected": "deu"
+    },
+    {
+      "input": "zho",
+      "expected": "zho"
+    },
+    {
+      "input": "sco",
+      "expected": "srd"
+    },
+    {
+      "input": "EN",
+      "expected": "EN"
+    },
+    {
+      "input": "FR-ca",
+      "expected": "FR-ca"
+    },
+    {
+      "input": "und",
+      "expected": "und"
+    },
+    {
+      "input": "zz",
+      "expected": "zz"
+    },
+    {
+      "input": "x",
+      "expected": "x"
+    },
+    {
+      "input": "",
+      "expected": ""
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "unsupported-embed-subtitles-alias",
+      "args": [
+        "--embed-subtitles"
+      ]
+    }
+  ]
+}

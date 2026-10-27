@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://tweakers.net/video/s1playlist/9926/1920/1080/playlist.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"items\": [{\"title\": \"New Nintendo 3DS XL - Op alle fronten beter\", \"description\": \"Nintendo heeft een nieuwe 3DS uitgebracht.\", \"poster\": \"https://tweakers.test/poster.jpg\", \"duration\": \"386\", \"account\": \"s7JeEm\", \"locations\": {\"progressive\": [{\"label\": \"360p\", \"width\": 640, \"height\": 360, \"sources\": [{\"src\": \"https://tweakers.test/v360.mp4\", \"type\": \"video/mp4\"}, {\"src\": \"https://tweakers.test/v360.webm\", \"type\": \"video/webm\"}, {\"src\": \"\"}]}, {\"label\": \"720p\", \"width\": \"1280\", \"height\": \"720\", \"sources\": [{\"src\": \"https://tweakers.test/v720.mp4\"}]}]}}]}"
+  },
+  {
+   "url": "https://tweakers.test/v720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://tweakers.net/video/s1playlist/2/1920/1080/playlist.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"items\": [{\"title\": \"Bare\"}]}"
+  },
+  {
+   "url": "https://tweakers.net/video/s1playlist/3/1920/1080/playlist.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"items\": []}"
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters%5Bterm%5D=search&filters%5Bprimary%5D=videos&filters%5Bsecondary%5D=images&sort=1&o=0",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>Pb.Data.Shared.put(Pb.Data.Shared.MEDIA, {\"username\": \"rachaneronas\", \"creationDate\": 1373712422, \"title\": \"Tired of Link Building? Try BacklinkMyDomain.com!\", \"thumbUrl\": \"http://i.photobucket.test/thumb.jpg\", \"linkcodes\": {\"html\": \"<embed src=\\\"http://g.photobucket.test/player.swf?file=http%3A%2F%2Fvid.photobucket.test%2Falbums%2Fa%2FTired_zpsc0c3b9fa.mp4&amp;x=1\\\">\"}});</script></body></html>"
+  },
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>Pb.Data.Shared.put(Pb.Data.Shared.MEDIA, {\"username\": \"rachaneronas\", \"creationDate\": 1373712422, \"title\": \"Tired of Link Building? Try BacklinkMyDomain.com!\", \"thumbUrl\": \"http://i.photobucket.test/thumb.jpg\", \"linkcodes\": {\"html\": \"<embed src=\\\"http://g.photobucket.test/player.swf?file=http%3A%2F%2Fvid.photobucket.test%2Falbums%2Fa%2FTired_zpsc0c3b9fa.mp4&amp;x=1\\\">\"}});</script></body></html>"
+  },
+  {
+   "url": "http://vid.photobucket.test/albums/a/Tired_zpsc0c3b9fa.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "http://s1.photobucket.com/user/x/media/broken_ab.flv.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>none</html>"
+  }
+ ]
+}

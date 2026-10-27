@@ -1,0 +1,9 @@
+[
+ {"url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1", "args": ["-j"]},
+ {"url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1", "args": ["-F"]},
+ {"url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1", "args": ["--list-thumbnails"]},
+ {"url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1", "args": ["--print", "%(id)s|%(title)s|%(timestamp)s|%(duration)s|%(uploader)s|%(uploader_id)s|%(view_count)s"]},
+ {"url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1", "args": ["--no-progress", "-f", "hd", "-o", "%(id)s.%(ext)s"]},
+ {"url": "http://www.filmweb.no/trailere/article1264921.ece", "args": ["-j"]},
+ {"url": "http://www.filmweb.no/filmnytt/article1265000.ece", "args": ["--print", "%(id)s|%(title)s|%(extractor)s|%(webpage_url)s"]}
+]

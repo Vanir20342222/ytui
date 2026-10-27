@@ -1,0 +1,65 @@
+{
+ "routes": [
+  {
+   "url": "https://api.lbry.tv/api/v1/proxy",
+   "request_body": [
+    "\"resolve\"",
+    "First-day-LBRY"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"result\": {\"lbry://@Mantega#1/First-day-LBRY#1\": {\"claim_id\": \"17f983b61f53091fb8ea58a9c56804e4ff8cff4d\", \"timestamp\": 1595694354, \"value_type\": \"stream\", \"value\": {\"stream_type\": \"video\", \"title\": \"First day in LBRY? Start HERE!\", \"description\": \"Welcome\", \"license\": \"None\", \"release_time\": 1595692729, \"tags\": [\"blockchain\", \"\", \"lbry\"], \"thumbnail\": {\"url\": \"https://spee.ch/x.jpg\"}, \"video\": {\"duration\": 517, \"width\": 1280, \"height\": 720}, \"source\": {\"name\": \"first-day.mp4\", \"media_type\": \"video/mp4\", \"size\": \"12345678\"}}, \"signing_channel\": {\"claim_id\": \"1c8ad6a2ab4e889a71146ae4deeb23bb92dab627\", \"name\": \"@Mantega\", \"value\": {\"title\": \"Mantega\"}}}}}"
+  },
+  {
+   "url": "https://api.lbry.tv/api/v1/proxy",
+   "request_body": [
+    "\"get\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"result\": {\"streaming_url\": \"https://player.odycdn.com/api/v4/streams/free/First-day-LBRY/17f983b6/abc\"}}"
+  },
+  {
+   "url": "https://api.lbry.tv/api/v1/proxy",
+   "request_body": [
+    "\"resolve\"",
+    "missing"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"error\": {\"code\": -32500, \"message\": \"no such claim\"}}"
+  },
+  {
+   "url": "https://player.odycdn.com/api/v3/streams/free/First-day-LBRY/17f983b6/abc",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-lbry"
+  },
+  {
+   "url": "https://player.odycdn.com/api/v4/streams/free/First-day-LBRY/17f983b6/abc",
+   "status": 302,
+   "headers": {
+    "Location": "https://player.odycdn.com/v6/streams/abc/master.m3u8"
+   },
+   "body": ""
+  },
+  {
+   "url": "https://player.odycdn.com/v6/streams/abc/master.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://player.odycdn.com/v6/streams/abc/720/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  }
+ ]
+}

@@ -1,0 +1,121 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://imgur.com/A61SaA1",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"title\": \"MRW gifv is up and running without any bugs\", \"description\": null, \"uploader_id\": \"1648642\", \"uploader\": \"wittyusernamehere\", \"uploader_url\": \"https://i.imgur.com/N5Flb2v_d.png?maxwidth=290&fidelity=grand\", \"like_count\": 120, \"dislike_count\": 4, \"comment_count\": 9, \"timestamp\": 1416446068, \"release_timestamp\": 1416446068, \"duration\": 30.0, \"id\": \"A61SaA1\", \"formats\": [{\"url\": \"https://i.imgur.com/A61SaA1.gif\", \"filesize\": 12345, \"width\": 640, \"height\": 360, \"format_id\": \"gif\", \"preference\": -10, \"ext\": \"gif\", \"acodec\": \"none\", \"vcodec\": \"gif\", \"container\": \"gif\", \"protocol\": \"https\", \"video_ext\": \"gif\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"gif - 640x360\"}, {\"format_id\": \"webm\", \"url\": \"https://i.imgur.com/A61SaA1.webm\", \"ext\": \"webm\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"webm - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 640x360\"}], \"thumbnails\": [{\"url\": \"https://i.imgur.com/A61SaA1h.jpg\", \"http_headers\": {\"Accept\": \"*/*\"}, \"id\": \"0\"}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"webpage_url\": \"https://imgur.com/A61SaA1\", \"original_url\": \"https://imgur.com/A61SaA1\", \"webpage_url_basename\": \"A61SaA1\", \"webpage_url_domain\": \"imgur.com\", \"extractor\": \"Imgur\", \"extractor_key\": \"Imgur\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://i.imgur.com/A61SaA1h.jpg\", \"display_id\": \"A61SaA1\", \"fulltitle\": \"MRW gifv is up and running without any bugs\", \"duration_string\": \"30\", \"upload_date\": \"20141120\", \"release_date\": \"20141120\", \"release_year\": 2014, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"format\": \"mp4 - 640x360\", \"_filename\": \"MRW gifv is up and running without any bugs [A61SaA1].mp4\", \"filename\": \"MRW gifv is up and running without any bugs [A61SaA1].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"format\": \"mp4 - 640x360\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://i.imgur.com/VQcQPhM.gifv",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"title\": \"Imgur video #VQcQPhM\", \"description\": \"The boss is here, really\", \"like_count\": 7, \"age_limit\": 18, \"timestamp\": 1476576000, \"release_timestamp\": 1476494751, \"id\": \"VQcQPhM\", \"formats\": [{\"url\": \"https://i.imgur.com/VQcQPhM.mp4\", \"width\": 320, \"height\": 240, \"acodec\": \"none\", \"ext\": \"mp4\", \"preference\": -10, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"320x240\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.33, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - 320x240\"}], \"thumbnails\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"webpage_url\": \"https://i.imgur.com/VQcQPhM.gifv\", \"original_url\": \"https://i.imgur.com/VQcQPhM.gifv\", \"webpage_url_basename\": \"VQcQPhM.gifv\", \"webpage_url_domain\": \"i.imgur.com\", \"extractor\": \"Imgur\", \"extractor_key\": \"Imgur\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"VQcQPhM\", \"fulltitle\": null, \"upload_date\": \"20161016\", \"release_date\": \"20161015\", \"release_year\": 2016, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"url\": \"https://i.imgur.com/VQcQPhM.mp4\", \"width\": 320, \"height\": 240, \"acodec\": \"none\", \"ext\": \"mp4\", \"preference\": -10, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"resolution\": \"320x240\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.33, \"format_id\": \"0\", \"format\": \"0 - 320x240\", \"_filename\": \"Imgur video #VQcQPhM [VQcQPhM].mp4\", \"filename\": \"Imgur video #VQcQPhM [VQcQPhM].mp4\", \"__write_download_archive\": false}], \"url\": \"https://i.imgur.com/VQcQPhM.mp4\", \"width\": 320, \"height\": 240, \"acodec\": \"none\", \"ext\": \"mp4\", \"preference\": -10, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"320x240\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.33, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - 320x240\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Imgur] VQcQPhM: Unable to download webpage: HTTP Error 404: Not Found",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://imgur.com/still1",
+   "args": [
+    "-J"
+   ],
+   "exit": 1,
+   "stdout": [
+    "null"
+   ],
+   "stderr": [
+    "ERROR: [Imgur] still1: still1 is not a video or animated image"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://imgur.com/still1",
+   "args": [
+    "--abort-on-error",
+    "-J"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Imgur] still1: still1 is not a video or animated image"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://imgur.com/gallery/classic-steve-carell-YcAQlkx",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"title\": \"Classic Steve Carell gif\", \"description\": null, \"uploader_id\": \"1648642\", \"uploader\": \"wittyusernamehere\", \"uploader_url\": \"https://i.imgur.com/N5Flb2v_d.png?maxwidth=290&fidelity=grand\", \"like_count\": 120, \"dislike_count\": 4, \"comment_count\": 9, \"timestamp\": 1416446068, \"release_timestamp\": 1416446068, \"duration\": 30.0, \"id\": \"A61SaA1\", \"formats\": [{\"url\": \"https://i.imgur.com/A61SaA1.gif\", \"filesize\": 12345, \"width\": 640, \"height\": 360, \"format_id\": \"gif\", \"preference\": -10, \"ext\": \"gif\", \"acodec\": \"none\", \"vcodec\": \"gif\", \"container\": \"gif\", \"protocol\": \"https\", \"video_ext\": \"gif\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"gif - 640x360\"}, {\"format_id\": \"webm\", \"url\": \"https://i.imgur.com/A61SaA1.webm\", \"ext\": \"webm\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"webm - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 640x360\"}], \"thumbnails\": [{\"url\": \"https://i.imgur.com/A61SaA1h.jpg\", \"http_headers\": {\"Accept\": \"*/*\"}, \"id\": \"0\"}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"original_url\": \"https://imgur.com/gallery/classic-steve-carell-YcAQlkx\", \"webpage_url\": \"https://imgur.com/gallery/classic-steve-carell-YcAQlkx\", \"webpage_url_basename\": \"classic-steve-carell-YcAQlkx\", \"webpage_url_domain\": \"imgur.com\", \"extractor\": \"Imgur\", \"extractor_key\": \"Imgur\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://i.imgur.com/A61SaA1h.jpg\", \"display_id\": \"A61SaA1\", \"fulltitle\": \"Classic Steve Carell gif\", \"duration_string\": \"30\", \"upload_date\": \"20141120\", \"release_date\": \"20141120\", \"release_year\": 2014, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"*/*\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"format\": \"mp4 - 640x360\", \"_filename\": \"Classic Steve Carell gif [A61SaA1].mp4\", \"filename\": \"Classic Steve Carell gif [A61SaA1].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://i.imgur.com/A61SaA1.mp4\", \"ext\": \"mp4\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"format\": \"mp4 - 640x360\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://imgur.com/r/aww/VQcQPhM",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(age_limit)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "VQcQPhM|Imgur video #VQcQPhM|18|http://imgur.com/r/aww/VQcQPhM"
+   ],
+   "stderr": [
+    "WARNING: [Imgur] VQcQPhM: Unable to download webpage: HTTP Error 404: Not Found",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://imgur.com/a/iX265HX",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"iX265HX\", \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"Imgur\", \"id\": \"A61SaA1\", \"_type\": \"url\", \"url\": \"https://imgur.com/A61SaA1\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Imgur\", \"id\": \"VQcQPhM\", \"_type\": \"url\", \"url\": \"https://imgur.com/VQcQPhM\", \"__x_forwarded_for_ip\": null}], \"title\": \"enen-no-shouboutai\", \"description\": \"Two clips\", \"webpage_url\": \"https://imgur.com/a/iX265HX\", \"original_url\": \"https://imgur.com/a/iX265HX\", \"webpage_url_basename\": \"iX265HX\", \"webpage_url_domain\": \"imgur.com\", \"extractor\": \"imgur:album\", \"extractor_key\": \"ImgurAlbum\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://imgur.com/mrw-gifv-A61SaA1",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Imgur] Extracting URL: https://imgur.com/mrw-gifv-A61SaA1",
+    "[Imgur] A61SaA1: Downloading JSON metadata",
+    "[Imgur] A61SaA1: Downloading webpage",
+    "[info] A61SaA1: Downloading 1 format(s): mp4",
+    "[download] Destination: A61SaA1.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "A61SaA1.mp4": 18
+   }
+  }
+ ]
+}

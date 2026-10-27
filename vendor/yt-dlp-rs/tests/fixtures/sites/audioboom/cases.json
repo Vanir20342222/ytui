@@ -1,0 +1,7 @@
+[
+ {"url": "https://audioboom.com/posts/7398103-asim-chaudhry", "args": ["-j"]},
+ {"url": "https://audioboom.com/posts/7398103-asim-chaudhry", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(uploader)s|%(uploader_url)s|%(ext)s"]},
+ {"url": "https://audioboom.com/posts/7398103-asim-chaudhry", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://audioboom.com/boos/2", "args": ["-j"]},
+ {"url": "https://audioboom.com/posts/3", "args": ["-j"]}
+]

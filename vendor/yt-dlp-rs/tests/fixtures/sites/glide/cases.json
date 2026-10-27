@@ -1,0 +1,9 @@
+[
+ {"url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==", "args": ["-j"]},
+ {"url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==", "args": ["-F"]},
+ {"url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==", "args": ["--print", "%(id)s|%(title)s|%(thumbnail)s|%(ext)s"]},
+ {"url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==", "args": ["--no-progress", "-o", "out.%(ext)s"]},
+ {"url": "https://share.glide.me/og-only", "args": ["-j"]},
+ {"url": "https://share.glide.me/none", "args": ["-j"]},
+ {"url": "https://share.glide.me/untitled", "args": ["-j"]}
+]

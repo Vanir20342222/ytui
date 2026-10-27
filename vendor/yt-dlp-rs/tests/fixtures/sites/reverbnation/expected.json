@@ -1,0 +1,132 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"16965047\", \"title\": \"MONA LISA\", \"url\": \"https://c2.reverbnation.com/audio_player/ec_stream_song/16965047?x=1\", \"uploader\": \"ALKILADOS\", \"uploader_id\": \"216429\", \"thumbnails\": [{\"url\": \"https://gp1.wac.edgecastcdn.net/thumb.jpg\", \"preference\": 0, \"id\": \"0\"}, {\"url\": \"https://gp1.wac.edgecastcdn.net/image.jpg\", \"preference\": 1, \"id\": \"1\"}], \"ext\": \"mp3\", \"vcodec\": \"none\", \"webpage_url\": \"http://www.reverbnation.com/alkilados/song/16965047-mona-lisa\", \"original_url\": \"http://www.reverbnation.com/alkilados/song/16965047-mona-lisa\", \"webpage_url_basename\": \"16965047-mona-lisa\", \"webpage_url_domain\": \"reverbnation.com\", \"extractor\": \"ReverbNation\", \"extractor_key\": \"ReverbNation\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://gp1.wac.edgecastcdn.net/image.jpg\", \"display_id\": \"16965047\", \"fulltitle\": \"MONA LISA\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"MONA LISA [16965047].mp3\", \"filename\": \"MONA LISA [16965047].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"16965047\", \"title\": \"MONA LISA\", \"url\": \"https://c2.reverbnation.com/audio_player/ec_stream_song/16965047?x=1\", \"uploader\": \"ALKILADOS\", \"uploader_id\": \"216429\", \"thumbnails\": [{\"url\": \"https://gp1.wac.edgecastcdn.net/thumb.jpg\", \"preference\": 0, \"id\": \"0\"}, {\"url\": \"https://gp1.wac.edgecastcdn.net/image.jpg\", \"preference\": 1, \"id\": \"1\"}], \"ext\": \"mp3\", \"vcodec\": \"none\", \"webpage_url\": \"http://www.reverbnation.com/alkilados/song/16965047-mona-lisa\", \"original_url\": \"http://www.reverbnation.com/alkilados/song/16965047-mona-lisa\", \"webpage_url_basename\": \"16965047-mona-lisa\", \"webpage_url_domain\": \"reverbnation.com\", \"extractor\": \"ReverbNation\", \"extractor_key\": \"ReverbNation\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://gp1.wac.edgecastcdn.net/image.jpg\", \"display_id\": \"16965047\", \"fulltitle\": \"MONA LISA\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"requested_downloads\": [{\"_filename\": \"MONA LISA [16965047].mp3\", \"filename\": \"MONA LISA [16965047].mp3\", \"__write_download_archive\": false}], \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[ReverbNation] Extracting URL: http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+    "[ReverbNation] 16965047: Downloading information of song 16965047",
+    "[info] Available formats for 16965047:",
+    "ID EXT RESOLUTION | PROTO | VCODEC     ACODEC",
+    "---------------------------------------------",
+    "0  mp3 audio only | https | audio only mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "--list-thumbnails"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[ReverbNation] Extracting URL: http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+    "[ReverbNation] 16965047: Downloading information of song 16965047",
+    "[info] Available thumbnails for 16965047:",
+    "ID Width   Height  URL",
+    "0  unknown unknown https://gp1.wac.edgecastcdn.net/thumb.jpg",
+    "1  unknown unknown https://gp1.wac.edgecastcdn.net/image.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "--print",
+    "%(title)s|%(uploader)s|%(uploader_id)s|%(thumbnail)s|%(ext)s|%(vcodec)s|%(acodec)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "MONA LISA|ALKILADOS|216429|https://gp1.wac.edgecastcdn.net/image.jpg|mp3|none|mp3|0"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[ReverbNation] Extracting URL: http://www.reverbnation.com/alkilados/song/16965047-mona-lisa",
+    "[ReverbNation] 16965047: Downloading information of song 16965047",
+    "[info] 16965047: Downloading 1 format(s): 0",
+    "[download] Destination: 16965047.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "16965047.mp3": 1546
+   }
+  },
+  {
+   "url": "https://reverbnation.com/x/song/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Bare\", \"url\": \"https://c2.reverbnation.com/audio/2.mp3\", \"uploader\": null, \"uploader_id\": null, \"thumbnails\": [], \"ext\": \"mp3\", \"vcodec\": \"none\", \"webpage_url\": \"https://reverbnation.com/x/song/2\", \"original_url\": \"https://reverbnation.com/x/song/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"reverbnation.com\", \"extractor\": \"ReverbNation\", \"extractor_key\": \"ReverbNation\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Bare\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Bare [2].mp3\", \"filename\": \"Bare [2].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://reverbnation.com/x/song/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('name')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://reverbnation.com/x/song/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [ReverbNation] 4: Unable to download JSON metadata: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

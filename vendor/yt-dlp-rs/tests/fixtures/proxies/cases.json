@@ -1,0 +1,1931 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "no-explicit-no-environment",
+      "args": [],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          null,
+          null
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    },
+    {
+      "name": "explicit-direct",
+      "args": [
+        "--proxy",
+        ""
+      ],
+      "environment": {
+        "all": "http://environment.test:9000"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "",
+        "selected": [
+          null,
+          null
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "sentinel-direct",
+      "args": [
+        "--proxy",
+        "__noproxy__"
+      ],
+      "environment": {
+        "all": "http://environment.test:9000"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "__noproxy__",
+        "selected": [
+          null,
+          null
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "explicit-overrides-no-proxy",
+      "args": [
+        "--proxy",
+        "http://proxy.test:8000"
+      ],
+      "environment": {
+        "no": "*",
+        "http": "http://environment.test:9000"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://proxy.test:8000",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "repeated-last-wins",
+      "args": [
+        "--proxy",
+        "http://first.test:80",
+        "--proxy",
+        "http://last.test:81"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://last.test:81",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "last.test",
+            "port": 81,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "last.test",
+            "port": 81,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "last-empty-direct",
+      "args": [
+        "--proxy",
+        "http://first.test:80",
+        "--proxy",
+        ""
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "",
+        "selected": [
+          null,
+          null
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http",
+      "args": [
+        "--proxy",
+        "http://proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https",
+      "args": [
+        "--proxy",
+        "https://proxy.test:8443"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://proxy.test:8443",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8443,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8443,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-default",
+      "args": [
+        "--proxy",
+        "http://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://proxy.test",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-default",
+      "args": [
+        "--proxy",
+        "https://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://proxy.test",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 443,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 443,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "missing-scheme",
+      "args": [
+        "--proxy",
+        "proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "scheme-relative",
+      "args": [
+        "--proxy",
+        "//proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "//proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-ipv6",
+      "args": [
+        "--proxy",
+        "http://[::1]:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://[::1]:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "::1",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "::1",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-ipv6-default",
+      "args": [
+        "--proxy",
+        "http://[::1]"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://[::1]",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "::1",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "::1",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "uppercase-host",
+      "args": [
+        "--proxy",
+        "http://PROXY.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://PROXY.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks",
+      "args": [
+        "--proxy",
+        "socks://proxy.test:1088"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks://proxy.test:1088",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks-default",
+      "args": [
+        "--proxy",
+        "socks://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks://proxy.test",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks4",
+      "args": [
+        "--proxy",
+        "socks4://proxy.test:1088"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://proxy.test:1088",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks4-default",
+      "args": [
+        "--proxy",
+        "socks4://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://proxy.test",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks4a",
+      "args": [
+        "--proxy",
+        "socks4a://proxy.test:1088"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4a://proxy.test:1088",
+        "selected": [
+          {
+            "scheme": "socks4a",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks4a",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks4a-default",
+      "args": [
+        "--proxy",
+        "socks4a://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4a://proxy.test",
+        "selected": [
+          {
+            "scheme": "socks4a",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks4a",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5",
+      "args": [
+        "--proxy",
+        "socks5://proxy.test:1088"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://proxy.test:1088",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5-default",
+      "args": [
+        "--proxy",
+        "socks5://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://proxy.test",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5h",
+      "args": [
+        "--proxy",
+        "socks5h://proxy.test:1088"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5h://proxy.test:1088",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1088,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5h-default",
+      "args": [
+        "--proxy",
+        "socks5h://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5h://proxy.test",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 1080,
+            "username": null,
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-auth-decoded",
+      "args": [
+        "--proxy",
+        "http://user%40name:pa%3Ass%2Bword@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://user%40name:pa%3Ass%2Bword@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-auth-user-only",
+      "args": [
+        "--proxy",
+        "http://user@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://user@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-auth-empty-password",
+      "args": [
+        "--proxy",
+        "http://user:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://user:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-auth-empty-user",
+      "args": [
+        "--proxy",
+        "http://:pass@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://:pass@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "http-auth-both-empty",
+      "args": [
+        "--proxy",
+        "http://:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "http://:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-auth-decoded",
+      "args": [
+        "--proxy",
+        "https://user%40name:pa%3Ass%2Bword@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://user%40name:pa%3Ass%2Bword@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-auth-user-only",
+      "args": [
+        "--proxy",
+        "https://user@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://user@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-auth-empty-password",
+      "args": [
+        "--proxy",
+        "https://user:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://user:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-auth-empty-user",
+      "args": [
+        "--proxy",
+        "https://:pass@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://:pass@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "https-auth-both-empty",
+      "args": [
+        "--proxy",
+        "https://:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "https://:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks4-auth-decoded",
+      "args": [
+        "--proxy",
+        "socks4://user%40name:pa%3Ass%2Bword@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://user%40name:pa%3Ass%2Bword@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native rejects SOCKS4 userinfo: reqwest SOCKS4 transport cannot carry USERID; source endpoint configuration remains reference-only"
+    },
+    {
+      "name": "socks4-auth-user-only",
+      "args": [
+        "--proxy",
+        "socks4://user@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://user@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native rejects SOCKS4 userinfo: reqwest SOCKS4 transport cannot carry USERID; source endpoint configuration remains reference-only"
+    },
+    {
+      "name": "socks4-auth-empty-password",
+      "args": [
+        "--proxy",
+        "socks4://user:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://user:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native rejects SOCKS4 userinfo: reqwest SOCKS4 transport cannot carry USERID; source endpoint configuration remains reference-only"
+    },
+    {
+      "name": "socks4-auth-empty-user",
+      "args": [
+        "--proxy",
+        "socks4://:pass@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://:pass@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native rejects SOCKS4 userinfo: reqwest SOCKS4 transport cannot carry USERID; source endpoint configuration remains reference-only"
+    },
+    {
+      "name": "socks4-auth-both-empty",
+      "args": [
+        "--proxy",
+        "socks4://:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks4://:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": false
+          },
+          {
+            "scheme": "socks4",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": false
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native rejects SOCKS4 userinfo: reqwest SOCKS4 transport cannot carry USERID; source endpoint configuration remains reference-only"
+    },
+    {
+      "name": "socks5-auth-decoded",
+      "args": [
+        "--proxy",
+        "socks5://user%40name:pa%3Ass%2Bword@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://user%40name:pa%3Ass%2Bword@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user@name",
+            "password": "pa:ss+word",
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5-auth-user-only",
+      "args": [
+        "--proxy",
+        "socks5://user@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://user@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": null,
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5-auth-empty-password",
+      "args": [
+        "--proxy",
+        "socks5://user:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://user:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "user",
+            "password": "",
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5-auth-empty-user",
+      "args": [
+        "--proxy",
+        "socks5://:pass@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://:pass@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "pass",
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "socks5-auth-both-empty",
+      "args": [
+        "--proxy",
+        "socks5://:@proxy.test:8080"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": "socks5://:@proxy.test:8080",
+        "selected": [
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": true
+          },
+          {
+            "scheme": "socks5h",
+            "host": "proxy.test",
+            "port": 8080,
+            "username": "",
+            "password": "",
+            "rdns": true
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "environment-http-fallback",
+      "args": [],
+      "environment": {
+        "http": "http://env-http.test:8000"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "env-http.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "env-http.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    },
+    {
+      "name": "environment-scheme-specific",
+      "args": [],
+      "environment": {
+        "http": "http://env-http.test:8000",
+        "https": "https://env-https.test:8443"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "env-http.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "https",
+            "host": "env-https.test",
+            "port": 8443,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    },
+    {
+      "name": "environment-all",
+      "args": [],
+      "environment": {
+        "all": "http://env-all.test:9000"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "env-all.test",
+            "port": 9000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "env-all.test",
+            "port": 9000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    },
+    {
+      "name": "environment-no-proxy",
+      "args": [],
+      "environment": {
+        "all": "http://env-all.test:9000",
+        "no": ".example.test"
+      },
+      "requests": [
+        "https://example.test/",
+        "https://sub.example.test/",
+        "https://other.test/"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          null,
+          null,
+          {
+            "scheme": "http",
+            "host": "env-all.test",
+            "port": 9000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    },
+    {
+      "name": "environment-none-sentinel",
+      "args": [],
+      "environment": {
+        "http": "http://env-http.test:8000",
+        "https": "__noproxy__"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "env-http.test",
+            "port": 8000,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          null
+        ],
+        "headers": {}
+      },
+      "native_policy": "Native records Environment mode and preserves reqwest environment behavior; source environment routes and HTTP-to-HTTPS fallback are reference-only"
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "legacy-request-header",
+      "args": [],
+      "environment": {
+        "no": "*",
+        "all": "http://env.test"
+      },
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "headers": {
+        "Ytdl-Request-Proxy": "http://request.test:8080"
+      },
+      "native_policy": "Native rejects legacy request-proxy headers; source clears environment including no_proxy",
+      "expected": {
+        "proxy_option": null,
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "request.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "request.test",
+            "port": 8080,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "path",
+      "args": [
+        "--proxy",
+        "http://proxy.test/path"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects non-root proxy URL paths; source cleanup preserves them",
+      "expected": {
+        "proxy_option": "http://proxy.test/path",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "query",
+      "args": [
+        "--proxy",
+        "http://proxy.test?mode=x"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects proxy URL query; source cleanup preserves it",
+      "expected": {
+        "proxy_option": "http://proxy.test?mode=x",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "fragment",
+      "args": [
+        "--proxy",
+        "http://proxy.test#part"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects proxy URL fragments; source cleanup preserves them",
+      "expected": {
+        "proxy_option": "http://proxy.test#part",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "bad-percent",
+      "args": [
+        "--proxy",
+        "http://us%ZZer:pass@proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects malformed credential percent escapes; source unquote preserves them",
+      "expected": {
+        "proxy_option": "http://us%ZZer:pass@proxy.test",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": "us%ZZer",
+            "password": "pass",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": "us%ZZer",
+            "password": "pass",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "whitespace",
+      "args": [
+        "--proxy",
+        "http://proxy.test /"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects proxy whitespace; source cleanup alone preserves it",
+      "expected": {
+        "proxy_option": "http://proxy.test /",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test ",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test ",
+            "port": 80,
+            "username": null,
+            "password": null,
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "unsupported",
+      "args": [
+        "--proxy",
+        "ftp://proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects unsupported proxy schemes; source cleanup alone preserves them",
+      "expected": {
+        "proxy_option": "ftp://proxy.test",
+        "selected": [
+          {
+            "unsupported_scheme": "ftp",
+            "raw": "ftp://proxy.test"
+          },
+          {
+            "unsupported_scheme": "ftp",
+            "raw": "ftp://proxy.test"
+          }
+        ],
+        "headers": {}
+      }
+    },
+    {
+      "name": "embedded-control",
+      "args": [
+        "--proxy",
+        "http://user:pa\tss@proxy.test"
+      ],
+      "environment": {},
+      "requests": [
+        "http://example.test/media",
+        "https://example.test/media"
+      ],
+      "native_policy": "Native rejects controls; URL parser may strip controls before source selection",
+      "expected": {
+        "proxy_option": "http://user:pa\tss@proxy.test",
+        "selected": [
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": "user",
+            "password": "pass",
+            "rdns": null
+          },
+          {
+            "scheme": "http",
+            "host": "proxy.test",
+            "port": 80,
+            "username": "user",
+            "password": "pass",
+            "rdns": null
+          }
+        ],
+        "headers": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[
+ {"url": "https://player.megaphone.fm/GLT9749789991", "args": ["-j"]},
+ {"url": "https://player.megaphone.fm/GLT9749789991", "args": ["-F"]},
+ {"url": "https://player.megaphone.fm/GLT9749789991", "args": ["--print", "%(title)s|%(creators)s|%(creator)s|%(duration)s|%(duration_string)s|%(thumbnail)s|%(ext)s|%(format_id)s"]},
+ {"url": "https://player.megaphone.fm/GLT9749789991", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://player.megaphone.fm/PLAIN1", "args": ["-j"]},
+ {"url": "https://player.megaphone.fm/NOJSON1", "args": ["-j"]},
+ {"url": "https://podcast.example.test/episode", "args": ["-j"]},
+ {"url": "https://podcast.example.test/both", "args": ["-s"]},
+ {"url": "https://podcast.example.test/both", "args": ["-J"]},
+ {"url": "https://podcast.example.test/both", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://player.megaphone.fm/NOURL1", "args": ["-j"]},
+ {"url": "https://player.megaphone.fm/COMMA1", "args": ["-j"]},
+ {"url": "https://player.megaphone.fm/COMMA1", "args": ["--print", "%(creators)s|%(creator)s|%(duration)s|%(thumbnail)s"]},
+ {"url": "https://podcast.example.test/both", "args": ["--flat-playlist", "-j"]},
+ {"url": "https://player.megaphone.fm/GLT9749789991", "args": ["--use-extractors", "megaphone.fm", "--print", "%(extractor)s|%(extractor_key)s"]}
+]

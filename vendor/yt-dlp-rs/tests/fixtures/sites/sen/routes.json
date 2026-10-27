@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://api.sen.com/content/public/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"nodes\": [{\"id\": \"player\", \"video\": {\"url\": \"https://sen.test/hls/video.m3u8\"}}, {\"id\": \"details\", \"content\": {\"title\": {\"text\": \"Hurricane Ian\"}, \"descriptions\": [{\"text\": \"Florida, 28 Sep 2022\"}], \"badges\": [{\"text\": \"North America\"}, {\"text\": 5}, {\"text\": \"Storm\"}, {}]}}, {\"id\": \"details\", \"content\": {\"title\": {\"text\": \"Second\"}}}]}}"
+  },
+  {
+   "url": "https://api.sen.com/content/public/video/b2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"nodes\": [{\"id\": \"player\", \"video\": {\"url\": \"not a url\"}}, {\"id\": \"details\", \"content\": {\"badges\": []}}]}}"
+  },
+  {
+   "url": "https://api.sen.com/content/public/video/c3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {}}"
+  },
+  {
+   "url": "https://api.sen.com/content/public/video/d4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"nodes\": [{\"id\": \"player\", \"video\": {\"url\": \"https://sen.test/hls/master.m3u8\"}}, {\"id\": \"details\", \"content\": {\"title\": {\"text\": \"Subs\"}}}]}}"
+  },
+  {
+   "url": "https://vod.sen.com/videos/b2/manifest.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://sen.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://sen.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://sen.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://sen.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

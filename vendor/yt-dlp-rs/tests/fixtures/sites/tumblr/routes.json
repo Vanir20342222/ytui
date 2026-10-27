@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://www.tumblr.com/login",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body_file": "login.html"
+  },
+  {
+   "url": "http://tatiana.tumblr.com/post/54196191430",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body_file": "post.html"
+  },
+  {
+   "url": "http://linker.tumblr.com/post/1111",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><title>x</title></html>"
+  },
+  {
+   "url": "https://www.tumblr.com/api/v2/blog/tatiana/posts/54196191430/permalink",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"response\": {\"timeline\": {\"elements\": [{\"summary\": \"Orphan Black summary\", \"blog_name\": \"tatiana\", \"timestamp\": 1372531936, \"like_count\": 44, \"reblog_count\": 3, \"tags\": [\"orphan black\", \"tv\"], \"is_nsfw\": false, \"content\": [{\"type\": \"text\", \"text\": \"First paragraph\"}, {\"type\": \"text\", \"text\": \"Second\"}, {\"type\": \"video\", \"provider\": \"tumblr\", \"media\": {\"url\": \"https://va.media.tumblr.com/tumblr_x.mp4\", \"width\": 1280, \"height\": 720}, \"poster\": [{\"url\": \"https://64.media.tumblr.com/poster.jpg\"}]}]}]}}}"
+  },
+  {
+   "url": "https://www.tumblr.com/api/v2/blog/linker/posts/1111/permalink",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"response\": {\"timeline\": {\"elements\": [{\"summary\": \"Linked clip\", \"blog_name\": \"linker\", \"content\": [{\"type\": \"video\", \"provider\": \"foo\", \"url\": \"https://media.example.test/clip.mp4\"}]}]}}}"
+  },
+  {
+   "url": "https://www.tumblr.com/video/tatiana/54196191430/700/",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body_file": "iframe.html"
+  },
+  {
+   "url": "https://media.example.test/clip.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom"
+  },
+  {
+   "url": "https://va.media.tumblr.com/tumblr_x_720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-tumblr"
+  }
+ ]
+}

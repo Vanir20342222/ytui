@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146,view=json.bild.html",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \" Das k&ouml;nnen die  neuen iPads \", \"description\": \"Apple hat &quot;neue&quot; iPads\", \"poster\": \"https://bild.test/poster.jpg\", \"durationSec\": \"196\", \"clipList\": [{\"srces\": [{\"src\": \"https://bild.test/hls/master.m3u8\", \"type\": \"application/x-mpegURL\"}, {\"src\": \"https://bild.test/v.mp4\", \"type\": \"video/mp4\"}, {\"src\": \"https://bild.test/v.webm\", \"type\": \"video/webm\"}, {\"type\": \"video/mp4\"}]}]}"
+  },
+  {
+   "url": "https://bild.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://bild.test/hls/low.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://bild.test/hls/high.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://bild.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://www.bild.de/x/plain-2,auto=true,view=json.bild.html",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Plain\", \"clipList\": [{\"srces\": [{\"src\": \"https://bild.test/v.mp4\", \"type\": \"video/mp4\"}]}]}"
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "routes": [
+  {
+   "url": "https://mediaplayer.nobelprize.org/mediaplayer/?id=22312",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"caption\" content=\"Announcement of the 2023 Nobel Prize in Physiology or Medicine\">\n<meta name=\"duration\" content=\"PT1H2M36S\"><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"VideoObject\", \"name\": \"LD name\", \"description\": \"LD description\", \"contentUrl\": \"https://nobelvideos.test/m/22312.mp4\", \"thumbnailUrl\": \"https://nobelvideos.test/t/22312.jpg\", \"uploadDate\": \"2023-10-02T09:30:00Z\", \"duration\": \"PT1M\"}</script></head>\n<body><span class=\"d\" itemprop=\"description\">The Nobel Assembly <b>at</b> Karolinska Institutet</span></body></html>"
+  },
+  {
+   "url": "https://nobelvideos.test/m/22312.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://mediaplayer.nobelprize.org/mediaplayer/?qid=2&id=x",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><meta name=\"caption\" content=\"Caption\"></head></html>"
+  }
+ ]
+}

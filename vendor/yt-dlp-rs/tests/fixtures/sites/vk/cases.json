@@ -1,0 +1,10 @@
+[
+ {"url": "https://vk.com/video-77521_162222515", "args": ["-J"]},
+ {"url": "https://vk.com/videos-77521?z=video-77521_162222515%2Fclub77521", "args": ["--list-subs"]},
+ {"url": "https://vk.com/video_ext.php?oid=-1&id=7&hash=abc", "args": ["-J"]},
+ {"url": "https://vk.com/video_ext.php?oid=-1&id=8", "args": ["--print", "id"]},
+ {"url": "https://vk.com/video_ext.php?oid=-1&id=9", "args": ["--print", "id"]},
+ {"url": "https://vk.com/video1_3?list=ln-abc", "args": ["--print", "id"]},
+ {"url": "https://vk.com/clip1_4", "args": ["--print", "id"]},
+ {"url": "https://vk.com/video-77521_162222515", "args": ["--no-progress", "-f", "url720", "-o", "%(id)s.%(ext)s"]}
+]

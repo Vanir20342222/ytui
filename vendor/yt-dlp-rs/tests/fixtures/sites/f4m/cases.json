@@ -1,0 +1,12 @@
+[
+ {"url": "https://media.example.test/hds/clip.f4m", "args": ["-j"]},
+ {"url": "https://media.example.test/hds/clip.f4m", "args": ["-F"]},
+ {"url": "https://media.example.test/set.f4m", "args": ["-j"]},
+ {"url": "https://media.example.test/set.f4m", "args": ["-F"]},
+ {"url": "https://media.example.test/hds/clip.f4m", "args": ["--print", "%(id)s|%(title)s|%(format_id)s|%(protocol)s|%(ext)s"]},
+ {"url": "https://media.example.test/pv.f4m", "args": ["-j"]},
+ {"url": "https://media.example.test/hds/real.f4m", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://media.example.test/hds/real.f4m", "args": ["--no-progress", "-f", "400", "-o", "%(id)s-lo.%(ext)s"]},
+ {"url": "https://media.example.test/hds/real.f4m", "args": ["-j"]},
+ {"url": "https://media.example.test/hds/byurl.f4m", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,105 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://livestreamfails.com/clip/39084",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"39084\", \"display_id\": \"ScrapeSource\", \"timestamp\": 1647200835, \"url\": \"https://livestreamfails-video-prod.b-cdn.net/video/ex.mp4\", \"title\": \"Fall, then rise\", \"creator\": \"Ash, Gamer\", \"thumbnail\": \"https://livestreamfails-image-prod.b-cdn.net/image/i1.jpg\", \"webpage_url\": \"https://livestreamfails.com/clip/39084\", \"original_url\": \"https://livestreamfails.com/clip/39084\", \"webpage_url_basename\": \"39084\", \"webpage_url_domain\": \"livestreamfails.com\", \"extractor\": \"Livestreamfails\", \"extractor_key\": \"Livestreamfails\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://livestreamfails-image-prod.b-cdn.net/image/i1.jpg\", \"id\": \"0\"}], \"fulltitle\": \"Fall, then rise\", \"upload_date\": \"20220313\", \"release_year\": null, \"creators\": [\"Ash\", \"Gamer\"], \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Fall, then rise [39084].mp4\", \"filename\": \"Fall, then rise [39084].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://livestreamfails.com/clip/39084",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Livestreamfails] Extracting URL: https://livestreamfails.com/clip/39084",
+    "[Livestreamfails] 39084: Downloading JSON metadata",
+    "[info] Available formats for 39084:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://livestreamfails.com/clip/39084",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(creator)s|%(creators)s|%(timestamp)s|%(upload_date)s|%(thumbnail)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "39084|ScrapeSource|Fall, then rise|Ash, Gamer|['Ash', 'Gamer']|1647200835|20220313|https://livestreamfails-image-prod.b-cdn.net/image/i1.jpg|mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://livestreamfails.com/clip/39084",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Livestreamfails] Extracting URL: https://livestreamfails.com/clip/39084",
+    "[Livestreamfails] 39084: Downloading JSON metadata",
+    "[info] 39084: Downloading 1 format(s): 0",
+    "[download] Destination: 39084.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "39084.mp4": 1048
+   }
+  },
+  {
+   "url": "https://www.livestreamfails.com/post/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"display_id\": \"2\", \"timestamp\": null, \"url\": \"https://livestreamfails-video-prod.b-cdn.net/video/noext\", \"title\": \"Livestreamfails video #2\", \"creator\": null, \"thumbnail\": \"\", \"webpage_url\": \"https://www.livestreamfails.com/post/2\", \"original_url\": \"https://www.livestreamfails.com/post/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"livestreamfails.com\", \"extractor\": \"Livestreamfails\", \"extractor_key\": \"Livestreamfails\", \"playlist\": null, \"playlist_index\": null, \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"unknown_video\", \"video_ext\": \"unknown_video\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Livestreamfails video #2 [2].unknown_video\", \"filename\": \"Livestreamfails video #2 [2].unknown_video\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://livestreamfails.com/clip/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('videoId')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://livestreamfails.com/clip/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"4\", \"display_id\": 7, \"timestamp\": null, \"url\": \"https://livestreamfails-video-prod.b-cdn.net/video/v4.mp4\", \"title\": \"y\", \"creator\": null, \"thumbnail\": \"\", \"webpage_url\": \"https://livestreamfails.com/clip/4\", \"original_url\": \"https://livestreamfails.com/clip/4\", \"webpage_url_basename\": \"4\", \"webpage_url_domain\": \"livestreamfails.com\", \"extractor\": \"Livestreamfails\", \"extractor_key\": \"Livestreamfails\", \"playlist\": null, \"playlist_index\": null, \"fulltitle\": \"y\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"y [4].mp4\", \"filename\": \"y [4].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

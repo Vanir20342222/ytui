@@ -1,0 +1,7 @@
+[
+ {"url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g", "args": ["-J"]},
+ {"url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g", "args": ["-F"]},
+ {"url": "at://poster.bsky.social/app.bsky.feed.post/3extpost00001", "args": ["--print", "%(id)s|%(webpage_url)s"]},
+ {"url": "https://bsky.app/profile/poster.bsky.social/post/3textonly0001", "args": ["-j"]},
+ {"url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g", "args": ["-f", "blob", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

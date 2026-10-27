@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"OG title\"></head><body>\n<div class=\"details\" id=\"d\"> <h2 class=\"x\">Living Victoriously in the Last Days> rest</h2></div>\n<div class=\"player\" mp3-url=\"https://cdn.oneplace.test/ep1.mp3\"></div>\n<div class=\"row epDesc\">\n  Paul tells us how to <b>live</b> in these days.\n</div></body></html>"
+  },
+  {
+   "url": "https://cdn.oneplace.test/ep1.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/meta-only-2",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><meta name=\"title\" content=\"Meta title only\"></head><body><div id=\"player\" class=\"p\" data-media-url=\"https://cdn.oneplace.test/ep1.mp3\"></div></body></html>"
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/og-3",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Second &amp; OG\"><meta name=\"title\" content=\"ignored\"></head><body><span mp3-url = \"https://cdn.oneplace.test/ep1.mp3\"></span></body></html>"
+  },
+  {
+   "url": "https://www.oneplace.com/ministries/x/listen/none-4",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>nothing</html>"
+  }
+ ]
+}

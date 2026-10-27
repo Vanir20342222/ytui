@@ -1,0 +1,6 @@
+[
+ {"url": "ytsearch:test query", "args": ["-J", "--flat-playlist"]},
+ {"url": "ytsearch3:test query", "args": ["--flat-playlist", "--print", "%(playlist_id)s|%(playlist_count)s|%(id)s|%(title)s|%(duration)s|%(url)s"]},
+ {"url": "ytsearchall:test query", "args": ["-J", "--flat-playlist"]},
+ {"url": "https://www.youtube.com/results?search_query=test+query&sp=CAI%253D", "args": ["-J", "--flat-playlist"]}
+]

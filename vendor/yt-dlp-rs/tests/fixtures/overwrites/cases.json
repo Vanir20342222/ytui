@@ -1,0 +1,485 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "name": "default/none",
+   "args": [],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "default/video.mp4",
+   "args": [],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "old",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "default/video.info.json",
+   "args": [],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "default/video.nb.vtt",
+   "args": [],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "default/video.mp4+video.info.json+video.nb.vtt",
+   "args": [],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "old",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-overwrites/none",
+   "args": [
+    "-w"
+   ],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-overwrites/video.mp4",
+   "args": [
+    "-w"
+   ],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "old",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-overwrites/video.info.json",
+   "args": [
+    "-w"
+   ],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "old",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-overwrites/video.nb.vtt",
+   "args": [
+    "-w"
+   ],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "old"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-overwrites/video.mp4+video.info.json+video.nb.vtt",
+   "args": [
+    "-w"
+   ],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "old",
+    "video.mp4": "old",
+    "video.nb.vtt": "old"
+   },
+   "archived": true
+  },
+  {
+   "name": "force/none",
+   "args": [
+    "--force-overwrites"
+   ],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "force/video.mp4",
+   "args": [
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "force/video.info.json",
+   "args": [
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "force/video.nb.vtt",
+   "args": [
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "force/video.mp4+video.info.json+video.nb.vtt",
+   "args": [
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "yes-alias/none",
+   "args": [
+    "--yes-overwrites"
+   ],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "yes-alias/video.mp4",
+   "args": [
+    "--yes-overwrites"
+   ],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "yes-alias/video.info.json",
+   "args": [
+    "--yes-overwrites"
+   ],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "yes-alias/video.nb.vtt",
+   "args": [
+    "--yes-overwrites"
+   ],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "yes-alias/video.mp4+video.info.json+video.nb.vtt",
+   "args": [
+    "--yes-overwrites"
+   ],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-force/none",
+   "args": [
+    "--force-overwrites",
+    "--no-force-overwrites"
+   ],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-force/video.mp4",
+   "args": [
+    "--force-overwrites",
+    "--no-force-overwrites"
+   ],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "old",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-force/video.info.json",
+   "args": [
+    "--force-overwrites",
+    "--no-force-overwrites"
+   ],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-force/video.nb.vtt",
+   "args": [
+    "--force-overwrites",
+    "--no-force-overwrites"
+   ],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "no-force/video.mp4+video.info.json+video.nb.vtt",
+   "args": [
+    "--force-overwrites",
+    "--no-force-overwrites"
+   ],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": false,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "old",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "w-then-force/none",
+   "args": [
+    "-w",
+    "--force-overwrites"
+   ],
+   "existing": [],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "w-then-force/video.mp4",
+   "args": [
+    "-w",
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.mp4"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "w-then-force/video.info.json",
+   "args": [
+    "-w",
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.info.json"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "w-then-force/video.nb.vtt",
+   "args": [
+    "-w",
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  },
+  {
+   "name": "w-then-force/video.mp4+video.info.json+video.nb.vtt",
+   "args": [
+    "-w",
+    "--force-overwrites"
+   ],
+   "existing": [
+    "video.mp4",
+    "video.info.json",
+    "video.nb.vtt"
+   ],
+   "media_downloaded": true,
+   "files": {
+    "video.info.json": "new",
+    "video.mp4": "new",
+    "video.nb.vtt": "new"
+   },
+   "archived": true
+  }
+ ]
+}

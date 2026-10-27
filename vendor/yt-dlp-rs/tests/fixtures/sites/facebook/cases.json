@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.facebook.com/watch/?v=1234567890", "args": ["-J"]},
+ {"url": "https://www.facebook.com/watch/?v=1234567890", "args": ["-F"]},
+ {"url": "https://www.facebook.com/reel/1234567890", "args": ["--print", "%(id)s|%(title)s|%(webpage_url)s"]},
+ {"url": "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fsomeone%2Fvideos%2F1234567890%2F&show_text=0", "args": ["--print", "%(id)s|%(uploader)s|%(duration)s"]},
+ {"url": "https://www.facebook.com/someone/videos/999/", "args": ["-j"]},
+ {"url": "https://www.facebook.com/watch/?v=1234567890", "args": ["--list-subs"]}
+]

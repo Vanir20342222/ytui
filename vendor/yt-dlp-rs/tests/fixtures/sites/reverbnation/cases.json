@@ -1,0 +1,11 @@
+[
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["-j"]},
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["-J"]},
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["-F"]},
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["--list-thumbnails"]},
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["--print", "%(title)s|%(uploader)s|%(uploader_id)s|%(thumbnail)s|%(ext)s|%(vcodec)s|%(acodec)s|%(format_id)s"]},
+ {"url": "http://www.reverbnation.com/alkilados/song/16965047-mona-lisa", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://reverbnation.com/x/song/2", "args": ["-j"]},
+ {"url": "https://reverbnation.com/x/song/3", "args": ["-j"]},
+ {"url": "https://reverbnation.com/x/song/4", "args": ["-j"]}
+]

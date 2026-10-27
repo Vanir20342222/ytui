@@ -1,0 +1,68 @@
+{
+ "routes": [
+  {
+   "url": "https://www.instagram.com/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8",
+    "Set-Cookie": "csrftoken=CSRF1; Domain=.instagram.com; Path=/"
+   },
+   "body_file": "home.html"
+  },
+  {
+   "url": "https://www.instagram.com/api/v1/web/get_ruling_for_content/?content_type=MEDIA&target_id=482584233761418119",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"status\": \"ok\"}"
+  },
+  {
+   "url": "https://www.instagram.com/api/v1/web/get_ruling_for_content/?content_type=MEDIA&target_id=43539060894620981",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"status\": \"fail\"}"
+  },
+  {
+   "url": "https://www.instagram.com/api/v1/web/get_ruling_for_content/?content_type=MEDIA&target_id=279683709305511093",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"status\": \"ok\"}"
+  },
+  {
+   "url": "https://www.instagram.com/api/v1/web/get_ruling_for_content/?content_type=MEDIA&target_id=314885677134303477",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Restricted Video\", \"description\": \"You must be 18 years old or over to see this video.\"}"
+  },
+  {
+   "url": "https://www.instagram.com/p/aye83DjauH",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "video.html"
+  },
+  {
+   "url": "https://www.instagram.com/p/CarouSel01",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "carousel.html"
+  },
+  {
+   "url": "https://www.instagram.com/p/PhotoOnly1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "photo.html"
+  },
+  {
+   "url": "https://scontent.cdninstagram.com/v/v1-640.mp4?efg=x",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-insta"
+  }
+ ]
+}

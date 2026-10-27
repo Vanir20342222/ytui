@@ -1,6 +1,8 @@
 # ytui
 
-A Rust terminal app for YouTube, YouTube Music, downloads and radio. The interface
+A Rust monorepo for YouTube, YouTube Music, downloads and radio. The desktop app
+is a terminal application; the new [Android development preview](docs/android/README.md)
+has a Rust touch UI for phones and tablets. The interface
 uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
 Omarchy + Ghostty + Brave Origin is the current desktop target; CachyOS/Caelestia
 remain historical compatibility targets.

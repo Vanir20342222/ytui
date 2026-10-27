@@ -1,0 +1,3367 @@
+{
+ "arrange": [
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "title": "c3"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c4"
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "c3"
+    ],
+    [
+     30,
+     40,
+     "c4"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       20,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "interaction",
+       20,
+       30,
+       "Interaction Reminder"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       40,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       50,
+       60,
+       "Interaction Reminder"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     30,
+     40,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       20,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       30,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "interaction",
+       30,
+       40,
+       "Interaction Reminder"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     40,
+     70,
+     "c"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 60,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "intro",
+       10,
+       20,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "sponsor",
+       30,
+       40,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "outro",
+       50,
+       60,
+       "Endcards/Credits"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Intermission/Intro Animation"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Endcards/Credits"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "remove": true
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "sponsor",
+       30,
+       40,
+       "Sponsor"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     40,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     10,
+     20
+    ],
+    [
+     30,
+     40
+    ],
+    [
+     50,
+     60
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       30,
+       "Sponsor"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       40,
+       60,
+       "Interaction Reminder"
+      ]
+     ],
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     20,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     10,
+     60
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       30,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       40,
+       60,
+       "Interaction Reminder"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Sponsor, Unpaid/Self Promotion"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     40,
+     50,
+     "[SponsorBlock]: Unpaid/Self Promotion, Interaction Reminder"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     60,
+     70,
+     "c"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 170,
+     "title": "c"
+    },
+    {
+     "start_time": 0,
+     "end_time": 30,
+     "remove": true
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "sponsor",
+       20,
+       50,
+       "Sponsor"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "remove": true
+    },
+    {
+     "start_time": 70,
+     "end_time": 90,
+     "_categories": [
+      [
+       "sponsor",
+       70,
+       90,
+       "Sponsor"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 80,
+     "end_time": 100,
+     "remove": true
+    },
+    {
+     "start_time": 90,
+     "end_time": 110,
+     "remove": true
+    },
+    {
+     "start_time": 120,
+     "end_time": 140,
+     "_categories": [
+      [
+       "sponsor",
+       120,
+       140,
+       "Sponsor"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 130,
+     "end_time": 160,
+     "_categories": [
+      [
+       "selfpromo",
+       130,
+       160,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 150,
+     "end_time": 170,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     20,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     0,
+     60
+    ],
+    [
+     70,
+     110
+    ],
+    [
+     120,
+     170
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 170,
+     "title": "c"
+    },
+    {
+     "start_time": 0,
+     "end_time": 30,
+     "_categories": [
+      [
+       "intro",
+       0,
+       30,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "sponsor",
+       20,
+       50,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "_categories": [
+      [
+       "selfpromo",
+       40,
+       60,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 70,
+     "end_time": 90,
+     "_categories": [
+      [
+       "sponsor",
+       70,
+       90,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 80,
+     "end_time": 100,
+     "_categories": [
+      [
+       "sponsor",
+       80,
+       100,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 90,
+     "end_time": 110,
+     "_categories": [
+      [
+       "sponsor",
+       90,
+       110,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 120,
+     "end_time": 140,
+     "_categories": [
+      [
+       "selfpromo",
+       120,
+       140,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 130,
+     "end_time": 160,
+     "_categories": [
+      [
+       "interaction",
+       130,
+       160,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 150,
+     "end_time": 170,
+     "_categories": [
+      [
+       "outro",
+       150,
+       170,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     20,
+     "[SponsorBlock]: Intermission/Intro Animation"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Intermission/Intro Animation, Sponsor"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     40,
+     50,
+     "[SponsorBlock]: Sponsor, Unpaid/Self Promotion"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     60,
+     70,
+     "c"
+    ],
+    [
+     70,
+     110,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     110,
+     120,
+     "c"
+    ],
+    [
+     120,
+     130,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     130,
+     140,
+     "[SponsorBlock]: Unpaid/Self Promotion, Interaction Reminder"
+    ],
+    [
+     140,
+     150,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     150,
+     160,
+     "[SponsorBlock]: Interaction Reminder, Endcards/Credits"
+    ],
+    [
+     160,
+     170,
+     "[SponsorBlock]: Endcards/Credits"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 200,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       40,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "intro",
+       10,
+       30,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "remove": true
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "selfpromo",
+       30,
+       40,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 70,
+     "_categories": [
+      [
+       "sponsor",
+       50,
+       70,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 60,
+     "end_time": 80,
+     "_categories": [
+      [
+       "interaction",
+       60,
+       80,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 70,
+     "end_time": 80,
+     "remove": true
+    },
+    {
+     "start_time": 70,
+     "end_time": 90,
+     "_categories": [
+      [
+       "sponsor",
+       70,
+       90,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 80,
+     "end_time": 100,
+     "_categories": [
+      [
+       "interaction",
+       80,
+       100,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 120,
+     "end_time": 170,
+     "_categories": [
+      [
+       "selfpromo",
+       120,
+       170,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 130,
+     "end_time": 180,
+     "_categories": [
+      [
+       "outro",
+       130,
+       180,
+       "Endcards/Credits"
+      ]
+     ]
+    },
+    {
+     "start_time": 140,
+     "end_time": 150,
+     "remove": true
+    },
+    {
+     "start_time": 150,
+     "end_time": 160,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor, Intermission/Intro Animation"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Sponsor, Unpaid/Self Promotion"
+    ],
+    [
+     30,
+     40,
+     "c"
+    ],
+    [
+     40,
+     50,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     50,
+     70,
+     "[SponsorBlock]: Sponsor, Interaction Reminder"
+    ],
+    [
+     70,
+     80,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     80,
+     100,
+     "c"
+    ],
+    [
+     100,
+     110,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     110,
+     130,
+     "[SponsorBlock]: Unpaid/Self Promotion, Endcards/Credits"
+    ],
+    [
+     130,
+     140,
+     "[SponsorBlock]: Endcards/Credits"
+    ],
+    [
+     140,
+     160,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     30
+    ],
+    [
+     70,
+     80
+    ],
+    [
+     140,
+     160
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 60,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       60,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       30,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     40,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     40,
+     50,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     30
+    ],
+    [
+     40,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       20,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "preview",
+       30,
+       40,
+       "Preview/Recap"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "filler",
+       50,
+       60,
+       "Filler Tangent"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     30,
+     "c"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Preview/Recap"
+    ],
+    [
+     40,
+     50,
+     "c"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Filler Tangent"
+    ],
+    [
+     60,
+     70,
+     "c"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       20,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "selfpromo",
+       30,
+       40,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       50,
+       60,
+       "Interaction Reminder"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     40,
+     "c"
+    ],
+    [
+     40,
+     50,
+     "[SponsorBlock]: Interaction Reminder"
+    ],
+    [
+     50,
+     60,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     30,
+     40
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "title": "c3"
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "title": "c4"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "c3"
+    ],
+    [
+     30,
+     40,
+     "c4"
+    ]
+   ],
+   "cuts": [
+    [
+     10,
+     30
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "title": "c3"
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "title": "c4"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "music_offtopic",
+       10,
+       30,
+       "Non-Music Section"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     30,
+     "[SponsorBlock]: Non-Music Section"
+    ],
+    [
+     30,
+     40,
+     "c2"
+    ],
+    [
+     40,
+     50,
+     "c3"
+    ],
+    [
+     50,
+     60,
+     "c4"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "title": "c3"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c4"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c4"
+    ]
+   ],
+   "cuts": [
+    [
+     10,
+     30
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "title": "c2"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c3"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "c3"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     30
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 60,
+     "end_time": 80,
+     "title": "c4"
+    },
+    {
+     "start_time": 80,
+     "end_time": 100,
+     "title": "c5"
+    },
+    {
+     "start_time": 10,
+     "end_time": 90,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c5"
+    ]
+   ],
+   "cuts": [
+    [
+     10,
+     90
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c3"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "c3"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     30
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "remove": true
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     30,
+     "c2"
+    ],
+    [
+     30,
+     40,
+     "c3"
+    ]
+   ],
+   "cuts": [
+    [
+     0,
+     10
+    ],
+    [
+     50,
+     60
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "title": "c3"
+    },
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "remove": true
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c2"
+    ]
+   ],
+   "cuts": [
+    [
+     0,
+     20
+    ],
+    [
+     30,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 60,
+     "end_time": 80,
+     "title": "c4"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "remove": true
+    },
+    {
+     "start_time": 50,
+     "end_time": 70,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     30,
+     "c2"
+    ],
+    [
+     30,
+     40,
+     "c3"
+    ],
+    [
+     40,
+     50,
+     "c4"
+    ]
+   ],
+   "cuts": [
+    [
+     20,
+     30
+    ],
+    [
+     50,
+     70
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "title": "c3"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c4"
+    },
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "remove": true
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "remove": true
+    }
+   ],
+   "expected": [],
+   "cuts": [
+    [
+     0,
+     40
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "title": "c3"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c4"
+    },
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "_categories": [
+      [
+       "intro",
+       0,
+       20,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "_categories": [
+      [
+       "outro",
+       20,
+       40,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     20,
+     "[SponsorBlock]: Intermission/Intro Animation"
+    ],
+    [
+     20,
+     40,
+     "[SponsorBlock]: Endcards/Credits"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 60,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 60,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       60,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "_categories": [
+      [
+       "intro",
+       10,
+       40,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "_categories": [
+      [
+       "interaction",
+       30,
+       50,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       30,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "_categories": [
+      [
+       "interaction",
+       40,
+       50,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "outro",
+       50,
+       60,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     30,
+     "[SponsorBlock]: Sponsor, Intermission/Intro Animation"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Sponsor, Endcards/Credits"
+    ]
+   ],
+   "cuts": [
+    [
+     30,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 2,
+     "title": "c"
+    },
+    {
+     "start_time": 0.5,
+     "end_time": 2,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     0.5,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     0.5,
+     2
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(name)s",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c"
+    },
+    {
+     "start_time": 2,
+     "end_time": 8,
+     "_categories": [
+      [
+       "sponsor",
+       2,
+       8,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 4,
+     "end_time": 6,
+     "_categories": [
+      [
+       "selfpromo",
+       4,
+       6,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     2,
+     "c"
+    ],
+    [
+     2,
+     4,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     4,
+     6,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     6,
+     8,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     8,
+     10,
+     "c"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "_categories": [
+      [
+       "chapter",
+       10,
+       20,
+       "sb c1"
+      ]
+     ]
+    },
+    {
+     "start_time": 15,
+     "end_time": 16,
+     "_categories": [
+      [
+       "chapter",
+       15,
+       16,
+       "sb c2"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "_categories": [
+      [
+       "preview",
+       30,
+       40,
+       "Preview/Recap"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "filler",
+       50,
+       60,
+       "Filler Tangent"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     15,
+     "[SponsorBlock]: sb c1"
+    ],
+    [
+     15,
+     16,
+     "[SponsorBlock]: sb c1, sb c2"
+    ],
+    [
+     16,
+     20,
+     "[SponsorBlock]: sb c1"
+    ],
+    [
+     20,
+     30,
+     "c"
+    ],
+    [
+     30,
+     40,
+     "[SponsorBlock]: Preview/Recap"
+    ],
+    [
+     40,
+     50,
+     "c"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Filler Tangent"
+    ],
+    [
+     60,
+     70,
+     "c"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "title": "c3"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c4"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       30,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     30,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     30,
+     40,
+     "c4"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "title": "c2"
+    },
+    {
+     "start_time": 30,
+     "end_time": 40,
+     "title": "c3"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       20,
+       30,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     30,
+     40,
+     "c3"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 60,
+     "end_time": 80,
+     "title": "c4"
+    },
+    {
+     "start_time": 80,
+     "end_time": 100,
+     "title": "c5"
+    },
+    {
+     "start_time": 10,
+     "end_time": 90,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       90,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     90,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     90,
+     100,
+     "c5"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 20,
+     "title": "c2"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c3"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       20,
+       30,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     30,
+     40,
+     "c3"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "title": "c1"
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "_categories": [
+      [
+       "intro",
+       0,
+       10,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "outro",
+       50,
+       60,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "[SponsorBlock]: Intermission/Intro Animation"
+    ],
+    [
+     10,
+     20,
+     "c1"
+    ],
+    [
+     20,
+     40,
+     "c2"
+    ],
+    [
+     40,
+     50,
+     "c3"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Endcards/Credits"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       30,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 50,
+     "_categories": [
+      [
+       "interaction",
+       20,
+       50,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       30,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "_categories": [
+      [
+       "sponsor",
+       40,
+       60,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       50,
+       60,
+       "Interaction Reminder"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     40,
+     "[SponsorBlock]: Sponsor, Interaction Reminder"
+    ],
+    [
+     40,
+     50,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     30,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 50,
+     "title": "c3"
+    },
+    {
+     "start_time": 0,
+     "end_time": 20,
+     "_categories": [
+      [
+       "intro",
+       0,
+       20,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "_categories": [
+      [
+       "outro",
+       30,
+       50,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     20,
+     "[SponsorBlock]: Intermission/Intro Animation"
+    ],
+    [
+     20,
+     30,
+     "c2"
+    ],
+    [
+     30,
+     50,
+     "[SponsorBlock]: Endcards/Credits"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 70,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 60,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       60,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 60,
+     "_categories": [
+      [
+       "interaction",
+       20,
+       60,
+       "Interaction Reminder"
+      ]
+     ]
+    },
+    {
+     "start_time": 30,
+     "end_time": 50,
+     "_categories": [
+      [
+       "selfpromo",
+       30,
+       50,
+       "Unpaid/Self Promotion"
+      ]
+     ],
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     40,
+     "[SponsorBlock]: Sponsor, Interaction Reminder"
+    ],
+    [
+     40,
+     50,
+     "c"
+    ]
+   ],
+   "cuts": [
+    [
+     30,
+     50
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 10,
+     "title": "c1"
+    },
+    {
+     "start_time": 10,
+     "end_time": 40,
+     "title": "c2"
+    },
+    {
+     "start_time": 40,
+     "end_time": 60,
+     "title": "c3"
+    },
+    {
+     "start_time": 60,
+     "end_time": 80,
+     "title": "c4"
+    },
+    {
+     "start_time": 20,
+     "end_time": 30,
+     "_categories": [
+      [
+       "sponsor",
+       20,
+       30,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 70,
+     "_categories": [
+      [
+       "selfpromo",
+       50,
+       70,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c1"
+    ],
+    [
+     10,
+     20,
+     "c2"
+    ],
+    [
+     20,
+     30,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     30,
+     40,
+     "c2"
+    ],
+    [
+     40,
+     50,
+     "c3"
+    ],
+    [
+     50,
+     70,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     70,
+     80,
+     "c4"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 2,
+     "title": "c1"
+    },
+    {
+     "start_time": 2,
+     "end_time": 4,
+     "title": "c2"
+    },
+    {
+     "start_time": 0.5,
+     "end_time": 2,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     2.5,
+     "c2"
+    ]
+   ],
+   "cuts": [
+    [
+     0.5,
+     2
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 0.1,
+     "title": "c1"
+    },
+    {
+     "start_time": 0.1,
+     "end_time": 0.2,
+     "title": "c2"
+    },
+    {
+     "start_time": 0.2,
+     "end_time": 0.3,
+     "title": "c3"
+    },
+    {
+     "start_time": 0.3,
+     "end_time": 0.4,
+     "title": "c4"
+    }
+   ],
+   "expected": [
+    [
+     0,
+     0.1,
+     "c1"
+    ],
+    [
+     0.1,
+     0.2,
+     "c2"
+    ],
+    [
+     0.2,
+     0.3,
+     "c3"
+    ],
+    [
+     0.3,
+     0.4,
+     "c4"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 2,
+     "title": "c1"
+    },
+    {
+     "start_time": 2,
+     "end_time": 3,
+     "title": "c2"
+    },
+    {
+     "start_time": 3,
+     "end_time": 3.5,
+     "title": "c3"
+    },
+    {
+     "start_time": 1.5,
+     "end_time": 2.5,
+     "remove": true
+    }
+   ],
+   "expected": [
+    [
+     0,
+     2.0,
+     "c1"
+    ],
+    [
+     2.0,
+     2.5,
+     "c3"
+    ]
+   ],
+   "cuts": [
+    [
+     1.5,
+     2.5
+    ]
+   ]
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 1,
+     "title": "c1"
+    },
+    {
+     "start_time": 1,
+     "end_time": 3,
+     "title": "c2"
+    },
+    {
+     "start_time": 3,
+     "end_time": 4,
+     "title": "c3"
+    },
+    {
+     "start_time": 1.5,
+     "end_time": 2.5,
+     "_categories": [
+      [
+       "sponsor",
+       1.5,
+       2.5,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     1.5,
+     "c1"
+    ],
+    [
+     1.5,
+     2.5,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     2.5,
+     4.0,
+     "c3"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 0.1,
+     "_categories": [
+      [
+       "intro",
+       0,
+       0.1,
+       "Intermission/Intro Animation"
+      ]
+     ]
+    },
+    {
+     "start_time": 0.1,
+     "end_time": 0.2,
+     "title": "c1"
+    },
+    {
+     "start_time": 0.2,
+     "end_time": 0.3,
+     "_categories": [
+      [
+       "sponsor",
+       0.2,
+       0.3,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 0.3,
+     "end_time": 0.4,
+     "title": "c2"
+    },
+    {
+     "start_time": 0.4,
+     "end_time": 0.5,
+     "_categories": [
+      [
+       "outro",
+       0.4,
+       0.5,
+       "Endcards/Credits"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     0.3,
+     "c1"
+    ],
+    [
+     0.3,
+     0.5,
+     "c2"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 2,
+     "title": "c1"
+    },
+    {
+     "start_time": 2,
+     "end_time": 3,
+     "title": "c2"
+    },
+    {
+     "start_time": 3,
+     "end_time": 5,
+     "title": "c3"
+    },
+    {
+     "start_time": 1,
+     "end_time": 3,
+     "_categories": [
+      [
+       "sponsor",
+       1,
+       3,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 2.5,
+     "end_time": 4,
+     "_categories": [
+      [
+       "selfpromo",
+       2.5,
+       4,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     1,
+     "c1"
+    ],
+    [
+     1,
+     3.0,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     3.0,
+     4.0,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     4.0,
+     5.0,
+     "c3"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 4,
+     "title": "c"
+    },
+    {
+     "start_time": 1.5,
+     "end_time": 2,
+     "_categories": [
+      [
+       "sponsor",
+       1.5,
+       2,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 2,
+     "end_time": 4,
+     "_categories": [
+      [
+       "selfpromo",
+       2,
+       4,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     1.5,
+     "c"
+    ],
+    [
+     1.5,
+     4.0,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ]
+   ],
+   "cuts": []
+  },
+  {
+   "title": "[SponsorBlock]: %(category_names)l",
+   "chapters": [
+    {
+     "start_time": 0,
+     "end_time": 120,
+     "title": "c"
+    },
+    {
+     "start_time": 10,
+     "end_time": 45,
+     "_categories": [
+      [
+       "sponsor",
+       10,
+       45,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 20,
+     "end_time": 40,
+     "_categories": [
+      [
+       "selfpromo",
+       20,
+       40,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 50,
+     "end_time": 70,
+     "_categories": [
+      [
+       "sponsor",
+       50,
+       70,
+       "Sponsor"
+      ]
+     ]
+    },
+    {
+     "start_time": 60,
+     "end_time": 85,
+     "_categories": [
+      [
+       "selfpromo",
+       60,
+       85,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 90,
+     "end_time": 120,
+     "_categories": [
+      [
+       "selfpromo",
+       90,
+       120,
+       "Unpaid/Self Promotion"
+      ]
+     ]
+    },
+    {
+     "start_time": 100,
+     "end_time": 110,
+     "_categories": [
+      [
+       "sponsor",
+       100,
+       110,
+       "Sponsor"
+      ]
+     ]
+    }
+   ],
+   "expected": [
+    [
+     0,
+     10,
+     "c"
+    ],
+    [
+     10,
+     20,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     20,
+     40,
+     "[SponsorBlock]: Sponsor, Unpaid/Self Promotion"
+    ],
+    [
+     40,
+     45,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     45,
+     50,
+     "c"
+    ],
+    [
+     50,
+     60,
+     "[SponsorBlock]: Sponsor"
+    ],
+    [
+     60,
+     70,
+     "[SponsorBlock]: Sponsor, Unpaid/Self Promotion"
+    ],
+    [
+     70,
+     85,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     85,
+     90,
+     "c"
+    ],
+    [
+     90,
+     100,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ],
+    [
+     100,
+     110,
+     "[SponsorBlock]: Unpaid/Self Promotion, Sponsor"
+    ],
+    [
+     110,
+     120,
+     "[SponsorBlock]: Unpaid/Self Promotion"
+    ]
+   ],
+   "cuts": []
+  }
+ ],
+ "concat": [
+  {
+   "cuts": [
+    [
+     1,
+     2
+    ],
+    [
+     10,
+     20
+    ]
+   ],
+   "duration": 30,
+   "expected": [
+    {
+     "outpoint": "1.000000"
+    },
+    {
+     "inpoint": "2.000000",
+     "outpoint": "10.000000"
+    },
+    {
+     "inpoint": "20.000000"
+    }
+   ]
+  },
+  {
+   "cuts": [
+    [
+     1,
+     2
+    ],
+    [
+     10,
+     20
+    ]
+   ],
+   "duration": 20,
+   "expected": [
+    {
+     "outpoint": "1.000000"
+    },
+    {
+     "inpoint": "2.000000",
+     "outpoint": "10.000000"
+    }
+   ]
+  },
+  {
+   "cuts": [
+    [
+     0,
+     1
+    ],
+    [
+     10,
+     20
+    ]
+   ],
+   "duration": 30,
+   "expected": [
+    {
+     "inpoint": "1.000000",
+     "outpoint": "10.000000"
+    },
+    {
+     "inpoint": "20.000000"
+    }
+   ]
+  }
+ ],
+ "quote": [
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "file:test",
+   "'file:test'"
+  ],
+  [
+   "special ' characters ' galore'''",
+   "'special '\\'' characters '\\'' galore'\\'\\'\\'"
+  ],
+  [
+   "'''special ' characters ' galore",
+   "\\'\\'\\''special '\\'' characters '\\'' galore'"
+  ],
+  [
+   "special ' ''characters'''galore",
+   "'special '\\'' '\\'\\''characters'\\'\\'\\''galore'"
+  ]
+ ]
+}

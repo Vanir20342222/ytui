@@ -1,0 +1,7 @@
+[
+ {"url": "https://archive.org/details/film1", "args": ["-J"]},
+ {"url": "https://archive.org/details/album1", "args": ["-J"]},
+ {"url": "https://archive.org/details/album1/02+Other.flac", "args": ["-J"]},
+ {"url": "https://archive.org/details/broken1", "args": ["--print", "id"]},
+ {"url": "https://archive.org/details/film1", "args": ["--no-progress", "-f", "0", "-o", "%(id)s.%(ext)s"]}
+]

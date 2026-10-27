@@ -1,0 +1,107 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.zhihu.com/zvideo/1342930761977176064",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"1342930761977176064\", \"title\": \"\\u5199\\u6625\\u8054\\u4e5f\\u592a\\u96be\\u4e86\\u5427\\uff01\", \"formats\": [{\"asr\": null, \"filesize\": null, \"format_id\": \"ld\", \"fps\": null, \"height\": 360, \"tbr\": 800.0, \"url\": \"https://zhihu.test/ld.mp4?auth=x\", \"width\": 640, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 14633300, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"ld - 640x360\"}, {\"asr\": 44100, \"filesize\": 792, \"format_id\": \"hd\", \"fps\": 30, \"height\": 720, \"tbr\": 2500.5, \"url\": \"https://zhihu.test/hd.mp4\", \"width\": 1280, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\"}], \"thumbnail\": \"https://zhihu.test/t.jpg\", \"uploader\": \"\\u6865\\u534a\\u822b\", \"timestamp\": 1612959715, \"uploader_id\": \"244ecb13b0fd7daf92235288c8ca3365\", \"uploader_url\": \"https://www.zhihu.com/people/qiao\", \"duration\": 146.333, \"view_count\": 100, \"like_count\": 5, \"comment_count\": null, \"webpage_url\": \"https://www.zhihu.com/zvideo/1342930761977176064\", \"original_url\": \"https://www.zhihu.com/zvideo/1342930761977176064\", \"webpage_url_basename\": \"1342930761977176064\", \"webpage_url_domain\": \"zhihu.com\", \"extractor\": \"Zhihu\", \"extractor_key\": \"Zhihu\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://zhihu.test/t.jpg\", \"id\": \"0\"}], \"display_id\": \"1342930761977176064\", \"fulltitle\": \"\\u5199\\u6625\\u8054\\u4e5f\\u592a\\u96be\\u4e86\\u5427\\uff01\", \"duration_string\": \"2:26\", \"upload_date\": \"20210210\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"asr\": 44100, \"filesize\": 792, \"format_id\": \"hd\", \"fps\": 30, \"height\": 720, \"tbr\": 2500.5, \"url\": \"https://zhihu.test/hd.mp4\", \"width\": 1280, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\", \"_filename\": \"\\u5199\\u6625\\u8054\\u4e5f\\u592a\\u96be\\u4e86\\u5427\\uff01 [1342930761977176064].mp4\", \"filename\": \"\\u5199\\u6625\\u8054\\u4e5f\\u592a\\u96be\\u4e86\\u5427\\uff01 [1342930761977176064].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.zhihu.com/zvideo/1342930761977176064",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Zhihu] Extracting URL: https://www.zhihu.com/zvideo/1342930761977176064",
+    "[Zhihu] 1342930761977176064: Downloading JSON metadata",
+    "[info] Available formats for 1342930761977176064:",
+    "ID EXT RESOLUTION FPS |  FILESIZE   TBR PROTO | VCODEC  ACODEC  ASR",
+    "-------------------------------------------------------------------",
+    "ld mp4 640x360        | ≈13.96MiB  800k https | unknown unknown",
+    "hd mp4 1280x720    30 |   792.00B 2500k https | unknown unknown 44k"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.zhihu.com/zvideo/1342930761977176064",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(thumbnail)s|%(uploader)s|%(upload_date)s|%(uploader_id)s|%(uploader_url)s|%(duration)s|%(view_count)s|%(like_count)s|%(comment_count)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1342930761977176064|写春联也太难了吧！|https://zhihu.test/t.jpg|桥半舫|20210210|244ecb13b0fd7daf92235288c8ca3365|https://www.zhihu.com/people/qiao|146.333|100|5|NA|hd"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.zhihu.com/zvideo/1342930761977176064",
+   "args": [
+    "--no-progress",
+    "-f",
+    "hd",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Zhihu] Extracting URL: https://www.zhihu.com/zvideo/1342930761977176064",
+    "[Zhihu] 1342930761977176064: Downloading JSON metadata",
+    "[info] 1342930761977176064: Downloading 1 format(s): hd",
+    "[download] Destination: 1342930761977176064.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "1342930761977176064.mp4": 792
+   }
+  },
+  {
+   "url": "https://zhihu.com/zvideo/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Plain\", \"formats\": [{\"asr\": null, \"filesize\": null, \"format_id\": \"x\", \"fps\": null, \"height\": null, \"tbr\": null, \"url\": \"https://zhihu.test/x\", \"width\": null, \"protocol\": \"https\", \"ext\": \"unknown_video\", \"video_ext\": \"unknown_video\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"x - unknown\"}], \"thumbnail\": \"https://zhihu.test/i.jpg\", \"uploader\": null, \"timestamp\": null, \"uploader_id\": null, \"uploader_url\": \"\", \"view_count\": null, \"like_count\": null, \"comment_count\": null, \"webpage_url\": \"https://zhihu.com/zvideo/2\", \"original_url\": \"https://zhihu.com/zvideo/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"zhihu.com\", \"extractor\": \"Zhihu\", \"extractor_key\": \"Zhihu\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://zhihu.test/i.jpg\", \"id\": \"0\"}], \"display_id\": \"2\", \"fulltitle\": \"Plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"asr\": null, \"filesize\": null, \"format_id\": \"x\", \"fps\": null, \"height\": null, \"tbr\": null, \"url\": \"https://zhihu.test/x\", \"width\": null, \"protocol\": \"https\", \"ext\": \"unknown_video\", \"video_ext\": \"unknown_video\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"x - unknown\", \"_filename\": \"Plain [2].unknown_video\", \"filename\": \"Plain [2].unknown_video\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://zhihu.com/zvideo/2",
+   "args": [
+    "--print",
+    "%(uploader_url)r"
+   ],
+   "exit": 0,
+   "stdout": [
+    "''"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.zhihu.com/zvideo/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('title')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

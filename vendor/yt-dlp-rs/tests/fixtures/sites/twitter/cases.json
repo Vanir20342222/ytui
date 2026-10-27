@@ -1,0 +1,13 @@
+[
+ {"url": "https://x.com/poster/status/1001", "args": ["-J"]},
+ {"url": "https://twitter.com/poster/status/1001", "args": ["-F"]},
+ {"url": "https://x.com/poster/status/1002", "args": ["-J"]},
+ {"url": "https://x.com/poster/status/1002/video/3", "args": ["--print", "%(id)s|%(title)s|%(playlist_index)s"]},
+ {"url": "https://x.com/poster/status/1002/video/3", "args": ["--no-playlist", "--print", "%(id)s|%(title)s|%(_old_archive_ids)s"]},
+ {"url": "https://x.com/poster/status/1002/video/1", "args": ["--no-playlist", "-j"]},
+ {"url": "https://x.com/poster/status/1003", "args": ["-j"]},
+ {"url": "https://x.com/poster/status/1004", "args": ["--print", "%(id)s|%(title)s|%(webpage_url)s"]},
+ {"url": "https://x.com/poster/status/1005", "args": ["-j"]},
+ {"url": "https://twitter.com/i/videos/tweet/1001", "args": ["--print", "%(id)s|%(webpage_url)s"]},
+ {"url": "https://x.com/poster/status/1001", "args": ["-f", "http-2176", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-TARGETDURATION:1
+#EXT-X-MEDIA-SEQUENCE:7
+#EXT-X-KEY:METHOD=AES-128,URI="../aes-keys/0.key"
+#EXTINF:0.6,
+segment-0.ts
+#EXTINF:0.6,
+segment-1.ts
+#EXT-X-KEY:METHOD=AES-128,URI="../aes-keys/1.key",IV=0x112233445566778899aabbccddeeff00
+#EXTINF:0.6,
+segment-2.ts
+#EXT-X-ENDLIST

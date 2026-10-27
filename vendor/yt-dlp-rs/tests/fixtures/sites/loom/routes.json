@@ -1,0 +1,144 @@
+{
+ "routes": [
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"GetVideoSSR\"",
+    "\"videoId\":\"43d05f362f734614a2e81b4694a3a523\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"getVideo\": {\"__typename\": \"RegularUserVideo\", \"id\": \"43d05f362f734614a2e81b4694a3a523\", \"name\": \"A Loom demo\", \"description\": \"Desc\", \"createdAt\": \"2024-04-04T12:00:00.000Z\", \"owner\": {\"display_name\": \"Owner Name\"}, \"video_properties\": {\"duration\": 76, \"width\": 1920, \"height\": 1080, \"microphone_enabled\": false}}}}"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"GetVideoSource\"",
+    "\"videoId\":\"43d05f362f734614a2e81b4694a3a523\"",
+    "\"acceptableMimes\":[\"DASH\",\"M3U8\",\"MP4\",\"WEBM\"]"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"getVideo\": {\"nullableRawCdnUrl\": {\"url\": \"https://cdn.loom.test/sessions/raw/abc.webm?Policy=p&Signature=s\"}}}}"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"FetchChapters\"",
+    "\"videoId\":\"43d05f362f734614a2e81b4694a3a523\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"fetchVideoChapters\": {\"content\": \"0:00 Intro\\n0:30 Demo\\n\"}}}"
+  },
+  {
+   "url": "https://www.loom.com/api/campaigns/sessions/43d05f362f734614a2e81b4694a3a523/raw-url",
+   "request_body": [
+    "\"deviceID\":null",
+    "\"force_original\":false"
+   ],
+   "status": 401,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://www.loom.com/api/campaigns/sessions/43d05f362f734614a2e81b4694a3a523/transcoded-url",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://luna.loom.test/id/playlist-split.m3u8?Policy=p&Signature=s\"}"
+  },
+  {
+   "url": "https://luna.loom.test/id/playlist.m3u8?Policy=p&Signature=s",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",NAME=\"Audio\",URI=\"https://luna.loom.test/id/audio.m3u8\"\n#EXT-X-STREAM-INF:BANDWIDTH=900000,RESOLUTION=1280x720,CODECS=\"avc1.64001f\",AUDIO=\"audio\"\nhttps://luna.loom.test/id/720.m3u8\n"
+  },
+  {
+   "url": "https://luna.loom.test/id/audio.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\nseg.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://luna.loom.test/id/720.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\nseg.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://cdn.loom.test/sessions/raw/abc.webm?Policy=p&Signature=s",
+   "headers": {
+    "Content-Type": "video/webm"
+   },
+   "body": "webm-loom"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"GetVideoSSR\"",
+    "\"videoId\":\"ddcf1c1ad21f451ea7468b1e33917e4e\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"getVideo\": {\"__typename\": \"VideoPasswordMissingOrIncorrect\", \"message\": \"pw\"}}}"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"GetVideoSSR\"",
+    "\"videoId\":\"0123456789abcdef0123456789abcdef\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"getVideo\": {\"__typename\": \"RegularUserVideo\", \"name\": \"HTTP only\", \"video_properties\": {\"duration\": \"12\", \"width\": \"640\"}}}}"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"GetVideoSource\"",
+    "\"videoId\":\"0123456789abcdef0123456789abcdef\""
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"getVideo\": {}}}"
+  },
+  {
+   "url": "https://www.loom.com/graphql",
+   "request_body": [
+    "\"operationName\":\"FetchChapters\"",
+    "\"videoId\":\"0123456789abcdef0123456789abcdef\""
+   ],
+   "status": 500,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://www.loom.com/api/campaigns/sessions/0123456789abcdef0123456789abcdef/raw-url",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cdn.loom.test/http.mp4?sig=1\"}"
+  },
+  {
+   "url": "https://www.loom.com/api/campaigns/sessions/0123456789abcdef0123456789abcdef/transcoded-url",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": null}"
+  }
+ ]
+}

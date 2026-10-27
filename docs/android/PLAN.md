@@ -7,11 +7,11 @@ The desktop application must continue to work and keep its existing state.
 ## Architecture
 
 - `apps/desktop`: existing Rust terminal application, with unchanged binary names.
-- `apps/android`: native Android touch/video/background-media/platform shell.
+- `apps/android`: Rust-rendered adaptive touch UI (egui) and minimal Android media/storage/service glue.
 - `crates/ytui-core`: shared models, queue/config/history, themes and policy.
 - `crates/ytui-providers`: shared Rust YouTube/Music browsing, radio/cliamp,
   bounded HTTP/cache, session scoping, images, lyrics and SponsorBlock.
-- `crates/ytui-mobile`: Rust Android engine/JNI boundary; no desktop process,
+- `crates/ytui-mobile`: Rust Android engine/UI/JNI boundary; no desktop process,
   keyring, MPRIS, NetworkManager or browser-database dependency.
 - Desktop services re-export shared provider APIs rather than maintain copies.
 

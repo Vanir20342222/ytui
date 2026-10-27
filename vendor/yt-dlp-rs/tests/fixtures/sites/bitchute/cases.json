@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.bitchute.com/video/UGlrF9o9b-Q/", "args": ["-J"]},
+ {"url": "https://www.bitchute.com/video/UGlrF9o9b-Q/", "args": ["--no-check-formats", "--print", "%(formats.0.url)s|%(formats.0.filesize)s"]},
+ {"url": "https://www.bitchute.com/embed/geo1/", "args": ["--print", "id"]},
+ {"url": "https://old.bitchute.com/video/nometa/", "args": ["--print", "%(id)s|%(title)s|%(is_live)s"]},
+ {"url": "https://www.bitchute.com/video/UGlrF9o9b-Q/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,109 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.historicfilms.com/tapes/4728",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"4728\", \"url\": \"http://www.historicfilms.com/video/GP7-1_4728_web.mov\", \"title\": \"Historic Films: GP-7 & more\", \"description\": \"Electro-Motive GP-7 locomotive.\", \"thumbnail\": \"http://www.historicfilms.com/thumbs/4728.jpg\", \"duration\": 2096, \"webpage_url\": \"http://www.historicfilms.com/tapes/4728\", \"original_url\": \"http://www.historicfilms.com/tapes/4728\", \"webpage_url_basename\": \"4728\", \"webpage_url_domain\": \"historicfilms.com\", \"extractor\": \"HistoricFilms\", \"extractor_key\": \"HistoricFilms\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://www.historicfilms.com/thumbs/4728.jpg\", \"id\": \"0\"}], \"display_id\": \"4728\", \"fulltitle\": \"Historic Films: GP-7 & more\", \"duration_string\": \"34:56\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mov\", \"video_ext\": \"mov\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Historic Films\\uff1a GP-7 & more [4728].mov\", \"filename\": \"Historic Films\\uff1a GP-7 & more [4728].mov\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.historicfilms.com/tapes/4728",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[HistoricFilms] Extracting URL: http://www.historicfilms.com/tapes/4728",
+    "[HistoricFilms] 4728: Downloading webpage",
+    "[info] Available formats for 4728:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mov unknown    | http  | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.historicfilms.com/tapes/4728",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(duration)s|%(duration_string)s|%(ext)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "4728|Historic Films: GP-7 & more|Electro-Motive GP-7 locomotive.|http://www.historicfilms.com/thumbs/4728.jpg|2096|34:56|mov|0"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.historicfilms.com/tapes/4728",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[HistoricFilms] Extracting URL: http://www.historicfilms.com/tapes/4728",
+    "[HistoricFilms] 4728: Downloading webpage",
+    "[info] 4728: Downloading 1 format(s): 0",
+    "[download] Destination: 4728.mov",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "4728.mov": 1044
+   }
+  },
+  {
+   "url": "https://historicfilms.com/play9",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"9\", \"url\": \"http://www.historicfilms.com/video/T9_9_web.mov\", \"title\": \"HistoricFilms video #9\", \"description\": null, \"thumbnail\": \"http://www.historicfilms.com/og/9.jpg\", \"webpage_url\": \"https://historicfilms.com/play9\", \"original_url\": \"https://historicfilms.com/play9\", \"webpage_url_basename\": \"play9\", \"webpage_url_domain\": \"historicfilms.com\", \"extractor\": \"HistoricFilms\", \"extractor_key\": \"HistoricFilms\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://www.historicfilms.com/og/9.jpg\", \"id\": \"0\"}], \"display_id\": \"9\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mov\", \"video_ext\": \"mov\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"HistoricFilms video #9 [9].mov\", \"filename\": \"HistoricFilms video #9 [9].mov\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [HistoricFilms] unable to extract OpenGraph title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [HistoricFilms] unable to extract OpenGraph description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [HistoricFilms] unable to extract thumbnails; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [HistoricFilms] unable to extract duration; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://historicfilms.com/tapes/10",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [HistoricFilms] 10: Unable to extract tape id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://historicfilms.com/tapes/11",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [HistoricFilms] 11: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

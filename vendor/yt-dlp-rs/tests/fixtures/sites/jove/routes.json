@@ -1,0 +1,74 @@
+{
+ "routes": [
+  {
+   "url": "http://www.jove.com/video/2744/electrode-positioning",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head>\n<meta name=\"citation_title\" content=\"Electrode Positioning &amp; Montage\">\n<meta name=\"citation_publication_date\" content=\"2011/05/23\">\n<meta property=\"og:image\" content=\"https://jove.test/t.jpg\">\n<meta name=\"num_comments\" content=\"3 Comments\">\n</head><body><a href=\"/video-chapters?videoid=99\">x</a>\n<div id=\"section_body_summary\"><p class=\"jove_content\">A <i>summary</i></p></div></body></html>"
+  },
+  {
+   "url": "http://www.jove.com/video-chapters?videoid=99",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<?xml version=\"1.0\"?><chapters video=\"https://jove.test/v.mp4\"><chapter/></chapters>"
+  },
+  {
+   "url": "https://www.jove.com/video/2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"num_comments\" content=\"1 Comment\"></head><body>/video-chapters?videoid=98</body></html>"
+  },
+  {
+   "url": "http://www.jove.com/video-chapters?videoid=98",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<chapters/>"
+  },
+  {
+   "url": "https://jove.com/video/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"num_comments\" content=\"0 Comments\"></head><body>/video-chapters?videoid=97</body></html>"
+  },
+  {
+   "url": "http://www.jove.com/video-chapters?videoid=97",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<chapters video=\"https://jove.test/v.mp4\"/>"
+  },
+  {
+   "url": "https://jove.com/video/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>/video-chapters?videoid=96</body></html>"
+  },
+  {
+   "url": "http://www.jove.com/video-chapters?videoid=96",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<chapters video=\"https://jove.test/v.mp4\"/>"
+  },
+  {
+   "url": "https://jove.com/video/5",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://jove.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

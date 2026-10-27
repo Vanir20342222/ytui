@@ -745,3 +745,15 @@ cancellation/tool metadata and player recovery, plus real M4A/Opus/FLAC conversi
 and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata,
 duplicate invocation and missing output records on hook failure (M3/M8). Final
 counts and reproducible commands are in docs/VALIDATION.md.
+
+### M9: Android and monorepo (in progress)
+
+The user chose a Rust engine **and Rust UI**, with APK sideloading, targeting
+Nothing Phone (3a) and Samsung Galaxy Tab S9. Desktop lives in `apps/desktop`;
+portable providers/themes are shared with the new Rust mobile engine/egui UI.
+Android platform adapters supply decoding/background media, downloads, input,
+notifications and file access. No Python subprocess runs on Android.
+See [Android implementation plan](docs/android/PLAN.md),
+[actual parity gaps](docs/android/PARITY.md), [build/use](docs/android/README.md)
+and [validation evidence](docs/android/VALIDATION.md). M9 is not complete until
+live/mobile/device gates and remaining capability gaps are addressed.

@@ -1,0 +1,241 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"GLT9749789991\", \"thumbnail\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"title\": \"#97 What Kind Of Idiot Gets Phished?\", \"creators\": [\"Reply All\"], \"duration\": 1998.36, \"formats\": [{\"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://player.megaphone.fm/GLT9749789991\", \"original_url\": \"https://player.megaphone.fm/GLT9749789991\", \"webpage_url_basename\": \"GLT9749789991\", \"webpage_url_domain\": \"player.megaphone.fm\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"id\": \"0\"}], \"display_id\": \"GLT9749789991\", \"fulltitle\": \"#97 What Kind Of Idiot Gets Phished?\", \"duration_string\": \"33:18\", \"release_year\": null, \"creator\": \"Reply All\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[megaphone.fm] Extracting URL: https://player.megaphone.fm/GLT9749789991",
+    "[megaphone.fm] GLT9749789991: Downloading webpage",
+    "[info] Available formats for GLT9749789991:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "------------------------------------------",
+    "0  mp3 unknown    | https | unknown mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "args": [
+    "--print",
+    "%(title)s|%(creators)s|%(creator)s|%(duration)s|%(duration_string)s|%(thumbnail)s|%(ext)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "#97 What Kind Of Idiot Gets Phished?|['Reply All']|Reply All|1998.36|33:18|https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails|mp3|0"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[megaphone.fm] Extracting URL: https://player.megaphone.fm/GLT9749789991",
+    "[megaphone.fm] GLT9749789991: Downloading webpage",
+    "[info] GLT9749789991: Downloading 1 format(s): 0",
+    "[download] Destination: GLT9749789991.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "GLT9749789991.mp3": 2058
+   }
+  },
+  {
+   "url": "https://player.megaphone.fm/PLAIN1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [megaphone.fm] PLAIN1: Unable to extract OpenGraph audio:artist; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/NOJSON1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [megaphone.fm] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: [megaphone.fm] NOJSON1: Unable to extract episode JSON; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://podcast.example.test/episode",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"GLT9749789991\", \"thumbnail\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"title\": \"#97 What Kind Of Idiot Gets Phished?\", \"creators\": [\"Reply All\"], \"duration\": 1998.36, \"formats\": [{\"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"original_url\": \"https://podcast.example.test/episode\", \"webpage_url\": \"https://player.megaphone.fm/GLT9749789991\", \"webpage_url_basename\": \"GLT9749789991\", \"webpage_url_domain\": \"player.megaphone.fm\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"id\": \"0\"}], \"display_id\": \"GLT9749789991\", \"fulltitle\": \"#97 What Kind Of Idiot Gets Phished?\", \"duration_string\": \"33:18\", \"release_year\": null, \"creator\": \"Reply All\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://podcast.example.test/both",
+   "args": [
+    "-s"
+   ],
+   "exit": 1,
+   "stdout": [
+    "[generic] Extracting URL: https://podcast.example.test/both",
+    "[generic] both: Downloading webpage",
+    "[generic] both: Extracting information",
+    "[download] Downloading playlist: Both",
+    "[generic] Playlist Both: Downloading 3 items of 3",
+    "[download] Downloading item 1 of 3",
+    "[megaphone.fm] Extracting URL: https://player.megaphone.fm/PLAIN1",
+    "[megaphone.fm] PLAIN1: Downloading webpage",
+    "[download] Downloading item 2 of 3",
+    "[megaphone.fm] Extracting URL: https://player.megaphone.fm/GLT9749789991",
+    "[megaphone.fm] GLT9749789991: Downloading webpage",
+    "[info] GLT9749789991: Downloading 1 format(s): 0",
+    "[download] Downloading item 3 of 3",
+    "[Streamable] Extracting URL: https://streamable.com/e/dnd1",
+    "[Streamable] dnd1: Downloading JSON metadata",
+    "[info] dnd1: Downloading 1 format(s): mp4",
+    "[download] Finished downloading playlist: Both"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [megaphone.fm] PLAIN1: Unable to extract OpenGraph audio:artist; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://podcast.example.test/both",
+   "args": [
+    "-J"
+   ],
+   "exit": 1,
+   "stdout": [
+    "{\"id\": \"both\", \"title\": \"Both\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [null, {\"id\": \"GLT9749789991\", \"thumbnail\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"title\": \"#97 What Kind Of Idiot Gets Phished?\", \"creators\": [\"Reply All\"], \"duration\": 1998.36, \"formats\": [{\"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://player.megaphone.fm/GLT9749789991\", \"original_url\": \"https://player.megaphone.fm/GLT9749789991\", \"webpage_url_basename\": \"GLT9749789991\", \"webpage_url_domain\": \"player.megaphone.fm\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"playlist_count\": 3, \"playlist\": \"Both\", \"playlist_id\": \"both\", \"playlist_title\": \"Both\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://podcast.example.test/both\", \"n_entries\": 3, \"playlist_index\": 2, \"__last_playlist_index\": 3, \"playlist_autonumber\": 2, \"thumbnails\": [{\"url\": \"https://megaphone.imgix.net/podcasts/cover.png?ixlib=rails\", \"id\": \"0\"}], \"display_id\": \"GLT9749789991\", \"fulltitle\": \"#97 What Kind Of Idiot Gets Phished?\", \"duration_string\": \"33:18\", \"release_year\": null, \"creator\": \"Reply All\", \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"acodec\": \"mp3\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"filename\": \"#97 What Kind Of Idiot Gets Phished\\uff1f [GLT9749789991].mp3\", \"__write_download_archive\": false}], \"url\": \"https://traffic.megaphone.fm/GLT9749789991.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}, {\"id\": \"dnd1\", \"title\": \"Mikel Oiarzabal scores\", \"description\": null, \"thumbnail\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"uploader\": \"teabaker\", \"timestamp\": 1454964157.35115, \"duration\": 61.516, \"view_count\": 4321, \"formats\": [{\"format_id\": \"mp4-mobile\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 7000, \"fps\": 30, \"vbr\": 500.0, \"vcodec\": null, \"acodec\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-mobile - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://streamable.com/e/dnd1\", \"original_url\": \"https://streamable.com/e/dnd1\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"playlist_count\": 3, \"playlist\": \"Both\", \"playlist_id\": \"both\", \"playlist_title\": \"Both\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://podcast.example.test/both\", \"n_entries\": 3, \"playlist_index\": 3, \"__last_playlist_index\": 3, \"playlist_autonumber\": 3, \"thumbnails\": [{\"url\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"id\": \"0\"}], \"display_id\": \"dnd1\", \"fulltitle\": \"Mikel Oiarzabal scores\", \"duration_string\": \"1:01\", \"upload_date\": \"20160208\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\", \"_filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://podcast.example.test/both\", \"original_url\": \"https://podcast.example.test/both\", \"webpage_url_basename\": \"both\", \"webpage_url_domain\": \"podcast.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 3, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [megaphone.fm] PLAIN1: Unable to extract OpenGraph audio:artist; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://podcast.example.test/both",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"both\", \"title\": \"Both\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"Megaphone\", \"_type\": \"url\", \"url\": \"https://player.megaphone.fm/PLAIN1\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Megaphone\", \"_type\": \"url\", \"url\": \"https://player.megaphone.fm/GLT9749789991\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/e/dnd1\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://podcast.example.test/both\", \"original_url\": \"https://podcast.example.test/both\", \"webpage_url_basename\": \"both\", \"webpage_url_domain\": \"podcast.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 3, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/NOURL1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [megaphone.fm] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: NOURL1: An extractor error has occurred. (caused by KeyError('mediaUrl')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/COMMA1",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"COMMA1\", \"thumbnail\": null, \"title\": \"Comma\", \"creators\": [\"A, B\"], \"formats\": [{\"url\": \"https://traffic.megaphone.fm/PLAIN1.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://player.megaphone.fm/COMMA1\", \"original_url\": \"https://player.megaphone.fm/COMMA1\", \"webpage_url_basename\": \"COMMA1\", \"webpage_url_domain\": \"player.megaphone.fm\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"COMMA1\", \"fulltitle\": \"Comma\", \"release_year\": null, \"creator\": \"A\\uff0c B\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://traffic.megaphone.fm/PLAIN1.mp3\", \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Comma [COMMA1].mp3\", \"filename\": \"Comma [COMMA1].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [megaphone.fm] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/COMMA1",
+   "args": [
+    "--print",
+    "%(creators)s|%(creator)s|%(duration)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "['A, B']|A， B|NA|NA"
+   ],
+   "stderr": [
+    "WARNING: [megaphone.fm] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://podcast.example.test/both",
+   "args": [
+    "--flat-playlist",
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"ie_key\": \"Megaphone\", \"_type\": \"url\", \"url\": \"https://player.megaphone.fm/PLAIN1\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"__x_forwarded_for_ip\": null, \"id\": \"PLAIN1\", \"webpage_url\": \"https://player.megaphone.fm/PLAIN1\", \"original_url\": \"https://player.megaphone.fm/PLAIN1\", \"webpage_url_basename\": \"PLAIN1\", \"webpage_url_domain\": \"player.megaphone.fm\", \"playlist_count\": 3, \"playlist\": \"Both\", \"playlist_id\": \"both\", \"playlist_title\": \"Both\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://podcast.example.test/both\", \"n_entries\": 3, \"playlist_index\": 1, \"__last_playlist_index\": 3, \"playlist_autonumber\": 1, \"release_year\": null}",
+    "{\"ie_key\": \"Megaphone\", \"_type\": \"url\", \"url\": \"https://player.megaphone.fm/GLT9749789991\", \"extractor\": \"megaphone.fm\", \"extractor_key\": \"Megaphone\", \"__x_forwarded_for_ip\": null, \"id\": \"GLT9749789991\", \"webpage_url\": \"https://player.megaphone.fm/GLT9749789991\", \"original_url\": \"https://player.megaphone.fm/GLT9749789991\", \"webpage_url_basename\": \"GLT9749789991\", \"webpage_url_domain\": \"player.megaphone.fm\", \"playlist_count\": 3, \"playlist\": \"Both\", \"playlist_id\": \"both\", \"playlist_title\": \"Both\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://podcast.example.test/both\", \"n_entries\": 3, \"playlist_index\": 2, \"__last_playlist_index\": 3, \"playlist_autonumber\": 2, \"release_year\": null}",
+    "{\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/e/dnd1\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null, \"id\": \"dnd1\", \"webpage_url\": \"https://streamable.com/e/dnd1\", \"original_url\": \"https://streamable.com/e/dnd1\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"playlist_count\": 3, \"playlist\": \"Both\", \"playlist_id\": \"both\", \"playlist_title\": \"Both\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://podcast.example.test/both\", \"n_entries\": 3, \"playlist_index\": 3, \"__last_playlist_index\": 3, \"playlist_autonumber\": 3, \"release_year\": null}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "args": [
+    "--use-extractors",
+    "megaphone.fm",
+    "--print",
+    "%(extractor)s|%(extractor_key)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "megaphone.fm|Megaphone"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

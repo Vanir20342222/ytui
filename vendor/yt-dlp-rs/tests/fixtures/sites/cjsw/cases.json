@@ -1,0 +1,8 @@
+[
+ {"url": "http://cjsw.com/program/freshly-squeezed/episode/20170620", "args": ["-j"]},
+ {"url": "http://cjsw.com/program/freshly-squeezed/episode/20170620", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(series)s|%(episode_id)s|%(ext)s"]},
+ {"url": "http://cjsw.com/program/freshly-squeezed/episode/20170620", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.cjsw.com/program/road-pops/episode/20170707/", "args": ["-j"]},
+ {"url": "https://cjsw.com/program/none/episode/3", "args": ["-j"]},
+ {"url": "https://cjsw.com/program/untitled/episode/4", "args": ["-j"]}
+]

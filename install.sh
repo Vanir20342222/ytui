@@ -13,7 +13,7 @@ cleanup() {
     if [[ -n "$ytui_publish_tmp" ]]; then rm -rf -- "$ytui_publish_tmp"; fi
 }
 trap cleanup EXIT
-if [[ ! -f "$ytui_source_dir/Cargo.toml" || ! -d "$ytui_source_dir/crates/ytui" ]]; then
+if [[ ! -f "$ytui_source_dir/Cargo.toml" || ! -d "$ytui_source_dir/apps/desktop" ]]; then
     command -v git >/dev/null 2>&1 || { printf 'Install git first.\n' >&2; exit 1; }
     ytui_source_tmp="$(mktemp -d "${TMPDIR:-/tmp}/ytui-source.XXXXXX")"
     git clone --depth 1 --branch "${YTUI_BRANCH:-main}" \

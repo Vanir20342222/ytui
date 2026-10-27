@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"description\" content=\"Anticigarette &amp; crusader\"></head><body>\n<div class=\"videoInfo\"><h2>The Smoking Out of Bella Butts</h2>\n <p>(Ernst Lubitsch, 1915)</p></div>\n<script>hpBase( \"https://hp.test/v/\" ); hpInjectVideo('268068288',\"720\");</script></body></html>"
+  },
+  {
+   "url": "https://harpodeon.com/preview/x/2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div class=videoInfo><h2>Bare</h2></div><script>hpBase('https://hp.test/v/');hpInjectVideo(\"a2\",\"480\")</script></body></html>"
+  },
+  {
+   "url": "https://harpodeon.com/video/x/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>hpBase('https://hp.test/v/');hpInjectVideo(\"a3\",\"480\")</script></body></html>"
+  },
+  {
+   "url": "https://harpodeon.com/video/x/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>hpInjectVideo(\"a3\",\"480\")</script></body></html>"
+  },
+  {
+   "url": "https://hp.test/v/268068288_720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

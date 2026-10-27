@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.dailymotion.com/video/x8abc", "args": ["-J"]},
+ {"url": "https://dai.ly/x8abc", "args": ["-F"]},
+ {"url": "https://www.dailymotion.com/video/x8geo", "args": ["-j"]},
+ {"url": "https://www.dailymotion.com/video/x8none", "args": ["-j"]},
+ {"url": "https://www.dailymotion.com/video/x8abc?playlist=x6hynp", "args": ["--no-playlist", "--print", "%(id)s|%(title)s"]},
+ {"url": "https://www.dailymotion.com/video/x8abc", "args": ["-f", "http-1080@60", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

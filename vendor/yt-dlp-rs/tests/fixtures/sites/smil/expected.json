@@ -1,0 +1,292 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"clip\", \"title\": \"Show & tell\", \"description\": \"An abstract\", \"upload_date\": \"20210504\", \"thumbnails\": [{\"id\": \"0\", \"url\": \"https://media.example.test/thumb.jpg\", \"width\": null, \"height\": null}, {\"id\": \"poster\", \"url\": \"https://media.example.test/poster.jpg\", \"width\": 640, \"height\": 360, \"resolution\": \"640x360\"}], \"formats\": [{\"url\": \"https://cdn.example.test/vod/sound.m4a\", \"ext\": \"m4a\", \"format_id\": \"http-4\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"m4a\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-4 - unknown\"}, {\"url\": \"https://other.example.test/abs.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-3\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-3 - unknown\"}, {\"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-400\", \"tbr\": 400.0, \"filesize\": null, \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-400 - 640x360\"}, {\"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1500 - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://media.example.test/en.vtt\", \"ext\": \"vtt\"}, {\"url\": \"https://media.example.test/x.ttml\", \"ext\": \"ttml\"}], \"de\": [{\"url\": \"https://media.example.test/de.srt\", \"ext\": \"srt\"}]}, \"webpage_url\": \"https://media.example.test/shows/clip.smil\", \"original_url\": \"https://media.example.test/shows/clip.smil\", \"webpage_url_basename\": \"clip.smil\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://media.example.test/poster.jpg\", \"display_id\": \"clip\", \"fulltitle\": \"Show & tell\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1500 - 1280x720\", \"_filename\": \"Show & tell [clip].mp4\", \"filename\": \"Show & tell [clip].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"clip\", \"title\": \"Show & tell\", \"description\": \"An abstract\", \"upload_date\": \"20210504\", \"thumbnails\": [{\"id\": \"0\", \"url\": \"https://media.example.test/thumb.jpg\", \"width\": null, \"height\": null}, {\"id\": \"poster\", \"url\": \"https://media.example.test/poster.jpg\", \"width\": 640, \"height\": 360, \"resolution\": \"640x360\"}], \"formats\": [{\"url\": \"https://cdn.example.test/vod/sound.m4a\", \"ext\": \"m4a\", \"format_id\": \"http-4\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"m4a\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-4 - unknown\"}, {\"url\": \"https://other.example.test/abs.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-3\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-3 - unknown\"}, {\"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-400\", \"tbr\": 400.0, \"filesize\": null, \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-400 - 640x360\"}, {\"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1500 - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://media.example.test/en.vtt\", \"ext\": \"vtt\"}, {\"url\": \"https://media.example.test/x.ttml\", \"ext\": \"ttml\"}], \"de\": [{\"url\": \"https://media.example.test/de.srt\", \"ext\": \"srt\"}]}, \"webpage_url\": \"https://media.example.test/shows/clip.smil\", \"original_url\": \"https://media.example.test/shows/clip.smil\", \"webpage_url_basename\": \"clip.smil\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://media.example.test/poster.jpg\", \"display_id\": \"clip\", \"fulltitle\": \"Show & tell\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1500 - 1280x720\", \"_filename\": \"Show & tell [clip].mp4\", \"filename\": \"Show & tell [clip].mp4\", \"__write_download_archive\": false}], \"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1500 - 1280x720\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/shows/clip.smil",
+    "[generic] clip: Downloading webpage",
+    "[generic] clip: Extracting information",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: video URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[info] Available formats for clip:",
+    "ID        EXT RESOLUTION |  FILESIZE   TBR PROTO | VCODEC  ACODEC",
+    "------------------------------------------------------------------",
+    "http-4    m4a unknown    |                 https | unknown unknown",
+    "http-3    mp4 unknown    |                 https | unknown unknown",
+    "http-400  mp4 640x360    |            400k https | unknown unknown",
+    "http-1500 mp4 1280x720   |  12.06KiB 1500k https | unknown unknown"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/shows/clip.smil",
+    "[generic] clip: Downloading webpage",
+    "[generic] clip: Extracting information",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: video URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[info] Available subtitles for clip:",
+    "Language Formats",
+    "en       ttml, vtt",
+    "de       srt"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "--list-thumbnails"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/shows/clip.smil",
+    "[generic] clip: Downloading webpage",
+    "[generic] clip: Extracting information",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: video URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[info] Available thumbnails for clip:",
+    "ID     Width   Height  URL",
+    "0      unknown unknown https://media.example.test/thumb.jpg",
+    "poster 640     360     https://media.example.test/poster.jpg"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(upload_date)s|%(format_id)s|%(tbr)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "clip|Show & tell|An abstract|20210504|http-1500|1500.0|https://media.example.test/poster.jpg"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "args": [
+    "--no-progress",
+    "-f",
+    "http-400",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/shows/clip.smil",
+    "[generic] clip: Downloading webpage",
+    "[generic] clip: Extracting information",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: video URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[info] clip: Downloading 1 format(s): http-400",
+    "[download] Destination: clip.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "clip.mp4": 792
+   }
+  },
+  {
+   "url": "https://media.example.test/plain.smil",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"plain\", \"title\": \"plain\", \"description\": null, \"upload_date\": null, \"thumbnails\": [], \"formats\": [{\"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1 - unknown\"}], \"subtitles\": {}, \"webpage_url\": \"https://media.example.test/plain.smil\", \"original_url\": \"https://media.example.test/plain.smil\", \"webpage_url_basename\": \"plain.smil\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"plain\", \"fulltitle\": \"plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1 - unknown\", \"_filename\": \"plain [plain].mp4\", \"filename\": \"plain [plain].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/manifests.smil",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"manifests\", \"title\": \"manifests\", \"description\": null, \"upload_date\": null, \"thumbnails\": [], \"formats\": [{\"format_id\": \"dash-1\", \"manifest_url\": \"https://cdn.example.test/live/segmented.mpd\", \"ext\": \"m4a\", \"width\": null, \"height\": null, \"tbr\": 69.248, \"asr\": 44100, \"fps\": null, \"language\": null, \"format_note\": \"DASH audio\", \"filesize\": null, \"container\": \"m4a_dash\", \"vcodec\": \"none\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": null, \"url\": \"https://cdn.example.test/live/segmented.mpd\", \"fragment_base_url\": \"https://cdn.example.test/live/\", \"fragments\": [{\"path\": \"init-stream1.m4s\"}, {\"path\": \"chunk-stream1-00001.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream1-00002.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream1-00003.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream1-00004.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream1-00005.m4s\", \"duration\": 2.0}], \"protocol\": \"http_dash_segments\", \"manifest_stream_number\": 1, \"is_dash_periods\": true, \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 69.248, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"dash-1 - audio only (DASH audio)\"}, {\"format_id\": \"hls-2\", \"format_index\": null, \"url\": \"https://cdn.example.test/live/stream\", \"ext\": \"ts\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"tbr\": null, \"width\": null, \"height\": null, \"video_ext\": \"ts\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-2 - unknown\"}, {\"format_id\": \"dash-0\", \"manifest_url\": \"https://cdn.example.test/live/segmented.mpd\", \"ext\": \"mp4\", \"width\": 320, \"height\": 240, \"tbr\": 56.115, \"asr\": null, \"fps\": null, \"language\": null, \"format_note\": \"DASH video\", \"filesize\": null, \"container\": \"mp4_dash\", \"vcodec\": \"avc1.f4000d\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"url\": \"https://cdn.example.test/live/segmented.mpd\", \"fragment_base_url\": \"https://cdn.example.test/live/\", \"fragments\": [{\"path\": \"init-stream0.m4s\"}, {\"path\": \"chunk-stream0-00001.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream0-00002.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream0-00003.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream0-00004.m4s\", \"duration\": 2.0}, {\"path\": \"chunk-stream0-00005.m4s\", \"duration\": 2.0}], \"protocol\": \"http_dash_segments\", \"manifest_stream_number\": 0, \"is_dash_periods\": true, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 56.115, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"dash-0 - 320x240 (DASH video)\"}, {\"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://cdn.example.test/live/low/index.m3u8\", \"manifest_url\": \"https://cdn.example.test/live/two.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\"}, {\"format_id\": \"hls-800\", \"format_index\": null, \"url\": \"https://cdn.example.test/live/high/index.m3u8\", \"manifest_url\": \"https://cdn.example.test/live/two.m3u8\", \"tbr\": 800.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 640, \"height\": 480, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x480\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-800 - 640x480\"}, {\"format_id\": \"hls-900\", \"format_index\": null, \"url\": \"https://cdn.example.test/live/single.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"tbr\": 900.0, \"width\": 1920, \"height\": 1080, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-900 - 1920x1080\"}], \"subtitles\": {\"fr\": [{\"ext\": \"vtt\", \"manifest_url\": \"https://cdn.example.test/live/segmented.mpd\", \"filesize\": null, \"url\": \"https://cdn.example.test/live/segmented.mpd\", \"fragment_base_url\": \"https://cdn.example.test/live/\", \"fragments\": [{\"path\": \"s1.vtt\", \"duration\": 2.0}, {\"path\": \"s2.vtt\", \"duration\": 2.0}], \"protocol\": \"http_dash_segments\"}]}, \"webpage_url\": \"https://media.example.test/manifests.smil\", \"original_url\": \"https://media.example.test/manifests.smil\", \"webpage_url_basename\": \"manifests.smil\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"manifests\", \"fulltitle\": \"manifests\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls-900\", \"format_index\": null, \"url\": \"https://cdn.example.test/live/single.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"tbr\": 900.0, \"width\": 1920, \"height\": 1080, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-900 - 1920x1080\", \"_filename\": \"manifests [manifests].mp4\", \"filename\": \"manifests [manifests].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] manifests: Failed to download m3u8 information: HTTP Error 404: Not Found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/manifests.smil",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/manifests.smil",
+    "[generic] manifests: Downloading webpage",
+    "[generic] manifests: Extracting information",
+    "[generic] manifests: Downloading m3u8 information",
+    "[generic] manifests: Downloading m3u8 information",
+    "[generic] manifests: Downloading m3u8 information",
+    "[generic] manifests: Downloading MPD manifest",
+    "[generic] manifests: Downloading m3u8 information",
+    "[info] Available formats for manifests:",
+    "ID      EXT RESOLUTION |  TBR PROTO | VCODEC      VBR ACODEC     ABR ASR MORE INFO",
+    "---------------------------------------------------------------------------------------------",
+    "dash-1  m4a audio only |  69k dash  | audio only      mp4a.40.2  69k 44k DASH audio, m4a_dash",
+    "hls-2   ts  unknown    |      m3u8  | unknown         unknown",
+    "dash-0  mp4 320x240    |  56k dash  | avc1.f4000d 56k video only         DASH video, mp4_dash",
+    "hls-200 mp4 320x240    | 200k m3u8  | avc1.42c00d     mp4a.40.2",
+    "hls-800 mp4 640x480    | 800k m3u8  | avc1.4d401e     mp4a.40.2",
+    "hls-900 mp4 1920x1080  | 900k m3u8  | unknown         unknown"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] manifests: Failed to download m3u8 information: HTTP Error 404: Not Found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/manifests.smil",
+   "args": [
+    "--print",
+    "%(format_id)s|%(tbr)s|%(width)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "hls-900|900.0|1920"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] manifests: Failed to download m3u8 information: HTTP Error 404: Not Found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/watch",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"clip\", \"title\": \"Watch page\", \"description\": \"An abstract\", \"upload_date\": \"20210504\", \"thumbnails\": [{\"id\": \"0\", \"url\": \"https://media.example.test/thumb.jpg\", \"width\": null, \"height\": null}, {\"id\": \"poster\", \"url\": \"https://media.example.test/poster.jpg\", \"width\": 640, \"height\": 360, \"resolution\": \"640x360\"}], \"formats\": [{\"url\": \"https://cdn.example.test/vod/sound.m4a\", \"ext\": \"m4a\", \"format_id\": \"http-4\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"m4a\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/watch\"}, \"format\": \"http-4 - unknown\"}, {\"url\": \"https://other.example.test/abs.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-3\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/watch\"}, \"format\": \"http-3 - unknown\"}, {\"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-400\", \"tbr\": 400.0, \"filesize\": null, \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/watch\"}, \"format\": \"http-400 - 640x360\"}, {\"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/watch\"}, \"format\": \"http-1500 - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://media.example.test/en.vtt\", \"ext\": \"vtt\"}, {\"url\": \"https://media.example.test/x.ttml\", \"ext\": \"ttml\"}], \"de\": [{\"url\": \"https://media.example.test/de.srt\", \"ext\": \"srt\"}]}, \"uploader\": \"www.example.test\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/watch\"}, \"timestamp\": 1620122400, \"thumbnail\": \"https://www.example.test/og.jpg\", \"webpage_url\": \"https://www.example.test/watch\", \"original_url\": \"https://www.example.test/watch\", \"webpage_url_basename\": \"watch\", \"webpage_url_domain\": \"example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"clip\", \"fulltitle\": \"Watch page\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.example.test/vod/hi.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1500\", \"tbr\": 1500.0, \"filesize\": 12345, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"format\": \"http-1500 - 1280x720\", \"_filename\": \"Watch page [clip].mp4\", \"filename\": \"Watch page [clip].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/watch",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://www.example.test/watch",
+    "[generic] watch: Downloading webpage",
+    "[generic] watch: Extracting information",
+    "[generic] clip: Downloading SMIL file",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: Checking video URL",
+    "[generic] clip: video URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[info] Available formats for clip:",
+    "ID        EXT RESOLUTION |  FILESIZE   TBR PROTO | VCODEC  ACODEC",
+    "------------------------------------------------------------------",
+    "http-4    m4a unknown    |                 https | unknown unknown",
+    "http-3    mp4 unknown    |                 https | unknown unknown",
+    "http-400  mp4 640x360    |            400k https | unknown unknown",
+    "http-1500 mp4 1280x720   |  12.06KiB 1500k https | unknown unknown"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/plainwatch",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"plain\", \"title\": \"Plain watch\", \"thumbnails\": [], \"formats\": [{\"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/plainwatch\"}, \"format\": \"http-1 - unknown\"}], \"subtitles\": {}, \"uploader\": \"www.example.test\", \"age_limit\": 18, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/plainwatch\"}, \"webpage_url\": \"https://www.example.test/plainwatch\", \"original_url\": \"https://www.example.test/plainwatch\", \"webpage_url_basename\": \"plainwatch\", \"webpage_url_domain\": \"example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"plain\", \"fulltitle\": \"Plain watch\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.example.test/vod/lo.mp4\", \"ext\": \"mp4\", \"format_id\": \"http-1\", \"tbr\": null, \"filesize\": null, \"width\": null, \"height\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"http-1 - unknown\", \"_filename\": \"Plain watch [plain].mp4\", \"filename\": \"Plain watch [plain].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/gonewatch",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [generic] gone: Unable to download SMIL file: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

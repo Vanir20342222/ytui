@@ -1,0 +1,93 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"9926\", \"title\": \"New Nintendo 3DS XL - Op alle fronten beter\", \"description\": \"Nintendo heeft een nieuwe 3DS uitgebracht.\", \"thumbnail\": \"https://tweakers.test/poster.jpg\", \"duration\": 386, \"uploader_id\": \"s7JeEm\", \"formats\": [{\"format_id\": \"360p-0\", \"url\": \"https://tweakers.test/v360.webm\", \"width\": 640, \"height\": 360, \"ext\": \"webm\", \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"360p-0 - 640x360\"}, {\"format_id\": \"360p-1\", \"url\": \"https://tweakers.test/v360.mp4\", \"width\": 640, \"height\": 360, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"360p-1 - 640x360\"}, {\"format_id\": \"720p\", \"url\": \"https://tweakers.test/v720.mp4\", \"width\": 1280, \"height\": 720, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\"}], \"webpage_url\": \"https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html\", \"original_url\": \"https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html\", \"webpage_url_basename\": \"new-nintendo-3ds-xl-op-alle-fronten-beter.html\", \"webpage_url_domain\": \"tweakers.net\", \"extractor\": \"Tweakers\", \"extractor_key\": \"Tweakers\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://tweakers.test/poster.jpg\", \"id\": \"0\"}], \"display_id\": \"9926\", \"fulltitle\": \"New Nintendo 3DS XL - Op alle fronten beter\", \"duration_string\": \"6:26\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"720p\", \"url\": \"https://tweakers.test/v720.mp4\", \"width\": 1280, \"height\": 720, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\", \"_filename\": \"New Nintendo 3DS XL - Op alle fronten beter [9926].mp4\", \"filename\": \"New Nintendo 3DS XL - Op alle fronten beter [9926].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Tweakers] Extracting URL: https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+    "[Tweakers] 9926: Downloading JSON metadata",
+    "[info] Available formats for 9926:",
+    "ID     EXT  RESOLUTION | PROTO | VCODEC  ACODEC",
+    "------------------------------------------------",
+    "360p-0 webm 640x360    | https | unknown unknown",
+    "360p-1 mp4  640x360    | https | unknown unknown",
+    "720p   mp4  1280x720   | https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(uploader_id)s|%(thumbnail)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "9926|New Nintendo 3DS XL - Op alle fronten beter|386|s7JeEm|https://tweakers.test/poster.jpg|720p"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Tweakers] Extracting URL: https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html",
+    "[Tweakers] 9926: Downloading JSON metadata",
+    "[info] 9926: Downloading 1 format(s): 720p",
+    "[download] Destination: 9926.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "9926.mp4": 792
+   }
+  },
+  {
+   "url": "https://tweakers.net/video/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Tweakers] 2: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://tweakers.net/video/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: list index out of range"
+   ],
+   "files": {}
+  }
+ ]
+}

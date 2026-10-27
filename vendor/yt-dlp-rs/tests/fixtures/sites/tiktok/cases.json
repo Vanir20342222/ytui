@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.tiktok.com/@dancer/video/7300000000000000001", "args": ["-J"]},
+ {"url": "https://www.tiktok.com/@dancer/video/7300000000000000001", "args": ["-F"]},
+ {"url": "https://www.tiktok.com/embed/7300000000000000001", "args": ["--print", "%(id)s|%(uploader)s|%(channel_url)s|%(artists)s|%(save_count)s"]},
+ {"url": "https://www.tiktok.com/@dancer/video/7300000000000000002", "args": ["--print", "%(id)s|%(title)s"]},
+ {"url": "https://www.tiktok.com/@dancer/video/7300000000000000009", "args": ["-j"]},
+ {"url": "https://vm.tiktok.com/ZMabc123/", "args": ["--print", "%(id)s|%(webpage_url)s|%(original_url)s"]},
+ {"url": "https://www.tiktok.com/@dancer/video/7300000000000000001", "args": ["-f", "h264_540p_800000", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

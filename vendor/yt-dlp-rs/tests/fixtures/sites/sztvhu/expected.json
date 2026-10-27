@@ -1,0 +1,89 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"20130909\", \"url\": \"http://media.sztv.hu/vod/20130909_cserkesz.mp4\", \"title\": \"Cserk\\u00e9szek & \\u00fcnnepe\", \"description\": \"Az \\u00fcnneps\\u00e9gen sok cserk\\u00e9sz volt.\", \"thumbnail\": \"http://sztv.hu/thumb/20130909.jpg\", \"webpage_url\": \"http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909\", \"original_url\": \"http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909\", \"webpage_url_basename\": \"cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909\", \"webpage_url_domain\": \"sztv.hu\", \"extractor\": \"SztvHu\", \"extractor_key\": \"SztvHu\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://sztv.hu/thumb/20130909.jpg\", \"id\": \"0\"}], \"display_id\": \"20130909\", \"fulltitle\": \"Cserk\\u00e9szek & \\u00fcnnepe\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Cserk\\u00e9szek & \\u00fcnnepe [20130909].mp4\", \"filename\": \"Cserk\\u00e9szek & \\u00fcnnepe [20130909].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "20130909|Cserkészek & ünnepe|Az ünnepségen sok cserkész volt.|http://sztv.hu/thumb/20130909.jpg|mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[SztvHu] Extracting URL: http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909",
+    "[SztvHu] 20130909: Downloading webpage",
+    "[info] 20130909: Downloading 1 format(s): 0",
+    "[download] Destination: 20130909.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "20130909.mp4": 792
+   }
+  },
+  {
+   "url": "http://www.tvszombathely.hu/x/bare-2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"url\": \"http://media.sztv.hu/vod/b.mp4\", \"title\": \"Bare\", \"description\": null, \"thumbnail\": null, \"webpage_url\": \"http://www.tvszombathely.hu/x/bare-2\", \"original_url\": \"http://www.tvszombathely.hu/x/bare-2\", \"webpage_url_basename\": \"bare-2\", \"webpage_url_domain\": \"tvszombathely.hu\", \"extractor\": \"SztvHu\", \"extractor_key\": \"SztvHu\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Bare\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Bare [2].mp4\", \"filename\": \"Bare [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [SztvHu] unable to extract video description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [SztvHu] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.tvszombathely.hu/x/notitle-3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [SztvHu] 3: Unable to extract video title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.tvszombathely.hu/x/nofile-4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [SztvHu] 4: Unable to extract video file; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

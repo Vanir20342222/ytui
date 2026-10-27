@@ -1,0 +1,95 @@
+{
+ "routes": [
+  {
+   "url": "https://player.megaphone.fm/GLT9749789991",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "GLT9749789991.html"
+  },
+  {
+   "url": "https://player.megaphone.fm/PLAIN1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "PLAIN1.html"
+  },
+  {
+   "url": "https://player.megaphone.fm/NOJSON1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:audio:title\" content=\"x\"><meta property=\"og:audio:artist\" content=\"A, B\"></head><body></body></html>"
+  },
+  {
+   "url": "https://traffic.megaphone.fm/GLT9749789991.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "media.mp3"
+  },
+  {
+   "url": "https://traffic.megaphone.fm/PLAIN1.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "media.mp3"
+  },
+  {
+   "url": "https://podcast.example.test/episode",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Episode</title></head><body><iframe width=\"100%\" src=\"https://player.megaphone.fm/GLT9749789991?light=true\"></iframe></body></html>"
+  },
+  {
+   "url": "https://podcast.example.test/both",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Both</title></head><body><iframe src=\"https://streamable.com/e/dnd1\"></iframe><iframe src='https://player.megaphone.fm/PLAIN1'></iframe><iframe src=\"https://player.megaphone.fm/GLT9749789991\"></iframe></body></html>"
+  },
+  {
+   "url": "https://ajax.streamable.com/videos/dnd1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "../streamable/dnd1.json"
+  },
+  {
+   "url": "https://ajax.streamable.com/videos/busy",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"status\": 1, \"files\": {}}"
+  },
+  {
+   "url": "https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "../streamable/media.mp4"
+  },
+  {
+   "url": "https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "../streamable/media.mp4"
+  },
+  {
+   "url": "https://player.megaphone.fm/NOURL1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:audio:title\" content=\"x\"><meta property=\"og:audio:artist\" content=\"A, B\"></head><body><script>var episode = {duration: 3};</script></body></html>"
+  },
+  {
+   "url": "https://player.megaphone.fm/COMMA1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:audio:title\" content=\"Comma\"><meta property=\"og:audio:artist\" content=\"A, B\"></head><body><script>var episode = {mediaUrl: \"https://traffic.megaphone.fm/PLAIN1.mp3\", duration: null};</script></body></html>"
+  }
+ ]
+}

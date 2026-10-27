@@ -1,0 +1,65 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://coub.com/view/5u5n1",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"5u5n1\", \"title\": \"The Matrix Moonwalk\", \"thumbnail\": \"https://coub-anubis.test/cover.jpg\", \"duration\": 4.6, \"timestamp\": 1443203123, \"uploader\": \"Peter Sweet\", \"uploader_id\": \"stone-cold\", \"view_count\": 120, \"like_count\": 8, \"repost_count\": 2, \"age_limit\": null, \"formats\": [{\"url\": \"https://coub.test/a-high.mp3\", \"format_id\": \"html5-audio-high\", \"filesize\": 100, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-audio-high - audio only\"}, {\"url\": \"https://coub.test/iphone.mp4\", \"format_id\": \"iphone\", \"source_preference\": 1, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"iphone - unknown\"}, {\"url\": \"https://coub.test/mobile.mp3\", \"format_id\": \"mobile-audio\", \"source_preference\": 0, \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mobile-audio - unknown\"}, {\"url\": \"https://coub.test/v-med.mp4\", \"format_id\": \"html5-video-med\", \"filesize\": 500, \"vcodec\": null, \"acodec\": \"none\", \"quality\": 1, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-video-med - unknown\"}, {\"url\": \"https://coub.test/v-high.mp4\", \"format_id\": \"html5-video-high\", \"filesize\": 900, \"vcodec\": null, \"acodec\": \"none\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-video-high - unknown\"}], \"webpage_url\": \"http://coub.com/view/5u5n1\", \"original_url\": \"http://coub.com/view/5u5n1\", \"webpage_url_basename\": \"5u5n1\", \"webpage_url_domain\": \"coub.com\", \"extractor\": \"Coub\", \"extractor_key\": \"Coub\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://coub-anubis.test/cover.jpg\", \"id\": \"0\"}], \"display_id\": \"5u5n1\", \"fulltitle\": \"The Matrix Moonwalk\", \"duration_string\": \"4\", \"upload_date\": \"20150925\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"requested_formats\": [{\"url\": \"https://coub.test/v-high.mp4\", \"format_id\": \"html5-video-high\", \"filesize\": 900, \"vcodec\": null, \"acodec\": \"none\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-video-high - unknown\"}, {\"url\": \"https://coub.test/a-high.mp3\", \"format_id\": \"html5-audio-high\", \"filesize\": 100, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-audio-high - audio only\"}], \"format\": \"html5-video-high - unknown+html5-audio-high - audio only\", \"format_id\": \"html5-video-high+html5-audio-high\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"filesize_approx\": 1000, \"tbr\": 0, \"resolution\": \"unknown\", \"dynamic_range\": \"SDR\", \"acodec\": \"mp3\", \"_filename\": \"The Matrix Moonwalk [5u5n1].mp4\", \"filename\": \"The Matrix Moonwalk [5u5n1].mp4\", \"__write_download_archive\": false}], \"requested_formats\": [{\"url\": \"https://coub.test/v-high.mp4\", \"format_id\": \"html5-video-high\", \"filesize\": 900, \"vcodec\": null, \"acodec\": \"none\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-video-high - unknown\"}, {\"url\": \"https://coub.test/a-high.mp3\", \"format_id\": \"html5-audio-high\", \"filesize\": 100, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"quality\": 2, \"source_preference\": 2, \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"html5-audio-high - audio only\"}], \"format\": \"html5-video-high - unknown+html5-audio-high - audio only\", \"format_id\": \"html5-video-high+html5-audio-high\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"language\": null, \"format_note\": null, \"filesize_approx\": 1000, \"tbr\": 0, \"width\": null, \"height\": null, \"resolution\": \"unknown\", \"fps\": null, \"dynamic_range\": \"SDR\", \"vcodec\": null, \"vbr\": null, \"stretched_ratio\": null, \"aspect_ratio\": null, \"acodec\": \"mp3\", \"abr\": null, \"asr\": null, \"audio_channels\": null, \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "coub:5u5n1",
+   "args": [
+    "--print",
+    "%(id)s|%(webpage_url)s|%(extractor)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "5u5n1|coub:5u5n1|Coub"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://coub.com/embed/gone1",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Coub] gone1: Coub said: Coub not found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://coub.com/view/5u5n1",
+   "args": [
+    "--no-progress",
+    "-f",
+    "html5-video-high",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Coub] Extracting URL: http://coub.com/view/5u5n1",
+    "[Coub] 5u5n1: Downloading JSON metadata",
+    "[info] 5u5n1: Downloading 1 format(s): html5-video-high",
+    "[download] Destination: 5u5n1.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "5u5n1.mp4": 17
+   }
+  }
+ ]
+}

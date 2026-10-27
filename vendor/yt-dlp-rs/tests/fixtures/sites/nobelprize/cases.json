@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.nobelprize.org/mediaplayer/?id=22312", "args": ["-j"]},
+ {"url": "https://www.nobelprize.org/mediaplayer/?id=22312", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(timestamp)s|%(thumbnail)s"]},
+ {"url": "https://www.nobelprize.org/mediaplayer/?id=22312", "args": ["--no-progress", "-o", "o.%(ext)s"]},
+ {"url": "https://www.nobelprize.org/mediaplayer/?qid=2&id=x", "args": ["-j"]},
+ {"url": "https://www.nobelprize.org/mediaplayer/?x=1", "args": ["-j"]}
+]

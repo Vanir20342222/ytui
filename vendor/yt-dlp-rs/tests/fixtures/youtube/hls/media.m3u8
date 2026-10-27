@@ -1,0 +1,7 @@
+#EXTM3U
+#EXT-X-TARGETDURATION:1
+#EXTINF:1,
+segments/first.ts
+#EXTINF:1,
+segments/second.ts
+#EXT-X-ENDLIST

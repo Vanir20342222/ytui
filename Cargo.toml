@@ -1,6 +1,7 @@
 [workspace]
-members = ["crates/ytui-core", "crates/ytui-services", "crates/ytui"]
+members = ["crates/ytui-core", "crates/ytui-services", "crates/ytui-providers", "crates/ytui-mobile", "apps/desktop"]
 resolver = "2"
+exclude = ["vendor/yt-dlp-rs"]
 
 [workspace.package]
 version = "0.2.0-alpha.12"
@@ -16,7 +17,10 @@ serde_json = "1"
 toml = "0.8"
 tokio = { version = "1", features = ["full"] }
 tokio-util = "0.7"
-reqwest = { version = "0.12", features = ["json", "native-tls", "stream", "socks"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "socks"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 url = "2"
 tempfile = "3"
+
+[patch."https://github.com/aagedal/yt-dlp-rs"]
+yt-dlp-rs = { path = "vendor/yt-dlp-rs" }

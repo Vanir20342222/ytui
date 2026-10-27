@@ -1,5 +1,5 @@
 //! Manual audit regressions for e2b01ea. These assert the desired behavior and
-//! intentionally fail on that revision. Copy into crates/ytui/tests/ to run.
+//! intentionally fail on that revision. Copy into apps/desktop/tests/ to run.
 //! Synthetic data only; no browser stores, VPN changes or public services.
 use ratatui::layout::Rect;
 use ratatui_image::{

@@ -1,0 +1,81 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"zpsc0c3b9fa\", \"url\": \"http://vid.photobucket.test/albums/a/Tired_zpsc0c3b9fa.mp4\", \"uploader\": \"rachaneronas\", \"timestamp\": 1373712422, \"title\": \"Tired of Link Building? Try BacklinkMyDomain.com!\", \"ext\": \"mp4\", \"thumbnail\": \"http://i.photobucket.test/thumb.jpg\", \"webpage_url\": \"http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0\", \"original_url\": \"http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0\", \"webpage_url_basename\": \"TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html\", \"webpage_url_domain\": \"media.photobucket.com\", \"extractor\": \"Photobucket\", \"extractor_key\": \"Photobucket\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://i.photobucket.test/thumb.jpg\", \"id\": \"0\"}], \"display_id\": \"zpsc0c3b9fa\", \"fulltitle\": \"Tired of Link Building? Try BacklinkMyDomain.com!\", \"upload_date\": \"20130713\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Tired of Link Building\\uff1f Try BacklinkMyDomain.com! [zpsc0c3b9fa].mp4\", \"filename\": \"Tired of Link Building\\uff1f Try BacklinkMyDomain.com! [zpsc0c3b9fa].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Photobucket] Extracting URL: http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zp...y]=images&sort=1&o=0",
+    "[Photobucket] zpsc0c3b9fa: Downloading webpage",
+    "[Photobucket] zpsc0c3b9fa: Extracting information",
+    "[info] Available formats for zpsc0c3b9fa:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | http  | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(ext)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "zpsc0c3b9fa|Tired of Link Building? Try BacklinkMyDomain.com!|rachaneronas|1373712422|20130713|mp4|http://i.photobucket.test/thumb.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zpsc0c3b9fa.mp4.html?filters[term]=search&filters[primary]=videos&filters[secondary]=images&sort=1&o=0",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Photobucket] Extracting URL: http://media.photobucket.com/user/rachaneronas/media/TiredofLinkBuildingTryBacklinkMyDomaincom_zp...y]=images&sort=1&o=0",
+    "[Photobucket] zpsc0c3b9fa: Downloading webpage",
+    "[Photobucket] zpsc0c3b9fa: Extracting information",
+    "[info] zpsc0c3b9fa: Downloading 1 format(s): 0",
+    "[download] Destination: zpsc0c3b9fa.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "zpsc0c3b9fa.mp4": 792
+   }
+  },
+  {
+   "url": "http://s1.photobucket.com/user/x/media/broken_ab.flv.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Photobucket] ab: Unable to extract info json; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

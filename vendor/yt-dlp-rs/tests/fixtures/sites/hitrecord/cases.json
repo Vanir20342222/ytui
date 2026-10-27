@@ -1,0 +1,9 @@
+[
+ {"url": "https://hitrecord.org/records/2954362", "args": ["-j"]},
+ {"url": "https://hitrecord.org/records/2954362", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(upload_date)s|%(uploader)s|%(uploader_id)s|%(view_count)s|%(like_count)s|%(comment_count)s|%(tags)s"]},
+ {"url": "https://hitrecord.org/records/2954362", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.hitrecord.org/records/2", "args": ["-j"]},
+ {"url": "https://hitrecord.org/records/3", "args": ["-j"]},
+ {"url": "https://hitrecord.org/records/4", "args": ["-j"]},
+ {"url": "https://hitrecord.org/records/5", "args": ["-j"]}
+]

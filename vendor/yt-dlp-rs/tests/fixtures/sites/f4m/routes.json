@@ -1,0 +1,88 @@
+{
+ "routes": [
+  {
+   "url": "https://media.example.test/hds/clip.f4m",
+   "headers": {
+    "Content-Type": "application/f4m+xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns=\"http://ns.adobe.com/f4m/1.0\">\n <id>clip</id>\n <streamType>recorded</streamType>\n <duration>10</duration>\n <bootstrapInfo profile=\"named\" id=\"bootstrap0\">AAAA</bootstrapInfo>\n <media streamId=\"hi\" url=\"clip_hi\" bitrate=\"1500\" width=\"1280\" height=\"720\" bootstrapInfoId=\"bootstrap0\"/>\n <media streamId=\"lo\" url=\"clip_lo\" bitrate=\"400\" width=\"640\" height=\"360\" bootstrapInfoId=\"bootstrap0\"/>\n <media streamId=\"drm\" url=\"clip_drm\" bitrate=\"900\" drmAdditionalHeaderId=\"d0\"/>\n</manifest>"
+  },
+  {
+   "url": "https://media.example.test/set.f4m",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<manifest xmlns=\"http://ns.adobe.com/f4m/2.0\">\n <baseURL> https://cdn.example.test/hds </baseURL>\n <mimeType>audio/mp4</mimeType>\n <media href=\"https://cdn.example.test/direct.mp4\" bitrate=\"128\"/>\n <media href=\"rel/audio.mp4\"/>\n <media url=\"old.mp4\" bitrate=\"64\"/>\n <media/>\n</manifest>"
+  },
+  {
+   "url": "https://media.example.test/pv.f4m",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<manifest xmlns=\"http://ns.adobe.com/f4m/1.0\"><pv-2.0>challenge;rest</pv-2.0><media url=\"x\" bitrate=\"1\"/></manifest>"
+  },
+  {
+   "url": "https://media.example.test/hds/real.f4m",
+   "headers": {
+    "Content-Type": "application/f4m+xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns=\"http://ns.adobe.com/f4m/1.0\">\n <id>real</id>\n <streamType>recorded</streamType>\n <bootstrapInfo profile=\"named\" id=\"b0\">AAAAamFic3QAAAAAAAAAAQAAAAPoAAAAAAAAH0AAAAAAAAAAAAAAAAAAAQAAABlhc3J0AAAAAAAAAAABAAAAAQAAAAIBAAAAJWFmcnQAAAAAAAAD6AAAAAABAAAAAQAAAAAAAAAAAAAPoA==</bootstrapInfo>\n <media url=\"real_hi\" bitrate=\"1500\" width=\"1280\" height=\"720\" bootstrapInfoId=\"b0\"><metadata>AgAKb25NZXRhRGF0YQgAAAAAAAAJ</metadata></media>\n <media url=\"real_lo\" bitrate=\"400\" bootstrapInfoId=\"b0\"/>\n</manifest>"
+  },
+  {
+   "url": "https://media.example.test/hds/byurl.f4m",
+   "headers": {
+    "Content-Type": "application/f4m+xml"
+   },
+   "body": "<manifest xmlns=\"http://ns.adobe.com/f4m/1.0\"><baseURL>https://cdn.example.test/hds/</baseURL><pv-2.0>;hdntl=exp=1~acl=*~hmac=ab</pv-2.0><bootstrapInfo profile=\"named\" url=\"boot/bootstrap.abst\"/><media url=\"v/clip?token=1&amp;x=2\" bitrate=\"800\"/></manifest>"
+  },
+  {
+   "url": "https://cdn.example.test/hds/boot/bootstrap.abst",
+   "headers": {
+    "Content-Type": "binary/octet"
+   },
+   "body_file": "bootstrap.abst"
+  },
+  {
+   "url": "https://media.example.test/hds/real_hiSeg1-Frag1",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag1.f4f"
+  },
+  {
+   "url": "https://media.example.test/hds/real_hiSeg1-Frag2",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag2.f4f"
+  },
+  {
+   "url": "https://media.example.test/hds/real_loSeg1-Frag1",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag1.f4f"
+  },
+  {
+   "url": "https://media.example.test/hds/real_loSeg1-Frag2",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag2.f4f"
+  },
+  {
+   "url": "https://cdn.example.test/hds/v/clipSeg1-Frag1?token=1&x=2&hdntl=exp=1~acl=*~hmac=ab",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag1.f4f"
+  },
+  {
+   "url": "https://cdn.example.test/hds/v/clipSeg1-Frag2?token=1&x=2&hdntl=exp=1~acl=*~hmac=ab",
+   "headers": {
+    "Content-Type": "video/f4f"
+   },
+   "body_file": "frag2.f4f"
+  }
+ ]
+}

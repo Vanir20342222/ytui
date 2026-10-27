@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://www.masters.com/relatedcontent/rest/v2/masters_v1/en/content/masters_v1_16493755593805191_en",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Sungjae Im: Thursday Interview 2022\", \"media\": {\"m3u8\": \"https://masters.test/hls/master.m3u8\"}, \"images\": [{\"small\": \"https://masters.test/s.jpg\", \"large\": \"https://masters.test/l.jpg\"}, {\"x\": \"https://masters.test/x.jpg\"}]}"
+  },
+  {
+   "url": "https://www.masters.com/relatedcontent/rest/v2/masters_v1/en/content/masters_v1_2_en",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"media\": {\"m3u8\": \"https://masters.test/hls/video.m3u8\"}}"
+  },
+  {
+   "url": "https://www.masters.com/relatedcontent/rest/v2/masters_v1/en/content/masters_v1_3_en",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"No media\", \"images\": []}"
+  },
+  {
+   "url": "https://www.masters.com/relatedcontent/rest/v2/masters_v1/en/content/masters_v1_4_en",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Gone\", \"media\": {\"m3u8\": \"https://masters.test/hls/missing.m3u8\"}}"
+  },
+  {
+   "url": "https://masters.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://masters.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://masters.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://masters.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

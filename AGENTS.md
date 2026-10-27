@@ -37,3 +37,15 @@ baseline defects, milestones, migration requirements, and acceptance checks.
 - Implementation evidence and open gates are in docs/VALIDATION.md and
   docs/PARITY.md. Do not equate implemented provider code with a successful live
   account, Ghostty, audio-device or stable-release acceptance result.
+
+- M9 adds the Android preview and monorepo. Desktop source is `apps/desktop`;
+  package/binary names and installed state paths must remain compatible.
+  Shared network/provider code is `crates/ytui-providers`; Android engine and
+  application UI must remain Rust in `crates/ytui-mobile`. Java under
+  `apps/android` is limited to Android activity/media/storage/OS adapters and
+  explicit account WebView sign-in. Do not replace the Rust UI with a web UI.
+- Read `docs/android/{PLAN,PARITY,VALIDATION}.md` for mobile gates. Unit/fixture,
+  APK build, emulator and physical-device/live acceptance are distinct. Do not
+  describe development APKs as production releases or claim feature parity while
+  listed mobile gaps remain. Keep Android signing keys and SDK/build outputs out
+  of Git. Instrumentation mutates only an explicitly selected disposable app.

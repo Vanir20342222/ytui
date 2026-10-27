@@ -1,0 +1,1151 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "normalization": "No ID or order normalization. Reference formats supplied in this explicit best-last order; no upstream sorting invoked. Compare selected ID or requested_formats IDs only. Native ranking/group compatibility and merge metadata differ outside these deliberately aligned cases. Context flags reflect full initial formats and are preserved by group filters as upstream does.",
+  "info": {
+    "id": "selector-fixture",
+    "title": "Synthetic selector presentation",
+    "url": "http://example.invalid/presentation",
+    "ext": "mp4",
+    "webpage_url": "http://example.invalid/page",
+    "extractor": "fixture",
+    "extractor_key": "Fixture",
+    "direct": false,
+    "formats": [
+      {
+        "format_id": "audio-low",
+        "url": "http://example.invalid/audio-low",
+        "ext": "m4a",
+        "stream_kind": "audio_only",
+        "tbr": 64,
+        "acodec": "mp4a.40.2",
+        "vcodec": "none",
+        "abr": 64
+      },
+      {
+        "format_id": "audio-high",
+        "url": "http://example.invalid/audio-high",
+        "ext": "m4a",
+        "stream_kind": "audio_only",
+        "tbr": 128,
+        "acodec": "mp4a.40.2",
+        "vcodec": "none",
+        "abr": 128
+      },
+      {
+        "format_id": "video-low",
+        "url": "http://example.invalid/video-low",
+        "ext": "mp4",
+        "stream_kind": "video_only",
+        "tbr": 400,
+        "acodec": "none",
+        "vcodec": "avc1.42001e",
+        "height": 360,
+        "width": 640
+      },
+      {
+        "format_id": "mux-low",
+        "url": "http://example.invalid/mux-low",
+        "ext": "mp4",
+        "stream_kind": "standalone",
+        "tbr": 500,
+        "acodec": "mp4a.40.2",
+        "vcodec": "avc1.42001e",
+        "height": 360,
+        "width": 640
+      },
+      {
+        "format_id": "video-mid",
+        "url": "http://example.invalid/video-mid",
+        "ext": "mp4",
+        "stream_kind": "video_only",
+        "tbr": 900,
+        "acodec": "none",
+        "vcodec": "avc1.42001e",
+        "height": 720,
+        "width": 1280
+      },
+      {
+        "format_id": "mux-high",
+        "url": "http://example.invalid/mux-high",
+        "ext": "mp4",
+        "stream_kind": "standalone",
+        "tbr": 1000,
+        "acodec": "mp4a.40.2",
+        "vcodec": "avc1.42001e",
+        "height": 720,
+        "width": 1280
+      },
+      {
+        "format_id": "video-high",
+        "url": "http://example.invalid/video-high",
+        "ext": "mp4",
+        "stream_kind": "video_only",
+        "tbr": 2000,
+        "acodec": "none",
+        "vcodec": "avc1.42001e",
+        "height": 1080,
+        "width": 1920
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "alias-best-muxed",
+      "selector": "best",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "alias-best-video",
+      "selector": "bestvideo",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "alias-best-v",
+      "selector": "bestv",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "alias-best-audio",
+      "selector": "bestaudio",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "alias-best-a",
+      "selector": "besta",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "alias-worst-muxed",
+      "selector": "worst",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "alias-worst-video",
+      "selector": "worstvideo",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "alias-worst-v",
+      "selector": "worstv",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "alias-worst-audio",
+      "selector": "worstaudio",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "alias-worst-a",
+      "selector": "worsta",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "alias-b-muxed",
+      "selector": "b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "alias-b-video",
+      "selector": "bvideo",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "alias-b-v",
+      "selector": "bv",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "alias-b-audio",
+      "selector": "baudio",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "alias-b-a",
+      "selector": "ba",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "alias-w-muxed",
+      "selector": "w",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "alias-w-video",
+      "selector": "wvideo",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "alias-w-v",
+      "selector": "wv",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "alias-w-audio",
+      "selector": "waudio",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "alias-w-a",
+      "selector": "wa",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "merge",
+      "selector": "bv+ba",
+      "expected_ids": [
+        "video-high",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "reverse-merge",
+      "selector": "ba+bv",
+      "expected_ids": [
+        "audio-high",
+        "video-high"
+      ]
+    },
+    {
+      "name": "merge-before-fallback",
+      "selector": "bv+ba/b",
+      "expected_ids": [
+        "video-high",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "grouped-merge-fallback",
+      "selector": "(bv+ba)/b",
+      "expected_ids": [
+        "video-high",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "choice-before-unused-group",
+      "selector": "bv/(ba+b)",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "group-choice-then-merge",
+      "selector": "(missing/bv)+ba",
+      "expected_ids": [
+        "video-high",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "nested-choice-then-merge",
+      "selector": "((missing/bv)+ba)/b",
+      "expected_ids": [
+        "video-high",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "failed-group-then-fallback",
+      "selector": "((missing/absent)+ba)/b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "literal-group-choice",
+      "selector": "(video-low/video-high)+audio-low",
+      "expected_ids": [
+        "video-low",
+        "audio-low"
+      ]
+    },
+    {
+      "name": "group-filter-before-merge-choice",
+      "selector": "(bv+ba/b)[height<=720]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "group-filter-before-explicit-choice",
+      "selector": "((bv+ba)/b)[height<=720]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "group-filter-keeps-missing-audio",
+      "selector": "(bv+ba)[height<=?720]",
+      "expected_ids": [
+        "video-mid",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "local-audio-filter",
+      "selector": "bv+ba[height<=720]",
+      "expected_ids": []
+    },
+    {
+      "name": "local-video-filter",
+      "selector": "bv[height<=720]+ba",
+      "expected_ids": [
+        "video-mid",
+        "audio-high"
+      ]
+    },
+    {
+      "name": "group-fallback-filter",
+      "selector": "(bv/b)[height<=720]",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "group-literal-fallback-filter",
+      "selector": "(missing/b)[height<=360]",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "bare-filter",
+      "selector": "[height<=720]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "grouped-bare-filter",
+      "selector": "([height<=360])",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "nested-bare-filter-context",
+      "selector": "([height<=720]/b)[tbr<600]",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "fallback-to-audio",
+      "selector": "(bv[height>1080]/ba)",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "reversed-fallback-merge",
+      "selector": "(bv[height>1080]/ba)+bv",
+      "expected_ids": [
+        "audio-high",
+        "video-high"
+      ]
+    },
+    {
+      "name": "nested-filtered-fallback-merge",
+      "selector": "((bv[height>1080]/ba)+bv)[height<=?720]",
+      "expected_ids": [
+        "audio-high",
+        "video-mid"
+      ]
+    },
+    {
+      "name": "merge-failure-outer-fallback",
+      "selector": "(bv[height>1080]/ba)+bv[height>1080]/b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "missing-pair-outer-fallback",
+      "selector": "((missing/bv)+absent)/b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "group-mime-context",
+      "selector": "(b/w)[ext=mp4]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "group-filter-removes-audio",
+      "selector": "((bv+ba)/b)[ext=mp4]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "all-branches-unavailable",
+      "selector": "(missing/absent)",
+      "expected_ids": []
+    },
+    {
+      "name": "no-video-or-muxed-above-bound",
+      "selector": "bv[height>1080]+ba/b[height>1080]",
+      "expected_ids": []
+    },
+    {
+      "name": "no-group-candidates",
+      "selector": "(bv+ba)[height<1]",
+      "expected_ids": []
+    },
+    {
+      "name": "no-bare-candidates",
+      "selector": "([height<1])",
+      "expected_ids": []
+    },
+    {
+      "name": "no-group-choice-candidates",
+      "selector": "(bv/ba)[height<1]",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-muxed-1",
+      "selector": "best.1",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-best-muxed-2",
+      "selector": "best.2",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-best-muxed-3",
+      "selector": "best.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-muxed-9",
+      "selector": "best.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-video-1",
+      "selector": "bestvideo.1",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-best-video-2",
+      "selector": "bestvideo.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-best-video-3",
+      "selector": "bestvideo.3",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-best-video-9",
+      "selector": "bestvideo.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-v-1",
+      "selector": "bestv.1",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-best-v-2",
+      "selector": "bestv.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-best-v-3",
+      "selector": "bestv.3",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-best-v-9",
+      "selector": "bestv.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-audio-1",
+      "selector": "bestaudio.1",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-best-audio-2",
+      "selector": "bestaudio.2",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-best-audio-3",
+      "selector": "bestaudio.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-audio-9",
+      "selector": "bestaudio.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-a-1",
+      "selector": "besta.1",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-best-a-2",
+      "selector": "besta.2",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-best-a-3",
+      "selector": "besta.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-best-a-9",
+      "selector": "besta.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-muxed-1",
+      "selector": "worst.1",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-muxed-2",
+      "selector": "worst.2",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-worst-muxed-3",
+      "selector": "worst.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-muxed-9",
+      "selector": "worst.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-video-1",
+      "selector": "worstvideo.1",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-video-2",
+      "selector": "worstvideo.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-worst-video-3",
+      "selector": "worstvideo.3",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-worst-video-9",
+      "selector": "worstvideo.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-v-1",
+      "selector": "worstv.1",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-v-2",
+      "selector": "worstv.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-worst-v-3",
+      "selector": "worstv.3",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-worst-v-9",
+      "selector": "worstv.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-audio-1",
+      "selector": "worstaudio.1",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-audio-2",
+      "selector": "worstaudio.2",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-worst-audio-3",
+      "selector": "worstaudio.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-audio-9",
+      "selector": "worstaudio.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-a-1",
+      "selector": "worsta.1",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-a-2",
+      "selector": "worsta.2",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-worst-a-3",
+      "selector": "worsta.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-worst-a-9",
+      "selector": "worsta.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-muxed-1",
+      "selector": "b.1",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-b-muxed-2",
+      "selector": "b.2",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-b-muxed-3",
+      "selector": "b.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-muxed-9",
+      "selector": "b.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-video-1",
+      "selector": "bvideo.1",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-b-video-2",
+      "selector": "bvideo.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-b-video-3",
+      "selector": "bvideo.3",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-b-video-9",
+      "selector": "bvideo.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-v-1",
+      "selector": "bv.1",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-b-v-2",
+      "selector": "bv.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-b-v-3",
+      "selector": "bv.3",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-b-v-9",
+      "selector": "bv.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-audio-1",
+      "selector": "baudio.1",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-b-audio-2",
+      "selector": "baudio.2",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-b-audio-3",
+      "selector": "baudio.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-audio-9",
+      "selector": "baudio.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-a-1",
+      "selector": "ba.1",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-b-a-2",
+      "selector": "ba.2",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-b-a-3",
+      "selector": "ba.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-b-a-9",
+      "selector": "ba.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-muxed-1",
+      "selector": "w.1",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-w-muxed-2",
+      "selector": "w.2",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-w-muxed-3",
+      "selector": "w.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-muxed-9",
+      "selector": "w.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-video-1",
+      "selector": "wvideo.1",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-w-video-2",
+      "selector": "wvideo.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-w-video-3",
+      "selector": "wvideo.3",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-w-video-9",
+      "selector": "wvideo.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-v-1",
+      "selector": "wv.1",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-w-v-2",
+      "selector": "wv.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-w-v-3",
+      "selector": "wv.3",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "indexed-w-v-9",
+      "selector": "wv.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-audio-1",
+      "selector": "waudio.1",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-w-audio-2",
+      "selector": "waudio.2",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-w-audio-3",
+      "selector": "waudio.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-audio-9",
+      "selector": "waudio.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-a-1",
+      "selector": "wa.1",
+      "expected_ids": [
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-w-a-2",
+      "selector": "wa.2",
+      "expected_ids": [
+        "audio-high"
+      ]
+    },
+    {
+      "name": "indexed-w-a-3",
+      "selector": "wa.3",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-w-a-9",
+      "selector": "wa.9",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-merge-fallback",
+      "selector": "(bv.2+ba.2)/b",
+      "expected_ids": [
+        "video-mid",
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-reversed-merge",
+      "selector": "ba.2+bv.2",
+      "expected_ids": [
+        "audio-low",
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-third-video",
+      "selector": "(bv.3+ba.2)/b",
+      "expected_ids": [
+        "video-low",
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-unavailable-video-fallback",
+      "selector": "(bv.9+ba)/b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-unavailable-audio-fallback",
+      "selector": "(bv+ba.9)/b",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-video-filter-before-rank",
+      "selector": "bv.2[height<=720]",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-video-filter-before-rank-high",
+      "selector": "bv.2[height>=720]",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-video-filter-insufficient-candidates",
+      "selector": "bv.2[height<720]",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-muxed-filter-before-rank",
+      "selector": "b.2[height<=720]",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-worst-filter-before-rank",
+      "selector": "w.2[height<=720]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-group-filter-keeps-missing",
+      "selector": "(bv.2+ba.2/b)[height<=?720]",
+      "expected_ids": [
+        "video-low",
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-group-filter-excludes-audio",
+      "selector": "(bv.2+ba.2/b)[height<=720]",
+      "expected_ids": [
+        "mux-high"
+      ]
+    },
+    {
+      "name": "indexed-group-fallback",
+      "selector": "(bv.2/b.2)[height<=720]",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-group-fallback-single",
+      "selector": "(bv.2/b)[height<=360]",
+      "expected_ids": [
+        "mux-low"
+      ]
+    },
+    {
+      "name": "indexed-group-both-unavailable",
+      "selector": "(bv.2/b.2)[height<=360]",
+      "expected_ids": []
+    },
+    {
+      "name": "indexed-grouped-atom-filter",
+      "selector": "(bv.2)[height>=720]",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "indexed-choice-merge",
+      "selector": "(missing/bv.2)+ba.2",
+      "expected_ids": [
+        "video-mid",
+        "audio-low"
+      ]
+    },
+    {
+      "name": "indexed-large-finite",
+      "selector": "b.1000000000000000000",
+      "expected_ids": []
+    },
+    {
+      "name": "literal-zero-index",
+      "selector": "bv.0",
+      "expected_ids": []
+    },
+    {
+      "name": "literal-leading-zero-index",
+      "selector": "bv.01",
+      "expected_ids": []
+    },
+    {
+      "name": "literal-nonnumeric-index",
+      "selector": "bv.x",
+      "expected_ids": []
+    },
+    {
+      "name": "literal-zero-index-fallback",
+      "selector": "bv.0/bv",
+      "expected_ids": [
+        "video-high"
+      ]
+    },
+    {
+      "name": "literal-leading-zero-index-fallback",
+      "selector": "bv.01/bv.2",
+      "expected_ids": [
+        "video-mid"
+      ]
+    },
+    {
+      "name": "literal-nonnumeric-index-fallback",
+      "selector": "bv.x/bv.3",
+      "expected_ids": [
+        "video-low"
+      ]
+    },
+    {
+      "name": "indexed-native-platform-cap",
+      "selector": "b.9223372036854775807",
+      "expected_ids": []
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "late-dangling-merge",
+      "selector": "b/(bv+)"
+    },
+    {
+      "name": "late-unclosed-group",
+      "selector": "b/(bv"
+    },
+    {
+      "name": "late-malformed-numeric-filter",
+      "selector": "b/(bv+ba)[height>>720]"
+    },
+    {
+      "name": "late-empty-numeric-filter",
+      "selector": "b/(bv+ba)[height<]"
+    }
+  ],
+  "excluded_index_cases": [
+    {
+      "selector": "b.9223372036854775808",
+      "upstream_behavior": "ValueError: itertools.islice stop exceeds sys.maxsize",
+      "native_policy": "Explicit whole-expression parse error above isize::MAX; not matching-ID parity."
+    },
+    {
+      "selector": "b.18446744073709551615",
+      "upstream_behavior": "ValueError: itertools.islice stop exceeds sys.maxsize",
+      "native_policy": "Explicit whole-expression parse error above isize::MAX; not matching-ID parity."
+    },
+    {
+      "selector": "b.18446744073709551616",
+      "upstream_behavior": "ValueError: itertools.islice stop exceeds sys.maxsize",
+      "native_policy": "Explicit whole-expression parse error above isize::MAX; not matching-ID parity."
+    },
+    {
+      "selector": "ba.99999999999999999999",
+      "upstream_behavior": "ValueError: itertools.islice stop exceeds sys.maxsize",
+      "native_policy": "Explicit whole-expression parse error above isize::MAX; not matching-ID parity."
+    }
+  ]
+}

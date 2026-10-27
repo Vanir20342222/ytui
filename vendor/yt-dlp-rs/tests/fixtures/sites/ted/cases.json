@@ -1,0 +1,10 @@
+[
+ {"url": "https://www.ted.com/talks/candace_parker_barriers", "args": ["-J"]},
+ {"url": "https://embed.ted.com/talks/candace_parker_barriers", "args": ["--print", "%(id)s|%(extractor)s|%(webpage_url)s"]},
+ {"url": "https://www.ted.com/talks/external_talk", "args": ["--print", "%(id)s|%(extractor)s"]},
+ {"url": "https://www.ted.com/talks/broken", "args": ["--print", "id"]},
+ {"url": "https://www.ted.com/playlists/171/popular", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://www.ted.com/series/small_thing_big_idea#season_2", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://www.ted.com/series/small_thing_big_idea", "args": ["--flat-playlist", "--print", "%(playlist_id)s|%(playlist_title)s|%(url)s"]},
+ {"url": "https://www.ted.com/talks/candace_parker_barriers", "args": ["--no-progress", "-f", "h264-1500k", "-o", "%(id)s.%(ext)s"]}
+]

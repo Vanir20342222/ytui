@@ -1,0 +1,7 @@
+[
+ {"url": "https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183", "args": ["-j"]},
+ {"url": "https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(duration)s|%(view_count)s"]},
+ {"url": "https://cinema.popcorntv.it/guarda/smash-cut/10", "args": ["-j"]},
+ {"url": "https://cinema.popcorntv.it/guarda/x/11", "args": ["-j"]},
+ {"url": "https://cinema.popcorntv.it/guarda/x/12", "args": ["-j"]}
+]

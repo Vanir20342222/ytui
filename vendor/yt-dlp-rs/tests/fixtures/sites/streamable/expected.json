@@ -1,0 +1,213 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://streamable.com/dnd1",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"dnd1\", \"title\": \"Mikel Oiarzabal scores\", \"description\": null, \"thumbnail\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"uploader\": \"teabaker\", \"timestamp\": 1454964157.35115, \"duration\": 61.516, \"view_count\": 4321, \"formats\": [{\"format_id\": \"mp4-mobile\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 7000, \"fps\": 30, \"vbr\": 500.0, \"vcodec\": null, \"acodec\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-mobile - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://streamable.com/dnd1\", \"original_url\": \"https://streamable.com/dnd1\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"id\": \"0\"}], \"display_id\": \"dnd1\", \"fulltitle\": \"Mikel Oiarzabal scores\", \"duration_string\": \"1:01\", \"upload_date\": \"20160208\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\", \"_filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://streamable.com/e/dnd1",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Streamable] Extracting URL: https://streamable.com/e/dnd1",
+    "[Streamable] dnd1: Downloading JSON metadata",
+    "[info] Available formats for dnd1:",
+    "ID         EXT RESOLUTION FPS |  FILESIZE PROTO | VCODEC    VBR ACODEC",
+    "-----------------------------------------------------------------------",
+    "mp4-mobile mp4 640x360     30 |   6.84KiB https | unknown  500k unknown",
+    "mp4        mp4 1280x720    30 |  14.20KiB https | h264    1500k aac"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://streamable.com/dnd1",
+   "args": [
+    "--print",
+    "%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(duration)s|%(duration_string)s|%(view_count)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "Mikel Oiarzabal scores|teabaker|1454964157.35115|20160208|61.516|1:01|4321|mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://streamable.com/dnd1",
+   "args": [
+    "--no-progress",
+    "-f",
+    "mp4",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Streamable] Extracting URL: https://streamable.com/dnd1",
+    "[Streamable] dnd1: Downloading JSON metadata",
+    "[info] dnd1: Downloading 1 format(s): mp4",
+    "[download] Destination: dnd1.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: \"-f mp4\" selects the best pre-merged mp4 format which is often not what's intended."
+   ],
+   "files": {
+    "dnd1.mp4": 14537
+   }
+  },
+  {
+   "url": "https://streamable.com/busy",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Streamable] busy: This video is currently unavailable. It may still be uploading or processing."
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://streamable.com/gone",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Streamable] gone: Unable to download JSON metadata: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"dnd1\", \"title\": \"Mikel Oiarzabal scores\", \"description\": null, \"thumbnail\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"uploader\": \"teabaker\", \"timestamp\": 1454964157.35115, \"duration\": 61.516, \"view_count\": 4321, \"formats\": [{\"format_id\": \"mp4-mobile\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 7000, \"fps\": 30, \"vbr\": 500.0, \"vcodec\": null, \"acodec\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-mobile - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"original_url\": \"https://blog.example.test/post\", \"webpage_url\": \"https://streamable.com/e/dnd1\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"id\": \"0\"}], \"display_id\": \"dnd1\", \"fulltitle\": \"Mikel Oiarzabal scores\", \"duration_string\": \"1:01\", \"upload_date\": \"20160208\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\", \"_filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "--print",
+    "%(original_url)s|%(webpage_url)s|%(extractor)s|%(playlist)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "https://blog.example.test/post|https://streamable.com/e/dnd1|Streamable|NA"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "args": [
+    "-s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://blog.example.test/two",
+    "[generic] two: Downloading webpage",
+    "[generic] two: Extracting information",
+    "[download] Downloading playlist: Two",
+    "[generic] Playlist Two: Downloading 2 items of 2",
+    "[download] Downloading item 1 of 2",
+    "[Streamable] Extracting URL: https://streamable.com/e/dnd1?a=1&b=2",
+    "[Streamable] dnd1: Downloading JSON metadata",
+    "[info] dnd1: Downloading 1 format(s): mp4",
+    "[download] Downloading item 2 of 2",
+    "[Streamable] Extracting URL: https://streamable.com/s/dnd1/x",
+    "[Streamable] dnd1: Downloading JSON metadata",
+    "[info] dnd1: Downloading 1 format(s): mp4",
+    "[download] Finished downloading playlist: Two"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"two\", \"title\": \"Two\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"id\": \"dnd1\", \"title\": \"Mikel Oiarzabal scores\", \"description\": null, \"thumbnail\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"uploader\": \"teabaker\", \"timestamp\": 1454964157.35115, \"duration\": 61.516, \"view_count\": 4321, \"formats\": [{\"format_id\": \"mp4-mobile\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 7000, \"fps\": 30, \"vbr\": 500.0, \"vcodec\": null, \"acodec\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-mobile - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"original_url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"playlist_count\": 2, \"playlist\": \"Two\", \"playlist_id\": \"two\", \"playlist_title\": \"Two\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/two\", \"n_entries\": 2, \"playlist_index\": 1, \"__last_playlist_index\": 2, \"playlist_autonumber\": 1, \"thumbnails\": [{\"url\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"id\": \"0\"}], \"display_id\": \"dnd1\", \"fulltitle\": \"Mikel Oiarzabal scores\", \"duration_string\": \"1:01\", \"upload_date\": \"20160208\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\", \"_filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}, {\"id\": \"dnd1\", \"title\": \"Mikel Oiarzabal scores\", \"description\": null, \"thumbnail\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"uploader\": \"teabaker\", \"timestamp\": 1454964157.35115, \"duration\": 61.516, \"view_count\": 4321, \"formats\": [{\"format_id\": \"mp4-mobile\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 7000, \"fps\": 30, \"vbr\": 500.0, \"vcodec\": null, \"acodec\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-mobile - 640x360\"}, {\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://streamable.com/s/dnd1/x\", \"original_url\": \"https://streamable.com/s/dnd1/x\", \"webpage_url_basename\": \"x\", \"webpage_url_domain\": \"streamable.com\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"playlist_count\": 2, \"playlist\": \"Two\", \"playlist_id\": \"two\", \"playlist_title\": \"Two\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/two\", \"n_entries\": 2, \"playlist_index\": 2, \"__last_playlist_index\": 2, \"playlist_autonumber\": 2, \"thumbnails\": [{\"url\": \"https://cdn-cf-east.streamable.com/image/dnd1.jpg\", \"id\": \"0\"}], \"display_id\": \"dnd1\", \"fulltitle\": \"Mikel Oiarzabal scores\", \"duration_string\": \"1:01\", \"upload_date\": \"20160208\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\", \"_filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"filename\": \"Mikel Oiarzabal scores [dnd1].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": 14537, \"fps\": 30, \"vbr\": 1500.0, \"vcodec\": \"h264\", \"acodec\": \"aac\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - 1280x720\"}], \"webpage_url\": \"https://blog.example.test/two\", \"original_url\": \"https://blog.example.test/two\", \"webpage_url_basename\": \"two\", \"webpage_url_domain\": \"blog.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"two\", \"title\": \"Two\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/s/dnd1/x\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://blog.example.test/two\", \"original_url\": \"https://blog.example.test/two\", \"webpage_url_basename\": \"two\", \"webpage_url_domain\": \"blog.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "args": [
+    "--flat-playlist",
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null, \"id\": \"dnd1\", \"webpage_url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"original_url\": \"https://streamable.com/e/dnd1?a=1&b=2\", \"webpage_url_basename\": \"dnd1\", \"webpage_url_domain\": \"streamable.com\", \"playlist_count\": 2, \"playlist\": \"Two\", \"playlist_id\": \"two\", \"playlist_title\": \"Two\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/two\", \"n_entries\": 2, \"playlist_index\": 1, \"__last_playlist_index\": 2, \"playlist_autonumber\": 1, \"release_year\": null}",
+    "{\"ie_key\": \"Streamable\", \"_type\": \"url\", \"url\": \"https://streamable.com/s/dnd1/x\", \"extractor\": \"Streamable\", \"extractor_key\": \"Streamable\", \"__x_forwarded_for_ip\": null, \"id\": \"dnd1\", \"webpage_url\": \"https://streamable.com/s/dnd1/x\", \"original_url\": \"https://streamable.com/s/dnd1/x\", \"webpage_url_basename\": \"x\", \"webpage_url_domain\": \"streamable.com\", \"playlist_count\": 2, \"playlist\": \"Two\", \"playlist_id\": \"two\", \"playlist_title\": \"Two\", \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://blog.example.test/two\", \"n_entries\": 2, \"playlist_index\": 2, \"__last_playlist_index\": 2, \"playlist_autonumber\": 2, \"release_year\": null}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "args": [
+    "--print",
+    "%(playlist_index)s|%(original_url)s|%(webpage_url)s|%(playlist_title)s|%(id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1|https://streamable.com/e/dnd1?a=1&b=2|https://streamable.com/e/dnd1?a=1&b=2|Two|dnd1",
+    "2|https://streamable.com/s/dnd1/x|https://streamable.com/s/dnd1/x|Two|dnd1"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

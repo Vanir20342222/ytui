@@ -1,0 +1,14 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT9S">
+  <BaseURL>timeline/</BaseURL><Period>
+    <AdaptationSet mimeType="video/mp4" codecs="avc1.64001f">
+      <Representation id="video" bandwidth="500000" width="854" height="480">
+        <SegmentTemplate timescale="10" initialization="init-$RepresentationID$.mp4" media="$RepresentationID$-$Time$.m4s"><SegmentTimeline><S t="30" d="10" r="2"/><S d="15" r="1"/></SegmentTimeline></SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" codecs="mp4a.40.2" lang="nb">
+      <Representation id="audio" bandwidth="96000">
+        <SegmentTemplate timescale="10" initialization="init-$RepresentationID$.mp4" media="$RepresentationID$-$Time$.m4s"><SegmentTimeline><S t="30" d="10" r="2"/><S d="15" r="1"/></SegmentTimeline></SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

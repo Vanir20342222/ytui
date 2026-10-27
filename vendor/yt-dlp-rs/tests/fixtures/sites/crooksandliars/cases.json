@@ -1,0 +1,11 @@
+[
+ {"url": "https://embed.crooksandliars.com/embed/8RUoRhRi", "args": ["-j"]},
+ {"url": "https://embed.crooksandliars.com/embed/8RUoRhRi", "args": ["-F"]},
+ {"url": "https://embed.crooksandliars.com/embed/8RUoRhRi", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(uploader)s|%(duration)s|%(url)s"]},
+ {"url": "https://embed.crooksandliars.com/embed/8RUoRhRi", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://embed.crooksandliars.com/v/b2", "args": ["-j"]},
+ {"url": "https://embed.crooksandliars.com/embed/c3", "args": ["-j"]},
+ {"url": "https://embed.crooksandliars.com/embed/d4", "args": ["-j"]},
+ {"url": "https://page.test/cl.html", "args": ["-j"]},
+ {"url": "https://page.test/cl2.html", "args": ["-J", "--flat-playlist"]}
+]

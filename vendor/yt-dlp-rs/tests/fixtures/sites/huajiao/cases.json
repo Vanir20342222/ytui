@@ -1,0 +1,7 @@
+[
+ {"url": "http://www.huajiao.com/l/38941232", "args": ["-j"]},
+ {"url": "http://www.huajiao.com/l/38941232", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(timestamp)s|%(upload_date)s|%(uploader)s|%(uploader_id)s"]},
+ {"url": "https://huajiao.com/l/2", "args": ["-j"]},
+ {"url": "https://www.huajiao.com/l/3", "args": ["-j"]},
+ {"url": "https://www.huajiao.com/l/4", "args": ["-j"]}
+]

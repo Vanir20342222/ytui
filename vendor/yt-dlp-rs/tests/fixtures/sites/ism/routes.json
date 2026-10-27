@@ -1,0 +1,74 @@
+{
+ "routes": [
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<SmoothStreamingMedia MajorVersion=\"2\" MinorVersion=\"2\" Duration=\"60000000\" TimeScale=\"10000000\">\n <StreamIndex Type=\"video\" Name=\"video\" Chunks=\"3\" QualityLevels=\"2\" Url=\"QualityLevels({bitrate})/Fragments(video={start time})\" MaxWidth=\"1280\" MaxHeight=\"720\">\n  <QualityLevel Index=\"0\" Bitrate=\"1500000\" FourCC=\"H264\" MaxWidth=\"1280\" MaxHeight=\"720\" CodecPrivateData=\"000000016742C01FDA014016E8400000FA40003A98238C19500000000168CE3C80\"/>\n  <QualityLevel Index=\"1\" Bitrate=\"400000\" FourCC=\"AVC1\" Width=\"640\" Height=\"360\" CodecPrivateData=\"000000016742C01FDA014016E8400000FA40003A98238C19500000000168CE3C80\"/>\n  <QualityLevel Index=\"2\" Bitrate=\"900000\" FourCC=\"WVC1\" MaxWidth=\"960\" MaxHeight=\"540\"/>\n  <c t=\"0\" d=\"20000000\"/>\n  <c d=\"20000000\" r=\"2\"/>\n </StreamIndex>\n <StreamIndex Type=\"audio\" Name=\"audio_eng\" Language=\"en\" Chunks=\"2\" Url=\"QualityLevels({Bitrate})/Fragments(audio_eng={start_time})\" TimeScale=\"44100\">\n  <QualityLevel Index=\"0\" Bitrate=\"128000\" AudioTag=\"255\" SamplingRate=\"44100\" Channels=\"2\" BitsPerSample=\"16\" CodecPrivateData=\"1210\"/>\n  <c t=\"0\" d=\"132300\"/>\n  <c t=\"132300\"/>\n </StreamIndex>\n <StreamIndex Type=\"text\" Name=\"textstream_fra\" Language=\"fra\" Url=\"QualityLevels({bitrate})/Fragments(textstream_fra={start time})\">\n  <QualityLevel Index=\"0\" Bitrate=\"1000\" FourCC=\"TTML\"/>\n  <c t=\"0\" d=\"30000000\"/>\n  <c d=\"30000000\"/>\n </StreamIndex>\n <StreamIndex Type=\"video\" Name=\"other\" Url=\"x\"><QualityLevel Bitrate=\"1\" FourCC=\"VP90\"/></StreamIndex>\n</SmoothStreamingMedia>"
+  },
+  {
+   "url": "https://media.example.test/vod/live.ism/Manifest",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<SmoothStreamingMedia IsLive=\"TRUE\" Duration=\"0\"><StreamIndex Type=\"video\" Url=\"x\"><QualityLevel Bitrate=\"1\" FourCC=\"H264\"/></StreamIndex></SmoothStreamingMedia>"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=0)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v0.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=20000000)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v1.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=40000000)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v2.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=0)",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body_file": "a0.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=132300)",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body_file": "a1.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=0)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v0.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=20000000)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v1.mp4"
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=40000000)",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "v2.mp4"
+  }
+ ]
+}

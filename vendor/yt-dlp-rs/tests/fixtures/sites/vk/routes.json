@@ -1,0 +1,77 @@
+{
+ "routes": [
+  {
+   "url": "https://vk.com/al_video.php",
+   "request_body": [
+    "video=-77521_162222515"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"payload\": [0, [\"\", \"<div class=\\\"mv_info\\\"><div class=\\\"mv_info_date\\\">2 Jun 2013</div><span class=\\\"mv_views_count\\\">12,345 views</span></div>\", null, {\"mvData\": {\"title\": \"Ignored title\", \"desc\": \"\", \"duration\": 229, \"likes\": 77, \"commcount\": \"5\"}, \"player\": {\"params\": [{\"md_title\": \"Elvis &amp; friends\", \"md_author\": \"Elvis Presley &amp; co\", \"author_id\": -77521, \"jpg\": \"https://sun9.userapi.test/thumb.jpg\", \"duration\": 230, \"date\": 1370000000, \"description\": \"<b>First</b> line<br>second\", \"live\": 0, \"url240\": \"https://vkvd.test/v-240.mp4\", \"url720\": \"https://vkvd.test/v-720.mp4\", \"cache480\": \"https://vkvd.test/c-480.mp4\", \"hls\": \"https://vkvd.test/video.m3u8\", \"hls_live_playback\": \"https://vkvd.test/live.m3u8\", \"dash_uni\": \"https://vkvd.test/uni.mpd\", \"rtmp\": \"rtmp://vkvd.test/live/stream\", \"jpg_big\": \"not a url\", \"subs\": [{\"lang\": \"ru\", \"title\": \"Russian.vtt\", \"url\": \"https://vkvd.test/ru.vtt\"}, {\"url\": \"https://vkvd.test/en.srt\"}], \"time_codes\": [{\"time\": 0, \"text\": \"Start &amp; intro\"}, {\"time\": \"x\", \"text\": \"bad\"}, {\"time\": 60, \"text\": \"Song\"}]}]}}]]}"
+  },
+  {
+   "url": "https://vk.com/al_video.php",
+   "request_body": [
+    "video=1_3",
+    "list=ln-abc"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"payload\": [\"8\", [\"\\\"<b>Access</b> denied\\\"\"]]}"
+  },
+  {
+   "url": "https://vk.com/al_video.php",
+   "request_body": [
+    "video=1_4"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"payload\": [\"3\", []]}"
+  },
+  {
+   "url": "https://vkvd.test/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720,CODECS=\"avc1.64001f,mp4a.40.2\"\nhttps://vkvd.test/hls-720.m3u8\n"
+  },
+  {
+   "url": "https://vkvd.test/hls-720.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\nseg0.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=7&hash=abc",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>\nvar playerParams = {\"params\": [{\"md_title\": \"Embedded clip\", \"url360\": \"https://vkvd.test/e-360.mp4\", \"date\": 1600000000}]};\n</script></html>"
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=8",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><!>This video is no longer available, because it has been deleted.</body></html>"
+  },
+  {
+   "url": "https://vk.com/video_ext.php?oid=-1&id=9",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div class=\"x\" id=\"video_ext_msg\"><b>Video</b> is private</div></body></html>"
+  },
+  {
+   "url": "https://vkvd.test/v-720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-vk"
+  }
+ ]
+}

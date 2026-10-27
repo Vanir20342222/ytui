@@ -1,0 +1,73 @@
+name: Android
+on:
+  push:
+    branches: [main, 'feat/android-monorepo']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,x86_64-linux-android
+      - uses: Swatinem/rust-cache@v2
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install pinned Android build tools
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018'
+      - name: Build both Rust ABIs and check the Android host
+        run: tools/android/build.sh
+      - name: Build synthetic media fixtures and instrumentation APK
+        run: |
+          bash tools/ci-install-media.sh ffmpeg
+          tools/android/test-fixtures.sh
+          apps/android/gradlew -p apps/android --no-daemon :app:assembleDebugAndroidTest
+      - name: Inspect APK signing and 16 KiB alignment
+        run: tools/android/inspect-apk.sh > apps/android/app/build/outputs/apk/debug/SHA256-and-checks.txt
+      - name: Upload sideloadable development APK and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ytui-android-${{ github.sha }}
+          path: |
+            apps/android/app/build/outputs/apk/debug/app-debug.apk
+            apps/android/app/build/outputs/apk/debug/SHA256-and-checks.txt
+            apps/android/app/build/reports/
+          retention-days: 30
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run actual JNI, isolated solver and media instrumentation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: apps/android/gradlew -p apps/android --no-daemon :app:connectedDebugAndroidTest
+      - name: Upload device test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-device-tests-${{ github.sha }}
+          path: |
+            apps/android/app/build/reports/androidTests/
+            apps/android/app/build/outputs/androidTest-results/
+          if-no-files-found: ignore

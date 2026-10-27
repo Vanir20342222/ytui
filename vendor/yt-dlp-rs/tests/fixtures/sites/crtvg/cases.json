@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.crtvg.es/tvg/a-carta/os-caimans-do-tea-5839623", "args": ["-j"]},
+ {"url": "https://www.crtvg.es/tvg/a-carta/os-caimans-do-tea-5839623", "args": ["-F"]},
+ {"url": "https://www.crtvg.es/tvg/a-carta/os-caimans-do-tea-5839623", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(_old_archive_ids)s"]},
+ {"url": "https://crtvg.es/tvg/a-carta/a-parabolica-love-story", "args": ["-j"]},
+ {"url": "https://www.crtvg.es/tvg/a-carta/none-1", "args": ["-j"]},
+ {"url": "https://www.crtvg.es/tvg/a-carta/gone-1234567", "args": ["-j"]}
+]

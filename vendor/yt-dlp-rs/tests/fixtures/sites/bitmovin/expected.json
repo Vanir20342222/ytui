@@ -1,0 +1,120 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"cqkl1t5giv3lrce7pjbg\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"manifest_url\": \"https://bitmovin.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"https://bitmovin.test/hls/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"https://bitmovin.test/hls/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"title\": \"Developing Osteopathic Residents\", \"thumbnail\": \"https://bitmovin.test/p.jpg\", \"webpage_url\": \"https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed\", \"original_url\": \"https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed\", \"webpage_url_basename\": \"embed\", \"webpage_url_domain\": \"streams.bitmovin.com\", \"extractor\": \"Bitmovin\", \"extractor_key\": \"Bitmovin\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://bitmovin.test/p.jpg\", \"id\": \"0\"}], \"display_id\": \"cqkl1t5giv3lrce7pjbg\", \"fulltitle\": \"Developing Osteopathic Residents\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"manifest_url\": \"https://bitmovin.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Developing Osteopathic Residents [cqkl1t5giv3lrce7pjbg].mp4\", \"filename\": \"Developing Osteopathic Residents [cqkl1t5giv3lrce7pjbg].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bitmovin] Extracting URL: https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed",
+    "[Bitmovin] cqkl1t5giv3lrce7pjbg: Downloading JSON metadata",
+    "[Bitmovin] cqkl1t5giv3lrce7pjbg: Downloading m3u8 information",
+    "[info] Available subtitles for cqkl1t5giv3lrce7pjbg:",
+    "Language Formats",
+    "en       vtt",
+    "de       vtt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://streams.bitmovin.com/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"b2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"webpage_url\": \"https://streams.bitmovin.com/b2\", \"original_url\": \"https://streams.bitmovin.com/b2\", \"webpage_url_basename\": \"b2\", \"webpage_url_domain\": \"streams.bitmovin.com\", \"extractor\": \"Bitmovin\", \"extractor_key\": \"Bitmovin\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"b2\", \"fulltitle\": null, \"title\": \"Bitmovin video #b2\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Bitmovin video #b2 [b2].mp4\", \"filename\": \"Bitmovin video #b2 [b2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://streams.bitmovin.com/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: c3: An extractor error has occurred. (caused by KeyError('hls')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://streams.bitmovin.com/d4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: d4: An extractor error has occurred. (caused by KeyError('sources')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/one.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"b2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"original_url\": \"https://page.test/one.html\", \"webpage_url\": \"https://streams.bitmovin.com/b2/embed?x=1&y=2\", \"webpage_url_basename\": \"embed\", \"webpage_url_domain\": \"streams.bitmovin.com\", \"extractor\": \"Bitmovin\", \"extractor_key\": \"Bitmovin\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"b2\", \"fulltitle\": null, \"title\": \"Bitmovin video #b2\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://bitmovin.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Bitmovin video #b2 [b2].mp4\", \"filename\": \"Bitmovin video #b2 [b2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/two.html",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"two\", \"title\": \"Two\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"Bitmovin\", \"_type\": \"url\", \"url\": \"https://streams.bitmovin.com/b2/embed\", \"extractor\": \"Bitmovin\", \"extractor_key\": \"Bitmovin\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"Bitmovin\", \"_type\": \"url\", \"url\": \"https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed\", \"extractor\": \"Bitmovin\", \"extractor_key\": \"Bitmovin\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://page.test/two.html\", \"original_url\": \"https://page.test/two.html\", \"webpage_url_basename\": \"two.html\", \"webpage_url_domain\": \"page.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/two.html",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "b2|Bitmovin video #b2",
+    "cqkl1t5giv3lrce7pjbg|Developing Osteopathic Residents"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  }
+ ]
+}

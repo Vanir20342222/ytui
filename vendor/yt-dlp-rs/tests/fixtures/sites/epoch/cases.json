@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html", "args": ["-j"]},
+ {"url": "https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html", "args": ["--list-subs"]},
+ {"url": "https://www.theepochtimes.com/nodata_2.html", "args": ["-j"]},
+ {"url": "https://www.theepochtimes.com/nobox_3.html", "args": ["-j"]},
+ {"url": "https://www.theepochtimes.com/unclosed_4.html", "args": ["-j"]}
+]

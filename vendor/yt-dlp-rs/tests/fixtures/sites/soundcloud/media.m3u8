@@ -1,0 +1,6 @@
+#EXTM3U
+#EXT-X-TARGETDURATION:10
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:10.0,
+https://cf-hls-media.sndcdn.com/media/0/10/seg.mp3
+#EXT-X-ENDLIST

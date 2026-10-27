@@ -1,0 +1,7 @@
+[
+ {"url": "https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s", "args": ["-j"]},
+ {"url": "https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s", "args": ["--print", "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(upload_date)s"]},
+ {"url": "https://www.fathom.video/share/b2", "args": ["-j"]},
+ {"url": "https://fathom.video/share/c3", "args": ["-j"]},
+ {"url": "https://fathom.video/share/d4", "args": ["-j"]}
+]

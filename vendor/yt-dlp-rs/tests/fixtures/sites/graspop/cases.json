@@ -1,0 +1,7 @@
+[
+ {"url": "https://vod.graspop.be/fr/101556/thy-art-is-murder-concert/", "args": ["-j"]},
+ {"url": "https://vod.graspop.be/fr/101556/thy-art-is-murder-concert/", "args": ["--print", "%(id)s|%(title)s|%(thumbnail)s"]},
+ {"url": "https://vod.graspop.be/nl/2/x/", "args": ["-j"]},
+ {"url": "https://vod.graspop.be/nl/3/x/", "args": ["-j"]},
+ {"url": "https://vod.graspop.be/nl/4/x/", "args": ["-j"]}
+]

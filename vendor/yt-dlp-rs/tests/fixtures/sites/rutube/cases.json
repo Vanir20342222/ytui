@@ -1,0 +1,7 @@
+[
+ {"url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/", "args": ["-J"]},
+ {"url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/", "args": ["--list-subs"]},
+ {"url": "https://rutube.ru/play/embed/8083783?p=tok", "args": ["-J"]},
+ {"url": "https://rutube.ru/video/00000000000000000000000000000000/", "args": ["--print", "id"]},
+ {"url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/", "args": ["--no-progress", "-f", "default", "-o", "%(id)s.%(ext)s"]}
+]

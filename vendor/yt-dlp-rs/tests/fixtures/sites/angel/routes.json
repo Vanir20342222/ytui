@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Tuttle Twins: When Laws Go Bad\">\n<meta property=\"og:description\" content=\"OG description\">\n<meta property=\"og:image\" content=\"https://images.angelstudios.test/image/upload/c_fill,w_1200/v1/angel-app/tuttle/ep1.jpg\">\n<script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"VideoObject\", \"name\": \"Tuttle Twins Season 1, Episode 1: When Laws Go Bad\", \"description\": \"LD description\", \"uploadDate\": \"2022-02-03T12:00:00Z\", \"duration\": \"PT21M23S\", \"thumbnailUrl\": \"https://images.angelstudios.test/ld.jpg\", \"contentUrl\": \"https://stream.angel.test/hd/master.m3u8\"}</script></head><body></body></html>"
+  },
+  {
+   "url": "https://stream.angel.test/hd/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://stream.angel.test/hd/low.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://stream.angel.test/hd/high.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  }
+ ]
+}

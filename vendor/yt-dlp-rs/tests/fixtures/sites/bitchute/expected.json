@@ -1,0 +1,85 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.bitchute.com/video/UGlrF9o9b-Q/",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"title\": \"This is a test video\", \"description\": \"<p>Desc</p>\", \"thumbnail\": \"https://static-3.bitchute.test/thumb.jpg\", \"channel\": \"Real channel\", \"channel_id\": \"chan1\", \"channel_url\": \"https://www.bitchute.com/channel/realslug/\", \"uploader_id\": \"prof1\", \"uploader_url\": \"https://www.bitchute.com/profile/prof1/\", \"timestamp\": 1685102400, \"duration\": 3723, \"tags\": [\"news\"], \"view_count\": 77, \"is_live\": false, \"uploader\": \"Uploader\", \"id\": \"UGlrF9o9b-Q\", \"formats\": [{\"url\": \"https://seed122.bitchute.com/abc/UGlrF9o9b-Q.mp4\", \"filesize\": 17, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://www.bitchute.com/video/UGlrF9o9b-Q/\", \"original_url\": \"https://www.bitchute.com/video/UGlrF9o9b-Q/\", \"webpage_url_basename\": \"UGlrF9o9b-Q\", \"webpage_url_domain\": \"bitchute.com\", \"extractor\": \"BitChute\", \"extractor_key\": \"BitChute\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://static-3.bitchute.test/thumb.jpg\", \"id\": \"0\"}], \"display_id\": \"UGlrF9o9b-Q\", \"fulltitle\": \"This is a test video\", \"duration_string\": \"1:02:03\", \"upload_date\": \"20230526\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://seed122.bitchute.com/abc/UGlrF9o9b-Q.mp4\", \"filesize\": 17, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"This is a test video [UGlrF9o9b-Q].mp4\", \"filename\": \"This is a test video [UGlrF9o9b-Q].mp4\", \"__write_download_archive\": false}], \"url\": \"https://seed122.bitchute.com/abc/UGlrF9o9b-Q.mp4\", \"filesize\": 17, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bitchute.com/video/UGlrF9o9b-Q/",
+   "args": [
+    "--no-check-formats",
+    "--print",
+    "%(formats.0.url)s|%(formats.0.filesize)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "https://seed305.bitchute.com/abc/UGlrF9o9b-Q.mp4|NA"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bitchute.com/embed/geo1/",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [BitChute] geo1: This video is not available in your location"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://old.bitchute.com/video/nometa/",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(is_live)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "nometa|BitChute video #nometa|False"
+   ],
+   "stderr": [
+    "WARNING: [BitChute] nometa: Unable to download video API JSON: HTTP Error 500: OK (caused by <HTTPError 500: OK>)",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.bitchute.com/video/UGlrF9o9b-Q/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[BitChute] Extracting URL: https://www.bitchute.com/video/UGlrF9o9b-Q/",
+    "[BitChute] UGlrF9o9b-Q: Downloading media API JSON",
+    "[BitChute] UGlrF9o9b-Q: Checking https://seed305.bitchute.com/abc/UGlrF9o9b-Q.mp4",
+    "[BitChute] UGlrF9o9b-Q: URL is invalid, skipping: HTTP Error 404: Not Found",
+    "[BitChute] UGlrF9o9b-Q: Checking https://seed122.bitchute.com/abc/UGlrF9o9b-Q.mp4",
+    "[BitChute] UGlrF9o9b-Q: Downloading video API JSON",
+    "[BitChute] UGlrF9o9b-Q: Downloading channel API JSON",
+    "[info] UGlrF9o9b-Q: Downloading 1 format(s): 0",
+    "[download] Destination: UGlrF9o9b-Q.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "UGlrF9o9b-Q.mp4": 17
+   }
+  }
+ ]
+}

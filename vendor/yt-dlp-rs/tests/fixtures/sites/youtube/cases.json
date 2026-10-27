@@ -1,0 +1,5 @@
+[
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["--no-js-runtimes", "-F"]},
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["--no-js-runtimes", "-j"]},
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc&t=1m5s", "args": ["--no-js-runtimes", "-J"]}
+]

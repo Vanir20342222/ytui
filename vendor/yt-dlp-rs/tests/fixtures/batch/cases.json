@@ -1,0 +1,99 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "upstream-vector",
+      "batch_hex": "c3afc2bbc2bf20666f6f0a2020202020202020202020206261720d0a20202020202020202020202062617a0a20202020202020202020202023204d6f72652061667465722074686973206c696e650d0a2020202020202020202020203b206f7220616674657220746869730a20202020202020202020202062616d",
+      "urls": [],
+      "expected": [
+        "foo",
+        "bar",
+        "baz",
+        "bam"
+      ]
+    },
+    {
+      "name": "real-bom-each-line",
+      "batch_hex": "efbbbf687474703a2f2f612f0aefbbbf687474703a2f2f622f0a",
+      "urls": [],
+      "expected": [
+        "http://a/",
+        "http://b/"
+      ]
+    },
+    {
+      "name": "fragment-vs-comment",
+      "batch_hex": "687474703a2f2f612f2366726167202023206e6f74650a687474703a2f2f622f0923780a687474703a2f2f632f230a",
+      "urls": [],
+      "expected": [
+        "http://a/#frag",
+        "http://b/",
+        "http://c/#"
+      ]
+    },
+    {
+      "name": "comment-prefixes",
+      "batch_hex": "23780a3b790a5d7a0a202023770a093b760a687474703a2f2f6b6565702f5b5d0a",
+      "urls": [],
+      "expected": [
+        "http://keep/[]"
+      ]
+    },
+    {
+      "name": "bare-cr-lines",
+      "batch_hex": "687474703a2f2f612f0d687474703a2f2f622f0d0a687474703a2f2f632f",
+      "urls": [],
+      "expected": [
+        "http://a/",
+        "http://b/",
+        "http://c/"
+      ]
+    },
+    {
+      "name": "invalid-utf8-dropped",
+      "batch_hex": "687474703a2f2f612ffffe620a687474703a2f2fc3a92f0a",
+      "urls": [],
+      "expected": [
+        "http://a/b",
+        "http://é/"
+      ]
+    },
+    {
+      "name": "python-only-spaces",
+      "batch_hex": "1c20687474703a2f2f612f201f0ae38080687474703a2f2f622fc2a023630a",
+      "urls": [],
+      "expected": [
+        "http://a/",
+        "http://b/"
+      ]
+    },
+    {
+      "name": "blank-and-whitespace",
+      "batch_hex": "0a200a090d0a0b0c0a",
+      "urls": [],
+      "expected": []
+    },
+    {
+      "name": "positional-stripped-after-batch",
+      "batch_hex": "687474703a2f2f62617463682f0a",
+      "urls": [
+        "  http://pos/\t",
+        "\u001fhttp://pos2/　"
+      ],
+      "expected": [
+        "http://batch/",
+        "http://pos/",
+        "http://pos2/"
+      ]
+    },
+    {
+      "name": "nul-and-unicode-separators",
+      "batch_hex": "687474703a2f2f612fe280a8780a687474703a2f2f622f000a",
+      "urls": [],
+      "expected": [
+        "http://a/ x",
+        "http://b/\u0000"
+      ]
+    }
+  ]
+}

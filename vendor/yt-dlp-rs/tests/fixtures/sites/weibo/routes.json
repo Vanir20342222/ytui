@@ -1,0 +1,82 @@
+{
+ "routes": [
+  {
+   "url": "https://weibo.com/ajax/statuses/show?id=N4xlMvjhI",
+   "request_headers": {
+    "cookie": "SUB=guest"
+   },
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 4910815147462302, \"idstr\": \"4910815147462302\", \"mblogid\": \"N4xlMvjhI\", \"text_raw\": \"【#微博# 】post text\", \"attitudes_count\": 1200, \"reposts_count\": \"33\", \"user\": {\"id\": 7827771738, \"screen_name\": \"疯狂的小羊胡\", \"profile_url\": \"/u/7827771738\"}, \"topic_struct\": [{\"topic_title\": \"微博\"}, {\"topic_title\": \"test\"}], \"page_info\": {\"page_pic\": \"https://wx1.sinaimg.test/large/cover.jpg\", \"media_info\": {\"video_title\": \"A very long title with a line\\nbreak that keeps going and going well past seventy-two characters\", \"duration\": 117, \"video_publish_time\": 1683000000, \"online_users_number\": \"8万\", \"playback_list\": [{\"play_info\": {\"url\": \"https://f.video.weibocdn.test/o0/720.mp4?label=mp4_720p\", \"quality_desc\": \"高清 720P\", \"label\": \"mp4_720p\", \"mime\": \"video/mp4\", \"bitrate\": 1500, \"video_codecs\": \"h264\", \"fps\": 30, \"width\": 1280, \"height\": 720, \"size\": 22000000, \"audio_codecs\": \"aac\", \"audio_sample_rate\": 44100, \"audio_channels\": 2}}, {\"play_info\": {\"url\": \"https://f.video.weibocdn.test/o0/480.mp4?label=mp4_hd\", \"quality_desc\": \"标清 480P\", \"label\": \"mp4_hd\", \"mime\": \"video/mp4\", \"bitrate\": 0, \"width\": 852, \"height\": 480}}, {\"play_info\": {\"url\": \"not a url\", \"label\": \"bad\"}}]}}}"
+  },
+  {
+   "url": "https://weibo.com/ajax/statuses/show?id=N4xlMvjhI",
+   "status": 302,
+   "headers": {
+    "Location": "https://passport.weibo.com/visitor/system?entry=miniblog&a=enter"
+   },
+   "body": ""
+  },
+  {
+   "url": "https://passport.weibo.com/visitor/system?entry=miniblog&a=enter",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>visitor</html>"
+  },
+  {
+   "url": "https://passport.weibo.com/visitor/genvisitor",
+   "request_body": [
+    "cb=gen_callback",
+    "Chrome90"
+   ],
+   "headers": {
+    "Content-Type": "application/javascript"
+   },
+   "body": "window.gen_callback && gen_callback({\"retcode\":20000000,\"msg\":\"succ\",\"data\":{\"tid\":\"TID123\",\"new_tid\":true,\"confidence\":95}});"
+  },
+  {
+   "url": "https://passport.weibo.com/visitor/visitor?a=incarnate&t=TID123&w=3&c=095&gc=&cb=cross_domain&from=weibo",
+   "ignore_query": [
+    "_rand"
+   ],
+   "headers": {
+    "Content-Type": "application/javascript",
+    "Set-Cookie": "SUB=guest; Domain=.weibo.com; Path=/"
+   },
+   "body": "window.cross_domain && cross_domain({\"retcode\":20000000});"
+  },
+  {
+   "url": "https://weibo.com/ajax/statuses/show?id=Mix5000",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": \"5000000000000001\", \"mix_media_info\": {\"items\": [{\"type\": \"pic\", \"data\": {\"object_id\": \"p1\"}}, {\"type\": \"video\", \"data\": {\"object_id\": \"1034:111\", \"media_info\": {\"name\": \"Clip one\", \"duration\": 10, \"playback_list\": [{\"play_info\": {\"url\": \"https://f.video.weibocdn.test/mix1.mp4\", \"label\": \"mp4_ld\", \"mime\": \"video/mp4\"}}]}}}, {\"type\": \"video\", \"data\": {\"object_id\": \"1034:222\", \"media_info\": {\"kol_title\": \"\", \"name\": \"Clip two\", \"playback_list\": [{\"play_info\": {\"url\": \"https://f.video.weibocdn.test/mix2.mp4\", \"label\": \"mp4_ld\"}}]}}}]}}"
+  },
+  {
+   "url": "https://weibo.com/ajax/statuses/show?id=4189191225395228",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"mid\": \"4189191225395228\", \"page_info\": {\"media_info\": {\"name\": \"Fallback\", \"stream_url\": \"https://f.video.weibocdn.test/fb.mp4?label=mp4_ld&template=640x360.25.0\", \"mp4_hd_url\": \"https://f.video.weibocdn.test/fb-hd.mp4?label=mp4_hd&template=852x480.25.0\", \"video_details\": [{\"label\": \"mp4_hd_x\", \"size\": 4000, \"bitrate\": 900}]}}}"
+  },
+  {
+   "url": "https://weibo.com/tv/api/component?page=%2Ftv%2Fshow%2F1034%3A4797699866951785",
+   "request_body": [
+    "data={\"Component_Play_Playinfo\":{\"oid\":\"1034:4797699866951785\"}}"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"code\": \"100000\", \"data\": {\"Component_Play_Playinfo\": {\"mid\": 4189191225395228}}}"
+  },
+  {
+   "url": "https://f.video.weibocdn.test/o0/720.mp4?label=mp4_720p",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-weibo"
+  }
+ ]
+}

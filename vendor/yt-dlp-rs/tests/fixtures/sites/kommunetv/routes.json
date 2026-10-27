@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://oslo.kommunetv.no/api/streams?streamType=1&id=921",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"stream\": {\"title\": \"Bystyrem\\u00f8te\"}, \"playlist\": [{\"playlist\": [{\"file\": \"https://kommune.test/hls/video.m3u8?token=x#frag\"}]}]}"
+  },
+  {
+   "url": "https://oslo.kommunetv.no/api/streams?streamType=1&id=2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"stream\": {\"title\": \"Gone\"}, \"playlist\": [{\"playlist\": [{\"file\": \"https://kommune.test/hls/missing.m3u8\"}]}]}"
+  },
+  {
+   "url": "https://oslo.kommunetv.no/api/streams?streamType=1&id=3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"playlist\": []}"
+  },
+  {
+   "url": "https://oslo.kommunetv.no/api/streams?streamType=1&id=4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"stream\": {\"title\": \"Empty\"}, \"playlist\": []}"
+  },
+  {
+   "url": "https://kommune.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  }
+ ]
+}

@@ -1,0 +1,87 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"eef46eb1-4d79-4e28-be9d-bd937767f8c4\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://sen.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"title\": \"Hurricane Ian\", \"description\": \"Florida, 28 Sep 2022\", \"tags\": [\"North America\", \"Storm\"], \"webpage_url\": \"https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4\", \"original_url\": \"https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4\", \"webpage_url_basename\": \"eef46eb1-4d79-4e28-be9d-bd937767f8c4\", \"webpage_url_domain\": \"sen.com\", \"extractor\": \"Sen\", \"extractor_key\": \"Sen\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"eef46eb1-4d79-4e28-be9d-bd937767f8c4\", \"fulltitle\": \"Hurricane Ian\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://sen.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Hurricane Ian [eef46eb1-4d79-4e28-be9d-bd937767f8c4].mp4\", \"filename\": \"Hurricane Ian [eef46eb1-4d79-4e28-be9d-bd937767f8c4].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(tags)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "eef46eb1-4d79-4e28-be9d-bd937767f8c4|Hurricane Ian|Florida, 28 Sep 2022|['North America', 'Storm']"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://sen.com/video/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"b2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://vod.sen.com/videos/b2/manifest.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://sen.com/video/b2\", \"original_url\": \"https://sen.com/video/b2\", \"webpage_url_basename\": \"b2\", \"webpage_url_domain\": \"sen.com\", \"extractor\": \"Sen\", \"extractor_key\": \"Sen\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"b2\", \"fulltitle\": null, \"title\": \"Sen video #b2\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://vod.sen.com/videos/b2/manifest.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Sen video #b2 [b2].mp4\", \"filename\": \"Sen video #b2 [b2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.sen.com/video/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Sen] c3: Failed to download m3u8 information: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.sen.com/video/d4",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"d4\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://sen.test/hls/video.m3u8\", \"manifest_url\": \"https://sen.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"title\": \"Subs\", \"webpage_url\": \"https://www.sen.com/video/d4\", \"original_url\": \"https://www.sen.com/video/d4\", \"webpage_url_basename\": \"d4\", \"webpage_url_domain\": \"sen.com\", \"extractor\": \"Sen\", \"extractor_key\": \"Sen\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"d4\", \"fulltitle\": \"Subs\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://sen.test/hls/video.m3u8\", \"manifest_url\": \"https://sen.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Subs [d4].mp4\", \"filename\": \"Subs [d4].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Sen] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.sen.com/video/d4",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Sen] Extracting URL: https://www.sen.com/video/d4",
+    "[Sen] d4: Downloading JSON metadata",
+    "[Sen] d4: Downloading m3u8 information",
+    "d4 has no subtitles"
+   ],
+   "stderr": [
+    "WARNING: [Sen] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://www.pinterest.com/resource/PinResource/get/?data=%7B%22options%22%3A+%7B%22field_set_key%22%3A+%22unauth_react_main_pin%22%2C+%22id%22%3A+%22664281013778109217%22%7D%7D",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"resource_response\": {\"data\": {\"id\": \"664281013778109217\", \"title\": \"  Origami  \", \"seo_description\": \"Folding paper\", \"created_at\": \"Fri, 05 Jan 2018 07:36:17 +0000\", \"images\": {\"236x\": {\"url\": \"https://i.pinimg.com/236x/x.jpg\", \"width\": 236, \"height\": 420}, \"orig\": {\"url\": \"https://i.pinimg.com/originals/x.jpg\", \"width\": 720, \"height\": 1280}, \"bad\": {\"url\": null}}, \"closeup_attribution\": {\"full_name\": \"Paper Folder\", \"id\": 1234}, \"repin_count\": 15, \"comment_count\": 2, \"pin_join\": {\"visual_annotation\": [\"Origami\", \"Paper\"]}, \"hashtags\": [\"#craft\"], \"domain\": \"Uploaded by user\", \"videos\": {\"video_list\": {\"V_HLSV4\": {\"url\": \"https://v1.pinimg.com/videos/hls/x.m3u8\", \"duration\": 9200, \"width\": 720, \"height\": 1280}, \"V_720P\": {\"url\": \"https://v1.pinimg.com/videos/720p/x.mp4\", \"duration\": 9200, \"width\": 720, \"height\": 1280}}}}}}"
+  },
+  {
+   "url": "https://www.pinterest.com/resource/PinResource/get/?data=%7B%22options%22%3A+%7B%22field_set_key%22%3A+%22unauth_react_main_pin%22%2C+%22id%22%3A+%2224770166%22%7D%7D",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"resource_response\": {\"data\": {\"id\": \"24770166\", \"title\": \"\", \"description\": \"A YouTube pin\", \"images\": {}, \"domain\": \"youtube.com\", \"embed\": {\"src\": \"https://media.example.test/clip.mp4\"}}}}"
+  },
+  {
+   "url": "https://v1.pinimg.com/videos/hls/x.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://v1.pinimg.com/videos/hls/720.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://media.example.test/clip.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom"
+  }
+ ]
+}

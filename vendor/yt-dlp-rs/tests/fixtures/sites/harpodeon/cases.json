@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288", "args": ["-j"]},
+ {"url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(creator)s|%(creators)s|%(release_year)s"]},
+ {"url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://harpodeon.com/preview/x/2", "args": ["-j"]},
+ {"url": "https://harpodeon.com/video/x/3", "args": ["-j"]},
+ {"url": "https://harpodeon.com/video/x/4", "args": ["-j"]}
+]

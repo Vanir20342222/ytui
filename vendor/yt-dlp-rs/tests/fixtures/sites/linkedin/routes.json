@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Post | LinkedIn</title><meta property=\"og:title\" content=\"Mishal K. on LinkedIn: #toronto\"><meta property=\"og:image\" content=\"https://media.licdn.test/thumb.jpg\"><meta property=\"og:description\" content=\"Post text\"><script type=\"application/ld+json\">{\"@context\": \"http://schema.org\", \"@type\": \"SocialMediaPosting\", \"author\": {\"@type\": \"Person\", \"name\": \"Mishal K.\"}}</script></head><body><video class=\"share-native-video__node\" data-sources=\"[{&quot;src&quot;: &quot;https://dms.licdn.test/playlist/720.mp4&quot;, &quot;type&quot;: &quot;video/mp4&quot;, &quot;data-bitrate&quot;: 2195042}, {&quot;src&quot;: &quot;https://dms.licdn.test/playlist/360.mp4&quot;, &quot;type&quot;: &quot;video/mp4&quot;, &quot;data-bitrate&quot;: 600000}]\" data-captions-url=\"https://dms.licdn.test/captions.vtt\" data-poster-url=\"x\"></video><span data-num-reactions=\"44\">44</span></body></html>"
+  },
+  {
+   "url": "https://www.linkedin.com/feed/update/urn:li:activity:7016901149999955968/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Only title</title></head><body><video data-sources=\"[{&quot;src&quot;: &quot;https://dms.licdn.test/v.mp4&quot;}]\"></video></body></html>"
+  },
+  {
+   "url": "https://www.linkedin.com/feed/update/urn:li:activity:1/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>no video</html>"
+  },
+  {
+   "url": "https://dms.licdn.test/playlist/720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-li"
+  }
+ ]
+}

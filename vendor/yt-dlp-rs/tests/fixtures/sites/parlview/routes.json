@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://vodapi.aph.gov.au/api/search/parlview/abc-123",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"videoDetails\": {\"parlViewTitle\": 5, \"title\": \"House of Reps\", \"parlViewDescription\": \"Question time\", \"files\": {\"file\": {\"url\": \"https://parl.test/hls/master.m3u8\", \"duration\": \"01:02:03:12\"}}, \"recordingFrom\": \"2023-05-01T14:00:00+10:00\", \"thumbUrl\": \"https://parl.test/t.jpg\"}}"
+  },
+  {
+   "url": "https://vodapi.aph.gov.au/api/search/parlview/b2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"videoDetails\": {\"files\": {\"file\": {\"url\": \"https://parl.test/hls/video.m3u8\", \"duration\": \"1:2:3\"}}, \"thumbUrl\": \"nope\"}}"
+  },
+  {
+   "url": "https://vodapi.aph.gov.au/api/search/parlview/c3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"videoDetails\": {\"files\": {}}}"
+  },
+  {
+   "url": "https://vodapi.aph.gov.au/api/search/parlview/d4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://parl.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://parl.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://parl.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://parl.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}
