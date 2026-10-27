@@ -296,6 +296,7 @@ impl Engine {
                 Ok(serde_json::to_value(tracks)?)
             }
             "import_cookie_file" => {
+                let _commit = self.settings_commit.lock().expect("settings commit");
                 use std::io::Write;
                 let text = r["text"].as_str().context("Missing cookie document")?;
                 ensure!(
@@ -318,6 +319,7 @@ impl Engine {
                 Ok(json!({"connected":true}))
             }
             "import_cookies" => {
+                let _commit = self.settings_commit.lock().expect("settings commit");
                 let cookies = if let Some(header) = r["header"].as_str() {
                     ensure!(
                         header.len() <= 2 * 1024 * 1024,
@@ -354,6 +356,7 @@ impl Engine {
                 Ok(json!({"connected":true}))
             }
             "disconnect" => {
+                let _commit = self.settings_commit.lock().expect("settings commit");
                 match std::fs::remove_file(self.root.join("account.json")) {
                     Ok(()) => {}
                     Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}

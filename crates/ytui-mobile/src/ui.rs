@@ -507,6 +507,8 @@ impl MobileApp {
             for event in events {
                 match event["kind"].as_str().unwrap_or_default() {
                     "cookies" => {
+                        self.account_generation += 1;
+                        self.playback_generation += 1;
                         self.request(
                             ctx,
                             json!({"op":"import_cookies","header":event["text"]}),
@@ -522,6 +524,8 @@ impl MobileApp {
                         );
                     }
                     "cookie_file" => {
+                        self.account_generation += 1;
+                        self.playback_generation += 1;
                         self.request(
                             ctx,
                             json!({"op":"import_cookie_file","text":event["text"]}),
@@ -1470,6 +1474,7 @@ mod tests {
         });
         let before = std::time::Instant::now();
         for attempt in 1..=4 {
+            app.feeds[1].retry_at = None;
             deliver(
                 &app,
                 Kind::Feed {
@@ -1483,10 +1488,14 @@ mod tests {
             app.poll(&ctx);
             assert_eq!(app.feeds[1].page.items[0].title, "Keep me");
             assert_eq!(app.feeds[1].failures, attempt.min(3));
-            assert!(
-                app.feeds[1].retry_at.unwrap().duration_since(before)
-                    >= std::time::Duration::from_secs(60)
-            );
+            if attempt <= 3 {
+                assert!(
+                    app.feeds[1].retry_at.unwrap().duration_since(before)
+                        >= std::time::Duration::from_secs(60)
+                );
+            } else {
+                assert!(app.feeds[1].retry_at.is_none());
+            }
         }
         app.feeds[1].generation = 1;
         deliver(

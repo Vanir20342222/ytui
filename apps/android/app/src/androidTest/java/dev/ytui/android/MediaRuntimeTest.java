@@ -17,6 +17,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaRuntimeTest {
+  @org.junit.Rule
+  public androidx.test.rule.GrantPermissionRule notifications =
+      androidx.test.rule.GrantPermissionRule.grant(
+          android.os.Build.VERSION.SDK_INT >= 33
+              ? new String[] {"android.permission.POST_NOTIFICATIONS"}
+              : new String[] {});
+
   interface Check {
     boolean ready() throws Exception;
   }
