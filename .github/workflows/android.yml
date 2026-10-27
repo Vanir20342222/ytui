@@ -25,6 +25,8 @@ jobs:
         with:
           targets: aarch64-linux-android,x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -63,7 +65,7 @@ jobs:
           profile: pixel_7
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: apps/android/gradlew -p apps/android --no-daemon :app:connectedDebugAndroidTest
+          script: tools/android/run-device-tests.sh
       - name: Upload device test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,4 +74,5 @@ jobs:
           path: |
             apps/android/app/build/reports/androidTests/
             apps/android/app/build/outputs/androidTest-results/
+            target/android-device-evidence/
           if-no-files-found: ignore

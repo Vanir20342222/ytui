@@ -53,7 +53,8 @@ public final class MediaBridge {
           (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
               == Configuration.UI_MODE_NIGHT_YES);
       value.put("player", new JSONObject(playerSnapshot));
-      value.put("downloads", OfflineStore.snapshot());
+      JSONArray downloads = OfflineStore.changedSnapshot();
+      if (downloads != null) value.put("downloads", downloads);
       JSONArray pending = new JSONArray();
       for (int i = 0; i < 32; i++) {
         JSONObject event = events.poll();

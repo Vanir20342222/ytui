@@ -223,3 +223,16 @@ pub fn omarchy(raw: &str, legacy_light: bool) -> Result<Palette> {
     p.success = get(&["green", "color2"], p.success)?;
     Ok(p)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn malformed_unicode_palette_colors_are_errors_instead_of_slice_panics() {
+        for invalid in ["éabcd", "💜ab", "#éa", "#ggg", "#12345"] {
+            assert!(color(invalid).is_err());
+        }
+        assert_eq!(color("#abc").unwrap(), (170, 187, 204));
+        assert_eq!(color("012345").unwrap(), (1, 35, 69));
+    }
+}

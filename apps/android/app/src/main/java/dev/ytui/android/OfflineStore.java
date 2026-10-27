@@ -143,6 +143,40 @@ public final class OfflineStore {
     }
   }
 
+  private static volatile String cachedSnapshot = "[]";
+  private static volatile long snapshotVersion = 0, lastRefresh = 0;
+  private static long deliveredVersion = -1;
+  private static final java.util.concurrent.atomic.AtomicBoolean refreshing =
+      new java.util.concurrent.atomic.AtomicBoolean();
+
+  static void resetSnapshotClient() {
+    deliveredVersion = -1;
+  }
+
+  // Database/prefs enumeration never runs in the Rust render thread.
+  static JSONArray changedSnapshot() throws JSONException {
+    long now = android.os.SystemClock.elapsedRealtime();
+    if (now - lastRefresh > 1000 && refreshing.compareAndSet(false, true))
+      IO.execute(
+          () -> {
+            try {
+              String current = snapshot().toString();
+              if (!current.equals(cachedSnapshot)) {
+                cachedSnapshot = current;
+                snapshotVersion++;
+              }
+              lastRefresh = android.os.SystemClock.elapsedRealtime();
+            } finally {
+              refreshing.set(false);
+            }
+          });
+    long version = snapshotVersion;
+    if (deliveredVersion == version) return null;
+    JSONArray result = new JSONArray(cachedSnapshot);
+    deliveredVersion = version;
+    return result;
+  }
+
   static JSONArray snapshot() {
     JSONArray rows = new JSONArray();
     try {

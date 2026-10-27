@@ -71,6 +71,8 @@ public final class PlaybackService extends MediaSessionService {
                     new Intent(this, RustActivity.class).setAction("dev.ytui.OPEN_PLAYER"),
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT))
             .build();
+    // The Rust UI starts playback directly, so no MediaController bind adds it for us.
+    addSession(session);
     player.addListener(
         new Player.Listener() {
           @Override
@@ -166,6 +168,28 @@ public final class PlaybackService extends MediaSessionService {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int id) {
+    if (intent != null && "play".equals(intent.getAction())) {
+      android.app.NotificationManager notifications =
+          getSystemService(android.app.NotificationManager.class);
+      notifications.createNotificationChannel(
+          new android.app.NotificationChannel(
+              "ytui-playback", "ytui playback", android.app.NotificationManager.IMPORTANCE_LOW));
+      setMediaNotificationProvider(
+          new DefaultMediaNotificationProvider.Builder(this)
+              .setNotificationId(4)
+              .setChannelId("ytui-playback")
+              .build());
+      // Android's foreground deadline starts before decoder/buffering completion.
+      android.app.Notification preparing =
+          new android.app.Notification.Builder(this, "ytui-playback")
+              .setSmallIcon(R.drawable.ic_ytui)
+              .setContentTitle("ytui")
+              .setContentText("Preparing playback")
+              .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
+              .setOngoing(true)
+              .build();
+      startForeground(4, preparing);
+    }
     int result = super.onStartCommand(intent, flags, id);
     if (intent != null && "play".equals(intent.getAction())) {
       try {
@@ -173,6 +197,8 @@ public final class PlaybackService extends MediaSessionService {
       } catch (Exception e) {
         error = "Invalid playback request";
         publish();
+        stopForeground(STOP_FOREGROUND_REMOVE);
+        stopSelf();
       }
     }
     return result;

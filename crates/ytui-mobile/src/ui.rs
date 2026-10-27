@@ -22,6 +22,7 @@ enum Kind {
     },
     Settings,
     SettingsSaved,
+    ImportedTheme,
     Theme,
     Image(String),
     Resolve {
@@ -94,7 +95,8 @@ pub struct MobileApp {
     visual_levels: [f32; 3],
     volume: f32,
     speed: f32,
-    download_audio: bool,
+    settings_original: Option<Config>,
+    settings_pending: bool,
     account_generation: u64,
     playback_generation: u64,
 }
@@ -139,7 +141,8 @@ impl MobileApp {
             visual_levels: [0.0; 3],
             volume: 0.7,
             speed: 1.0,
-            download_audio: false,
+            settings_original: None,
+            settings_pending: false,
             account_generation: 0,
             playback_generation: 0,
         };
@@ -163,7 +166,8 @@ impl MobileApp {
             let result = if matches!(&kind, Kind::Image(_)) {
                 let work = async {
                     let media: Media = serde_json::from_value(data["media"].clone())?;
-                    let pixels = engine.thumbnail(&media, 240, 240).await?.to_rgba8();
+                    let width = data["width"].as_u64().unwrap_or(240).clamp(32, 768) as u32;
+                    let pixels = engine.thumbnail(&media, width, width).await?.to_rgba8();
                     let size = [pixels.width() as usize, pixels.height() as usize];
                     image = Some(egui::ColorImage::from_rgba_unmultiplied(size, &pixels));
                     Ok::<Value, anyhow::Error>(Value::Null)
@@ -242,6 +246,10 @@ impl MobileApp {
         }
     }
     fn save_settings(&mut self, ctx: &egui::Context) {
+        if self.settings_pending {
+            return;
+        }
+        self.settings_pending = true;
         self.request(
             ctx,
             json!({"op":"save_settings","config":self.config}),
@@ -259,7 +267,7 @@ impl MobileApp {
         let audio = matches!(
             media.kind,
             ytui_core::MediaKind::Song | ytui_core::MediaKind::Station
-        ) || self.download_audio && download;
+        ) || self.config.download.audio && download;
         if media.collection() {
             if download {
                 self.effects.push(Effect::Command(json!({"op":"download_playlist","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2,"audio":audio})));
@@ -281,7 +289,10 @@ impl MobileApp {
         self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,media:Box::new(media),audio,preview,download,resume});
     }
     fn poll(&mut self, ctx: &egui::Context) {
-        while let Ok(reply) = self.rx.try_recv() {
+        for _ in 0..4 {
+            let Ok(reply) = self.rx.try_recv() else {
+                return;
+            };
             self.tasks.remove(&reply.id);
             if let Kind::Resolve {
                 account_generation,
@@ -359,12 +370,26 @@ impl MobileApp {
                         self.config = config;
                     }
                 }
+                (Kind::SettingsSaved, Err(error)) => {
+                    self.settings_pending = false;
+                    self.settings_open = true;
+                    self.status = error;
+                }
                 (Kind::SettingsSaved, Ok(_)) => {
+                    self.settings_pending = false;
+                    self.settings_original = None;
                     self.request(ctx, json!({"op":"theme","dark":self.dark}), Kind::Theme);
                     self.effects.push(Effect::Command(
                         json!({"op":"settings","config":self.config}),
                     ));
                     self.status = "Settings saved".into();
+                }
+                (Kind::ImportedTheme, Ok(value)) => {
+                    if let Ok(palette) = serde_json::from_value(value) {
+                        self.palette = palette;
+                    }
+                    self.request(ctx, json!({"op":"settings"}), Kind::Settings);
+                    self.settings_original = None;
                 }
                 (Kind::Theme, Ok(value)) => {
                     if let Ok(palette) = serde_json::from_value(value) {
@@ -377,9 +402,19 @@ impl MobileApp {
                         self.image_failures.remove(&url);
                         let texture =
                             ctx.load_texture(url.clone(), image, egui::TextureOptions::LINEAR);
-                        if self.images.len() >= 40
-                            && let Some(old) = self.image_order.pop_front()
+                        let bytes = texture.size()[0] * texture.size()[1] * 4;
+                        while self.images.len() >= 40
+                            || self
+                                .images
+                                .values()
+                                .map(|image| image.size()[0] * image.size()[1] * 4)
+                                .sum::<usize>()
+                                + bytes
+                                > 24 * 1024 * 1024
                         {
+                            let Some(old) = self.image_order.pop_front() else {
+                                break;
+                            };
                             self.images.remove(&old);
                         }
                         self.images.insert(url.clone(), texture);
@@ -389,6 +424,11 @@ impl MobileApp {
                             .image_failures
                             .get(&url)
                             .map_or(1, |(n, _)| n.saturating_add(1));
+                        if self.image_failures.len() >= 512
+                            && let Some(old) = self.image_failures.keys().next().cloned()
+                        {
+                            self.image_failures.remove(&old);
+                        }
                         self.image_failures.insert(
                             url,
                             (
@@ -445,8 +485,10 @@ impl MobileApp {
                 }
                 (Kind::Popup(title), Ok(value)) => {
                     self.popup = Some((
-                        title,
-                        if let Some(s) = value.as_str() {
+                        title.clone(),
+                        if title == "Lyrics" {
+                            lyric_text(&value)
+                        } else if let Some(s) = value.as_str() {
                             s.into()
                         } else {
                             serde_json::to_string_pretty(&value).unwrap_or_default()
@@ -478,6 +520,7 @@ impl MobileApp {
                 _ => {}
             }
         }
+        ctx.request_repaint();
     }
     pub fn platform_status(&mut self, ctx: &egui::Context, value: Value) {
         self.safe_top = value["inset_top"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
@@ -516,11 +559,10 @@ impl MobileApp {
                         );
                     }
                     "theme_file" => {
-                        self.config.theme = "custom".into();
                         self.request(
                             ctx,
                             json!({"op":"import_theme","text":event["text"]}),
-                            Kind::Theme,
+                            Kind::ImportedTheme,
                         );
                     }
                     "cookie_file" => {
@@ -547,6 +589,9 @@ impl MobileApp {
                     "back" => {
                         if self.settings_open {
                             self.settings_open = false;
+                            if let Some(original) = self.settings_original.take() {
+                                self.config = original;
+                            }
                         } else if self.menu_open {
                             self.menu_open = false;
                         } else if self.popup.is_some() {
@@ -585,7 +630,11 @@ impl MobileApp {
         let now = std::time::Instant::now();
         let playing = self.player["playing"].as_bool().unwrap_or(false);
         let buffering = self.player["buffering"].as_bool().unwrap_or(false);
-        let animate = playing && !buffering && !self.config.reduced_motion;
+        let animate = playing
+            && !buffering
+            && !self.config.reduced_motion
+            && matches!(self.tab, 2 | 3)
+            && self.config.music_player_style != "classic";
         if animate {
             self.phase = (self.phase
                 + (now - self.last_frame).as_secs_f32() * std::f32::consts::TAU / 4.0)
@@ -641,7 +690,7 @@ impl MobileApp {
                         .strong()
                         .color(c(self.palette.accent)),
                 );
-                ui.label(["Downloads", "YouTube", "Music", "Cliamp / Radio"][self.tab]);
+                ui.label(["Files", "YouTube", "Music", "Radio"][self.tab]);
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui.button("Menu").clicked() {
                         self.menu_open = true;
@@ -667,6 +716,16 @@ impl MobileApp {
                 }
             });
         });
+        egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
+            ui.add(
+                egui::Label::new(
+                    RichText::new(&self.status)
+                        .small()
+                        .color(c(self.palette.muted)),
+                )
+                .truncate(),
+            );
+        });
         let has_media = self.player["title"].as_str().is_some_and(|s| !s.is_empty());
         if has_media {
             egui::TopBottomPanel::bottom("mini-player").show(ctx, |ui| {
@@ -674,8 +733,10 @@ impl MobileApp {
                     if ui.button(if playing { "Pause" } else { "Play" }).clicked() {
                         self.command("pause");
                     }
+                    let title_width = (ui.available_width() - 72.0).max(40.0);
                     if ui
-                        .add(
+                        .add_sized(
+                            [title_width, 48.0],
                             egui::Button::new(
                                 self.player["title"].as_str().unwrap_or("Now playing"),
                             )
@@ -702,12 +763,6 @@ impl MobileApp {
             } else {
                 self.catalog(ctx, ui);
             }
-            ui.separator();
-            ui.label(
-                RichText::new(&self.status)
-                    .small()
-                    .color(c(self.palette.muted)),
-            );
         });
         if self.settings_open {
             self.settings(ctx);
@@ -921,9 +976,10 @@ impl MobileApp {
                                 } else {
                                     ui.allocate_space(Vec2::splat(80.0));
                                     if self.image_pending.len() < 8
-                                        && self.image_failures.get(&media.thumbnail).is_none_or(
-                                            |(n, at)| *n < 3 && std::time::Instant::now() >= *at,
-                                        )
+                                        && self
+                                            .image_failures
+                                            .get(&media.thumbnail)
+                                            .is_none_or(|(_, at)| std::time::Instant::now() >= *at)
                                         && self.image_pending.insert(media.thumbnail.clone())
                                     {
                                         self.request(
@@ -1169,31 +1225,43 @@ impl MobileApp {
                 center + Vec2::angled(self.phase) * radius * (0.5 + self.visual_levels[2] * 0.3);
             p.circle_filled(pos, 5.0, c(self.palette.warning));
         } else {
-            let side = (rect.width() / 1.55).min(rect.height() - 12.0);
-            let x = rect.center().x - side * 0.775;
+            let classic = style == "classic";
+            let side = if classic {
+                rect.width().min(rect.height() - 12.0)
+            } else {
+                (rect.width() / 1.55).min(rect.height() - 12.0)
+            };
+            let x = rect.center().x - side * if classic { 0.5 } else { 0.775 };
             let y = rect.center().y - side * 0.5;
             let center = egui::pos2(x + side * 1.04, rect.center().y);
             let radius = side * 0.5;
-            p.circle_filled(center, radius, Color32::from_rgb(25, 25, 29));
-            for ring in 1..9 {
-                p.circle_stroke(
-                    center,
-                    radius * ring as f32 / 9.0,
-                    egui::Stroke::new(1.0_f32, Color32::from_gray(45)),
+            if !classic {
+                p.circle_filled(center, radius, Color32::from_rgb(25, 25, 29));
+                for ring in 1..9 {
+                    p.circle_stroke(
+                        center,
+                        radius * ring as f32 / 9.0,
+                        egui::Stroke::new(1.0_f32, Color32::from_gray(45)),
+                    );
+                }
+                p.circle_filled(center, radius * 0.27, c(self.palette.accent));
+                p.line_segment(
+                    [center, center + Vec2::angled(self.phase) * radius * 0.25],
+                    egui::Stroke::new(3.0_f32, Color32::BLACK),
                 );
             }
-            p.circle_filled(center, radius * 0.27, c(self.palette.accent));
-            p.line_segment(
-                [center, center + Vec2::angled(self.phase) * radius * 0.25],
-                egui::Stroke::new(3.0_f32, Color32::BLACK),
-            );
             let sleeve = egui::Rect::from_min_size(egui::pos2(x, y), Vec2::splat(side));
             if let Some(media) = self
                 .player
                 .get("media")
                 .and_then(|v| serde_json::from_value::<Media>(v.clone()).ok())
             {
-                if let Some(image) = self.images.get(&media.thumbnail) {
+                let pixels = (side * ui.ctx().pixels_per_point())
+                    .ceil()
+                    .clamp(240.0, 768.0) as u32;
+                let pixels = pixels.div_ceil(64) * 64;
+                let art_key = format!("{}#art-{pixels}", media.thumbnail);
+                if let Some(image) = self.images.get(&art_key) {
                     p.image(
                         image.id(),
                         sleeve,
@@ -1206,14 +1274,14 @@ impl MobileApp {
                         && self.image_pending.len() < 8
                         && self
                             .image_failures
-                            .get(&media.thumbnail)
-                            .is_none_or(|(n, at)| *n < 3 && std::time::Instant::now() >= *at)
-                        && self.image_pending.insert(media.thumbnail.clone())
+                            .get(&art_key)
+                            .is_none_or(|(_, at)| std::time::Instant::now() >= *at)
+                        && self.image_pending.insert(art_key.clone())
                     {
                         self.request(
                             ui.ctx(),
-                            json!({"op":"image","media":media}),
-                            Kind::Image(media.thumbnail.clone()),
+                            json!({"op":"image","media":media,"width":pixels}),
+                            Kind::Image(art_key),
                         );
                     }
                 }
@@ -1221,6 +1289,9 @@ impl MobileApp {
         }
     }
     fn settings(&mut self, ctx: &egui::Context) {
+        self.settings_original
+            .get_or_insert_with(|| self.config.clone());
+        let mut saved = false;
         let mut open = true;
         egui::Window::new("Settings")
             .open(&mut open)
@@ -1264,7 +1335,7 @@ impl MobileApp {
                             ui.selectable_value(&mut self.config.download.quality, q.into(), q);
                         }
                     });
-                ui.checkbox(&mut self.download_audio, "Audio-only downloads");
+                ui.checkbox(&mut self.config.download.audio, "Audio-only downloads");
                 egui::ComboBox::from_label("SponsorBlock")
                     .selected_text(&self.config.playback_sponsorblock)
                     .show_ui(ui, |ui| {
@@ -1285,12 +1356,22 @@ impl MobileApp {
                         Some(proxy)
                     };
                 }
-                if ui.button("Save settings").clicked() {
+                if ui
+                    .add_enabled(!self.settings_pending, egui::Button::new("Save settings"))
+                    .clicked()
+                {
+                    saved = true;
                     self.save_settings(ctx);
                     self.settings_open = false;
                 }
             });
         self.settings_open &= open;
+        if !self.settings_open
+            && !saved
+            && let Some(original) = self.settings_original.take()
+        {
+            self.config = original;
+        }
     }
     fn feeds(&mut self, ctx: &egui::Context) {
         let mut open = true;
@@ -1352,27 +1433,39 @@ impl MobileApp {
         if items.is_empty() {
             ui.label("Download a video, song or playlist from its More menu.");
         }
-        egui::ScrollArea::vertical().show(ui, |ui| {
-            for item in items {
+        egui::ScrollArea::vertical().show_rows(ui, 168.0, items.len(), |ui, range| {
+            for index in range {
+                let item = &items[index];
                 ui.group(|ui| {
-                    ui.label(item["title"].as_str().unwrap_or("Download"));
-                    ui.label(item["state"].as_str().unwrap_or("Queued"));
+                    ui.set_min_height(152.0);
+                    ui.add(
+                        egui::Label::new(item["title"].as_str().unwrap_or("Download")).truncate(),
+                    );
+                    let state = item["state"].as_str().unwrap_or("Queued");
+                    ui.add(egui::Label::new(state).truncate());
                     ui.add(egui::ProgressBar::new(
                         item["progress"].as_f64().unwrap_or(0.0) as f32,
                     ));
+                    let id = item["id"].as_str().unwrap_or("");
                     ui.horizontal(|ui| {
-                        let id = item["id"].as_str().unwrap_or("");
-                        if ui.button("Play offline").clicked() {
+                        if ui
+                            .add_enabled(state == "Complete", egui::Button::new("Play offline"))
+                            .clicked()
+                        {
                             self.effects.push(Effect::Offline(id.into()));
                         }
-                        if ui.button("Pause / retry").clicked() {
-                            self.effects
-                                .push(Effect::Command(json!({"op":"download_toggle","id":id})));
-                        }
-                        if ui.button("Remove").clicked() {
-                            self.effects
-                                .push(Effect::Command(json!({"op":"download_remove","id":id})));
-                        }
+                        ui.menu_button("Actions", |ui| {
+                            if ui.button("Pause / retry").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_toggle","id":id})));
+                                ui.close();
+                            }
+                            if ui.button("Remove").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_remove","id":id})));
+                                ui.close();
+                            }
+                        });
                     });
                 });
             }
@@ -1391,6 +1484,37 @@ fn progress(player: &Value) -> f32 {
     }
 }
 
+fn lyric_text(value: &Value) -> String {
+    let Some(tracks) = value.as_array() else {
+        return "No lyrics returned".into();
+    };
+    if tracks.is_empty() {
+        return "No lyrics found".into();
+    }
+    tracks
+        .iter()
+        .take(5)
+        .map(|track| {
+            let heading = format!(
+                "{} — {}",
+                track["title"].as_str().unwrap_or("Lyrics"),
+                track["artist"].as_str().unwrap_or("")
+            );
+            let lines = track["lines"]
+                .as_array()
+                .map(|rows| {
+                    rows.iter()
+                        .filter_map(|line| line["text"].as_str())
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                })
+                .unwrap_or_default();
+            format!("{heading}\n\n{lines}")
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n────────\n\n")
+}
+
 impl Drop for MobileApp {
     fn drop(&mut self) {
         for task in self.tasks.values() {
@@ -1407,7 +1531,17 @@ mod tests {
         let ctx = egui::Context::default();
         let engine =
             Arc::new(Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap());
-        (MobileApp::with_network(engine, &ctx, false), ctx, root)
+        let mut app = MobileApp::with_network(engine, &ctx, false);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        while !app.tasks.is_empty() {
+            app.poll(&ctx);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "Local startup requests stalled"
+            );
+            std::thread::yield_now();
+        }
+        (app, ctx, root)
     }
     fn deliver(
         app: &MobileApp,
@@ -1527,12 +1661,54 @@ mod tests {
         assert!(matches!(app.effects.as_slice(),[Effect::Command(v)] if v["op"]=="background"));
     }
     #[test]
+    fn every_music_style_renders_and_pause_reduced_motion_and_cancel_preserve_state() {
+        let (mut app, ctx, _root) = test_app();
+        let input = || egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                Vec2::new(412.0, 915.0),
+            )),
+            ..Default::default()
+        };
+        app.tab = 2;
+        app.player_open = true;
+        app.player = json!({"title":"Synthetic song","playing":true,"duration":180,"position":60,"left":0.4,"right":0.7,"peak":0.8});
+        for &style in ytui_core::MUSIC_PLAYER_STYLES {
+            app.config.music_player_style = style.into();
+            app.last_frame = std::time::Instant::now() - std::time::Duration::from_millis(50);
+            let previous = app.phase;
+            let output = ctx.run(input(), |ctx| app.frame(ctx));
+            assert!(!output.shapes.is_empty());
+            if style == "classic" {
+                assert_eq!(previous, app.phase);
+            } else {
+                assert!(app.phase > previous);
+            }
+        }
+        app.player["playing"] = json!(false);
+        let frozen = app.phase;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        assert_eq!(app.phase, frozen);
+        app.player["playing"] = json!(true);
+        app.config.reduced_motion = true;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        assert_eq!(app.phase, frozen);
+        app.player_open = false;
+        app.settings_open = true;
+        let original = app.config.download.audio;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        app.config.download.audio = !original;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert_eq!(app.config.download.audio, original);
+        assert!(app.effects.is_empty());
+        assert_eq!(
+            lyric_text(&json!([{ "title":"Song", "artist":"Artist", "lines":[{"text":"Hello"}]}])),
+            "Song — Artist\n\nHello"
+        );
+    }
+    #[test]
     fn phone_tablet_and_all_theme_layouts_render_without_network() {
-        let root = tempfile::tempdir().unwrap();
-        let engine =
-            Arc::new(Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap());
-        let ctx = egui::Context::default();
-        let mut app = MobileApp::with_network(engine, &ctx, false);
+        let (mut app, ctx, _root) = test_app();
         for name in ytui_core::theme::THEMES {
             app.palette = ytui_core::theme::builtin(name).unwrap();
             for size in [
@@ -1572,11 +1748,7 @@ mod tests {
     }
     #[test]
     fn phone_navigation_responds_to_touch_sized_pointer_input() {
-        let root = tempfile::tempdir().unwrap();
-        let engine =
-            Arc::new(Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap());
-        let ctx = egui::Context::default();
-        let mut app = MobileApp::with_network(engine, &ctx, false);
+        let (mut app, ctx, _root) = test_app();
         let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(400.0, 800.0));
         let _ = ctx.run(
             egui::RawInput {

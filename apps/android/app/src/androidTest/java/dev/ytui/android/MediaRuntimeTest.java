@@ -77,6 +77,18 @@ public final class MediaRuntimeTest {
           "Video decoder never advanced",
           () -> status().optDouble("position") > 0.2 && status().optBoolean("playing"));
       await("Video never reached the Rust surface", () -> MediaBridge.videoFrames.get() > 0);
+      AudioTap.enabled = true;
+      await("Decoded audio never produced visualizer levels", () -> AudioTap.levels != 0);
+      android.graphics.Bitmap screenshot =
+          InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+      if (screenshot != null) {
+        try (FileOutputStream out =
+            new FileOutputStream(new File(context.getExternalFilesDir(null), "video-player.png"))) {
+          screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+        } finally {
+          screenshot.recycle();
+        }
+      }
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
       MediaBridge.execute("{\"op\":\"volume\",\"value\":0.23}");

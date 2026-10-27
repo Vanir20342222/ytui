@@ -1,0 +1,27 @@
+ytui Android platform dependencies
+
+AndroidX (AppCompat, Activity, annotation, collection, core, fragment, lifecycle,
+savedstate, startup, profileinstaller, loader, resourceinspection, customview,
+versionedparcelable, vectordrawable, tracing), AndroidX Media3, WorkManager,
+JavaScriptEngine and Android Games GameActivity are Copyright The Android Open
+Source Project and their respective contributors, licensed under Apache-2.0.
+Sources and notices: https://android.googlesource.com/platform/frameworks/support/
+https://github.com/androidx/media and https://github.com/android/games-samples
+
+Guava / ListenableFuture / FailureAccess: Copyright Google LLC and contributors,
+Apache-2.0. https://github.com/google/guava
+Kotlin standard library: Copyright JetBrains s.r.o. and contributors,
+Apache-2.0. https://github.com/JetBrains/kotlin
+Checker Framework qualifier annotations: Copyright the Checker Framework authors;
+MIT (see https://github.com/typetools/checker-framework/blob/master/LICENSE.txt).
+Error Prone annotations: Copyright Google LLC, Apache-2.0.
+https://github.com/google/error-prone
+JSpecify annotations: Copyright The JSpecify Authors, Apache-2.0.
+https://github.com/jspecify/jspecify
+JetBrains annotations: Copyright JetBrains s.r.o. and contributors, Apache-2.0.
+https://github.com/JetBrains/java-annotations
+
+Apache-2.0 text is included in licenses/Apache-2.0.txt. Rust dependencies and their
+original available notices are in notices/inventory.json and notices/<package>.
+The Android SDK/system codecs, WebView and JavaScript sandbox service are provided
+by Android and are not redistributed as executables by this application.

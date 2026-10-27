@@ -14,7 +14,7 @@ android {
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     buildFeatures { buildConfig true }
-    sourceSets { main { jniLibs.srcDirs = [rootProject.file('../../target/android-jni')]; assets.srcDirs = [rootProject.file('../../target/android-assets')] }; androidTest { assets.srcDirs = [rootProject.file('../../target/android-test-assets'),rootProject.file('../../vendor/yt-dlp-rs/vendor/ejs'),rootProject.file('../../vendor/yt-dlp-rs/tests/fixtures/youtube/challenges')] } }
+    sourceSets { main { jniLibs.srcDirs = [rootProject.file('../../target/android-jni')]; assets.srcDirs = ['src/main/assets',rootProject.file('../../target/android-assets')] }; androidTest { assets.srcDirs = [rootProject.file('../../target/android-test-assets'),rootProject.file('../../vendor/yt-dlp-rs/vendor/ejs'),rootProject.file('../../vendor/yt-dlp-rs/tests/fixtures/youtube/challenges')] } }
     packaging { jniLibs { useLegacyPackaging false } }
     buildTypes { debug { debuggable true }; release { minifyEnabled false } }
     lint { abortOnError true; checkReleaseBuilds true }

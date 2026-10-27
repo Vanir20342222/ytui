@@ -29,7 +29,29 @@ used or changed by these tests.
   This exposed search-row overflow and system-inset overlap, corrected in source.
   The final GameActivity keyboard/insets changes require fresh visual acceptance.
 
+## Final local build checkpoint
+
+- Expanded workspace suite: **288 passed, 0 failed, 31 explicitly ignored**;
+  strict all-target workspace Clippy and formatting passed. Added deterministic
+  checks cover every music style, pause/reduced motion, settings cancel, readable
+  lyrics and malformed Unicode palette colors as well as the cases above.
+- Desktop upstream saved-player Node tests: **2 passed**. Hosted Rust workflow
+  on the initial PR revision also passed its real FFmpeg/mpv/local-playlist checks
+  and release build (run `40519913051`).
+- The complete `tools/android/build.sh` ran locally, including both native ABIs,
+  dependency notices, Gradle wrapper, APK assembly, **3 Java unit tests** and lint.
+  APK inspection verified signatures, ZIP and **16 KiB ELF** alignment, JNI and
+  GameActivity exports, both requested ABIs and bundled Rust notices.
+
 ## Failed / blocked checks, retained honestly
+
+Accelerated GitHub API 35 instrumentation (run `40519913127`) exposed a real
+`ForegroundServiceDidNotStartInTimeException` during local fixture playback.
+The direct Rust→service path had not explicitly registered its MediaSession;
+it now calls `addSession`, and posts a preparing foreground notification before
+waiting for decoder readiness. The updated instrumentation must pass before
+this issue is considered qualified. The first APK artifact from that failed run
+is not an accepted build.
 
 The cloud host has no `/dev/kvm`. The software emulator had Android launcher,
 Bluetooth and Digital Wellbeing failures/ANRs, very slow cold starts, and an
@@ -52,7 +74,7 @@ sideloadable **development** APK plus reports. The accelerated API 35 job runs:
 - Real JNI initialization, request/error contracts and direct-buffer bounds.
 - AndroidX isolated JavaScript API isolation and saved upstream YouTube
   n/signature challenge vectors (no public network or real session).
-- Generated MP4 actual decoder progress into the Rust video surface, pause,
+- Generated MP4 actual decoder progress into the Rust video surface and PCM meter output, pause,
   volume persistence across stream changes, loopback HTTP download and playback
   from the private cache after the fixture server is closed.
 

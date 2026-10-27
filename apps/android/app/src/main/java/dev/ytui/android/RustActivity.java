@@ -19,6 +19,7 @@ public final class RustActivity extends GameActivity {
   protected void onCreate(Bundle state) {
     reference = new java.lang.ref.WeakReference<>(this);
     super.onCreate(state);
+    OfflineStore.resetSnapshotClient();
     getWindow()
         .getDecorView()
         .setOnApplyWindowInsetsListener(
@@ -78,22 +79,27 @@ public final class RustActivity extends GameActivity {
   protected void onActivityResult(int request, int result, Intent data) {
     super.onActivityResult(request, result, data);
     if (result != RESULT_OK || data == null || data.getData() == null) return;
-    try (InputStream input = getContentResolver().openInputStream(data.getData())) {
-      if (input == null) throw new java.io.IOException("No document data");
-      java.io.ByteArrayOutputStream resultBytes = new java.io.ByteArrayOutputStream();
-      byte[] buffer = new byte[4096];
-      int count;
-      while ((count = input.read(buffer)) != -1) {
-        resultBytes.write(buffer, 0, count);
-        if (resultBytes.size() > 2 * 1024 * 1024) break;
-      }
-      byte[] bytes = resultBytes.toByteArray();
-      if (bytes.length > 2 * 1024 * 1024) throw new java.io.IOException("Document exceeds 2 MiB");
-      MediaBridge.event(
-          request == 41 ? "cookie_file" : request == 42 ? "theme_file" : "document",
-          new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
-    } catch (Exception error) {
-      MediaBridge.event("error", "Could not read selected document");
-    }
+    final android.net.Uri uri = data.getData();
+    final android.content.ContentResolver resolver = getApplicationContext().getContentResolver();
+    OfflineStore.IO.execute(
+        () -> {
+          try (InputStream input = resolver.openInputStream(uri)) {
+            if (input == null) throw new java.io.IOException("No document data");
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int count;
+            while ((count = input.read(buffer)) != -1) {
+              if (bytes.size() + count > 2 * 1024 * 1024)
+                throw new java.io.IOException("Document exceeds 2 MiB");
+              bytes.write(buffer, 0, count);
+            }
+            MediaBridge.event(
+                request == 41 ? "cookie_file" : request == 42 ? "theme_file" : "document",
+                new String(bytes.toByteArray(), java.nio.charset.StandardCharsets.UTF_8));
+            NativeBridge.frameAvailable();
+          } catch (Exception error) {
+            MediaBridge.event("error", "Could not read selected document");
+          }
+        });
   }
 }

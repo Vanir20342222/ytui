@@ -48,7 +48,7 @@ public final class PrepareWorker extends Worker {
       JSONObject request = new JSONObject(raw);
       JSONArray items;
       if (checkpoint.isFile()) {
-        try (java.io.InputStream in = new java.io.FileInputStream(checkpoint)) {
+        try (java.io.InputStream in = new android.util.AtomicFile(checkpoint).openRead()) {
           java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
           byte[] b = new byte[8192];
           int n;
@@ -141,7 +141,8 @@ public final class PrepareWorker extends Worker {
             Thread.sleep(100);
           }
         }
-        progress.edit().putInt(id, i + 1).putInt(id + "-failed", failed).commit();
+        if (!progress.edit().putInt(id, i + 1).putInt(id + "-failed", failed).commit())
+          throw new java.io.IOException("Cannot persist playlist progress");
       }
       status(
           getApplicationContext(),
