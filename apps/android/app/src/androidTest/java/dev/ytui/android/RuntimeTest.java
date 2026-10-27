@@ -28,6 +28,26 @@ public final class RuntimeTest {
   }
 
   @Test
+  public void emptyAudioProcessorInputDoesNotCopyTheSharedEosBuffer() throws Exception {
+    AudioTap tap = new AudioTap();
+    tap.configure(
+        new androidx.media3.common.audio.AudioProcessor.AudioFormat(
+            44100, 1, androidx.media3.common.C.ENCODING_PCM_16BIT));
+    tap.flush();
+    tap.queueInput(androidx.media3.common.audio.AudioProcessor.EMPTY_BUFFER);
+    assertFalse(tap.getOutput().hasRemaining());
+    java.nio.ByteBuffer samples =
+        java.nio.ByteBuffer.allocateDirect(4).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    samples.putShort((short) 12000).putShort((short) -12000).flip();
+    AudioTap.enabled = true;
+    tap.queueInput(samples);
+    assertTrue(AudioTap.levels != 0);
+    assertEquals(4, tap.getOutput().remaining());
+    tap.queueInput(androidx.media3.common.audio.AudioProcessor.EMPTY_BUFFER);
+    tap.reset();
+  }
+
+  @Test
   public void isolatedJavascriptHasNoBrowserNetworkOrCookieApis() throws Exception {
     String value =
         ScriptRuntime.evaluate(

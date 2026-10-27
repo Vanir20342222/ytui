@@ -31,7 +31,7 @@ used or changed by these tests.
 
 ## Final local build checkpoint
 
-- Expanded workspace suite: **288 passed, 0 failed, 31 explicitly ignored**;
+- Expanded workspace suite: **289 passed, 0 failed, 31 explicitly ignored**;
   strict all-target workspace Clippy and formatting passed. Added deterministic
   checks cover every music style, pause/reduced motion, settings cancel, readable
   lyrics and malformed Unicode palette colors as well as the cases above.
@@ -52,6 +52,18 @@ it now calls `addSession`, and posts a preparing foreground notification before
 waiting for decoder readiness. The updated instrumentation must pass before
 this issue is considered qualified. The first APK artifact from that failed run
 is not an accepted build.
+
+Subsequent accelerated runs `40523130438` and `40528348716` passed JNI contracts
+but failed media and sandbox checks. The captured cause was
+`ByteBuffer.createSameBufferException` in `AudioTap.queueInput` for an empty EOS
+buffer; the tap now returns without copying empty input, with an instrumentation
+regression. Sandbox connection timeouts traced the Android main thread blocked
+in `GameActivity.terminateNativeCode` during Activity destruction. A documented
+winit 0.30.13 Android-only patch exits on Destroy and permits sequential UI
+recreation; the Activity is singleTask. The new device test closes/reopens the
+Rust UI without restarting the engine and checks main-loop responsiveness.
+Both native ABIs compile after that patch. These fixes require a successful fresh
+instrumentation run before media/solver acceptance can be marked passed.
 
 The cloud host has no `/dev/kvm`. The software emulator had Android launcher,
 Bluetooth and Digital Wellbeing failures/ANRs, very slow cold starts, and an

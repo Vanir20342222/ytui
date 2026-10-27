@@ -13,6 +13,7 @@ collect_evidence() {
     adb logcat -d -b crash -b main -b system > "$evidence/logcat.txt" 2>&1 || true
     adb shell dumpsys activity exit-info dev.ytui.android > "$evidence/exit-info.txt" 2>&1 || true
     adb pull /sdcard/Android/data/dev.ytui.android/files/video-player.png "$evidence/video-player.png" > /dev/null 2>&1 || true
+    adb pull /sdcard/Android/data/dev.ytui.android/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
 }
 trap collect_evidence EXIT
-apps/android/gradlew -p apps/android --no-daemon :app:connectedDebugAndroidTest
+apps/android/gradlew -p apps/android --no-daemon -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true :app:connectedDebugAndroidTest

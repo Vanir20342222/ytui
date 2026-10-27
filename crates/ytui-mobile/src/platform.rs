@@ -16,6 +16,14 @@ pub extern "system" fn Java_dev_ytui_android_NativeBridge_frameAvailable(
         ctx.request_repaint();
     }
 }
+static UI_GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_ytui_android_NativeBridge_uiGeneration(
+    _env: jni::JNIEnv,
+    _class: jni::objects::JClass,
+) -> jni::sys::jlong {
+    UI_GENERATION.load(std::sync::atomic::Ordering::Relaxed) as jni::sys::jlong
+}
 const TEXTURE_EXTERNAL_OES: u32 = 0x8D65;
 static BRIDGE: OnceLock<(JavaVM, GlobalRef)> = OnceLock::new();
 
@@ -115,6 +123,7 @@ fn android_main(app: AndroidApp) {
             options,
             Box::new(move |cc| {
                 *CONTEXT.lock().expect("context") = Some(cc.egui_ctx.clone());
+                UI_GENERATION.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 Ok(Box::new(AndroidUi {
                     app: ui::MobileApp::new(engine.clone(), &cc.egui_ctx),
                     last: std::time::Instant::now(),

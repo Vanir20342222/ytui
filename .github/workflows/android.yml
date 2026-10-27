@@ -27,6 +27,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+          cache-workspace-crates: true
+          key: android-workspace-v1
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

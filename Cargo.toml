@@ -1,7 +1,7 @@
 [workspace]
 members = ["crates/ytui-core", "crates/ytui-services", "crates/ytui-providers", "crates/ytui-mobile", "apps/desktop"]
 resolver = "2"
-exclude = ["vendor/yt-dlp-rs"]
+exclude = ["vendor/yt-dlp-rs", "vendor/winit"]
 
 [workspace.package]
 version = "0.2.0-alpha.12"
@@ -24,3 +24,6 @@ tempfile = "3"
 
 [patch."https://github.com/aagedal/yt-dlp-rs"]
 yt-dlp-rs = { path = "vendor/yt-dlp-rs" }
+
+[patch.crates-io]
+winit = { path = "vendor/winit" }

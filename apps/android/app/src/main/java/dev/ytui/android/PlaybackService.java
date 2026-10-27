@@ -163,9 +163,13 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onIsPlayingChanged(boolean playing) {
-            if (playing && !pendingQueueUrl.isEmpty()) {
+            if (playing
+                && player.isPlaying()
+                && player.getPlaybackState() == Player.STATE_READY
+                && !pendingQueueUrl.isEmpty()) {
               String started = pendingQueueUrl;
               pendingQueueUrl = "";
+              currentRequest.remove("queued");
               worker.execute(
                   () -> {
                     try {

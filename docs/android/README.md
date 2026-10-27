@@ -104,5 +104,7 @@ separate; the desktop installer/tests remain unchanged in behavior.
   re-exports shared providers for compatibility.
 - `crates/ytui-mobile`: Rust Android engine, adaptive touch UI, GLES video,
   JNI boundary and PCM visualizer metering.
+- `vendor/winit`: pinned 0.30.13 with a documented Android destruction/recreation
+  adapter; other platforms retain upstream behavior.
 - `vendor/yt-dlp-rs`: pinned upstream source with a documented isolated-JS runtime
   callback; desktop Node/Deno behavior is retained. See its `YTUI_PATCH.md`.

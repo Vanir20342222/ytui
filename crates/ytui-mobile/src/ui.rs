@@ -79,6 +79,7 @@ pub struct MobileApp {
     player_open: bool,
     queue_open: bool,
     queue: Vec<Media>,
+    queue_selection: Option<String>,
     popup: Option<(String, String)>,
     feed_menu: bool,
     network_enabled: bool,
@@ -125,6 +126,7 @@ impl MobileApp {
             player_open: false,
             queue_open: false,
             queue: Vec::new(),
+            queue_selection: None,
             popup: None,
             feed_menu: false,
             network_enabled,
@@ -265,6 +267,12 @@ impl MobileApp {
         download: bool,
         resume: bool,
     ) {
+        let queued = self
+            .queue_selection
+            .take()
+            .is_some_and(|url| url == media.url)
+            && !download
+            && !preview;
         let audio = matches!(
             media.kind,
             ytui_core::MediaKind::Song | ytui_core::MediaKind::Station
@@ -292,10 +300,6 @@ impl MobileApp {
         if !download {
             self.playback_generation += 1;
         }
-        let queued = !download
-            && !preview
-            && self.queue_open
-            && self.queue.iter().any(|item| item.url == media.url);
         self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume});
     }
     fn poll(&mut self, ctx: &egui::Context) {
@@ -824,7 +828,9 @@ impl MobileApp {
                             for (i, media) in self.queue.clone().iter().enumerate() {
                                 ui.horizontal(|ui| {
                                     if ui.button(&media.title).clicked() {
+                                        self.queue_selection = Some(media.url.clone());
                                         self.resolve(ctx, media.clone(), false, false, false);
+                                        self.queue_open = false;
                                     }
                                     if ui.button("Remove").clicked() {
                                         self.request(

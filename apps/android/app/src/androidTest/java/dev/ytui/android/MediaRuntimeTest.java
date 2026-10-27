@@ -28,10 +28,32 @@ public final class MediaRuntimeTest {
     boolean ready() throws Exception;
   }
 
+  static void capture(String filename) {
+    try {
+      android.graphics.Bitmap shot =
+          InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+      if (shot != null) {
+        try (FileOutputStream out =
+            new FileOutputStream(
+                new File(
+                    InstrumentationRegistry.getInstrumentation()
+                        .getTargetContext()
+                        .getExternalFilesDir(null),
+                    filename))) {
+          shot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+        } finally {
+          shot.recycle();
+        }
+      }
+    } catch (Exception ignored) {
+    }
+  }
+
   static void await(String message, Check check) throws Exception {
     long deadline = android.os.SystemClock.elapsedRealtime() + 60000;
     while (!check.ready()) {
-      if (!status().isNull("error"))
+      if (!status().isNull("error") || android.os.SystemClock.elapsedRealtime() > deadline) {
+        capture("video-error.png");
         throw new AssertionError(
             message
                 + ": "
@@ -39,8 +61,7 @@ public final class MediaRuntimeTest {
                 + " Main thread: "
                 + java.util.Arrays.toString(
                     android.os.Looper.getMainLooper().getThread().getStackTrace()));
-      if (android.os.SystemClock.elapsedRealtime() > deadline)
-        throw new AssertionError(message + ": " + MediaBridge.playerSnapshot);
+      }
       Thread.sleep(100);
     }
   }
@@ -67,6 +88,7 @@ public final class MediaRuntimeTest {
       int n;
       while ((n = input.read(data)) != -1) output.write(data, 0, n);
     }
+    long firstGeneration;
     try (ActivityScenario<RustActivity> scenario = ActivityScenario.launch(RustActivity.class)) {
       JSONObject request =
           new JSONObject()
@@ -136,9 +158,23 @@ public final class MediaRuntimeTest {
         MediaBridge.execute(new JSONObject().put("op", "download_remove").put("id", id).toString());
       }
       command("stop");
+      firstGeneration = NativeBridge.uiGeneration();
     } finally {
       media.delete();
     }
+    java.util.concurrent.CountDownLatch alive = new java.util.concurrent.CountDownLatch(1);
+    MediaBridge.main.post(alive::countDown);
+    assertTrue(
+        "Activity teardown blocked the Android main looper",
+        alive.await(5, java.util.concurrent.TimeUnit.SECONDS));
+    try (ActivityScenario<RustActivity> reopened = ActivityScenario.launch(RustActivity.class)) {
+      await(
+          "Rust UI did not restart in the existing app process",
+          () -> NativeBridge.uiGeneration() > firstGeneration);
+    }
+    java.util.concurrent.CountDownLatch closedAgain = new java.util.concurrent.CountDownLatch(1);
+    MediaBridge.main.post(closedAgain::countDown);
+    assertTrue(closedAgain.await(5, java.util.concurrent.TimeUnit.SECONDS));
   }
 
   static final class FixtureServer implements AutoCloseable {

@@ -18,6 +18,7 @@ public final class AudioTap extends BaseAudioProcessor {
   @Override
   public void queueInput(ByteBuffer input) {
     int size = input.remaining();
+    if (size == 0) return; // EOS may pass the shared EMPTY_BUFFER; never put a buffer into itself.
     if (enabled && size > 0)
       levels = NativeBridge.meter(input, input.position(), size, inputAudioFormat.channelCount);
     ByteBuffer output = replaceOutputBuffer(size);
