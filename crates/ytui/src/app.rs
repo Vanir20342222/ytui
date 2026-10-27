@@ -2173,7 +2173,11 @@ impl App {
                 .saturating_add_signed(delta)
                 .min(view.page.items.len().saturating_sub(1));
         }
-        self.selection_changed();
+        // Vinyl follows the player, so catalog navigation must retain its
+        // decoded cover and any in-flight playing-art request.
+        if !self.vinyl_enabled() {
+            self.selection_changed();
+        }
         self.redraw = true;
     }
     pub fn mouse(&mut self, mouse: MouseEvent) {

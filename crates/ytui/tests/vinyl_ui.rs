@@ -164,7 +164,7 @@ async fn artwork_is_cached_for_the_playing_song_independently_of_browse_selectio
     }
     assert!(app.image.is_some());
     assert!(app.image_matches("demo://art/1"));
-    app.tabs[2].selected = 5;
+    app.move_selection(5);
     render(&mut app, 120, 40);
     app.refresh_image();
     assert!(app.image_matches("demo://art/1"));
