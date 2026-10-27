@@ -89,6 +89,7 @@ public final class MediaRuntimeTest {
       while ((n = input.read(data)) != -1) output.write(data, 0, n);
     }
     long firstGeneration;
+    long cleanShutdowns = NativeBridge.uiShutdowns();
     try (ActivityScenario<RustActivity> scenario = ActivityScenario.launch(RustActivity.class)) {
       JSONObject request =
           new JSONObject()
@@ -178,6 +179,7 @@ public final class MediaRuntimeTest {
     } finally {
       media.delete();
     }
+    await("Rust UI exit hook did not complete", () -> NativeBridge.uiShutdowns() > cleanShutdowns);
     java.util.concurrent.CountDownLatch alive = new java.util.concurrent.CountDownLatch(1);
     MediaBridge.main.post(alive::countDown);
     assertTrue(
@@ -188,6 +190,9 @@ public final class MediaRuntimeTest {
           "Rust UI did not restart in the existing app process",
           () -> NativeBridge.uiGeneration() > firstGeneration);
     }
+    await(
+        "Reopened Rust UI did not clean up",
+        () -> NativeBridge.uiShutdowns() >= cleanShutdowns + 2);
     java.util.concurrent.CountDownLatch closedAgain = new java.util.concurrent.CountDownLatch(1);
     MediaBridge.main.post(closedAgain::countDown);
     assertTrue(closedAgain.await(5, java.util.concurrent.TimeUnit.SECONDS));

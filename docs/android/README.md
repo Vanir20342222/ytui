@@ -118,6 +118,8 @@ the desktop installer/tests remain unchanged in behavior.
   JNI boundary and PCM visualizer metering.
 - `vendor/winit`: pinned 0.30.13 with a documented Android destruction/recreation
   adapter; other platforms retain upstream behavior.
+- `vendor/eframe`: pinned 0.33.3 with documented Android suspended-window and EGL
+  teardown handling so application cleanup runs without a caught Rust panic.
 - `vendor/yt-dlp-rs`: pinned upstream source with a documented isolated-JS runtime
   callback; desktop Node/Deno behavior is retained. See its `YTUI_PATCH.md`.
 

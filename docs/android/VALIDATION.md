@@ -1,128 +1,116 @@
 # Android validation record — 2026-10-27 (M9)
 
-This record distinguishes implemented code from qualified behavior. Android is a
-preview. No physical Nothing Phone (3a) or Galaxy Tab S9 has been connected.
-No personal cookies, browser database, VPN or desktop appearance settings were
-used or changed by these tests.
+Android is a development preview. No physical Nothing Phone (3a) or Galaxy Tab S9
+has been connected. No personal cookies, browser database, VPN or desktop
+appearance settings were used or changed by these tests. Fixture decoding,
+public-provider checks and hardware acceptance are recorded separately.
 
-## Evidence already collected in the cloud workspace
+## Passed checks
 
-- Existing desktop/shared offline workspace suite after initial provider/desktop
-  move: **282 passed, 0 failed, 31 ignored**. The final expanded suite must also
-  pass after all M9 follow-up changes; its result is recorded below when run.
-- Expanded focused mobile suite: **13 passed, 0 failed** at the current checkpoint:
-  all built-in theme entries across 360×800, 412×915 and 1280×800 logical layouts;
-  four tabs/overlays; touch navigation; Back overlay order; stale playback/account
-  reply rejection; bounded feed cooldown; scoped synthetic account import and
-  disconnect; failed-write rollback; durable saved/queue/resume; private palette
-  import; malformed requests/config rejection. Render checks are headless Rust
-  UI checks, not screenshots or device performance measurements.
-- Android Gradle debug APK and instrumentation APK assembly passed. Android Lint
-  passed with **0 errors**; warnings retain explicit pinned-dependency upgrade
-  notices rather than blanket suppression.
-- Rust strict workspace/all-target Clippy passed at an earlier checkpoint;
-  the final follow-up gate is run again for changed code.
-- ARM64 and x86-64 Rust GameActivity native libraries built successfully at the
-  initial checkpoint, including JNI and GameActivity entrypoints. A final build
-  and APK alignment/signature inspection is required for the packaged revision.
-- A prior APK installed and displayed the Rust UI in an API 35 software emulator.
-  This exposed search-row overflow and system-inset overlap, corrected in source.
-  The final GameActivity keyboard/insets changes require fresh visual acceptance.
+- Final local Rust workspace suite: **293 passed, 0 failed, 31 explicitly ignored**.
+  Formatting and strict all-target workspace Clippy passed. ARM64 Android-specific
+  JNI/GLES code also passed strict cross-target Clippy.
+- Mobile checks cover all 13 theme entries at 360×800, 412×915 and 1280×800 logical
+  layouts; four tabs and overlays; touch navigation; Back overlay order; three
+  music styles, pause/reduced motion; settings/download draft cancellation;
+  malformed Unicode palettes; stale playback/account replies; feed cooldown;
+  bounded requests/images; scoped synthetic sessions; durable saved/queue/resume;
+  failed-write rollback; native format selection and SponsorBlock-off privacy.
+  These are headless Rust UI checks, not hardware performance measurements.
+- Desktop saved-player Node challenge vectors: **2 passed**. Hosted
+  [Rust run 40543256434](https://github.com/Vanir20342222/ytui/actions/runs/40543256434)
+  passed desktop/shared checks, real FFmpeg/mpv/local-playlist checks and release
+  build after the monorepo move. Desktop launchers/state paths are unchanged.
+- Complete local Android build: ARM64 and x86-64 native libraries, dependency
+  notices, Gradle wrapper, debug/instrumentation APK assembly, **3 Java unit tests**
+  and Android Lint with **0 errors**. APK inspection passed signing, ZIP and
+  **16 KiB ELF** alignment, both ABIs, JNI/GameActivity symbols and bundled notices.
+- Accelerated API 35
+  [Android run 40543256859](https://github.com/Vanir20342222/ytui/actions/runs/40543256859)
+  passed **5 device tests, 0 failures**. The separate opt-in public YouTube case
+  was explicitly skipped in this default, account-free run. Passed device checks:
+  - Generated MP4 actually decodes into the Rust GLES surface and produces PCM
+    levels; pause and volume persistence across stream changes work.
+  - Short muted preview restores the previous media/position/preferences on EOS.
+  - Actual loopback HTTP download plays from private offline cache after its
+    server is closed.
+  - Closing/reopening the Rust UI in the same process recreates the UI and leaves
+    Android's main loop responsive.
+  - JNI contracts/direct-buffer bounds and empty audio EOS input are checked.
+  - Android's isolated JavaScript runtime has no browser/network/cookie APIs;
+    original saved YouTube n/signature vectors return the exact expected maps.
 
-## Final local build checkpoint
+The run's device-evidence artifact contains JUnit results, continuous logcat,
+exit information and an actual 1080×2400 player screenshot. Visual inspection
+confirmed system-bar separation and visible sliders/clock labels. It is generated
+local test media, not evidence of public YouTube playback or audible output.
 
-- Expanded workspace suite: **289 passed, 0 failed, 31 explicitly ignored**;
-  strict all-target workspace Clippy and formatting passed. Added deterministic
-  checks cover every music style, pause/reduced motion, settings cancel, readable
-  lyrics and malformed Unicode palette colors as well as the cases above.
-- Desktop upstream saved-player Node tests: **2 passed**. Hosted Rust workflow
-  on the initial PR revision also passed its real FFmpeg/mpv/local-playlist checks
-  and release build (run `40519913051`).
-- The complete `tools/android/build.sh` ran locally, including both native ABIs,
-  dependency notices, Gradle wrapper, APK assembly, **3 Java unit tests** and lint.
-  APK inspection verified signatures, ZIP and **16 KiB ELF** alignment, JNI and
-  GameActivity exports, both requested ABIs and bundled Rust notices.
+## Development APK
 
-## Failed / blocked checks, retained honestly
+The earlier five-test checkpoint is source `aad9486` (PR merge revision `0d98630`);
+log review subsequently exposed a caught shutdown panic, described below. It is
+retained as historical evidence and must be replaced by a clean-shutdown build:
+[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40543256859/artifacts/12750509647).
+The ZIP contains `outputs/apk/debug/app-debug.apk` and `SHA256-and-checks.txt`.
+The APK's SHA256 is:
 
-Accelerated GitHub API 35 instrumentation (run `40519913127`) exposed a real
-`ForegroundServiceDidNotStartInTimeException` during local fixture playback.
-The direct Rust→service path had not explicitly registered its MediaSession;
-it now calls `addSession`, and posts a preparing foreground notification before
-waiting for decoder readiness. The updated instrumentation must pass before
-this issue is considered qualified. The first APK artifact from that failed run
-is not an accepted build.
+```text
+e3b472dc6f3c1caf18b7b5baa864397191214482079d6a2108f423cf42c62a5d
+```
 
-Subsequent accelerated runs `40523130438` and `40528348716` passed JNI contracts
-but failed media and sandbox checks. The captured cause was
-`ByteBuffer.createSameBufferException` in `AudioTap.queueInput` for an empty EOS
-buffer; the tap now returns without copying empty input, with an instrumentation
-regression. Sandbox connection timeouts traced the Android main thread blocked
-in `GameActivity.terminateNativeCode` during Activity destruction. A documented
-winit 0.30.13 Android-only patch exits on Destroy and permits sequential UI
-recreation; the Activity is singleTask. The new device test closes/reopens the
-Rust UI without restarting the engine and checks main-loop responsiveness.
-Both native ABIs compile after that patch. These fixes require a successful fresh
-instrumentation run before media/solver acceptance can be marked passed.
+Artifacts expire after 30 days. This debug APK is not a stable signed release;
+different CI signing identities cannot update each other in place. Read
+[installation instructions](README.md#install-an-apk) before replacing an install.
 
-The cloud host has no `/dev/kvm`. The software emulator had Android launcher,
-Bluetooth and Digital Wellbeing failures/ANRs, very slow cold starts, and an
-instrumentation attempt ended **“Process crashed”**. That is not an instrumentation
-pass. The only captured Android crash-buffer entries at that checkpoint belonged
-to Bluetooth; the app failure cause remains unresolved until the accelerated CI
-run supplies logs. Do not infer that the app itself is sound from that observation.
+## Public YouTube acceptance
 
-The emulator's public YouTube request failed DNS/network access in this proxied
-cloud environment. No public Android YouTube/Music extraction, personalized feed,
-audible playback or actual public download is claimed as passed. Desktop prior
-local-machine acceptance does not qualify the new Android adapters.
+The explicit, cookie-free
+[public run 40543378151](https://github.com/Vanir20342222/ytui/actions/runs/40543378151)
+failed before network access because the test sent `kind: Video` rather than
+the Rust API's lowercase `video`. Both media test fixtures now use the actual
+contract. The rerun tests native extraction and at least three seconds of actual
+playback of `https://www.youtube.com/watch?v=jNQXAC9IVRw`; its result is recorded
+separately after completion. No public Android playback success is claimed from
+fixture or saved-player checks. The workflow's `public_url` input makes this
+reproducible without making ordinary tests depend on YouTube availability.
 
-## Automated acceptance added
+## Reproduced runtime bugs fixed during acceptance
 
-The Android workflow builds both ABIs, runs Java unit tests and lint, checks APK
-signing/ZIP alignment/16 KiB ELF segments/JNI entrypoints/licenses, and uploads a
-sideloadable **development** APK plus reports. The accelerated API 35 job runs:
+Earlier accelerated runs exposed real failures; their first APKs are not accepted:
 
-- Real JNI initialization, request/error contracts and direct-buffer bounds.
-- AndroidX isolated JavaScript API isolation and saved upstream YouTube
-  n/signature challenge vectors (no public network or real session).
-- Generated MP4 actual decoder progress into the Rust video surface and PCM meter output, pause,
-  volume persistence across stream changes, loopback HTTP download and playback
-  from the private cache after the fixture server is closed.
+- `40519913127`: playback foreground-service deadline. Explicitly register the
+  MediaSession and post a preparing notification before decoder readiness.
+- `40528348716`: empty EOS audio input copied the shared empty ByteBuffer into
+  itself. Return before copying empty input; device regression now passes.
+- The same run found Activity teardown blocking in GameActivity termination.
+  Documented Android-only winit Destroy/loop-recreation patch fixes shutdown;
+  close/reopen/main-loop responsiveness now pass in the same app process.
+- `40532272312`: offline foreground service used string-resource ID zero. Use a
+  real channel-name resource; actual download/offline decoding now pass.
+- `40536947562`: four of five passed; saved-player test incorrectly expected
+  response `type` to equal `n`/`sig` rather than EJS's `result`. Corrected the
+  envelope assertion while retaining exact key-count/solution-map validation;
+  both challenge vectors passed in the subsequent green run.
+- Reviewing `40543256859` logcat exposed caught Rust shutdown panics despite
+  passing assertions: eframe's exit path unwrapped a window already removed on
+  Android Suspended, skipping application cleanup. A documented eframe 0.33.3
+  patch saves with an optional window and restores a surfaceless EGL context for
+  deletion where supported. The test now requires the Rust exit hook to complete
+  twice; the device runner also fails on Rust panic logs. Cross-target Clippy
+  passes; runtime qualification requires the new run.
 
-These checks have been added to the repository; their CI results must be read
-before describing them as passed. They do not replace real provider acceptance.
+The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
+earlier instrumentation attempt crashed. Those attempts are not counted as
+passes. The accelerated hosted emulator supplied the successful runtime evidence.
 
-## Latest runtime checkpoint
+## Acceptance still required
 
-Run `40536947562` passed four of five device tests, including actual video/PCM,
-pause, persistent volume across streams, loopback download, offline decoding with
-the server closed, UI destruction/recreation in the same process, JNI boundaries,
-empty audio EOS input and JavaScript sandbox API isolation. The remaining saved
-player vector test incorrectly expected each response's `type` to equal `n`/`sig`;
-EJS uses `type: result` and orders responses by request. The assertion is corrected
-and still requires the exact complete expected solution map. A fresh run must pass
-before the entire solver test is reported successful.
-
-The final UI follow-up uses system-inset bounds for windows, visible theme-colored
-rails, clock-style progress labels, bounded/resolution-specific artwork, direct
-URL/playlist download forms, preview EOS restoration/mute isolation, actual audio
-sampling at visualizer frame rate, SponsorBlock timeline marks/replay and an off
-mode that performs no API request. The local checks and new CI head qualify these
-changes separately from the checkpoint above.
-
-A public-only, opt-in instrumentation case now exercises actual native extraction
-and three seconds of playback. The regular offline fixture suite explicitly skips
-that case; see the workflow `public_url` input. Record its actual result separately.
-
-## Device acceptance still required
-
-On both requested devices: install/update signing identity, search soft keyboard,
-rotation, tablet split layout, gesture/system insets, every settings/modal screen,
-all themes/three player styles/reduced motion, real video and Music playback,
-codec/quality/track/caption selection, HTTP/HTTPS stations, SponsorBlock marks/skip/
-replay, account expiry/disconnect, multi-page feeds/playlists, paired offline media,
+On both requested physical devices: install/update signing identity, soft keyboard,
+rotation, tablet split layout, gesture/system insets, accessibility, every
+settings/modal screen, all themes/player styles, real video and Music playback,
+codec/quality/track/caption selection, HTTP/HTTPS stations, SponsorBlock timing,
+account expiry/disconnect, multi-page feeds/playlists, paired offline media,
 network loss/VPN handoff/reconnect/rate-limit cooldown, process death, screen lock,
-audio focus/headset/Bluetooth, notifications, background limits, memory/CPU/frame
-latency and human audible confirmation. Advanced parity gaps are explicit in
-[PARITY.md](PARITY.md). M9 remains open.
+audio focus/headset/Bluetooth, notifications, background limits, measured
+memory/CPU/frame latency and human audible confirmation. Advanced capability gaps
+remain explicit in [PARITY.md](PARITY.md). M9 remains open.

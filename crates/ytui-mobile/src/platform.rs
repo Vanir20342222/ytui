@@ -17,6 +17,14 @@ pub extern "system" fn Java_dev_ytui_android_NativeBridge_frameAvailable(
     }
 }
 static UI_GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+static UI_SHUTDOWNS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_ytui_android_NativeBridge_uiShutdowns(
+    _env: jni::JNIEnv,
+    _class: jni::objects::JClass,
+) -> jni::sys::jlong {
+    UI_SHUTDOWNS.load(std::sync::atomic::Ordering::Relaxed) as jni::sys::jlong
+}
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_ytui_android_NativeBridge_uiGeneration(
     _env: jni::JNIEnv,
@@ -190,6 +198,7 @@ impl eframe::App for AndroidUi {
         }
         *CONTEXT.lock().expect("context") = None;
         let _ = bridge_call("releaseVideo", Some(""));
+        UI_SHUTDOWNS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     }
 }
 struct Video {

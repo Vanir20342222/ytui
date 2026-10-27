@@ -18,5 +18,7 @@ public final class NativeBridge {
 
   public static native long uiGeneration();
 
+  public static native long uiShutdowns();
+
   public static native long meter(java.nio.ByteBuffer buffer, int offset, int length, int channels);
 }

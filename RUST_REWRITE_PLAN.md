@@ -757,3 +757,11 @@ See [Android implementation plan](docs/android/PLAN.md),
 [actual parity gaps](docs/android/PARITY.md), [build/use](docs/android/README.md)
 and [validation evidence](docs/android/VALIDATION.md). M9 is not complete until
 live/mobile/device gates and remaining capability gaps are addressed.
+
+The mobile acceptance suite exercises actual JNI, saved-player challenges in
+Android's isolated runtime, synthetic media decoding/PCM, preview restoration,
+offline downloads and repeated UI teardown/recreation. Device logs are checked
+for Rust panics as well as JUnit failures. Original upstream source/licenses and
+documented narrow Android adapters are retained in `vendor/{yt-dlp-rs,winit,eframe}`.
+Public YouTube is an explicit separate workflow input; no account or live-service
+success is inferred from the deterministic checks.

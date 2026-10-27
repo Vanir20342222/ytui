@@ -21,3 +21,8 @@ if [[ -n "${YTUI_ANDROID_PUBLIC_URL:-}" ]]; then
     arguments+=("-Pandroid.testInstrumentationRunnerArguments.youtubeUrl=$YTUI_ANDROID_PUBLIC_URL")
 fi
 apps/android/gradlew -p apps/android --no-daemon "${arguments[@]}" :app:connectedDebugAndroidTest
+adb logcat -d -s RustPanic:E RustStdoutStderr:I > "$evidence/rust-runtime.txt"
+if rg -q 'RustPanic|panicked at' "$evidence/rust-runtime.txt"; then
+    echo 'Rust panic detected despite passing instrumentation; inspect device evidence.' >&2
+    exit 1
+fi
