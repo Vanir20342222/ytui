@@ -92,8 +92,18 @@ Instrumentation needs an API 35 emulator with current Android System WebView or
 an explicitly selected disposable test device. It changes that app's player,
 volume, downloads and private library. Never point these tests at a personal
 production install. It uses synthetic sessions and local generated media, not a
-real account or public YouTube. Public/provider and real-device acceptance stays
-separate; the desktop installer/tests remain unchanged in behavior.
+real account or public YouTube by default. For an explicit cookie-free public
+check, dispatch the Android workflow with its `public_url` input, or run:
+
+```bash
+YTUI_ANDROID_PUBLIC_URL='https://www.youtube.com/watch?v=jNQXAC9IVRw' \
+  ./tools/android/run-device-tests.sh
+```
+
+That additional test requires native extraction and three seconds of actual
+decoding. A public-service failure fails the run; it is never replaced by a local
+fixture pass. Public/provider and physical-device acceptance stay separate;
+the desktop installer/tests remain unchanged in behavior.
 
 ## Repository structure
 

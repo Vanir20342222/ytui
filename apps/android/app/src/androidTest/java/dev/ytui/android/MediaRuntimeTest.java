@@ -97,7 +97,7 @@ public final class MediaRuntimeTest {
                   new JSONObject()
                       .put("url", "https://media.test/video")
                       .put("title", "Instrumented decoder")
-                      .put("kind", "Video"))
+                      .put("kind", "video"))
               .put(
                   "stream", new JSONObject().put("url", android.net.Uri.fromFile(media).toString()))
               .put("audio", false);

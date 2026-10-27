@@ -222,6 +222,9 @@ impl MobileApp {
         feed.retry_at = None;
         feed.last_attempt = Some((query.clone(), append));
         if !append {
+            if feed.request.as_ref() != Some(&query) {
+                feed.scroll_offset = 0.0;
+            }
             feed.generation += 1;
             feed.last_token = None;
             feed.request = Some(query.clone());

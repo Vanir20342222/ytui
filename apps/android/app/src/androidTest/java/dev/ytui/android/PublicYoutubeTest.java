@@ -37,7 +37,7 @@ public final class PublicYoutubeTest {
           new JSONObject()
               .put("url", url)
               .put("title", "Public YouTube acceptance")
-              .put("kind", "Video");
+              .put("kind", "video");
       JSONObject resolved =
           new JSONObject(
               NativeBridge.request(
