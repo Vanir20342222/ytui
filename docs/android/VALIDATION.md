@@ -22,7 +22,7 @@ public-provider checks and hardware acceptance are recorded separately.
   passed desktop/shared checks, real FFmpeg/mpv/local-playlist checks and release
   build after the monorepo move. Desktop launchers/state paths are unchanged.
 - Complete local Android build: ARM64 and x86-64 native libraries, dependency
-  notices, Gradle wrapper, debug/instrumentation APK assembly, **3 Java unit tests**
+  notices, Gradle wrapper, debug/instrumentation APK assembly, **5 Java unit tests**
   and Android Lint with **0 errors**. APK inspection passed signing, ZIP and
   **16 KiB ELF** alignment, both ABIs, JNI/GameActivity symbols and bundled notices.
 - Accelerated API 35
@@ -49,7 +49,11 @@ local test media, not evidence of public YouTube playback or audible output.
 
 The earlier five-test checkpoint is source `aad9486` (PR merge revision `0d98630`);
 log review subsequently exposed a caught shutdown panic, described below. It is
-retained as historical evidence and must be replaced by a clean-shutdown build:
+retained only as historical evidence. The clean-shutdown follow-up at `fa48079`
+passed [Android run 40547062980](https://github.com/Vanir20342222/ytui/actions/runs/40547062980)
+and Rust run `40547062981`: **5 device tests passed**, both exit hooks completed,
+and the panic-log gate recorded **zero Rust panics**. Its newer APK supersedes
+the first checkpoint below; the export follow-up needs its own runtime result.
 [APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40543256859/artifacts/12750509647).
 The ZIP contains `outputs/apk/debug/app-debug.apk` and `SHA256-and-checks.txt`.
 The APK's SHA256 is:
@@ -68,11 +72,13 @@ The explicit, cookie-free
 [public run 40543378151](https://github.com/Vanir20342222/ytui/actions/runs/40543378151)
 failed before network access because the test sent `kind: Video` rather than
 the Rust API's lowercase `video`. Both media test fixtures now use the actual
-contract. The rerun tests native extraction and at least three seconds of actual
-playback of `https://www.youtube.com/watch?v=jNQXAC9IVRw`; its result is recorded
-separately after completion. No public Android playback success is claimed from
-fixture or saved-player checks. The workflow's `public_url` input makes this
-reproducible without making ordinary tests depend on YouTube availability.
+contract. [Corrected run 40546258421](https://github.com/Vanir20342222/ytui/actions/runs/40546258421)
+reached the native extractor and failed with **“All player responses are invalid.
+Your IP is likely being blocked by Youtube”** for
+`https://www.youtube.com/watch?v=jNQXAC9IVRw`. Its other five tests passed.
+Public Android playback remains unqualified on this hosted runner; no fixture or
+saved-player success is substituted for it. The workflow's `public_url` input
+makes this check reproducible on another network without an account.
 
 ## Reproduced runtime bugs fixed during acceptance
 
@@ -97,7 +103,27 @@ Earlier accelerated runs exposed real failures; their first APKs are not accepte
   patch saves with an optional window and restores a surfaceless EGL context for
   deletion where supported. The test now requires the Rust exit hook to complete
   twice; the device runner also fails on Rust panic logs. Cross-target Clippy
-  passes; runtime qualification requires the new run.
+  passes; run `40547062980` subsequently passed both cleanup assertions and the
+  zero-panic gate.
+
+## Offline export follow-up
+
+Rust UI now offers Export file on completed downloads. The Android storage
+adapter copies original containers or muxes compatible separate tracks from
+cache, writes via the document picker, and runs a cancellable foreground worker.
+Queued song/station classification now uses the lowercase Rust JSON contract;
+the previous uppercase comparison incorrectly requested video for Music queues.
+Five Java unit tests/lint, instrumentation assembly and focused Rust/Clippy checks
+pass locally. The added device test downloads separate generated tracks, closes
+both source servers, muxes and actually decodes an exported file, verifies a
+foreground audio export is byte-for-byte identical, and checks cancellation.
+Its actual hosted result must pass before claiming export runtime acceptance.
+
+The vendored player fixtures' public client keys are sanitized. Both exact Node
+challenge vectors still pass. Secret scanning now checks all fetched history;
+see [the provenance/security review](../SECURITY_REVIEW_2026-10-27.md) for the
+specific legacy public-fixture baseline and the API permission limit on closing
+GitHub's historical alerts.
 
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as

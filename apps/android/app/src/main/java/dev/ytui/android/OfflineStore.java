@@ -219,6 +219,19 @@ public final class OfflineStore {
       }
       for (java.util.Map.Entry<String, ?> entry :
           MediaBridge.context
+              .getSharedPreferences("exports", Context.MODE_PRIVATE)
+              .getAll()
+              .entrySet()) {
+        if (rows.length() >= 2016) break;
+        rows.put(
+            new JSONObject()
+                .put("id", "export:" + entry.getKey())
+                .put("title", "Media export")
+                .put("state", String.valueOf(entry.getValue()))
+                .put("progress", 0));
+      }
+      for (java.util.Map.Entry<String, ?> entry :
+          MediaBridge.context
               .getSharedPreferences("preparations", Context.MODE_PRIVATE)
               .getAll()
               .entrySet()) {
@@ -236,6 +249,22 @@ public final class OfflineStore {
   }
 
   static void remove(String id) {
+    if (id.startsWith("export:")) {
+      String job = id.substring(7);
+      MediaBridge.context
+          .getSharedPreferences("export-dismissed", Context.MODE_PRIVATE)
+          .edit()
+          .putBoolean(job, true)
+          .commit();
+      androidx.work.WorkManager.getInstance(MediaBridge.context)
+          .cancelWorkById(java.util.UUID.fromString(job));
+      MediaBridge.context
+          .getSharedPreferences("exports", Context.MODE_PRIVATE)
+          .edit()
+          .remove(job)
+          .apply();
+      return;
+    }
     if (id.startsWith("job:")) {
       String job = id.substring(4);
       androidx.work.WorkManager.getInstance(MediaBridge.context)
@@ -254,6 +283,7 @@ public final class OfflineStore {
   }
 
   static void toggle(String id) throws Exception {
+    if (id.startsWith("export:")) return;
     if (id.startsWith("job:")) {
       String job = id.substring(4);
       String raw =

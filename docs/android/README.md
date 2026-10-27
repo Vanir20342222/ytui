@@ -39,6 +39,15 @@ to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, que
 and visualizer controls. Tablet layouts keep catalog and player side by side.
 Android Back closes overlays before putting the app in the background.
 
+For a completed offline download, open **Actions → Export file…** and choose a
+destination in Android's document picker. Original MP4/M4A/WebM containers are
+copied without re-encoding; compatible separate video/audio tracks are combined
+into one MP4 or WebM file. Export runs in a foreground worker, reads only completed
+offline cache data and does not contact the original server. Export jobs appear
+in Downloads; Remove cancels/dismisses a job, preserving a completed exported file.
+Segmented streams, live recordings and incompatible codec combinations cannot
+currently be exported. MP3/FLAC conversion is not offered as an implemented option.
+
 Appearance follows Android light/dark or selects a built-in palette. Import a
 Caelestia JSON, Omarchy TOML or exported ytui Palette JSON through the document
 picker; Linux theme daemons are not accessed on a phone. Importing creates a

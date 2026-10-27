@@ -165,6 +165,10 @@ public final class MediaBridge {
               case "download_toggle":
                 OfflineStore.toggle(request.getString("id"));
                 break;
+              case "download_export":
+                if (RustActivity.current() != null)
+                  RustActivity.current().exportDownload(request.getString("id"));
+                break;
               case "open":
                 context.startActivity(
                     new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(request.getString("url")))

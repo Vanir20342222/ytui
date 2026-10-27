@@ -8,6 +8,7 @@ import com.google.androidgamesdk.GameActivity;
 import java.io.InputStream;
 
 public final class RustActivity extends GameActivity {
+  private String exportDownload;
   static volatile java.lang.ref.WeakReference<RustActivity> reference =
       new java.lang.ref.WeakReference<>(null);
 
@@ -19,6 +20,7 @@ public final class RustActivity extends GameActivity {
   protected void onCreate(Bundle state) {
     reference = new java.lang.ref.WeakReference<>(this);
     super.onCreate(state);
+    if (state != null) exportDownload = state.getString("ytui-export-download");
     OfflineStore.resetSnapshotClient();
     getWindow()
         .getDecorView()
@@ -89,8 +91,69 @@ public final class RustActivity extends GameActivity {
   }
 
   @Override
+  protected void onSaveInstanceState(Bundle state) {
+    state.putString("ytui-export-download", exportDownload);
+    super.onSaveInstanceState(state);
+  }
+
+  void exportDownload(String id) {
+    if (exportDownload != null) {
+      MediaBridge.event("error", "Finish or cancel the open export picker first");
+      return;
+    }
+    exportDownload = id;
+    OfflineStore.IO.execute(
+        () -> {
+          try {
+            OfflineExport.Plan plan = OfflineExport.inspect(id);
+            MediaBridge.main.post(
+                () -> {
+                  if (isFinishing() || isDestroyed()) {
+                    exportDownload = null;
+                    return;
+                  }
+                  try {
+                    startActivityForResult(
+                        new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                            .setType(plan.mime)
+                            .addCategory(Intent.CATEGORY_OPENABLE)
+                            .addFlags(
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                            .putExtra(
+                                Intent.EXTRA_TITLE,
+                                PlaybackPolicy.exportName(plan.title, plan.extension)),
+                        43);
+                  } catch (RuntimeException error) {
+                    exportDownload = null;
+                    MediaBridge.event("error", "No document provider is available for export");
+                  }
+                });
+          } catch (Exception error) {
+            MediaBridge.main.post(() -> exportDownload = null);
+            MediaBridge.event("error", OfflineExport.safeReason(error));
+          }
+        });
+  }
+
+  @Override
   protected void onActivityResult(int request, int result, Intent data) {
     super.onActivityResult(request, result, data);
+    if (request == 43) {
+      String id = exportDownload;
+      exportDownload = null;
+      if (id == null || result != RESULT_OK || data == null || data.getData() == null) return;
+      android.net.Uri destination = data.getData();
+      if ((data.getFlags() & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
+        try {
+          getContentResolver()
+              .takePersistableUriPermission(destination, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        } catch (SecurityException ignored) {
+        }
+      }
+      OfflineExport.enqueue(id, destination);
+      return;
+    }
     if (result != RESULT_OK || data == null || data.getData() == null) return;
     final android.net.Uri uri = data.getData();
     final android.content.ContentResolver resolver = getApplicationContext().getContentResolver();

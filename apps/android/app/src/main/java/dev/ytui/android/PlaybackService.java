@@ -632,8 +632,7 @@ public final class PlaybackService extends MediaSessionService {
             JSONObject media =
                 rpc(new JSONObject().put("op", "queue_peek").put("shuffle", shuffle));
             if (media.length() == 0) return;
-            boolean audio =
-                "Song".equals(media.optString("kind")) || "Station".equals(media.optString("kind"));
+            boolean audio = PlaybackPolicy.audioOnly(media.optString("kind"));
             JSONObject stream =
                 rpc(new JSONObject().put("op", "resolve").put("media", media).put("audio", audio));
             JSONObject request =

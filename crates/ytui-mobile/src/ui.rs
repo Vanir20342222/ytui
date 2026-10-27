@@ -669,7 +669,7 @@ impl MobileApp {
                                 .push(Effect::Command(json!({"op":"background"})));
                         }
                     }
-                    "error" => {
+                    "error" | "notice" => {
                         self.status = event["text"]
                             .as_str()
                             .unwrap_or("Android operation failed")
@@ -1704,7 +1704,12 @@ impl MobileApp {
                             self.effects.push(Effect::Offline(id.into()));
                         }
                         ui.menu_button("Actions", |ui| {
-                            if ui.button("Pause / retry").clicked() {
+                            if state == "Complete" && ui.button("Export file…").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_export","id":id})));
+                                ui.close();
+                            }
+                            if !id.starts_with("export:") && ui.button("Pause / retry").clicked() {
                                 self.effects
                                     .push(Effect::Command(json!({"op":"download_toggle","id":id})));
                                 ui.close();
