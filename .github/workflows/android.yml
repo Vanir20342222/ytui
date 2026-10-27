@@ -1,7 +1,7 @@
 name: Android
 on:
   push:
-    branches: [main, 'feat/android-monorepo']
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -26,6 +26,8 @@ jobs:
           targets: aarch64-linux-android,x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - uses: gradle/actions/setup-gradle@v4
       - name: Install pinned Android build tools
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018'
