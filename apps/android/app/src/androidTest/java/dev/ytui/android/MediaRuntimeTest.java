@@ -87,6 +87,19 @@ public final class MediaRuntimeTest {
     return focused.get();
   }
 
+  static void acknowledgeSystemFullscreenHint(androidx.test.uiautomator.UiDevice device) {
+    androidx.test.uiautomator.BySelector title =
+        androidx.test.uiautomator.By.res("android:id/immersive_cling_title");
+    if (device.wait(androidx.test.uiautomator.Until.findObject(title), 3000) == null) return;
+    androidx.test.uiautomator.UiObject2 acknowledge =
+        device.findObject(androidx.test.uiautomator.By.res("android:id/ok"));
+    assertNotNull("Android's fullscreen tutorial needs its acknowledgment button", acknowledge);
+    acknowledge.click();
+    assertTrue(
+        "The system tutorial must leave the video touch surface",
+        device.wait(androidx.test.uiautomator.Until.gone(title), 3000));
+  }
+
   static void surfaceEvidence() {
     if (android.os.Build.VERSION.SDK_INT < 29) return;
     java.util.concurrent.CountDownLatch recorded = new java.util.concurrent.CountDownLatch(1);
@@ -240,6 +253,7 @@ public final class MediaRuntimeTest {
               FullscreenActivity.visible
                   && fullscreenHasInputFocus()
                   && device.getDisplayWidth() > device.getDisplayHeight());
+      acknowledgeSystemFullscreenHint(device);
       assertEquals(
           "Fullscreen must reuse the prepared decoder",
           fullscreenGeneration,

@@ -141,3 +141,9 @@ handling; double taps retain seeking and child controls keep their own events.
 The test accepts both native full/minimal toolbar layouts and retains a control
 screenshot/accessibility hierarchy before asserting, so remaining failures have
 concrete evidence.
+The retained `db1c47e` hierarchy identifies the remaining blocker as Android's
+first-use immersive-mode tutorial (`android:id/immersive_cling_title`). The
+surface/control diagnosis above was too broad: this system overlay intercepted
+the test taps. Instrumentation now acknowledges that specific OS prompt before
+checking the native toolbar and exit routes; no application or permission dialog
+is blindly dismissed, and production does not suppress the system tutorial.
