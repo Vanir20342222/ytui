@@ -32,6 +32,7 @@ enum Kind {
         queued: bool,
         media: Box<Media>,
         audio: bool,
+        quality: String,
         preview: bool,
         download: bool,
         resume: bool,
@@ -414,7 +415,23 @@ impl MobileApp {
         let context = (!download && !preview && !queued)
             .then(|| self.collection_context(&media))
             .flatten();
-        let id=self.request(ctx,json!({"op":"resolve","media":media,"audio":audio,"quality":self.config.download.quality}),Kind::Resolve{account_generation:self.account_generation,playback_generation:self.playback_generation,queued,media:Box::new(media),audio,preview,download,resume,context});
+        let quality = self.config.download.quality.clone();
+        let id = self.request(
+            ctx,
+            json!({"op":"resolve","media":media,"audio":audio,"quality":quality}),
+            Kind::Resolve {
+                account_generation: self.account_generation,
+                playback_generation: self.playback_generation,
+                queued,
+                media: Box::new(media),
+                audio,
+                quality,
+                preview,
+                download,
+                resume,
+                context,
+            },
+        );
         if !download {
             self.pending_playback = Some(id);
         }
@@ -588,6 +605,7 @@ impl MobileApp {
                     Kind::Resolve {
                         mut media,
                         audio,
+                        quality,
                         preview,
                         download,
                         resume,
@@ -613,7 +631,7 @@ impl MobileApp {
                             media.thumbnail = thumbnail.into();
                         }
                     }
-                    let request = json!({"media":media,"stream":stream,"audio":audio,"preview":preview,"resume":resume,"queued":queued,"context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context});
+                    let request = json!({"media":media,"stream":stream,"audio":audio,"quality":quality,"preview":preview,"resume":resume,"queued":queued,"context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context});
                     self.effects.push(if download {
                         Effect::Download(request)
                     } else {
@@ -1388,6 +1406,9 @@ impl MobileApp {
             .unwrap_or("Choose a song or station")
             .to_owned();
         ui.heading(title);
+        if let Some(station) = self.player["station"].as_str().filter(|s| !s.is_empty()) {
+            ui.label(RichText::new(format!("Live · {station}")).color(c(self.palette.muted)));
+        }
         if let Some(creator) = self.player["media"]["creator"]
             .as_str()
             .filter(|s| !s.is_empty())
@@ -2080,6 +2101,38 @@ mod tests {
         assert!(linked_media("https://name:secret@youtube.com/playlist?list=PLx", 1).is_err());
     }
     #[test]
+    fn a_pending_download_keeps_its_requested_quality_when_settings_change() {
+        let (mut app, ctx, _root) = test_app();
+        app.config.download.quality = "1080".into();
+        deliver(
+            &app,
+            Kind::Resolve {
+                account_generation: app.account_generation,
+                playback_generation: app.playback_generation,
+                queued: false,
+                media: Box::new(Media {
+                    url: "https://media.test/video".into(),
+                    title: "Fixture".into(),
+                    ..Default::default()
+                }),
+                audio: false,
+                quality: "360".into(),
+                preview: false,
+                download: true,
+                resume: false,
+                context: None,
+            },
+            Ok(json!({"url":"https://media.test/selected-360"})),
+            None,
+        );
+        app.poll(&ctx);
+        let [Effect::Download(request)] = app.effects.as_slice() else {
+            panic!("Missing download request")
+        };
+        assert_eq!(request["quality"], "360");
+        assert_eq!(app.config.download.quality, "1080");
+    }
+    #[test]
     fn stale_playback_and_account_replies_cannot_start_media() {
         let (mut app, ctx, _root) = test_app();
         app.account_generation = 3;
@@ -2093,6 +2146,7 @@ mod tests {
                     queued: false,
                     media: Box::default(),
                     audio: true,
+                    quality: "360".into(),
                     preview: false,
                     download: false,
                     resume: false,
@@ -2112,6 +2166,7 @@ mod tests {
                 queued: false,
                 media: Box::default(),
                 audio: true,
+                quality: "360".into(),
                 preview: false,
                 download: false,
                 resume: false,

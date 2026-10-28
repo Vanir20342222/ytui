@@ -67,6 +67,20 @@ public final class ExportRuntimeTest {
                   "stream",
                   new JSONObject().put("url", videos.url()).put("audio_url", audios.url()))
               .put("audio", false);
+      JSONObject uncachedCaptions =
+          new JSONObject()
+              .put(
+                  "captions",
+                  new JSONArray()
+                      .put(
+                          new JSONObject()
+                              .put("url", "https://captions.test/uncached.vtt")
+                              .put("label", "en")))
+              .put(
+                  "formats",
+                  new JSONArray().put(new JSONObject().put("unused", "x".repeat(128 * 1024))));
+      paired.put("quality", "480");
+      paired.getJSONObject("stream").put("catalog", uncachedCaptions);
       JSONObject audioRequest =
           new JSONObject()
               .put(
@@ -88,6 +102,26 @@ public final class ExportRuntimeTest {
           () -> complete(vid) && complete(vid + "-audio") && complete(aud));
       videos.close();
       audios.close();
+      Download stored = OfflineStore.manager().getDownloadIndex().getDownload(videoId);
+      assertTrue(
+          "Unused format catalogs should not inflate download metadata",
+          stored.request.data.length < 4096);
+      JSONObject storedRequest =
+          new JSONObject(new String(stored.request.data, java.nio.charset.StandardCharsets.UTF_8));
+      assertEquals("480", storedRequest.getString("quality"));
+      assertFalse(storedRequest.getJSONObject("stream").has("catalog"));
+      // Existing downloads may still contain uncached caption URLs. They must
+      // not break cache-only playback or trigger an upstream caption request.
+      JSONObject legacyOffline = OfflineStore.offlineRequest(videoId);
+      legacyOffline.getJSONObject("stream").put("catalog", uncachedCaptions);
+      MediaBridge.execute(
+          new JSONObject().put("op", "play").put("request", legacyOffline).toString());
+      MediaRuntimeTest.await(
+          "Uncached legacy captions broke offline playback",
+          () ->
+              MediaRuntimeTest.status().optString("title").equals("Paired export")
+                  && MediaRuntimeTest.status().optBoolean("playing")
+                  && MediaRuntimeTest.status().optDouble("position") > 0.2);
       assertTrue(OfflineExport.inspect(videoId).container >= 0);
       OfflineExport.write(videoId, Uri.fromFile(exported), () -> false);
       MediaExtractor extractor = new MediaExtractor();

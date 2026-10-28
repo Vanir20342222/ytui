@@ -786,3 +786,9 @@ prior successful checks for the same revision; Rust builds before signing secret
 are loaded. A disposable local release build passed packaging/signature checks,
 and its private fixture identity was removed. Owner key setup and device update
 acceptance remain open. Mobile native cookies now stay in an in-memory jar.
+
+The next follow-up wires live ICY song metadata without changing station identity,
+retains requested download quality through retry/preparation, removes unused
+catalogs from download records, and prevents uncached external captions breaking
+offline playback. Deterministic device regressions exercise the actual stream and
+cache paths; their latest results remain in the Android validation record.

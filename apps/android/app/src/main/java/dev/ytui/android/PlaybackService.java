@@ -24,6 +24,7 @@ public final class PlaybackService extends MediaSessionService {
   volatile long generation = 0;
   long skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
   boolean pendingStart, navigationPending, contextReady;
+  long streamMetadataUpdates;
   String sponsorMode = "skip";
   String error = "", streamTitle = "", captionText = "", pendingQueueUrl = "", errorTrace = "";
   JSONObject previewRestore;
@@ -142,6 +143,19 @@ public final class PlaybackService extends MediaSessionService {
     addSession(session);
     player.addListener(
         new Player.Listener() {
+          @Override
+          public void onMediaMetadataChanged(MediaMetadata metadata) {
+            if (!isLive()) return;
+            JSONObject media = currentRequest.optJSONObject("media");
+            String title = PlaybackPolicy.liveTitle(metadata.title);
+            if (media != null && title.equals(media.optString("title").trim())) title = "";
+            if (!title.equals(streamTitle)) {
+              streamTitle = title;
+              streamMetadataUpdates++;
+              publish();
+            }
+          }
+
           @Override
           public void onVideoSizeChanged(VideoSize size) {
             if (size.width < 1 || size.height < 1) return;
@@ -333,6 +347,7 @@ public final class PlaybackService extends MediaSessionService {
     error = "";
     errorTrace = "";
     streamTitle = "";
+    streamMetadataUpdates = 0;
     captionText = "";
     skipUntil = 0;
     lastSkipped = -1;
@@ -371,7 +386,7 @@ public final class PlaybackService extends MediaSessionService {
     java.util.List<MediaItem.SubtitleConfiguration> captions = new java.util.ArrayList<>();
     JSONObject catalog = stream.optJSONObject("catalog");
     JSONArray choices = catalog == null ? null : catalog.optJSONArray("captions");
-    if (choices != null) {
+    if (choices != null && !request.optBoolean("offline")) {
       for (int i = 0; i < Math.min(choices.length(), 40); i++) {
         JSONObject choice = choices.optJSONObject(i);
         if (choice != null)
@@ -954,7 +969,18 @@ public final class PlaybackService extends MediaSessionService {
       JSONObject media = currentRequest.optJSONObject("media");
       JSONObject status =
           new JSONObject()
-              .put("title", media == null ? "" : media.optString("title"))
+              .put(
+                  "title",
+                  !streamTitle.isEmpty()
+                      ? streamTitle
+                      : media == null ? "" : media.optString("title"))
+              .put("stream_title", streamTitle)
+              .put("stream_metadata_updates", streamMetadataUpdates)
+              .put(
+                  "station",
+                  isLive() && !streamTitle.isEmpty() && media != null
+                      ? media.optString("title")
+                      : "")
               .put("playing", player.isPlaying())
               .put("playback_state", player.getPlaybackState())
               .put("play_when_ready", player.getPlayWhenReady())

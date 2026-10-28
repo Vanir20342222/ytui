@@ -6,6 +6,18 @@ final class PlaybackPolicy {
     return "song".equals(kind) || "station".equals(kind);
   }
 
+  static String liveTitle(CharSequence title) {
+    if (title == null) return "";
+    return title
+        .toString()
+        .codePoints()
+        .limit(512)
+        .map(cp -> Character.isISOControl(cp) ? ' ' : cp >= 0xd800 && cp <= 0xdfff ? 0xfffd : cp)
+        .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+        .toString()
+        .trim();
+  }
+
   static String exportName(String title, String extension) {
     String clean = title.replaceAll("[\\p{Cntrl}/\\\\:*?\"<>|]", "_").trim();
     if (clean.isEmpty()) clean = "ytui-media";

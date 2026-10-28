@@ -83,7 +83,12 @@ public final class OfflineStore {
     manager();
     JSONObject stream = request.getJSONObject("stream");
     String id = id(request);
-    byte[] data = request.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    // Persist the selected streams, not the entire format/caption catalog.
+    // Snapshot polling parses this data; large catalogs multiplied by a playlist
+    // otherwise cost memory/CPU on every refresh and contain unusable captions.
+    JSONObject compact = new JSONObject(request.toString());
+    compact.getJSONObject("stream").remove("catalog");
+    byte[] data = compact.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
     DownloadRequest main =
         new DownloadRequest.Builder(id, android.net.Uri.parse(stream.getString("url")))
             .setData(data)
@@ -310,7 +315,8 @@ public final class OfflineStore {
                       new JSONObject()
                           .put("op", "resolve")
                           .put("media", request.getJSONObject("media"))
-                          .put("audio", request.optBoolean("audio")));
+                          .put("audio", request.optBoolean("audio"))
+                          .put("quality", request.opt("quality")));
               request.put("stream", stream);
               MediaBridge.main.post(
                   () -> {

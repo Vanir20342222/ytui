@@ -125,6 +125,7 @@ public final class PrepareWorker extends Worker {
               new JSONObject()
                   .put("media", media)
                   .put("stream", resolved.getJSONObject("data"))
+                  .put("quality", request.optString("quality", "1080"))
                   .put("audio", request.optBoolean("audio"));
           CompletableFuture<Void> accepted = new CompletableFuture<>();
           MediaBridge.main.post(

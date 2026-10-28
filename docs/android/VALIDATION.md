@@ -264,6 +264,20 @@ regular files in its own old staging directory, preserves unrelated files and
 refuses symlinked staging directories. Host tests cover HTTPS/domain/path scope
 and selective cleanup; a new full APK/runtime qualification remains required.
 
+### Radio metadata and download follow-up (device qualification pending)
+
+Live ICY song titles now update the player and notification while preserving the
+station's library/history identity. Titles are bounded and strip control codes;
+Unicode code points are not split. A generated MP3 with two actual HTTP/ICY title
+updates is the new device regression; no external radio service is used.
+
+Download requests now retain their selected quality through asynchronous replies,
+playlist preparation and failed-stream refresh. Download-index data drops unused
+format/caption catalogs to reduce repeated parsing during library polling. Existing
+offline requests skip external caption sources that were never cached; embedded
+tracks remain available. The export device case checks metadata compaction,
+retained quality and real cache-only decoding with legacy uncached captions.
+
 ### Physical/live release gates
 
 On both requested physical devices: install/update signing identity, soft keyboard,
