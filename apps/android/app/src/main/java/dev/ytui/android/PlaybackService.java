@@ -49,7 +49,7 @@ public final class PlaybackService extends MediaSessionService {
             "ytui-playback", "ytui playback", android.app.NotificationManager.IMPORTANCE_LOW));
     setMediaNotificationProvider(
         new DefaultMediaNotificationProvider.Builder(this)
-            .setNotificationId(4)
+            .setNotificationId(NotificationIds.PLAYBACK)
             .setChannelId("ytui-playback")
             .build());
     prefs = getSharedPreferences("player", MODE_PRIVATE);
@@ -366,7 +366,8 @@ public final class PlaybackService extends MediaSessionService {
       android.app.Notification preparing = null;
       for (android.service.notification.StatusBarNotification active :
           notifications.getActiveNotifications()) {
-        if (active.getId() == 4) {
+        if (active.getId() == NotificationIds.PLAYBACK
+            && "ytui-playback".equals(active.getNotification().getChannelId())) {
           preparing = active.getNotification();
           break;
         }
@@ -383,7 +384,7 @@ public final class PlaybackService extends MediaSessionService {
                         .setMediaSession(session.getPlatformToken()))
                 .setOngoing(true)
                 .build();
-      startForeground(4, preparing);
+      startForeground(NotificationIds.PLAYBACK, preparing);
     }
     int result = super.onStartCommand(intent, flags, id);
     if (intent != null && "play".equals(intent.getAction())) {

@@ -101,6 +101,29 @@ Offline URL/notice regressions cover these changes; full runtime qualification
 remains pending. Release Kotlin/Java compilation, 11 release JVM tests and release
 lint also passed for the native UI; no signing identity was loaded for that check.
 
+### Fourth run: visible video passes; concurrent export exposes a notification collision
+
+[Run 40665889912](https://github.com/Vanir20342222/ytui/actions/runs/40665889912)
+at `2c2d3a7` passed **16 cases**, including actual RGB video, pause/quality/position,
+volume persistence, preview restoration, offline playback, all six native UI
+checks, radio metadata, crypto and challenge vectors. One concurrent-export
+playback case failed; the public case was explicitly skipped. The retained
+screenshot now shows the generated color-bar video inside the native player.
+
+The export worker used notification ID **4**, the same ID as playback. Publishing
+and removing its non-media foreground notification replaced the MediaStyle entry;
+System UI destroyed the active media session. Job notifications now have separate
+preparation/export namespaces, away from playback/download IDs; the preparing
+playback fallback also verifies its notification channel. A JVM regression and
+an active-session/channel assertion extend the existing real export/decode test.
+Debug/release JVM tests and lint pass locally; the full device rerun remains
+required. This failure is retained, not dismissed as an emulator-only issue.
+
+The full local workspace at this source passed **317 tests, 0 failures, 31
+explicitly ignored**; strict Clippy passed. The six native UI cases are keyboard/
+Unicode editing, all-theme background/foreground/persistence, protected-account
+navigation/cancel, wide-layout panels, cooldown prefetch, and pasted URL intent.
+
 ## Passed historical backend checks
 
 - Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.

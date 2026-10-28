@@ -208,7 +208,8 @@ public final class PrepareWorker extends Worker {
             .setOngoing(true)
             .build();
     return android.os.Build.VERSION.SDK_INT >= 29
-        ? new ForegroundInfo(3, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        : new ForegroundInfo(3, n);
+        ? new ForegroundInfo(
+            NotificationIds.preparation(getId()), n, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        : new ForegroundInfo(NotificationIds.preparation(getId()), n);
   }
 }

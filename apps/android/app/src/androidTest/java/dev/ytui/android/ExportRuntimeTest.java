@@ -146,6 +146,16 @@ public final class ExportRuntimeTest {
                           .getSharedPreferences("exports", Context.MODE_PRIVATE)
                           .getString(exportJob.toString(), "")));
       OfflineStore.remove("export:" + exportJob);
+      assertFalse(
+          "Completing an export must not destroy the active media session",
+          MediaRuntimeTest.status().optString("title").isEmpty());
+      for (android.service.notification.StatusBarNotification active :
+          context
+              .getSystemService(android.app.NotificationManager.class)
+              .getActiveNotifications()) {
+        if (active.getId() == NotificationIds.PLAYBACK)
+          assertEquals("ytui-playback", active.getNotification().getChannelId());
+      }
       assertArrayEquals(
           java.nio.file.Files.readAllBytes(audio.toPath()),
           java.nio.file.Files.readAllBytes(song.toPath()));

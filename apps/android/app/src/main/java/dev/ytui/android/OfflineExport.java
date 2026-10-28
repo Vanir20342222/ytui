@@ -395,7 +395,10 @@ public final class OfflineExport extends Worker {
             .setOngoing(true)
             .build();
     return android.os.Build.VERSION.SDK_INT >= 29
-        ? new ForegroundInfo(4, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        : new ForegroundInfo(4, notification);
+        ? new ForegroundInfo(
+            NotificationIds.export(getId()),
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        : new ForegroundInfo(NotificationIds.export(getId()), notification);
   }
 }
