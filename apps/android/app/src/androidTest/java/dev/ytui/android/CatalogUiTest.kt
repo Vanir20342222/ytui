@@ -172,10 +172,27 @@ class CatalogUiTest {
             .assertIsDisplayed()
         MediaRuntimeTest.capture("native-card-menu.png")
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
+        compose.waitForIdle()
+        compose.onAllNodesWithText("Play now").assertCountEquals(0)
+        // A tablet cold start avoids photographing old popup surfaces while wm
+        // applies two successive physical-size/density overrides. The separate
+        // NativeUiTest still checks live activity rotation and panel navigation.
+        scenario.close()
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.setOrientationNatural()
         device.executeShellCommand("wm size 2560x1600")
         device.executeShellCommand("wm density 320")
+        scenario = RuntimeTest.launchOffline()
+        compose.waitUntil(10_000) {
+            compose
+                .onAllNodes(
+                    hasTestTag("app-background") and
+                        SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Ready")
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        populate(1)
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("navigation-rail").fetchSemanticsNodes().isNotEmpty()
         }

@@ -26,8 +26,20 @@ and recomposition. The remaining suite did not run; this APK is not qualified.
 [Failure evidence](https://github.com/Vanir20342222/ytui/actions/runs/40707245687/artifacts/12825705781)
 retains logs, JUnit and screenshots. The fix captures a finite normalized progress
 value, guards unknown telemetry and tests stopping playback with the UI attached.
-The next run also verifies rendered artwork pixels before screenshots and a
-2560×1600 tablet layout. Runtime results are pending.
+The subsequent [Android run 40710108292](https://github.com/Vanir20342222/ytui/actions/runs/40710108292)
+for `9e38ddf` passed **20 cases**, with the public YouTube case explicitly skipped.
+The stop/mini-player regression and all prior video, export, queue, ICY, account,
+solver and native UI cases passed. Fourteen Android unit tests pass in debug and
+release locally; hosted Rust and Secret scan also pass. Rendered warm artwork
+pixels are checked before screenshots. The first 2560×1600 screenshot caught an
+old popup surface during two emulator size/density overrides despite the grid
+geometry checks passing. Tablet screenshot setup now cold-launches the activity
+at the target viewport; the separate live-rotation test remains intact.
+
+Development packaging is being separated as `dev.ytui.android.preview` after an
+actual certificate comparison proved the installed mobile.2 APK and a new CI
+build cannot update each other. Normal release identity stays unchanged. The
+new package and cold-start screenshot setup require one final emulator run.
 
 The earlier metadata-only `fdd047c` Android run 40682419478 failed while installing
 the emulator system image (`Error on ZipFile unknown archive`), before any device

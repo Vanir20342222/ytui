@@ -30,6 +30,7 @@ android {
     ndkVersion '27.2.12479018'
     defaultConfig {
         applicationId 'dev.ytui.android'
+        resValue 'string', 'app_name', 'ytui'
         minSdk 26
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
         targetSdk 35
@@ -54,7 +55,11 @@ android {
         }
     }
     buildTypes {
-        debug { debuggable true }
+        debug {
+            debuggable true
+            applicationIdSuffix '.preview'
+            resValue 'string', 'app_name', 'ytui Preview'
+        }
         release {
             debuggable false
             minifyEnabled false

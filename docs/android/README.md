@@ -34,6 +34,12 @@ The APK includes ARM64 (both requested devices) and x86-64 (emulators), requires
 Android 8/API 26 or newer, and targets API 35. Verify its SHA256 using the included
 `SHA256-and-checks.txt`.
 
+New debug builds install as **ytui Preview** (`dev.ytui.android.preview`), alongside
+older APKs and the normal release (`dev.ytui.android`). They do not remove or
+migrate the other app's private account/library/cache. Open the **ytui Preview**
+launcher to test the redesign; connect your account explicitly in that app.
+Release builds keep the original package and label.
+
 These APKs use development signing. Different CI runners can have different
 keys: updates require the same signing key. Do not uninstall a working install
 without exporting wanted data; uninstalling removes private account/library and

@@ -4,6 +4,7 @@ set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$root"
 evidence="$root/target/android-device-evidence"
+test_package=dev.ytui.android.preview
 mkdir -p "$evidence"
 # Disposable emulator only. A first-boot Pixel Launcher ANR can cover the app
 # and steal IME focus; the launcher is not used by these activity tests.
@@ -17,13 +18,13 @@ collect_evidence() {
     kill "$capture_pid" 2>/dev/null || true
     wait "$capture_pid" 2>/dev/null || true
     adb logcat -d -b crash -b main -b system > "$evidence/logcat.txt" 2>&1 || true
-    adb shell dumpsys activity exit-info dev.ytui.android > "$evidence/exit-info.txt" 2>&1 || true
-    adb pull /sdcard/Android/data/dev.ytui.android/files/video-player.png "$evidence/video-player.png" > /dev/null 2>&1 || true
-    adb pull /sdcard/Android/data/dev.ytui.android/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
-    adb pull /sdcard/Android/data/dev.ytui.android/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
+    adb shell dumpsys activity exit-info "$test_package" > "$evidence/exit-info.txt" 2>&1 || true
+    adb pull /sdcard/Android/data/$test_package/files/video-player.png "$evidence/video-player.png" > /dev/null 2>&1 || true
+    adb pull /sdcard/Android/data/$test_package/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
+    adb pull /sdcard/Android/data/$test_package/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
     mkdir -p "$evidence/native-ui"
     for screenshot in native-search native-account native-tablet native-catalog native-music native-wide-catalog native-player native-settings native-card-menu native-theme-{0..12}; do
-        adb pull "/sdcard/Android/data/dev.ytui.android/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true
+        adb pull "/sdcard/Android/data/$test_package/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true
     done
 }
 trap collect_evidence EXIT
@@ -37,7 +38,7 @@ if rg -q 'RustPanic|panicked at' "$evidence/rust-runtime.txt"; then
     echo 'Rust panic detected despite passing instrumentation; inspect device evidence.' >&2
     exit 1
 fi
-if rg -q 'ANR in dev\.ytui\.android' "$evidence/live-logcat.txt"; then
+if rg -Fq "ANR in $test_package" "$evidence/live-logcat.txt"; then
     echo 'Application ANR detected despite passing instrumentation; inspect device evidence.' >&2
     exit 1
 fi
