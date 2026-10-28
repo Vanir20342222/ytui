@@ -321,8 +321,22 @@ class CatalogUiTest {
                 MediaRuntimeTest.status().optBoolean("paused")
             }
             compose.onNodeWithTag("mini-player").performClick()
-            compose.onNodeWithTag("music-visualizer").assertIsDisplayed()
-            MediaRuntimeTest.capture("native-player.png")
+            try {
+                // Dialog windows are attached by Android after Compose has become idle.
+                compose.waitUntil(10_000) {
+                    compose.onNodeWithTag("music-visualizer").isDisplayed()
+                }
+            } finally {
+                MediaRuntimeTest.capture("native-player.png")
+                android.util.Log.i(
+                    "PlayerLayoutTest",
+                    compose.onRoot(useUnmergedTree = true).printToString(),
+                )
+            }
+            compose
+                .onNodeWithTag("music-visualizer")
+                .assertIsDisplayed()
+                .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
             compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
                 MediaRuntimeTest.status().optBoolean("playing")

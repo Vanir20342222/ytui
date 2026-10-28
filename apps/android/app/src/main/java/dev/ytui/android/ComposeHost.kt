@@ -699,6 +699,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             Column(Modifier.weight(1f)) {
                 Text(
                     feed.title,
+                    Modifier.testTag("feed-heading"),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,

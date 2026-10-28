@@ -85,7 +85,8 @@ and separate Android folder-picker Music/Video destinations for completed media.
 - Radio uses provider artwork first and curated sized genre photographs as a
   fallback; [sources/license](RADIO_ARTWORK.md) are recorded. Vinyl/VU/Orbit use
   cached cover art and pause-aware animation/PCM, without generated online demo feeds.
-- Owner signing was selected; [private setup and stable channel](SIGNING.md)
+- Private local signing with SSH-encrypted recovery replaced GitHub secret setup;
+  [recovery and the stable channel](SIGNING.md)
   preserve both old installations. No signing key is committed or published.
 
 Current evidence: local debug/release compile/unit/lint and strict Rust Clippy

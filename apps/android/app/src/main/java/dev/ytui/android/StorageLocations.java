@@ -18,6 +18,18 @@ final class StorageLocations {
     return raw.isEmpty() ? null : Uri.parse(raw);
   }
 
+  /** DocumentsUI expects a document URI here, not the persisted tree-grant URI. */
+  static Uri initialDocument(boolean audio) {
+    Uri tree = folder(audio);
+    if (tree == null) return null;
+    try {
+      return DocumentsContract.buildDocumentUri(
+          tree.getAuthority(), DocumentsContract.getTreeDocumentId(tree));
+    } catch (IllegalArgumentException invalid) {
+      return null;
+    }
+  }
+
   static String label(boolean audio) {
     Uri folder = folder(audio);
     if (folder == null) return "App storage";

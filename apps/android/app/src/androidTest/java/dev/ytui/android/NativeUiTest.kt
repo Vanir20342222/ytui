@@ -122,7 +122,7 @@ class NativeUiTest {
             Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
             Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
             val layouts = mutableListOf<TextLayoutResult>()
-            compose.onNodeWithText("For you").performSemanticsAction(
+            compose.onNodeWithTag("feed-heading").performSemanticsAction(
                 SemanticsActions.GetTextLayoutResult
             ) {
                 it(layouts)

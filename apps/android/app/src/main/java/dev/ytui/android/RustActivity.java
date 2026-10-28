@@ -140,7 +140,7 @@ public final class RustActivity extends ComponentActivity {
           new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
               .putExtra(
                   android.provider.DocumentsContract.EXTRA_INITIAL_URI,
-                  StorageLocations.folder(audio))
+                  StorageLocations.initialDocument(audio))
               .addFlags(
                   Intent.FLAG_GRANT_READ_URI_PERMISSION
                       | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

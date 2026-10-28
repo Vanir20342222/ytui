@@ -47,12 +47,20 @@ public final class OfflineLibraryRuntimeTest {
             new MediaRuntimeTest.FixtureServer(ExportRuntimeTest.asset(ctx, "fixture-audio.m4a"))) {
       MobileSettings.prefs().edit().putBoolean("auto_save_folders", false).commit();
       StorageLocations.prefs().edit().putString("music", tree.toString()).commit();
+      assertEquals(
+          DocumentsContract.buildDocumentUri(
+              tree.getAuthority(), DocumentsContract.getTreeDocumentId(tree)),
+          StorageLocations.initialDocument(true));
       scenario.onActivity(activity -> activity.pickFolder(true));
+      assertNotNull(
+          "Folder picker opened the wrong directory",
+          device.wait(Until.findObject(By.text(folderName)), 10000));
       UiObject2 use =
           device.wait(
               Until.findObject(By.text(java.util.regex.Pattern.compile("(?i)use this folder"))),
               10000);
       assertNotNull("System folder picker did not open at the requested folder", use);
+      assertTrue("The chosen folder must be writable", use.isEnabled());
       use.click();
       UiObject2 allow =
           device.wait(
