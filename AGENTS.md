@@ -40,8 +40,8 @@ baseline defects, milestones, migration requirements, and acceptance checks.
 
 - M9 adds the Android preview and monorepo. Desktop source is `apps/desktop`;
   package/binary names and installed state paths must remain compatible.
-  Shared network/provider code is `crates/ytui-providers`; Android engine and
-  engine remains Rust in `crates/ytui-mobile`. On 2026-10-28 the user authorized a
+  Shared network/provider code is `crates/ytui-providers`; Android's engine
+  remains Rust in `crates/ytui-mobile`. On 2026-10-28 the user authorized a
   stack change after reporting unusable text input/themes/account navigation on
   a physical Galaxy Tab S9. Android's current UI target is native Jetpack Compose
   under `apps/android`, with the shared Rust engine and terminal visual style.

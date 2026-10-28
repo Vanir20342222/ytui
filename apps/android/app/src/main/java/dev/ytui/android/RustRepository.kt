@@ -1,0 +1,682 @@
+package dev.ytui.android
+
+import android.graphics.Bitmap
+import android.net.Uri
+import android.util.LruCache
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import java.util.UUID
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
+import org.json.JSONArray
+import org.json.JSONObject
+
+internal fun json(vararg fields: Pair<String, Any?>) =
+    JSONObject().apply { fields.forEach { (key, value) -> put(key, value ?: JSONObject.NULL) } }
+
+internal fun JSONObject.copyJson() = JSONObject(toString())
+
+internal fun JSONArray.objects() = (0 until length()).mapNotNull { optJSONObject(it) }
+
+internal class RpcError(val code: String, message: String, val retryMs: Long = 0) :
+    Exception(message)
+
+/** Blocking JNI never runs on Android's main thread; cancellation reaches Rust immediately. */
+internal object RustRpc {
+    private val ids = AtomicLong(10_000)
+    private val workers = ThreadPoolExecutor(8, 8, 0L, TimeUnit.SECONDS, ArrayBlockingQueue(64))
+
+    suspend fun call(request: JSONObject): Any? = suspendCancellableCoroutine { continuation ->
+        val id = ids.incrementAndGet()
+        val payload = request.copyJson().put("request_id", id).toString()
+        val future =
+            try {
+                workers.submit {
+                    try {
+                        val reply = JSONObject(NativeBridge.request(payload))
+                        if (!reply.optBoolean("ok"))
+                            throw RpcError(
+                                reply.optString("code"),
+                                reply.optString("error", "Request failed"),
+                                reply.optLong("retry_after_ms"),
+                            )
+                        if (continuation.isActive)
+                            continuation.resume(
+                                reply.opt("data").takeUnless { it == JSONObject.NULL }
+                            )
+                    } catch (error: Exception) {
+                        if (continuation.isActive) continuation.resumeWithException(error)
+                    }
+                }
+            } catch (busy: RejectedExecutionException) {
+                continuation.resumeWithException(
+                    RpcError("busy", "Too many requests. Please try again shortly.")
+                )
+                return@suspendCancellableCoroutine
+            }
+        continuation.invokeOnCancellation {
+            NativeBridge.cancel(id)
+            future.cancel(true)
+        }
+    }
+
+    suspend fun objectCall(op: String, vararg fields: Pair<String, Any?>) =
+        call(json("op" to op, *fields)) as? JSONObject ?: JSONObject()
+
+    suspend fun arrayCall(op: String, vararg fields: Pair<String, Any?>) =
+        call(json("op" to op, *fields)) as? JSONArray ?: JSONArray()
+}
+
+internal data class MediaCard(val value: JSONObject) {
+    val title: String
+        get() = value.optString("title")
+
+    val creator: String
+        get() = value.optString("creator")
+
+    val url: String
+        get() = value.optString("url")
+
+    val kind: String
+        get() = value.optString("kind", "video")
+
+    val key: String
+        get() = url.ifBlank { "$kind:${value.optString("id")}:$title" }
+
+    val collection: Boolean
+        get() = kind in setOf("playlist", "album", "artist", "channel")
+
+    val audio: Boolean
+        get() = kind == "song" || kind == "station"
+
+    val live: Boolean
+        get() = value.optBoolean("live")
+}
+
+internal data class FeedState(
+    val request: Any = "Home",
+    val title: String = "For you",
+    val cards: List<MediaCard> = emptyList(),
+    val categories: List<JSONObject> = emptyList(),
+    val continuation: String? = null,
+    val loading: Boolean = false,
+    val error: String? = null,
+    val errorCode: String = "",
+    val notice: String? = null,
+    val generation: Long = 0,
+    val scrollIndex: Int = 0,
+)
+
+internal data class PlayerState(val value: JSONObject = JSONObject()) {
+    val title: String
+        get() = value.optString("title")
+
+    val media: JSONObject?
+        get() = value.optJSONObject("media")
+
+    val playing: Boolean
+        get() = value.optBoolean("playing")
+
+    val position: Float
+        get() = value.optDouble("position", 0.0).toFloat().coerceAtLeast(0f)
+
+    val duration: Float
+        get() = value.optDouble("duration", 0.0).toFloat().coerceAtLeast(0f)
+
+    val video: Boolean
+        get() = value.optBoolean("video")
+
+    val preview: Boolean
+        get() = value.optBoolean("preview")
+}
+
+internal object ArtworkCache {
+    private val slots = Semaphore(8)
+    private val memory =
+        object : LruCache<String, Bitmap>(24 * 1024 * 1024) {
+            override fun sizeOf(key: String, value: Bitmap) = value.allocationByteCount
+        }
+
+    suspend fun load(media: MediaCard, pixels: Int): Bitmap? {
+        if (
+            media.value.optString("thumbnail").isBlank() &&
+                (media.value.optJSONArray("thumbnails")?.length() ?: 0) == 0
+        )
+            return null
+        val size = pixels.coerceIn(32, 768)
+        val key = "${media.key}:${media.value.optString("thumbnail")}:$size"
+        memory.get(key)?.let {
+            return it
+        }
+        return slots.withPermit {
+            memory.get(key)
+                ?: withContext(Dispatchers.IO) {
+                    val data =
+                        NativeBridge.thumbnail(media.value.toString(), size)
+                            ?: return@withContext null
+                    if (
+                        data.size < 3 ||
+                            data[0] !in 1..768 ||
+                            data[1] !in 1..768 ||
+                            data.size != data[0] * data[1] + 2
+                    )
+                        return@withContext null
+                    Bitmap.createBitmap(data, 2, data[0], data[0], data[1], Bitmap.Config.ARGB_8888)
+                        .also { memory.put(key, it) }
+                }
+        }
+    }
+}
+
+internal class YtuiViewModel : ViewModel() {
+    val tab = MutableStateFlow(1)
+    val feeds = Array(4) { MutableStateFlow(FeedState()) }
+    private val history = Array(4) { ArrayDeque<FeedState>() }
+    private val feedJobs = arrayOfNulls<Job>(4)
+    private var playbackJob: Job? = null
+    private var accountEpoch = 0L
+    private val settingsLock = Mutex()
+    private val snapshotLock = Mutex()
+    val config = MutableStateFlow(JSONObject())
+    val palette = MutableStateFlow(JSONObject())
+    val themes = MutableStateFlow<List<String>>(emptyList())
+    val account = MutableStateFlow(JSONObject())
+    val player = MutableStateFlow(PlayerState())
+    val downloads = MutableStateFlow<List<JSONObject>>(emptyList())
+    val queue = MutableStateFlow<List<MediaCard>>(emptyList())
+    val recent = MutableStateFlow<List<MediaCard>>(emptyList())
+    val status = MutableStateFlow("Ready")
+    val ready = MutableStateFlow(false)
+    val playerOpen = MutableStateFlow(false)
+    val sharedQuery = MutableStateFlow("")
+    private var initialized = false
+
+    fun initialize(dark: Boolean) {
+        if (initialized) return
+        initialized = true
+        viewModelScope.launch {
+            runCatching {
+                    config.value = RustRpc.objectCall("settings")
+                    palette.value = RustRpc.objectCall("theme", "dark" to dark)
+                    themes.value =
+                        RustRpc.arrayCall("themes").let { values ->
+                            (0 until values.length()).map { values.getString(it) }
+                        }
+                    account.value = RustRpc.objectCall("account")
+                    account.value
+                        .optString("notice")
+                        .takeUnless { it.isBlank() || it == "null" }
+                        ?.let { status.value = it }
+                }
+                .onFailure { status.value = it.message ?: "Could not load settings" }
+            ready.value = true
+            if (!MediaBridge.offlineUi) navigate(1, "Home", remember = false)
+        }
+    }
+
+    fun systemTheme(dark: Boolean) {
+        if (config.value.optString("theme", "system") == "system")
+            viewModelScope.launch {
+                runCatching { palette.value = RustRpc.objectCall("theme", "dark" to dark) }
+            }
+    }
+
+    suspend fun snapshot() =
+        snapshotLock.withLock {
+            val value = withContext(Dispatchers.Default) { JSONObject(MediaBridge.snapshot()) }
+            value.optJSONObject("player")?.let { player.value = PlayerState(it) }
+            value.optJSONArray("downloads")?.let { downloads.value = it.objects() }
+            value.optJSONArray("events")?.objects()?.forEach { event ->
+                val text = event.optString("text")
+                when (event.optString("kind")) {
+                    "show_player" -> playerOpen.value = true
+                    "shared" -> sharedQuery.value = text
+                    "error",
+                    "notice" -> status.value = text
+                    "theme_file" ->
+                        task {
+                            palette.value = RustRpc.objectCall("import_theme", "text" to text)
+                            config.value = RustRpc.objectCall("settings")
+                            status.value = "Palette applied"
+                        }
+                    "cookie_file" -> {
+                        val intent = event.optLong("account_intent", -1)
+                        if (intent == NativeBridge.accountIntent())
+                            acceptAccount("import_cookie_file", intent, "text" to text)
+                    }
+                    "cookies" -> changeAccount("import_cookies", "header" to text)
+                    "account_updated" -> refreshAccount()
+                    "history_updated",
+                    "history_cleared" -> loadHistory()
+                    "lyrics_file" ->
+                        if (event.optString("request_token") == lyricToken)
+                            importedLyrics.value = text
+                }
+            }
+        }
+
+    fun chooseTab(index: Int) {
+        tab.value = index
+        if (index > 0 && feeds[index].value.generation == 0L && !MediaBridge.offlineUi)
+            navigate(index, if (index == 3) "Cliamp" else "Home", remember = false)
+    }
+
+    fun rememberScroll(index: Int, position: Int) {
+        feeds[index].value = feeds[index].value.copy(scrollIndex = position)
+    }
+
+    fun navigate(
+        index: Int = tab.value,
+        request: Any,
+        append: Boolean = false,
+        remember: Boolean = true,
+        retry: Int = 0,
+    ) {
+        if (index !in 1..3) return
+        val previous = feeds[index].value
+        if (append && (previous.loading || previous.continuation == null)) return
+        feedJobs[index]?.cancel()
+        if (!append && remember && previous.generation > 0) {
+            history[index].addLast(previous.copy(loading = false))
+            while (
+                history[index].size > 12 ||
+                    history[index].sumOf {
+                        it.cards.sumOf { card -> card.value.toString().length * 2 }
+                    } > 2 * 1024 * 1024
+            ) history[index].removeFirst()
+        }
+        val generation = previous.generation + 1
+        val loading =
+            if (append) previous.copy(loading = true, error = null, generation = generation)
+            else FeedState(request = request, loading = true, generation = generation)
+        feeds[index].value = loading
+        feedJobs[index] =
+            viewModelScope.launch {
+                try {
+                    val page =
+                        RustRpc.objectCall(
+                            "browse",
+                            "tab" to index,
+                            "request" to request,
+                            "offset" to if (append) previous.cards.size else 0,
+                        )
+                    if (feeds[index].value.generation != generation) return@launch
+                    val incoming =
+                        page.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+                    val cards =
+                        (if (append) previous.cards + incoming else incoming)
+                            .distinctBy { it.key }
+                            .takeLast(2000)
+                    feeds[index].value =
+                        loading.copy(
+                            request = if (append) previous.request else request,
+                            title = page.optString("title", previous.title),
+                            cards = cards,
+                            categories =
+                                if (append) previous.categories
+                                else page.optJSONArray("categories")?.objects() ?: emptyList(),
+                            continuation =
+                                page.optString("continuation").takeUnless {
+                                    it.isBlank() || it == "null"
+                                },
+                            notice =
+                                page.optString("notice").takeUnless {
+                                    it.isBlank() || it == "null"
+                                },
+                            loading = false,
+                        )
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    if (feeds[index].value.generation != generation) return@launch
+                    feeds[index].value =
+                        loading.copy(
+                            loading = false,
+                            error = error.message,
+                            errorCode = (error as? RpcError)?.code ?: "",
+                        )
+                    if (error is RpcError && error.retryMs > 0 && retry < 3) {
+                        delay(error.retryMs.coerceAtLeast(2000))
+                        if (feeds[index].value.generation == generation)
+                            navigate(index, request, append, remember = false, retry = retry + 1)
+                    }
+                }
+            }
+    }
+
+    fun more() {
+        feeds[tab.value].value.continuation?.let {
+            navigate(request = json("Continue" to it), append = true)
+        }
+    }
+
+    fun back(): Boolean {
+        if (history[tab.value].isEmpty()) return false
+        val index = tab.value
+        feedJobs[index]?.cancel()
+        feeds[index].value =
+            history[index]
+                .removeLast()
+                .copy(generation = feeds[index].value.generation + 1, loading = false)
+        return true
+    }
+
+    fun search(raw: String) {
+        val query = raw.trim()
+        if (query.isBlank()) return
+        if (query.startsWith("https://") || query.startsWith("http://")) {
+            runCatching { linked(query) }
+                .onSuccess { play(it) }
+                .onFailure { status.value = "Enter a valid HTTP(S) video or playlist URL" }
+        } else navigate(request = json((if (tab.value == 3) "RadioSearch" else "Search") to query))
+    }
+
+    fun linked(raw: String): MediaCard {
+        val uri = java.net.URI(raw)
+        require(uri.scheme in listOf("http", "https") && uri.host != null && uri.userInfo == null)
+        val parsed = Uri.parse(raw)
+        val playlist =
+            parsed.path?.trimEnd('/') == "/playlist" && parsed.getQueryParameter("list") != null
+        return MediaCard(
+            json(
+                "url" to raw,
+                "title" to raw,
+                "id" to if (playlist) parsed.getQueryParameter("list") else "",
+                "kind" to
+                    if (playlist) "playlist"
+                    else if (tab.value == 3) "station" else if (tab.value == 2) "song" else "video",
+                "live" to (tab.value == 3),
+            )
+        )
+    }
+
+    fun tracks(media: MediaCard) {
+        media.value
+            .optString("tracks_url")
+            .takeUnless { it.isBlank() || it == "null" }
+            ?.let { navigate(request = json("CliampTracks" to it)) }
+    }
+
+    private fun context(media: MediaCard): JSONObject? {
+        val request = feeds[tab.value].value.request as? JSONObject ?: return null
+        if (
+            tab.value !in 2..3 ||
+                media.live ||
+                media.collection ||
+                listOf("Collection", "Details", "CliampTracks").none { request.has(it) }
+        )
+            return null
+        return json(
+            "op" to "prepare_context",
+            "context_id" to UUID.randomUUID().toString(),
+            "request" to request,
+            "source_url" to media.url,
+            "source_id" to media.value.optString("id"),
+            "music" to (tab.value == 2),
+        )
+    }
+
+    fun play(
+        media: MediaCard,
+        preview: Boolean = false,
+        download: Boolean = false,
+        resume: Boolean = false,
+        queued: Boolean = false,
+    ) {
+        val quality = config.value.optJSONObject("download")?.optString("quality", "1080") ?: "1080"
+        val audio =
+            media.audio ||
+                download && config.value.optJSONObject("download")?.optBoolean("audio") == true
+        if (download && media.live) {
+            status.value = "Live recording is not available"
+            return
+        }
+        if (media.collection) {
+            if (download)
+                effect(
+                    "download_playlist",
+                    "request" to json("Collection" to media.value.optString("id")),
+                    "music" to (tab.value == 2),
+                    "audio" to audio,
+                    "quality" to quality,
+                )
+            else navigate(request = json("Collection" to media.value.optString("id")))
+            return
+        }
+        val context = if (!preview && !download && !queued) context(media) else null
+        val epoch = accountEpoch
+        if (!download) playbackJob?.cancel()
+        val job = task {
+            status.value = if (download) "Preparing download…" else "Resolving playback…"
+            val stream =
+                RustRpc.objectCall(
+                    "resolve",
+                    "media" to media.value,
+                    "audio" to audio,
+                    "quality" to quality,
+                )
+            if (epoch != accountEpoch) return@task
+            val item = media.value.copyJson()
+            if (item.optString("title") == media.url) {
+                item.put("title", stream.optString("title", media.title))
+                item.put("creator", stream.optString("creator"))
+                item.put("thumbnail", stream.optString("thumbnail"))
+            }
+            val request =
+                json(
+                    "media" to item,
+                    "stream" to stream,
+                    "audio" to audio,
+                    "quality" to quality,
+                    "preview" to preview,
+                    "resume" to resume,
+                    "queued" to queued,
+                    "context_id" to context?.optString("context_id"),
+                    "context" to context,
+                )
+            effect(if (download) "download" else "play", "request" to request)
+            if (
+                !download &&
+                    (!audio || config.value.optString("music_player_style").endsWith("-fullscreen"))
+            )
+                playerOpen.value = true
+            status.value = if (download) "Download queued" else "Starting playback"
+        }
+        if (!download) playbackJob = job
+    }
+
+    fun effect(op: String, vararg fields: Pair<String, Any?>) {
+        MediaBridge.execute(json("op" to op, *fields).toString())
+    }
+
+    fun command(op: String, vararg fields: Pair<String, Any?>) {
+        if (op == "pause")
+            player.value =
+                PlayerState(
+                    player.value.value
+                        .copyJson()
+                        .put("playing", !player.value.playing)
+                        .put("paused", player.value.playing)
+                )
+        effect(op, *fields)
+    }
+
+    fun save(media: MediaCard) = task {
+        RustRpc.objectCall("save_media", "media" to media.value)
+        status.value = "Saved locally"
+    }
+
+    fun enqueue(media: MediaCard) = task {
+        RustRpc.call(
+            json(
+                "op" to if (media.collection) "enqueue_collection" else "enqueue",
+                "media" to media.value,
+                "request" to json("Collection" to media.value.optString("id")),
+                "music" to (tab.value == 2),
+            )
+        )
+        loadQueue()
+        status.value = "Added to queue"
+    }
+
+    fun loadQueue() = task { queue.value = RustRpc.arrayCall("queue").objects().map(::MediaCard) }
+
+    fun moveQueue(index: Int, to: Int, media: MediaCard) = task {
+        val result =
+            RustRpc.objectCall("queue_move", "from" to index, "to" to to, "url" to media.url)
+        queue.value = result.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+    }
+
+    fun removeQueue(index: Int, media: MediaCard) = task {
+        val result = RustRpc.objectCall("queue_remove", "index" to index, "url" to media.url)
+        queue.value = result.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+    }
+
+    fun loadHistory() = task {
+        recent.value = RustRpc.arrayCall("history_list").objects().map(::MediaCard)
+    }
+
+    fun updateConfig(dark: Boolean, edit: (JSONObject) -> Unit) = task {
+        settingsLock.withLock {
+            val draft = config.value.copyJson()
+            edit(draft)
+            RustRpc.objectCall("save_settings", "config" to draft)
+            val appliedPalette = RustRpc.objectCall("theme", "dark" to dark)
+            palette.value = appliedPalette
+            config.value = draft
+            effect("settings", "config" to draft)
+            status.value = "Settings applied"
+        }
+    }
+
+    private fun invalidateAccount() {
+        accountEpoch++
+        playbackJob?.cancel()
+        for (index in 1..2) {
+            feedJobs[index]?.cancel()
+            history[index].clear()
+            feeds[index].value = FeedState(generation = feeds[index].value.generation + 1)
+        }
+    }
+
+    fun changeAccount(op: String, vararg fields: Pair<String, Any?>) {
+        acceptAccount(op, NativeBridge.beginAccountChange(), *fields)
+    }
+
+    private fun acceptAccount(op: String, intent: Long, vararg fields: Pair<String, Any?>) {
+        invalidateAccount()
+        val epoch = accountEpoch
+        if (op == "disconnect") effect("disconnect")
+        task {
+            val result = RustRpc.objectCall(op, "account_intent" to intent, *fields)
+            if (epoch != accountEpoch) return@task
+            account.value = result
+            status.value =
+                if (account.value.optBoolean("connected")) "Account connected"
+                else
+                    account.value.optString("notice").takeUnless { it.isBlank() || it == "null" }
+                        ?: "Disconnected"
+            if (!MediaBridge.offlineUi && tab.value in 1..2)
+                navigate(request = "Home", remember = false)
+        }
+    }
+
+    private fun refreshAccount() {
+        invalidateAccount()
+        val epoch = accountEpoch
+        task {
+            val result = RustRpc.objectCall("account")
+            if (epoch != accountEpoch) return@task
+            account.value = result
+            if (!MediaBridge.offlineUi && tab.value in 1..2)
+                navigate(request = "Home", remember = false)
+        }
+    }
+
+    val lyricData = MutableStateFlow(JSONObject())
+    val lyricVersions = MutableStateFlow<List<JSONObject>>(emptyList())
+    val importedLyrics = MutableStateFlow<String?>(null)
+    private var lyricToken = ""
+    private var lyricRevision = 0L
+
+    fun lyricLoad(media: JSONObject) {
+        lyricToken = UUID.randomUUID().toString()
+        lyricData.value = JSONObject()
+        lyricVersions.value = emptyList()
+        importedLyrics.value = null
+        val token = lyricToken
+        val revision = ++lyricRevision
+        task {
+            val result = RustRpc.objectCall("lyrics_get", "url" to media.optString("url"))
+            if (token == lyricToken && revision == lyricRevision) lyricData.value = result
+        }
+    }
+
+    fun lyricImport() {
+        effect("pick", "kind" to "lyrics", "request_token" to lyricToken)
+    }
+
+    fun lyricClose() {
+        lyricToken = ""
+        lyricRevision++
+        importedLyrics.value = null
+    }
+
+    fun lyricLookup(media: JSONObject, title: String, artist: String) = task {
+        val token = lyricToken
+        val revision = ++lyricRevision
+        val result =
+            RustRpc.arrayCall("lyrics", "media" to media, "title" to title, "artist" to artist)
+                .objects()
+        if (token == lyricToken && revision == lyricRevision) lyricVersions.value = result
+    }
+
+    fun lyricSave(media: JSONObject, document: JSONObject) = task {
+        val token = lyricToken
+        val revision = ++lyricRevision
+        val result =
+            RustRpc.objectCall(
+                "lyrics_save",
+                "url" to media.optString("url"),
+                "document" to document,
+            )
+        if (token == lyricToken && revision == lyricRevision) lyricData.value = result
+        status.value = "Lyrics saved locally"
+    }
+
+    fun lyricRemove(media: JSONObject) = task {
+        val token = lyricToken
+        val revision = ++lyricRevision
+        RustRpc.objectCall("lyrics_remove", "url" to media.optString("url"))
+        if (token == lyricToken && revision == lyricRevision) lyricData.value = JSONObject()
+        status.value = "Saved lyrics removed"
+    }
+
+    private fun task(block: suspend CoroutineScope.() -> Unit): Job =
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                status.value = error.message ?: "Operation failed"
+            }
+        }
+
+    override fun onCleared() {
+        playbackJob?.cancel()
+        feedJobs.forEach { it?.cancel() }
+        super.onCleared()
+    }
+}

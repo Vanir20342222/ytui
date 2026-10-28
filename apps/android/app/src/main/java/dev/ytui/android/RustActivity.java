@@ -4,11 +4,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import com.google.androidgamesdk.GameActivity;
+import androidx.activity.ComponentActivity;
 import java.io.InputStream;
 
-public final class RustActivity extends GameActivity {
+public final class RustActivity extends ComponentActivity {
+  static final java.util.concurrent.atomic.AtomicLong generations =
+      new java.util.concurrent.atomic.AtomicLong();
+  static final java.util.concurrent.atomic.AtomicLong shutdowns =
+      new java.util.concurrent.atomic.AtomicLong();
   private String exportDownload;
+  private int documentRequest;
+  private long documentAccountIntent;
+  private String documentToken;
   static volatile java.lang.ref.WeakReference<RustActivity> reference =
       new java.lang.ref.WeakReference<>(null);
 
@@ -22,7 +29,14 @@ public final class RustActivity extends GameActivity {
     MediaBridge.offlineUi =
         BuildConfig.DEBUG && getIntent().getBooleanExtra("ytui.offline-ui", false);
     super.onCreate(state);
-    if (state != null) exportDownload = state.getString("ytui-export-download");
+    generations.incrementAndGet();
+    ComposeHost.attach(this);
+    if (state != null) {
+      exportDownload = state.getString("ytui-export-download");
+      documentRequest = state.getInt("ytui-document-request");
+      documentAccountIntent = state.getLong("ytui-document-account-intent");
+      documentToken = state.getString("ytui-document-token");
+    }
     OfflineStore.resetSnapshotClient();
     getWindow()
         .getDecorView()
@@ -51,22 +65,6 @@ public final class RustActivity extends GameActivity {
             != PackageManager.PERMISSION_GRANTED)
       requestPermissions(new String[] {"android.permission.POST_NOTIFICATIONS"}, 21);
     onNewIntent(getIntent());
-    if (Build.VERSION.SDK_INT >= 33)
-      getOnBackInvokedDispatcher()
-          .registerOnBackInvokedCallback(
-              android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-              () -> {
-                MediaBridge.event("back", "");
-                NativeBridge.frameAvailable();
-              });
-  }
-
-  // Rust handles overlays/navigation; calling the base would finish the activity.
-  @android.annotation.SuppressLint("MissingSuperCall")
-  @Override
-  public void onBackPressed() {
-    MediaBridge.event("back", "");
-    NativeBridge.frameAvailable();
   }
 
   @Override
@@ -86,11 +84,13 @@ public final class RustActivity extends GameActivity {
   protected void onDestroy() {
     if (reference.get() == this) reference.clear();
     super.onDestroy();
+    shutdowns.incrementAndGet();
   }
 
   @Override
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
+    setIntent(intent);
     if ("dev.ytui.OPEN_PLAYER".equals(intent.getAction())) MediaBridge.event("show_player", "");
     if (Intent.ACTION_SEND.equals(intent.getAction()))
       MediaBridge.event("shared", intent.getStringExtra(Intent.EXTRA_TEXT));
@@ -99,7 +99,30 @@ public final class RustActivity extends GameActivity {
   @Override
   protected void onSaveInstanceState(Bundle state) {
     state.putString("ytui-export-download", exportDownload);
+    state.putInt("ytui-document-request", documentRequest);
+    state.putLong("ytui-document-account-intent", documentAccountIntent);
+    state.putString("ytui-document-token", documentToken);
     super.onSaveInstanceState(state);
+  }
+
+  void pickDocument(String kind, String token) {
+    if (documentRequest != 0) {
+      MediaBridge.event("error", "Finish or cancel the open document picker first");
+      return;
+    }
+    documentRequest = "lyrics".equals(kind) ? 44 : "theme".equals(kind) ? 42 : 41;
+    documentToken = token;
+    documentAccountIntent = documentRequest == 41 ? NativeBridge.beginAccountChange() : 0;
+    try {
+      startActivityForResult(
+          new Intent(Intent.ACTION_OPEN_DOCUMENT)
+              .setType("*/*")
+              .addCategory(Intent.CATEGORY_OPENABLE),
+          documentRequest);
+    } catch (RuntimeException error) {
+      documentRequest = 0;
+      MediaBridge.event("error", "No document provider is available");
+    }
   }
 
   void exportDownload(String id) {
@@ -160,10 +183,12 @@ public final class RustActivity extends GameActivity {
       OfflineExport.enqueue(id, destination);
       return;
     }
-    if ((request != 41 && request != 42 && request != 44)
-        || result != RESULT_OK
-        || data == null
-        || data.getData() == null) return;
+    if (request != documentRequest || documentRequest == 0) return;
+    documentRequest = 0;
+    final long accountIntent = documentAccountIntent;
+    final String token = documentToken;
+    documentToken = null;
+    if (result != RESULT_OK || data == null || data.getData() == null) return;
     final android.net.Uri uri = data.getData();
     final android.content.ContentResolver resolver = getApplicationContext().getContentResolver();
     OfflineStore.IO.execute(
@@ -171,8 +196,9 @@ public final class RustActivity extends GameActivity {
           try (InputStream input = resolver.openInputStream(uri)) {
             MediaBridge.event(
                 request == 41 ? "cookie_file" : request == 42 ? "theme_file" : "lyrics_file",
-                DocumentInput.read(input, request == 44 ? 512 * 1024 : 2 * 1024 * 1024));
-            NativeBridge.frameAvailable();
+                DocumentInput.read(input, request == 44 ? 512 * 1024 : 2 * 1024 * 1024),
+                token,
+                accountIntent);
           } catch (Exception error) {
             MediaBridge.event("error", "Could not read selected document");
           }

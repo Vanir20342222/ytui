@@ -5,7 +5,29 @@ has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
-## Passed checks
+## Physical UI failure and native migration (2026-10-28)
+
+The user installed the earlier development APK on a Galaxy Tab S9 and reported
+unusable text fields, theme choices with no visible effect, and protected-feed
+errors offering only desktop F2/CLI instructions. This **failed physical UI
+acceptance** supersedes earlier impressions from headless renders and backend
+checks. The old APK below is a historical backend checkpoint, not a recommended
+UI-qualified build.
+
+Production Android presentation now uses Jetpack Compose/ComponentActivity and a
+native Media3 PlayerView. The shared Rust engine, private paths and data formats
+are preserved. Native text/IME, all-theme painted-pixel/persistence, account-error
+navigation/sign-in cancellation and wide-layout panel tests are added. Their
+emulator results and a physical Tab S9 re-test must pass before qualification.
+
+Local complete ARM64/x86-64 builds, Kotlin/Java compilation, instrumentation APK
+assembly, **9 Java unit tests**, Android lint and APK signing/16 KiB alignment
+inspection passed. The full Rust workspace passed **315 tests, 0 failed, 31
+explicitly ignored**, formatting and strict host/ARM64 Clippy. Native UI emulator
+results will be recorded after the new suite runs. Earlier test counts below describe
+their specific Rust/legacy UI/backend checkpoints only.
+
+## Passed historical backend checks
 
 - Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.
   Formatting and strict all-target workspace Clippy passed. ARM64 Android-specific
@@ -54,7 +76,7 @@ exit information and an actual 1080×2400 player screenshot. Visual inspection
 confirmed system-bar separation and visible sliders/clock labels. It is generated
 local test media, not evidence of public YouTube playback or audible output.
 
-## Development APK
+## Historical development APK (failed physical UI acceptance)
 
 Qualified checkpoint: source `59675e0` (PR merge revision `b5c48f3`).
 [APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40641208084/artifacts/12795433805).

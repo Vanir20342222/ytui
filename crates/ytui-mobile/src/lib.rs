@@ -1029,8 +1029,56 @@ pub fn call(raw: &str) -> String {
     })();
     match result {
         Ok(value) => json!({"ok":true,"data":value}).to_string(),
-        Err(error) => json!({"ok":false,"error":ytui_providers::diagnostic(&format!("{error:#}"))})
-            .to_string(),
+        Err(error) => mobile_error(&error).to_string(),
+    }
+}
+fn mobile_error(error: &anyhow::Error) -> Value {
+    let text = ytui_providers::diagnostic(&format!("{error:#}"));
+    let lower = text.to_ascii_lowercase();
+    let (code, message) = if lower.contains("no anonymous home recommendations") {
+        ("anonymous_home_empty","YouTube did not provide anonymous recommendations. Search for a video or sign in for a personalized feed.".into())
+    } else if lower.contains("sign in first") || lower.contains("session expired") {
+        (
+            "auth_required",
+            "Sign in to open this feed. Use Account → Sign in, or import a cookie document/header."
+                .into(),
+        )
+    } else if text.contains("F2") || text.contains("ytui-rs auth") {
+        ("consent_required","YouTube requires consent or a refreshed account session. Use Account → Sign in or import cookies.".into())
+    } else if lower.contains("likely being blocked")
+        || lower.contains("http 429")
+        || lower.contains("rate limit")
+    {
+        ("provider_rejected", text)
+    } else {
+        ("provider_error", text)
+    };
+    let retry = error
+        .downcast_ref::<ytui_providers::browse::FeedRetry>()
+        .map(|r| r.after.as_millis().min(u64::MAX as u128) as u64);
+    json!({"ok":false,"code":code,"error":message,"retry_after_ms":retry})
+}
+#[cfg(test)]
+mod mobile_error_tests {
+    use super::*;
+    #[test]
+    fn account_errors_offer_android_actions_without_desktop_commands() {
+        for text in [
+            "Sign in first: use F2 → Account → Connect browser or ytui-rs auth import --browser brave-origin",
+            "YouTube requires browser consent. Open YouTube then F2 → Account → Connect browser",
+        ] {
+            let value = mobile_error(&anyhow::anyhow!(text));
+            let text = value["error"].as_str().unwrap();
+            assert!(text.contains("Account"));
+            assert!(
+                !text.contains("F2") && !text.contains("brave-origin") && !text.contains("ytui-rs")
+            );
+        }
+        let value = mobile_error(&anyhow::anyhow!(
+            "No anonymous Home recommendations were returned. Press / to search, or F2"
+        ));
+        assert_eq!(value["code"], "anonymous_home_empty");
+        assert!(value["error"].as_str().unwrap().contains("Search"));
     }
 }
 #[cfg(target_os = "android")]
@@ -1082,6 +1130,64 @@ mod android {
         };
         env.new_string(text)
             .map(|s| s.into_raw())
+            .unwrap_or(std::ptr::null_mut())
+    }
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_ytui_android_NativeBridge_beginAccountChange(
+        _env: JNIEnv,
+        _class: JClass,
+    ) -> jlong {
+        ENGINE
+            .get()
+            .map(|e| e.begin_account_change() as jlong)
+            .unwrap_or(0)
+    }
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_ytui_android_NativeBridge_accountIntent(
+        _env: JNIEnv,
+        _class: JClass,
+    ) -> jlong {
+        ENGINE
+            .get()
+            .map(|e| e.account_intent() as jlong)
+            .unwrap_or(0)
+    }
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_ytui_android_NativeBridge_thumbnail(
+        mut env: JNIEnv,
+        _class: JClass,
+        media: JString,
+        pixels: jni::sys::jint,
+    ) -> jni::sys::jintArray {
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+            || -> Result<jni::sys::jintArray> {
+                let raw: String = env.get_string(&media)?.into();
+                ensure!(raw.len() <= 256 * 1024, "Thumbnail request exceeds limit");
+                let media: Media = serde_json::from_str(&raw)?;
+                let width = pixels.clamp(32, 768) as u32;
+                let image = runtime()
+                    .block_on(
+                        ENGINE
+                            .get()
+                            .context("Engine is not initialized")?
+                            .thumbnail(&media, width, width),
+                    )?
+                    .to_rgba8();
+                let mut values =
+                    Vec::with_capacity(2 + image.width() as usize * image.height() as usize);
+                values.extend([image.width() as i32, image.height() as i32]);
+                values.extend(image.pixels().map(|p| {
+                    ((p[3] as u32) << 24 | (p[0] as u32) << 16 | (p[1] as u32) << 8 | p[2] as u32)
+                        as i32
+                }));
+                let output = env.new_int_array(values.len() as i32)?;
+                env.set_int_array_region(&output, 0, &values)?;
+                Ok(output.into_raw())
+            },
+        ));
+        result
+            .ok()
+            .and_then(Result::ok)
             .unwrap_or(std::ptr::null_mut())
     }
     #[unsafe(no_mangle)]

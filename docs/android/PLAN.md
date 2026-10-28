@@ -4,14 +4,21 @@ The user requested a Rust Android app with touch-first phone/tablet layouts,
 terminal styling, existing themes/features, performance and actual build checks.
 The desktop application must continue to work and keep its existing state.
 
+The user authorized a native UI stack change on 2026-10-28 after failed physical
+Tab S9 input, theme and account navigation. The engine remains Rust. See
+[NATIVE_UI_MIGRATION.md](NATIVE_UI_MIGRATION.md) for the decision and acceptance
+gates; earlier egui render tests do not qualify the new UI.
+
 ## Architecture
 
 - `apps/desktop`: existing Rust terminal application, with unchanged binary names.
-- `apps/android`: Rust-rendered adaptive touch UI (egui) and minimal Android media/storage/service glue.
+- `apps/android`: native Jetpack Compose adaptive touch UI, Media3 video/player
+  surface, and Android media/storage/service adapters.
 - `crates/ytui-core`: shared models, queue/config/history, themes and policy.
 - `crates/ytui-providers`: shared Rust YouTube/Music browsing, radio/cliamp,
   bounded HTTP/cache, session scoping, images, lyrics and SponsorBlock.
-- `crates/ytui-mobile`: Rust Android engine/UI/JNI boundary; no desktop process,
+- `crates/ytui-mobile`: Rust Android engine/JNI boundary and retained legacy UI
+  prototype; no desktop process,
   keyring, MPRIS, NetworkManager or browser-database dependency.
 - Desktop services re-export shared provider APIs rather than maintain copies.
 

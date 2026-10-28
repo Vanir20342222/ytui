@@ -22,7 +22,7 @@ with zipfile.ZipFile(sys.argv[1]) as archive, tempfile.TemporaryDirectory() as t
         if not loads or any(int(line.split()[-1],16)<16384 for line in loads):
             raise SystemExit(f'{name}: requires 16 KiB ELF alignment')
         symbols=subprocess.check_output([sys.argv[2],'-Ws',str(target)],text=True)
-        for symbol in ['GameActivity_onCreate','Java_dev_ytui_android_NativeBridge_request','Java_dev_ytui_android_NativeBridge_meter','Java_dev_ytui_android_NativeBridge_uiShutdowns','Java_dev_ytui_android_NativeBridge_activateContext']:
+        for symbol in ['Java_dev_ytui_android_NativeBridge_request','Java_dev_ytui_android_NativeBridge_thumbnail','Java_dev_ytui_android_NativeBridge_beginAccountChange','Java_dev_ytui_android_NativeBridge_accountIntent','Java_dev_ytui_android_NativeBridge_meter','Java_dev_ytui_android_NativeBridge_activateContext']:
             if symbol not in symbols: raise SystemExit(f'Missing {abi} symbol: {symbol}')
     if 'assets/ytui-LICENSE' not in archive.namelist():raise SystemExit('Missing application license')
     if 'assets/notices/inventory.json' not in archive.namelist():raise SystemExit('Missing Rust dependency notices')

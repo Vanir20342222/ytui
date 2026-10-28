@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build Rust UI/engine and package an installable Android APK; installs nothing.
+# Build the shared Rust engine and package the native Android UI; installs nothing.
 set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 variant="${YTUI_ANDROID_VARIANT:-debug}"

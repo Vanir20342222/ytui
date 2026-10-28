@@ -23,6 +23,7 @@ public final class PlaybackService extends MediaSessionService {
   final Handler handler = new Handler(Looper.getMainLooper());
   final Set<Long> contextJobs = ConcurrentHashMap.newKeySet();
   volatile long generation = 0;
+  long qualityIntent = 0;
   long skipUntil = 0, lastSkipped = -1, lastPositionSave = 0, sleepDeadline = 0;
   boolean pendingStart, navigationPending, contextReady;
   long streamMetadataUpdates;
@@ -76,6 +77,9 @@ public final class PlaybackService extends MediaSessionService {
         true);
     player.setHandleAudioBecomingNoisy(true);
     player.setWakeMode(C.WAKE_MODE_NETWORK);
+    player.setVideoFrameMetadataListener(
+        (presentationTimeUs, releaseTimeNs, format, mediaFormat) ->
+            MediaBridge.videoFrames.incrementAndGet());
     player.setVolume(prefs.getFloat("volume", 0.7f));
     player.setPlaybackSpeed(prefs.getFloat("speed", 1f));
     session =
@@ -667,6 +671,9 @@ public final class PlaybackService extends MediaSessionService {
         player.setPlaybackSpeed(speed);
         prefs.edit().putFloat("speed", speed).apply();
         break;
+      case "quality":
+        changeQuality(command.optString("value"));
+        break;
       case "next":
         next();
         break;
@@ -721,9 +728,6 @@ public final class PlaybackService extends MediaSessionService {
                   });
           }
           historyEnabled = config.optBoolean("playback_history", true);
-          AudioTap.enabled =
-              config.optString("music_player_style").startsWith("vu")
-                  || config.optString("music_player_style").startsWith("orbit");
         }
         break;
       case "track":
@@ -756,6 +760,69 @@ public final class PlaybackService extends MediaSessionService {
         break;
     }
     publish();
+  }
+
+  private void changeQuality(String quality) throws JSONException {
+    if (!Arrays.asList("360", "480", "720", "1080", "best").contains(quality)) return;
+    if (currentRequest.optJSONObject("media") == null
+        || currentRequest.optBoolean("offline")
+        || currentRequest.optBoolean("preview")
+        || isLive()) {
+      MediaBridge.event("notice", "Quality selection is available for online videos");
+      return;
+    }
+    long intent = ++qualityIntent, version = generation;
+    JSONObject original = currentRequest;
+    JSONObject resolve =
+        new JSONObject()
+            .put("op", "resolve")
+            .put("media", original.getJSONObject("media"))
+            .put("audio", original.optBoolean("audio"))
+            .put("quality", quality);
+    MediaBridge.event("notice", "Loading quality " + quality + "…");
+    worker.execute(
+        () -> {
+          try {
+            JSONObject stream = rpc(resolve);
+            handler.post(
+                () -> {
+                  if (current != this
+                      || version != generation
+                      || intent != qualityIntent
+                      || currentRequest != original) return;
+                  try {
+                    replaceQuality(original, stream, quality);
+                  } catch (JSONException invalid) {
+                    MediaBridge.event("error", "Could not change video quality");
+                  }
+                });
+          } catch (Exception unavailable) {
+            handler.post(
+                () -> {
+                  if (current == this && version == generation && intent == qualityIntent)
+                    MediaBridge.event(
+                        "error", "Could not load this quality. Current playback was kept.");
+                });
+          }
+        });
+  }
+
+  // Invoked on the player thread only; preserve user intent and finite collection state.
+  void replaceQuality(JSONObject original, JSONObject stream, String quality) throws JSONException {
+    long position = player.getCurrentPosition();
+    boolean started = pendingStart, preparedContext = contextReady;
+    JSONObject replacement =
+        new JSONObject(original.toString())
+            .put("stream", stream)
+            .put("quality", quality)
+            .put("reconnect", true)
+            .put("resume", false)
+            .put("queued", false);
+    play(replacement);
+    pendingStart = started;
+    contextReady = preparedContext;
+    player.seekTo(position);
+    MediaBridge.event("notice", "Video quality: " + quality);
   }
 
   boolean isLive() {
@@ -1037,6 +1104,8 @@ public final class PlaybackService extends MediaSessionService {
               .put("position", player.getCurrentPosition() / 1000.0)
               .put("duration", Math.max(0, player.getDuration()) / 1000.0)
               .put("video", !currentRequest.optBoolean("audio", true))
+              .put("offline", currentRequest.optBoolean("offline"))
+              .put("quality", currentRequest.optString("quality", "1080"))
               .put("video_width", player.getVideoSize().width)
               .put("video_height", player.getVideoSize().height)
               .put("captions", captionText)

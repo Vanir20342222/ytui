@@ -1,8 +1,9 @@
 # Android development preview (M9)
 
-The Android app has a Rust engine and a Rust egui UI. GameActivity hosts the
-render surface and keyboard. Small Android adapters use Media3 for hardware media
-decoding, background playback, MediaSession notifications and durable downloads;
+The Android app has a shared Rust engine and a native Jetpack Compose UI with
+monospaced terminal styling. Android supplies text fields, keyboard, touch and
+adaptive layouts. Media3 handles hardware video/captions, background playback,
+MediaSession notifications and durable downloads;
 WorkManager prepares full playlists. There is no Python or mpv executable on
 Android. The account sign-in web page is the only WebView screen.
 
@@ -34,7 +35,7 @@ and portable file export; audio-only playback still selects the best audio.
 Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
 Use the bottom tabs for Downloads, YouTube, Music and Radio. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
-server responses. The top **Menu** and **Settings** provide touch controls.
+server responses. The top **⋮** menu, **Settings** and **Sign in / Account** provide touch controls.
 Tap a card's play, preview, queue, download or save action. Downloads → Add URL
 accepts a video or dedicated playlist link, with audio-only and quality choices.
 A watch link with `list=` keeps single-video intent. Tap the current player
@@ -42,8 +43,7 @@ to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, que
 and visualizer controls. Tablet layouts keep catalog and player side by side.
 Android Back closes overlays, then returns to the previous feed with its scroll
 position, before putting the app in the background. Each tab retains up to twelve
-navigation steps and 2 MiB of cached previous pages; evicted pages reload
-automatically. Disconnecting clears account navigation history. The queue's
+navigation steps and 2 MiB of cached previous pages. Disconnecting clears account navigation history. The queue's
 arrow buttons reorder items; edits are saved before their result is shown.
 
 Music albums/playlists and cliamp track libraries continue automatically after
@@ -58,7 +58,7 @@ not retain derived collection context; select the collection again to rebuild it
 Menu → **Lyrics / local LRC** opens a song-specific view. Review title and artist
 before choosing Find on LRCLIB; no automatic lookup or cookies are sent. Choose
 a returned version or import a UTF-8 LRC/plain text document (up to 512 KiB).
-Timed lines follow playback and support tap-to-seek. Positive Delay shows lines
+Enable **Follow playing line** for automatic scrolling; timed lines support tap-to-seek. Positive Delay shows lines
 later; edits and adjustments save locally for that media URL. Timing pauses when
 another song is playing. The local lyric library holds up to 100 songs / 8 MiB;
 Remove saved lyrics frees an entry without changing saved media or the queue.
@@ -79,14 +79,17 @@ private copy. Vinyl/VU/Orbit are available only for Music/Radio. VU/Orbit use de
 PCM levels, not microphone input; reduced motion and pause stop their animation.
 
 Account access is explicit: in-app YouTube sign-in (which Google may reject in an
-embedded browser) or a Netscape cookie file selected by the user. Another browser's
+embedded browser), a Netscape cookie file selected by the user, or an explicitly
+pasted Cookie header. Use **Sign in / Account** in the top bar, or the account
+action on a protected-feed error. After signing in, choose **Use this session**;
+**Cancel**, rotation or closing the page never imports implicitly. Another browser's
 private database is inaccessible on normal Android. Disconnect clears the app's
 session; local saved media/queue stay. Never send cookies to a bug report.
 
 Android encrypts persisted sessions using AES-GCM and a non-exportable key in
 Android Keystore. Earlier private plaintext imports migrate on load; if cleanup
 fails the app reports it. New document imports parse in memory without a plaintext
-temporary file. Settings → Reload stored account retries the saved envelope. A
+temporary file. Account → Reload stored account retries the saved envelope. A
 missing/invalid key or damaged envelope clears active authentication and keeps the
 offline library usable; reconnect/import or disconnect to recover. Hardware key
 backing depends on the device. The app never falls back to new plaintext storage.

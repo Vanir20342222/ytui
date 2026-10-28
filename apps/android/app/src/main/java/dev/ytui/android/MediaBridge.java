@@ -8,7 +8,7 @@ import android.view.Surface;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.json.*;
 
-/** Platform adapters only. UI, themes, providers and application state are Rust. */
+/** Android platform adapters; providers, theme palettes and durable application state are Rust. */
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaBridge {
   static android.app.Application context;
@@ -31,7 +31,7 @@ public final class MediaBridge {
   }
 
   static void notifyUi() {
-    if (uiVisible) NativeBridge.frameAvailable();
+    if (uiVisible) ComposeHost.changed();
   }
 
   static final java.util.concurrent.atomic.AtomicLong videoFrames =
@@ -57,8 +57,18 @@ public final class MediaBridge {
   }
 
   static void event(String kind, String text) {
+    event(kind, text, null, 0);
+  }
+
+  static void event(String kind, String text, String token, long accountIntent) {
     try {
-      events.add(new JSONObject().put("kind", kind).put("text", text == null ? "" : text));
+      events.add(
+          new JSONObject()
+              .put("kind", kind)
+              .put("text", text == null ? "" : text)
+              .put("request_token", token)
+              .put("account_intent", accountIntent));
+      ComposeHost.changed();
     } catch (JSONException ignored) {
     }
   }
@@ -210,13 +220,8 @@ public final class MediaBridge {
                 {
                   RustActivity activity = RustActivity.current();
                   if (activity != null)
-                    activity.startActivityForResult(
-                        new Intent(Intent.ACTION_OPEN_DOCUMENT)
-                            .setType("*/*")
-                            .addCategory(Intent.CATEGORY_OPENABLE),
-                        "lyrics".equals(request.optString("kind"))
-                            ? 44
-                            : "theme".equals(request.optString("kind")) ? 42 : 41);
+                    activity.pickDocument(
+                        request.optString("kind"), request.optString("request_token"));
                   break;
                 }
               case "login":
@@ -226,6 +231,7 @@ public final class MediaBridge {
                 }
                 context.startActivity(
                     new Intent(context, AuthActivity.class)
+                        .putExtra("ytui.offline-auth", BuildConfig.DEBUG && offlineUi)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 break;
               case "disconnect":

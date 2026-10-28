@@ -1,6 +1,6 @@
 package dev.ytui.android;
 
-/** JNI has no UI policy; all screens, themes and actions live in Rust. */
+/** Shared Rust engine contract; Android presentation uses native Compose controls. */
 public final class NativeBridge {
   static {
     System.loadLibrary("ytui_mobile");
@@ -11,6 +11,12 @@ public final class NativeBridge {
   public static native String init(String files, String cache);
 
   public static native String request(String json);
+
+  public static native int[] thumbnail(String media, int pixels);
+
+  public static native long beginAccountChange();
+
+  public static native long accountIntent();
 
   public static native void cancel(long id);
 

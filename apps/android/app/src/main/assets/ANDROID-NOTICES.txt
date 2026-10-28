@@ -2,6 +2,7 @@ ytui Android platform dependencies
 
 AndroidX (AppCompat, Activity, annotation, collection, core, fragment, lifecycle,
 savedstate, startup, profileinstaller, loader, resourceinspection, customview,
+Jetpack Compose UI/Foundation/Material3, Activity Compose,
 versionedparcelable, vectordrawable, tracing), AndroidX Media3, WorkManager,
 JavaScriptEngine and Android Games GameActivity are Copyright The Android Open
 Source Project and their respective contributors, licensed under Apache-2.0.
@@ -12,6 +13,8 @@ Guava / ListenableFuture / FailureAccess: Copyright Google LLC and contributors,
 Apache-2.0. https://github.com/google/guava
 Kotlin standard library: Copyright JetBrains s.r.o. and contributors,
 Apache-2.0. https://github.com/JetBrains/kotlin
+Kotlin coroutines: Copyright JetBrains s.r.o. and contributors,
+Apache-2.0. https://github.com/Kotlin/kotlinx.coroutines
 Checker Framework qualifier annotations: Copyright the Checker Framework authors;
 MIT (see https://github.com/typetools/checker-framework/blob/master/LICENSE.txt).
 Error Prone annotations: Copyright Google LLC, Apache-2.0.

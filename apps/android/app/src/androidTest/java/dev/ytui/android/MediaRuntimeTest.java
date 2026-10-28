@@ -89,7 +89,7 @@ public final class MediaRuntimeTest {
       while ((n = input.read(data)) != -1) output.write(data, 0, n);
     }
     long firstGeneration;
-    long cleanShutdowns = NativeBridge.uiShutdowns();
+    long cleanShutdowns = RustActivity.shutdowns.get();
     try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline()) {
       JSONObject request =
           new JSONObject()
@@ -107,12 +107,26 @@ public final class MediaRuntimeTest {
       await(
           "Video decoder never advanced",
           () -> status().optDouble("position") > 0.2 && status().optBoolean("playing"));
-      await("Video never reached the Rust surface", () -> MediaBridge.videoFrames.get() > 0);
+      await("Video decoder did not submit a native frame", () -> MediaBridge.videoFrames.get() > 0);
       AudioTap.enabled = true;
       await("Decoded audio never produced visualizer levels", () -> AudioTap.levels != 0);
       android.graphics.Bitmap screenshot =
           InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
       if (screenshot != null) {
+        int red = 0, green = 0, blue = 0;
+        for (int y = 0; y < screenshot.getHeight(); y += 3)
+          for (int x = 0; x < screenshot.getWidth(); x += 3) {
+            int pixel = screenshot.getPixel(x, y),
+                r = android.graphics.Color.red(pixel),
+                g = android.graphics.Color.green(pixel),
+                b = android.graphics.Color.blue(pixel);
+            if (r > 180 && g < 90 && b < 90) red++;
+            if (g > 180 && r < 90 && b < 90) green++;
+            if (b > 180 && r < 90 && g < 90) blue++;
+          }
+        assertTrue(
+            "Decoded video was not visible in the native Android surface",
+            red > 100 && green > 100 && blue > 100);
         try (FileOutputStream out =
             new FileOutputStream(new File(context.getExternalFilesDir(null), "video-player.png"))) {
           screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
@@ -122,6 +136,30 @@ public final class MediaRuntimeTest {
       }
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
+      double position = status().getDouble("position");
+      java.util.concurrent.CountDownLatch replaced = new java.util.concurrent.CountDownLatch(1);
+      java.util.concurrent.atomic.AtomicReference<Exception> replaceError =
+          new java.util.concurrent.atomic.AtomicReference<>();
+      MediaBridge.main.post(
+          () -> {
+            try {
+              PlaybackService service = PlaybackService.current;
+              service.replaceQuality(
+                  service.currentRequest, request.optJSONObject("stream"), "720");
+            } catch (Exception error) {
+              replaceError.set(error);
+            } finally {
+              replaced.countDown();
+            }
+          });
+      assertTrue(replaced.await(5, java.util.concurrent.TimeUnit.SECONDS));
+      if (replaceError.get() != null) throw replaceError.get();
+      await(
+          "Quality switch did not keep pause and position",
+          () ->
+              status().optString("quality").equals("720")
+                  && status().optBoolean("paused")
+                  && Math.abs(status().optDouble("position") - position) < 0.5);
       MediaBridge.execute("{\"op\":\"volume\",\"value\":0.23}");
       await("Volume did not change", () -> Math.abs(status().optDouble("volume") - 0.23) < 0.01);
       request.getJSONObject("media").put("title", "Second stream");
@@ -175,11 +213,11 @@ public final class MediaRuntimeTest {
         MediaBridge.execute(new JSONObject().put("op", "download_remove").put("id", id).toString());
       }
       command("stop");
-      firstGeneration = NativeBridge.uiGeneration();
+      firstGeneration = RustActivity.generations.get();
     } finally {
       media.delete();
     }
-    await("Rust UI exit hook did not complete", () -> NativeBridge.uiShutdowns() > cleanShutdowns);
+    await("Android UI did not close", () -> RustActivity.shutdowns.get() > cleanShutdowns);
     java.util.concurrent.CountDownLatch alive = new java.util.concurrent.CountDownLatch(1);
     MediaBridge.main.post(alive::countDown);
     assertTrue(
@@ -188,11 +226,11 @@ public final class MediaRuntimeTest {
     try (ActivityScenario<RustActivity> reopened = RuntimeTest.launchOffline()) {
       await(
           "Rust UI did not restart in the existing app process",
-          () -> NativeBridge.uiGeneration() > firstGeneration);
+          () -> RustActivity.generations.get() > firstGeneration);
     }
     await(
         "Reopened Rust UI did not clean up",
-        () -> NativeBridge.uiShutdowns() >= cleanShutdowns + 2);
+        () -> RustActivity.shutdowns.get() >= cleanShutdowns + 2);
     java.util.concurrent.CountDownLatch closedAgain = new java.util.concurrent.CountDownLatch(1);
     MediaBridge.main.post(closedAgain::countDown);
     assertTrue(closedAgain.await(5, java.util.concurrent.TimeUnit.SECONDS));
