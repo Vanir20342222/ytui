@@ -17,8 +17,9 @@ The desktop terminal application stays Rust and retains its launchers/state.
 Compose supplies Android input/IME, touch, accessibility, dialogs, adaptive
 layouts and theme composition. Media3 renders video directly into an Android
 surface with native captions; Rust still supplies extraction/policy and decoded
-PCM visualizer measurements. Keep the monospaced terminal styling and all shared
-palettes. No browser/web application UI is introduced.
+PCM visualizer measurements. The initial monospaced terminal presentation was
+superseded by the user's later [mobile media design request](MEDIA_UI_REDESIGN.md).
+Keep all shared palettes. No browser/web application UI is introduced.
 
 The existing Rust UI can remain an optional prototype/test target during the
 transition; it is not the production Android input/theme acceptance evidence.
