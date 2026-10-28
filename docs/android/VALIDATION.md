@@ -5,6 +5,34 @@ has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
+## Modern media UI redesign: runtime validation in progress
+
+The user confirmed installation and explicitly requested replacing terminal
+styling with a YouTube/Netflix-inspired mobile design. Source `2c7cca5` adds
+artwork grids, native icon navigation, a mini-player and grouped native panels;
+see [the design and acceptance requirements](MEDIA_UI_REDESIGN.md).
+
+Local debug/release compilation, lint, APK signing/alignment/ABI inspection,
+317 offline Rust tests and 13 Android JVM tests passed. The hosted Rust and
+Secret scan workflows also passed for that source. New populated UI tests use
+original generated artwork over loopback HTTP; they never substitute for real
+provider feeds in the app.
+
+[First redesign Android run 40707245687](https://github.com/Vanir20342222/ytui/actions/runs/40707245687)
+planned 21 cases but the process stopped after two: the Music/settings case
+passed and the player case crashed with `current must not be NaN`. The deferred
+mini-player progress callback read a stopped zero-duration state between layout
+and recomposition. The remaining suite did not run; this APK is not qualified.
+[Failure evidence](https://github.com/Vanir20342222/ytui/actions/runs/40707245687/artifacts/12825705781)
+retains logs, JUnit and screenshots. The fix captures a finite normalized progress
+value, guards unknown telemetry and tests stopping playback with the UI attached.
+The next run also verifies rendered artwork pixels before screenshots and a
+2560×1600 tablet layout. Runtime results are pending.
+
+The earlier metadata-only `fdd047c` Android run 40682419478 failed while installing
+the emulator system image (`Error on ZipFile unknown archive`), before any device
+tests ran. Bounded system-image download retries are now part of the workflow.
+
 ## Current native UI checkpoint: passed emulator checks
 
 Source **`4b2e988`**, PR merge revision **`494627636f39e34b4be5fbb18ee2fa8bd012a616`**.

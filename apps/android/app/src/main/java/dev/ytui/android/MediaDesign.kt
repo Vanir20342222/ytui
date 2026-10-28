@@ -27,6 +27,10 @@ import androidx.compose.ui.unit.dp
 internal fun mediaOnAccent(accent: Color): Color =
     if (accent.luminance() > 0.179f) Color.Black else Color.White
 
+internal fun mediaProgress(position: Float, duration: Float): Float =
+    if (!position.isFinite() || !duration.isFinite() || duration <= 0f) 0f
+    else (position / duration).coerceIn(0f, 1f)
+
 /** Small original vector drawings: no icon font, bitmap pack or network dependency. */
 internal enum class Glyph {
     Home,

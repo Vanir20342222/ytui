@@ -370,8 +370,10 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         }
                     }
                     if (LocalConfiguration.current.screenWidthDp < 840) {
-                        PlayerDock(vm)
-                        AppNavigation(tab, vm::chooseTab)
+                        if (!imeVisible) {
+                            PlayerDock(vm)
+                            AppNavigation(tab, vm::chooseTab)
+                        }
                     }
                 }
                 SnackbarHost(
@@ -646,7 +648,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                 }
             }
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(if (tab == 2) 164.dp else 280.dp),
+            columns = GridCells.Adaptive(if (tab in 2..3) 164.dp else 280.dp),
             modifier = Modifier.weight(1f).fillMaxWidth().testTag("feed-list"),
             state = grid,
             contentPadding = PaddingValues(bottom = 24.dp),
@@ -758,8 +760,10 @@ private fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = tru
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         val pixels = with(LocalDensity.current) { maxWidth.roundToPx().coerceIn(32, 768) }
-        var bitmap by remember(media.key, pixels, enabled) { mutableStateOf<Bitmap?>(null) }
-        LaunchedEffect(media.key, pixels, enabled) {
+        val source =
+            "${media.value.optString("thumbnail")}:${media.value.optJSONArray("thumbnails")}"
+        var bitmap by remember(media.key, source, pixels, enabled) { mutableStateOf<Bitmap?>(null) }
+        LaunchedEffect(media.key, source, pixels, enabled) {
             bitmap =
                 if (enabled) runCatching { ArtworkCache.load(media, pixels) }.getOrNull() else null
         }
@@ -798,7 +802,7 @@ private fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = tru
 private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
     val config by vm.config.collectAsState()
     var menu by remember(media.key) { mutableStateOf(false) }
-    val square = tab == 2 || media.kind in setOf("album", "song", "station")
+    val square = tab in 2..3 || media.kind in setOf("album", "song", "station")
     Column(Modifier.fillMaxWidth().testTag("media-card-${media.key}")) {
         Box(
             Modifier.fillMaxWidth()
@@ -810,9 +814,10 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
                 Modifier.fillMaxSize().clickable { vm.play(media) },
                 config.optBoolean("thumbnails", true),
             )
-            if (media.live || !media.value.isNull("duration"))
+            if (media.live || (!square && !media.value.isNull("duration")))
                 Surface(
-                    Modifier.align(Alignment.BottomEnd).padding(10.dp),
+                    Modifier.align(if (media.live) Alignment.TopStart else Alignment.BottomEnd)
+                        .padding(10.dp),
                     color = Color.Black.copy(alpha = 0.8f),
                     shape = RoundedCornerShape(6.dp),
                 ) {
@@ -970,9 +975,10 @@ private fun PlayerDock(vm: YtuiViewModel) {
                 }
                 MediaIconButton(Glyph.Next, "Next track", "dock-next") { vm.command("next") }
             }
+            val progress = mediaProgress(player.position, player.duration)
             if (player.duration > 0)
                 LinearProgressIndicator(
-                    progress = { (player.position / player.duration).coerceIn(0f, 1f) },
+                    progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(2.dp),
                     gapSize = 0.dp,
                     drawStopIndicator = {},
@@ -1773,7 +1779,11 @@ private fun DownloadsPane(vm: YtuiViewModel) {
                         )
                         LinearProgressIndicator(
                             progress = {
-                                item.optDouble("progress", 0.0).toFloat().coerceIn(0f, 1f)
+                                item
+                                    .optDouble("progress", 0.0)
+                                    .toFloat()
+                                    .takeIf { it.isFinite() }
+                                    ?.coerceIn(0f, 1f) ?: 0f
                             },
                             Modifier.fillMaxWidth(),
                         )

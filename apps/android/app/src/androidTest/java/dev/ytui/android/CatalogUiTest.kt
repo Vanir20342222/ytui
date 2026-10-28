@@ -7,6 +7,7 @@ import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Shader
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -80,6 +81,8 @@ class CatalogUiTest {
         NativeBridge.request(json("op" to "save_settings", "config" to original).toString())
         MediaBridge.execute(json("op" to "settings", "config" to original).toString())
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
+            executeShellCommand("wm size reset")
+            executeShellCommand("wm density reset")
             setOrientationNatural()
             unfreezeRotation()
         }
@@ -140,6 +143,17 @@ class CatalogUiTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+        compose.waitForIdle()
+        // Validate a rendered warm cover pixel, not merely an Image semantics node.
+        compose.waitUntil(10_000) {
+            val bitmap =
+                compose
+                    .onNodeWithTag("artwork-${cards.first().key}", useUnmergedTree = true)
+                    .captureToImage()
+            val color = bitmap.toPixelMap()[bitmap.width / 2, bitmap.height / 4]
+            color.red > color.green * 1.15f
+        }
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(150, 3000)
         return cards
     }
 
@@ -159,7 +173,9 @@ class CatalogUiTest {
         MediaRuntimeTest.capture("native-card-menu.png")
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        device.setOrientationLeft()
+        device.setOrientationNatural()
+        device.executeShellCommand("wm size 2560x1600")
+        device.executeShellCommand("wm density 320")
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("navigation-rail").fetchSemanticsNodes().isNotEmpty()
         }
@@ -247,6 +263,12 @@ class CatalogUiTest {
             compose.onNodeWithTag("volume-slider").performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("Audio & subtitles").performScrollTo().performClick()
             compose.onNodeWithText("Toggle captions").performScrollTo().assertIsDisplayed()
+            compose.onNodeWithText("Close").performClick()
+            MediaBridge.execute(json("op" to "stop").toString())
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithTag("mini-player").fetchSemanticsNodes().isEmpty()
+            }
+            compose.onNodeWithTag("bottom-navigation").assertIsDisplayed()
         } finally {
             MediaBridge.main.post {
                 PlaybackService.current?.player?.repeatMode =
