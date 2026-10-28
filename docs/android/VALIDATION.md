@@ -5,6 +5,68 @@ has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
+## Current modern media UI checkpoint: passed
+
+Source **`5f340830c7091aa4546be0e2290560ddbd0bc3ea`**, PR merge revision
+**`bb0aa7be25668696f6f41c74c165946799975c75`**.
+[Android 40712963078](https://github.com/Vanir20342222/ytui/actions/runs/40712963078),
+[Rust 40712962600](https://github.com/Vanir20342222/ytui/actions/runs/40712962600)
+and [Secret scan 40712962670](https://github.com/Vanir20342222/ytui/actions/runs/40712962670)
+passed. The UI now uses sans-serif typography, artwork grids, phone navigation /
+tablet rail, a mini-player and grouped native settings/account/download surfaces.
+
+- **317 offline Rust tests passed**, 0 failed, 31 explicitly ignored; formatting
+  and strict hosted Clippy pass. The hosted Rust media regression workflow passes.
+- **14 Android JVM tests pass**, including AA accent contrast across 381 colours
+  and finite progress with stopped/unknown/invalid telemetry. Debug/release
+  compile, unit tests and lint pass locally; hosted debug build/tests/lint pass.
+- **20 API 35 emulator cases passed**, 0 failures/errors; the separate public
+  YouTube case was explicitly skipped. Continuous logs contain **zero app ANRs
+  and zero Rust panic markers**.
+- Actual keyboard/Unicode input, all 13 theme backgrounds/foregrounds/persistence,
+  account navigation/cancel, native menus/panels, cooldown and URL intent pass.
+- New populated UI checks pass thumbnail HTTP/decode/rendered pixels, responsive
+  video grids and square Music covers, overflow actions, native settings and
+  real Media3 pause/resume/stop through mini-player and expanded transport.
+  The tablet setup cold-launches at 2560×1600; a separate case checks live rotation.
+- Existing visible RGB video, quality/position/pause, persisted volume, preview
+  restoration, cache-only playback, mux/copy/cancel exports alongside playback,
+  queue/EOF/history, ICY metadata, exact isolated challenge vectors, lyrics and
+  encrypted account/tamper/migration/disconnect checks also pass.
+
+[Phone/tablet/player/settings gallery](../screenshots/android/README.md) contains
+unaltered captures from this run; representative catalog, tablet, Music, settings
+and player images were visually reviewed. Generated artwork and catalog entries
+are test-only; no production provider failure is replaced with demo results.
+All theme/keyboard/account captures, JUnit and logs are in the
+[device evidence](https://github.com/Vanir20342222/ytui/actions/runs/40712963078/artifacts/12828725236).
+Emulator software decoding does not establish physical hardware or audible output.
+
+### Current direct APK
+
+[Download ytui Preview](https://github.com/Vanir20342222/ytui/releases/download/android-media-preview-2026-10-28/ytui-preview-0.2.0-alpha.12-mobile.3.apk)
+or open the [preview assets/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28).
+Version **`0.2.0-alpha.12-mobile.3`**, code **3**, ARM64/x86-64, Android 8/API 26+.
+Package **`dev.ytui.android.preview`**, launcher **ytui Preview**. It installs
+alongside the old package without uninstalling or changing its private data;
+account/settings/library are separate. The normal release identity is unchanged.
+
+The publisher checks successful Android/Rust/Secret scan runs and the exact APK
+hash, then republishes the existing tested artifact without rebuilding/re-signing.
+Independent inspection verified signing, ZIP / 16 KiB ELF alignment, both native
+ABIs, JNI exports, notices, app label, package and version. SHA256:
+
+```text
+2e184784b3052b3f15b2a66b0ea7636c8b6f46ed58fc0d1772372e45d7ccaf47
+```
+
+This is a development preview. Real Tab S9 / Nothing Phone, live YouTube/account,
+audible output, OEM background behaviour and owner stable signing remain open.
+Public YouTube playback is not qualified by these offline fixtures. See
+[device acceptance](DEVICE_ACCEPTANCE.md), [parity gaps](PARITY.md) and
+[signing/update requirements](SIGNING.md). Original artifacts expire; prerelease
+assets provide a direct download without a GitHub sign-in or ZIP extraction.
+
 ## Modern media UI redesign: runtime validation in progress
 
 The user confirmed installation and explicitly requested replacing terminal
@@ -39,13 +101,13 @@ at the target viewport; the separate live-rotation test remains intact.
 Development packaging is being separated as `dev.ytui.android.preview` after an
 actual certificate comparison proved the installed mobile.2 APK and a new CI
 build cannot update each other. Normal release identity stays unchanged. The
-new package and cold-start screenshot setup require one final emulator run.
+new package and cold-start screenshot setup pass in the current checkpoint above.
 
 The earlier metadata-only `fdd047c` Android run 40682419478 failed while installing
 the emulator system image (`Error on ZipFile unknown archive`), before any device
 tests ran. Bounded system-image download retries are now part of the workflow.
 
-## Current native UI checkpoint: passed emulator checks
+## Previous native UI migration checkpoint: passed emulator checks
 
 Source **`4b2e988`**, PR merge revision **`494627636f39e34b4be5fbb18ee2fa8bd012a616`**.
 [Android run 40668747753](https://github.com/Vanir20342222/ytui/actions/runs/40668747753),
@@ -112,7 +174,8 @@ and preserve wanted app data before replacing an installation.
 **Still required:** [Tab S9/phone acceptance](DEVICE_ACCEPTANCE.md), real YouTube/
 account/network and audible output checks, hardware/OEM background behavior,
 remaining capability gaps and stable owner signing. Public playback is not
-qualified by these generated fixtures. M9 and PR #20 remain draft.
+qualified by these generated fixtures. At that checkpoint PR #20 was draft; it has since been merged by the owner.
+M9 remains a development preview while the physical/live/signing gates are open.
 
 ## Physical UI failure and native migration (2026-10-28)
 

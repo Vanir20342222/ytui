@@ -1,7 +1,8 @@
 # Android development preview (M9)
 
 The Android app has a shared Rust engine and a native Jetpack Compose UI with
-artwork-first media grids, sans-serif typography and rounded native controls. Android supplies text fields, keyboard, touch and
+artwork-first media grids, sans-serif typography and rounded native controls.
+Android supplies text fields, keyboard, touch and
 adaptive layouts. Media3 handles hardware video/captions, background playback,
 MediaSession notifications and durable downloads;
 WorkManager prepares full playlists. There is no Python or mpv executable on
@@ -12,14 +13,16 @@ Nothing Phone (3a) / Galaxy Tab S9 acceptance. Read [PARITY.md](PARITY.md) and
 [VALIDATION.md](VALIDATION.md) before treating it as a daily driver. The
 [device acceptance checklist](DEVICE_ACCEPTANCE.md) covers the native UI re-test.
 
-The [tested native UI APK and checksum](VALIDATION.md#tested-development-apk)
-cover source `4b2e988`: 17 emulator checks pass, including actual keyboard input,
+The [tested native UI APK and checksum](VALIDATION.md#current-direct-apk)
+cover source `5f34083`: 20 emulator checks pass, including actual keyboard input,
 all-theme contrast, account navigation and visible generated video. Real device/
 YouTube acceptance is still required; earlier failed APKs are historical only.
 
+[View actual phone, tablet, player and settings screenshots](../screenshots/android/README.md).
+
 ## Install an APK
 
-The [tested native UI preview](https://github.com/Vanir20342222/ytui/releases/tag/android-native-preview-2026-10-28)
+The [tested native UI preview](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28)
 provides a direct `.apk` download without GitHub sign-in or ZIP extraction.
 Download the APK under **Assets**, open it from Android's Files app, and permit
 installation from that source when prompted. Its checksum and inspection report
@@ -55,7 +58,7 @@ and portable file export; audio-only playback still selects the best audio.
 Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
 Use the bottom navigation for YouTube, Music, Radio and Downloads. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
-server responses. The top **⋮** menu, **Settings** and **Sign in / Account** provide touch controls.
+server responses. The top **⋮** menu, **sliders** (Settings) and **profile** (Account) icons provide touch controls.
 Tap artwork to play/open it. The card's **⋮** menu contains preview, queue, save
 and download actions. Downloads → Add URL
 accepts a video or dedicated playlist link, with audio-only and quality choices.

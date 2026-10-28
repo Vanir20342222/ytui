@@ -1,7 +1,9 @@
 # Native Android UI device acceptance (M9)
 
 The first physical Tab S9 preview failed input, theme and account navigation.
-Use the native Compose build (`0.2.0-alpha.12-mobile.2` or newer) for re-testing.
+Use the modern native UI build (`0.2.0-alpha.12-mobile.3`) for re-testing.
+Open the **ytui Preview** launcher; it installs separately from the older app,
+with its own account/settings/library. Your original installation stays intact.
 Check **⋮ → About** for the version and source revision; use the exact APK linked
 from the corresponding successful Android workflow run, not an earlier artifact.
 
