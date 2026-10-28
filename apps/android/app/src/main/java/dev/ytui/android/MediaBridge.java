@@ -61,6 +61,8 @@ public final class MediaBridge {
   }
 
   static void event(String kind, String text, String token, long accountIntent) {
+    // Success/progress feedback belongs in controls and library state, never an overlay.
+    if ("notice".equals(kind)) return;
     try {
       events.add(
           new JSONObject()

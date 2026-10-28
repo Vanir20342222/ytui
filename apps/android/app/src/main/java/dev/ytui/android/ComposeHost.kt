@@ -166,14 +166,12 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val hasPlayer by
         remember(vm) { vm.player.map { it.media != null }.distinctUntilChanged() }
             .collectAsState(false)
-    val status by vm.status.collectAsState()
     val ready by vm.ready.collectAsState()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val keyboard = LocalSoftwareKeyboardController.current
     val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var dialog by rememberSaveable { mutableStateOf("") }
     var menu by remember { mutableStateOf(false) }
-    val snackbar = remember { SnackbarHostState() }
     val background = palette.color("background", Color(0xff101418))
     val surface = palette.color("surface", Color(0xff202830))
     val foreground = palette.color("text", Color(0xffd5dee6))
@@ -203,9 +201,6 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
         )
     LaunchedEffect(Unit) { vm.initialize(dark) }
     LaunchedEffect(dark) { vm.systemTheme(dark) }
-    LaunchedEffect(status) {
-        if (status.isNotBlank() && status != "Ready") snackbar.showSnackbar(status)
-    }
     LaunchedEffect(lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             coroutineScope {
@@ -376,11 +371,6 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         }
                     }
                 }
-                SnackbarHost(
-                    snackbar,
-                    Modifier.align(Alignment.BottomCenter)
-                        .padding(bottom = 88.dp, start = 16.dp, end = 16.dp),
-                )
             }
             if (playerOpen)
                 Panel("Now playing", { vm.playerOpen.value = false }, full = true) {
