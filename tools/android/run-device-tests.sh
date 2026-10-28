@@ -23,7 +23,7 @@ collect_evidence() {
     adb pull /sdcard/Android/data/$test_package/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/$test_package/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
     mkdir -p "$evidence/native-ui"
-    for screenshot in native-search native-account native-tablet native-catalog native-music native-wide-catalog native-player native-settings native-card-menu native-theme-{0..12}; do
+    for screenshot in native-search native-account native-tablet native-catalog native-music native-wide-catalog native-player native-settings native-card-menu native-video-fullscreen native-theme-{0..12}; do
         adb pull "/sdcard/Android/data/$test_package/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true
     done
 }

@@ -82,6 +82,7 @@ class NativeUiTest {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("search-field").assertIsDisplayed()
         compose.onNodeWithTag("settings-button").performClick()
+        compose.onNodeWithTag("settings-Network").performClick()
         compose
             .onNodeWithTag("proxy-field")
             .performScrollTo()
@@ -97,12 +98,13 @@ class NativeUiTest {
         for (index in 0 until themes.length()) {
             val theme = themes.getString(index)
             compose.onNodeWithTag("settings-button").performClick()
+            compose.onNodeWithTag("settings-Appearance").performClick()
             compose.onNodeWithTag("theme-selector").performClick()
             compose.onNodeWithTag("theme-$theme").performScrollTo().performClick()
             compose.waitUntil(10_000) {
                 compose.onAllNodesWithText("Theme: $theme").fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithText("Close").performClick()
+            compose.onNodeWithContentDescription("Close").performClick()
             compose.waitForIdle()
             val dark =
                 InstrumentationRegistry.getInstrumentation()
@@ -255,7 +257,7 @@ class NativeUiTest {
                 listOf("Playback queue", "Recently played", "Lyrics", "Sleep timer", "About")) {
                 compose.onNodeWithTag("menu-button").performClick()
                 compose.onNodeWithText(label).performClick()
-                compose.onNodeWithText("Close").assertIsDisplayed().performClick()
+                compose.onNodeWithContentDescription("Close").assertIsDisplayed().performClick()
             }
             MediaRuntimeTest.capture("native-tablet.png")
         } finally {

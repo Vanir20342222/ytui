@@ -431,6 +431,14 @@ impl Browser {
                     "Subscriptions".into(),
                 )
             }
+            BrowseRequest::Playlists => {
+                self.require_auth()?;
+                (
+                    "browse",
+                    json!({"browseId":if music{"FEmusic_liked_playlists"}else{"FEplaylist_aggregation"}}),
+                    "Your playlists".into(),
+                )
+            }
             BrowseRequest::Library => {
                 self.require_auth()?;
                 (
@@ -851,6 +859,12 @@ fn parse_renderer(name: &str, r: &Value, music: bool) -> Option<Media> {
             .unwrap_or_default();
     }
     item.description = r.get("descriptionSnippet").map(text).unwrap_or_default();
+    item.views_text = r
+        .get("viewCountText")
+        .or_else(|| r.get("shortViewCountText"))
+        .map(text)
+        .unwrap_or_default();
+    item.published_text = r.get("publishedTimeText").map(text).unwrap_or_default();
     item.duration = r
         .get("lengthText")
         .map(text)
@@ -1629,6 +1643,32 @@ mod request_tests {
 #[cfg(test)]
 mod category_tests {
     use super::*;
+    #[test]
+    fn video_metadata_preserves_server_counts_and_dates_without_an_extra_request() {
+        let page = parse_page(
+            &json!({"contents":[{"videoRenderer":{
+                "videoId":"fixture", "title":{"simpleText":"Video"},
+                "viewCountText":{"simpleText":"12,345 views"},
+                "publishedTimeText":{"simpleText":"3 days ago"}
+            }}]}),
+            false,
+        );
+        assert_eq!(page.items[0].views_text, "12,345 views");
+        assert_eq!(page.items[0].published_text, "3 days ago");
+    }
+
+    #[tokio::test]
+    async fn personal_playlist_sources_require_a_session_before_any_network_request() {
+        let browser = Browser::new(crate::http_client(None).unwrap(), None, 0);
+        for music in [false, true] {
+            let error = browser
+                .fetch(music, &BrowseRequest::Playlists)
+                .await
+                .unwrap_err()
+                .to_string();
+            assert!(error.to_lowercase().contains("sign in"), "{error}");
+        }
+    }
     #[test]
     fn shelves_keep_labels_thumbnail_variants_and_real_category_payloads() {
         let page = parse_page(

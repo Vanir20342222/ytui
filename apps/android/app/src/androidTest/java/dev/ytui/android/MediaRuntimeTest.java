@@ -205,6 +205,28 @@ public final class MediaRuntimeTest {
               screenshot.recycle();
             }
           });
+      long fullscreenGeneration = PlaybackService.current.generation;
+      androidx.test.uiautomator.UiDevice device =
+          androidx.test.uiautomator.UiDevice.getInstance(
+              InstrumentationRegistry.getInstrumentation());
+      androidx.test.uiautomator.UiObject2 fullscreen =
+          device.wait(
+              androidx.test.uiautomator.Until.findObject(
+                  androidx.test.uiautomator.By.desc("Fullscreen video")),
+              5000);
+      assertNotNull("Fullscreen button must be visible", fullscreen);
+      fullscreen.click();
+      await(
+          "Fullscreen did not enter landscape",
+          () -> FullscreenActivity.visible && device.getDisplayWidth() > device.getDisplayHeight());
+      assertEquals(
+          "Fullscreen must reuse the prepared decoder",
+          fullscreenGeneration,
+          PlaybackService.current.generation);
+      capture("native-video-fullscreen.png");
+      device.pressBack();
+      await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);
+      assertEquals(fullscreenGeneration, PlaybackService.current.generation);
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
       command("repeat");

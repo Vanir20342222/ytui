@@ -171,7 +171,28 @@ class CatalogUiTest {
             .onNodeWithText(label)
             .assertIsDisplayed()
         MediaRuntimeTest.capture("native-card-menu.png")
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
+        compose.onNodeWithText("Add to queue").performClick()
+        compose.waitUntil(10_000) {
+            var contains = false
+            scenario.onActivity {
+                contains =
+                    ViewModelProvider(it)[YtuiViewModel::class.java].queue.value.any {
+                        it.url == cards[0].url
+                    }
+            }
+            contains
+        }
+        MediaBridge.event("notice", "Playback added")
+        compose.waitForIdle()
+        compose.onAllNodesWithText("Added to queue").assertCountEquals(0)
+        compose.onAllNodesWithText("Playback added").assertCountEquals(0)
+        compose.onNodeWithTag("bottom-navigation").assertIsDisplayed()
+        val queued = PlaybackService.rpcArray(json("op" to "queue")).objects()
+        val index = queued.indexOfFirst { it.optString("url") == cards[0].url }
+        if (index >= 0)
+            PlaybackService.rpc(
+                json("op" to "queue_remove", "index" to index, "url" to cards[0].url)
+            )
         compose.waitForIdle()
         compose.onAllNodesWithText("Play now").assertCountEquals(0)
         // A tablet cold start avoids photographing old popup surfaces while wm
@@ -226,15 +247,44 @@ class CatalogUiTest {
         )
         MediaRuntimeTest.capture("native-music.png")
         compose.onNodeWithTag("settings-button").performClick()
-        compose.onNodeWithText("Appearance").assertIsDisplayed()
+        compose.onNodeWithTag("settings-Appearance").assertIsDisplayed().performClick()
         compose.onNodeWithTag("theme-selector").assertIsDisplayed()
         MediaRuntimeTest.capture("native-settings.png")
-        compose.onNodeWithText("Playback & downloads").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("settings-back").performClick()
+        compose.onNodeWithTag("settings-Network").performClick()
         compose
             .onNodeWithTag("proxy-field")
             .performScrollTo()
             .performTextInput("editable-native-field")
         compose.onNodeWithTag("proxy-field").assertTextContains("editable-native-field")
+    }
+
+    @Test
+    fun offlinePlaylistsUseEditableNativeFieldsAndRealRustPersistence() {
+        compose.onNodeWithTag("tab-0").performClick()
+        compose.onNodeWithTag("create-offline-playlist").performClick()
+        val title = "UI fixture " + java.util.UUID.randomUUID().toString().take(8)
+        compose.onNodeWithTag("offline-playlist-name").performTextInput(title)
+        compose.onNodeWithText("Create").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(title).performClick()
+        compose.onNodeWithTag("offline-playlist-edit-name").performTextReplacement("$title renamed")
+        compose.onNodeWithText("Rename").performClick()
+        compose.waitUntil(10_000) {
+            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
+                it.optString("title") == "$title renamed"
+            }
+        }
+        compose.onNodeWithText("Delete playlist").performClick()
+        compose.onNodeWithText("Delete").performClick()
+        compose.waitUntil(10_000) {
+            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().none {
+                it.optString("title").startsWith(title)
+            }
+        }
+        compose.onAllNodesWithText("$title renamed").assertCountEquals(0)
     }
 
     @Test
@@ -273,14 +323,16 @@ class CatalogUiTest {
             compose.onNodeWithTag("mini-player").performClick()
             compose.onNodeWithTag("music-visualizer").assertIsDisplayed()
             MediaRuntimeTest.capture("native-player.png")
-            compose.onNodeWithTag("player-pause").performScrollTo().performClick()
+            compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
                 MediaRuntimeTest.status().optBoolean("playing")
             }
+            compose.onNodeWithTag("player-options").performClick()
             compose.onNodeWithTag("volume-slider").performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("Audio & subtitles").performScrollTo().performClick()
             compose.onNodeWithText("Toggle captions").performScrollTo().assertIsDisplayed()
-            compose.onNodeWithText("Close").performClick()
+            compose.onNodeWithContentDescription("Close").performClick()
+            compose.onNodeWithContentDescription("Minimize player").performClick()
             MediaBridge.execute(json("op" to "stop").toString())
             compose.waitUntil(10_000) {
                 compose.onAllNodesWithTag("mini-player").fetchSemanticsNodes().isEmpty()

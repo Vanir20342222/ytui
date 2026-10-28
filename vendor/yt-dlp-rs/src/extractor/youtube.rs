@@ -6,6 +6,7 @@ pub(crate) use chapters::from_description as chapters_from_description;
 pub(crate) mod dict;
 mod innertube;
 mod metadata;
+mod player_assets;
 pub(crate) mod search;
 mod streams;
 mod subs;
@@ -221,8 +222,7 @@ impl streams::Solver for JsSolver<'_> {
             "[youtube] {}: Downloading player {key}",
             self.video_id
         ));
-        let Ok(player) = direct::request(self.client, &url, None)
-            .and_then(|response| response.text().map_err(Error::Http))
+        let Ok(player) = player_assets::get(self.client, &url)
         else {
             crate::screen::warning(&format!(
                 "[youtube] {}: Download of {key} failed",

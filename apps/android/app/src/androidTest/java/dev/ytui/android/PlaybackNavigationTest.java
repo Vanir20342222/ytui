@@ -188,11 +188,95 @@ public final class PlaybackNavigationTest {
     }
   }
 
+  @Test
+  public void visiblePlaylistSeedPlaysNextWhileFullCollectionIsBlocked() throws Exception {
+    JSONObject original = PlaybackService.rpc(new JSONObject().put("op", "settings"));
+    byte[] audio;
+    try (InputStream input =
+        InstrumentationRegistry.getInstrumentation()
+            .getContext()
+            .getAssets()
+            .open("fixture-audio.m4a")) {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      byte[] buffer = new byte[8192];
+      int count;
+      while ((count = input.read(buffer)) != -1) out.write(buffer, 0, count);
+      audio = out.toByteArray();
+    }
+    try (ActivityScenario<RustActivity> activity = RuntimeTest.launchOffline();
+        CollectionServer server = new CollectionServer(audio)) {
+      clearQueue();
+      MediaBridge.playbackStore
+          .submit(
+              () -> {
+                PlaybackService.rpcArray(new JSONObject().put("op", "history_clear"));
+                return null;
+              })
+          .get(5, TimeUnit.SECONDS);
+      PlaybackService.rpc(
+          new JSONObject()
+              .put("op", "save_settings")
+              .put("config", new JSONObject(original.toString()).put("proxy", server.url(""))));
+      server.pauseLibrary = new CountDownLatch(1);
+      JSONArray items = new JSONArray();
+      for (String id : new String[] {"First", "Second", "Third"}) items.put(media(server, id));
+      JSONObject descriptor =
+          new JSONObject()
+              .put("op", "prepare_context")
+              .put("context_id", "blocked-seed")
+              .put("source_url", server.url("/First.m4a"))
+              .put("source_id", "First")
+              .put("items", items)
+              .put(
+                  "request",
+                  new JSONObject().put("CliampTracks", "http://radio.cliamp.stream/library"));
+      JSONObject request =
+          new JSONObject()
+              .put("media", media(server, "First"))
+              .put("audio", true)
+              .put("stream", new JSONObject().put("url", server.url("/First.m4a")))
+              .put("context_id", "blocked-seed")
+              .put("context", descriptor);
+      MediaBridge.execute(new JSONObject().put("op", "play").put("request", request).toString());
+      playing("First");
+      assertTrue(
+          "Full collection request never started",
+          server.libraryEntered.await(5, TimeUnit.SECONDS));
+      assertEquals(
+          "Prefetch must not record unplayed tracks",
+          1,
+          PlaybackService.rpcArray(new JSONObject().put("op", "history_list")).length());
+      long start = android.os.SystemClock.elapsedRealtime();
+      MediaRuntimeTest.command("next");
+      playing("Second");
+      long elapsed = android.os.SystemClock.elapsedRealtime() - start;
+      assertTrue("Fixture Next exceeded three seconds: " + elapsed, elapsed < 3000);
+      assertEquals("Full fetch should still be blocked", 1, server.pauseLibrary.getCount());
+      server.pauseLibrary.countDown();
+      MediaRuntimeTest.await(
+          "Full collection must retain only the unplayed tail",
+          () ->
+              PlaybackService.rpc(
+                      new JSONObject().put("op", "queue_peek").put("context_id", "blocked-seed"))
+                  .optString("title")
+                  .equals("Third"));
+      MediaRuntimeTest.command("next");
+      playing("Third");
+    } finally {
+      MediaRuntimeTest.command("stop");
+      MediaBridge.playbackStore.submit(() -> null).get(5, TimeUnit.SECONDS);
+      clearQueue();
+      PlaybackService.rpc(new JSONObject().put("op", "save_settings").put("config", original));
+    }
+  }
+
   static final class CollectionServer implements AutoCloseable {
     final ServerSocket socket = new ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"));
     final ExecutorService clients = Executors.newCachedThreadPool();
     final Thread acceptor;
     final byte[] audio;
+    volatile CountDownLatch pauseLibrary;
+    final CountDownLatch libraryEntered = new CountDownLatch(1);
 
     CollectionServer(byte[] audio) throws Exception {
       this.audio = audio;
@@ -235,6 +319,9 @@ public final class PlaybackNavigationTest {
         boolean library = first.contains("/library");
         boolean missing = first.contains("/Missing.m4a");
         if (library) {
+          libraryEntered.countDown();
+          CountDownLatch paused = pauseLibrary;
+          if (paused != null) paused.await(12, TimeUnit.SECONDS);
           JSONArray tracks = new JSONArray();
           for (String id : new String[] {"First", "Second", "Third"}) tracks.put(media(this, id));
           body =
@@ -275,6 +362,7 @@ public final class PlaybackNavigationTest {
 
     @Override
     public void close() throws Exception {
+      if (pauseLibrary != null) pauseLibrary.countDown();
       socket.close();
       acceptor.join(2000);
       clients.shutdownNow();

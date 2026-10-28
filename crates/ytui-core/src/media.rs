@@ -25,6 +25,8 @@ pub struct Thumbnail {
 #[serde(default)]
 pub struct Media {
     pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offline_id: Option<String>,
     pub title: String,
     pub creator: String,
     pub url: String,
@@ -32,6 +34,18 @@ pub struct Media {
     pub thumbnails: Vec<Thumbnail>,
     pub section: String,
     pub duration: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_count: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upload_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub like_count: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub channel_follower_count: Option<u64>,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub views_text: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub published_text: String,
     pub description: String,
     pub kind: MediaKind,
     pub browse_id: Option<String>,
@@ -44,12 +58,16 @@ impl Media {
     pub fn retained_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + self.id.len()
+            + self.offline_id.as_ref().map_or(0, String::len)
             + self.title.len()
             + self.creator.len()
             + self.url.len()
             + self.thumbnail.len()
             + self.section.len()
             + self.description.len()
+            + self.views_text.len()
+            + self.published_text.len()
+            + self.upload_date.as_ref().map_or(0, String::len)
             + self.browse_id.as_ref().map_or(0, String::len)
             + self.tracks_url.as_ref().map_or(0, String::len)
             + self
@@ -134,6 +152,7 @@ pub enum BrowseRequest {
     WatchLater,
     Liked,
     Library,
+    Playlists,
     History,
     Collection(String),
     Related(String),

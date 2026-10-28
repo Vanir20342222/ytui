@@ -51,3 +51,47 @@ and separate Android folder-picker Music/Video destinations for completed media.
   exact qualified development APK with a direct download.
 - Record actual timings and public YouTube/device limitations honestly. Preserve
   prior APK/data and all existing desktop/service validation gates.
+
+## Implementation checkpoint (not yet an APK qualification)
+
+- `aaf12c5` removes all app-wide snackbar confirmations and drops platform
+  `notice` events. Errors belong in normal screen content, not timed overlays.
+- Android reuses account/network/quality-scoped native extractor clients and
+  five-minute-or-shorter stream leases. Signed expiry margins, cancellation,
+  deduplication and cache memory budgets are checked offline. The vendored
+  extractor reuses bounded public versioned player JavaScript assets; independent
+  versions do not share a blocking network lock.
+- Visible finite-playlist items seed Next while the complete collection loads.
+  Accepted decoder starts still commit queue/history; warmed shuffle candidates
+  remain stable and manual queue entries have priority. Related media are the
+  default tail outside collections. Streaming bytes use a separate bounded LRU;
+  speculative failures do not interrupt the current player.
+- A focused, non-scrolling song player exposes advanced controls in a secondary
+  panel; native video overlay controls and landscape fullscreen share the same
+  decoder/session. Optimistic seeking reconciles actual Media3 positions.
+  Category/tab swipes, downward player minimization, double-tap video seeking,
+  reduced-motion-aware transitions and icon close controls are implemented.
+- Settings now have Appearance, Playback, Offline & storage, Video information,
+  Network, Privacy and Account categories. Personal playlists have direct
+  YouTube/Music source chips and a Play all action. Feed counts/dates are kept
+  without another request and extraction enriches the playing media metadata.
+- Offline/Playlists/Transfers views, Rust-owned local playlist edits and
+  Android-granted Music/Video document trees are implemented. Completed compatible
+  progressive media copies/muxes through the existing export adapter. Files have
+  a private local URI index; missing grants preserve cached playback. Audio/video
+  modes and video qualities have separate download identities. Legacy URL-only
+  completed downloads remain discoverable. Progressive format cache keys survive
+  signed-URL renewal, while different formats/content revisions stay separate.
+- Radio uses provider artwork first and curated sized genre photographs as a
+  fallback; [sources/license](RADIO_ARTWORK.md) are recorded. Vinyl/VU/Orbit use
+  cached cover art and pause-aware animation/PCM, without generated online demo feeds.
+- Owner signing was selected; [private setup and stable channel](SIGNING.md)
+  preserve both old installations. No signing key is committed or published.
+
+Current evidence: local debug/release compile/unit/lint and strict Rust Clippy
+pass at their recorded checkpoints. The newest Rust/mobile playlist, expiry,
+shuffle, metadata and cache checks pass. Actual new fullscreen, blocked-playlist
+Next, folder-picker/export/local EOF and populated native UI cases are authored;
+CI device execution, final exact-source checks and updated screenshots remain
+required. Three-second real YouTube starts and physical-device acceptance are
+not established by these fixture or build results.

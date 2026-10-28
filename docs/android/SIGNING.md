@@ -5,7 +5,11 @@ builds use `dev.ytui.android.preview` and the launcher label **ytui Preview**.
 This allows installing them alongside older `dev.ytui.android` development APKs
 without uninstalling or deleting existing private data. State and Keystore
 sessions are separate; no cross-app private data import is attempted. Release
-builds retain `dev.ytui.android` and the normal **ytui** launcher label.
+builds now use `dev.ytui.android.stable` and the normal **ytui** launcher label.
+This one-time owner-signed channel avoids conflicts with both earlier disposable
+package identities. Keep existing installations: their private data is untouched.
+The stable channel has separate account/settings/cache and will need sign-in and
+folder selection once. Every subsequent stable update must use the same owner key.
 
 Android requires the same signing identity to update an installed package while retaining its
 private account/library/cache. A different key requires a separate application
@@ -52,7 +56,7 @@ YouTube account or browser cookies.
 
 After the selected main revision's checks pass, dispatch **Android signed APK**
 from `main` with an increasing `version_code` (1–2100000000) and a version name
-such as `0.2.0-alpha.12-mobile.2`. Download its `ytui-android-signed-<code>-<sha>`
+such as `0.2.0-alpha.12-mobile.4`. Download its `ytui-android-signed-<code>-<sha>`
 artifact. The report includes the APK SHA256, public certificate fingerprints,
 source revision, both ABIs, 16 KiB alignment and license checks. Confirm the
 certificate matches the previous signed APK before installing an update.
@@ -76,3 +80,18 @@ report are uploaded. About in the app shows its version/code and Rust revision.
 The first stable owner signing identity has not been configured or validated on
 the requested devices here. A successful build with a disposable test identity
 does not establish that release setup or in-place device updates are complete.
+
+## Current delivery decision
+
+The owner selected private GitHub signing for future updates on 2026-10-28.
+The installed media Preview certificate is different from new local/hosted debug
+builds; its private signing key is unavailable. A new owner key cannot update
+that old package in place. The permanent `.stable` channel preserves both older
+apps, without uninstalling them or silently copying their private sessions.
+
+The connected GitHub integration cannot list/manage signing secrets (HTTP 403).
+The repository owner must configure the four `android-release` Environment
+secrets in the table above, through private GitHub settings or owner-authenticated
+`gh secret set`. Do not post their contents in chat, issues, PRs or artifacts.
+Code/build qualification can finish before credentials are configured; a public
+owner-signed APK cannot honestly be published until that setup succeeds.

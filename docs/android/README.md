@@ -38,7 +38,7 @@ Android 8/API 26 or newer, and targets API 35. Verify its SHA256 using the inclu
 `SHA256-and-checks.txt`.
 
 New debug builds install as **ytui Preview** (`dev.ytui.android.preview`), alongside
-older APKs and the normal release (`dev.ytui.android`). They do not remove or
+older APKs and the owner-signed stable channel (`dev.ytui.android.stable`). They do not remove or
 migrate the other app's private account/library/cache. Open the **ytui Preview**
 launcher to test the redesign; connect your account explicitly in that app.
 Release builds keep the original package and label.

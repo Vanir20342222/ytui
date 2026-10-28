@@ -14,11 +14,13 @@ use ytui_providers::{
 };
 mod account;
 mod lyrics;
+mod resolution;
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct MobileState {
     pub saved: Vec<Media>,
+    pub offline_playlists: Vec<ytui_core::offline::OfflinePlaylist>,
     pub queue: Vec<Media>,
     pub positions: HashMap<String, u64>,
     pub playback: ytui_core::PlaybackQueue,
@@ -28,6 +30,7 @@ struct PlaybackContext {
     id: String,
     items: std::collections::VecDeque<Media>,
     prepared: bool,
+    consumed: std::collections::HashSet<String>,
 }
 pub struct Engine {
     settings_commit: Mutex<()>,
@@ -44,6 +47,7 @@ pub struct Engine {
     cancellations: Mutex<HashMap<u64, CancellationToken>>,
     playback_context: Mutex<Option<PlaybackContext>>,
     lyrics: Mutex<HashMap<String, lyrics::Document>>,
+    resolver: Arc<resolution::Resolver>,
 }
 impl Engine {
     pub fn new(root: &Path, cache: &Path) -> Result<Self> {
@@ -71,6 +75,7 @@ impl Engine {
         let client = ytui_providers::http_client(config.proxy.as_deref())?;
         Ok(Self {
             settings_commit: Mutex::new(()),
+            resolver: Arc::new(resolution::Resolver::default()),
             root: root.into(),
             cache: cache.into(),
             config: Mutex::new(config.clone()),
@@ -101,6 +106,7 @@ impl Engine {
             id,
             items: Default::default(),
             prepared: false,
+            consumed: Default::default(),
         });
     }
     pub async fn thumbnail(
@@ -125,6 +131,7 @@ impl Engine {
             .load(std::sync::atomic::Ordering::SeqCst)
     }
     pub fn begin_account_change(&self) -> u64 {
+        self.resolver.clear();
         self.account_intent
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
             + 1
@@ -175,19 +182,34 @@ impl Engine {
                         "Android supports an HTTP proxy without embedded credentials, or your system VPN"
                     );
                 }
-                let client = ytui_providers::http_client(config.proxy.as_deref())?;
+                let previous = self.config.lock().expect("config").clone();
                 atomic_write(
                     &self.root.join("config.json"),
                     &serde_json::to_vec(&config)?,
                 )?;
-                let session = self.session.lock().expect("session").clone();
-                *self.browser.lock().expect("browser") =
-                    Browser::new(client.clone(), session, config.account_index);
-                *self.radio.lock().expect("radio") =
-                    Radio::new(client.clone(), config.radio_servers.clone())
-                        .with_cache(self.cache.join("radio"));
-                *self.images.lock().expect("images") =
-                    ImageCache::new(client, self.cache.join("images"));
+                let proxy_changed = previous.proxy != config.proxy;
+                let account_changed = previous.account_index != config.account_index;
+                if proxy_changed
+                    || account_changed
+                    || previous.radio_servers != config.radio_servers
+                {
+                    let client = ytui_providers::http_client(config.proxy.as_deref())?;
+                    if proxy_changed || account_changed {
+                        let session = self.session.lock().expect("session").clone();
+                        *self.browser.lock().expect("browser") =
+                            Browser::new(client.clone(), session, config.account_index);
+                        self.resolver.clear();
+                    }
+                    if proxy_changed || previous.radio_servers != config.radio_servers {
+                        *self.radio.lock().expect("radio") =
+                            Radio::new(client.clone(), config.radio_servers.clone())
+                                .with_cache(self.cache.join("radio"));
+                    }
+                    if proxy_changed {
+                        *self.images.lock().expect("images") =
+                            ImageCache::new(client, self.cache.join("images"));
+                    }
+                }
                 *self.config.lock().expect("config") = config;
                 Ok(json!({"saved":true}))
             }
@@ -268,6 +290,42 @@ impl Engine {
             "saved" => Ok(serde_json::to_value(
                 self.state.lock().expect("state").saved.clone(),
             )?),
+            "offline_playlists" => Ok(serde_json::to_value(
+                &self.state.lock().expect("state").offline_playlists,
+            )?),
+            "offline_playlist_create" | "offline_playlist_update" | "offline_playlist_delete" => {
+                self.mutate(|state| {
+                    match r["op"].as_str().unwrap_or_default() {
+                        "offline_playlist_create" => {
+                            state
+                                .offline_playlists
+                                .push(ytui_core::offline::OfflinePlaylist {
+                                    id: uuid::Uuid::new_v4().to_string(),
+                                    title: r["title"].as_str().unwrap_or_default().trim().into(),
+                                    items: vec![],
+                                });
+                        }
+                        "offline_playlist_update" => {
+                            let playlist = state
+                                .offline_playlists
+                                .iter_mut()
+                                .find(|p| Some(p.id.as_str()) == r["id"].as_str())
+                                .context("Offline playlist is no longer available")?;
+                            if let Some(title) = r["title"].as_str() {
+                                playlist.title = title.trim().into();
+                            }
+                            if let Some(items) = r.get("items") {
+                                playlist.items = serde_json::from_value(items.clone())?;
+                            }
+                        }
+                        _ => state
+                            .offline_playlists
+                            .retain(|p| Some(p.id.as_str()) != r["id"].as_str()),
+                    }
+                    ytui_core::offline::validate_library(&state.offline_playlists)?;
+                    Ok(serde_json::to_value(&state.offline_playlists)?)
+                })
+            }
             "save_media" => {
                 let media: Media = serde_json::from_value(r["media"].clone())?;
                 ensure!(media.retained_bytes() <= 256 * 1024, "Media is too large");
@@ -299,12 +357,20 @@ impl Engine {
             "queue_peek" => {
                 let state = self.state.lock().expect("state");
                 let index = if r["shuffle"].as_bool().unwrap_or(false) && !state.queue.is_empty() {
-                    u64::from_le_bytes(
-                        uuid::Uuid::new_v4().as_bytes()[..8]
-                            .try_into()
-                            .expect("UUID bytes"),
-                    ) as usize
-                        % state.queue.len()
+                    if let Some(index) = state
+                        .queue
+                        .iter()
+                        .position(|m| Some(m.url.as_str()) == r["preferred_url"].as_str())
+                    {
+                        index
+                    } else {
+                        u64::from_le_bytes(
+                            uuid::Uuid::new_v4().as_bytes()[..8]
+                                .try_into()
+                                .expect("UUID bytes"),
+                        ) as usize
+                            % state.queue.len()
+                    }
                 } else {
                     0
                 };
@@ -323,7 +389,14 @@ impl Engine {
                     .filter(|c| Some(c.id.as_str()) == r["context_id"].as_str())
                     && let Some(media) = context.items.get(
                         if r["shuffle"].as_bool().unwrap_or(false) && !context.items.is_empty() {
-                            (uuid::Uuid::new_v4().as_u128() % context.items.len() as u128) as usize
+                            context
+                                .items
+                                .iter()
+                                .position(|m| Some(m.url.as_str()) == r["preferred_url"].as_str())
+                                .unwrap_or_else(|| {
+                                    (uuid::Uuid::new_v4().as_u128() % context.items.len() as u128)
+                                        as usize
+                                })
                         } else {
                             0
                         },
@@ -347,7 +420,9 @@ impl Engine {
                             .iter()
                             .position(|m| Some(m.url.as_str()) == r["url"].as_str())
                         {
-                            context.items.remove(index);
+                            if let Some(media) = context.items.remove(index) {
+                                context.consumed.insert(media.url);
+                            }
                             true
                         } else {
                             false
@@ -527,6 +602,7 @@ impl Engine {
                     Browser::new(client, session.clone(), config.account_index);
                 *self.session.lock().expect("session") = session.clone();
                 *self.account_notice.lock().expect("account notice") = stored.notice.clone();
+                self.resolver.clear();
                 self.activate_context(None);
                 Ok(json!({"connected":session.is_some(),"notice":stored.notice}))
             }
@@ -555,6 +631,7 @@ impl Engine {
                 *self.account_notice.lock().expect("account notice") = notice.clone();
                 let session = Arc::new(session);
                 *self.session.lock().expect("session") = Some(session.clone());
+                self.resolver.clear();
                 self.activate_context(None);
                 *self.browser.lock().expect("browser") =
                     Browser::new(client, Some(session), config.account_index);
@@ -588,6 +665,7 @@ impl Engine {
                 let notice = account::save(&self.root, &session)?;
                 *self.account_notice.lock().expect("account notice") = notice.clone();
                 *self.session.lock().expect("session") = Some(session.clone());
+                self.resolver.clear();
                 self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();
                 *self.browser.lock().expect("browser") = Browser::new(
@@ -603,6 +681,7 @@ impl Engine {
                 account::remove(&self.root)?;
                 *self.account_notice.lock().expect("account notice") = None;
                 *self.session.lock().expect("session") = None;
+                self.resolver.clear();
                 self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();
                 *self.browser.lock().expect("browser") = Browser::new(
@@ -613,6 +692,56 @@ impl Engine {
                 Ok(json!({"connected":false}))
             }
             "resolve" => self.resolve(r).await,
+            "resolve_cache_clear" => {
+                self.resolver.clear();
+                Ok(json!({"cleared":true}))
+            }
+            "seed_context" | "offline_context" => {
+                let id = r["context_id"]
+                    .as_str()
+                    .context("Missing playback context")?;
+                let items: Vec<Media> = serde_json::from_value(r["items"].clone())?;
+                let offline = r["op"].as_str() == Some("offline_context");
+                if offline {
+                    ytui_core::offline::OfflinePlaylist {
+                        id: uuid::Uuid::new_v4().to_string(),
+                        title: "Playback".into(),
+                        items: items.clone(),
+                    }
+                    .validate()?;
+                }
+                ensure!(
+                    items.len() <= if offline { 1000 } else { 500 }
+                        && items.iter().map(Media::retained_bytes).sum::<usize>()
+                            <= 4 * 1024 * 1024,
+                    "Playback seed exceeds budget"
+                );
+                let source = r["source_url"].as_str().unwrap_or("");
+                let offset = items
+                    .iter()
+                    .position(|m| m.url == source)
+                    .map_or(0, |i| i + 1);
+                let mut active = self.playback_context.lock().expect("playback context");
+                if let Some(context) = active
+                    .as_mut()
+                    .filter(|c| c.id == id && !c.prepared && c.items.is_empty())
+                {
+                    context.items = items
+                        .into_iter()
+                        .skip(offset)
+                        .filter(|m| {
+                            !m.live
+                                && !m.collection()
+                                && m.url != source
+                                && !context.consumed.contains(&m.url)
+                        })
+                        .collect();
+                    context.prepared = offline;
+                    Ok(json!({"prepared":true,"count":context.items.len()}))
+                } else {
+                    Ok(json!({"prepared":false}))
+                }
+            }
             "context_status" => {
                 let active = self.playback_context.lock().expect("playback context");
                 Ok(
@@ -648,10 +777,18 @@ impl Engine {
                         BrowseRequest::Collection(_)
                             | BrowseRequest::Details(_)
                             | BrowseRequest::CliampTracks(_)
+                            | BrowseRequest::Related(_)
                     ),
                     "This feed is not a finite playback collection"
                 );
-                let items = if matches!(query, BrowseRequest::CliampTracks(_)) {
+                let related = matches!(query, BrowseRequest::Related(_));
+                let items = if related {
+                    let browser = self.browser.lock().expect("browser").clone();
+                    browser
+                        .fetch(r["music"].as_bool().unwrap_or(false), &query)
+                        .await?
+                        .items
+                } else if matches!(query, BrowseRequest::CliampTracks(_)) {
                     let radio = self.radio.lock().expect("radio").clone();
                     radio.fetch(&query, 0).await?.items
                 } else {
@@ -677,17 +814,28 @@ impl Engine {
                     )
                     .await?
                 };
-                let selected = items
-                    .iter()
-                    .position(|m| {
-                        Some(m.url.as_str()) == r["source_url"].as_str()
-                            || !m.id.is_empty() && Some(m.id.as_str()) == r["source_id"].as_str()
-                    })
-                    .context("Selected song is no longer present in the collection")?;
+                let selected = if related {
+                    None
+                } else {
+                    Some(
+                        items
+                            .iter()
+                            .position(|m| {
+                                Some(m.url.as_str()) == r["source_url"].as_str()
+                                    || !m.id.is_empty()
+                                        && Some(m.id.as_str()) == r["source_id"].as_str()
+                            })
+                            .context("Selected song is no longer present in the collection")?,
+                    )
+                };
                 let tail = items
                     .into_iter()
-                    .skip(selected + 1)
-                    .filter(|m| !m.live && !m.collection())
+                    .skip(selected.map_or(0, |i| i + 1))
+                    .filter(|m| {
+                        !m.live
+                            && !m.collection()
+                            && Some(m.url.as_str()) != r["source_url"].as_str()
+                    })
                     .collect::<std::collections::VecDeque<_>>();
                 ensure!(
                     tail.len() <= 2000
@@ -698,7 +846,10 @@ impl Engine {
                 let mut active = self.playback_context.lock().expect("playback context");
                 if let Some(context) = active.as_mut().filter(|c| c.id == id) {
                     if !context.prepared {
-                        context.items = tail;
+                        context.items = tail
+                            .into_iter()
+                            .filter(|m| !context.consumed.contains(&m.url))
+                            .collect();
                         context.prepared = true;
                     }
                     let count = context.items.len();
@@ -775,47 +926,70 @@ impl Engine {
     async fn resolve(&self, r: &Value) -> Result<Value> {
         let media: Media = serde_json::from_value(r["media"].clone())?;
         let url = ytui_core::http_url(&media.url)?;
-        if !ytui_core::youtube_host(url.host_str().unwrap_or_default()) {
-            let radio = self.radio.lock().expect("radio").clone();
-            let url = radio.resolve_playlist(url.as_str()).await?;
-            return Ok(json!({"url":url,"headers":{},"audio_url":null}));
+        if let Some(session) = self.session.lock().expect("session").as_ref() {
+            session.headers("https://www.youtube.com")?;
         }
         let config = self.config.lock().expect("config").clone();
-        let proxy = config.proxy;
         let audio = r["audio"].as_bool().unwrap_or(false);
         let quality = r["quality"]
             .as_str()
             .unwrap_or(&config.download.quality)
             .to_owned();
-        let cookies = self.session.lock().expect("session").clone();
-        let permit = extractor_slots().acquire_owned().await?;
-        let data = tokio::task::spawn_blocking(move || -> Result<Value> {
-            let _permit = permit;
-            let jar = cookies.as_deref().map(account::native_jar).transpose()?;
-            let client = yt_dlp_rs::YoutubeDl::with_options(
-                yt_dlp_rs::YoutubeOptions {
-                    no_playlist: true,
-                    js_runtime: if cfg!(target_os = "android") {
-                        Some("ytui-android-js".into())
-                    } else {
-                        None
-                    },
-                    ..Default::default()
-                },
-                yt_dlp_rs::HttpOptions {
-                    proxy,
-                    cookies: jar,
-                    socket_timeout: Some(15.0),
-                    ..Default::default()
-                },
-            )?;
-            let format = mobile_format(audio, &quality)?;
-            Ok(serde_json::to_value(
-                client.extract_info_with_format(&media.url, Some(&format))?,
-            )?)
-        })
-        .await??;
-        stream(&data, audio)
+        let key = resolution::Key {
+            epoch: self.resolver.epoch(),
+            account: self
+                .account_intent
+                .load(std::sync::atomic::Ordering::Acquire),
+            account_index: config.account_index,
+            proxy: config.proxy.clone(),
+            url: media.url.clone(),
+            audio,
+            quality: quality.clone(),
+        };
+        let client_key = key.clone();
+        self.resolver
+            .get_or_resolve(key, r["fresh"].as_bool().unwrap_or(false), async {
+                if !ytui_core::youtube_host(url.host_str().unwrap_or_default()) {
+                    let radio = self.radio.lock().expect("radio").clone();
+                    let resolved = radio.resolve_playlist(url.as_str()).await?;
+                    return Ok(
+                        json!({"url":resolved,"headers":{},"audio_url":null,"live":media.live}),
+                    );
+                }
+                let cookies = self.session.lock().expect("session").clone();
+                let pool = self.resolver.clone();
+                let permit = extractor_slots().acquire_owned().await?;
+                let data = tokio::task::spawn_blocking(move || -> Result<Value> {
+                    let _permit = permit;
+                    let client = pool.client(&client_key, || {
+                        let jar = cookies.as_deref().map(account::native_jar).transpose()?;
+                        Ok(yt_dlp_rs::YoutubeDl::with_options(
+                            yt_dlp_rs::YoutubeOptions {
+                                no_playlist: true,
+                                js_runtime: if cfg!(target_os = "android") {
+                                    Some("ytui-android-js".into())
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            },
+                            yt_dlp_rs::HttpOptions {
+                                proxy: config.proxy,
+                                cookies: jar,
+                                socket_timeout: Some(12.0),
+                                ..Default::default()
+                            },
+                        )?)
+                    })?;
+                    Ok(serde_json::to_value(client.extract_info_with_format(
+                        &media.url,
+                        Some(&mobile_format(audio, &quality)?),
+                    )?)?)
+                })
+                .await??;
+                stream(&data, audio)
+            })
+            .await
     }
 }
 fn extractor_slots() -> Arc<tokio::sync::Semaphore> {
@@ -890,6 +1064,153 @@ mod format_tests {
             );
         }
     }
+    #[tokio::test]
+    async fn playlist_seed_is_available_before_the_full_collection_and_commits_only_on_start() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        engine.activate_context(Some("collection".into()));
+        let items = json!([{"url":"https://media.test/a","title":"First","kind":"song"},
+            {"url":"https://media.test/b","title":"Second","kind":"song"},
+            {"url":"https://media.test/c","title":"Third","kind":"song"}]);
+        let seeded=engine.request(json!({"op":"seed_context","context_id":"collection","source_url":"https://media.test/a","items":items})).await.unwrap();
+        assert_eq!(seeded["count"], 2);
+        for _ in 0..2 {
+            assert_eq!(
+                engine
+                    .request(json!({"op":"queue_peek","context_id":"collection"}))
+                    .await
+                    .unwrap()["title"],
+                "Second"
+            );
+        }
+        engine.request(json!({"op":"queue_commit","context_id":"collection","context_entry":true,"url":"https://media.test/b"})).await.unwrap();
+        assert_eq!(
+            engine
+                .request(json!({"op":"queue_peek","context_id":"collection"}))
+                .await
+                .unwrap()["title"],
+            "Third"
+        );
+        assert!(
+            engine
+                .playback_context
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .consumed
+                .contains("https://media.test/b")
+        );
+        engine.activate_context(Some("new intent".into()));
+        assert_eq!(
+            engine
+                .request(json!({"op":"seed_context","context_id":"collection","items":[]}))
+                .await
+                .unwrap()["prepared"],
+            false
+        );
+    }
+
+    #[tokio::test]
+    async fn warm_shuffle_choice_stays_stable_without_overriding_manual_queue_priority() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        engine.activate_context(Some("collection".into()));
+        engine.request(json!({"op":"seed_context","context_id":"collection","source_url":"https://media.test/a","items":[
+            {"url":"https://media.test/a","kind":"song"}, {"url":"https://media.test/b","kind":"song"}, {"url":"https://media.test/c","kind":"song"}]})).await.unwrap();
+        let peek = json!({"op":"queue_peek","context_id":"collection","shuffle":true,"preferred_url":"https://media.test/c"});
+        for _ in 0..3 {
+            assert_eq!(
+                engine.request(peek.clone()).await.unwrap()["url"],
+                "https://media.test/c"
+            );
+        }
+        engine
+            .request(
+                json!({"op":"enqueue","media":{"url":"https://media.test/manual","kind":"song"}}),
+            )
+            .await
+            .unwrap();
+        let candidate = engine.request(peek.clone()).await.unwrap();
+        assert_eq!(candidate["url"], "https://media.test/manual");
+        assert!(candidate.get("context_entry").is_none());
+        engine
+            .request(json!({"op":"queue_commit","url":"https://media.test/manual"}))
+            .await
+            .unwrap();
+        assert_eq!(
+            engine.request(peek).await.unwrap()["url"],
+            "https://media.test/c"
+        );
+        assert_eq!(engine.request(json!({"op":"queue_peek","context_id":"collection","preferred_url":"https://media.test/c"})).await.unwrap()["url"], "https://media.test/b");
+    }
+
+    #[tokio::test]
+    async fn offline_playlists_are_transactional_persisted_and_prepare_without_network() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        let created = engine
+            .request(json!({"op":"offline_playlist_create","title":"Road trip"}))
+            .await
+            .unwrap();
+        let id = created[0]["id"].as_str().unwrap();
+        let items = json!([
+            {"url":"https://media.test/a","title":"First","kind":"song","offline_id":"a".repeat(64)},
+            {"url":"https://media.test/b","title":"Second","kind":"song","offline_id":"b".repeat(64)}
+        ]);
+        engine
+            .request(json!({"op":"offline_playlist_update","id":id,"items":items}))
+            .await
+            .unwrap();
+        let previous = std::fs::read(temp.path().join("library.json")).unwrap();
+        assert!(
+            engine
+                .request(json!({"op":"offline_playlist_update","id":id,"title":""}))
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            previous,
+            std::fs::read(temp.path().join("library.json")).unwrap()
+        );
+        engine.activate_context(Some("offline".into()));
+        assert_eq!(engine.request(json!({"op":"offline_context","context_id":"offline","items":items,"source_url":"https://media.test/a"})).await.unwrap()["count"],1);
+        let next = engine
+            .request(json!({"op":"queue_peek","context_id":"offline"}))
+            .await
+            .unwrap();
+        assert_eq!(next["offline_id"], "b".repeat(64));
+        assert_eq!(
+            engine.request(json!({"op":"history_list"})).await.unwrap(),
+            json!([])
+        );
+        drop(engine);
+        let restored = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        let restored_items: Vec<Media> = serde_json::from_value(
+            restored
+                .request(json!({"op":"offline_playlists"}))
+                .await
+                .unwrap()[0]["items"]
+                .clone(),
+        )
+        .unwrap();
+        assert_eq!(
+            restored_items,
+            serde_json::from_value::<Vec<Media>>(items).unwrap()
+        );
+        restored
+            .request(json!({"op":"offline_playlist_delete","id":id}))
+            .await
+            .unwrap();
+        assert_eq!(
+            restored
+                .request(json!({"op":"offline_playlists"}))
+                .await
+                .unwrap(),
+            json!([])
+        );
+    }
+
     #[test]
     fn phone_quality_prefers_compatible_video_and_honors_the_selected_cap() {
         let formats = vec![
@@ -998,7 +1319,7 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
         }
     }
     Ok(
-        json!({"url":url,"audio_url":audio_url,"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
+        json!({"url":url,"audio_url":audio_url,"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
     )
 }
 pub(crate) fn runtime() -> &'static tokio::runtime::Runtime {
