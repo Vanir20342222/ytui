@@ -765,3 +765,11 @@ for Rust panics as well as JUnit failures. Original upstream source/licenses and
 documented narrow Android adapters are retained in `vendor/{yt-dlp-rs,winit,eframe}`.
 Public YouTube is an explicit separate workflow input; no account or live-service
 success is inferred from the deterministic checks.
+
+Finite Music/radio collection continuation, local recent/previous/forward history,
+and MediaSession navigation are implemented with decoder-start commits and manual
+queue priority. Timed lyrics now have reviewed online lookup, local LRC import,
+follow/seek, edits and per-song timing adjustment. Their bounded private store is
+separate from queue/resume state to keep playback writes small. Runtime follow-up
+and notification race evidence remain tracked in `docs/android/VALIDATION.md`;
+these additions do not close the physical-device, live-service or signing gates.

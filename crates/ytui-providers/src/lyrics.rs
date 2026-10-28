@@ -9,12 +9,12 @@ const MAX_TEXT: usize = 512 * 1024;
 const MAX_LINES: usize = 10_000;
 const DAY_MS: u64 = 86_400_000;
 
-#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, Deserialize)]
 pub struct Line {
     pub at_ms: Option<u64>,
     pub text: String,
 }
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, Deserialize)]
 pub struct Track {
     pub title: String,
     pub artist: String,

@@ -13,6 +13,109 @@ fn media(id: &str) -> ytui_core::Media {
     }
 }
 #[tokio::test]
+async fn local_lyrics_keep_unicode_offsets_and_identity_after_restart_and_failed_writes() {
+    let (e, root) = engine();
+    let a = media("abcdefghijk");
+    let b = media("lmnopqrstuv");
+    let document = json!({"title":"Grüße 🎵","artist":"Artist","text":"[offset:-200]\n[00:01.234]Hello\n[00:04.567]World","offset_ms":500});
+    let saved = e
+        .request(json!({"op":"lyrics_save","url":a.url,"document":document}))
+        .await
+        .unwrap();
+    assert_eq!(saved["track"]["lines"][0]["at_ms"], 1034);
+    let restored = Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap();
+    assert_eq!(
+        restored
+            .request(json!({"op":"lyrics_get","url":a.url}))
+            .await
+            .unwrap()["document"],
+        document
+    );
+    assert!(
+        restored
+            .request(json!({"op":"lyrics_get","url":b.url}))
+            .await
+            .unwrap()
+            .is_null()
+    );
+    for change in [
+        json!({"offset_ms":120001}),
+        json!({"text":"[offset:999999999999]\nHello"}),
+        json!({"text":""}),
+        json!({"text":"x".repeat(512*1024+1)}),
+        json!({"artist":"x".repeat(513)}),
+    ] {
+        let mut bad = document.clone();
+        for (k, v) in change.as_object().unwrap() {
+            bad[k] = v.clone();
+        }
+        assert!(
+            restored
+                .request(json!({"op":"lyrics_save","url":a.url,"document":bad}))
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            restored
+                .request(json!({"op":"lyrics_get","url":a.url}))
+                .await
+                .unwrap()["document"],
+            document
+        );
+    }
+    assert!(
+        restored
+            .request(json!({"op":"lyrics_save","url":"file:///tmp/invalid","document":document}))
+            .await
+            .is_err()
+    );
+    // Failed edits cannot publish an in-memory change that was never saved.
+    // Resume/queue writes use a separate file to keep playback IO bounded.
+    std::fs::remove_file(root.path().join("files/lyrics.json")).unwrap();
+    std::fs::create_dir(root.path().join("files/lyrics.json")).unwrap();
+    let mut changed = document.clone();
+    changed["text"] = json!("Changed");
+    assert!(
+        restored
+            .request(json!({"op":"lyrics_save","url":a.url,"document":changed}))
+            .await
+            .is_err()
+    );
+    assert_eq!(
+        restored
+            .request(json!({"op":"lyrics_get","url":a.url}))
+            .await
+            .unwrap()["document"],
+        document
+    );
+}
+#[tokio::test]
+async fn local_lyrics_capacity_requires_explicit_removal_and_preserves_queue() {
+    let (e, _root) = engine();
+    let m = media("abcdefghijk");
+    e.request(json!({"op":"enqueue","media":m})).await.unwrap();
+    for i in 0..100 {
+        e.request(json!({"op":"lyrics_save","url":format!("https://media.test/{i}"),"document":{"title":"Song","artist":"Artist","text":"Hello","offset_ms":0}})).await.unwrap();
+    }
+    let extra = json!({"op":"lyrics_save","url":m.url,"document":{"title":"Song","artist":"Artist","text":"Hello","offset_ms":0}});
+    assert!(e.request(extra.clone()).await.is_err());
+    e.request(json!({"op":"lyrics_remove","url":"https://media.test/0"}))
+        .await
+        .unwrap();
+    e.request(extra).await.unwrap();
+    e.request(json!({"op":"history_clear"})).await.unwrap();
+    assert_eq!(
+        e.request(json!({"op":"lyrics_get","url":m.url}))
+            .await
+            .unwrap()["document"]["text"],
+        "Hello"
+    );
+    assert_eq!(
+        e.request(json!({"op":"queue"})).await.unwrap()[0]["url"],
+        m.url
+    );
+}
+#[tokio::test]
 async fn mobile_queue_saved_and_resume_are_durable_and_checked() {
     let (e, root) = engine();
     let m = media("abcdefghijk");

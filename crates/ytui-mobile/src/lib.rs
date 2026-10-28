@@ -12,6 +12,7 @@ use ytui_core::{BrowseRequest, Config, Media, Page};
 use ytui_providers::{
     auth::Session, browse::Browser, images::ImageCache, paths::atomic_write, radio::Radio,
 };
+mod lyrics;
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -39,6 +40,7 @@ pub struct Engine {
     images: Mutex<ImageCache>,
     cancellations: Mutex<HashMap<u64, CancellationToken>>,
     playback_context: Mutex<Option<PlaybackContext>>,
+    lyrics: Mutex<HashMap<String, lyrics::Document>>,
 }
 impl Engine {
     pub fn new(root: &Path, cache: &Path) -> Result<Self> {
@@ -73,6 +75,7 @@ impl Engine {
             images: Mutex::new(ImageCache::new(client, cache.join("images"))),
             cancellations: Mutex::new(HashMap::new()),
             playback_context: Mutex::new(None),
+            lyrics: Mutex::new(read_json(&root.join("lyrics.json"))?.unwrap_or_default()),
         })
     }
     pub fn activate_context(&self, id: Option<String>) {
@@ -474,11 +477,13 @@ impl Engine {
             "lyrics" => {
                 let media: Media = serde_json::from_value(r["media"].clone())?;
                 let proxy = self.config.lock().expect("config").proxy.clone();
+                let title = r["title"].as_str().unwrap_or(&media.title);
+                let artist = r["artist"].as_str().unwrap_or(&media.creator);
                 let tracks =
-                    ytui_providers::lyrics::lookup(proxy.as_deref(), &media.title, &media.creator)
-                        .await?;
+                    ytui_providers::lyrics::lookup(proxy.as_deref(), title, artist).await?;
                 Ok(serde_json::to_value(tracks)?)
             }
+            "lyrics_get" | "lyrics_save" | "lyrics_remove" => self.local_lyrics(r),
             "import_cookie_file" => {
                 let _commit = self.settings_commit.lock().expect("settings commit");
                 use std::io::Write;

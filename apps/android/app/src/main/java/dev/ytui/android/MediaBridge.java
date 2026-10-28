@@ -205,7 +205,9 @@ public final class MediaBridge {
                         new Intent(Intent.ACTION_OPEN_DOCUMENT)
                             .setType("*/*")
                             .addCategory(Intent.CATEGORY_OPENABLE),
-                        "theme".equals(request.optString("kind")) ? 42 : 41);
+                        "lyrics".equals(request.optString("kind"))
+                            ? 44
+                            : "theme".equals(request.optString("kind")) ? 42 : 41);
                   break;
                 }
               case "login":

@@ -160,24 +160,18 @@ public final class RustActivity extends GameActivity {
       OfflineExport.enqueue(id, destination);
       return;
     }
-    if (result != RESULT_OK || data == null || data.getData() == null) return;
+    if ((request != 41 && request != 42 && request != 44)
+        || result != RESULT_OK
+        || data == null
+        || data.getData() == null) return;
     final android.net.Uri uri = data.getData();
     final android.content.ContentResolver resolver = getApplicationContext().getContentResolver();
     OfflineStore.IO.execute(
         () -> {
           try (InputStream input = resolver.openInputStream(uri)) {
-            if (input == null) throw new java.io.IOException("No document data");
-            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
-            byte[] buffer = new byte[4096];
-            int count;
-            while ((count = input.read(buffer)) != -1) {
-              if (bytes.size() + count > 2 * 1024 * 1024)
-                throw new java.io.IOException("Document exceeds 2 MiB");
-              bytes.write(buffer, 0, count);
-            }
             MediaBridge.event(
-                request == 41 ? "cookie_file" : request == 42 ? "theme_file" : "document",
-                new String(bytes.toByteArray(), java.nio.charset.StandardCharsets.UTF_8));
+                request == 41 ? "cookie_file" : request == 42 ? "theme_file" : "lyrics_file",
+                DocumentInput.read(input, request == 44 ? 512 * 1024 : 2 * 1024 * 1024));
             NativeBridge.frameAvailable();
           } catch (Exception error) {
             MediaBridge.event("error", "Could not read selected document");

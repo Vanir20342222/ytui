@@ -188,11 +188,33 @@ a MediaStyle placeholder with the session token. Remote pause/resume also update
 the application's user intent, and remote Stop clears pending continuation.
 These changes must pass the full device suite before qualification.
 
+Run `40590717413` passed remote pause/resume, EOF, history and all other cases,
+but rapid preview entry still triggered the System UI Stop race. Already-ongoing
+playback now leaves Media3's foreground notification untouched; the deadline
+placeholder is used only when the service is not already in foreground playback.
+
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as
 passes. The accelerated hosted emulator supplied the successful runtime evidence.
 
 ## Acceptance still required
+
+### Timed lyrics follow-up (device qualification pending)
+
+The Rust lyric window replaces the old plain popup. It supports reviewed LRCLIB
+title/artist lookup, version selection, virtualized timed follow and line seeking,
+UTF-8 LRC/text import, text editing and per-media timing adjustment. A different
+playing URL suspends timing/seeks; dismissed/superseded requests and imports
+cannot reopen or overwrite another view. Local documents are limited to 512 KiB,
+100 songs / 8 MiB total, and use a separate atomic private file so queue/resume
+writes do not serialize the lyric library. No automatic lyric/history lookup is
+sent. Tests cover Unicode/timestamps, offsets, all themes at phone/tablet sizes,
+late replies, invalid edits, persistence rollback and library capacity. Android
+document tests reject malformed/truncated UTF-8, excessive bytes and stuck streams.
+An added JNI device case checks exact timings and failed-edit rollback. Its
+emulator result and live LRCLIB/device keyboard acceptance remain separate.
+
+### Physical/live release gates
 
 On both requested physical devices: install/update signing identity, soft keyboard,
 rotation, tablet split layout, gesture/system insets, accessibility, every

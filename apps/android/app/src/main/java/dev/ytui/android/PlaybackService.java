@@ -269,7 +269,7 @@ public final class PlaybackService extends MediaSessionService {
       stopSelf(id);
       return START_NOT_STICKY;
     }
-    if (intent != null && "play".equals(intent.getAction())) {
+    if ("play".equals(intent.getAction()) && !isPlaybackOngoing()) {
       android.app.NotificationManager notifications =
           getSystemService(android.app.NotificationManager.class);
       // Android's foreground deadline starts before decoder/buffering completion.

@@ -2,6 +2,7 @@
 use crate::*;
 use egui::{Color32, RichText, Vec2};
 use std::{collections::HashSet, sync::mpsc};
+mod lyrics;
 
 #[derive(Clone, Debug)]
 pub enum Effect {
@@ -39,7 +40,7 @@ enum Kind {
     Queue,
     QueueChanged,
     History,
-    Popup(String),
+    Lyrics(uuid::Uuid, lyrics::ReplyKind),
     Account,
     Ignore,
 }
@@ -119,6 +120,8 @@ pub struct MobileApp {
     queue_selection: Option<String>,
     history_open: bool,
     recent: Vec<Media>,
+    lyrics: Option<lyrics::View>,
+    lyric_import: Option<uuid::Uuid>,
     popup: Option<(String, String)>,
     feed_menu: bool,
     add_download: bool,
@@ -178,6 +181,8 @@ impl MobileApp {
             queue_selection: None,
             history_open: false,
             recent: Vec::new(),
+            lyrics: None,
+            lyric_import: None,
             popup: None,
             feed_menu: false,
             add_download: false,
@@ -625,18 +630,7 @@ impl MobileApp {
                 (Kind::History, Ok(value)) => {
                     self.recent = serde_json::from_value(value).unwrap_or_default()
                 }
-                (Kind::Popup(title), Ok(value)) => {
-                    self.popup = Some((
-                        title.clone(),
-                        if title == "Lyrics" {
-                            lyric_text(&value)
-                        } else if let Some(s) = value.as_str() {
-                            s.into()
-                        } else {
-                            serde_json::to_string_pretty(&value).unwrap_or_default()
-                        },
-                    ));
-                }
+                (Kind::Lyrics(id, kind), result) => self.lyric_reply(id, reply.id, kind, result),
                 (Kind::Account, Ok(_)) => {
                     self.account_generation += 1;
                     self.playback_generation += 1;
@@ -713,6 +707,7 @@ impl MobileApp {
                             Kind::ImportedTheme,
                         );
                     }
+                    "lyrics_file" => self.import_lyrics(event["text"].as_str().unwrap_or_default()),
                     "cookie_file" => {
                         self.account_generation += 1;
                         self.playback_generation += 1;
@@ -766,6 +761,8 @@ impl MobileApp {
                             }
                         } else if self.menu_open {
                             self.menu_open = false;
+                        } else if self.lyrics.is_some() {
+                            self.close_lyrics();
                         } else if self.popup.is_some() {
                             self.popup = None;
                         } else if self.queue_open {
@@ -1074,6 +1071,7 @@ impl MobileApp {
                 });
             self.history_open &= open;
         }
+        self.lyrics_window(ctx);
         if let Some((title, text)) = self.popup.clone() {
             let mut open = true;
             egui::Window::new(title)
@@ -1821,7 +1819,7 @@ impl MobileApp {
     fn menu(&mut self, ctx: &egui::Context) {
         let mut open = true;
         egui::Window::new("Actions").constrain_to(self.safe_rect(ctx)).open(&mut open).show(ctx,|ui|{
-            if ui.button("Look up lyrics for this song").clicked()&& let Some(media)=self.player.get("media"){self.request(ctx,json!({"op":"lyrics","media":media}),Kind::Popup("Lyrics".into()));}
+            if ui.add_enabled(self.player.get("media").is_some(),egui::Button::new("Lyrics / local LRC")).clicked(){self.open_lyrics(ctx);self.menu_open=false;}
             if ui.button("Sleep timer: 30 minutes").clicked(){self.effects.push(Effect::Command(json!({"op":"sleep","seconds":1800})));}
             if ui.button("Cancel sleep timer").clicked(){self.command("sleep_cancel");}
 
@@ -1984,36 +1982,6 @@ fn timestamp(seconds: f64) -> String {
         format!("{}:{:02}", n / 60, n % 60)
     }
 }
-fn lyric_text(value: &Value) -> String {
-    let Some(tracks) = value.as_array() else {
-        return "No lyrics returned".into();
-    };
-    if tracks.is_empty() {
-        return "No lyrics found".into();
-    }
-    tracks
-        .iter()
-        .take(5)
-        .map(|track| {
-            let heading = format!(
-                "{} — {}",
-                track["title"].as_str().unwrap_or("Lyrics"),
-                track["artist"].as_str().unwrap_or("")
-            );
-            let lines = track["lines"]
-                .as_array()
-                .map(|rows| {
-                    rows.iter()
-                        .filter_map(|line| line["text"].as_str())
-                        .collect::<Vec<_>>()
-                        .join("\n")
-                })
-                .unwrap_or_default();
-            format!("{heading}\n\n{lines}")
-        })
-        .collect::<Vec<_>>()
-        .join("\n\n────────\n\n")
-}
 
 impl Drop for MobileApp {
     fn drop(&mut self) {
@@ -2026,7 +1994,7 @@ impl Drop for MobileApp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    fn test_app() -> (MobileApp, egui::Context, tempfile::TempDir) {
+    pub(super) fn test_app() -> (MobileApp, egui::Context, tempfile::TempDir) {
         let root = tempfile::tempdir().unwrap();
         let ctx = egui::Context::default();
         let engine =
@@ -2358,10 +2326,6 @@ mod tests {
         app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
         assert_eq!(app.config.download.audio, original);
         assert!(app.effects.is_empty());
-        assert_eq!(
-            lyric_text(&json!([{ "title":"Song", "artist":"Artist", "lines":[{"text":"Hello"}]}])),
-            "Song — Artist\n\nHello"
-        );
     }
     #[test]
     fn collection_continuation_is_scoped_to_the_selected_finite_music_or_radio_feed() {

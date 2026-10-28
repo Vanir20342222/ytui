@@ -36,6 +36,43 @@ public final class RuntimeTest {
   }
 
   @Test
+  public void localLyricJniPreservesTimingsAndRejectsAnInvalidEdit() throws Exception {
+    String url = "https://media.test/android-lyrics";
+    try {
+      JSONObject document =
+          new JSONObject()
+              .put("title", "Grüße 🎵")
+              .put("artist", "Artist")
+              .put("text", "[00:01.234]First\n[00:03.987]Second")
+              .put("offset_ms", 500);
+      JSONObject saved =
+          PlaybackService.rpc(
+              new JSONObject().put("op", "lyrics_save").put("url", url).put("document", document));
+      assertEquals(
+          1234,
+          saved.getJSONObject("track").getJSONArray("lines").getJSONObject(0).getLong("at_ms"));
+      JSONObject invalid = new JSONObject(document.toString()).put("offset_ms", 120001);
+      JSONObject bad =
+          new JSONObject(
+              NativeBridge.request(
+                  new JSONObject()
+                      .put("op", "lyrics_save")
+                      .put("url", url)
+                      .put("document", invalid)
+                      .toString()));
+      assertFalse(bad.getBoolean("ok"));
+      JSONObject stored =
+          PlaybackService.rpc(new JSONObject().put("op", "lyrics_get").put("url", url))
+              .getJSONObject("document");
+      assertEquals(document.getString("title"), stored.getString("title"));
+      assertEquals(500, stored.getInt("offset_ms"));
+      assertEquals(document.getString("text"), stored.getString("text"));
+    } finally {
+      PlaybackService.rpc(new JSONObject().put("op", "lyrics_remove").put("url", url));
+    }
+  }
+
+  @Test
   public void emptyAudioProcessorInputDoesNotCopyTheSharedEosBuffer() throws Exception {
     AudioTap tap = new AudioTap();
     tap.configure(
