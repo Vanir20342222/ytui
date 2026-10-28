@@ -18,6 +18,7 @@ public final class PlaybackService extends MediaSessionService {
   static volatile PlaybackService current;
   ExoPlayer player;
   MediaSession session;
+  LiveMetadataPlayer sessionPlayer;
   final ExecutorService worker = Executors.newFixedThreadPool(3);
   final Handler handler = new Handler(Looper.getMainLooper());
   final Set<Long> contextJobs = ConcurrentHashMap.newKeySet();
@@ -80,58 +81,60 @@ public final class PlaybackService extends MediaSessionService {
     session =
         new MediaSession.Builder(
                 this,
-                new ForwardingSimpleBasePlayer(player) {
-                  @Override
-                  protected com.google.common.util.concurrent.ListenableFuture<?>
-                      handleSetPlayWhenReady(boolean ready) {
-                    pausedByUser = !ready;
-                    if (ready && player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
-                    return super.handleSetPlayWhenReady(ready);
-                  }
+                sessionPlayer =
+                    new LiveMetadataPlayer(player) {
+                      @Override
+                      protected com.google.common.util.concurrent.ListenableFuture<?>
+                          handleSetPlayWhenReady(boolean ready) {
+                        pausedByUser = !ready;
+                        if (ready && player.getPlaybackState() == Player.STATE_ENDED)
+                          player.seekTo(0);
+                        return super.handleSetPlayWhenReady(ready);
+                      }
 
-                  @Override
-                  protected com.google.common.util.concurrent.ListenableFuture<?> handleStop() {
-                    stopAndClear();
-                    return com.google.common.util.concurrent.Futures.immediateVoidFuture();
-                  }
+                      @Override
+                      protected com.google.common.util.concurrent.ListenableFuture<?> handleStop() {
+                        stopAndClear();
+                        return com.google.common.util.concurrent.Futures.immediateVoidFuture();
+                      }
 
-                  @Override
-                  protected State getState() {
-                    State state = super.getState();
-                    return state
-                        .buildUpon()
-                        .setAvailableCommands(
-                            state
-                                .availableCommands
-                                .buildUpon()
-                                .add(Player.COMMAND_SEEK_TO_NEXT)
-                                .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
-                                .add(Player.COMMAND_SEEK_TO_PREVIOUS)
-                                .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
-                                .build())
-                        .build();
-                  }
+                      @Override
+                      protected State getState() {
+                        State state = super.getState();
+                        return state
+                            .buildUpon()
+                            .setAvailableCommands(
+                                state
+                                    .availableCommands
+                                    .buildUpon()
+                                    .add(Player.COMMAND_SEEK_TO_NEXT)
+                                    .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                                    .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                                    .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                                    .build())
+                            .build();
+                      }
 
-                  @Override
-                  protected com.google.common.util.concurrent.ListenableFuture<?> handleSeek(
-                      int index, long position, int command) {
-                    switch (command) {
-                      case Player.COMMAND_SEEK_TO_NEXT:
-                      case Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM:
-                        PlaybackService.this.next();
-                        break;
-                      case Player.COMMAND_SEEK_TO_PREVIOUS:
-                        PlaybackService.this.previous();
-                        break;
-                      case Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM:
-                        PlaybackService.this.navigate(true);
-                        break;
-                      default:
-                        return super.handleSeek(index, position, command);
-                    }
-                    return com.google.common.util.concurrent.Futures.immediateVoidFuture();
-                  }
-                })
+                      @Override
+                      protected com.google.common.util.concurrent.ListenableFuture<?> handleSeek(
+                          int index, long position, int command) {
+                        switch (command) {
+                          case Player.COMMAND_SEEK_TO_NEXT:
+                          case Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM:
+                            PlaybackService.this.next();
+                            break;
+                          case Player.COMMAND_SEEK_TO_PREVIOUS:
+                            PlaybackService.this.previous();
+                            break;
+                          case Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM:
+                            PlaybackService.this.navigate(true);
+                            break;
+                          default:
+                            return super.handleSeek(index, position, command);
+                        }
+                        return com.google.common.util.concurrent.Futures.immediateVoidFuture();
+                      }
+                    })
             .setSessionActivity(
                 PendingIntent.getActivity(
                     this,
@@ -148,11 +151,15 @@ public final class PlaybackService extends MediaSessionService {
             if (!isLive()) return;
             JSONObject media = currentRequest.optJSONObject("media");
             String title = PlaybackPolicy.liveTitle(metadata.title);
-            if (media != null && title.equals(media.optString("title").trim())) title = "";
-            if (!title.equals(streamTitle)) {
-              streamTitle = title;
-              streamMetadataUpdates++;
-              publish();
+            if (!title.isEmpty() && media != null && !title.equals(media.optString("title").trim()))
+              setLiveTitle(title);
+          }
+
+          @Override
+          public void onMetadata(Metadata metadata) {
+            for (int i = 0; i < metadata.length(); i++) {
+              if (metadata.get(i) instanceof androidx.media3.extractor.metadata.icy.IcyInfo icy
+                  && icy.title != null) setLiveTitle(icy.title);
             }
           }
 
@@ -270,6 +277,44 @@ public final class PlaybackService extends MediaSessionService {
           }
         });
     handler.post(ticker);
+  }
+
+  private void setLiveTitle(CharSequence raw) {
+    if (!isLive()) return;
+    String title = PlaybackPolicy.liveTitle(raw);
+    if (title.equals(streamTitle)) return;
+    streamTitle = title;
+    streamMetadataUpdates++;
+    sessionPlayer.metadataChanged();
+    publish();
+  }
+
+  // MediaItem's fixed station title takes precedence in ExoPlayer metadata.
+  // Overlay timed ICY information for session consumers without replacing the
+  // source, restarting audio, or changing the station's durable media identity.
+  private class LiveMetadataPlayer extends ForwardingSimpleBasePlayer {
+    LiveMetadataPlayer(Player delegate) {
+      super(delegate);
+    }
+
+    void metadataChanged() {
+      invalidateState();
+    }
+
+    @Override
+    protected State getState() {
+      State state = super.getState();
+      if (isLive() && !streamTitle.isEmpty() && !state.timeline.isEmpty()) {
+        return state
+            .buildUpon()
+            .setPlaylist(
+                state.timeline,
+                state.currentTracks,
+                state.currentMetadata.buildUpon().setTitle(streamTitle).build())
+            .build();
+      }
+      return state;
+    }
   }
 
   @Override
@@ -900,6 +945,8 @@ public final class PlaybackService extends MediaSessionService {
     cancelContextJobs();
     pendingStart = false;
     navigationPending = false;
+    streamTitle = "";
+    streamMetadataUpdates = 0;
     player.stop();
     player.clearMediaItems();
     currentRequest = new JSONObject();
@@ -1012,6 +1059,9 @@ public final class PlaybackService extends MediaSessionService {
       java.util.List<Tracks.Group> groups = player.getCurrentTracks().getGroups();
       for (int g = 0; g < groups.size(); g++) {
         Tracks.Group group = groups.get(g);
+        if (group.getType() != C.TRACK_TYPE_AUDIO
+            && group.getType() != C.TRACK_TYPE_VIDEO
+            && group.getType() != C.TRACK_TYPE_TEXT) continue;
         for (int i = 0; i < group.length; i++) {
           Format format = group.getTrackFormat(i);
           tracks.put(

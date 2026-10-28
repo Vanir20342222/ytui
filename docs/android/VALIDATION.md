@@ -270,6 +270,11 @@ Live ICY song titles now update the player and notification while preserving the
 station's library/history identity. Titles are bounded and strip control codes;
 Unicode code points are not split. A generated MP3 with two actual HTTP/ICY title
 updates is the new device regression; no external radio service is used.
+The first run (`40645113719`) decoded audio but left the fixed station title in
+place. MediaItem's metadata takes priority over timed ICY data. The adapter now
+consumes `onMetadata` IcyInfo entries and overlays the live title in session state
+without replacing/restarting the source. The regression also checks the session
+title and ensures metadata-only tracks are not mislabeled as selectable video.
 
 Download requests now retain their selected quality through asynchronous replies,
 playlist preparation and failed-stream refresh. Download-index data drops unused

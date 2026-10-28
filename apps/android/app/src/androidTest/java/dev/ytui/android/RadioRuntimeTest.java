@@ -55,6 +55,21 @@ public final class RadioRuntimeTest {
       assertEquals("Fixture station", status.getJSONObject("media").getString("title"));
       assertEquals("Fixture station", status.getString("station"));
       assertEquals("Fixture artist - Second song", status.getString("stream_title"));
+      java.util.concurrent.atomic.AtomicReference<String> sessionTitle =
+          new java.util.concurrent.atomic.AtomicReference<>("");
+      MediaBridge.main.post(
+          () ->
+              sessionTitle.set(
+                  String.valueOf(
+                      PlaybackService.current.session.getPlayer().getMediaMetadata().title)));
+      MediaRuntimeTest.await(
+          "MediaSession did not receive the live song title",
+          () -> "Fixture artist - Second song".equals(sessionTitle.get()));
+      JSONArray tracks = status.getJSONArray("tracks");
+      for (int i = 0; i < tracks.length(); i++)
+        assertFalse(
+            "A metadata track was mislabeled as video",
+            tracks.getJSONObject(i).getString("label").startsWith("Video"));
       MediaRuntimeTest.command("pause");
       MediaRuntimeTest.await(
           "Live pause was not applied", () -> MediaRuntimeTest.status().optBoolean("paused"));
