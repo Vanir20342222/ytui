@@ -34,11 +34,18 @@ jobs:
       actions: read
     env:
       GH_TOKEN: ${{ github.token }}
-      YTUI_APK_URL: ${{ inputs.apk_url }}
       YTUI_APK_SHA256: ${{ inputs.sha256 }}
       YTUI_VERSION_CODE: ${{ inputs.version_code }}
       YTUI_VERSION_NAME: ${{ inputs.version_name }}
     steps:
+      - name: Mask the temporary transfer link before any environment logging
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+            core.setSecret(event.inputs.apk_url);
+            core.exportVariable('YTUI_APK_URL', event.inputs.apk_url);
       - uses: actions/checkout@v4
       - name: Require successful exact-source main checks
         run: |
@@ -62,7 +69,6 @@ jobs:
         run: sdkmanager 'build-tools;35.0.0' 'ndk;27.2.12479018'
       - name: Download, verify and inspect the signed APK
         run: |
-          printf '::add-mask::%s\n' "$YTUI_APK_URL"
           python3 tools/android/verify-local-release.py
           apk="publish/ytui-$YTUI_VERSION_NAME.apk"
           tools/android/inspect-apk.sh "$apk" >> publish/APK-inspection.txt

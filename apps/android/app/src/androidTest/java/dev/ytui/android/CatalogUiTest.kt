@@ -340,9 +340,12 @@ class CatalogUiTest {
             val focusedCover =
                 hasTestTag("artwork-${cards[0].key}") and
                     hasAnyAncestor(hasTestTag("focused-player"))
-            compose.waitUntil(10_000) {
-                compose.onNode(focusedCover, useUnmergedTree = true).isDisplayed()
+            // Vinyl deliberately draws the same art on the sleeve and record label.
+            fun loadedCoverVisible(): Boolean {
+                val nodes = compose.onAllNodes(focusedCover, useUnmergedTree = true)
+                return nodes.fetchSemanticsNodes().indices.any { nodes[it].isDisplayed() }
             }
+            compose.waitUntil(10_000) { loadedCoverVisible() }
             MediaRuntimeTest.capture("native-player.png")
             for (style in listOf("vinyl", "vu", "orbit")) {
                 scenario.onActivity {
@@ -359,7 +362,7 @@ class CatalogUiTest {
                                 .value
                                 .optString("music_player_style") == style
                     }
-                    selected && compose.onNode(focusedCover, useUnmergedTree = true).isDisplayed()
+                    selected && loadedCoverVisible()
                 }
                 compose
                     .onNodeWithTag("music-visualizer")

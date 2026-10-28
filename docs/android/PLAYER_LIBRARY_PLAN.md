@@ -106,3 +106,23 @@ render assertions are being tightened before final qualification. A local stable
 APK has passed a full temporary transfer, checksum, certificate, package and
 source-marker verification. Neither that intermediate APK nor a failed device
 checkpoint is a public release.
+
+The stronger `67863cf` render pass found a real fullscreen defect: registering
+the exit listener before setting its initial state immediately finished the
+activity. Listener ordering/state handling is repaired, and first-frame timing
+is retained across surface switches. The Vinyl assertion now permits its two
+intentional cover instances. Local/indexed media also explicitly block related
+recommendations outside offline test mode; a stopped-worker regression prevents
+even a failing guard from sending network requests. Transfer URLs are masked
+before workflow environment logging, and recovery files have Git ignore guards.
+These repairs require a new device pass; the failed screenshot/checkpoint is
+retained as evidence rather than treated as a release qualification.
+
+Public-network attempt: [Android 40781371045](https://github.com/Vanir20342222/ytui/actions/runs/40781371045)
+explicitly tried a public YouTube video on `67863cf`. Native extraction failed
+with invalid player responses and the extractor's likely-IP-block diagnostic;
+no real YouTube playback or three-second service latency was established. This
+run also contains the two older player/assertion failures described above.
+Neither a skipped default live case nor local decoding fixtures erase that
+separate failed network acceptance result. Do not retry aggressively or import
+personal credentials into hosted CI to make it pass.

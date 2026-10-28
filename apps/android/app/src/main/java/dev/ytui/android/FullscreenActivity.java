@@ -33,8 +33,11 @@ public final class FullscreenActivity extends ComponentActivity {
     view.setUseController(true);
     view.setShowSubtitleButton(true);
     view.setShowShuffleButton(true);
-    view.setFullscreenButtonClickListener(fullscreen -> finish());
     view.setFullscreenButtonState(true);
+    view.setFullscreenButtonClickListener(
+        fullscreen -> {
+          if (!fullscreen) finish();
+        });
     VideoGestures.attach(view);
     setContentView(view);
   }

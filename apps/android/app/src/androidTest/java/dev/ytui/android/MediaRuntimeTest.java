@@ -206,6 +206,8 @@ public final class MediaRuntimeTest {
             }
           });
       long fullscreenGeneration = PlaybackService.current.generation;
+      long inlineFirstFrameMs = status().getLong("first_frame_ms");
+      assertTrue("The decoder must report its first frame", inlineFirstFrameMs > 0);
       androidx.test.uiautomator.UiDevice device =
           androidx.test.uiautomator.UiDevice.getInstance(
               InstrumentationRegistry.getInstrumentation());
@@ -256,6 +258,10 @@ public final class MediaRuntimeTest {
       device.pressBack();
       await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);
       assertEquals(fullscreenGeneration, PlaybackService.current.generation);
+      assertEquals(
+          "Surface switches must not overwrite startup latency",
+          inlineFirstFrameMs,
+          status().getLong("first_frame_ms"));
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
       command("repeat");

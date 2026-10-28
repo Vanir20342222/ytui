@@ -220,7 +220,8 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onRenderedFirstFrame() {
-            firstFrameMs = SystemClock.elapsedRealtime() - startupAt;
+            if (firstFrameMs == 0)
+              firstFrameMs = Math.max(1, SystemClock.elapsedRealtime() - startupAt);
             publish();
           }
 
@@ -1218,6 +1219,8 @@ public final class PlaybackService extends MediaSessionService {
     if (media == null
         || isLive()
         || currentRequest.optBoolean("offline")
+        || currentRequest.optBoolean("local")
+        || !media.isNull("offline_id")
         || currentRequest.optBoolean("preview")
         || MediaBridge.offlineUi
         || !MobileSettings.enabled("autoplay_related")) return false;

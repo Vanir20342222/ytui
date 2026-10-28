@@ -23,6 +23,40 @@ public final class PlaybackNavigationTest {
               ? new String[] {"android.permission.POST_NOTIFICATIONS"}
               : new String[] {});
 
+  @Test
+  public void savedMediaNeverRequestsOnlineRecommendationsEvenOutsideOfflineTestMode()
+      throws Exception {
+    try (ActivityScenario<RustActivity> activity = RuntimeTest.launchOffline()) {
+      PlaybackService isolated = new PlaybackService();
+      // Even a regression cannot send HTTP: a mistaken preparation hits a closed executor.
+      isolated.worker.shutdownNow();
+      boolean offline = MediaBridge.offlineUi;
+      boolean autoplay = MobileSettings.enabled("autoplay_related");
+      try {
+        MobileSettings.prefs().edit().putBoolean("autoplay_related", true).commit();
+        MediaBridge.offlineUi = false;
+        for (String mode : new String[] {"local", "offline", "offline_id"}) {
+          JSONObject item =
+              new JSONObject()
+                  .put("kind", "song")
+                  .put("url", "https://www.youtube.com/watch?v=offline0001");
+          isolated.currentRequest = new JSONObject().put("media", item);
+          if (mode.equals("offline_id")) item.put("offline_id", "a".repeat(64));
+          else isolated.currentRequest.put(mode, true);
+          assertFalse(
+              "Saved media must not request related media: " + mode, isolated.prepareRelated());
+          assertEquals("No online context should be created", "", isolated.relatedForUrl);
+          assertTrue(isolated.contextJobs.isEmpty());
+        }
+      } finally {
+        MediaBridge.offlineUi = offline;
+        MobileSettings.prefs().edit().putBoolean("autoplay_related", autoplay).commit();
+        NativeBridge.activateContext(
+            PlaybackService.current == null ? "" : PlaybackService.current.contextId());
+      }
+    }
+  }
+
   static JSONObject media(CollectionServer server, String id) throws Exception {
     return new JSONObject()
         .put("id", id)
