@@ -330,13 +330,44 @@ class CatalogUiTest {
                 MediaRuntimeTest.capture("native-player.png")
                 android.util.Log.i(
                     "PlayerLayoutTest",
-                    compose.onRoot(useUnmergedTree = true).printToString(),
+                    compose.onNodeWithTag("focused-player", useUnmergedTree = true).printToString(),
                 )
             }
             compose
                 .onNodeWithTag("music-visualizer")
                 .assertIsDisplayed()
                 .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
+            val focusedCover =
+                hasTestTag("artwork-${cards[0].key}") and
+                    hasAnyAncestor(hasTestTag("focused-player"))
+            compose.waitUntil(10_000) {
+                compose.onNode(focusedCover, useUnmergedTree = true).isDisplayed()
+            }
+            MediaRuntimeTest.capture("native-player.png")
+            for (style in listOf("vinyl", "vu", "orbit")) {
+                scenario.onActivity {
+                    ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(false) { config ->
+                        config.put("music_player_style", style)
+                    }
+                }
+                compose.waitUntil(10_000) {
+                    var selected = false
+                    scenario.onActivity {
+                        selected =
+                            ViewModelProvider(it)[YtuiViewModel::class.java]
+                                .config
+                                .value
+                                .optString("music_player_style") == style
+                    }
+                    selected && compose.onNode(focusedCover, useUnmergedTree = true).isDisplayed()
+                }
+                compose
+                    .onNodeWithTag("music-visualizer")
+                    .assertIsDisplayed()
+                    .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
+                compose.onNodeWithTag("player-pause").assertIsDisplayed()
+                MediaRuntimeTest.capture("native-player-$style.png")
+            }
             compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
                 MediaRuntimeTest.status().optBoolean("playing")

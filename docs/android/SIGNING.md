@@ -59,6 +59,15 @@ Future signing can run locally using this same archive; a cloud session cannot
 recover it without access to the owner's SSH private key. This trades automatic
 CI signing for keeping private signing credentials outside GitHub.
 
+The manual **Publish locally signed Android APK** workflow transfers only a
+finished APK through a temporary HTTPS file-service URL. It requires successful
+Android/Rust/Secret scan runs for the exact `main` revision, verifies the source
+marker, checksum, stable certificate, release package/version, both ABIs and
+16 KiB alignment, then publishes a development prerelease. It never receives a
+keystore, password or recovery archive, rebuilds the APK, or changes its signature.
+Temporary APK transfers are masked in logs; no public sharing of Drive files is
+needed. The old debug Preview publisher is unrelated to this stable channel.
+
 A separate stable package is necessary because the old Preview's private key is
 unavailable. The new stable key cannot update that old package in place. No
 uninstall is required. Physical-device stable-update acceptance remains open.

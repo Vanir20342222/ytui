@@ -223,7 +223,36 @@ public final class MediaRuntimeTest {
           "Fullscreen must reuse the prepared decoder",
           fullscreenGeneration,
           PlaybackService.current.generation);
-      capture("native-video-fullscreen.png");
+      await(
+          "Fullscreen must display the decoded RGB fixture, not the previous dialog",
+          () -> {
+            android.graphics.Bitmap frame =
+                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+            if (frame == null) return false;
+            try {
+              if (frame.getWidth() <= frame.getHeight()) return false;
+              int red = 0, green = 0, blue = 0;
+              for (int y = 0; y < frame.getHeight(); y += 8)
+                for (int x = 0; x < frame.getWidth(); x += 8) {
+                  int pixel = frame.getPixel(x, y);
+                  int r = android.graphics.Color.red(pixel);
+                  int g = android.graphics.Color.green(pixel);
+                  int b = android.graphics.Color.blue(pixel);
+                  if (r > 180 && g < 90 && b < 90) red++;
+                  if (g > 180 && r < 90 && b < 90) green++;
+                  if (b > 180 && r < 90 && g < 90) blue++;
+                }
+              if (red < 100 || green < 100 || blue < 100) return false;
+              try (FileOutputStream out =
+                  new FileOutputStream(
+                      new File(context.getExternalFilesDir(null), "native-video-fullscreen.png"))) {
+                frame.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+              }
+              return true;
+            } finally {
+              frame.recycle();
+            }
+          });
       device.pressBack();
       await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);
       assertEquals(fullscreenGeneration, PlaybackService.current.generation);

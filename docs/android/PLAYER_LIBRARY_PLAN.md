@@ -96,3 +96,13 @@ Next, folder-picker/export/local EOF and populated native UI cases are authored;
 CI device execution, final exact-source checks and updated screenshots remain
 required. Three-second real YouTube starts and physical-device acceptance are
 not established by these fixture or build results.
+
+The next hosted pass (`f847568`, run 40759812773) passes the real folder grant,
+legacy/new exports, cache-free local playlist EOF and all 13 theme checks. Its
+only remaining failure is a diagnostic selecting one Compose root while two
+windows exist. The player screenshot confirms bounded controls/artwork geometry;
+the diagnostic is scoped to the player and cover-ready/visualizer/fullscreen
+render assertions are being tightened before final qualification. A local stable
+APK has passed a full temporary transfer, checksum, certificate, package and
+source-marker verification. Neither that intermediate APK nor a failed device
+checkpoint is a public release.
