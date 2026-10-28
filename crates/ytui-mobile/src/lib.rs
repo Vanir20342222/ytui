@@ -236,7 +236,7 @@ impl Engine {
             "browse" => {
                 let query: BrowseRequest = serde_json::from_value(r["request"].clone())?;
                 let tab = r["tab"].as_u64().unwrap_or(1);
-                let page = if matches!(
+                let mut page = if matches!(
                     query,
                     BrowseRequest::SavedMedia { .. } | BrowseRequest::Favorites
                 ) {
@@ -258,6 +258,7 @@ impl Engine {
                     let browser = self.browser.lock().expect("browser").clone();
                     browser.fetch(tab == 2, &query).await?
                 };
+                page.notice = page.notice.map(mobile_notice);
                 ensure!(
                     page.retained_bytes() <= 16 * 1024 * 1024,
                     "Feed response exceeds memory budget"
@@ -271,13 +272,16 @@ impl Engine {
                 let media: Media = serde_json::from_value(r["media"].clone())?;
                 ensure!(media.retained_bytes() <= 256 * 1024, "Media is too large");
                 self.mutate(|state| {
-                    if let Some(i) = state.saved.iter().position(|m| m.url == media.url) {
+                    let saved = if let Some(i) = state.saved.iter().position(|m| m.url == media.url)
+                    {
                         state.saved.remove(i);
+                        false
                     } else {
                         ensure!(state.saved.len() < 2000, "Saved library is full");
                         state.saved.push(media);
-                    }
-                    Ok(json!({"count":state.saved.len()}))
+                        true
+                    };
+                    Ok(json!({"count":state.saved.len(),"saved":saved}))
                 })
             }
             "queue" => Ok(serde_json::to_value(
@@ -1058,9 +1062,26 @@ fn mobile_error(error: &anyhow::Error) -> Value {
         .map(|r| r.after.as_millis().min(u64::MAX as u128) as u64);
     json!({"ok":false,"code":code,"error":message,"retryable":retry.is_some(),"retry_after_ms":retry})
 }
+fn mobile_notice(text: String) -> String {
+    if text.contains("F2") || text.contains("ytui-rs auth") {
+        mobile_error(&anyhow::anyhow!(text))["error"]
+            .as_str()
+            .unwrap_or("Use Account to sign in or import cookies.")
+            .to_owned()
+    } else {
+        text
+    }
+}
 #[cfg(test)]
 mod mobile_error_tests {
     use super::*;
+    #[test]
+    fn successful_empty_pages_do_not_keep_desktop_instructions() {
+        let notice = mobile_notice("No anonymous Home recommendations were returned. Press / to search, or F2 → Account → Connect browser".into());
+        assert!(notice.contains("Search") && notice.contains("sign in"));
+        assert!(!notice.contains("F2") && !notice.contains("Press /"));
+        assert_eq!(mobile_notice("End of results".into()), "End of results");
+    }
     #[test]
     fn account_errors_offer_android_actions_without_desktop_commands() {
         for text in [

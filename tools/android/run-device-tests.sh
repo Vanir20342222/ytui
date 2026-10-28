@@ -20,6 +20,7 @@ collect_evidence() {
     adb shell dumpsys activity exit-info dev.ytui.android > "$evidence/exit-info.txt" 2>&1 || true
     adb pull /sdcard/Android/data/dev.ytui.android/files/video-player.png "$evidence/video-player.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/dev.ytui.android/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
+    adb pull /sdcard/Android/data/dev.ytui.android/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
     mkdir -p "$evidence/native-ui"
     for screenshot in native-search native-account native-tablet native-theme-{0..12}; do
         adb pull "/sdcard/Android/data/dev.ytui.android/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true

@@ -178,6 +178,37 @@ class NativeUiTest {
     }
 
     @Test
+    fun pastedPlaylistAndMusicUrlsKeepTheirProviderIntent() {
+        scenario.onActivity {
+            val vm = androidx.lifecycle.ViewModelProvider(it)[YtuiViewModel::class.java]
+            vm.chooseTab(0)
+            val playlist = vm.linked("https://music.youtube.com/playlist?list=PLfixture")
+            Assert.assertTrue(playlist.collection)
+            Assert.assertTrue(playlist.musicSource)
+            Assert.assertEquals("VLPLfixture", playlist.collectionId)
+            Assert.assertEquals(
+                "VLPLfixture",
+                MediaCard(
+                        json(
+                            "kind" to "playlist",
+                            "id" to "PLfixture",
+                            "browse_id" to "VLPLfixture",
+                        )
+                    )
+                    .collectionId,
+            )
+            Assert.assertFalse(
+                vm.linked("https://music.youtube.com/watch?v=fixture&list=PLfixture").collection
+            )
+            Assert.assertTrue(vm.linked("https://music.youtube.com/watch?v=fixture").audio)
+            Assert.assertFalse(vm.linked("https://youtube.com/playlist?list=").collection)
+            Assert.assertFalse(
+                vm.linked("https://media.invalid/playlist?list=PLfixture").collection
+            )
+        }
+    }
+
+    @Test
     fun continuationFailureDoesNotTriggerAnImmediateScrollRetry() {
         val reference = java.util.concurrent.atomic.AtomicReference<YtuiViewModel>()
         scenario.onActivity {

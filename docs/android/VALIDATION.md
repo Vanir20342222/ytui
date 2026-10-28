@@ -80,6 +80,27 @@ all 13 entries, including System, and reject a covering system ANR dialog.
 Visible video keeps the screen awake only while playing; in-flight feed replies
 retain the user's current scroll index. The full rerun remains required.
 
+### Third run: all native UI regressions pass; video fixture timing remains
+
+[Run 40660857974](https://github.com/Vanir20342222/ytui/actions/runs/40660857974)
+at `7319021` passed **15 cases**, including all five native UI cases and all 13
+background/foreground theme checks, with no covering launcher dialog. Video
+visibility still failed; the public case was explicitly skipped. The trace
+confirms Android's `c2.android.avc.decoder` was selected, and shows pause at
+0.671 seconds before the visible TextureView was attached. The fixture now keeps
+playing/repeating until the full screenshot contains actual RGB video pixels,
+then tests pause/position/quality. Failures additionally save native view/texture
+diagnostics. No visibility assertion is removed or replaced by decoder counters.
+
+The follow-up also repairs pasted/saved playlist browse IDs (`VL`), preserves
+Music/audio intent from the Downloads tab, keeps watch links with `list=` as
+single items, and avoids treating another host's `/playlist` path as YouTube.
+Successful empty-feed notices now translate desktop F2 instructions as well as
+errors. Save toggles report removal accurately and refresh an open saved shelf.
+Offline URL/notice regressions cover these changes; full runtime qualification
+remains pending. Release Kotlin/Java compilation, 11 release JVM tests and release
+lint also passed for the native UI; no signing identity was loaded for that check.
+
 ## Passed historical backend checks
 
 - Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.

@@ -110,6 +110,18 @@ internal data class MediaCard(val value: JSONObject) {
 
     val live: Boolean
         get() = value.optBoolean("live")
+
+    val musicSource: Boolean
+        get() = Uri.parse(url).host.equals("music.youtube.com", ignoreCase = true)
+
+    val collectionId: String
+        get() {
+            val id =
+                value.optString("browse_id").takeUnless { it.isBlank() || it == "null" }
+                    ?: value.optString("id")
+            return if (kind == "playlist" && id.isNotBlank() && !id.startsWith("VL")) "VL$id"
+            else id
+        }
 }
 
 internal data class FeedState(
@@ -414,8 +426,12 @@ internal class YtuiViewModel : ViewModel() {
         val uri = java.net.URI(raw)
         require(uri.scheme in listOf("http", "https") && uri.host != null && uri.userInfo == null)
         val parsed = Uri.parse(raw)
+        val host = uri.host.lowercase(java.util.Locale.ROOT)
+        val youtube = host == "youtube.com" || host.endsWith(".youtube.com") || host == "youtu.be"
         val playlist =
-            parsed.path?.trimEnd('/') == "/playlist" && parsed.getQueryParameter("list") != null
+            youtube &&
+                parsed.path?.trimEnd('/') == "/playlist" &&
+                !parsed.getQueryParameter("list").isNullOrBlank()
         return MediaCard(
             json(
                 "url" to raw,
@@ -423,7 +439,8 @@ internal class YtuiViewModel : ViewModel() {
                 "id" to if (playlist) parsed.getQueryParameter("list") else "",
                 "kind" to
                     if (playlist) "playlist"
-                    else if (tab.value == 3) "station" else if (tab.value == 2) "song" else "video",
+                    else if (tab.value == 3) "station"
+                    else if (tab.value == 2 || host == "music.youtube.com") "song" else "video",
                 "live" to (tab.value == 3),
             )
         )
@@ -465,6 +482,7 @@ internal class YtuiViewModel : ViewModel() {
         val quality = config.value.optJSONObject("download")?.optString("quality", "1080") ?: "1080"
         val audio =
             media.audio ||
+                (media.collection && (media.musicSource || tab.value == 2)) ||
                 download && config.value.optJSONObject("download")?.optBoolean("audio") == true
         if (download && media.live) {
             status.value = "Live recording is not available"
@@ -474,12 +492,12 @@ internal class YtuiViewModel : ViewModel() {
             if (download)
                 effect(
                     "download_playlist",
-                    "request" to json("Collection" to media.value.optString("id")),
-                    "music" to (tab.value == 2),
+                    "request" to json("Collection" to media.collectionId),
+                    "music" to (tab.value == 2 || media.musicSource),
                     "audio" to audio,
                     "quality" to quality,
                 )
-            else navigate(request = json("Collection" to media.value.optString("id")))
+            else navigate(request = json("Collection" to media.collectionId))
             return
         }
         val context = if (!preview && !download && !queued) context(media) else null
@@ -551,8 +569,11 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     fun save(media: MediaCard) = task {
-        RustRpc.objectCall("save_media", "media" to media.value)
-        status.value = "Saved locally"
+        val result = RustRpc.objectCall("save_media", "media" to media.value)
+        status.value =
+            if (result.optBoolean("saved")) "Saved locally" else "Removed from saved items"
+        if (feeds[tab.value].value.request == "Favorites")
+            navigate(request = "Favorites", remember = false)
     }
 
     fun enqueue(media: MediaCard) = task {
@@ -560,8 +581,8 @@ internal class YtuiViewModel : ViewModel() {
             json(
                 "op" to if (media.collection) "enqueue_collection" else "enqueue",
                 "media" to media.value,
-                "request" to json("Collection" to media.value.optString("id")),
-                "music" to (tab.value == 2),
+                "request" to json("Collection" to media.collectionId),
+                "music" to (tab.value == 2 || media.musicSource),
             )
         )
         loadQueue()

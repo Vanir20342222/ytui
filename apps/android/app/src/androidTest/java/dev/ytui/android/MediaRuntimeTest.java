@@ -54,6 +54,7 @@ public final class MediaRuntimeTest {
     while (!check.ready()) {
       if (!status().isNull("error") || android.os.SystemClock.elapsedRealtime() > deadline) {
         capture("video-error.png");
+        surfaceEvidence();
         throw new AssertionError(
             message
                 + ": "
@@ -68,6 +69,65 @@ public final class MediaRuntimeTest {
 
   static JSONObject status() throws Exception {
     return new JSONObject(MediaBridge.playerSnapshot);
+  }
+
+  static void surfaceEvidence() {
+    if (android.os.Build.VERSION.SDK_INT < 29) return;
+    java.util.concurrent.CountDownLatch recorded = new java.util.concurrent.CountDownLatch(1);
+    MediaBridge.main.post(
+        () -> {
+          try {
+            for (android.view.View root :
+                android.view.inspector.WindowInspector.getGlobalWindowViews()) inspectSurface(root);
+          } finally {
+            recorded.countDown();
+          }
+        });
+    try {
+      recorded.await(5, java.util.concurrent.TimeUnit.SECONDS);
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  static void inspectSurface(android.view.View view) {
+    if (view instanceof androidx.media3.ui.PlayerView) {
+      androidx.media3.ui.PlayerView playerView = (androidx.media3.ui.PlayerView) view;
+      android.view.View surface = playerView.getVideoSurfaceView();
+      android.util.Log.i(
+          "NativeVideoEvidence",
+          "view="
+              + (surface == null ? "none" : surface.getClass().getSimpleName())
+              + " attached="
+              + view.isAttachedToWindow()
+              + " hardware="
+              + view.isHardwareAccelerated()
+              + " size="
+              + view.getWidth()
+              + "x"
+              + view.getHeight()
+              + " bound="
+              + (playerView.getPlayer() != null));
+      if (surface instanceof android.view.TextureView) {
+        android.view.TextureView texture = (android.view.TextureView) surface;
+        android.util.Log.i("NativeVideoEvidence", "texture_available=" + texture.isAvailable());
+        android.graphics.Bitmap frame = texture.getBitmap();
+        if (frame != null) {
+          try (FileOutputStream output =
+              new FileOutputStream(
+                  new File(MediaBridge.context.getExternalFilesDir(null), "video-texture.png"))) {
+            frame.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output);
+          } catch (IOException ignored) {
+          } finally {
+            frame.recycle();
+          }
+        }
+      }
+    }
+    if (view instanceof android.view.ViewGroup) {
+      android.view.ViewGroup group = (android.view.ViewGroup) view;
+      for (int i = 0; i < group.getChildCount(); i++) inspectSurface(group.getChildAt(i));
+    }
   }
 
   static void command(String op) throws Exception {
@@ -113,10 +173,10 @@ public final class MediaRuntimeTest {
           () -> MediaBridge.videoFrames.get() > initialFrames);
       AudioTap.enabled = true;
       await("Decoded audio never produced visualizer levels", () -> AudioTap.levels != 0);
-      // Freeze a decoded frame before screenshot synchronization can outlast the
-      // short fixture. Require visible RGB pixels, not just decoder callbacks.
-      command("pause");
-      await("Pause was not applied", () -> status().optBoolean("paused"));
+      // The decoder can start against its placeholder before Compose attaches
+      // the visible view. Keep the short fixture playing until a visible frame
+      // arrives; pausing before attachment can retain only a placeholder frame.
+      command("repeat");
       await(
           "Decoded video was not visible in the native Android surface",
           () -> {
@@ -145,6 +205,9 @@ public final class MediaRuntimeTest {
               screenshot.recycle();
             }
           });
+      command("pause");
+      await("Pause was not applied", () -> status().optBoolean("paused"));
+      command("repeat");
       double position = status().getDouble("position");
       java.util.concurrent.CountDownLatch replaced = new java.util.concurrent.CountDownLatch(1);
       java.util.concurrent.atomic.AtomicReference<Exception> replaceError =
@@ -224,6 +287,12 @@ public final class MediaRuntimeTest {
       command("stop");
       firstGeneration = RustActivity.generations.get();
     } finally {
+      MediaBridge.main.post(
+          () -> {
+            if (PlaybackService.current != null)
+              PlaybackService.current.player.setRepeatMode(
+                  androidx.media3.common.Player.REPEAT_MODE_OFF);
+          });
       command("stop");
       AudioTap.enabled = false;
       media.delete();
