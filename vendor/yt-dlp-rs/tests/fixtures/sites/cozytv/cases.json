@@ -1,0 +1,6 @@
+[
+ {"url": "https://cozy.tv/beardson/replays/2021-11-19_1", "args": ["-j"]},
+ {"url": "https://cozy.tv/beardson/replays/2021-11-19_1", "args": ["--print", "%(id)s|%(title)s|%(uploader)s|%(upload_date)s|%(was_live)s|%(live_status)s|%(duration)s|%(duration_string)s"]},
+ {"url": "https://www.cozy.tv/x/replays/b2", "args": ["-j"]},
+ {"url": "https://cozy.tv/x/replays/c3", "args": ["-j"]}
+]

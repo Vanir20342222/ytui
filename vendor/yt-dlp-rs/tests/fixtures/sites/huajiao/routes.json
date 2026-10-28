@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "http://www.huajiao.com/l/38941232",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"description\" content=\"花椒 &amp; 直播\"></head><body><script>var feed = {\"feed\": {\"formated_title\": \"《我们戴着面具》\", \"duration\": \"00:02:58\", \"image\": \"https://hj.test/i.jpg\", \"m3u8\": \"https://hj.test/hls/master.m3u8\"}, \"creatime\": \"2016-12-26 18:47:47\", \"author\": {\"nickname\": \"龙婉\", \"uid\": 52869316}};</script></body></html>"
+  },
+  {
+   "url": "https://huajiao.com/l/2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>var feed = {\"feed\": {\"formated_title\": \"Plain\", \"m3u8\": \"https://hj.test/hls/video.m3u8\"}};</script></html>"
+  },
+  {
+   "url": "https://www.huajiao.com/l/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>var feed = {\"feed\": {\"m3u8\": \"x\"}};</script></html>"
+  },
+  {
+   "url": "https://www.huajiao.com/l/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>none</html>"
+  },
+  {
+   "url": "https://hj.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://hj.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://hj.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://hj.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

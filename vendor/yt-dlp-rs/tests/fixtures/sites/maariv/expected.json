@@ -1,0 +1,116 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3611585\", \"title\": \"\\u05ea\\u05d2\\u05d5\\u05d1\\u05d4\", \"duration\": 199, \"timestamp\": 1699958520, \"formats\": [{\"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://maariv.test/hls/video.m3u8\", \"manifest_url\": \"https://maariv.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\"}, {\"url\": \"https://maariv.test/v-480p.mp4\", \"format_id\": \"http-0\", \"height\": 480, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"480p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-0 - 480p\"}, {\"url\": \"https://maariv.test/v_1280x720.mp4\", \"format_id\": \"http-1\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1 - 1280x720\"}], \"webpage_url\": \"https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585\", \"original_url\": \"https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585\", \"webpage_url_basename\": \"player.html\", \"webpage_url_domain\": \"player.maariv.co.il\", \"extractor\": \"maariv.co.il\", \"extractor_key\": \"Maariv\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"3611585\", \"fulltitle\": \"\\u05ea\\u05d2\\u05d5\\u05d1\\u05d4\", \"duration_string\": \"3:19\", \"upload_date\": \"20231114\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://maariv.test/v_1280x720.mp4\", \"format_id\": \"http-1\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1 - 1280x720\", \"_filename\": \"\\u05ea\\u05d2\\u05d5\\u05d1\\u05d4 [3611585].mp4\", \"filename\": \"\\u05ea\\u05d2\\u05d5\\u05d1\\u05d4 [3611585].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [maariv.co.il] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[maariv.co.il] Extracting URL: https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585",
+    "[maariv.co.il] 3611585: Downloading JSON metadata",
+    "[maariv.co.il] 3611585: Downloading m3u8 information",
+    "[info] Available formats for 3611585:",
+    "ID      EXT RESOLUTION | FILESIZE  TBR PROTO | VCODEC      ACODEC",
+    "--------------------------------------------------------------------",
+    "hls-200 mp4 320x240    | ~4.74MiB 200k m3u8  | avc1.42c00d mp4a.40.2",
+    "http-0  mp4 480p       |               https | unknown     unknown",
+    "http-1  mp4 1280x720   |               https | unknown     unknown"
+   ],
+   "stderr": [
+    "WARNING: [maariv.co.il] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(upload_date)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "3611585|תגובה|199|1699958520|20231114"
+   ],
+   "stderr": [
+    "WARNING: [maariv.co.il] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [maariv.co.il] 2: Failed to download m3u8 information: HTTP Error 404: Not Found",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead",
+    "ERROR: [maariv.co.il] 2: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[maariv.co.il] Extracting URL: https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3",
+    "[maariv.co.il] 3: Downloading JSON metadata",
+    "[info] 3: Downloading 1 format(s): http",
+    "[download] Destination: 3.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "3.mp4": 792
+   }
+  },
+  {
+   "url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 4: An extractor error has occurred. (caused by KeyError('data')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/m.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3\", \"title\": \"HTTP\", \"formats\": [{\"url\": \"https://maariv.test/v_1280x720.mp4\", \"format_id\": \"http\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http - 1280x720\"}], \"original_url\": \"https://page.test/m.html\", \"webpage_url\": \"https://player.maariv.co.il/public/player.html?player=x&media=3\", \"webpage_url_basename\": \"player.html\", \"webpage_url_domain\": \"player.maariv.co.il\", \"extractor\": \"maariv.co.il\", \"extractor_key\": \"Maariv\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"3\", \"fulltitle\": \"HTTP\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://maariv.test/v_1280x720.mp4\", \"format_id\": \"http\", \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http - 1280x720\", \"_filename\": \"HTTP [3].mp4\", \"filename\": \"HTTP [3].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

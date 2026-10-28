@@ -1,0 +1,7 @@
+# Netscape HTTP Cookie File
+# Synthetic deterministic reference data
+
+.example.test	TRUE	/	FALSE	0	session_zero	zero
+.example.test	TRUE	/	FALSE		session_blank	blank
+.example.test	TRUE	/	FALSE	4102444800	future	future
+.example.test	TRUE	/	FALSE	1	past	past

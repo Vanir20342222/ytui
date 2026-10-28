@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://app.mixcloud.com/graphql?query=%7B%0A++cloudcastLookup%28lookup%3A+%7Busername%3A+%22dholbach%22%2C+slug%3A+%22cryptkeeper%22%7D%29+%7B%0A++++audioLength%0A++++comments%28first%3A+100%29+%7B%0A++++++edges+%7B%0A++++++++node+%7B%0A++++++++++comment%0A++++++++++created%0A++++++++++user+%7B%0A++++++++++++displayName%0A++++++++++++username%0A++++++++++%7D%0A++++++++%7D%0A++++++%7D%0A++++++totalCount%0A++++%7D%0A++++description%0A++++favorites+%7B%0A++++++totalCount%0A++++%7D%0A++++featuringArtistList%0A++++isExclusive%0A++++name%0A++++owner+%7B%0A++++++displayName%0A++++++url%0A++++++username%0A++++%7D%0A++++picture%28width%3A+1024%2C+height%3A+1024%29+%7B%0A++++++++url%0A++++%7D%0A++++plays%0A++++publishDate%0A++++reposts+%7B%0A++++++totalCount%0A++++%7D%0A++++streamInfo+%7B%0A++++++dashUrl%0A++++++hlsUrl%0A++++++url%0A++++%7D%0A++++tags+%7B%0A++++++tag+%7B%0A++++++++name%0A++++++%7D%0A++++%7D%0A++++restrictedReason%0A++++id%0A++%7D%0A%7D",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "cast.json"
+  },
+  {
+   "url": "https://app.mixcloud.com/graphql?query=%7B%0A++cloudcastLookup%28lookup%3A+%7Busername%3A+%22dholbach%22%2C+slug%3A+%22gone%22%7D%29+%7B%0A++++audioLength%0A++++comments%28first%3A+100%29+%7B%0A++++++edges+%7B%0A++++++++node+%7B%0A++++++++++comment%0A++++++++++created%0A++++++++++user+%7B%0A++++++++++++displayName%0A++++++++++++username%0A++++++++++%7D%0A++++++++%7D%0A++++++%7D%0A++++++totalCount%0A++++%7D%0A++++description%0A++++favorites+%7B%0A++++++totalCount%0A++++%7D%0A++++featuringArtistList%0A++++isExclusive%0A++++name%0A++++owner+%7B%0A++++++displayName%0A++++++url%0A++++++username%0A++++%7D%0A++++picture%28width%3A+1024%2C+height%3A+1024%29+%7B%0A++++++++url%0A++++%7D%0A++++plays%0A++++publishDate%0A++++reposts+%7B%0A++++++totalCount%0A++++%7D%0A++++streamInfo+%7B%0A++++++dashUrl%0A++++++hlsUrl%0A++++++url%0A++++%7D%0A++++tags+%7B%0A++++++tag+%7B%0A++++++++name%0A++++++%7D%0A++++%7D%0A++++restrictedReason%0A++++id%0A++%7D%0A%7D",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"cloudcastLookup\": null}}"
+  },
+  {
+   "url": "https://app.mixcloud.com/graphql?query=%7B%0A++cloudcastLookup%28lookup%3A+%7Busername%3A+%22dholbach%22%2C+slug%3A+%22blocked%22%7D%29+%7B%0A++++audioLength%0A++++comments%28first%3A+100%29+%7B%0A++++++edges+%7B%0A++++++++node+%7B%0A++++++++++comment%0A++++++++++created%0A++++++++++user+%7B%0A++++++++++++displayName%0A++++++++++++username%0A++++++++++%7D%0A++++++++%7D%0A++++++%7D%0A++++++totalCount%0A++++%7D%0A++++description%0A++++favorites+%7B%0A++++++totalCount%0A++++%7D%0A++++featuringArtistList%0A++++isExclusive%0A++++name%0A++++owner+%7B%0A++++++displayName%0A++++++url%0A++++++username%0A++++%7D%0A++++picture%28width%3A+1024%2C+height%3A+1024%29+%7B%0A++++++++url%0A++++%7D%0A++++plays%0A++++publishDate%0A++++reposts+%7B%0A++++++totalCount%0A++++%7D%0A++++streamInfo+%7B%0A++++++dashUrl%0A++++++hlsUrl%0A++++++url%0A++++%7D%0A++++tags+%7B%0A++++++tag+%7B%0A++++++++name%0A++++++%7D%0A++++%7D%0A++++restrictedReason%0A++++id%0A++%7D%0A%7D",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"cloudcastLookup\": {\"restrictedReason\": \"tracklist\"}}}"
+  },
+  {
+   "url": "https://audio.mixcloud.com/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://audio.mixcloud.com/hls/hls/128.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://stream.mixcloud.com/a/cryptkeeper.m4a",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body": "0000ftypM4A-mix"
+  }
+ ]
+}

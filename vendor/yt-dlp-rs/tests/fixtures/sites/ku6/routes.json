@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><h1 title=\"x\" class=\"t\">美国 &amp; <b>选</b></h1></body></html>"
+  },
+  {
+   "url": "http://v.ku6.com/fetchVideo4Player/JG-8yS14xzBr4bCn1pu0xw.html",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"f\": \"https://ku6.test/v.mp4\"}}"
+  },
+  {
+   "url": "https://v.ku6.com/show/b2.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><h1 title=\"t\">B</h1></body></html>"
+  },
+  {
+   "url": "http://v.ku6.com/fetchVideo4Player/b2.html",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {}}"
+  },
+  {
+   "url": "https://v.ku6.com/show/c3.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://ku6.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

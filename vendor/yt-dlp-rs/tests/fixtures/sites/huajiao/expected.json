@@ -1,0 +1,73 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.huajiao.com/l/38941232",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"38941232\", \"title\": \"\\u300a\\u6211\\u4eec\\u6234\\u7740\\u9762\\u5177\\u300b\", \"description\": \"\\u82b1\\u6912 & \\u76f4\\u64ad\", \"duration\": 178, \"thumbnail\": \"https://hj.test/i.jpg\", \"timestamp\": 1482778067, \"uploader\": \"\\u9f99\\u5a49\", \"uploader_id\": 52869316, \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://hj.test/hls/video.m3u8\", \"manifest_url\": \"https://hj.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"webpage_url\": \"http://www.huajiao.com/l/38941232\", \"original_url\": \"http://www.huajiao.com/l/38941232\", \"webpage_url_basename\": \"38941232\", \"webpage_url_domain\": \"huajiao.com\", \"extractor\": \"Huajiao\", \"extractor_key\": \"Huajiao\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://hj.test/i.jpg\", \"id\": \"0\"}], \"display_id\": \"38941232\", \"fulltitle\": \"\\u300a\\u6211\\u4eec\\u6234\\u7740\\u9762\\u5177\\u300b\", \"duration_string\": \"2:58\", \"upload_date\": \"20161226\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://hj.test/hls/video.m3u8\", \"manifest_url\": \"https://hj.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"\\u300a\\u6211\\u4eec\\u6234\\u7740\\u9762\\u5177\\u300b [38941232].mp4\", \"filename\": \"\\u300a\\u6211\\u4eec\\u6234\\u7740\\u9762\\u5177\\u300b [38941232].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Huajiao] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.huajiao.com/l/38941232",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(timestamp)s|%(upload_date)s|%(uploader)s|%(uploader_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "38941232|《我们戴着面具》|花椒 & 直播|178|https://hj.test/i.jpg|1482778067|20161226|龙婉|52869316"
+   ],
+   "stderr": [
+    "WARNING: [Huajiao] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://huajiao.com/l/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Plain\", \"description\": null, \"thumbnail\": null, \"timestamp\": null, \"uploader\": null, \"uploader_id\": null, \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://hj.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://huajiao.com/l/2\", \"original_url\": \"https://huajiao.com/l/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"huajiao.com\", \"extractor\": \"Huajiao\", \"extractor_key\": \"Huajiao\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://hj.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Plain [2].mp4\", \"filename\": \"Plain [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Huajiao] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.huajiao.com/l/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [Huajiao] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('formated_title')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.huajiao.com/l/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Huajiao] 4: Unable to extract feed json; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

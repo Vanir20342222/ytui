@@ -1,0 +1,77 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://audioboom.com/posts/7398103-asim-chaudhry",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"7398103\", \"url\": \"https://audioboom.test/posts/7398103.mp3\", \"title\": \"Asim Chaudhry & friends\", \"description\": \"Joining us this week\", \"duration\": 4000.99, \"uploader\": \"Off The Ball\", \"uploader_url\": \"https://audioboom.com/channels/5128\", \"webpage_url\": \"https://audioboom.com/posts/7398103-asim-chaudhry\", \"original_url\": \"https://audioboom.com/posts/7398103-asim-chaudhry\", \"webpage_url_basename\": \"7398103-asim-chaudhry\", \"webpage_url_domain\": \"audioboom.com\", \"extractor\": \"AudioBoom\", \"extractor_key\": \"AudioBoom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"7398103\", \"fulltitle\": \"Asim Chaudhry & friends\", \"duration_string\": \"1:06:40\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Asim Chaudhry & friends [7398103].mp3\", \"filename\": \"Asim Chaudhry & friends [7398103].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://audioboom.com/posts/7398103-asim-chaudhry",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(duration)s|%(uploader)s|%(uploader_url)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "7398103|Asim Chaudhry & friends|Joining us this week|4000.99|Off The Ball|https://audioboom.com/channels/5128|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://audioboom.com/posts/7398103-asim-chaudhry",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[AudioBoom] Extracting URL: https://audioboom.com/posts/7398103-asim-chaudhry",
+    "[AudioBoom] 7398103: Downloading webpage",
+    "[info] 7398103: Downloading 1 format(s): 0",
+    "[download] Destination: 7398103.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "7398103.mp3": 778
+   }
+  },
+  {
+   "url": "https://audioboom.com/boos/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"url\": \"https://audioboom.test/posts/2.mp3\", \"title\": \"Fallback title\", \"description\": \"OG description\", \"duration\": 12.5, \"uploader\": \"Artist\", \"uploader_url\": \"https://audioboom.com/channels/9\", \"webpage_url\": \"https://audioboom.com/boos/2\", \"original_url\": \"https://audioboom.com/boos/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"audioboom.com\", \"extractor\": \"AudioBoom\", \"extractor_key\": \"AudioBoom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Fallback title\", \"duration_string\": \"12\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Fallback title [2].mp3\", \"filename\": \"Fallback title [2].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [AudioBoom] unable to extract clip store; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://audioboom.com/posts/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [AudioBoom] unable to extract clip store; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: [AudioBoom] 3: Unable to extract audio url; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

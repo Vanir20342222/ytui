@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://video.twentythree.net/api/photo/list?showDescriptions=0&source=site&photo_id=20448876&autoPlay=1&format=json",
+   "headers": {
+    "Content-Type": "application/javascript"
+   },
+   "body": "var visual = {\"photo\": {\"title\": \"Video Marketing Minute: Personalized Video\", \"creation_date_epoch\": \"1458140101\", \"video_length\": \"137\", \"view_count\": 9, \"number_of_comments\": 0, \"user_id\": \"12258964\", \"display_name\": \"Rasmus Bysted\", \"audio_download\": \"/20448876/audio.mp3\", \"audio_size\": \"1000\", \"video_mobile_high_download\": \"/20448876/mobile.mp4\", \"video_mobile_high_width\": \"640\", \"video_mobile_high_height\": \"360\", \"video_mobile_high_size\": \"5000\", \"video_hd_download\": \"/20448876/hd.mp4\", \"video_hd_width\": \"1280\", \"video_hd_height\": \"720\", \"quad50_download\": \"/20448876/quad50.jpg\", \"quad50_width\": \"50\", \"quad50_height\": \"50\", \"large_download\": \"/20448876/large.jpg\", \"large_width\": \"1024\", \"large_size\": \"40000\"}};"
+  },
+  {
+   "url": "https://video.twentythree.net/20448876/hd.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://www.filmweb.no/template_v2/ajax/json_trailerEmbed.jsp?articleId=1264921",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"embedCode\": \"<iframe width=\\\"640\\\" src=\\\"//video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1\\\"></iframe>\"}"
+  },
+  {
+   "url": "http://www.filmweb.no/filmnytt/article1265000.ece",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><div data-videoid=\"1264921\"></div></html>"
+  }
+ ]
+}

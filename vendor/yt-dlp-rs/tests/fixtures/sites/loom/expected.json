@@ -1,0 +1,75 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"43d05f362f734614a2e81b4694a3a523\", \"duration\": 76, \"chapters\": [{\"start_time\": 0, \"title\": \"Intro\", \"end_time\": 30}, {\"start_time\": 30, \"title\": \"Demo\", \"end_time\": 76}], \"formats\": [{\"format_id\": \"hls-transcoded-audio-Audio\", \"format_note\": \"Audio\", \"format_index\": null, \"url\": \"https://luna.loom.test/id/audio.m3u8?Policy=p&Signature=s\", \"manifest_url\": \"https://luna.loom.test/id/playlist.m3u8?Policy=p&Signature=s\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": -1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": null, \"extra_param_to_segment_url\": \"Policy=p&Signature=s\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-transcoded-audio-Audio - audio only (Audio)\"}, {\"format_id\": \"hls-transcoded-900\", \"format_index\": null, \"url\": \"https://luna.loom.test/id/720.m3u8?Policy=p&Signature=s\", \"manifest_url\": \"https://luna.loom.test/id/playlist.m3u8?Policy=p&Signature=s\", \"tbr\": 900.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": -1, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.64001f\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"extra_param_to_segment_url\": \"Policy=p&Signature=s\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 900.0, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-transcoded-900 - 1280x720\"}, {\"url\": \"https://cdn.loom.test/sessions/raw/abc.webm?Policy=p&Signature=s\", \"ext\": \"webm\", \"format_id\": \"http-cdn\", \"quality\": 0, \"width\": 1920, \"height\": 1080, \"acodec\": \"none\", \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-cdn - 1920x1080\"}], \"subtitles\": {}, \"title\": \"A Loom demo\", \"description\": \"Desc\", \"uploader\": \"Owner Name\", \"timestamp\": 1712232000, \"webpage_url\": \"https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523\", \"original_url\": \"https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523\", \"webpage_url_basename\": \"43d05f362f734614a2e81b4694a3a523\", \"webpage_url_domain\": \"loom.com\", \"extractor\": \"loom\", \"extractor_key\": \"Loom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"43d05f362f734614a2e81b4694a3a523\", \"fulltitle\": \"A Loom demo\", \"duration_string\": \"1:16\", \"upload_date\": \"20240404\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"requested_formats\": [{\"url\": \"https://cdn.loom.test/sessions/raw/abc.webm?Policy=p&Signature=s\", \"ext\": \"webm\", \"format_id\": \"http-cdn\", \"quality\": 0, \"width\": 1920, \"height\": 1080, \"acodec\": \"none\", \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-cdn - 1920x1080\"}, {\"format_id\": \"hls-transcoded-audio-Audio\", \"format_note\": \"Audio\", \"format_index\": null, \"url\": \"https://luna.loom.test/id/audio.m3u8?Policy=p&Signature=s\", \"manifest_url\": \"https://luna.loom.test/id/playlist.m3u8?Policy=p&Signature=s\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": -1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": null, \"extra_param_to_segment_url\": \"Policy=p&Signature=s\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-transcoded-audio-Audio - audio only (Audio)\"}], \"format\": \"http-cdn - 1920x1080+hls-transcoded-audio-Audio - audio only (Audio)\", \"format_id\": \"http-cdn+hls-transcoded-audio-Audio\", \"ext\": \"mkv\", \"protocol\": \"https+m3u8_native\", \"format_note\": \"Audio\", \"tbr\": 0, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"_filename\": \"A Loom demo [43d05f362f734614a2e81b4694a3a523].mkv\", \"filename\": \"A Loom demo [43d05f362f734614a2e81b4694a3a523].mkv\", \"__write_download_archive\": false}], \"requested_formats\": [{\"url\": \"https://cdn.loom.test/sessions/raw/abc.webm?Policy=p&Signature=s\", \"ext\": \"webm\", \"format_id\": \"http-cdn\", \"quality\": 0, \"width\": 1920, \"height\": 1080, \"acodec\": \"none\", \"protocol\": \"https\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": null, \"tbr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-cdn - 1920x1080\"}, {\"format_id\": \"hls-transcoded-audio-Audio\", \"format_note\": \"Audio\", \"format_index\": null, \"url\": \"https://luna.loom.test/id/audio.m3u8?Policy=p&Signature=s\", \"manifest_url\": \"https://luna.loom.test/id/playlist.m3u8?Policy=p&Signature=s\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": -1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": null, \"extra_param_to_segment_url\": \"Policy=p&Signature=s\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-transcoded-audio-Audio - audio only (Audio)\"}], \"format\": \"http-cdn - 1920x1080+hls-transcoded-audio-Audio - audio only (Audio)\", \"format_id\": \"http-cdn+hls-transcoded-audio-Audio\", \"ext\": \"mkv\", \"protocol\": \"https+m3u8_native\", \"language\": null, \"format_note\": \"Audio\", \"filesize_approx\": null, \"tbr\": 0, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"fps\": null, \"dynamic_range\": \"SDR\", \"vcodec\": null, \"vbr\": null, \"stretched_ratio\": null, \"aspect_ratio\": 1.78, \"acodec\": null, \"abr\": null, \"asr\": null, \"audio_channels\": null, \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [loom] 43d05f362f734614a2e81b4694a3a523: Failed to download raw-url JSON: HTTP Error 401: OK"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.loom.com/embed/ddcf1c1ad21f451ea7468b1e33917e4e",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [loom] ddcf1c1ad21f451ea7468b1e33917e4e: This video is password-protected, use the --video-password option"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.loom.com/share/0123456789abcdef0123456789abcdef",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"0123456789abcdef0123456789abcdef\", \"duration\": 12, \"chapters\": null, \"formats\": [{\"url\": \"https://cdn.loom.test/http.mp4?sig=1\", \"ext\": \"mp4\", \"format_id\": \"http-raw\", \"quality\": 1, \"width\": 640, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x?\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-raw - 640x?\"}], \"subtitles\": {}, \"title\": \"HTTP only\", \"webpage_url\": \"https://www.loom.com/share/0123456789abcdef0123456789abcdef\", \"original_url\": \"https://www.loom.com/share/0123456789abcdef0123456789abcdef\", \"webpage_url_basename\": \"0123456789abcdef0123456789abcdef\", \"webpage_url_domain\": \"loom.com\", \"extractor\": \"loom\", \"extractor_key\": \"Loom\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"0123456789abcdef0123456789abcdef\", \"fulltitle\": \"HTTP only\", \"duration_string\": \"12\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://cdn.loom.test/http.mp4?sig=1\", \"ext\": \"mp4\", \"format_id\": \"http-raw\", \"quality\": 1, \"width\": 640, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"640x?\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-raw - 640x?\", \"_filename\": \"HTTP only [0123456789abcdef0123456789abcdef].mp4\", \"filename\": \"HTTP only [0123456789abcdef0123456789abcdef].mp4\", \"__write_download_archive\": false}], \"url\": \"https://cdn.loom.test/http.mp4?sig=1\", \"ext\": \"mp4\", \"format_id\": \"http-raw\", \"quality\": 1, \"width\": 640, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x?\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-raw - 640x?\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [loom] 0123456789abcdef0123456789abcdef: Failed to download GraphQL JSON: HTTP Error 500: OK"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523",
+   "args": [
+    "--no-progress",
+    "-f",
+    "http-cdn",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[loom] Extracting URL: https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading GraphQL metadata JSON",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading GraphQL video JSON",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading GraphQL chapters JSON",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading raw-url JSON",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading transcoded-url JSON",
+    "[loom] 43d05f362f734614a2e81b4694a3a523: Downloading m3u8 information",
+    "[info] 43d05f362f734614a2e81b4694a3a523: Downloading 1 format(s): http-cdn",
+    "[download] Destination: 43d05f362f734614a2e81b4694a3a523.webm",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [loom] 43d05f362f734614a2e81b4694a3a523: Failed to download raw-url JSON: HTTP Error 401: OK"
+   ],
+   "files": {
+    "43d05f362f734614a2e81b4694a3a523.webm": 9
+   }
+  }
+ ]
+}

@@ -1,0 +1,119 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://vocaroo.com/1de8yA3LNe77",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"1de8yA3LNe77\", \"title\": \"Vocaroo video #1de8yA3LNe77\", \"url\": \"https://media1.vocaroo.com/mp3/1de8yA3LNe77\", \"ext\": \"mp3\", \"timestamp\": 1704067200.123, \"vcodec\": \"none\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://vocaroo.com/\"}, \"webpage_url\": \"https://vocaroo.com/1de8yA3LNe77\", \"original_url\": \"https://vocaroo.com/1de8yA3LNe77\", \"webpage_url_basename\": \"1de8yA3LNe77\", \"webpage_url_domain\": \"vocaroo.com\", \"extractor\": \"Vocaroo\", \"extractor_key\": \"Vocaroo\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"1de8yA3LNe77\", \"fulltitle\": \"\", \"upload_date\": \"20240101\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Vocaroo video #1de8yA3LNe77 [1de8yA3LNe77].mp3\", \"filename\": \"Vocaroo video #1de8yA3LNe77 [1de8yA3LNe77].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vocaroo.com/1de8yA3LNe77",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Vocaroo] Extracting URL: https://vocaroo.com/1de8yA3LNe77",
+    "[Vocaroo] 1de8yA3LNe77: Downloading webpage",
+    "[info] Available formats for 1de8yA3LNe77:",
+    "ID EXT RESOLUTION | PROTO | VCODEC     ACODEC",
+    "---------------------------------------------",
+    "0  mp3 audio only | https | audio only mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vocaroo.com/1de8yA3LNe77",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(fulltitle)s|%(timestamp)s|%(upload_date)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "1de8yA3LNe77|Vocaroo video #1de8yA3LNe77||1704067200.123|20240101|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vocaroo.com/1de8yA3LNe77",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Vocaroo] Extracting URL: https://vocaroo.com/1de8yA3LNe77",
+    "[Vocaroo] 1de8yA3LNe77: Downloading webpage",
+    "[info] 1de8yA3LNe77: Downloading 1 format(s): 0",
+    "[download] Destination: 1de8yA3LNe77.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "1de8yA3LNe77.mp3": 778
+   }
+  },
+  {
+   "url": "https://vocaroo.com/1de8yA3LNe77",
+   "args": [
+    "-v",
+    "-s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Vocaroo] Extracting URL: https://vocaroo.com/1de8yA3LNe77",
+    "[Vocaroo] 1de8yA3LNe77: Downloading webpage",
+    "[info] 1de8yA3LNe77: Downloading 1 format(s): 0"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://voca.ro/embed/12WqtjLnpj6g",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"12WqtjLnpj6g\", \"title\": \"Vocaroo video #12WqtjLnpj6g\", \"url\": \"https://media1.vocaroo.com/mp3/12WqtjLnpj6g\", \"ext\": \"mp3\", \"timestamp\": null, \"vcodec\": \"none\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://vocaroo.com/\"}, \"webpage_url\": \"https://voca.ro/embed/12WqtjLnpj6g\", \"original_url\": \"https://voca.ro/embed/12WqtjLnpj6g\", \"webpage_url_basename\": \"12WqtjLnpj6g\", \"webpage_url_domain\": \"voca.ro\", \"extractor\": \"Vocaroo\", \"extractor_key\": \"Vocaroo\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"12WqtjLnpj6g\", \"fulltitle\": \"\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Vocaroo video #12WqtjLnpj6g [12WqtjLnpj6g].mp3\", \"filename\": \"Vocaroo video #12WqtjLnpj6g [12WqtjLnpj6g].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://vocaroo.com/abcdefghij",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Vocaroo] abcdefghij: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vocaroo.com/abcd1234",
+   "args": [
+    "--print",
+    "%(id)s|%(url)s|%(timestamp)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "abcd1234|https://media.vocaroo.com/mp3/abcd1234|NA"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

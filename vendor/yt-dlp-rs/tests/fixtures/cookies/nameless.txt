@@ -1,0 +1,4 @@
+# Netscape HTTP Cookie File
+# Synthetic deterministic reference data
+
+.example.test	TRUE	/	FALSE	0		nameless-value

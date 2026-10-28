@@ -1,0 +1,3778 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "target-best",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-bsf:a",
+              "aac_adtstoasc"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "target-mp3",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "target-aac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "aac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "aac",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "2.05"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 2.05,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "target-m4a",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "2.05"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 2.05,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "target-opus",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "target-vorbis",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "target-flac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "target-wav",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "matching-mp3",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "mp3"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "copy",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "matching-aac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "aac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "aac",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-f",
+              "adts"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "matching-opus",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "copy",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "matching-vorbis",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "vorbis"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "copy",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "matching-flac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "flac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "copy",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "aac-copy-m4a",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-bsf:a",
+              "aac_adtstoasc"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "aac-copy-best",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-bsf:a",
+              "aac_adtstoasc"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "unknown-best-mp3-fallback",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "unknown_audio"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "common-best-skip-mp3",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp3",
+        "ext": "mp3",
+        "codec": "mp3"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-m4a",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.m4a",
+        "ext": "m4a",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-aac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.aac",
+        "ext": "aac",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.aac",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-bsf:a",
+              "aac_adtstoasc"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.aac"
+        ],
+        "replacements": [
+          [
+            "movie.aac",
+            "movie.aac"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.aac"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-opus",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.opus",
+        "ext": "opus",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-ogg",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.ogg",
+        "ext": "ogg",
+        "codec": "vorbis"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-flac",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.flac",
+        "ext": "flac",
+        "codec": "flac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "common-best-skip-wav",
+      "args": [
+        "-x",
+        "--audio-format",
+        "best",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.wav",
+        "ext": "wav",
+        "codec": "pcm_s16le"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "best",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "same-extension-copy-skip",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp3",
+        "ext": "mp3",
+        "codec": "mp3"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [
+          "movie.mp3"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "same-extension-transcode",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp3",
+        "ext": "mp3",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp3",
+            "output": "movie.temp.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.orig.mp3"
+        ],
+        "replacements": [
+          [
+            "movie.mp3",
+            "movie.orig.mp3"
+          ],
+          [
+            "movie.temp.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp3"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "append-extension",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.final",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.final.opus",
+        "calls": [
+          {
+            "input": "movie.final",
+            "output": "movie.final.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.final"
+        ],
+        "replacements": [
+          [
+            "movie.final",
+            "movie.final"
+          ],
+          [
+            "movie.final.opus",
+            "movie.final.opus"
+          ]
+        ],
+        "probes": [
+          "movie.final"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "no-file-extension",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie"
+        ],
+        "replacements": [
+          [
+            "movie",
+            "movie"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "0.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 0.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "10.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 10.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.5"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.5,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-q:a",
+              "10.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 10.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-q:a",
+              "0.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 0.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-q:a",
+              "4.5"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 4.5,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-vorbis-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "vorbis",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "vorbis",
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.ogg",
+            "codec": "libvorbis",
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.ogg",
+            "movie.ogg"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "4.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 4.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "2.05"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 2.05,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "0.10000000000000009"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 0.10000000000000009,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-q:a",
+              "1.855"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 1.855,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "quality-m4a-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "m4a",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "opus"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "m4a",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "aac",
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-opus-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-opus-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-opus-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-opus-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-opus-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-opus-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "opus",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-flac-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-flac-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-flac-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-flac-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-flac-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-flac-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "flac",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "flac",
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.flac",
+            "codec": "flac",
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.flac",
+            "movie.flac"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-wav-0",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "0"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-wav-5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-wav-10",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "10"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-wav-128K",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "128K"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-wav-5.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "5.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "quality-wav-128.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "128.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "wav",
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.wav",
+            "codec": null,
+            "more_opts": [
+              "-b:a",
+              "128.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.wav",
+            "movie.wav"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-128k",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "128k"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-b:a",
+              "128.0k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 128.0,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "quality-mp3-10.5",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "10.5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-b:a",
+              "10.5k"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": 10.5,
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "map-first",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp4>mp3/opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "map-fallback",
+      "args": [
+        "-x",
+        "--audio-format",
+        "webm>opus/mp3",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "map-no-match",
+      "args": [
+        "-x",
+        "--audio-format",
+        "webm>opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": null,
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "calls": [],
+        "delete": [],
+        "replacements": [],
+        "probes": [],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "map-whitespace",
+      "args": [
+        "-x",
+        "--audio-format",
+        " mp4 > opus / mp3 ",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "opus",
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.opus",
+            "codec": "libopus",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.opus",
+            "movie.opus"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "map-source-match",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3>mp3/opus",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp3",
+        "ext": "mp3",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp3",
+            "output": "movie.temp.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.orig.mp3"
+        ],
+        "replacements": [
+          [
+            "movie.mp3",
+            "movie.orig.mp3"
+          ],
+          [
+            "movie.temp.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp3"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "selector-explicit",
+      "args": [
+        "-x",
+        "-f",
+        "best",
+        "--audio-format",
+        "mp3"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "selector-keep-video",
+      "args": [
+        "-x",
+        "--keep-video",
+        "--audio-format",
+        "mp3"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": null,
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "selector-default",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "5.0"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": 5.0,
+          "unit": ""
+        }
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "alac-source-encode",
+      "args": [
+        "-x",
+        "--audio-format",
+        "alac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "native_policy": "Native uses explicit alac encoder; source acodec=None plus discarded ACODECS opts silently leaves encoder default",
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "alac",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": null,
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "source-quality-bad",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "bad"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "native_policy": "Native rejects nonnumeric/nonfinite audio quality; actual source option validation accepts it",
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": []
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    },
+    {
+      "name": "source-quality-inf",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "inf"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "native_policy": "Native rejects nonnumeric/nonfinite audio quality; actual source option validation accepts it",
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-b:a",
+              "infk"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-b:a",
+          "value": "inf",
+          "unit": "k"
+        }
+      }
+    },
+    {
+      "name": "source-quality-nan",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "nan"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "aac"
+      },
+      "native_policy": "Native rejects nonnumeric/nonfinite audio quality; actual source option validation accepts it",
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "mp3",
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.mp3",
+            "codec": "libmp3lame",
+            "more_opts": [
+              "-q:a",
+              "nan"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.mp3",
+            "movie.mp3"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": {
+          "flag": "-q:a",
+          "value": "nan",
+          "unit": ""
+        }
+      }
+    },
+    {
+      "name": "alac-source-copy",
+      "args": [
+        "-x",
+        "--audio-format",
+        "alac",
+        "--audio-quality",
+        "5"
+      ],
+      "source": {
+        "filepath": "movie.mp4",
+        "ext": "mp4",
+        "codec": "alac"
+      },
+      "native_policy": "Source copy codec plus later -acodec alac overrides copy; native plans explicit lossless copy without hidden re-encode",
+      "expected": {
+        "selector": "bestaudio/best",
+        "mapping_target": "alac",
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.m4a",
+            "codec": "copy",
+            "more_opts": [
+              "-acodec",
+              "alac"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ],
+        "replacements": [
+          [
+            "movie.mp4",
+            "movie.mp4"
+          ],
+          [
+            "movie.m4a",
+            "movie.m4a"
+          ]
+        ],
+        "probes": [
+          "movie.mp4"
+        ],
+        "quality_args": null
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "invalid-format",
+      "args": [
+        "-x",
+        "--audio-format",
+        "unsupported"
+      ]
+    },
+    {
+      "name": "invalid-format-uppercase",
+      "args": [
+        "-x",
+        "--audio-format",
+        "MP3"
+      ]
+    },
+    {
+      "name": "invalid-mapping",
+      "args": [
+        "-x",
+        "--audio-format",
+        "mp4>mp3/"
+      ]
+    },
+    {
+      "name": "invalid-quality-negative",
+      "args": [
+        "-x",
+        "--audio-quality",
+        "-1"
+      ]
+    }
+  ]
+}

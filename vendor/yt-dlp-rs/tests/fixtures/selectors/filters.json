@@ -1,0 +1,1277 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "normalization": "Exact predicate results in input declaration order. Only typed supported fields are present; missing and explicit null share upstream None semantics. Filesize values and comparison integers are at most 2^53; no sorting, format ranking, selection grammar, regular expression, or larger integer float precision parity is claimed.",
+  "formats": [
+    {
+      "format_id": "low",
+      "url": "http://example.invalid/low.mp4",
+      "ext": "mp4",
+      "width": 640,
+      "height": 360,
+      "filesize": 500,
+      "tbr": 400,
+      "abr": null,
+      "language": "en",
+      "format_note": "Main / 360p [safe]+audio",
+      "audio_group": "group-a"
+    },
+    {
+      "format_id": "mid",
+      "url": "http://example.invalid/mid.webm",
+      "ext": "webm",
+      "width": 1280,
+      "height": 720,
+      "filesize": 1000,
+      "tbr": 1000,
+      "abr": 128,
+      "language": "en-US",
+      "format_note": "High \"quote\" [720p]/+ fallback",
+      "audio_group": "group-b"
+    },
+    {
+      "format_id": "high",
+      "url": "http://example.invalid/high.mp4",
+      "ext": "mp4",
+      "width": 1920,
+      "height": 1080,
+      "filesize": 2000,
+      "tbr": 2500.5,
+      "abr": 192,
+      "language": "nb",
+      "format_note": "Director's cut \\ surround",
+      "audio_group": "group-a"
+    },
+    {
+      "format_id": "decimal",
+      "url": "http://example.invalid/decimal.m4a",
+      "ext": "m4a",
+      "width": null,
+      "height": null,
+      "filesize": 1000000,
+      "tbr": 128.5,
+      "abr": 128,
+      "language": "en",
+      "format_note": "English",
+      "audio_group": "group-a"
+    },
+    {
+      "format_id": "binary",
+      "url": "http://example.invalid/binary.webm",
+      "ext": "webm",
+      "filesize": 1048576,
+      "tbr": 96,
+      "abr": 96,
+      "language": "fr",
+      "format_note": "autoselect?",
+      "audio_group": "group-c"
+    },
+    {
+      "format_id": "missing",
+      "url": "http://example.invalid/missing.mp4",
+      "ext": "mp4",
+      "filesize": null,
+      "tbr": null,
+      "abr": null,
+      "language": null,
+      "format_note": null,
+      "audio_group": null
+    },
+    {
+      "format_id": "limit",
+      "url": "http://example.invalid/limit.mp4",
+      "ext": "mp4",
+      "filesize": 9007199254740992
+    },
+    {
+      "format_id": "near-limit",
+      "url": "http://example.invalid/near-limit.mp4",
+      "ext": "mp4",
+      "filesize": 9007199254740991
+    },
+    {
+      "format_id": "1",
+      "url": "http://example.invalid/numeric-string",
+      "ext": "123",
+      "language": "123",
+      "tbr": 0.0,
+      "abr": -0.0
+    },
+    {
+      "format_id": "zero",
+      "url": "http://example.invalid/zero.mp4",
+      "ext": "mp4",
+      "language": null,
+      "tbr": -0.0,
+      "abr": 0.0
+    }
+  ],
+  "cases": [
+    {
+      "name": "numeric-height-<-False",
+      "predicate": "height < 720",
+      "expected_ids": [
+        "low"
+      ]
+    },
+    {
+      "name": "numeric-height-<-True",
+      "predicate": "height <? 720",
+      "expected_ids": [
+        "low",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-height-<=-False",
+      "predicate": "height <= 720",
+      "expected_ids": [
+        "low",
+        "mid"
+      ]
+    },
+    {
+      "name": "numeric-height-<=-True",
+      "predicate": "height <=? 720",
+      "expected_ids": [
+        "low",
+        "mid",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-height->-False",
+      "predicate": "height > 720",
+      "expected_ids": [
+        "high"
+      ]
+    },
+    {
+      "name": "numeric-height->-True",
+      "predicate": "height >? 720",
+      "expected_ids": [
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-height->=-False",
+      "predicate": "height >= 720",
+      "expected_ids": [
+        "mid",
+        "high"
+      ]
+    },
+    {
+      "name": "numeric-height->=-True",
+      "predicate": "height >=? 720",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-height-=-False",
+      "predicate": "height = 720",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "numeric-height-=-True",
+      "predicate": "height =? 720",
+      "expected_ids": [
+        "mid",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-height-!=-False",
+      "predicate": "height != 720",
+      "expected_ids": [
+        "low",
+        "high"
+      ]
+    },
+    {
+      "name": "numeric-height-!=-True",
+      "predicate": "height !=? 720",
+      "expected_ids": [
+        "low",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "width",
+      "predicate": "width>=1280",
+      "expected_ids": [
+        "mid",
+        "high"
+      ]
+    },
+    {
+      "name": "width-missing",
+      "predicate": "width>=?1280",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "filesize-decimal-unit",
+      "predicate": "filesize<1M",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high"
+      ]
+    },
+    {
+      "name": "filesize-binary-unit",
+      "predicate": "filesize<1MiB",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal"
+      ]
+    },
+    {
+      "name": "filesize-legacy-lowercase-kb",
+      "predicate": "filesize<=1kB",
+      "expected_ids": [
+        "low",
+        "mid"
+      ]
+    },
+    {
+      "name": "filesize-legacy-lowercase-k-fraction",
+      "predicate": "filesize>=1.5k",
+      "expected_ids": [
+        "high",
+        "decimal",
+        "binary",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "filesize-binary-fraction",
+      "predicate": "filesize<1.5KiB",
+      "expected_ids": [
+        "low",
+        "mid"
+      ]
+    },
+    {
+      "name": "filesize-binary-no-b",
+      "predicate": "filesize>=1Mi",
+      "expected_ids": [
+        "binary",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "filesize-legacy-lowercase-half-k",
+      "predicate": "filesize=0.5kB",
+      "expected_ids": []
+    },
+    {
+      "name": "filesize-integer-limit",
+      "predicate": "filesize=9007199254740992",
+      "expected_ids": [
+        "limit"
+      ]
+    },
+    {
+      "name": "filesize-near-limit",
+      "predicate": "filesize=9007199254740991",
+      "expected_ids": [
+        "near-limit"
+      ]
+    },
+    {
+      "name": "filesize-below-limit",
+      "predicate": "filesize<9007199254740992",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "bitrate-decimal",
+      "predicate": "tbr>128.5",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high"
+      ]
+    },
+    {
+      "name": "bitrate-missing",
+      "predicate": "tbr<=?128.5",
+      "expected_ids": [
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "audio-bitrate",
+      "predicate": "abr=128",
+      "expected_ids": [
+        "mid",
+        "decimal"
+      ]
+    },
+    {
+      "name": "audio-bitrate-missing",
+      "predicate": "abr!=?128",
+      "expected_ids": [
+        "low",
+        "high",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "ext-equals",
+      "predicate": "ext=mp4",
+      "expected_ids": [
+        "low",
+        "high",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "ext-not-equal",
+      "predicate": "ext!=mp4",
+      "expected_ids": [
+        "mid",
+        "decimal",
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "language-equals",
+      "predicate": "language='en'",
+      "expected_ids": [
+        "low",
+        "decimal"
+      ]
+    },
+    {
+      "name": "language-prefix",
+      "predicate": "language^=en",
+      "expected_ids": [
+        "low",
+        "mid",
+        "decimal"
+      ]
+    },
+    {
+      "name": "language-suffix",
+      "predicate": "language$=US",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "language-contains",
+      "predicate": "language*=n",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal"
+      ]
+    },
+    {
+      "name": "language-not-equal",
+      "predicate": "language!=en",
+      "expected_ids": [
+        "mid",
+        "high",
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "language-not-prefix",
+      "predicate": "language!^=en",
+      "expected_ids": [
+        "high",
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "language-not-suffix",
+      "predicate": "language!$=US",
+      "expected_ids": [
+        "low",
+        "high",
+        "decimal",
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "language-not-contains",
+      "predicate": "language!*=n",
+      "expected_ids": [
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "language-equals-missing",
+      "predicate": "language=?en",
+      "expected_ids": [
+        "low",
+        "decimal",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-prefix-missing",
+      "predicate": "language^=?en",
+      "expected_ids": [
+        "low",
+        "mid",
+        "decimal",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-suffix-missing",
+      "predicate": "language$=?US",
+      "expected_ids": [
+        "mid",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-contains-missing",
+      "predicate": "language*=?n",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-not-equal-missing",
+      "predicate": "language!=?en",
+      "expected_ids": [
+        "mid",
+        "high",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-not-prefix-missing",
+      "predicate": "language!^=?en",
+      "expected_ids": [
+        "high",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-not-suffix-missing",
+      "predicate": "language!$=?US",
+      "expected_ids": [
+        "low",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "language-not-contains-missing",
+      "predicate": "language!*=?n",
+      "expected_ids": [
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "id-equals",
+      "predicate": "format_id=mid",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "id-prefix",
+      "predicate": "format_id^=near",
+      "expected_ids": [
+        "near-limit"
+      ]
+    },
+    {
+      "name": "id-suffix",
+      "predicate": "format_id$=limit",
+      "expected_ids": [
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "note-delimiters",
+      "predicate": "format_note*=\"[safe]+audio\"",
+      "expected_ids": [
+        "low"
+      ]
+    },
+    {
+      "name": "note-slash-delimiters",
+      "predicate": "format_note*=\"[720p]/+ fallback\"",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "note-double-quote",
+      "predicate": "format_note*=\"\\\"quote\\\"\"",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "note-single-quote",
+      "predicate": "format_note^='Director\\'s'",
+      "expected_ids": [
+        "high"
+      ]
+    },
+    {
+      "name": "note-backslash",
+      "predicate": "format_note*=\"\\\\ surround\"",
+      "expected_ids": [
+        "high"
+      ]
+    },
+    {
+      "name": "note-literal-question",
+      "predicate": "format_note$=\"?\"",
+      "expected_ids": [
+        "binary"
+      ]
+    },
+    {
+      "name": "note-negated-missing",
+      "predicate": "format_note!*=?\"[safe]+audio\"",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "group-equals",
+      "predicate": "audio_group=group-a",
+      "expected_ids": [
+        "low",
+        "high",
+        "decimal"
+      ]
+    },
+    {
+      "name": "group-prefix",
+      "predicate": "audio_group^=group",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "group-negated-missing",
+      "predicate": "audio_group!=?group-a",
+      "expected_ids": [
+        "mid",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "spaced-filter",
+      "predicate": " language ! ^= ? 'en' ",
+      "expected_ids": [
+        "high",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "filesize-decimal-kb",
+      "predicate": "filesize<=1KB",
+      "expected_ids": [
+        "low",
+        "mid"
+      ]
+    },
+    {
+      "name": "filesize-decimal-k-fraction",
+      "predicate": "filesize>=1.5K",
+      "expected_ids": [
+        "high",
+        "decimal",
+        "binary",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "filesize-exact-half-k",
+      "predicate": "filesize=0.5KB",
+      "expected_ids": [
+        "low"
+      ]
+    },
+    {
+      "name": "filesize-uppercase-k-equals",
+      "predicate": "filesize=1KB",
+      "expected_ids": [
+        "mid"
+      ]
+    },
+    {
+      "name": "filesize-lowercase-k-equals",
+      "predicate": "filesize=1kB",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-format_id-=-False-False",
+      "predicate": "format_id=1",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-format_id-=-False-True",
+      "predicate": "format_id=?1",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-format_id-=-True-False",
+      "predicate": "format_id=\"1\"",
+      "expected_ids": [
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-format_id-=-True-True",
+      "predicate": "format_id=?\"1\"",
+      "expected_ids": [
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-format_id-!=-False-False",
+      "predicate": "format_id!=1",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-format_id-!=-False-True",
+      "predicate": "format_id!=?1",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-format_id-!=-True-False",
+      "predicate": "format_id!=\"1\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-format_id-!=-True-True",
+      "predicate": "format_id!=?\"1\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-=-False-False",
+      "predicate": "ext=123",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-ext-=-False-True",
+      "predicate": "ext=?123",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-ext-=-True-False",
+      "predicate": "ext=\"123\"",
+      "expected_ids": [
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-=-True-True",
+      "predicate": "ext=?\"123\"",
+      "expected_ids": [
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-!=-False-False",
+      "predicate": "ext!=123",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-!=-False-True",
+      "predicate": "ext!=?123",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-!=-True-False",
+      "predicate": "ext!=\"123\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-ext-!=-True-True",
+      "predicate": "ext!=?\"123\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-language-=-False-False",
+      "predicate": "language=123",
+      "expected_ids": []
+    },
+    {
+      "name": "numeric-string-language-=-False-True",
+      "predicate": "language=?123",
+      "expected_ids": [
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-language-=-True-False",
+      "predicate": "language=\"123\"",
+      "expected_ids": [
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-language-=-True-True",
+      "predicate": "language=?\"123\"",
+      "expected_ids": [
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-language-!=-False-False",
+      "predicate": "language!=123",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "1"
+      ]
+    },
+    {
+      "name": "numeric-string-language-!=-False-True",
+      "predicate": "language!=?123",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "numeric-string-language-!=-True-False",
+      "predicate": "language!=\"123\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "numeric-string-language-!=-True-True",
+      "predicate": "language!=?\"123\"",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-<-False",
+      "predicate": "tbr<0",
+      "expected_ids": []
+    },
+    {
+      "name": "zero-rate-tbr-<-True",
+      "predicate": "tbr<?0",
+      "expected_ids": [
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-<=-False",
+      "predicate": "tbr<=0",
+      "expected_ids": [
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-<=-True",
+      "predicate": "tbr<=?0",
+      "expected_ids": [
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr->-False",
+      "predicate": "tbr>0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr->-True",
+      "predicate": "tbr>?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr->=-False",
+      "predicate": "tbr>=0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr->=-True",
+      "predicate": "tbr>=?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-=-False",
+      "predicate": "tbr=0",
+      "expected_ids": [
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-=-True",
+      "predicate": "tbr=?0",
+      "expected_ids": [
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-!=-False",
+      "predicate": "tbr!=0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "zero-rate-tbr-!=-True",
+      "predicate": "tbr!=?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-<-False",
+      "predicate": "abr<0",
+      "expected_ids": []
+    },
+    {
+      "name": "zero-rate-abr-<-True",
+      "predicate": "abr<?0",
+      "expected_ids": [
+        "low",
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-<=-False",
+      "predicate": "abr<=0",
+      "expected_ids": [
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-<=-True",
+      "predicate": "abr<=?0",
+      "expected_ids": [
+        "low",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr->-False",
+      "predicate": "abr>0",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "zero-rate-abr->-True",
+      "predicate": "abr>?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    },
+    {
+      "name": "zero-rate-abr->=-False",
+      "predicate": "abr>=0",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr->=-True",
+      "predicate": "abr>=?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-=-False",
+      "predicate": "abr=0",
+      "expected_ids": [
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-=-True",
+      "predicate": "abr=?0",
+      "expected_ids": [
+        "low",
+        "missing",
+        "limit",
+        "near-limit",
+        "1",
+        "zero"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-!=-False",
+      "predicate": "abr!=0",
+      "expected_ids": [
+        "mid",
+        "high",
+        "decimal",
+        "binary"
+      ]
+    },
+    {
+      "name": "zero-rate-abr-!=-True",
+      "predicate": "abr!=?0",
+      "expected_ids": [
+        "low",
+        "mid",
+        "high",
+        "decimal",
+        "binary",
+        "missing",
+        "limit",
+        "near-limit"
+      ]
+    }
+  ]
+}

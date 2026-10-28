@@ -1,0 +1,1 @@
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div><p begin=".5s" dur="1.2345s">decimal</p><p begin="01:02:03:04" end="01:02:04.9999">clock</p><p begin="25:00:00" dur="0.001s">large hour</p></div></body></tt>

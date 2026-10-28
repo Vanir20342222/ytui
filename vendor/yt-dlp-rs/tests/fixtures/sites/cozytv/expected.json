@@ -1,0 +1,56 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://cozy.tv/beardson/replays/2021-11-19_1",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"beardson-2021-11-19_1\", \"title\": \"pokemon pt2\", \"uploader\": \"Beardson\", \"upload_date\": \"20211119\", \"was_live\": true, \"duration\": 7981, \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/video.m3u8\", \"manifest_url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/index.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"webpage_url\": \"https://cozy.tv/beardson/replays/2021-11-19_1\", \"original_url\": \"https://cozy.tv/beardson/replays/2021-11-19_1\", \"webpage_url_basename\": \"2021-11-19_1\", \"webpage_url_domain\": \"cozy.tv\", \"extractor\": \"CozyTV\", \"extractor_key\": \"CozyTV\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"beardson-2021-11-19_1\", \"fulltitle\": \"pokemon pt2\", \"duration_string\": \"2:13:01\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/video.m3u8\", \"manifest_url\": \"https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/index.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"pokemon pt2 [beardson-2021-11-19_1].mp4\", \"filename\": \"pokemon pt2 [beardson-2021-11-19_1].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://cozy.tv/beardson/replays/2021-11-19_1",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(uploader)s|%(upload_date)s|%(was_live)s|%(live_status)s|%(duration)s|%(duration_string)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "beardson-2021-11-19_1|pokemon pt2|Beardson|20211119|True|NA|7981|2:13:01"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.cozy.tv/x/replays/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"x-b2\", \"title\": \"CozyTV video #x-b2\", \"uploader\": \"x\", \"upload_date\": null, \"was_live\": true, \"duration\": 12.5, \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cozycdn.foxtrotstream.xyz/replays/x/b2/index.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"webpage_url\": \"https://www.cozy.tv/x/replays/b2\", \"original_url\": \"https://www.cozy.tv/x/replays/b2\", \"webpage_url_basename\": \"b2\", \"webpage_url_domain\": \"cozy.tv\", \"extractor\": \"CozyTV\", \"extractor_key\": \"CozyTV\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"x-b2\", \"fulltitle\": null, \"duration_string\": \"12\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cozycdn.foxtrotstream.xyz/replays/x/b2/index.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"CozyTV video #x-b2 [x-b2].mp4\", \"filename\": \"CozyTV video #x-b2 [x-b2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cozy.tv/x/replays/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CozyTV] x-c3: Failed to download m3u8 information: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

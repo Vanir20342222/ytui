@@ -1,0 +1,108 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"UZF8zlmuQbe4mr+7dCiQ0w==\", \"title\": \"Damon's Glide message\", \"url\": \"https://d1.cloudfront.net/v/UZF8.mp4\", \"thumbnail\": \"https://d1.cloudfront.net/thumb.jpg\", \"webpage_url\": \"http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==\", \"original_url\": \"http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==\", \"webpage_url_basename\": \"UZF8zlmuQbe4mr+7dCiQ0w==\", \"webpage_url_domain\": \"share.glide.me\", \"extractor\": \"Glide\", \"extractor_key\": \"Glide\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://d1.cloudfront.net/thumb.jpg\", \"id\": \"0\"}], \"display_id\": \"UZF8zlmuQbe4mr+7dCiQ0w==\", \"fulltitle\": \"Damon's Glide message\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Damon's Glide message [UZF8zlmuQbe4mr+7dCiQ0w==].mp4\", \"filename\": \"Damon's Glide message [UZF8zlmuQbe4mr+7dCiQ0w==].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Glide] Extracting URL: http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+    "[Glide] UZF8zlmuQbe4mr+7dCiQ0w==: Downloading webpage",
+    "[info] Available formats for UZF8zlmuQbe4mr+7dCiQ0w==:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(thumbnail)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "UZF8zlmuQbe4mr+7dCiQ0w==|Damon's Glide message|https://d1.cloudfront.net/thumb.jpg|mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+   "args": [
+    "--no-progress",
+    "-o",
+    "out.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Glide] Extracting URL: http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+    "[Glide] UZF8zlmuQbe4mr+7dCiQ0w==: Downloading webpage",
+    "[info] UZF8zlmuQbe4mr+7dCiQ0w==: Downloading 1 format(s): 0",
+    "[download] Destination: out.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "out.mp4": 792
+   }
+  },
+  {
+   "url": "https://share.glide.me/og-only",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"og-only\", \"title\": \"Plain title\", \"url\": \"https://d1.cloudfront.net/v/UZF8.mp4\", \"thumbnail\": null, \"webpage_url\": \"https://share.glide.me/og-only\", \"original_url\": \"https://share.glide.me/og-only\", \"webpage_url_basename\": \"og-only\", \"webpage_url_domain\": \"share.glide.me\", \"extractor\": \"Glide\", \"extractor_key\": \"Glide\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"og-only\", \"fulltitle\": \"Plain title\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Plain title [og-only].mp4\", \"filename\": \"Plain title [og-only].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Glide] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://share.glide.me/none",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Glide] none: Unable to extract video url; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://share.glide.me/untitled",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"untitled\", \"title\": \"Glide video #untitled\", \"url\": \"https://d1.cloudfront.net/v/UZF8.mp4\", \"thumbnail\": null, \"webpage_url\": \"https://share.glide.me/untitled\", \"original_url\": \"https://share.glide.me/untitled\", \"webpage_url_basename\": \"untitled\", \"webpage_url_domain\": \"share.glide.me\", \"extractor\": \"Glide\", \"extractor_key\": \"Glide\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"untitled\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Glide video #untitled [untitled].mp4\", \"filename\": \"Glide video #untitled [untitled].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Glide] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  }
+ ]
+}

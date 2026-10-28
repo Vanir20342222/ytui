@@ -1,0 +1,223 @@
+{
+ "cases": [
+  {
+   "input": "",
+   "tokens": []
+  },
+  {
+   "input": "-f best",
+   "tokens": [
+    "-f",
+    "best"
+   ]
+  },
+  {
+   "input": "  -o  \"%(title)s.%(ext)s\"  ",
+   "tokens": [
+    "-o",
+    "%(title)s.%(ext)s"
+   ]
+  },
+  {
+   "input": "-o '%(id)s [x].%(ext)s'",
+   "tokens": [
+    "-o",
+    "%(id)s [x].%(ext)s"
+   ]
+  },
+  {
+   "input": "# comment\n-f b",
+   "tokens": [
+    "-f",
+    "b"
+   ]
+  },
+  {
+   "input": "-f b # trailing\n-x",
+   "tokens": [
+    "-f",
+    "b",
+    "-x"
+   ]
+  },
+  {
+   "input": "a#b c",
+   "tokens": [
+    "a"
+   ]
+  },
+  {
+   "input": "\"a#b\" c",
+   "tokens": [
+    "a#b",
+    "c"
+   ]
+  },
+  {
+   "input": "it's",
+   "error": "No closing quotation"
+  },
+  {
+   "input": "\"unterminated",
+   "error": "No closing quotation"
+  },
+  {
+   "input": "back\\\\slash",
+   "tokens": [
+    "back\\slash"
+   ]
+  },
+  {
+   "input": "esc\\ aped",
+   "tokens": [
+    "esc aped"
+   ]
+  },
+  {
+   "input": "\"in \\\" quote\"",
+   "tokens": [
+    "in \" quote"
+   ]
+  },
+  {
+   "input": "\"keep \\n backslash\"",
+   "tokens": [
+    "keep \\n backslash"
+   ]
+  },
+  {
+   "input": "'single \\ keep'",
+   "tokens": [
+    "single \\ keep"
+   ]
+  },
+  {
+   "input": "a\\",
+   "error": "No escaped character"
+  },
+  {
+   "input": "\"\"",
+   "tokens": [
+    ""
+   ]
+  },
+  {
+   "input": "''",
+   "tokens": [
+    ""
+   ]
+  },
+  {
+   "input": "\"\" x",
+   "tokens": [
+    "",
+    "x"
+   ]
+  },
+  {
+   "input": "x \"\"",
+   "tokens": [
+    "x",
+    ""
+   ]
+  },
+  {
+   "input": "--opt=val\t--two\r\n--three",
+   "tokens": [
+    "--opt=val",
+    "--two",
+    "--three"
+   ]
+  },
+  {
+   "input": "a\"b\"c",
+   "tokens": [
+    "abc"
+   ]
+  },
+  {
+   "input": "a'b'c",
+   "tokens": [
+    "abc"
+   ]
+  },
+  {
+   "input": "\"a\"'b'",
+   "tokens": [
+    "ab"
+   ]
+  },
+  {
+   "input": "line\\\ncont",
+   "tokens": [
+    "line\ncont"
+   ]
+  },
+  {
+   "input": "#only comment",
+   "tokens": []
+  },
+  {
+   "input": "x #c\n#d\ny",
+   "tokens": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "input": "\"#notcomment\"",
+   "tokens": [
+    "#notcomment"
+   ]
+  },
+  {
+   "input": "é ü 影",
+   "tokens": [
+    "é",
+    "ü",
+    "影"
+   ]
+  },
+  {
+   "input": "-P \"~/Downloads\" --paths temp:/tmp",
+   "tokens": [
+    "-P",
+    "~/Downloads",
+    "--paths",
+    "temp:/tmp"
+   ]
+  },
+  {
+   "input": "\"multi\nline\"",
+   "tokens": [
+    "multi\nline"
+   ]
+  },
+  {
+   "input": "\\#",
+   "tokens": [
+    "#"
+   ]
+  },
+  {
+   "input": "a \\# b",
+   "tokens": [
+    "a",
+    "#",
+    "b"
+   ]
+  },
+  {
+   "input": "\"\\\\\"",
+   "tokens": [
+    "\\"
+   ]
+  },
+  {
+   "input": "\"a\\b\"",
+   "tokens": [
+    "a\\b"
+   ]
+  }
+ ]
+}

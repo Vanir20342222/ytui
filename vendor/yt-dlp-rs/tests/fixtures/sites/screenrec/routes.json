@@ -1,0 +1,53 @@
+{
+ "routes": [
+  {
+   "url": "https://screenrec.com/share/DasLtbknYo",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Not this</title>\n<meta property=\"og:title\" content=\"02.05.2024_03.01.25_REC\">\n<meta property=\"og:description\" content=\"Recorded with ScreenRec\">\n<meta property=\"og:image\" content=\"https://sr.test/t.png\">\n</head><body><script>player({customUrl: 'https://sr.test/hls/master.m3u8', x: 1});</script></body></html>"
+  },
+  {
+   "url": "https://www.screenrec.com/share/Bbbbbbbbbb",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title> Fallback\n title </title></head><body><script>customUrl:\"https://sr.test/hls/video.m3u8\"</script></body></html>"
+  },
+  {
+   "url": "https://screenrec.com/share/Cccccccccc",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://sr.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://sr.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://sr.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://sr.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

@@ -1,0 +1,77 @@
+{
+  "playabilityStatus": {
+    "status": "OK",
+    "playableInEmbed": true
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Metadata fixture",
+    "lengthSeconds": "597",
+    "channelId": "UCSMOQeBJ2RAnuFungnQOxLg",
+    "shortDescription": "Line one\nLine two & more",
+    "isLiveContent": false,
+    "viewCount": "12345",
+    "keywords": [
+      "blender",
+      "open movie"
+    ],
+    "averageRating": 4.75,
+    "author": "Blender",
+    "thumbnail": {
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/BaW_jenozKc/hqdefault.jpg?sqp=fixture",
+          "width": 480,
+          "height": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/BaW_jenozKc/maxresdefault.jpg?v=1",
+          "width": 1280,
+          "height": 720
+        },
+        {
+          "url": "not-a-url",
+          "width": 1,
+          "height": 1
+        }
+      ]
+    }
+  },
+  "microformat": {
+    "playerMicroformatRenderer": {
+      "category": "Film & Animation",
+      "isFamilySafe": false,
+      "externalChannelId": "UCSMOQeBJ2RAnuFungnQOxLg",
+      "ownerProfileUrl": "http://www.youtube.com/@BlenderOfficial",
+      "ownerChannelName": "Blender",
+      "uploadDate": "2008-05-29T00:00:00-07:00",
+      "publishDate": "2008-05-29T00:00:00-07:00",
+      "description": {
+        "simpleText": "Translated description"
+      },
+      "isShortsEligible": true,
+      "thumbnail": {
+        "thumbnails": [
+          {
+            "url": "https://i.ytimg.com/vi/BaW_jenozKc/hqdefault.jpg",
+            "width": "480",
+            "height": 360
+          }
+        ]
+      }
+    }
+  },
+  "streamingData": {
+    "formats": [
+      {
+        "itag": 18,
+        "url": "{{ORIGIN}}/media/low.mp4",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "width": 640,
+        "height": 360,
+        "contentLength": "5",
+        "audioQuality": "AUDIO_QUALITY_LOW"
+      }
+    ]
+  }
+}

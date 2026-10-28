@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.example.test/videos/10000/some-clip/", "args": ["-j"]},
+ {"url": "https://www.example.test/videos/10000/some-clip/", "args": ["-F"]},
+ {"url": "https://www.example.test/videos/10000/some-clip/", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(thumbnail)s|%(description)s|%(format_id)s|%(height)s"]},
+ {"url": "https://www.example.test/videos/10000/some-clip/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://old.example.test/v/7", "args": ["-j"]},
+ {"url": "https://old.example.test/v/8", "args": ["-j"]},
+ {"url": "https://old.example.test/v/9", "args": ["-j"]}
+]

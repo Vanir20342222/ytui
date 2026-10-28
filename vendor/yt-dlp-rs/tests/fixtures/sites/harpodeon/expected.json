@@ -1,0 +1,93 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"268068288\", \"title\": \"The Smoking Out of Bella Butts\", \"url\": \"https://hp.test/v/268068288_720.mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288\"}, \"description\": \"Anticigarette & crusader\", \"creator\": \"Ernst Lubitsch\", \"release_year\": 1915, \"webpage_url\": \"https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288\", \"original_url\": \"https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288\", \"webpage_url_basename\": \"268068288\", \"webpage_url_domain\": \"harpodeon.com\", \"extractor\": \"Harpodeon\", \"extractor_key\": \"Harpodeon\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"268068288\", \"fulltitle\": \"The Smoking Out of Bella Butts\", \"creators\": [\"Ernst Lubitsch\"], \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"The Smoking Out of Bella Butts [268068288].mp4\", \"filename\": \"The Smoking Out of Bella Butts [268068288].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(creator)s|%(creators)s|%(release_year)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "268068288|The Smoking Out of Bella Butts|Anticigarette & crusader|Ernst Lubitsch|['Ernst Lubitsch']|1915"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Harpodeon] Extracting URL: https://www.harpodeon.com/video/The_Smoking_Out_of_Bella_Butts/268068288",
+    "[Harpodeon] 268068288: Downloading webpage",
+    "[info] 268068288: Downloading 1 format(s): 0",
+    "[download] Destination: 268068288.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "268068288.mp4": 792
+   }
+  },
+  {
+   "url": "https://harpodeon.com/preview/x/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Bare\", \"url\": \"https://hp.test/v/a2_480.mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://harpodeon.com/preview/x/2\"}, \"description\": null, \"creator\": null, \"release_year\": null, \"webpage_url\": \"https://harpodeon.com/preview/x/2\", \"original_url\": \"https://harpodeon.com/preview/x/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"harpodeon.com\", \"extractor\": \"Harpodeon\", \"extractor_key\": \"Harpodeon\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Bare\", \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Bare [2].mp4\", \"filename\": \"Bare [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Harpodeon] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://harpodeon.com/video/x/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3\", \"title\": \"Harpodeon video #3\", \"url\": \"https://hp.test/v/a3_480.mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://harpodeon.com/video/x/3\"}, \"description\": null, \"creator\": null, \"release_year\": null, \"webpage_url\": \"https://harpodeon.com/video/x/3\", \"original_url\": \"https://harpodeon.com/video/x/3\", \"webpage_url_basename\": \"3\", \"webpage_url_domain\": \"harpodeon.com\", \"extractor\": \"Harpodeon\", \"extractor_key\": \"Harpodeon\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"3\", \"fulltitle\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Harpodeon video #3 [3].mp4\", \"filename\": \"Harpodeon video #3 [3].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Harpodeon] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Harpodeon] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://harpodeon.com/video/x/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [Harpodeon] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: [Harpodeon] 4: Unable to extract hp_base; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

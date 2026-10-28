@@ -1,0 +1,17 @@
+[
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["-j"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["-J"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["-F"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["--list-subs"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["--list-thumbnails"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(upload_date)s|%(format_id)s|%(tbr)s|%(thumbnail)s"]},
+ {"url": "https://media.example.test/shows/clip.smil", "args": ["--no-progress", "-f", "http-400", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://media.example.test/plain.smil", "args": ["-j"]},
+ {"url": "https://media.example.test/manifests.smil", "args": ["-j"]},
+ {"url": "https://media.example.test/manifests.smil", "args": ["-F"]},
+ {"url": "https://media.example.test/manifests.smil", "args": ["--print", "%(format_id)s|%(tbr)s|%(width)s"]},
+ {"url": "https://www.example.test/watch", "args": ["-j"]},
+ {"url": "https://www.example.test/watch", "args": ["-F"]},
+ {"url": "https://www.example.test/plainwatch", "args": ["-j"]},
+ {"url": "https://www.example.test/gonewatch", "args": ["-j"]}
+]

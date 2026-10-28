@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>var VIDEO_CONFIG = {\"iframe_id\": \"BLOGGER-video-3c740e3a49197e16-796\", \"thumbnail\": \"https://i9.ytimg.test/vi_blogger/BLOG.jpg\", \"streams\": [{\"play_url\": \"https://rr3.blogger.test/videoplayback?id=3c740e\\u0026itag=18\\u0026mime=video/mp4\\u0026dur=76.068\\u0026source=blogger\", \"format_id\": 18}, {\"play_url\": \"https://rr3.blogger.test/videoplayback?id=3c740e\\u0026itag=22\\u0026mime=video%2Fmp4\\u0026dur=76.068\", \"format_id\": \"22\"}]}\n</script></body></html>"
+  },
+  {
+   "url": "https://rr3.blogger.test/videoplayback?id=3c740e&itag=22&mime=video%2Fmp4&dur=76.068",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Post</title></head><body><iframe src=\"https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw\"></iframe></body></html>"
+  },
+  {
+   "url": "https://www.blogger.com/video.g?token=missing",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>x</html>"
+  }
+ ]
+}

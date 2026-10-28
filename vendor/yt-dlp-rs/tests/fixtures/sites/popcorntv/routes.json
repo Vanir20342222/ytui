@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:image\" content=\"https://ptv.test/t.jpg\">\n<link itemprop=\"contentUrl\" href=\"https://ptv.test/hls/master.m3u8?a=1&amp;b=2\">\n<meta itemprop=\"uploadDate\" content=\"2016-09-15T10:00:00+02:00\"><meta itemprop=\"duration\" content=\"24\">\n<meta itemprop=\"interactionCount\" content=\"1500\"></head><body>\n<h1 itemprop=\"name\">Food Wars, Episodio 01</h1><article itemprop=\"description\">Soma\n <b>Yukihira</b></article></body></html>"
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/smash-cut/10",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Smash Cut\"><link itemprop='embedUrl' href='https://ptv.test/hls/video.m3u8'></head></html>"
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/x/11",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><link itemprop=\"embedUrl\" rel=\"x\"></head></html>"
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/x/12",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>none</html>"
+  },
+  {
+   "url": "https://ptv.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://ptv.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://ptv.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://ptv.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://ptv.test/hls/master.m3u8?a=1&b=2",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  }
+ ]
+}

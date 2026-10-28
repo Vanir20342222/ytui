@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://www.fc-zenit.ru/video/41044/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Zenit</title></head><body><script>\nvar config = {\n  autoplay: false,\n  video_id: 'LMNO123',\n  other: 1\n};\n</script></body></html>"
+  },
+  {
+   "url": "http://player.fc-zenit.ru/msi/video?video=LMNO123",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"name\": \"Goal of the week\", \"preview\": \"http://fc-zenit.test/p.jpg\", \"duration\": \"93.5\", \"date\": \"1471873200\", \"qualities\": [{\"label\": \"720\", \"url\": \"http://fc-zenit.test/v720.mp4\"}, {\"label\": \"HD\", \"url\": \"http://fc-zenit.test/vhd.mp4\"}, {\"label\": \"360\"}, {\"url\": \"http://fc-zenit.test/nolabel.mp4\"}], \"tags\": [{\"label\": \"Football\"}, {\"label\": \"\"}, {\"x\": 1}, {\"label\": \"Zenit\"}]}}"
+  },
+  {
+   "url": "http://fc-zenit.test/v720.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/2",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><script>var config = {video_id: 'Q2'};</script></html>"
+  },
+  {
+   "url": "http://player.fc-zenit.ru/msi/video?video=Q2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"name\": \"Bare\", \"qualities\": []}}"
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/3",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>nothing</html>"
+  }
+ ]
+}

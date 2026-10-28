@@ -1,0 +1,52 @@
+{
+ "routes": [
+  {
+   "url": "https://benprunty.bandcamp.com/track/lanius-battle",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "track.html"
+  },
+  {
+   "url": "https://youtube-dl.bandcamp.com/track/youtube-dl-test-song",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "free.html"
+  },
+  {
+   "url": "https://bandcamp.com/download?id=1812978515&ts=1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "download.html"
+  },
+  {
+   "url": "https://popplers5.bandcamp.com/statdownload/track?enc=mp3-320&id=1812978515",
+   "ignore_query": [
+    ".rand"
+   ],
+   "headers": {
+    "Content-Type": "text/javascript"
+   },
+   "body": "var _statDL_result = {\"result\":\"ok\",\"retry_url\":\"//popplers5.bandcamp.com/download/track?enc=mp3-320&id=1812978515&retry=1\"};"
+  },
+  {
+   "url": "https://popplers5.bandcamp.com/statdownload/track?enc=flac&id=1812978515",
+   "ignore_query": [
+    ".rand"
+   ],
+   "headers": {
+    "Content-Type": "text/javascript"
+   },
+   "body": "x({\"result\":\"ok\"})"
+  },
+  {
+   "url": "http://t4.bcbits.com/stream/abc/mp3-128/2650410135?p=0&ts=1&t=x",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body": "ID3-bandcamp"
+  }
+ ]
+}

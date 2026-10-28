@@ -1,0 +1,53 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Saved caption fixture",
+    "lengthSeconds": "1",
+    "isLiveContent": false
+  },
+  "streamingData": {
+    "formats": [
+      {
+        "itag": 18,
+        "url": "https://example.test/media.mp4",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "width": 640,
+        "height": 360,
+        "audioQuality": "AUDIO_QUALITY_LOW"
+      }
+    ]
+  },
+  "captions": {
+    "playerCaptionsTracklistRenderer": {
+      "captionTracks": [
+        {
+          "baseUrl": "https://www.youtube.com/api/timedtext?lang=en",
+          "languageCode": "en",
+          "name": {
+            "runs": [
+              {
+                "text": "First"
+              },
+              {
+                "text": "Ignored"
+              }
+            ]
+          },
+          "vssId": ".en"
+        },
+        {
+          "baseUrl": "https://www.youtube.com/api/timedtext?lang=en",
+          "languageCode": "de",
+          "name": {
+            "simpleText": "Deutsch"
+          },
+          "vssId": ".de"
+        }
+      ],
+      "translationLanguages": []
+    }
+  }
+}

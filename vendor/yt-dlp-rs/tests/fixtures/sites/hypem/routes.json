@@ -1,0 +1,75 @@
+{
+ "routes": [
+  {
+   "url": "http://hypem.com/track/1v6ga/BODYWORK+-+TAME",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "1v6ga.html"
+  },
+  {
+   "url": "http://hypem.com/serve/source/1v6ga/k3y",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"type\": \"normal\", \"url\": \"https://cdn.hypem.test/1v6ga.mp3\"}"
+  },
+  {
+   "url": "https://cdn.hypem.test/1v6ga.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "media.mp3"
+  },
+  {
+   "url": "https://hypem.com/track/2bare",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Hype Machine</title></head><body>\n<script type=\"application/json\" id=\"displayList-data\">\n{\"tracks\": [{\"id\": \"other\", \"key\": \"z\", \"song\": \"Bare\"}]}\n</script></body></html>"
+  },
+  {
+   "url": "http://hypem.com/serve/source/other/z",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cdn.hypem.test/1v6ga.mp3\"}"
+  },
+  {
+   "url": "https://hypem.com/track/3none",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><body>gone</body></html>"
+  },
+  {
+   "url": "https://hypem.com/track/4emty",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Hype Machine</title></head><body>\n<script type=\"application/json\" id=\"displayList-data\">\n{\"tracks\": []}\n</script></body></html>"
+  },
+  {
+   "url": "https://hypem.com/track/5nokey",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Hype Machine</title></head><body>\n<script type=\"application/json\" id=\"displayList-data\">\n{\"tracks\": [{\"id\": \"5nokey\", \"song\": \"x\"}]}\n</script></body></html>"
+  },
+  {
+   "url": "https://hypem.com/track/6dead",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Hype Machine</title></head><body>\n<script type=\"application/json\" id=\"displayList-data\">\n{\"tracks\": [{\"id\": \"6dead\", \"key\": \"q\", \"song\": \"x\"}]}\n</script></body></html>"
+  },
+  {
+   "url": "http://hypem.com/serve/source/6dead/q",
+   "status": 403,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  }
+ ]
+}

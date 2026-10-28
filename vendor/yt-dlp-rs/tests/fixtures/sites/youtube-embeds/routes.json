@@ -1,0 +1,18 @@
+{
+ "routes": [
+  {
+   "url": "https://blog.example.test/post",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Blog post</title></head><body>\n<iframe width=\"560\" src=\"https://www.youtube.com/embed/BaW_jenozKc?rel=0&amp;start=5\" frameborder=\"0\"></iframe>\n<p>more</p><iframe src='//www.youtube-nocookie.com/embed/dQw4w9WgXcQ'></iframe>\n<a href=\"https://www.youtube.com/watch?v=9bZkp7q19f0\" class=\"lazy-load-youtube preview\"></a>\n<iframe src=\"https://www.youtube.com/embed/BaW_jenozKc?rel=0&amp;start=5\"></iframe>\n</body></html>"
+  },
+  {
+   "url": "https://blog.example.test/one",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>One</title></head><body><iframe src=\"https://www.youtube.com/embed/BaW_jenozKc\"></iframe></body></html>"
+  }
+ ]
+}

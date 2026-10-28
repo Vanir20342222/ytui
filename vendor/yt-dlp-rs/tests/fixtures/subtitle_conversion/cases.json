@@ -1,0 +1,2290 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "ttml_cases": [
+    {
+      "name": "upstream-basic",
+      "input_file": "upstream-basic.ttml",
+      "provenance": "test/test_utils.py::test_dfxp2srt, dfxp_data",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+    },
+    {
+      "name": "upstream-no-namespace",
+      "input_file": "upstream-no-namespace.ttml",
+      "provenance": "test/test_utils.py::test_dfxp2srt, dfxp_data_no_default_namespace",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nThe first line\n\n"
+    },
+    {
+      "name": "upstream-styles-forward-inheritance",
+      "input_file": "upstream-styles-forward-inheritance.ttml",
+      "provenance": "test/test_utils.py::test_dfxp2srt, dfxp_data_with_style",
+      "expected_srt": "1\n00:00:02,080 --> 00:00:05,840\n<font color=\"white\" face=\"sansSerif\" size=\"16\">default style<font color=\"red\">custom style</font></font>\n\n2\n00:00:02,080 --> 00:00:05,840\n<b><font color=\"cyan\" face=\"sansSerif\" size=\"16\"><font color=\"lime\">part 1\n</font>part 2</font></b>\n\n3\n00:00:05,840 --> 00:00:09,560\n<u><font color=\"lime\">line 3\npart 3</font></u>\n\n4\n00:00:09,560 --> 00:00:12,360\n<i><u><font color=\"yellow\"><font color=\"lime\">inner\n </font>style</font></u></i>\n\n"
+    },
+    {
+      "name": "upstream-utf16",
+      "input_file": "upstream-utf16.ttml",
+      "provenance": "test/test_utils.py::test_dfxp2srt, dfxp_data_non_utf8",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nLine 1\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n\n"
+    },
+    {
+      "name": "timing-offset-clock-duration",
+      "input_file": "timing-offset-clock-duration.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "2\n01:02:03,040 --> 01:02:04,999\nclock\n\n3\n25:00:00,000 --> 25:00:00,001\nlarge hour\n\n"
+    },
+    {
+      "name": "timing-skips-index-gaps",
+      "input_file": "timing-skips-index-gaps.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "3\n00:00:01,000 --> 00:00:03,000\nthird\n\n4\n00:00:02,000 --> 00:00:04,000\nzero end uses duration\n\n6\n00:00:02,000 --> 00:00:01,000\nreversed accepted\n\n"
+    },
+    {
+      "name": "timing-all-invalid-empty-output",
+      "input_file": "timing-all-invalid-empty-output.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": ""
+    },
+    {
+      "name": "whitespace-entities-inline",
+      "input_file": "whitespace-entities-inline.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nA & <b>\ntext\n tail\n\n"
+    },
+    {
+      "name": "styled-inline-and-cross-cue",
+      "input_file": "styled-inline-and-cross-cue.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\n<u><font color=\"#FF00AA\" face=\"serif\" size=\"20\">first<b> bold<i> both</i></b></font></u>\n\n2\n00:00:01,000 --> 00:00:02,000\n<u><font color=\"#FF00AA\" face=\"serif\" size=\"20\">second</font></u>\n\n"
+    },
+    {
+      "name": "legacy-namespace-2004",
+      "input_file": "legacy-namespace-2004.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\n<i>legacy</i>\n\n"
+    },
+    {
+      "name": "legacy-namespace-2006",
+      "input_file": "legacy-namespace-2006.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nlegacy\n\n"
+    },
+    {
+      "name": "utf8-mislabelled-utf16",
+      "input_file": "utf8-mislabelled-utf16.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nmislabelled é\n\n"
+    },
+    {
+      "name": "unknown-style-and-unsupported-style",
+      "input_file": "unknown-style-and-unsupported-style.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nplain\n\n"
+    },
+    {
+      "name": "precision-rounding-boundaries",
+      "input_file": "precision-rounding-boundaries.ttml",
+      "provenance": "Saved edge case evaluated with pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,999\nhalf milliseconds\n\n2\n00:00:59,999 --> 00:01:00,000\nminute boundary\n\n"
+    },
+    {
+      "name": "utf16-be-bom",
+      "input_file": "utf16-be-bom.ttml",
+      "provenance": "Saved UTF-16BE BOM case, pinned actual dfxp2srt",
+      "expected_srt": "1\n00:00:00,000 --> 00:00:01,000\nBE 第二行\n\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "srt-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "temp/movie.en.srt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles",
+          "Subtitle file for srt is already in the requested format"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "filepath": "temp/movie.en.srt",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "srt-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "temp/movie.en.srt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.srt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.srt": "published/movie.en.srt",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "srt-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "temp/movie.en.srt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.srt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.srt": "published/movie.en.srt",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "srt-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "srt",
+          "filepath": "temp/movie.en.srt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.srt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.srt": "published/movie.en.srt",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "vtt-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "vtt-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles",
+          "Subtitle file for vtt is already in the requested format"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "filepath": "temp/movie.en.vtt",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "vtt-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "vtt-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "ass-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "temp/movie.en.ass",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.ass",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ass"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.ass": "published/movie.en.ass",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "ass-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "temp/movie.en.ass",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.ass",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ass"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.ass": "published/movie.en.ass",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "ass-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "temp/movie.en.ass",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles",
+          "Subtitle file for ass is already in the requested format"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "filepath": "temp/movie.en.ass",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "ass-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ass",
+          "filepath": "temp/movie.en.ass",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.ass",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ass"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.ass": "published/movie.en.ass",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "lrc-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "lrc",
+          "filepath": "temp/movie.en.lrc",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.lrc",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.lrc"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.lrc": "published/movie.en.lrc",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "lrc-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "lrc",
+          "filepath": "temp/movie.en.lrc",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.lrc",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.lrc"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.lrc": "published/movie.en.lrc",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "lrc-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "lrc",
+          "filepath": "temp/movie.en.lrc",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.lrc",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.lrc"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.lrc": "published/movie.en.lrc",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "lrc-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "lrc",
+          "filepath": "temp/movie.en.lrc",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles",
+          "Subtitle file for lrc is already in the requested format"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "filepath": "temp/movie.en.lrc",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "dfxp-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "dfxp",
+          "filepath": "temp/movie.en.dfxp",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.dfxp"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.dfxp": "published/movie.en.dfxp"
+        }
+      }
+    },
+    {
+      "name": "dfxp-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "dfxp",
+          "filepath": "temp/movie.en.dfxp",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.dfxp",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.dfxp": "published/movie.en.dfxp",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "dfxp-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "dfxp",
+          "filepath": "temp/movie.en.dfxp",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.dfxp",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.dfxp": "published/movie.en.dfxp",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "dfxp-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "dfxp",
+          "filepath": "temp/movie.en.dfxp",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.dfxp",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.dfxp": "published/movie.en.dfxp",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "ttml-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ttml",
+          "filepath": "temp/movie.en.ttml",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ttml"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.ttml": "published/movie.en.ttml"
+        }
+      }
+    },
+    {
+      "name": "ttml-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ttml",
+          "filepath": "temp/movie.en.ttml",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ttml",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.ttml": "published/movie.en.ttml",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "ttml-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ttml",
+          "filepath": "temp/movie.en.ttml",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ttml",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.ttml": "published/movie.en.ttml",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "ttml-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ttml",
+          "filepath": "temp/movie.en.ttml",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ttml",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.ttml": "published/movie.en.ttml",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "tt-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "tt",
+          "filepath": "temp/movie.en.tt",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.tt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.tt": "published/movie.en.tt"
+        }
+      }
+    },
+    {
+      "name": "tt-to-vtt",
+      "args": [
+        "--convert-subs",
+        "vtt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "tt",
+          "filepath": "temp/movie.en.tt",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "vtt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.vtt",
+            "args": [
+              "-f",
+              "webvtt"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "data": "FFMPEG:webvtt\n",
+            "filepath": "temp/movie.en.vtt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.tt",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.tt": "published/movie.en.tt",
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "tt-to-ass",
+      "args": [
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "tt",
+          "filepath": "temp/movie.en.tt",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.tt",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.tt": "published/movie.en.tt",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "tt-to-lrc",
+      "args": [
+        "--convert-subs",
+        "lrc"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "tt",
+          "filepath": "temp/movie.en.tt",
+          "name": "English",
+          "input_file": "upstream-basic.ttml"
+        }
+      ],
+      "expected": {
+        "target": "lrc",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.srt",
+            "output": "temp/movie.en.lrc",
+            "args": [
+              "-f",
+              "lrc"
+            ]
+          }
+        ],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "lrc",
+            "data": "FFMPEG:lrc\n",
+            "filepath": "temp/movie.en.lrc"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.tt",
+          "temp/movie.en.srt"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nThe following line contains Chinese characters and special symbols\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n♪♪\n\n3\n00:00:02,000 --> 00:00:03,000\nThird\nLine\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.tt": "published/movie.en.tt",
+          "temp/movie.en.lrc": "published/movie.en.lrc"
+        }
+      }
+    },
+    {
+      "name": "alias-short",
+      "args": [
+        "--convert-sub",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "alias-long",
+      "args": [
+        "--convert-subtitles",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "none",
+      "args": [
+        "--convert-subs",
+        "none"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": null,
+        "when": null,
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "filepath": "temp/movie.en.vtt",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "none-last",
+      "args": [
+        "--convert-subs",
+        "srt",
+        "--convert-subs",
+        "none"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": null,
+        "when": null,
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "filepath": "temp/movie.en.vtt",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "last-target",
+      "args": [
+        "--convert-subs",
+        "none",
+        "--convert-subs",
+        "ass"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "ass",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.ass",
+            "args": [
+              "-f",
+              "ass"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "ass",
+            "data": "FFMPEG:ass\n",
+            "filepath": "temp/movie.en.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.ass": "published/movie.en.ass"
+        }
+      }
+    },
+    {
+      "name": "skip-download",
+      "args": [
+        "--write-subs",
+        "--skip-download",
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": true,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "audio-and-video",
+      "args": [
+        "-x",
+        "--recode-video",
+        "mp4",
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": "bestaudio/best",
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "no-requested-subtitles",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": null,
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "There aren't any subtitles to convert"
+        ],
+        "subtitles": null,
+        "delete": [],
+        "writes": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "empty-requested-subtitles",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {}
+      }
+    },
+    {
+      "name": "missing-file",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English",
+          "missing": true
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [
+          "Skipping embedding en subtitle because the file is missing"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "vtt",
+            "filepath": "temp/movie.en.vtt",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt"
+        }
+      }
+    },
+    {
+      "name": "mixed-declaration-order",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.en.vtt",
+          "name": "English"
+        },
+        {
+          "language": "fr",
+          "ext": "srt",
+          "filepath": "temp/movie.fr.srt"
+        },
+        {
+          "language": "de",
+          "ext": "ass",
+          "filepath": "temp/movie.de.ass",
+          "missing": true
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.vtt",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [
+          "Skipping embedding de subtitle because the file is missing"
+        ],
+        "messages": [
+          "Converting subtitles",
+          "Subtitle file for srt is already in the requested format"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          },
+          {
+            "language": "fr",
+            "ext": "srt",
+            "filepath": "temp/movie.fr.srt"
+          },
+          {
+            "language": "de",
+            "ext": "ass",
+            "filepath": "temp/movie.de.ass"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.vtt"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.vtt": "published/movie.en.vtt",
+          "temp/movie.fr.srt": "published/movie.fr.srt",
+          "temp/movie.de.ass": "published/movie.de.ass",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    },
+    {
+      "name": "json-special-skip",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "json",
+          "filepath": "temp/movie.en.json",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles",
+          "You have requested to convert json subtitles into another format, which is currently not possible"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "json",
+            "filepath": "temp/movie.en.json",
+            "name": "English"
+          }
+        ],
+        "delete": [],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.json": "published/movie.en.json"
+        }
+      }
+    },
+    {
+      "name": "filename-last-suffix-replaced",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "vtt",
+          "filepath": "temp/movie.literal",
+          "name": "English"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.literal",
+            "output": "temp/movie.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.literal"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.literal": "published/movie.literal",
+          "temp/movie.srt": "published/movie.srt"
+        }
+      }
+    },
+    {
+      "name": "utf16-to-srt",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "ttml",
+          "filepath": "temp/movie.en.ttml",
+          "name": "English",
+          "input_file": "upstream-utf16.ttml"
+        }
+      ],
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [],
+        "warnings": [
+          "You have requested to convert dfxp (TTML) subtitles into another format, which results in style information loss"
+        ],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nLine 1\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.ttml"
+        ],
+        "writes": [
+          {
+            "path": "temp/movie.en.srt",
+            "data": "1\n00:00:00,000 --> 00:00:01,000\nLine 1\n\n2\n00:00:01,000 --> 00:00:02,000\n第二行\n\n"
+          }
+        ],
+        "files_to_move": {
+          "temp/movie.en.ttml": "published/movie.en.ttml"
+        }
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "json3-is-not-json-special-case",
+      "args": [
+        "--convert-subs",
+        "srt"
+      ],
+      "subtitles": [
+        {
+          "language": "en",
+          "ext": "json3",
+          "filepath": "temp/movie.en.json3",
+          "name": "English"
+        }
+      ],
+      "native_policy": "Native rejects unsupported subtitle source formats before tool execution; upstream planning attempts FFmpeg for json3, unlike its literal json skip. Captured calls do not prove that FFmpeg accepts this input.",
+      "expected": {
+        "target": "srt",
+        "when": "before_dl",
+        "selector": null,
+        "skip_download": false,
+        "calls": [
+          {
+            "input": "temp/movie.en.json3",
+            "output": "temp/movie.en.srt",
+            "args": [
+              "-f",
+              "srt"
+            ]
+          }
+        ],
+        "warnings": [],
+        "messages": [
+          "Converting subtitles"
+        ],
+        "subtitles": [
+          {
+            "language": "en",
+            "ext": "srt",
+            "data": "FFMPEG:srt\n",
+            "filepath": "temp/movie.en.srt"
+          }
+        ],
+        "delete": [
+          "temp/movie.en.json3"
+        ],
+        "writes": [],
+        "files_to_move": {
+          "temp/movie.en.json3": "published/movie.en.json3",
+          "temp/movie.en.srt": "published/movie.en.srt"
+        }
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "uppercase",
+      "args": [
+        "--convert-subs",
+        "SRT"
+      ]
+    },
+    {
+      "name": "invalid-target",
+      "args": [
+        "--convert-subs",
+        "ttml"
+      ]
+    },
+    {
+      "name": "empty",
+      "args": [
+        "--convert-subs",
+        ""
+      ]
+    },
+    {
+      "name": "none-uppercase",
+      "args": [
+        "--convert-subs",
+        "None"
+      ]
+    },
+    {
+      "name": "mapping-unsupported",
+      "args": [
+        "--convert-subs",
+        "vtt>srt"
+      ]
+    }
+  ]
+}

@@ -5,7 +5,7 @@ on:
     branches: ['fix/playback-fallback']
     paths:
       - '.github/workflows/youtube-live.yml'
-      - 'crates/ytui/tests/live_youtube.rs'
+      - 'apps/desktop/tests/live_youtube.rs'
       - 'tools/test-youtube.sh'
 permissions:
   contents: read

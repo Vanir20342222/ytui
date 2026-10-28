@@ -1,0 +1,132 @@
+{
+ "routes": [
+  {
+   "url": "https://old.reddit.com/",
+   "headers": {
+    "Content-Type": "text/html",
+    "Set-Cookie": "loid=LOID1; Domain=reddit.com; Path=/"
+   },
+   "body": "<html></html>"
+  },
+  {
+   "url": "https://www.reddit.com/r/videos/comments/vid123/.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "video.json"
+  },
+  {
+   "url": "https://www.reddit.com/r/pics/comments/txt123/.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "text.json"
+  },
+  {
+   "url": "https://www.reddit.com/r/clips/comments/lnk123/.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "link.json"
+  },
+  {
+   "url": "https://www.reddit.com/r/funny/comments/xp1234/.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "cross.json"
+  },
+  {
+   "url": "https://www.reddit.com/r/secret/comments/prv123/.json",
+   "status": 403,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "private.json"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/HLSPlaylist.m3u8?a=1&v=1&f=sd%2CsubsAll",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/HLS_AUDIO_128.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/HLS_SUBS_en.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "subs.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/HLS_360.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/HLS_720.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/DASHPlaylist.mpd?a=1&v=1&f=sd",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "dash.mpd"
+  },
+  {
+   "url": "https://v.redd.it/m1/HLSPlaylist.m3u8?a=2&v=1",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/m1/DASHPlaylist.mpd?a=2",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "dash.mpd"
+  },
+  {
+   "url": "https://v.redd.it/xvid/HLSPlaylist.m3u8?f=hd%2CsubsAll",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://v.redd.it/xvid/DASHPlaylist.mpd",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "dash.mpd"
+  },
+  {
+   "url": "https://v.redd.it/vid1abc/CMAF_720.mp4?source=fallback",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisomfallback-bytes"
+  },
+  {
+   "url": "https://media.example.test/clip.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom"
+  }
+ ]
+}

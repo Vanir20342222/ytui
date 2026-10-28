@@ -1,0 +1,12 @@
+<html><head><title>JW page</title><meta property="og:description" content="Page text"></head><body><div id="p"></div>
+<script type="text/javascript">
+jwplayer('p').setup({
+  playlist: [{
+    title: 'Clip &amp; more', description: '<p>About</p>', image: 'poster.jpg', duration: 12.5, pubdate: 1700000000,
+    sources: [{file: 'a.mp4', label: '720p', type: 'video/mp4', bitrate: 1500000}, {file: "b.mp4", label: "360p HD", width: 640}, {file: 'a.mp4'}],
+    tracks: [{file: 'en.vtt', kind: 'captions', label: 'English'}, {file: 'de.vtt', kind: 'thumbnails'}],
+  }],
+  width: '100%', // comment
+  autostart: false
+});
+</script></body></html>

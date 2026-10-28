@@ -1,0 +1,8 @@
+[
+ {"url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html", "args": ["-j"]},
+ {"url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html", "args": ["-F"]},
+ {"url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html", "args": ["--print", "%(id)s|%(title)s|%(duration)s|%(uploader_id)s|%(thumbnail)s|%(format_id)s"]},
+ {"url": "https://tweakers.net/video/9926/new-nintendo-3ds-xl-op-alle-fronten-beter.html", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://tweakers.net/video/2", "args": ["-j"]},
+ {"url": "https://tweakers.net/video/3", "args": ["-j"]}
+]

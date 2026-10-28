@@ -1,0 +1,9 @@
+[
+ {"url": "https://livestreamfails.com/clip/39084", "args": ["-j"]},
+ {"url": "https://livestreamfails.com/clip/39084", "args": ["-F"]},
+ {"url": "https://livestreamfails.com/clip/39084", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(creator)s|%(creators)s|%(timestamp)s|%(upload_date)s|%(thumbnail)s|%(ext)s"]},
+ {"url": "https://livestreamfails.com/clip/39084", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.livestreamfails.com/post/2", "args": ["-j"]},
+ {"url": "https://livestreamfails.com/clip/3", "args": ["-j"]},
+ {"url": "https://livestreamfails.com/clip/4", "args": ["-j"]}
+]

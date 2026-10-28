@@ -1,0 +1,104 @@
+name: Android signed APK
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: 'Increasing Android version code (1–2100000000)'
+        required: true
+        type: string
+      version_name:
+        description: 'Visible version, for example 0.2.0-alpha.12-mobile.2'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: android-signed-apk
+  cancel-in-progress: false
+jobs:
+  signed-apk:
+    if: github.ref == 'refs/heads/main'
+    environment: android-release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CARGO_INCREMENTAL: '0'
+      YTUI_ANDROID_VERSION_CODE: ${{ inputs.version_code }}
+      YTUI_ANDROID_VERSION_NAME: ${{ inputs.version_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require successful checks for this exact main revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$GITHUB_SHA&per_page=100" > "$RUNNER_TEMP/ytui-checks.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          runs = json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'ytui-checks.json').read_text())['workflow_runs']
+          required = {'Android', 'Rust', 'Secret scan'}
+          passed = {r['name'] for r in runs if r['head_sha'] == os.environ['GITHUB_SHA'] and r['head_branch'] == 'main' and r['status'] == 'completed' and r['conclusion'] == 'success'}
+          missing = required - passed
+          if missing:
+              raise SystemExit('Wait for successful main checks before signing: ' + ', '.join(sorted(missing)))
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,x86_64-linux-android
+      - uses: Swatinem/rust-cache@v2
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install pinned build tools
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018'
+      - name: Build Rust libraries and notices before loading signing credentials
+        run: tools/android/build.sh
+      - name: Build with the private release identity
+        env:
+          YTUI_ANDROID_KEYSTORE_BASE64: ${{ secrets.YTUI_ANDROID_KEYSTORE_BASE64 }}
+          YTUI_ANDROID_KEY_ALIAS: ${{ secrets.YTUI_ANDROID_KEY_ALIAS }}
+          YTUI_ANDROID_STORE_PASSWORD: ${{ secrets.YTUI_ANDROID_STORE_PASSWORD }}
+          YTUI_ANDROID_KEY_PASSWORD: ${{ secrets.YTUI_ANDROID_KEY_PASSWORD }}
+        run: |
+          export YTUI_ANDROID_KEYSTORE="$RUNNER_TEMP/ytui-android-release.jks"
+          trap 'rm -f -- "$YTUI_ANDROID_KEYSTORE"' EXIT
+          python3 - <<'PY'
+          import base64, os, pathlib
+          value = os.environ.get('YTUI_ANDROID_KEYSTORE_BASE64', '')
+          if not value:
+              raise SystemExit('Configure the android-release environment signing secrets first; see docs/android/SIGNING.md')
+          try:
+              data = base64.b64decode(value, validate=True)
+              if not 0 < len(data) <= 1024 * 1024:
+                  raise ValueError()
+              path = pathlib.Path(os.environ['YTUI_ANDROID_KEYSTORE'])
+              with path.open('xb') as output:
+                  os.chmod(path, 0o600)
+                  output.write(data)
+          except Exception:
+              raise SystemExit('Could not decode the private signing keystore') from None
+          PY
+          apps/android/gradlew -p apps/android --no-daemon :app:assembleRelease :app:testReleaseUnitTest :app:lintRelease
+      - name: Inspect signed release artifact
+        run: |
+          apk=apps/android/app/build/outputs/apk/release/app-release.apk
+          tools/android/inspect-apk.sh "$apk" > apps/android/app/build/outputs/apk/release/SHA256-and-checks.txt
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$apk" >> apps/android/app/build/outputs/apk/release/SHA256-and-checks.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging "$apk" > "$RUNNER_TEMP/ytui-release-badging.txt"
+          if rg -q '^application-debuggable' "$RUNNER_TEMP/ytui-release-badging.txt"; then
+            echo 'Release APK must not be debuggable.' >&2
+            exit 1
+          fi
+          printf '%s\n' "Source revision: $GITHUB_SHA" >> apps/android/app/build/outputs/apk/release/SHA256-and-checks.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ytui-android-signed-${{ inputs.version_code }}-${{ github.sha }}
+          path: |
+            apps/android/app/build/outputs/apk/release/app-release.apk
+            apps/android/app/build/outputs/apk/release/SHA256-and-checks.txt
+          retention-days: 30

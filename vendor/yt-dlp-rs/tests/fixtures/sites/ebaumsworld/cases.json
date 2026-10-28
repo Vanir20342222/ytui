@@ -1,0 +1,10 @@
+[
+ {"url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/", "args": ["-j"]},
+ {"url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/", "args": ["-F"]},
+ {"url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(uploader)s|%(ext)s"]},
+ {"url": "http://www.ebaumsworld.com/videos/a-giant-python-opens-the-door/83367677/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://ebaumsworld.com/videos/x/2", "args": ["-j"]},
+ {"url": "https://ebaumsworld.com/videos/x/3", "args": ["-j"]},
+ {"url": "https://ebaumsworld.com/videos/x/4", "args": ["-j"]},
+ {"url": "https://ebaumsworld.com/videos/x/6", "args": ["-j"]}
+]

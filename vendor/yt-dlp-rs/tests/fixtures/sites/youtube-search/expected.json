@@ -1,0 +1,60 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "ytsearch:test query",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"test query\", \"title\": \"test query\", \"_type\": \"playlist\", \"entries\": [{\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"SEARCHVID01\", \"url\": \"https://www.youtube.com/watch?v=SEARCHVID01\", \"title\": \"First result\", \"description\": \"Snippet of First result\", \"duration\": 245, \"channel_id\": \"UCownerownerownerowner12\", \"channel\": \"Owner Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"uploader\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SEARCHVID01/hq720.jpg\", \"height\": 404, \"width\": 720}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 12345, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"ytsearch:test query\", \"original_url\": \"ytsearch:test query\", \"webpage_url_basename\": \"test query\", \"webpage_url_domain\": null, \"extractor\": \"youtube:search\", \"extractor_key\": \"YoutubeSearch\", \"release_year\": null, \"playlist_count\": 1, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "ytsearch3:test query",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(playlist_id)s|%(playlist_count)s|%(id)s|%(title)s|%(duration)s|%(url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "test query|3|SEARCHVID01|First result|245|https://www.youtube.com/watch?v=SEARCHVID01",
+    "test query|NA|UCownerownerownerowner12|Owner Channel|NA|https://www.youtube.com/channel/UCownerownerownerowner12",
+    "test query|3|SEARCHVID02|Second result|3600|https://www.youtube.com/watch?v=SEARCHVID02"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "ytsearchall:test query",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"test query\", \"title\": \"test query\", \"_type\": \"playlist\", \"entries\": [{\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"SEARCHVID01\", \"url\": \"https://www.youtube.com/watch?v=SEARCHVID01\", \"title\": \"First result\", \"description\": \"Snippet of First result\", \"duration\": 245, \"channel_id\": \"UCownerownerownerowner12\", \"channel\": \"Owner Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"uploader\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SEARCHVID01/hq720.jpg\", \"height\": 404, \"width\": 720}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 12345, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"id\": \"UCownerownerownerowner12\", \"ie_key\": \"YoutubeTab\", \"channel\": \"Owner Channel\", \"uploader\": \"Owner Channel\", \"channel_id\": \"UCownerownerownerowner12\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"title\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"channel_follower_count\": 2500000, \"thumbnails\": [{\"url\": \"//yt3.ggpht.com/owner=s88\", \"height\": 88, \"width\": 88}], \"playlist_count\": null, \"description\": \"Channel about things\", \"channel_is_verified\": true, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"SEARCHVID02\", \"url\": \"https://www.youtube.com/watch?v=SEARCHVID02\", \"title\": \"Second result\", \"description\": \"Snippet of Second result\", \"duration\": 3600, \"channel_id\": \"UCownerownerownerowner12\", \"channel\": \"Owner Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"uploader\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SEARCHVID02/hq720.jpg\", \"height\": 404, \"width\": 720}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 987, \"live_status\": \"was_live\", \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"SEARCHVID03\", \"url\": \"https://www.youtube.com/watch?v=SEARCHVID03\", \"title\": \"Third result\", \"description\": \"Snippet of Third result\", \"duration\": 30, \"channel_id\": \"UCownerownerownerowner12\", \"channel\": \"Owner Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"uploader\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SEARCHVID03/hq720.jpg\", \"height\": 404, \"width\": 720}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 5, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"ytsearchall:test query\", \"original_url\": \"ytsearchall:test query\", \"webpage_url_basename\": \"test query\", \"webpage_url_domain\": null, \"extractor\": \"youtube:search\", \"extractor_key\": \"YoutubeSearch\", \"release_year\": null, \"playlist_count\": 4, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/results?search_query=test+query&sp=CAI%253D",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"test query\", \"title\": \"test query\", \"_type\": \"playlist\", \"entries\": [{\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"SEARCHVID04\", \"url\": \"https://www.youtube.com/watch?v=SEARCHVID04\", \"title\": \"Newest result\", \"description\": \"Snippet of Newest result\", \"duration\": 142, \"channel_id\": \"UCownerownerownerowner12\", \"channel\": \"Owner Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCownerownerownerowner12\", \"uploader\": \"Owner Channel\", \"uploader_id\": \"@Owner\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SEARCHVID04/hq720.jpg\", \"height\": 404, \"width\": 720}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 1, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://www.youtube.com/results?search_query=test+query&sp=CAI%253D\", \"original_url\": \"https://www.youtube.com/results?search_query=test+query&sp=CAI%253D\", \"webpage_url_basename\": \"results\", \"webpage_url_domain\": \"youtube.com\", \"extractor\": \"youtube:search_url\", \"extractor_key\": \"YoutubeSearchURL\", \"release_year\": null, \"playlist_count\": 1, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

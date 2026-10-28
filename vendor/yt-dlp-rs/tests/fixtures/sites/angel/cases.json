@@ -1,0 +1,5 @@
+[
+ {"url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad", "args": ["-j"]},
+ {"url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad", "args": ["-F"]},
+ {"url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(duration)s"]}
+]

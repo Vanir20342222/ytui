@@ -1,0 +1,2715 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "remux-target-avi",
+      "args": [
+        "--remux-video",
+        "avi"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "avi",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "avi",
+        "output_path": "movie.avi",
+        "output_format": "avi",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.avi",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-flv",
+      "args": [
+        "--remux-video",
+        "flv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "flv",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "flv",
+        "output_path": "movie.flv",
+        "output_format": "flv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.flv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-gif",
+      "args": [
+        "--remux-video",
+        "gif"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "gif",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "gif",
+        "output_path": "movie.gif",
+        "output_format": "gif",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.gif",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-mkv",
+      "args": [
+        "--remux-video",
+        "mkv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mkv",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mkv",
+        "output_path": "movie.mkv",
+        "output_format": "mkv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-mov",
+      "args": [
+        "--remux-video",
+        "mov"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mov",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mov",
+        "output_path": "movie.mov",
+        "output_format": "mov",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mov",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-mp4",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-webm",
+      "args": [
+        "--remux-video",
+        "webm"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "webm",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "webm",
+        "output_path": "movie.webm",
+        "output_format": "webm",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.webm",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-aac",
+      "args": [
+        "--remux-video",
+        "aac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "aac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "aac",
+        "output_path": "movie.aac",
+        "output_format": "aac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.aac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-aiff",
+      "args": [
+        "--remux-video",
+        "aiff"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "aiff",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "aiff",
+        "output_path": "movie.aiff",
+        "output_format": "aiff",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.aiff",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-alac",
+      "args": [
+        "--remux-video",
+        "alac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "alac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "alac",
+        "output_path": "movie.alac",
+        "output_format": "alac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.alac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-flac",
+      "args": [
+        "--remux-video",
+        "flac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "flac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "output_format": "flac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.flac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-m4a",
+      "args": [
+        "--remux-video",
+        "m4a"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "m4a",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "output_format": "m4a",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.m4a",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-mka",
+      "args": [
+        "--remux-video",
+        "mka"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mka",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mka",
+        "output_path": "movie.mka",
+        "output_format": "mka",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mka",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-mp3",
+      "args": [
+        "--remux-video",
+        "mp3"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp3",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "output_format": "mp3",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp3",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-ogg",
+      "args": [
+        "--remux-video",
+        "ogg"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "ogg",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "output_format": "ogg",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.ogg",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-opus",
+      "args": [
+        "--remux-video",
+        "opus"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "opus",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "output_format": "opus",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.opus",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-vorbis",
+      "args": [
+        "--remux-video",
+        "vorbis"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "vorbis",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "vorbis",
+        "output_path": "movie.vorbis",
+        "output_format": "vorbis",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.vorbis",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-target-wav",
+      "args": [
+        "--remux-video",
+        "wav"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "wav",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "output_format": "wav",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.wav",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-same-extension",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "remux-same-extension-casefold",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "MP4",
+        "filepath": "movie.MP4"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "MP4",
+        "output_path": "movie.MP4",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "remux-source-casefold",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "WEBM",
+        "filepath": "movie.WEBM"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.WEBM.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.WEBM",
+            "output": "movie.WEBM.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.WEBM"
+        ]
+      }
+    },
+    {
+      "name": "remux-append-nonmatching",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.final"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.final.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.final",
+            "output": "movie.final.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.final"
+        ]
+      }
+    },
+    {
+      "name": "remux-append-case-mismatched-suffix",
+      "args": [
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.WEBM"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.WEBM.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.WEBM",
+            "output": "movie.WEBM.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.WEBM"
+        ]
+      }
+    },
+    {
+      "name": "remux-map-first",
+      "args": [
+        "--remux-video",
+        "webm>mkv/webm>mp4/mov"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "webm>mkv/webm>mp4/mov",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mkv",
+        "output_path": "movie.mkv",
+        "output_format": "mkv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-map-fallback",
+      "args": [
+        "--remux-video",
+        "avi>mkv/mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "avi>mkv/mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-map-unmatched",
+      "args": [
+        "--remux-video",
+        "avi>mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "avi>mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "webm",
+        "output_path": "movie.webm",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "remux-map-source-case-trim",
+      "args": [
+        "--remux-video",
+        " WebM > mp4 / mkv "
+      ],
+      "source": {
+        "ext": "WEBM",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": " WebM > mp4 / mkv ",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-keep",
+      "args": [
+        "--remux-video",
+        "mp4",
+        "-k"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-no-keep-last",
+      "args": [
+        "--remux-video",
+        "mp4",
+        "-k",
+        "--no-keep-video"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-keep-last",
+      "args": [
+        "--remux-video",
+        "mp4",
+        "--no-keep-video",
+        "-k"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-explicit-selector",
+      "args": [
+        "--remux-video",
+        "mp4",
+        "-f",
+        "worst"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": "worst",
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-audio-combination",
+      "args": [
+        "-x",
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": "bestaudio/best",
+        "keep_video": false,
+        "extract_audio": true,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-audio-keep-combination",
+      "args": [
+        "-x",
+        "-k",
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": true,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "remux-repeated-last",
+      "args": [
+        "--remux-video",
+        "mkv",
+        "--remux-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "remux",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-avi",
+      "args": [
+        "--recode-video",
+        "avi"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "avi",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "avi",
+        "output_path": "movie.avi",
+        "output_format": "avi",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.avi",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c:v",
+              "libxvid",
+              "-vtag",
+              "XVID"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-flv",
+      "args": [
+        "--recode-video",
+        "flv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "flv",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "flv",
+        "output_path": "movie.flv",
+        "output_format": "flv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.flv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-gif",
+      "args": [
+        "--recode-video",
+        "gif"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "gif",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "gif",
+        "output_path": "movie.gif",
+        "output_format": "gif",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.gif",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-mkv",
+      "args": [
+        "--recode-video",
+        "mkv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mkv",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mkv",
+        "output_path": "movie.mkv",
+        "output_format": "mkv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-mov",
+      "args": [
+        "--recode-video",
+        "mov"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mov",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mov",
+        "output_path": "movie.mov",
+        "output_format": "mov",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mov",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-mp4",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-webm",
+      "args": [
+        "--recode-video",
+        "webm"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "webm",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "webm",
+        "output_path": "movie.webm",
+        "output_format": "webm",
+        "calls": [
+          {
+            "input": "movie.mp4",
+            "output": "movie.webm",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.mp4"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-aac",
+      "args": [
+        "--recode-video",
+        "aac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "aac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "aac",
+        "output_path": "movie.aac",
+        "output_format": "aac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.aac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-aiff",
+      "args": [
+        "--recode-video",
+        "aiff"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "aiff",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "aiff",
+        "output_path": "movie.aiff",
+        "output_format": "aiff",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.aiff",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-alac",
+      "args": [
+        "--recode-video",
+        "alac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "alac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "alac",
+        "output_path": "movie.alac",
+        "output_format": "alac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.alac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-flac",
+      "args": [
+        "--recode-video",
+        "flac"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "flac",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "flac",
+        "output_path": "movie.flac",
+        "output_format": "flac",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.flac",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-m4a",
+      "args": [
+        "--recode-video",
+        "m4a"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "m4a",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "m4a",
+        "output_path": "movie.m4a",
+        "output_format": "m4a",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.m4a",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-mka",
+      "args": [
+        "--recode-video",
+        "mka"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mka",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mka",
+        "output_path": "movie.mka",
+        "output_format": "mka",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mka",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-mp3",
+      "args": [
+        "--recode-video",
+        "mp3"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp3",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp3",
+        "output_path": "movie.mp3",
+        "output_format": "mp3",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp3",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-ogg",
+      "args": [
+        "--recode-video",
+        "ogg"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "ogg",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "ogg",
+        "output_path": "movie.ogg",
+        "output_format": "ogg",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.ogg",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-opus",
+      "args": [
+        "--recode-video",
+        "opus"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "opus",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "opus",
+        "output_path": "movie.opus",
+        "output_format": "opus",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.opus",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-vorbis",
+      "args": [
+        "--recode-video",
+        "vorbis"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "vorbis",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "vorbis",
+        "output_path": "movie.vorbis",
+        "output_format": "vorbis",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.vorbis",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-target-wav",
+      "args": [
+        "--recode-video",
+        "wav"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "wav",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "wav",
+        "output_path": "movie.wav",
+        "output_format": "wav",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.wav",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-same-extension",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "mp4",
+        "filepath": "movie.mp4"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "recode-same-extension-casefold",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "MP4",
+        "filepath": "movie.MP4"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "MP4",
+        "output_path": "movie.MP4",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "recode-source-casefold",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "WEBM",
+        "filepath": "movie.WEBM"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.WEBM.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.WEBM",
+            "output": "movie.WEBM.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.WEBM"
+        ]
+      }
+    },
+    {
+      "name": "recode-append-nonmatching",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.final"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.final.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.final",
+            "output": "movie.final.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.final"
+        ]
+      }
+    },
+    {
+      "name": "recode-append-case-mismatched-suffix",
+      "args": [
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.WEBM"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.WEBM.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.WEBM",
+            "output": "movie.WEBM.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.WEBM"
+        ]
+      }
+    },
+    {
+      "name": "recode-map-first",
+      "args": [
+        "--recode-video",
+        "webm>mkv/webm>mp4/mov"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "webm>mkv/webm>mp4/mov",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mkv",
+        "output_path": "movie.mkv",
+        "output_format": "mkv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-map-fallback",
+      "args": [
+        "--recode-video",
+        "avi>mkv/mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "avi>mkv/mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-map-unmatched",
+      "args": [
+        "--recode-video",
+        "avi>mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "avi>mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "webm",
+        "output_path": "movie.webm",
+        "output_format": "fixture",
+        "calls": [],
+        "delete": []
+      }
+    },
+    {
+      "name": "recode-map-source-case-trim",
+      "args": [
+        "--recode-video",
+        " WebM > mp4 / mkv "
+      ],
+      "source": {
+        "ext": "WEBM",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": " WebM > mp4 / mkv ",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-keep",
+      "args": [
+        "--recode-video",
+        "mp4",
+        "-k"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-no-keep-last",
+      "args": [
+        "--recode-video",
+        "mp4",
+        "-k",
+        "--no-keep-video"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-keep-last",
+      "args": [
+        "--recode-video",
+        "mp4",
+        "--no-keep-video",
+        "-k"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-explicit-selector",
+      "args": [
+        "--recode-video",
+        "mp4",
+        "-f",
+        "worst"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": "worst",
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-audio-combination",
+      "args": [
+        "-x",
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": "bestaudio/best",
+        "keep_video": false,
+        "extract_audio": true,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-audio-keep-combination",
+      "args": [
+        "-x",
+        "-k",
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": true,
+        "extract_audio": true,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "recode-repeated-last",
+      "args": [
+        "--recode-video",
+        "mkv",
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "conflict-remux-first",
+      "args": [
+        "--remux-video",
+        "mkv",
+        "--recode-video",
+        "mp4"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [
+          "--remux-video is ignored since --recode-video was given"
+        ],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    },
+    {
+      "name": "conflict-recode-first",
+      "args": [
+        "--recode-video",
+        "mp4",
+        "--remux-video",
+        "mkv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "expected": {
+        "mode": "recode",
+        "mapping": "mp4",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [
+          "--remux-video is ignored since --recode-video was given"
+        ],
+        "output_ext": "mp4",
+        "output_path": "movie.mp4",
+        "output_format": "mp4",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mp4",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "unicode-source-mapping",
+      "args": [
+        "--remux-video",
+        "É>mp4/mkv"
+      ],
+      "source": {
+        "ext": "webm",
+        "filepath": "movie.webm"
+      },
+      "native_policy": "Native mapping sources are bounded ASCII words; upstream option regex accepts Unicode word characters.",
+      "expected": {
+        "mode": "remux",
+        "mapping": "É>mp4/mkv",
+        "selector": null,
+        "keep_video": false,
+        "extract_audio": false,
+        "warnings": [],
+        "output_ext": "mkv",
+        "output_path": "movie.mkv",
+        "output_format": "mkv",
+        "calls": [
+          {
+            "input": "movie.webm",
+            "output": "movie.mkv",
+            "args": [
+              "-map",
+              "0",
+              "-dn",
+              "-ignore_unknown",
+              "-c",
+              "copy"
+            ]
+          }
+        ],
+        "delete": [
+          "movie.webm"
+        ]
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "unknown-remux",
+      "args": [
+        "--remux-video",
+        "invalid"
+      ]
+    },
+    {
+      "name": "unknown-recode",
+      "args": [
+        "--recode-video",
+        "invalid"
+      ]
+    },
+    {
+      "name": "uppercase-target",
+      "args": [
+        "--remux-video",
+        "MP4"
+      ]
+    },
+    {
+      "name": "empty-target",
+      "args": [
+        "--recode-video",
+        ""
+      ]
+    },
+    {
+      "name": "trailing-branch",
+      "args": [
+        "--remux-video",
+        "mp4/"
+      ]
+    },
+    {
+      "name": "empty-source",
+      "args": [
+        "--recode-video",
+        ">mp4"
+      ]
+    },
+    {
+      "name": "double-arrow",
+      "args": [
+        "--remux-video",
+        "webm>>mp4"
+      ]
+    },
+    {
+      "name": "punctuated-source",
+      "args": [
+        "--recode-video",
+        "a-b>mp4"
+      ]
+    }
+  ]
+}

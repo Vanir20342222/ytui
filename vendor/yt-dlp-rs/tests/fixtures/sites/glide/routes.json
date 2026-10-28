@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Damon&#39;s Glide message\"><meta property=\"og:image\" content=\"https://d1.cloudfront.net/og.jpg\"></head><body><video><source type=\"video/mp4\" src=\"//d1.cloudfront.net/v/UZF8.mp4\"></video><img class=\"x\" id=\"video-thumbnail\" src='//d1.cloudfront.net/thumb.jpg'></body></html>"
+  },
+  {
+   "url": "https://d1.cloudfront.net/v/UZF8.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://share.glide.me/og-only",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Plain title</title><meta property=\"og:video:secure_url\" content=\"https://d1.cloudfront.net/v/UZF8.mp4\"></head><body></body></html>"
+  },
+  {
+   "url": "https://share.glide.me/none",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>None</title></head><body></body></html>"
+  },
+  {
+   "url": "https://share.glide.me/untitled",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head></head><body><source src=\"https://d1.cloudfront.net/v/UZF8.mp4\"></body></html>"
+  }
+ ]
+}

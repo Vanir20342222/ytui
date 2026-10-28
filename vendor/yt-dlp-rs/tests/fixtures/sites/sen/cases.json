@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4", "args": ["-j"]},
+ {"url": "https://www.sen.com/video/eef46eb1-4d79-4e28-be9d-bd937767f8c4", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(tags)s"]},
+ {"url": "https://sen.com/video/b2", "args": ["-j"]},
+ {"url": "https://www.sen.com/video/c3", "args": ["-j"]},
+ {"url": "https://www.sen.com/video/d4", "args": ["-j"]},
+ {"url": "https://www.sen.com/video/d4", "args": ["--list-subs"]}
+]

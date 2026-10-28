@@ -1,0 +1,103 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.dailymotion.com/video/x8abc",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"x8abc\", \"title\": \"Great clip\", \"description\": \"A great clip\", \"thumbnails\": [{\"height\": 60, \"id\": \"60\", \"url\": \"https://s1.dmcdn.net/v/x60\"}, {\"height\": 120, \"id\": \"120\", \"url\": \"https://s1.dmcdn.net/v/t120\"}, {\"height\": 720, \"id\": \"720\", \"url\": \"https://s1.dmcdn.net/v/x720\"}], \"duration\": 125, \"timestamp\": 1700000000, \"uploader\": \"Some User\", \"uploader_id\": \"x2user\", \"age_limit\": 0, \"tags\": [\"fun\", \"clip\"], \"view_count\": 3456, \"like_count\": 12, \"formats\": [{\"format_id\": \"hls-380\", \"format_index\": null, \"url\": \"https://proxy.dmcdn.net/x8abc/H264-512x288/video.m3u8\", \"manifest_url\": \"https://www.dailymotion.com/cdn/manifest/video/x8abc.m3u8?sec=abc\", \"tbr\": 480.0, \"ext\": \"mp4\", \"fps\": 25.0, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 512, \"height\": 288, \"vcodec\": \"avc1.64001e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"512x288\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-380 - 512x288\"}, {\"format_id\": \"http-380\", \"format_index\": null, \"url\": \"https://proxy.dmcdn.net/x8abc/H264-512x288/video.mp4\", \"tbr\": 480.0, \"ext\": \"mp4\", \"fps\": 25.0, \"protocol\": \"http\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 512, \"height\": 288, \"vcodec\": \"avc1.64001e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"512x288\", \"aspect_ratio\": 1.78, \"filesize_approx\": 7500000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-380 - 512x288\"}, {\"format_id\": \"hls-720@60\", \"format_index\": null, \"url\": \"https://proxy.dmcdn.net/x8abc/H264-1280x720-60/video.m3u8\", \"manifest_url\": \"https://www.dailymotion.com/cdn/manifest/video/x8abc.m3u8?sec=abc\", \"tbr\": 2500.0, \"ext\": \"mp4\", \"fps\": 60, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.64001f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-720@60 - 1280x720\"}, {\"url\": \"https://proxy.dmcdn.net/x8abc/H264-1920x1080/video.mp4\", \"format_id\": \"http-1080@60\", \"fps\": 60, \"height\": 1080, \"width\": 1920, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1080@60 - 1920x1080\"}], \"subtitles\": {\"en\": [{\"url\": \"https://static2.dmcdn.net/static/video/en.vtt\", \"ext\": \"vtt\"}]}, \"is_live\": null, \"webpage_url\": \"https://www.dailymotion.com/video/x8abc\", \"original_url\": \"https://www.dailymotion.com/video/x8abc\", \"webpage_url_basename\": \"x8abc\", \"webpage_url_domain\": \"dailymotion.com\", \"extractor\": \"dailymotion\", \"extractor_key\": \"Dailymotion\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://s1.dmcdn.net/v/x720\", \"display_id\": \"x8abc\", \"fulltitle\": \"Great clip\", \"duration_string\": \"2:05\", \"upload_date\": \"20231114\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://proxy.dmcdn.net/x8abc/H264-1920x1080/video.mp4\", \"format_id\": \"http-1080@60\", \"fps\": 60, \"height\": 1080, \"width\": 1920, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1080@60 - 1920x1080\", \"_filename\": \"Great clip [x8abc].mp4\", \"filename\": \"Great clip [x8abc].mp4\", \"__write_download_archive\": false}], \"url\": \"https://proxy.dmcdn.net/x8abc/H264-1920x1080/video.mp4\", \"format_id\": \"http-1080@60\", \"fps\": 60, \"height\": 1080, \"width\": 1920, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1920x1080\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-1080@60 - 1920x1080\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://dai.ly/x8abc",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[dailymotion] Extracting URL: https://dai.ly/x8abc",
+    "[dailymotion] Downloading Access Token",
+    "[dailymotion] x8abc: Downloading media JSON metadata",
+    "[dailymotion] x8abc: Downloading metadata JSON",
+    "[dailymotion] x8abc: Downloading m3u8 information with randomized headers",
+    "[info] Available formats for x8abc:",
+    "ID           EXT RESOLUTION FPS |  FILESIZE   TBR PROTO | VCODEC      ACODEC",
+    "-------------------------------------------------------------------------------",
+    "hls-380      mp4 512x288     25 | ~ 7.15MiB  480k m3u8  | avc1.64001e mp4a.40.2",
+    "http-380     mp4 512x288     25 | ≈ 7.15MiB  480k http  | avc1.64001e mp4a.40.2",
+    "hls-720@60   mp4 1280x720    60 | ~37.25MiB 2500k m3u8  | avc1.64001f mp4a.40.2",
+    "http-1080@60 mp4 1920x1080   60 |                 https | unknown     unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.dailymotion.com/video/x8geo",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [dailymotion] x8geo: This video is not available in your country"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.dailymotion.com/video/x8none",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [dailymotion] x8none: Media not found"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.dailymotion.com/video/x8abc?playlist=x6hynp",
+   "args": [
+    "--no-playlist",
+    "--print",
+    "%(id)s|%(title)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "x8abc|Great clip"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.dailymotion.com/video/x8abc",
+   "args": [
+    "-f",
+    "http-1080@60",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[dailymotion] Extracting URL: https://www.dailymotion.com/video/x8abc",
+    "[dailymotion] Downloading Access Token",
+    "[dailymotion] x8abc: Downloading media JSON metadata",
+    "[dailymotion] x8abc: Downloading metadata JSON",
+    "[dailymotion] x8abc: Downloading m3u8 information with randomized headers",
+    "[info] x8abc: Downloading 1 format(s): http-1080@60",
+    "[download] Destination: x8abc.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "x8abc.mp4": 15
+   }
+  }
+ ]
+}

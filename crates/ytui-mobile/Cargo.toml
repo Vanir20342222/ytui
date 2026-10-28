@@ -1,0 +1,30 @@
+[package]
+name = "ytui-mobile"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+[lib]
+crate-type = ["cdylib", "rlib"]
+[dependencies]
+ytui-core = { path = "../ytui-core" }
+ytui-providers = { path = "../ytui-providers" }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+reqwest = { workspace = true, features = ["rustls-tls"] }
+egui = "0.33"
+tempfile.workspace = true
+url.workspace = true
+uuid.workspace = true
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
+yt-dlp-rs = { git = "https://github.com/aagedal/yt-dlp-rs", rev = "f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab" }
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+eframe = { version = "0.33", default-features = false, features = ["glow", "default_fonts", "android-game-activity"] }
+android-activity = { version = "0.6", features = ["game-activity"] }
+glow = "0.16"
+[dev-dependencies]
+tempfile.workspace = true

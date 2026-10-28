@@ -1,0 +1,62 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://kick.com/xqc/videos/8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea\", \"formats\": [{\"format_id\": \"2000\", \"format_index\": null, \"url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/480p30/playlist.m3u8\", \"manifest_url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8\", \"tbr\": 2000.0, \"ext\": \"mp4\", \"fps\": 30.0, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 852, \"height\": 480, \"vcodec\": \"avc1.4D401F\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"852x480\", \"aspect_ratio\": 1.77, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"2000 - 852x480\"}, {\"format_id\": \"8000\", \"format_index\": null, \"url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/1080p60/playlist.m3u8\", \"manifest_url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8\", \"tbr\": 8000.0, \"ext\": \"mp4\", \"fps\": 60.0, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.64002A\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"8000 - 1920x1080\"}], \"title\": \"VOD title\", \"description\": \"Bio text\", \"channel\": \"xqc\", \"channel_id\": \"668\", \"uploader\": \"xQc\", \"uploader_id\": \"676\", \"timestamp\": 1703547317, \"duration\": 3600.0, \"thumbnail\": \"https://images.kick.com/video_thumbnails/x.jpg\", \"categories\": [\"Just Chatting\", \"Chess\"], \"view_count\": 1234, \"age_limit\": 0, \"is_live\": false, \"webpage_url\": \"https://kick.com/xqc/videos/8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea\", \"original_url\": \"https://kick.com/xqc/videos/8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea\", \"webpage_url_basename\": \"8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea\", \"webpage_url_domain\": \"kick.com\", \"extractor\": \"kick:vod\", \"extractor_key\": \"KickVOD\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://images.kick.com/video_thumbnails/x.jpg\", \"id\": \"0\"}], \"display_id\": \"8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea\", \"fulltitle\": \"VOD title\", \"duration_string\": \"1:00:00\", \"upload_date\": \"20231225\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"8000\", \"url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/1080p60/playlist.m3u8\", \"manifest_url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8\", \"tbr\": 8000.0, \"ext\": \"mp4\", \"fps\": 60.0, \"protocol\": \"m3u8_native\", \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.64002A\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"8000 - 1920x1080\", \"_filename\": \"VOD title [8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea].mp4\", \"filename\": \"VOD title [8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea].mp4\", \"__write_download_archive\": false}], \"format_id\": \"8000\", \"format_index\": null, \"url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/1080p60/playlist.m3u8\", \"manifest_url\": \"https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8\", \"tbr\": 8000.0, \"ext\": \"mp4\", \"fps\": 60.0, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.64002A\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"8000 - 1920x1080\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [kick:vod] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://kick.com/mxddy?clip=clip_01GYXVB5Y8PWAPWCWMSBCFB05X",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(channel)s|%(channel_id)s|%(uploader)s|%(uploader_id)s|%(timestamp)s|%(release_timestamp)s|%(duration)s|%(thumbnail)s|%(categories)s|%(view_count)s|%(like_count)s|%(concurrent_view_count)s|%(age_limit)s|%(is_live)s|%(description)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "clip_01GYXVB5Y8PWAPWCWMSBCFB05X|Clip title|mxddy|NA|Clipper|5|1681948800|NA|30.0|https://clips.kick.com/clips/x/thumb.png|['IRL']|99|5|NA|18|NA|NA|8000"
+   ],
+   "stderr": [
+    "WARNING: [kick:clips] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://kick.com/buddha",
+   "args": [
+    "--print",
+    "%(id)s|%(channel)s|%(channel_id)s|%(uploader)s|%(uploader_id)s|%(timestamp)s|%(release_timestamp)s|%(duration)s|%(thumbnail)s|%(categories)s|%(view_count)s|%(like_count)s|%(concurrent_view_count)s|%(age_limit)s|%(is_live)s|%(description)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "live-slug|buddha|123|buddha|456|1704103200|1704103200|NA|https://images.kick.com/live/x.webp|['GTA V']|NA|NA|500|0|True|Streamer bio|1"
+   ],
+   "stderr": [
+    "WARNING: [kick:live] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://kick.com/offline",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [kick:live] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies",
+    "ERROR: [kick:live] offline: The channel is not currently live"
+   ],
+   "files": {}
+  }
+ ]
+}

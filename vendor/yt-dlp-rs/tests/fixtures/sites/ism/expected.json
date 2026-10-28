@@ -1,0 +1,152 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"Manifest\", \"title\": \"Manifest\", \"timestamp\": null, \"formats\": [{\"format_id\": \"audio_eng-128\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"ext\": \"isma\", \"width\": null, \"height\": null, \"tbr\": 128, \"asr\": 44100, \"vcodec\": \"none\", \"acodec\": \"AACL\", \"protocol\": \"ism\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=0)\", \"duration\": 3.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=132300)\", \"duration\": 1357.544217687075}], \"has_drm\": false, \"language\": \"eng\", \"audio_channels\": 2, \"_download_params\": {\"stream_type\": \"audio\", \"duration\": 60000000, \"timescale\": 44100, \"width\": 0, \"height\": 0, \"fourcc\": \"AACL\", \"language\": \"eng\", \"codec_private_data\": \"1210\", \"sampling_rate\": 44100, \"channels\": 2, \"bits_per_sample\": 16, \"nal_unit_length_field\": 4}, \"audio_ext\": \"isma\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio_eng-128 - audio only\"}, {\"format_id\": \"video-400\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"ext\": \"ismv\", \"width\": 640, \"height\": 360, \"tbr\": 400, \"asr\": null, \"vcodec\": \"AVC1\", \"acodec\": \"none\", \"protocol\": \"ism\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=0)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=20000000)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(400000)/Fragments(video=40000000)\", \"duration\": 2.0}], \"has_drm\": false, \"language\": \"und\", \"audio_channels\": null, \"_download_params\": {\"stream_type\": \"video\", \"duration\": 60000000, \"timescale\": 10000000, \"width\": 640, \"height\": 360, \"fourcc\": \"AVC1\", \"language\": \"und\", \"codec_private_data\": \"000000016742C01FDA014016E8400000FA40003A98238C19500000000168CE3C80\", \"sampling_rate\": null, \"channels\": 2, \"bits_per_sample\": 16, \"nal_unit_length_field\": 4}, \"video_ext\": \"ismv\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 400, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-400 - 640x360\"}, {\"format_id\": \"video-1500\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"ext\": \"ismv\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"asr\": null, \"vcodec\": \"H264\", \"acodec\": \"none\", \"protocol\": \"ism\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=0)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=20000000)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=40000000)\", \"duration\": 2.0}], \"has_drm\": false, \"language\": \"und\", \"audio_channels\": null, \"_download_params\": {\"stream_type\": \"video\", \"duration\": 60000000, \"timescale\": 10000000, \"width\": 1280, \"height\": 720, \"fourcc\": \"H264\", \"language\": \"und\", \"codec_private_data\": \"000000016742C01FDA014016E8400000FA40003A98238C19500000000168CE3C80\", \"sampling_rate\": null, \"channels\": 2, \"bits_per_sample\": 16, \"nal_unit_length_field\": 4}, \"video_ext\": \"ismv\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 1500, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-1500 - 1280x720\"}], \"subtitles\": {\"fra\": [{\"ext\": \"ismt\", \"protocol\": \"ism\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1000)/Fragments(textstream_fra=0)\", \"duration\": 3.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1000)/Fragments(textstream_fra=30000000)\", \"duration\": 3.0}], \"_download_params\": {\"stream_type\": \"text\", \"duration\": 60000000, \"timescale\": 10000000, \"fourcc\": \"TTML\", \"language\": \"fra\", \"codec_private_data\": null}}]}, \"webpage_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"original_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"webpage_url_basename\": \"Manifest\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"Manifest\", \"fulltitle\": \"Manifest\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_formats\": [{\"format_id\": \"video-1500\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"ext\": \"ismv\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"asr\": null, \"vcodec\": \"H264\", \"acodec\": \"none\", \"protocol\": \"ism\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=0)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=20000000)\", \"duration\": 2.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(1500000)/Fragments(video=40000000)\", \"duration\": 2.0}], \"has_drm\": false, \"language\": \"und\", \"audio_channels\": null, \"_download_params\": {\"stream_type\": \"video\", \"duration\": 60000000, \"timescale\": 10000000, \"width\": 1280, \"height\": 720, \"fourcc\": \"H264\", \"language\": \"und\", \"codec_private_data\": \"000000016742C01FDA014016E8400000FA40003A98238C19500000000168CE3C80\", \"sampling_rate\": null, \"channels\": 2, \"bits_per_sample\": 16, \"nal_unit_length_field\": 4}, \"video_ext\": \"ismv\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 1500, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-1500 - 1280x720\"}, {\"format_id\": \"audio_eng-128\", \"url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"manifest_url\": \"https://media.example.test/vod/clip.ism/Manifest\", \"ext\": \"isma\", \"width\": null, \"height\": null, \"tbr\": 128, \"asr\": 44100, \"vcodec\": \"none\", \"acodec\": \"AACL\", \"protocol\": \"ism\", \"fragments\": [{\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=0)\", \"duration\": 3.0}, {\"url\": \"https://media.example.test/vod/clip.ism/QualityLevels(128000)/Fragments(audio_eng=132300)\", \"duration\": 1357.544217687075}], \"has_drm\": false, \"language\": \"eng\", \"audio_channels\": 2, \"_download_params\": {\"stream_type\": \"audio\", \"duration\": 60000000, \"timescale\": 44100, \"width\": 0, \"height\": 0, \"fourcc\": \"AACL\", \"language\": \"eng\", \"codec_private_data\": \"1210\", \"sampling_rate\": 44100, \"channels\": 2, \"bits_per_sample\": 16, \"nal_unit_length_field\": 4}, \"audio_ext\": \"isma\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio_eng-128 - audio only\"}], \"format\": \"video-1500 - 1280x720+audio_eng-128 - audio only\", \"format_id\": \"video-1500+audio_eng-128\", \"ext\": \"mp4\", \"protocol\": \"ism+ism\", \"language\": \"und+eng\", \"format_note\": null, \"filesize_approx\": null, \"tbr\": 1628, \"width\": 1280, \"height\": 720, \"resolution\": \"1280x720\", \"fps\": null, \"dynamic_range\": \"SDR\", \"vcodec\": \"H264\", \"vbr\": 1500, \"stretched_ratio\": null, \"aspect_ratio\": 1.78, \"acodec\": \"AACL\", \"abr\": 128, \"asr\": 44100, \"audio_channels\": 2, \"_filename\": \"Manifest [Manifest].mp4\", \"filename\": \"Manifest [Manifest].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/vod/clip.ism/Manifest",
+    "[generic] Manifest: Downloading webpage",
+    "[generic] Manifest: Extracting information",
+    "[info] Available formats for Manifest:",
+    "ID            EXT  RESOLUTION CH |   TBR PROTO | VCODEC       VBR ACODEC      ABR ASR MORE INFO",
+    "-----------------------------------------------------------------------------------------------",
+    "audio_eng-128 isma audio only  2 |  128k ism   | audio only       AACL       128k 44k [eng]",
+    "video-400     ismv 640x360       |  400k ism   | AVC1        400k video only          [und]",
+    "video-1500    ismv 1280x720      | 1500k ism   | H264       1500k video only          [und]"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/vod/clip.ism/Manifest",
+    "[generic] Manifest: Downloading webpage",
+    "[generic] Manifest: Extracting information",
+    "[info] Available subtitles for Manifest:",
+    "Language Formats",
+    "fra      ismt"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "--print",
+    "%(format_id)s|%(protocol)s|%(ext)s|%(vcodec)s|%(acodec)s|%(language)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "video-1500+audio_eng-128|ism+ism|mp4|H264|AACL|und+eng"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/vod/live.ism/Manifest",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [generic] Manifest: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "--no-progress",
+    "-f",
+    "video-400",
+    "-o",
+    "v.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/vod/clip.ism/Manifest",
+    "[generic] Manifest: Downloading webpage",
+    "[generic] Manifest: Extracting information",
+    "[info] Manifest: Downloading 1 format(s): video-400",
+    "[ism] Total fragments: 3",
+    "[download] Destination: v.ismv",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {
+    "v.ismv": 1335
+   }
+  },
+  {
+   "url": "https://media.example.test/vod/clip.ism/Manifest",
+   "args": [
+    "--no-progress",
+    "-f",
+    "audio_eng-128",
+    "-o",
+    "a.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/vod/clip.ism/Manifest",
+    "[generic] Manifest: Downloading webpage",
+    "[generic] Manifest: Extracting information",
+    "[info] Manifest: Downloading 1 format(s): audio_eng-128",
+    "[ism] Total fragments: 2",
+    "[download] Destination: a.isma",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] WVC1 is not a supported codec",
+    "WARNING: [generic] VP90 is not a supported codec"
+   ],
+   "files": {
+    "a.isma": 1021
+   }
+  }
+ ]
+}

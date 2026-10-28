@@ -1,0 +1,677 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "info": {
+  "id": "a1",
+  "title": "",
+  "ext": "mp4",
+  "url": "https://example.test/media.mp4",
+  "webpage_url": "https://example.test/watch",
+  "extractor": "generic",
+  "extractor_key": "Generic",
+  "direct": true,
+  "formats": []
+ },
+ "cases": [
+  {
+   "name": "reserved/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "A? \"b\" <c>|*: d\\e/f",
+   "expected": "A？ ＂b＂ ＜c＞｜＊： d⧹e⧸f [a1].mp4"
+  },
+  {
+   "name": "reserved/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "A? \"b\" <c>|*: d\\e/f",
+   "expected": "A_b_c_-_d_e_f [a1].mp4"
+  },
+  {
+   "name": "reserved/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "A? \"b\" <c>|*: d\\e/f",
+   "expected": "A? \"b\" <c>|*: d\\e⧸f [a1].mp4"
+  },
+  {
+   "name": "reserved/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "A? \"b\" <c>|*: d\\e/f",
+   "expected": "A？ ＂b＂ ＜c＞｜＊： d⧹e⧸f [a1].mp4"
+  },
+  {
+   "name": "reserved/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "A? \"b\" <c>|*: d\\e/f",
+   "expected": "A_b_c_-_d_e_f [a1].mp4"
+  },
+  {
+   "name": "newline-ends/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "\nline one\nline two\n",
+   "expected": "line one line two [a1].mp4"
+  },
+  {
+   "name": "newline-ends/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "\nline one\nline two\n",
+   "expected": "line_oneline_two [a1].mp4"
+  },
+  {
+   "name": "newline-ends/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "\nline one\nline two\n",
+   "expected": "\nline one\nline two\n [a1].mp4"
+  },
+  {
+   "name": "newline-ends/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "\nline one\nline two\n",
+   "expected": "line one line two [a1].mp4"
+  },
+  {
+   "name": "newline-ends/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "\nline one\nline two\n",
+   "expected": "line_oneline_two [a1].mp4"
+  },
+  {
+   "name": "timestamps/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Live 12:34:56 at 1:2 x:3 a: b",
+   "expected": "Live 12_34_56 at 1_2 x：3 a： b [a1].mp4"
+  },
+  {
+   "name": "timestamps/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Live 12:34:56 at 1:2 x:3 a: b",
+   "expected": "Live_12_34_56_at_1_2_x_-3_a_-_b [a1].mp4"
+  },
+  {
+   "name": "timestamps/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Live 12:34:56 at 1:2 x:3 a: b",
+   "expected": "Live 12:34:56 at 1:2 x:3 a: b [a1].mp4"
+  },
+  {
+   "name": "timestamps/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Live 12:34:56 at 1:2 x:3 a: b",
+   "expected": "Live 12_34_56 at 1_2 x：3 a： b [a1].mp4"
+  },
+  {
+   "name": "timestamps/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Live 12:34:56 at 1:2 x:3 a: b",
+   "expected": "Live_12_34_56_at_1_2_x_-3_a_-_b [a1].mp4"
+  },
+  {
+   "name": "accents-amp/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Épisode & Ærø ßtraße — naïve!",
+   "expected": "Épisode & Ærø ßtraße — naïve! [a1].mp4"
+  },
+  {
+   "name": "accents-amp/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Épisode & Ærø ßtraße — naïve!",
+   "expected": "Episode_AEro_sstrasse_naive [a1].mp4"
+  },
+  {
+   "name": "accents-amp/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Épisode & Ærø ßtraße — naïve!",
+   "expected": "Épisode & Ærø ßtraße — naïve! [a1].mp4"
+  },
+  {
+   "name": "accents-amp/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Épisode & Ærø ßtraße — naïve!",
+   "expected": "Épisode & Ærø ßtraße — naïve! [a1].mp4"
+  },
+  {
+   "name": "accents-amp/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "Épisode & Ærø ßtraße — naïve!",
+   "expected": "Episode_AEro_sstrasse_naive [a1].mp4"
+  },
+  {
+   "name": "cjk-dash/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "大声带 - Song",
+   "expected": "大声带 - Song [a1].mp4"
+  },
+  {
+   "name": "cjk-dash/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "大声带 - Song",
+   "expected": "Song [a1].mp4"
+  },
+  {
+   "name": "cjk-dash/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "大声带 - Song",
+   "expected": "大声带 - Song [a1].mp4"
+  },
+  {
+   "name": "cjk-dash/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "大声带 - Song",
+   "expected": "大声带 - Song [a1].mp4"
+  },
+  {
+   "name": "cjk-dash/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "大声带 - Song",
+   "expected": "Song [a1].mp4"
+  },
+  {
+   "name": "leading-dash-dots/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "-..hidden__name__",
+   "expected": "-..hidden__name__ [a1].mp4"
+  },
+  {
+   "name": "leading-dash-dots/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "-..hidden__name__",
+   "expected": "-..hidden__name__ [a1].mp4"
+  },
+  {
+   "name": "leading-dash-dots/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "-..hidden__name__",
+   "expected": "-..hidden__name__ [a1].mp4"
+  },
+  {
+   "name": "leading-dash-dots/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "-..hidden__name__",
+   "expected": "-..hidden__name__ [a1].mp4"
+  },
+  {
+   "name": "leading-dash-dots/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "-..hidden__name__",
+   "expected": "-..hidden__name__ [a1].mp4"
+  },
+  {
+   "name": "nfkc-lookalikes/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "ｆｕｌｌ ① ﬁ ²",
+   "expected": "ｆｕｌｌ ① ﬁ ² [a1].mp4"
+  },
+  {
+   "name": "nfkc-lookalikes/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "ｆｕｌｌ ① ﬁ ²",
+   "expected": "full_1_fi_2 [a1].mp4"
+  },
+  {
+   "name": "nfkc-lookalikes/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "ｆｕｌｌ ① ﬁ ²",
+   "expected": "ｆｕｌｌ ① ﬁ ² [a1].mp4"
+  },
+  {
+   "name": "nfkc-lookalikes/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "ｆｕｌｌ ① ﬁ ²",
+   "expected": "ｆｕｌｌ ① ﬁ ² [a1].mp4"
+  },
+  {
+   "name": "nfkc-lookalikes/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "ｆｕｌｌ ① ﬁ ²",
+   "expected": "full_1_fi_2 [a1].mp4"
+  },
+  {
+   "name": "emoji-marks/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "é 😀 ​­ x",
+   "expected": "é 😀 ​­ x [a1].mp4"
+  },
+  {
+   "name": "emoji-marks/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "é 😀 ​­ x",
+   "expected": "e_x [a1].mp4"
+  },
+  {
+   "name": "emoji-marks/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "é 😀 ​­ x",
+   "expected": "é 😀 ​­ x [a1].mp4"
+  },
+  {
+   "name": "emoji-marks/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "é 😀 ​­ x",
+   "expected": "é 😀 ​­ x [a1].mp4"
+  },
+  {
+   "name": "emoji-marks/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "é 😀 ​­ x",
+   "expected": "e_x [a1].mp4"
+  },
+  {
+   "name": "controls/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "tab\there\u0001end",
+   "expected": "tabhereend [a1].mp4"
+  },
+  {
+   "name": "controls/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "tab\there\u0001end",
+   "expected": "tabhereend [a1].mp4"
+  },
+  {
+   "name": "controls/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "tab\there\u0001end",
+   "expected": "tab\there\u0001end [a1].mp4"
+  },
+  {
+   "name": "controls/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "tab\there\u0001end",
+   "expected": "tabhereend [a1].mp4"
+  },
+  {
+   "name": "controls/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "tab\there\u0001end",
+   "expected": "tabhereend [a1].mp4"
+  },
+  {
+   "name": "shell/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p",
+   "expected": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p [a1].mp4"
+  },
+  {
+   "name": "shell/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p",
+   "expected": "a_b_c_d_e_f_g_h_i_j_k_l_m_n_o_p [a1].mp4"
+  },
+  {
+   "name": "shell/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p",
+   "expected": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p [a1].mp4"
+  },
+  {
+   "name": "shell/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p",
+   "expected": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p [a1].mp4"
+  },
+  {
+   "name": "shell/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "a!b&c'd(e)f[g]h{i}j$k;l`m^n,o#p",
+   "expected": "a_b_c_d_e_f_g_h_i_j_k_l_m_n_o_p [a1].mp4"
+  },
+  {
+   "name": "only-reserved/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "???",
+   "expected": "？？？ [a1].mp4"
+  },
+  {
+   "name": "only-reserved/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "???",
+   "expected": "_ [a1].mp4"
+  },
+  {
+   "name": "only-reserved/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "???",
+   "expected": "??? [a1].mp4"
+  },
+  {
+   "name": "only-reserved/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "???",
+   "expected": "？？？ [a1].mp4"
+  },
+  {
+   "name": "only-reserved/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "???",
+   "expected": "_ [a1].mp4"
+  },
+  {
+   "name": "dot-segments/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "./../x/./y",
+   "expected": ".⧸..⧸x⧸.⧸y [a1].mp4"
+  },
+  {
+   "name": "dot-segments/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "./../x/./y",
+   "expected": "._.._x_._y [a1].mp4"
+  },
+  {
+   "name": "dot-segments/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "./../x/./y",
+   "expected": ".⧸..⧸x⧸.⧸y [a1].mp4"
+  },
+  {
+   "name": "dot-segments/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "./../x/./y",
+   "expected": ".⧸..⧸x⧸.⧸y [a1].mp4"
+  },
+  {
+   "name": "dot-segments/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "./../x/./y",
+   "expected": "._.._x_._y [a1].mp4"
+  },
+  {
+   "name": "trailing-dots/default",
+   "params": {},
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "name... ",
+   "expected": "name...  [a1].mp4"
+  },
+  {
+   "name": "trailing-dots/restrict",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "name... ",
+   "expected": "name... [a1].mp4"
+  },
+  {
+   "name": "trailing-dots/minimal",
+   "params": {
+    "windowsfilenames": false
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "name... ",
+   "expected": "name...  [a1].mp4"
+  },
+  {
+   "name": "trailing-dots/windows",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "name... ",
+   "expected": "name...  [a1].mp4"
+  },
+  {
+   "name": "trailing-dots/restrict-windows",
+   "params": {
+    "restrictfilenames": true,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s [%(id)s].%(ext)s",
+   "title": "name... ",
+   "expected": "name... [a1].mp4"
+  },
+  {
+   "name": "default-template-restricted",
+   "params": {
+    "restrictfilenames": true
+   },
+   "output": null,
+   "title": "Some Title - Part 2",
+   "expected": "Some_Title_-_Part_2-[a1].mp4"
+  },
+  {
+   "name": "default-template",
+   "params": {},
+   "output": null,
+   "title": "Some Title - Part 2",
+   "expected": "Some Title - Part 2 [a1].mp4"
+  },
+  {
+   "name": "trim",
+   "params": {
+    "trim_file_name": 5
+   },
+   "output": "%(title)s.%(id)s.%(ext)s",
+   "title": "Épisode long title",
+   "expected": "Épiso.a1.mp4"
+  },
+  {
+   "name": "trim-dirs",
+   "params": {
+    "trim_file_name": 8
+   },
+   "output": "dir/%(title)s.%(ext)s",
+   "title": "abcdefghij",
+   "expected": "dir/abcd.mp4"
+  },
+  {
+   "name": "trim-no-ext",
+   "params": {
+    "trim_file_name": 3
+   },
+   "output": "plainname",
+   "title": "x",
+   "expected": "pla"
+  },
+  {
+   "name": "trim-many-dots",
+   "params": {
+    "trim_file_name": 2
+   },
+   "output": "a.b.c.d.%(ext)s",
+   "title": "x",
+   "expected": "a..d.mp4"
+  },
+  {
+   "name": "trim-negative",
+   "params": {
+    "trim_file_name": -3
+   },
+   "output": "%(title)s.%(ext)s",
+   "title": "abcdefgh",
+   "expected": "abcde.mp4"
+  },
+  {
+   "name": "windows-literal-path",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "a/./b/../c<d> /%(title)s.%(ext)s",
+   "title": "t. ",
+   "expected": "a/c#d##/t. .mp4"
+  },
+  {
+   "name": "windows-absolute",
+   "params": {
+    "windowsfilenames": true
+   },
+   "output": "/tmp//x/%(title)s.%(ext)s",
+   "title": "q?",
+   "expected": "/tmp/x/q？.mp4"
+  },
+  {
+   "name": "trim-then-windows",
+   "params": {
+    "trim_file_name": 4,
+    "windowsfilenames": true
+   },
+   "output": "%(title)s.%(ext)s",
+   "title": "ab. cdef",
+   "expected": "ab. cdef.mp4"
+  }
+ ]
+}

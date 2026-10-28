@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.twitch.tv/videos/1234567890?t=5m10s", "args": ["--print", "%(id)s|%(title)s|%(duration)s|%(uploader)s|%(uploader_id)s|%(timestamp)s|%(view_count)s|%(is_live)s|%(was_live)s|%(chapters)s|%(thumbnails)s|%(start_time)s|%(format_id)s"]},
+ {"url": "https://www.twitch.tv/streamer/v/1234567890", "args": ["-F"]},
+ {"url": "https://clips.twitch.tv/FaintLightGullWholeWheat", "args": ["-J"]},
+ {"url": "https://clips.twitch.tv/FaintLightGullWholeWheat", "args": ["-F"]},
+ {"url": "https://www.twitch.tv/someone/clip/GoneClipSlug", "args": ["-j"]},
+ {"url": "https://clips.twitch.tv/FaintLightGullWholeWheat", "args": ["-f", "720", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,27 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Fixture } ; & video",
+    "lengthSeconds": "12",
+    "isLiveContent": false
+  },
+  "assets": {
+    "js": "https://www.youtube.com/s/player/74edf1a3/player_ias.vflset/en_US/base.js"
+  },
+  "streamingData": {
+    "formats": [
+      {
+        "itag": 18,
+        "url": "{{ORIGIN}}/media.mp4?n=IlLiA21ny7gqA2m4p37",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "width": 640,
+        "height": 360,
+        "contentLength": "5",
+        "audioQuality": "AUDIO_QUALITY_LOW"
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"JG-8yS14xzBr4bCn1pu0xw\", \"title\": \"Ku6 video #JG-8yS14xzBr4bCn1pu0xw\", \"url\": \"https://ku6.test/v.mp4\", \"webpage_url\": \"http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html\", \"original_url\": \"http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html\", \"webpage_url_basename\": \"JG-8yS14xzBr4bCn1pu0xw...html\", \"webpage_url_domain\": \"v.ku6.com\", \"extractor\": \"Ku6\", \"extractor_key\": \"Ku6\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"JG-8yS14xzBr4bCn1pu0xw\", \"fulltitle\": \"\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Ku6 video #JG-8yS14xzBr4bCn1pu0xw [JG-8yS14xzBr4bCn1pu0xw].mp4\", \"filename\": \"Ku6 video #JG-8yS14xzBr4bCn1pu0xw [JG-8yS14xzBr4bCn1pu0xw].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Ku6] Extracting URL: http://v.ku6.com/show/JG-8yS14xzBr4bCn1pu0xw...html",
+    "[Ku6] JG-8yS14xzBr4bCn1pu0xw: Downloading webpage",
+    "[Ku6] JG-8yS14xzBr4bCn1pu0xw: Downloading JSON metadata",
+    "[info] JG-8yS14xzBr4bCn1pu0xw: Downloading 1 format(s): 0",
+    "[download] Destination: JG-8yS14xzBr4bCn1pu0xw.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "JG-8yS14xzBr4bCn1pu0xw.mp4": 792
+   }
+  },
+  {
+   "url": "https://v.ku6.com/show/b2.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: b2: An extractor error has occurred. (caused by KeyError('f')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://v.ku6.com/show/c3.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Ku6] c3: Unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

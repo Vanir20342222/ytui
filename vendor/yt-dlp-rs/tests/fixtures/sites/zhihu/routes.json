@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://www.zhihu.com/api/v4/zvideos/1342930761977176064",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"\\u5199\\u6625\\u8054\\u4e5f\\u592a\\u96be\\u4e86\\u5427\\uff01\", \"video\": {\"thumbnail\": \"https://zhihu.test/t.jpg\", \"duration\": 146.333, \"playlist\": {\"hd\": {\"play_url\": \"https://zhihu.test/hd.mp4\", \"width\": 1280, \"height\": 720, \"bitrate\": \"2500.5\", \"fps\": 30, \"size\": 792, \"sample_rate\": 44100}, \"sd\": {\"width\": 640}, \"ld\": {\"url\": \"https://zhihu.test/ld.mp4?auth=x\", \"width\": \"640\", \"height\": 360, \"bitrate\": 800}}}, \"published_at\": 1612959715, \"author\": {\"name\": \"\\u6865\\u534a\\u822b\", \"id\": \"244ecb13b0fd7daf92235288c8ca3365\", \"url_token\": \"qiao\"}, \"play_count\": 100, \"liked_count\": \"5\", \"comment_count\": null}"
+  },
+  {
+   "url": "https://www.zhihu.com/api/v4/zvideos/2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Plain\", \"image_url\": \"https://zhihu.test/i.jpg\", \"video\": {\"playlist\": {\"x\": {\"url\": \"https://zhihu.test/x\"}}}, \"author\": {\"url_token\": \"\"}}"
+  },
+  {
+   "url": "https://www.zhihu.com/api/v4/zvideos/3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"video\": {}}"
+  },
+  {
+   "url": "https://zhihu.test/hd.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

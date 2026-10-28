@@ -1,0 +1,77 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"5cOz1yup\", \"title\": \"Watch \\u2013 Clyburn: Statues\", \"description\": \"Clyburn & statues\", \"thumbnail\": \"https://breitbart.test/t.jpg\", \"age_limit\": 18, \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/video.m3u8\", \"manifest_url\": \"https://cdn.jwplayer.com/manifests/5cOz1yup.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"webpage_url\": \"https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji\", \"original_url\": \"https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji\", \"webpage_url_basename\": \"5cOz1yup\", \"webpage_url_domain\": \"breitbart.com\", \"extractor\": \"BreitBart\", \"extractor_key\": \"BreitBart\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://breitbart.test/t.jpg\", \"id\": \"0\"}], \"display_id\": \"5cOz1yup\", \"fulltitle\": \"Watch \\u2013 Clyburn: Statues\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/video.m3u8\", \"manifest_url\": \"https://cdn.jwplayer.com/manifests/5cOz1yup.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Watch \\u2013 Clyburn\\uff1a Statues [5cOz1yup].mp4\", \"filename\": \"Watch \\u2013 Clyburn\\uff1a Statues [5cOz1yup].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [BreitBart] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.breitbart.com/videos/v/5cOz1yup/?pl=Ij6NDOji",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(age_limit)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "5cOz1yup|Watch – Clyburn: Statues|Clyburn & statues|https://breitbart.test/t.jpg|18"
+   ],
+   "stderr": [
+    "WARNING: [BreitBart] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://breitbart.com/videos/v/plain",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"plain\", \"title\": \"Plain title\", \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/plain.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://breitbart.com/videos/v/plain\", \"original_url\": \"https://breitbart.com/videos/v/plain\", \"webpage_url_basename\": \"plain\", \"webpage_url_domain\": \"breitbart.com\", \"extractor\": \"BreitBart\", \"extractor_key\": \"BreitBart\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"plain\", \"fulltitle\": \"Plain title\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/plain.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Plain title [plain].mp4\", \"filename\": \"Plain title [plain].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [BreitBart] unable to extract OpenGraph description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [BreitBart] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.breitbart.com/videos/v/bare",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"bare\", \"title\": \"BreitBart video #bare\", \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/bare.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"webpage_url\": \"https://www.breitbart.com/videos/v/bare\", \"original_url\": \"https://www.breitbart.com/videos/v/bare\", \"webpage_url_basename\": \"bare\", \"webpage_url_domain\": \"breitbart.com\", \"extractor\": \"BreitBart\", \"extractor_key\": \"BreitBart\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"bare\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/bare.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"BreitBart video #bare [bare].mp4\", \"filename\": \"BreitBart video #bare [bare].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [BreitBart] unable to extract OpenGraph description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [BreitBart] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.breitbart.com/videos/v/gone",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [BreitBart] gone: Failed to download m3u8 information: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

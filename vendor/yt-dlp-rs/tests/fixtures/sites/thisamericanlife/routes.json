@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "http://www.thisamericanlife.org/radio-archives/episode/487",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"twitter:title\" content=\"487: Harper High School, Part One\">\n<meta name=\"description\" content=\"We spent five months at Harper High School.\">\n<meta property=\"og:image\" content=\"http://www.thisamericanlife.test/487.jpg\"></head><body></body></html>"
+  },
+  {
+   "url": "http://stream.thisamericanlife.org/487/stream/487_64k.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "stream.m3u8"
+  },
+  {
+   "url": "http://stream.thisamericanlife.org/487/stream/seg0.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body_file": "seg.ts"
+  },
+  {
+   "url": "http://stream.thisamericanlife.org/487/stream/seg1.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body_file": "seg.ts"
+  },
+  {
+   "url": "http://www.thisamericanlife.org/radio-archives/episode/2",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>none</html>"
+  }
+ ]
+}

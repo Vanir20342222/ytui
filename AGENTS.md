@@ -37,3 +37,21 @@ baseline defects, milestones, migration requirements, and acceptance checks.
 - Implementation evidence and open gates are in docs/VALIDATION.md and
   docs/PARITY.md. Do not equate implemented provider code with a successful live
   account, Ghostty, audio-device or stable-release acceptance result.
+
+- M9 adds the Android preview and monorepo. Desktop source is `apps/desktop`;
+  package/binary names and installed state paths must remain compatible.
+  Shared network/provider code is `crates/ytui-providers`; Android's engine
+  remains Rust in `crates/ytui-mobile`. On 2026-10-28 the user authorized a
+  stack change after reporting unusable text input/themes/account navigation on
+  a physical Galaxy Tab S9. Android's current UI target is native Jetpack Compose
+  under `apps/android`, with the shared Rust engine and terminal visual style.
+  Java/Kotlin also handle activity/media/storage/OS adapters and explicit account
+  WebView sign-in. Do not replace application screens with a web UI.
+- Read `docs/android/{PLAN,PARITY,VALIDATION}.md` for mobile gates. Unit/fixture,
+  APK build, emulator and physical-device/live acceptance are distinct. Do not
+  describe development APKs as production releases or claim feature parity while
+  listed mobile gaps remain. Keep Android signing keys and SDK/build outputs out
+  of Git. Instrumentation mutates only an explicitly selected disposable app.
+  Earlier egui headless/render checks did not qualify real Android keyboard,
+  theme or account flows. Preserve their backend evidence, and require actual
+  native text-entry/theme/account-navigation tests for the replacement UI.

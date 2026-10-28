@@ -1,0 +1,90 @@
+{
+ "routes": [
+  {
+   "url": "https://gql.twitch.tv/gql",
+   "request_body": [
+    "VideoMetadata"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "meta.json"
+  },
+  {
+   "url": "https://gql.twitch.tv/gql",
+   "request_body": [
+    "videoPlaybackAccessToken"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "token.json"
+  },
+  {
+   "url": "https://gql.twitch.tv/gql",
+   "request_body": [
+    "ShareClipRenderStatus",
+    "FaintLightGullWholeWheat"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "clip.json"
+  },
+  {
+   "url": "https://gql.twitch.tv/gql",
+   "request_body": [
+    "ShareClipRenderStatus"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "[{\"data\": {\"clip\": null}}]"
+  },
+  {
+   "url": "https://usher.ttvnw.net/vod/1234567890.m3u8?allow_source=true&allow_audio_only=true&allow_spectre=true&platform=web&player=twitchweb&supported_codecs=av1%2Ch265%2Ch264&playlist_include_framerate=true&sig=SIG123&token=TOKENVALUE",
+   "ignore_query": [
+    "p"
+   ],
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://d2nvs31859zcd8.cloudfront.net/abc_123/storyboards/1234567890-info.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "storyboard.json"
+  },
+  {
+   "url": "https://d2nvs31859zcd8.cloudfront.net/abc_123/chunked/index-dvr.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://d2nvs31859zcd8.cloudfront.net/abc_123/720p60/index-dvr.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://d2nvs31859zcd8.cloudfront.net/abc_123/audio_only/index-dvr.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://production.assets.clips.twitchcdn.net/v2/media/abc%7C396245304-720.mp4?sig=CLIPSIG&token=%7B%22clip_uri%22%3A%22x%22%7D",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-clip"
+  }
+ ]
+}

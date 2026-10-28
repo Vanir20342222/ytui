@@ -1,0 +1,86 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://new.godresource.com/video/A01mTKjyf6w",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"A01mTKjyf6w\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://gr.test/hls/video.m3u8\", \"manifest_url\": \"https://gr.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"https://gr.test/hls/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"https://gr.test/hls/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"title\": \"Victory Over Trials\", \"is_live\": false, \"thumbnail\": \"https://gr.test/t.jpg\", \"view_count\": 12, \"channel\": \"Pastor Mark\", \"channel_id\": \"9\", \"timestamp\": 1716590570, \"modified_timestamp\": 1716598923, \"webpage_url\": \"https://new.godresource.com/video/A01mTKjyf6w\", \"original_url\": \"https://new.godresource.com/video/A01mTKjyf6w\", \"webpage_url_basename\": \"A01mTKjyf6w\", \"webpage_url_domain\": \"new.godresource.com\", \"extractor\": \"GodResource\", \"extractor_key\": \"GodResource\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://gr.test/t.jpg\", \"id\": \"0\"}], \"display_id\": \"A01mTKjyf6w\", \"fulltitle\": \"Victory Over Trials\", \"upload_date\": \"20240524\", \"modified_date\": \"20240525\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://gr.test/hls/video.m3u8\", \"manifest_url\": \"https://gr.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Victory Over Trials [A01mTKjyf6w].mp4\", \"filename\": \"Victory Over Trials [A01mTKjyf6w].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://new.godresource.com/video/A01mTKjyf6w",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(thumbnail)s|%(view_count)s|%(channel)s|%(channel_id)s|%(timestamp)s|%(modified_timestamp)s|%(modified_date)s|%(is_live)s|%(live_status)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "A01mTKjyf6w|Victory Over Trials|https://gr.test/t.jpg|12|Pastor Mark|9|1716590570|1716598923|20240525|False|NA"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://new.godresource.com/video/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"b2\", \"formats\": [{\"url\": \"https://gr.test/v.mp4\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"title\": \"GodResource video #b2\", \"is_live\": false, \"webpage_url\": \"https://new.godresource.com/video/b2\", \"original_url\": \"https://new.godresource.com/video/b2\", \"webpage_url_basename\": \"b2\", \"webpage_url_domain\": \"new.godresource.com\", \"extractor\": \"GodResource\", \"extractor_key\": \"GodResource\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"b2\", \"fulltitle\": \"\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://gr.test/v.mp4\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"GodResource video #b2 [b2].mp4\", \"filename\": \"GodResource video #b2 [b2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://new.godresource.com/video/b2",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[GodResource] Extracting URL: https://new.godresource.com/video/b2",
+    "[GodResource] b2: Downloading JSON metadata",
+    "[info] b2: Downloading 1 format(s): 0",
+    "[download] Destination: b2.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "b2.mp4": 792
+   }
+  },
+  {
+   "url": "https://new.godresource.com/video/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [GodResource] c3: Unexpected video format flv; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://new.godresource.com/video/d4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: d4: An extractor error has occurred. (caused by KeyError('streamUrl')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

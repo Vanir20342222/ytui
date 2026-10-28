@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"><channel><title>Feed</title><description>A feed</description>
+<item><title>Ep 1</title><description>First</description><enclosure url="{ORIGIN}/a.mp4" type="video/mp4" length="1"/><guid>ep1</guid><pubDate>Mon, 01 Jan 2024 00:00:00 GMT</pubDate><itunes:duration>01:02</itunes:duration><itunes:explicit>no</itunes:explicit><itunes:episode>1</itunes:episode><itunes:season>2</itunes:season></item>
+<item><title>Ep 2</title><link>{ORIGIN}/b.mp4</link></item>
+</channel></rss>

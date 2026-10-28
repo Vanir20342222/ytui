@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.zhihu.com/zvideo/1342930761977176064", "args": ["-j"]},
+ {"url": "https://www.zhihu.com/zvideo/1342930761977176064", "args": ["-F"]},
+ {"url": "https://www.zhihu.com/zvideo/1342930761977176064", "args": ["--print", "%(id)s|%(title)s|%(thumbnail)s|%(uploader)s|%(upload_date)s|%(uploader_id)s|%(uploader_url)s|%(duration)s|%(view_count)s|%(like_count)s|%(comment_count)s|%(format_id)s"]},
+ {"url": "https://www.zhihu.com/zvideo/1342930761977176064", "args": ["--no-progress", "-f", "hd", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://zhihu.com/zvideo/2", "args": ["-j"]},
+ {"url": "https://zhihu.com/zvideo/2", "args": ["--print", "%(uploader_url)r"]},
+ {"url": "https://www.zhihu.com/zvideo/3", "args": ["-j"]}
+]

@@ -1,0 +1,9 @@
+[
+ {"url": "http://www.historicfilms.com/tapes/4728", "args": ["-j"]},
+ {"url": "http://www.historicfilms.com/tapes/4728", "args": ["-F"]},
+ {"url": "http://www.historicfilms.com/tapes/4728", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(duration)s|%(duration_string)s|%(ext)s|%(format_id)s"]},
+ {"url": "http://www.historicfilms.com/tapes/4728", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://historicfilms.com/play9", "args": ["-j"]},
+ {"url": "https://historicfilms.com/tapes/10", "args": ["-j"]},
+ {"url": "https://historicfilms.com/tapes/11", "args": ["-j"]}
+]

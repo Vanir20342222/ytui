@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://m.qtfm.cn/vchannels/378005/programs/22257411/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>window.__initStores = {\"ProgramStore\": {\"programInfo\": {\"title\": \"\\u6b66\\u6797\\u5916\\u4f20 1\", \"audioUrl\": \"https://od.qingting.test/m4a/5f8a.m4a\"}, \"channelInfo\": {\"title\": \"Radio\"}, \"podcasterInfo\": {\"podcaster\": {\"nickname\": \"Host\"}}}};\nwindow.other = {\"a\": 1};</script></body></html>"
+  },
+  {
+   "url": "https://od.qingting.test/m4a/5f8a.m4a",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body_file": "a.m4a"
+  },
+  {
+   "url": "https://m.qtfm.cn/vchannels/1/programs/2/",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><script>window.__initStores = {\"ProgramStore\": {}};</script></html>"
+  },
+  {
+   "url": "https://m.qtfm.cn/vchannels/1/programs/3/",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>nothing</html>"
+  }
+ ]
+}

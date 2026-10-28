@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://tv.proximus.be/MWC/videocenter/festivals/101556/stream",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"name\": \"Thy Art Is Murder\", \"source\": {\"assetUri\": \"https://graspop.test/hls/video.m3u8?x=1\", \"poster\": \"https://graspop.test/p.jpg\"}}"
+  },
+  {
+   "url": "https://tv.proximus.be/MWC/videocenter/festivals/2/stream",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"source\": {\"assetUri\": \"https://graspop.test/hls/video.m3u8\", \"poster\": \"not a url\"}}"
+  },
+  {
+   "url": "https://tv.proximus.be/MWC/videocenter/festivals/3/stream",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"name\": \"No source\"}"
+  },
+  {
+   "url": "https://tv.proximus.be/MWC/videocenter/festivals/4/stream",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"name\": 5, \"source\": {\"assetUri\": \"https://graspop.test/hls/missing.m3u8\"}}"
+  },
+  {
+   "url": "http://graspop.test/hls/video.m3u8?x=1",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "http://graspop.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  }
+ ]
+}

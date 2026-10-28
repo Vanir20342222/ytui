@@ -1,0 +1,83 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"53662\", \"display_id\": \"The-Next--Best-West\", \"url\": \"https://cu.test/v.mp4\", \"title\": \"The Next, Best West\", \"description\": \"A synopsis\", \"creator\": \"Coldstream Creative\", \"duration\": 2203, \"view_count\": 42, \"thumbnails\": [{\"url\": \"https://cu.test/s.jpg\", \"id\": \"small\", \"preference\": 0}, {\"url\": \"https://cu.test/l.jpg\", \"id\": \"large\", \"preference\": 1}], \"webpage_url\": \"http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West\", \"original_url\": \"http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West\", \"webpage_url_basename\": \"The-Next--Best-West\", \"webpage_url_domain\": \"cultureunplugged.com\", \"extractor\": \"CultureUnplugged\", \"extractor_key\": \"CultureUnplugged\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://cu.test/l.jpg\", \"fulltitle\": \"The Next, Best West\", \"duration_string\": \"36:43\", \"release_year\": null, \"creators\": [\"Coldstream Creative\"], \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"The Next, Best West [53662].mp4\", \"filename\": \"The Next, Best West [53662].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West",
+   "args": [
+    "--list-thumbnails"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[CultureUnplugged] Extracting URL: http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West",
+    "[CultureUnplugged] The-Next--Best-West: Downloading JSON metadata",
+    "[info] Available thumbnails for 53662:",
+    "ID    Width   Height  URL",
+    "small unknown unknown https://cu.test/s.jpg",
+    "large unknown unknown https://cu.test/l.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(description)s|%(creator)s|%(creators)s|%(duration)s|%(view_count)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "53662|The-Next--Best-West|The Next, Best West|A synopsis|Coldstream Creative|['Coldstream Creative']|2203|42|https://cu.test/l.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.cultureunplugged.com/play/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"display_id\": \"2\", \"url\": \"https://cu.test/v.mp4\", \"title\": \"Plain\", \"description\": null, \"creator\": null, \"view_count\": null, \"thumbnails\": [{\"url\": \"https://cu.test/l.jpg\", \"id\": \"large\", \"preference\": 1}], \"webpage_url\": \"https://www.cultureunplugged.com/play/2\", \"original_url\": \"https://www.cultureunplugged.com/play/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"cultureunplugged.com\", \"extractor\": \"CultureUnplugged\", \"extractor_key\": \"CultureUnplugged\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://cu.test/l.jpg\", \"fulltitle\": \"Plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Plain [2].mp4\", \"filename\": \"Plain [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://cultureunplugged.com/play/3/x",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('url')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cultureunplugged.com/play/4/x",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 4: An extractor error has occurred. (caused by KeyError('title')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

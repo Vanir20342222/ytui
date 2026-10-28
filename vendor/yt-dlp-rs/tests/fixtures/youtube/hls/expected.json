@@ -1,0 +1,27 @@
+{
+  "id": "BaW_jenozKc",
+  "title": "Saved YouTube HLS fixture",
+  "extractor": "youtube",
+  "extractor_key": "Youtube",
+  "webpage_url": "https://www.youtube.com/watch?v=BaW_jenozKc",
+  "formats": [
+    {
+      "format_id": "hls-0",
+      "stream_kind": "standalone",
+      "url": "{{ORIGIN}}/hls/itag/95/file/index.m3u8",
+      "width": 640,
+      "height": 360,
+      "tbr": 400,
+      "language": null
+    },
+    {
+      "format_id": "hls-1",
+      "stream_kind": "standalone",
+      "url": "{{ORIGIN}}/hls/itag/96/file/index.m3u8",
+      "width": 1280,
+      "height": 720,
+      "tbr": 1000,
+      "language": null
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://media.example.test/hds/clip.f4m",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"clip\", \"title\": \"clip\", \"timestamp\": null, \"formats\": [{\"format_id\": \"400\", \"url\": \"https://media.example.test/hds/clip.f4m\", \"manifest_url\": \"https://media.example.test/hds/clip.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 400, \"width\": 640, \"height\": 360, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"400 - 640x360\"}, {\"format_id\": \"1500\", \"url\": \"https://media.example.test/hds/clip.f4m\", \"manifest_url\": \"https://media.example.test/hds/clip.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 1500, \"width\": 1280, \"height\": 720, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1500 - 1280x720\"}], \"webpage_url\": \"https://media.example.test/hds/clip.f4m\", \"original_url\": \"https://media.example.test/hds/clip.f4m\", \"webpage_url_basename\": \"clip.f4m\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"clip\", \"fulltitle\": \"clip\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"1500\", \"url\": \"https://media.example.test/hds/clip.f4m\", \"manifest_url\": \"https://media.example.test/hds/clip.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 1500, \"width\": 1280, \"height\": 720, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1500 - 1280x720\", \"_filename\": \"clip [clip].flv\", \"filename\": \"clip [clip].flv\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/hds/clip.f4m",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/hds/clip.f4m",
+    "[generic] clip: Downloading webpage",
+    "[generic] clip: Extracting information",
+    "[info] Available formats for clip:",
+    "ID   EXT RESOLUTION |   TBR PROTO | VCODEC  ACODEC",
+    "---------------------------------------------------",
+    "400  flv 640x360    |  400k f4m   | unknown unknown",
+    "1500 flv 1280x720   | 1500k f4m   | unknown unknown"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/set.f4m",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"set\", \"title\": \"set\", \"timestamp\": null, \"formats\": [{\"format_id\": \"1\", \"url\": \"https://cdn.example.test/hds/rel/audio.mp4\", \"manifest_url\": \"https://cdn.example.test/hds/rel/audio.mp4\", \"ext\": \"mp4\", \"protocol\": \"f4m\", \"tbr\": null, \"width\": null, \"height\": null, \"vcodec\": \"none\", \"preference\": null, \"quality\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1 - audio only\"}, {\"format_id\": \"64\", \"url\": \"https://cdn.example.test/hds/old.mp4\", \"manifest_url\": \"https://cdn.example.test/hds/old.mp4\", \"ext\": \"mp4\", \"protocol\": \"f4m\", \"tbr\": 64, \"width\": null, \"height\": null, \"vcodec\": \"none\", \"preference\": null, \"quality\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 64, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"64 - audio only\"}, {\"format_id\": \"128\", \"url\": \"https://cdn.example.test/direct.mp4\", \"manifest_url\": \"https://cdn.example.test/direct.mp4\", \"ext\": \"mp4\", \"protocol\": \"f4m\", \"tbr\": 128, \"width\": null, \"height\": null, \"vcodec\": \"none\", \"preference\": null, \"quality\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"128 - audio only\"}], \"webpage_url\": \"https://media.example.test/set.f4m\", \"original_url\": \"https://media.example.test/set.f4m\", \"webpage_url_basename\": \"set.f4m\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"set\", \"fulltitle\": \"set\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"128\", \"url\": \"https://cdn.example.test/direct.mp4\", \"manifest_url\": \"https://cdn.example.test/direct.mp4\", \"ext\": \"mp4\", \"protocol\": \"f4m\", \"tbr\": 128, \"width\": null, \"height\": null, \"vcodec\": \"none\", \"preference\": null, \"quality\": null, \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"128 - audio only\", \"_filename\": \"set [set].mp4\", \"filename\": \"set [set].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/set.f4m",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/set.f4m",
+    "[generic] set: Downloading webpage",
+    "[generic] set: Extracting information",
+    "[info] Available formats for set:",
+    "ID  EXT RESOLUTION |  TBR PROTO | VCODEC     ACODEC   ABR",
+    "---------------------------------------------------------",
+    "1   mp4 audio only |      f4m   | audio only unknown",
+    "64  mp4 audio only |  64k f4m   | audio only unknown  64k",
+    "128 mp4 audio only | 128k f4m   | audio only unknown 128k"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/hds/clip.f4m",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(format_id)s|%(protocol)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "clip|clip|1500|f4m|flv"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/pv.f4m",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [generic] pv: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/hds/real.f4m",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/hds/real.f4m",
+    "[generic] real: Downloading webpage",
+    "[generic] real: Extracting information",
+    "[info] real: Downloading 1 format(s): 1500",
+    "[f4m] Downloading f4m manifest",
+    "[f4m] Total fragments: 2",
+    "[download] Destination: real.flv",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "real.flv": 449
+   }
+  },
+  {
+   "url": "https://media.example.test/hds/real.f4m",
+   "args": [
+    "--no-progress",
+    "-f",
+    "400",
+    "-o",
+    "%(id)s-lo.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/hds/real.f4m",
+    "[generic] real: Downloading webpage",
+    "[generic] real: Extracting information",
+    "[info] real: Downloading 1 format(s): 400",
+    "[f4m] Downloading f4m manifest",
+    "[f4m] Total fragments: 2",
+    "[download] Destination: real-lo.flv",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "real-lo.flv": 413
+   }
+  },
+  {
+   "url": "https://media.example.test/hds/real.f4m",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"real\", \"title\": \"real\", \"timestamp\": null, \"formats\": [{\"format_id\": \"400\", \"url\": \"https://media.example.test/hds/real.f4m\", \"manifest_url\": \"https://media.example.test/hds/real.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 400, \"width\": null, \"height\": null, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"400 - unknown\"}, {\"format_id\": \"1500\", \"url\": \"https://media.example.test/hds/real.f4m\", \"manifest_url\": \"https://media.example.test/hds/real.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 1500, \"width\": 1280, \"height\": 720, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1500 - 1280x720\"}], \"webpage_url\": \"https://media.example.test/hds/real.f4m\", \"original_url\": \"https://media.example.test/hds/real.f4m\", \"webpage_url_basename\": \"real.f4m\", \"webpage_url_domain\": \"media.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"real\", \"fulltitle\": \"real\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"1500\", \"url\": \"https://media.example.test/hds/real.f4m\", \"manifest_url\": \"https://media.example.test/hds/real.f4m\", \"ext\": \"flv\", \"protocol\": \"f4m\", \"tbr\": 1500, \"width\": 1280, \"height\": 720, \"vcodec\": null, \"preference\": null, \"quality\": null, \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1500 - 1280x720\", \"_filename\": \"real [real].flv\", \"filename\": \"real [real].flv\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://media.example.test/hds/byurl.f4m",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://media.example.test/hds/byurl.f4m",
+    "[generic] byurl: Downloading webpage",
+    "[generic] byurl: Extracting information",
+    "[info] byurl: Downloading 1 format(s): 800",
+    "[f4m] Downloading f4m manifest",
+    "[f4m] Total fragments: 2",
+    "[download] Destination: byurl.flv",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "byurl.flv": 413
+   }
+  }
+ ]
+}

@@ -1,0 +1,104 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"16493755593805191\", \"title\": \"Sungjae Im: Thursday Interview 2022\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://masters.test/hls/video.m3u8\", \"manifest_url\": \"https://masters.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"https://masters.test/hls/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"https://masters.test/hls/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"upload_date\": \"20220407\", \"thumbnails\": [{\"id\": \"large\", \"url\": \"https://masters.test/l.jpg\"}, {\"id\": \"small\", \"url\": \"https://masters.test/s.jpg\"}], \"webpage_url\": \"https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html\", \"original_url\": \"https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html\", \"webpage_url_basename\": \"sungjae_im_thursday_interview_2022.html\", \"webpage_url_domain\": \"masters.com\", \"extractor\": \"Masters\", \"extractor_key\": \"Masters\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://masters.test/s.jpg\", \"display_id\": \"16493755593805191\", \"fulltitle\": \"Sungjae Im: Thursday Interview 2022\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://masters.test/hls/video.m3u8\", \"manifest_url\": \"https://masters.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Sungjae Im\\uff1a Thursday Interview 2022 [16493755593805191].mp4\", \"filename\": \"Sungjae Im\\uff1a Thursday Interview 2022 [16493755593805191].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Masters] Extracting URL: https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+    "[Masters] 16493755593805191: Downloading JSON metadata",
+    "[Masters] 16493755593805191: Downloading m3u8 information",
+    "[info] Available subtitles for 16493755593805191:",
+    "Language Formats",
+    "en       vtt",
+    "de       vtt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+   "args": [
+    "--list-thumbnails"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Masters] Extracting URL: https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+    "[Masters] 16493755593805191: Downloading JSON metadata",
+    "[Masters] 16493755593805191: Downloading m3u8 information",
+    "[info] Available thumbnails for 16493755593805191:",
+    "ID    Width   Height  URL",
+    "large unknown unknown https://masters.test/l.jpg",
+    "small unknown unknown https://masters.test/s.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/16493755593805191/sungjae_im_thursday_interview_2022.html",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(upload_date)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "16493755593805191|Sungjae Im: Thursday Interview 2022|20220407|https://masters.test/s.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://masters.com/en_US/watch/2021-13-40/2/x.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Masters video #2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://masters.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"upload_date\": null, \"thumbnails\": [], \"webpage_url\": \"https://masters.com/en_US/watch/2021-13-40/2/x.html\", \"original_url\": \"https://masters.com/en_US/watch/2021-13-40/2/x.html\", \"webpage_url_basename\": \"x.html\", \"webpage_url_domain\": \"masters.com\", \"extractor\": \"Masters\", \"extractor_key\": \"Masters\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://masters.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"Masters video #2 [2].mp4\", \"filename\": \"Masters video #2 [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/3/x.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Masters] 3: Failed to obtain m3u8 URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.masters.com/en_US/watch/2022-04-07/4/x.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Masters] 4: Failed to download m3u8 information: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

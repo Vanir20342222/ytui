@@ -1,0 +1,75 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://benprunty.bandcamp.com/track/lanius-battle",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2650410135\", \"title\": \"Ben Prunty - Lanius (Battle)\", \"thumbnail\": \"https://f4.bcbits.com/img/a123_5.jpg\", \"uploader\": \"Ben Prunty\", \"uploader_id\": \"benprunty\", \"uploader_url\": \"https://benprunty.bandcamp.com\", \"timestamp\": 1396506091, \"release_timestamp\": 1396483200, \"duration\": 260.877, \"track\": \"Lanius (Battle)\", \"track_number\": 1, \"track_id\": \"2650410135\", \"artist\": \"Ben Prunty\", \"album\": \"FTL Soundtrack\", \"album_artist\": \"Album Artist\", \"formats\": [{\"format_id\": \"mp3-128\", \"url\": \"http://t4.bcbits.com/stream/abc/mp3-128/2650410135?p=0&ts=1&t=x\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"acodec\": \"mp3\", \"abr\": 128, \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 4174032, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-128 - audio only\"}], \"tags\": [\"house\", \"deep&house\"], \"webpage_url\": \"https://benprunty.bandcamp.com/track/lanius-battle\", \"original_url\": \"https://benprunty.bandcamp.com/track/lanius-battle\", \"webpage_url_basename\": \"lanius-battle\", \"webpage_url_domain\": \"benprunty.bandcamp.com\", \"extractor\": \"Bandcamp\", \"extractor_key\": \"Bandcamp\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://f4.bcbits.com/img/a123_5.jpg\", \"id\": \"0\"}], \"display_id\": \"2650410135\", \"fulltitle\": \"Ben Prunty - Lanius (Battle)\", \"duration_string\": \"4:20\", \"upload_date\": \"20140403\", \"release_date\": \"20140403\", \"release_year\": 2014, \"album_artists\": [\"Album Artist\"], \"artists\": [\"Ben Prunty\"], \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"mp3-128\", \"url\": \"http://t4.bcbits.com/stream/abc/mp3-128/2650410135?p=0&ts=1&t=x\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"acodec\": \"mp3\", \"abr\": 128, \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 128, \"resolution\": \"audio only\", \"filesize_approx\": 4174032, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-128 - audio only\", \"_filename\": \"Ben Prunty - Lanius (Battle) [2650410135].mp3\", \"filename\": \"Ben Prunty - Lanius (Battle) [2650410135].mp3\", \"__write_download_archive\": false}], \"format_id\": \"mp3-128\", \"url\": \"http://t4.bcbits.com/stream/abc/mp3-128/2650410135?p=0&ts=1&t=x\", \"ext\": \"mp3\", \"vcodec\": \"none\", \"acodec\": \"mp3\", \"abr\": 128, \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 128, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 4174032, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-128 - audio only\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://youtube-dl.bandcamp.com/track/youtube-dl-test-song",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"1812978515\", \"title\": \"youtube-dl - test song\", \"thumbnail\": \"https://f4.bcbits.com/img/a123_5.jpg\", \"uploader\": \"youtube-dl\", \"uploader_id\": \"youtube-dl\", \"uploader_url\": \"https://youtube-dl.bandcamp.com\", \"timestamp\": 1354224127, \"release_timestamp\": null, \"duration\": 9.8485, \"track\": \"test song\", \"track_number\": null, \"track_id\": \"1812978515\", \"artist\": \"youtube-dl\", \"album\": null, \"album_artist\": null, \"formats\": [{\"url\": \"http://popplers5.bandcamp.com/download/track?enc=mp3-320&id=1812978515&retry=1\", \"ext\": \"mp3\", \"format_id\": \"mp3-320\", \"format_note\": \"MP3 320\", \"filesize\": 7200000, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-320 - audio only (MP3 320)\"}], \"tags\": [\"house\", \"deep&house\"], \"webpage_url\": \"https://youtube-dl.bandcamp.com/track/youtube-dl-test-song\", \"original_url\": \"https://youtube-dl.bandcamp.com/track/youtube-dl-test-song\", \"webpage_url_basename\": \"youtube-dl-test-song\", \"webpage_url_domain\": \"youtube-dl.bandcamp.com\", \"extractor\": \"Bandcamp\", \"extractor_key\": \"Bandcamp\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://f4.bcbits.com/img/a123_5.jpg\", \"id\": \"0\"}], \"display_id\": \"1812978515\", \"fulltitle\": \"youtube-dl - test song\", \"duration_string\": \"9\", \"upload_date\": \"20121129\", \"release_year\": null, \"artists\": [\"youtube-dl\"], \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"http://popplers5.bandcamp.com/download/track?enc=mp3-320&id=1812978515&retry=1\", \"ext\": \"mp3\", \"format_id\": \"mp3-320\", \"format_note\": \"MP3 320\", \"filesize\": 7200000, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"resolution\": \"audio only\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-320 - audio only (MP3 320)\", \"_filename\": \"youtube-dl - test song [1812978515].mp3\", \"filename\": \"youtube-dl - test song [1812978515].mp3\", \"__write_download_archive\": false}], \"url\": \"http://popplers5.bandcamp.com/download/track?enc=mp3-320&id=1812978515&retry=1\", \"ext\": \"mp3\", \"format_id\": \"mp3-320\", \"format_note\": \"MP3 320\", \"filesize\": 7200000, \"vcodec\": \"none\", \"acodec\": \"mp3\", \"protocol\": \"http\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp3-320 - audio only (MP3 320)\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Bandcamp] unable to extract album artist; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Bandcamp] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://youtube-dl.bandcamp.com/track/youtube-dl-test-song",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bandcamp] Extracting URL: https://youtube-dl.bandcamp.com/track/youtube-dl-test-song",
+    "[Bandcamp] youtube-dl-test-song: Downloading webpage",
+    "[Bandcamp] 1812978515: Downloading free downloads page",
+    "[Bandcamp] 1812978515: Downloading mp3-320 JSON",
+    "[Bandcamp] 1812978515: Downloading flac JSON",
+    "[info] Available formats for 1812978515:",
+    "ID      EXT RESOLUTION | FILESIZE PROTO | VCODEC     ACODEC MORE INFO",
+    "---------------------------------------------------------------------",
+    "mp3-320 mp3 audio only |  6.87MiB http  | audio only mp3    MP3 320"
+   ],
+   "stderr": [
+    "WARNING: [Bandcamp] unable to extract album artist; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [Bandcamp] unable to extract title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://benprunty.bandcamp.com/track/lanius-battle",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bandcamp] Extracting URL: https://benprunty.bandcamp.com/track/lanius-battle",
+    "[Bandcamp] lanius-battle: Downloading webpage",
+    "[info] 2650410135: Downloading 1 format(s): mp3-128",
+    "[download] Destination: 2650410135.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "2650410135.mp3": 12
+   }
+  }
+ ]
+}

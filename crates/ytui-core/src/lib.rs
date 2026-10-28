@@ -20,3 +20,5 @@ pub fn clean_text(value: &str) -> String {
         .filter(|c| !c.is_control() || *c == '\n')
         .collect()
 }
+
+pub mod theme;

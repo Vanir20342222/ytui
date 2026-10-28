@@ -1,0 +1,87 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://rtrfm.com.au/show-episode/breakfast-2021-11-11/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"breakfast-2021-11-11\", \"title\": \"Breakfast with Taylah 2021-11-11\", \"series\": \"Breakfast with Taylah\", \"url\": \"https://rtrfm.test/a.mp3\", \"release_date\": \"2021-11-11\", \"description\": \"Wake up & listen\", \"webpage_url\": \"https://rtrfm.com.au/show-episode/breakfast-2021-11-11/\", \"original_url\": \"https://rtrfm.com.au/show-episode/breakfast-2021-11-11/\", \"webpage_url_basename\": \"breakfast-2021-11-11\", \"webpage_url_domain\": \"rtrfm.com.au\", \"extractor\": \"RTRFM\", \"extractor_key\": \"RTRFM\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"breakfast-2021-11-11\", \"fulltitle\": \"Breakfast with Taylah 2021-11-11\", \"release_year\": 2021, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp3\", \"video_ext\": \"mp3\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Breakfast with Taylah 2021-11-11 [breakfast-2021-11-11].mp3\", \"filename\": \"Breakfast with Taylah 2021-11-11 [breakfast-2021-11-11].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rtrfm.com.au/show-episode/breakfast-2021-11-11/",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(series)s|%(release_date)s|%(description)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "breakfast-2021-11-11|Breakfast with Taylah 2021-11-11|Breakfast with Taylah|2021-11-11|Wake up & listen|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rtrfm.com.au/show-episode/breakfast-2021-11-11/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[RTRFM] Extracting URL: https://rtrfm.com.au/show-episode/breakfast-2021-11-11/",
+    "[RTRFM] breakfast-2021-11-11: Downloading webpage",
+    "[RTRFM] breakfast: Downloading MP3 URL",
+    "[info] breakfast-2021-11-11: Downloading 1 format(s): 0",
+    "[download] Destination: breakfast-2021-11-11.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "breakfast-2021-11-11.mp3": 778
+   }
+  },
+  {
+   "url": "https://www.rtrfm.com.au/shows/old/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [RTRFM] old: Expired or no episode on this date"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://rtrfm.com.au/shows/none/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [RTRFM] none: Unable to extract details; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://rtrfm.com.au/shows/nokey/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: nokey: An extractor error has occurred. (caused by KeyError('u')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

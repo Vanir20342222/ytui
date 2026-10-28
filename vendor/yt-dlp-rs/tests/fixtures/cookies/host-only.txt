@@ -1,0 +1,4 @@
+# Netscape HTTP Cookie File
+# Synthetic deterministic reference data
+
+example.test	FALSE	/	FALSE	4102444800	host	H

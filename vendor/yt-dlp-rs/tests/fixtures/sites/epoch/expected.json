@@ -1,0 +1,71 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"a3dd732c-4750\", \"formats\": [{\"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/video.m3u8\", \"manifest_url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/playlist.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"title\": \"Rex Lee on apps\", \"webpage_url\": \"https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html\", \"original_url\": \"https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html\", \"webpage_url_basename\": \"rex-lee-on-intrusive-apps_4661688.html\", \"webpage_url_domain\": \"theepochtimes.com\", \"extractor\": \"Epoch\", \"extractor_key\": \"Epoch\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"a3dd732c-4750\", \"fulltitle\": \"Rex Lee on apps\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/video.m3u8\", \"manifest_url\": \"http://vs1.youmaker.com/assets/a3dd732c-4750/playlist.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\", \"_filename\": \"Rex Lee on apps [a3dd732c-4750].mp4\", \"filename\": \"Rex Lee on apps [a3dd732c-4750].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Epoch] Extracting URL: https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html",
+    "[Epoch] 4661688: Downloading webpage",
+    "[Epoch] 4661688: Downloading m3u8 information",
+    "[info] Available subtitles for a3dd732c-4750:",
+    "Language Formats",
+    "en       vtt",
+    "de       vtt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.theepochtimes.com/nodata_2.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 2: An extractor error has occurred. (caused by KeyError('data-id')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.theepochtimes.com/nobox_3.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: object of type 'NoneType' has no len()"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.theepochtimes.com/unclosed_4.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: closing div tag not found"
+   ],
+   "files": {}
+  }
+ ]
+}

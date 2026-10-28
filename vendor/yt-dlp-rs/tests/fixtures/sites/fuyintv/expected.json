@@ -1,0 +1,76 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.fuyin.tv/html/2733/44129.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"44129\", \"title\": \"\\u7b2c1\\u96c6\", \"url\": \"https://fy.test/v.m3u8x\", \"ext\": \"mp4\", \"description\": \"\\u798f\\u97f3 & \\u89c6\\u9891\", \"webpage_url\": \"https://www.fuyin.tv/html/2733/44129.html\", \"original_url\": \"https://www.fuyin.tv/html/2733/44129.html\", \"webpage_url_basename\": \"44129.html\", \"webpage_url_domain\": \"fuyin.tv\", \"extractor\": \"FuyinTV\", \"extractor_key\": \"FuyinTV\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"44129\", \"fulltitle\": \"\\u7b2c1\\u96c6\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"\\u7b2c1\\u96c6 [44129].mp4\", \"filename\": \"\\u7b2c1\\u96c6 [44129].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://fuyin.tv/html/1/2.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [FuyinTV] 2: Unable to download webpage: HTTP Error 404: Not Found",
+    "ERROR: expected string or bytes-like object, got 'bool'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://fuyin.tv/html/1/2.html",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 1,
+   "stdout": [
+    "[FuyinTV] Extracting URL: https://fuyin.tv/html/1/2.html",
+    "[FuyinTV] 2: Downloading JSON metadata",
+    "[FuyinTV] 2: Downloading webpage"
+   ],
+   "stderr": [
+    "WARNING: [FuyinTV] 2: Unable to download webpage: HTTP Error 404: Not Found",
+    "ERROR: expected string or bytes-like object, got 'bool'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.fuyin.tv/html/1/3.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('url')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.fuyin.tv/html/1/4.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"4\", \"title\": \"FuyinTV video #4\", \"url\": \"https://fy.test/v.mp4\", \"ext\": \"mp4\", \"description\": null, \"webpage_url\": \"https://www.fuyin.tv/html/1/4.html\", \"original_url\": \"https://www.fuyin.tv/html/1/4.html\", \"webpage_url_basename\": \"4.html\", \"webpage_url_domain\": \"fuyin.tv\", \"extractor\": \"FuyinTV\", \"extractor_key\": \"FuyinTV\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"4\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"FuyinTV video #4 [4].mp4\", \"filename\": \"FuyinTV video #4 [4].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [FuyinTV] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  }
+ ]
+}

@@ -1,0 +1,80 @@
+{
+ "routes": [
+  {
+   "url": "https://soundcloud.com/",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body_file": "home.html"
+  },
+  {
+   "url": "https://a-v2.sndcdn.com/assets/1-second.js",
+   "headers": {
+    "Content-Type": "application/javascript"
+   },
+   "body": "var x={client_id:\"aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB\",y:1};"
+  },
+  {
+   "url": "https://a-v2.sndcdn.com/assets/0-first.js",
+   "headers": {
+    "Content-Type": "application/javascript"
+   },
+   "body": "var nothing=1;"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/resolve?url=https%3A%2F%2Fsoundcloud.com%2Fethmusic%2Flostin-powers-she-so-heavy&client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "track.json"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/tracks/123998367?client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "track.json"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/media/soundcloud:tracks:123998367/aaa/stream/hls?client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cf-hls-media.sndcdn.com/playlist/x.128.mp3/playlist.m3u8?Policy=1\"}"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/media/soundcloud:tracks:123998367/bbb/stream/progressive?client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cf-media.sndcdn.com/x.128.mp3?Policy=2\"}"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/media/soundcloud:tracks:123998367/ccc/stream/hls?client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cf-hls-media.sndcdn.com/playlist/y.aac/playlist.m3u8?Policy=3\"}"
+  },
+  {
+   "url": "https://api-v2.soundcloud.com/media/soundcloud:tracks:123998367/ddd/stream/hls?client_id=aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBB",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cf-hls-opus-media.sndcdn.com/playlist/z.64.opus/playlist.m3u8?Policy=4\"}"
+  },
+  {
+   "url": "https://i1.sndcdn.com/artworks-000071811455-l4hrpp-original.png",
+   "status": 404,
+   "headers": {},
+   "body": ""
+  },
+  {
+   "url": "https://cf-media.sndcdn.com/x.128.mp3?Policy=2",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body": "ID3-fake-mp3-bytes"
+  }
+ ]
+}

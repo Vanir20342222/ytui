@@ -1,0 +1,500 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "filter": "xy",
+   "dict": {
+    "x": 1200
+   },
+   "result": false
+  },
+  {
+   "filter": "!xy",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "x",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "!x",
+   "dict": {
+    "x": 1200
+   },
+   "result": false
+  },
+  {
+   "filter": "x",
+   "dict": {
+    "x": 0
+   },
+   "result": true
+  },
+  {
+   "filter": "is_live",
+   "dict": {
+    "is_live": false
+   },
+   "result": false
+  },
+  {
+   "filter": "!is_live",
+   "dict": {
+    "is_live": false
+   },
+   "result": true
+  },
+  {
+   "filter": "is_live",
+   "dict": {
+    "is_live": true
+   },
+   "result": true
+  },
+  {
+   "filter": "x>0",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "x>1200",
+   "dict": {
+    "x": 1200
+   },
+   "result": false
+  },
+  {
+   "filter": "x>1100",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "x>2K",
+   "dict": {
+    "x": 1200
+   },
+   "result": false
+  },
+  {
+   "filter": "x>=1200 & x < 1300",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "x>=1100 & x < 1200",
+   "dict": {
+    "x": 1200
+   },
+   "result": false
+  },
+  {
+   "filter": "x > 1:0:0",
+   "dict": {
+    "x": 3601
+   },
+   "result": true
+  },
+  {
+   "filter": "y=a212",
+   "dict": {
+    "y": "foobar42"
+   },
+   "result": false
+  },
+  {
+   "filter": "y=foobar42",
+   "dict": {
+    "y": "foobar42"
+   },
+   "result": true
+  },
+  {
+   "filter": "y!=foobar42",
+   "dict": {
+    "y": "foobar42"
+   },
+   "result": false
+  },
+  {
+   "filter": "y!=foobar2",
+   "dict": {
+    "y": "foobar42"
+   },
+   "result": true
+  },
+  {
+   "filter": "y ! = foobar2",
+   "dict": {
+    "y": "foobar42"
+   },
+   "result": true
+  },
+  {
+   "filter": "like_count > 100 & dislike_count <? 50 & description",
+   "dict": {
+    "like_count": 90,
+    "description": "foo"
+   },
+   "result": false
+  },
+  {
+   "filter": "like_count > 100 & dislike_count <? 50 & description",
+   "dict": {
+    "like_count": 190,
+    "description": "foo"
+   },
+   "result": true
+  },
+  {
+   "filter": "like_count > 100 & dislike_count <? 50 & description",
+   "dict": {
+    "like_count": 190,
+    "dislike_count": 60,
+    "description": "foo"
+   },
+   "result": false
+  },
+  {
+   "filter": "like_count > 100 & dislike_count <? 50 & description",
+   "dict": {
+    "like_count": 190,
+    "dislike_count": 10
+   },
+   "result": false
+  },
+  {
+   "filter": "dislike_count >? 50",
+   "dict": {},
+   "result": true
+  },
+  {
+   "filter": "dislike_count > 50",
+   "dict": {},
+   "result": false
+  },
+  {
+   "filter": "duration < 30",
+   "dict": {
+    "duration": 15
+   },
+   "result": true
+  },
+  {
+   "filter": "description *= 'cats \\& dogs'",
+   "dict": {
+    "description": "Raining cats & dogs"
+   },
+   "result": true
+  },
+  {
+   "filter": "description~='(?i)\\bcats \\& dogs\\b'",
+   "dict": {
+    "description": "Raining Cats & dogs"
+   },
+   "result": true
+  },
+  {
+   "filter": "tags*=foo",
+   "dict": {
+    "tags": [
+     "foo",
+     "bar"
+    ]
+   },
+   "result": true
+  },
+  {
+   "filter": "tags*=fo",
+   "dict": {
+    "tags": [
+     "foo",
+     "bar"
+    ]
+   },
+   "result": false
+  },
+  {
+   "filter": "title^=\"Hello \\\"world\"",
+   "dict": {
+    "title": "Hello \"world\" here"
+   },
+   "result": true
+  },
+  {
+   "filter": "title$=here",
+   "dict": {
+    "title": "x here"
+   },
+   "result": true
+  },
+  {
+   "filter": "filesize<1.5MiB",
+   "dict": {
+    "filesize": 1000000
+   },
+   "result": true
+  },
+  {
+   "filter": "filesize<1M",
+   "dict": {
+    "filesize": 999999
+   },
+   "result": true
+  },
+  {
+   "filter": "filesize<1M",
+   "dict": {
+    "filesize": 1000001
+   },
+   "result": false
+  },
+  {
+   "filter": "duration>5m",
+   "dict": {
+    "duration": 301
+   },
+   "result": false
+  },
+  {
+   "filter": "duration>5 min",
+   "dict": {
+    "duration": 301
+   },
+   "result": true
+  },
+  {
+   "filter": "duration>1:30",
+   "dict": {
+    "duration": 91
+   },
+   "result": true
+  },
+  {
+   "filter": "duration>=PT1M30S",
+   "dict": {
+    "duration": 90
+   },
+   "result": true
+  },
+  {
+   "filter": "duration<2 hours",
+   "dict": {
+    "duration": 7000
+   },
+   "result": true
+  },
+  {
+   "filter": "x=1_200",
+   "dict": {
+    "x": 1200
+   },
+   "result": true
+  },
+  {
+   "filter": "x=1",
+   "dict": {
+    "x": true
+   },
+   "result": true
+  },
+  {
+   "filter": "x= 12 ",
+   "dict": {
+    "x": 12
+   },
+   "result": true
+  },
+  {
+   "filter": "x=+12",
+   "dict": {
+    "x": 12
+   },
+   "result": true
+  },
+  {
+   "filter": "y<b",
+   "dict": {
+    "y": "a"
+   },
+   "result": true
+  },
+  {
+   "filter": "y>=b",
+   "dict": {
+    "y": "a"
+   },
+   "result": false
+  },
+  {
+   "filter": "x=abc",
+   "dict": {
+    "x": 1
+   },
+   "result": false
+  },
+  {
+   "filter": "x='abc'",
+   "dict": {
+    "x": "abc"
+   },
+   "result": true
+  },
+  {
+   "filter": "x ='a b'",
+   "dict": {
+    "x": "a b"
+   },
+   "result": true
+  },
+  {
+   "filter": "x='a'b'",
+   "dict": {
+    "x": "a'b"
+   },
+   "result": true
+  },
+  {
+   "filter": "x=''",
+   "dict": {
+    "x": "''"
+   },
+   "result": true
+  },
+  {
+   "filter": "x=5",
+   "dict": {
+    "x": 5.0
+   },
+   "result": true
+  },
+  {
+   "filter": "x<5.5",
+   "dict": {
+    "x": 5
+   },
+   "result": true
+  },
+  {
+   "filter": "x=1.5k",
+   "dict": {
+    "x": 1536
+   },
+   "result": true
+  },
+  {
+   "filter": "x=1,5KB",
+   "dict": {
+    "x": 1500
+   },
+   "result": true
+  },
+  {
+   "filter": "view_count>=?1000",
+   "dict": {
+    "view_count": null
+   },
+   "result": true
+  },
+  {
+   "filter": "!view_count",
+   "dict": {
+    "view_count": null
+   },
+   "result": true
+  },
+  {
+   "filter": "height<=720",
+   "dict": {
+    "height": 720
+   },
+   "result": true
+  },
+  {
+   "filter": "ext=mp4",
+   "dict": {
+    "ext": "mp4"
+   },
+   "result": true
+  },
+  {
+   "filter": "ext!=webm",
+   "dict": {
+    "ext": "mp4"
+   },
+   "result": true
+  },
+  {
+   "filter": "title~=^Fix",
+   "dict": {
+    "title": "Fixture"
+   },
+   "result": true
+  },
+  {
+   "filter": "title!~=^Fix",
+   "dict": {
+    "title": "Fixture"
+   },
+   "result": false
+  },
+  {
+   "filter": "title !*= ture",
+   "dict": {
+    "title": "Fixture"
+   },
+   "result": false
+  },
+  {
+   "filter": "x<abc",
+   "dict": {
+    "x": 1
+   },
+   "error": "TypeError"
+  },
+  {
+   "filter": "x*=12",
+   "dict": {
+    "x": 1
+   },
+   "error": "ValueError"
+  },
+  {
+   "filter": "x ?? 5",
+   "dict": {},
+   "error": "ValueError"
+  },
+  {
+   "filter": "X=1",
+   "dict": {
+    "X": 1
+   },
+   "error": "ValueError"
+  },
+  {
+   "filter": "x=",
+   "dict": {
+    "x": 1
+   },
+   "error": "ValueError"
+  },
+  {
+   "filter": "x~=1",
+   "dict": {
+    "x": 1
+   },
+   "error": "ValueError"
+  }
+ ]
+}

@@ -1,0 +1,125 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000001",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"7300000000000000001\", \"formats\": [{\"format_id\": \"audio\", \"url\": \"https://sf16-ies-music.tiktokcdn.com/obj/music.mp3?mime_type=audio_mpeg\", \"ext\": \"mp3\", \"acodec\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"audio - audio only\"}, {\"ext\": \"mp4\", \"vcodec\": \"bytevc2\", \"acodec\": \"aac\", \"format_id\": \"bytevc2_720p_900000\", \"tbr\": 900, \"quality\": 2, \"format_note\": \"UNPLAYABLE\", \"preference\": -100, \"filesize\": null, \"width\": 720, \"height\": 1280, \"url\": \"https://v16-webapp-prime.tiktok.com/video/vvc.mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"720x1280\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"filesize_approx\": 1687500, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"bytevc2_720p_900000 - 720x1280 (UNPLAYABLE)\"}, {\"ext\": \"mp4\", \"vcodec\": \"h264\", \"acodec\": \"aac\", \"format_id\": \"download\", \"url\": \"https://v16-webapp-prime.tiktok.com/video/download.mp4\", \"format_note\": \"watermarked\", \"preference\": -2, \"__needs_testing\": true, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"download - unknown (watermarked)\"}, {\"ext\": \"mp4\", \"vcodec\": \"h264\", \"acodec\": \"aac\", \"format_id\": \"play\", \"url\": \"https://v16-webapp-prime.tiktok.com/video/play.mp4\", \"width\": 576, \"height\": 1024, \"quality\": 1, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"576x1024\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"play - 576x1024\"}, {\"ext\": \"mp4\", \"vcodec\": \"h264\", \"acodec\": \"aac\", \"format_id\": \"h264_540p_800000\", \"tbr\": 800, \"quality\": 1, \"format_note\": null, \"preference\": -1, \"filesize\": 1500000, \"width\": 576, \"height\": 1024, \"url\": \"https://v16-webapp-prime.tiktok.com/video/540.mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"576x1024\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"h264_540p_800000 - 576x1024\"}, {\"ext\": \"mp4\", \"vcodec\": \"h265\", \"acodec\": \"none\", \"format_id\": \"bytevc1_1080p_2000000\", \"tbr\": 2000, \"quality\": 3, \"format_note\": null, \"preference\": -1, \"filesize\": 3000000, \"width\": 1080, \"height\": 1920, \"url\": \"https://v19-webapp-prime.tiktok.com/video/media-video-hvc1/\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000, \"resolution\": \"1080x1920\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"bytevc1_1080p_2000000 - 1080x1920\", \"__working\": true}], \"subtitles\": {}, \"http_headers\": {\"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"channel\": \"Dancer Name\", \"channel_id\": \"MS4wLjABAAAA_secuid\", \"uploader\": \"dancer\", \"uploader_id\": \"6800000000000000001\", \"channel_url\": \"https://www.tiktok.com/@MS4wLjABAAAA_secuid\", \"uploader_url\": \"https://www.tiktok.com/@dancer\", \"track\": \"original sound\", \"artists\": [\"Artist One\", \"Artist Two\"], \"duration\": 15, \"title\": \"Dancing in the rain with my best friends on a sunny afternoon #fun #d...\", \"description\": \"Dancing in the rain with my best friends on a sunny afternoon #fun #dance\", \"timestamp\": 1700000000, \"view_count\": 99000, \"like_count\": 1500, \"repost_count\": 20, \"comment_count\": 33, \"save_count\": 45, \"thumbnails\": [{\"id\": \"dynamicCover\", \"url\": \"https://p16-sign.tiktokcdn.com/dynamic.webp\", \"preference\": -2}, {\"id\": \"cover\", \"url\": \"https://p16-sign.tiktokcdn.com/cover.jpeg\", \"preference\": -1}, {\"id\": \"originCover\", \"url\": \"https://p16-sign.tiktokcdn.com/origin.jpeg\", \"preference\": -1}], \"webpage_url\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\", \"original_url\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\", \"webpage_url_basename\": \"7300000000000000001\", \"webpage_url_domain\": \"tiktok.com\", \"extractor\": \"TikTok\", \"extractor_key\": \"TikTok\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://p16-sign.tiktokcdn.com/origin.jpeg\", \"display_id\": \"7300000000000000001\", \"fulltitle\": \"Dancing in the rain with my best friends on a sunny afternoon #fun #d...\", \"duration_string\": \"15\", \"upload_date\": \"20231114\", \"release_year\": null, \"artist\": \"Artist One, Artist Two\", \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"requested_formats\": [{\"ext\": \"mp4\", \"vcodec\": \"h265\", \"acodec\": \"none\", \"format_id\": \"bytevc1_1080p_2000000\", \"tbr\": 2000, \"quality\": 3, \"format_note\": null, \"preference\": -1, \"filesize\": 3000000, \"width\": 1080, \"height\": 1920, \"url\": \"https://v19-webapp-prime.tiktok.com/video/media-video-hvc1/\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000, \"resolution\": \"1080x1920\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"bytevc1_1080p_2000000 - 1080x1920\", \"__working\": true}, {\"format_id\": \"audio\", \"url\": \"https://sf16-ies-music.tiktokcdn.com/obj/music.mp3?mime_type=audio_mpeg\", \"ext\": \"mp3\", \"acodec\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"audio - audio only\"}], \"format\": \"bytevc1_1080p_2000000 - 1080x1920+audio - audio only\", \"format_id\": \"bytevc1_1080p_2000000+audio\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"filesize_approx\": 3000000, \"tbr\": 2000, \"width\": 1080, \"height\": 1920, \"resolution\": \"1080x1920\", \"dynamic_range\": \"SDR\", \"vcodec\": \"h265\", \"vbr\": 2000, \"aspect_ratio\": 0.56, \"acodec\": \"mp3\", \"_filename\": \"Dancing in the rain with my best friends on a sunny afternoon #fun #d... [7300000000000000001].mp4\", \"filename\": \"Dancing in the rain with my best friends on a sunny afternoon #fun #d... [7300000000000000001].mp4\", \"__write_download_archive\": false}], \"requested_formats\": [{\"ext\": \"mp4\", \"vcodec\": \"h265\", \"acodec\": \"none\", \"format_id\": \"bytevc1_1080p_2000000\", \"tbr\": 2000, \"quality\": 3, \"format_note\": null, \"preference\": -1, \"filesize\": 3000000, \"width\": 1080, \"height\": 1920, \"url\": \"https://v19-webapp-prime.tiktok.com/video/media-video-hvc1/\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000, \"resolution\": \"1080x1920\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 0.56, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"bytevc1_1080p_2000000 - 1080x1920\", \"__working\": true}, {\"format_id\": \"audio\", \"url\": \"https://sf16-ies-music.tiktokcdn.com/obj/music.mp3?mime_type=audio_mpeg\", \"ext\": \"mp3\", \"acodec\": \"mp3\", \"vcodec\": \"none\", \"protocol\": \"https\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.tiktok.com/@dancer/video/7300000000000000001\"}, \"format\": \"audio - audio only\"}], \"format\": \"bytevc1_1080p_2000000 - 1080x1920+audio - audio only\", \"format_id\": \"bytevc1_1080p_2000000+audio\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"language\": null, \"format_note\": null, \"filesize_approx\": 3000000, \"tbr\": 2000, \"width\": 1080, \"height\": 1920, \"resolution\": \"1080x1920\", \"fps\": null, \"dynamic_range\": \"SDR\", \"vcodec\": \"h265\", \"vbr\": 2000, \"stretched_ratio\": null, \"aspect_ratio\": 0.56, \"acodec\": \"mp3\", \"abr\": null, \"asr\": null, \"audio_channels\": null, \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000001",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[TikTok] Extracting URL: https://www.tiktok.com/@dancer/video/7300000000000000001",
+    "[TikTok] 7300000000000000001: Downloading webpage",
+    "[info] Available formats for 7300000000000000001:",
+    "ID                    EXT RESOLUTION | FILESIZE   TBR PROTO | VCODEC       VBR ACODEC     MORE INFO",
+    "---------------------------------------------------------------------------------------------------------------",
+    "audio                 mp3 audio only |                https | audio only       mp3",
+    "bytevc2_720p_900000   mp4 720x1280   | ≈1.61MiB  900k https | bytevc2          aac        UNPLAYABLE",
+    "download              mp4 unknown    |                https | h264             aac        Untested, watermarked",
+    "play                  mp4 576x1024   |                https | h264             aac",
+    "h264_540p_800000      mp4 576x1024   |  1.43MiB  800k https | h264             aac",
+    "bytevc1_1080p_2000000 mp4 1080x1920  |  2.86MiB 2000k https | h265       2000k video only Untested"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.tiktok.com/embed/7300000000000000001",
+   "args": [
+    "--print",
+    "%(id)s|%(uploader)s|%(channel_url)s|%(artists)s|%(save_count)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "7300000000000000001|dancer|https://www.tiktok.com/@MS4wLjABAAAA_secuid|['Artist One', 'Artist Two']|45"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000002",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "7300000000000000002|Short one"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000009",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies",
+    "ERROR: [TikTok] 7300000000000000009: You do not have permission to view this post. Log into an account that has access. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://vm.tiktok.com/ZMabc123/",
+   "args": [
+    "--print",
+    "%(id)s|%(webpage_url)s|%(original_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "7300000000000000001|https://www.tiktok.com/@dancer/video/7300000000000000001?_r=1|https://vm.tiktok.com/ZMabc123/"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000001",
+   "args": [
+    "-f",
+    "h264_540p_800000",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[TikTok] Extracting URL: https://www.tiktok.com/@dancer/video/7300000000000000001",
+    "[TikTok] 7300000000000000001: Downloading webpage",
+    "[info] 7300000000000000001: Downloading 1 format(s): h264_540p_800000",
+    "[download] Destination: 7300000000000000001.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies"
+   ],
+   "files": {
+    "7300000000000000001.mp4": 16
+   }
+  }
+ ]
+}

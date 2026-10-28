@@ -1,0 +1,88 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"display_id\": \"movie-mindset-33-casino-feat-felix\", \"vcodec\": \"none\", \"id\": \"478606546\", \"url\": \"https://playerfm.test/a.mp3\", \"title\": \"Movie Mindset 33 - Casino feat. Felix\", \"description\": \"The first episode & more\", \"duration\": 6830, \"thumbnail\": \"https://playerfm.test/s.png\", \"filesize\": 778, \"timestamp\": 1745406000, \"creators\": [\"Chapo Trap House\"], \"webpage_url\": \"https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix\", \"original_url\": \"https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix\", \"webpage_url_basename\": \"movie-mindset-33-casino-feat-felix\", \"webpage_url_domain\": \"player.fm\", \"extractor\": \"PlayerFm\", \"extractor_key\": \"PlayerFm\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://playerfm.test/s.png\", \"id\": \"0\"}], \"fulltitle\": \"Movie Mindset 33 - Casino feat. Felix\", \"duration_string\": \"1:53:50\", \"upload_date\": \"20250423\", \"release_year\": null, \"creator\": \"Chapo Trap House\", \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"Movie Mindset 33 - Casino feat. Felix [478606546].mp3\", \"filename\": \"Movie Mindset 33 - Casino feat. Felix [478606546].mp3\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(filesize)s|%(upload_date)s|%(creators)s|%(creator)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "478606546|movie-mindset-33-casino-feat-felix|Movie Mindset 33 - Casino feat. Felix|The first episode & more|6830|https://playerfm.test/s.png|778|20250423|['Chapo Trap House']|Chapo Trap House|mp3"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[PlayerFm] Extracting URL: https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix",
+    "[PlayerFm] movie-mindset-33-casino-feat-felix: Downloading JSON metadata",
+    "[info] 478606546: Downloading 1 format(s): 0",
+    "[download] Destination: 478606546.mp3",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "478606546.mp3": 778
+   }
+  },
+  {
+   "url": "https://www.player.fm/x/plain",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"display_id\": \"plain\", \"vcodec\": \"none\", \"id\": \"5\", \"url\": \"https://playerfm.test/b\", \"thumbnail\": \"https://playerfm.test/i.jpg\", \"webpage_url\": \"https://www.player.fm/x/plain\", \"original_url\": \"https://www.player.fm/x/plain\", \"webpage_url_basename\": \"plain\", \"webpage_url_domain\": \"player.fm\", \"extractor\": \"PlayerFm\", \"extractor_key\": \"PlayerFm\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://playerfm.test/i.jpg\", \"id\": \"0\"}], \"fulltitle\": null, \"title\": \"PlayerFm video #5\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"unknown_video\", \"audio_ext\": \"unknown_video\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"PlayerFm video #5 [5].unknown_video\", \"filename\": \"PlayerFm video #5 [5].unknown_video\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.fm/x/empty",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [PlayerFm] Missing \"id\" field in extractor result; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://player.fm/x/nourl",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [PlayerFm] 6: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

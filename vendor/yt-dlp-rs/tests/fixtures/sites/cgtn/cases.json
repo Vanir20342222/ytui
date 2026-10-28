@@ -1,0 +1,6 @@
+[
+ {"url": "https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html", "args": ["-j"]},
+ {"url": "https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(categories)s|%(creators)s|%(creator)s|%(timestamp)s|%(upload_date)s"]},
+ {"url": "https://news.cgtn.com/news/2021-06-06/Bare-x1/index.html", "args": ["-j"]},
+ {"url": "https://news.cgtn.com/news/2021-06-06/None-x2/index.html", "args": ["-j"]}
+]

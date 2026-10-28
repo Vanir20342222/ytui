@@ -1,0 +1,91 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://ok.ru/video/20079905452?fromTime=5",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"20079905452\", \"title\": \"\\u0414\\u0435\\u0432\\u0443\\u0448\\u043a\\u0438 \\u043f\\u043e\\u044e\\u0442 &amp; \\u0442\\u0430\\u043d\\u0446\\u0443\\u044e\\u0442\", \"thumbnail\": \"https://iv.okcdn.test/poster.jpg\", \"duration\": 1250, \"upload_date\": \"20151102\", \"uploader\": \"\\u041e\\u041a \\u0442\\u0435\\u0441\\u0442\", \"uploader_id\": \"54111\", \"like_count\": 12, \"age_limit\": 0, \"start_time\": 5, \"subtitles\": {\"ru\": [{\"url\": \"https://vd.mycdn.test/sub.vtt\", \"ext\": \"vtt\"}]}, \"formats\": [{\"url\": \"rtmp://vd.mycdn.test/live\", \"format_id\": \"rtmp\", \"ext\": \"flv\", \"protocol\": \"rtmp\", \"video_ext\": \"flv\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"rtmp - unknown\"}, {\"url\": \"https://vd.mycdn.test/?expires=1&type=4&id=1\", \"ext\": \"mp4\", \"format_id\": \"mobile\", \"quality\": 0, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mobile - unknown\"}, {\"format_id\": \"hls-500\", \"format_index\": null, \"url\": \"https://vd.mycdn.test/360.m3u8?type=1\", \"manifest_url\": \"https://vd.mycdn.test/video.m3u8?type=2\", \"tbr\": 500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 2, \"has_drm\": false, \"width\": 640, \"height\": 360, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-500 - 640x360\"}, {\"url\": \"https://vd.mycdn.test/?expires=1&type=3&id=1\", \"ext\": \"mp4\", \"format_id\": \"hd\", \"quality\": 4, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - unknown\"}], \"webpage_url\": \"https://ok.ru/video/20079905452?fromTime=5\", \"original_url\": \"https://ok.ru/video/20079905452?fromTime=5\", \"webpage_url_basename\": \"20079905452\", \"webpage_url_domain\": \"ok.ru\", \"extractor\": \"Odnoklassniki\", \"extractor_key\": \"Odnoklassniki\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://iv.okcdn.test/poster.jpg\", \"id\": \"0\"}], \"display_id\": \"20079905452\", \"fulltitle\": \"\\u0414\\u0435\\u0432\\u0443\\u0448\\u043a\\u0438 \\u043f\\u043e\\u044e\\u0442 &amp; \\u0442\\u0430\\u043d\\u0446\\u0443\\u044e\\u0442\", \"duration_string\": \"20:50\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://vd.mycdn.test/?expires=1&type=3&id=1\", \"ext\": \"mp4\", \"format_id\": \"hd\", \"quality\": 4, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - unknown\", \"_filename\": \"\\u0414\\u0435\\u0432\\u0443\\u0448\\u043a\\u0438 \\u043f\\u043e\\u044e\\u0442 &amp; \\u0442\\u0430\\u043d\\u0446\\u0443\\u044e\\u0442 [20079905452].mp4\", \"filename\": \"\\u0414\\u0435\\u0432\\u0443\\u0448\\u043a\\u0438 \\u043f\\u043e\\u044e\\u0442 &amp; \\u0442\\u0430\\u043d\\u0446\\u0443\\u044e\\u0442 [20079905452].mp4\", \"__write_download_archive\": false}], \"url\": \"https://vd.mycdn.test/?expires=1&type=3&id=1\", \"ext\": \"mp4\", \"format_id\": \"hd\", \"quality\": 4, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://ok.ru/videoembed/555-1",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"yt-copy\", \"title\": \"From YouTube\", \"timestamp\": null, \"direct\": true, \"formats\": [{\"format_id\": \"mp4\", \"url\": \"https://media.example.test/yt-copy.mp4\", \"ext\": \"mp4\", \"vcodec\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4 - unknown\"}], \"subtitles\": {}, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"hls_aes\": null, \"original_url\": \"https://ok.ru/videoembed/555-1\", \"webpage_url\": \"https://ok.ru/videoembed/555-1\", \"webpage_url_basename\": \"555-1\", \"webpage_url_domain\": \"ok.ru\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"duration\": 10, \"uploader\": \"yt\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"yt-copy\", \"fulltitle\": \"From YouTube\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"mp4\", \"url\": \"https://media.example.test/yt-copy.mp4\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"format\": \"mp4 - unknown\", \"_filename\": \"From YouTube [yt-copy].mp4\", \"filename\": \"From YouTube [yt-copy].mp4\", \"__write_download_archive\": false}], \"format_id\": \"mp4\", \"url\": \"https://media.example.test/yt-copy.mp4\", \"ext\": \"mp4\", \"vcodec\": null, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"mp4 - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://ok.ru/video/777",
+   "args": [
+    "--print",
+    "%(id)s|%(extractor)s"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [generic] external: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ok.ru/video/888",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Odnoklassniki] 888: Video has been blocked"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ok.ru/video/999",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Odnoklassniki] 999: This video is only available for registered users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://ok.ru/video/20079905452",
+   "args": [
+    "--no-progress",
+    "-f",
+    "hd",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Odnoklassniki] Extracting URL: https://ok.ru/video/20079905452",
+    "[Odnoklassniki] 20079905452: Downloading webpage",
+    "[Odnoklassniki] 20079905452: Downloading m3u8 information",
+    "[info] 20079905452: Downloading 1 format(s): hd",
+    "[download] Destination: 20079905452.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "20079905452.mp4": 15
+   }
+  }
+ ]
+}

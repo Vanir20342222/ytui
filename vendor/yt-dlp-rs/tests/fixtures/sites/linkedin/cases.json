@@ -1,0 +1,6 @@
+[
+ {"url": "https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20", "args": ["-J"]},
+ {"url": "https://www.linkedin.com/feed/update/urn:li:activity:7016901149999955968/", "args": ["-J"]},
+ {"url": "https://www.linkedin.com/feed/update/urn:li:activity:1/", "args": ["--print", "id"]},
+ {"url": "https://www.linkedin.com/posts/mishalkhawaja_toronto-ugcPost-6850898786781339649-mM20", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

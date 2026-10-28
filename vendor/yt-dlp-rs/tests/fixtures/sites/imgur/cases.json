@@ -1,0 +1,10 @@
+[
+ {"url": "https://imgur.com/A61SaA1", "args": ["-J"]},
+ {"url": "https://i.imgur.com/VQcQPhM.gifv", "args": ["-J"]},
+ {"url": "https://imgur.com/still1", "args": ["-J"]},
+ {"url": "https://imgur.com/still1", "args": ["--abort-on-error", "-J"]},
+ {"url": "https://imgur.com/gallery/classic-steve-carell-YcAQlkx", "args": ["-J"]},
+ {"url": "http://imgur.com/r/aww/VQcQPhM", "args": ["--print", "%(id)s|%(title)s|%(age_limit)s|%(webpage_url)s"]},
+ {"url": "https://imgur.com/a/iX265HX", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://imgur.com/mrw-gifv-A61SaA1", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,74 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.nobelprize.org/mediaplayer/?id=22312",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"url\": \"https://nobelvideos.test/m/22312.mp4\", \"title\": \"Announcement of the 2023 Nobel Prize in Physiology or Medicine\", \"description\": \"The Nobel Assembly at Karolinska Institutet\", \"thumbnails\": [{\"url\": \"https://nobelvideos.test/t/22312.jpg\", \"id\": \"0\"}], \"duration\": 3756, \"timestamp\": 1696239000, \"id\": \"22312\", \"webpage_url\": \"https://www.nobelprize.org/mediaplayer/?id=22312\", \"original_url\": \"https://www.nobelprize.org/mediaplayer/?id=22312\", \"webpage_url_basename\": \"mediaplayer\", \"webpage_url_domain\": \"nobelprize.org\", \"extractor\": \"NobelPrize\", \"extractor_key\": \"NobelPrize\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://nobelvideos.test/t/22312.jpg\", \"display_id\": \"22312\", \"fulltitle\": \"Announcement of the 2023 Nobel Prize in Physiology or Medicine\", \"duration_string\": \"1:02:36\", \"upload_date\": \"20231002\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Announcement of the 2023 Nobel Prize in Physiology or Medicine [22312].mp4\", \"filename\": \"Announcement of the 2023 Nobel Prize in Physiology or Medicine [22312].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.nobelprize.org/mediaplayer/?id=22312",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(duration)s|%(timestamp)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "22312|Announcement of the 2023 Nobel Prize in Physiology or Medicine|The Nobel Assembly at Karolinska Institutet|3756|1696239000|https://nobelvideos.test/t/22312.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.nobelprize.org/mediaplayer/?id=22312",
+   "args": [
+    "--no-progress",
+    "-o",
+    "o.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[NobelPrize] Extracting URL: https://www.nobelprize.org/mediaplayer/?id=22312",
+    "[NobelPrize] 22312: Downloading webpage",
+    "[info] 22312: Downloading 1 format(s): 0",
+    "[download] Destination: o.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "o.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.nobelprize.org/mediaplayer/?qid=2&id=x",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [NobelPrize] Unable to extract JSON-LD; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.nobelprize.org/mediaplayer/?x=1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: Unsupported URL: https://www.nobelprize.org/mediaplayer/?x=1"
+   ],
+   "files": {}
+  }
+ ]
+}

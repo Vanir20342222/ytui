@@ -1,0 +1,2554 @@
+//! Touch-first, virtualized Rust UI shared by phone and tablet Android builds.
+use crate::*;
+use egui::{Color32, RichText, Vec2};
+use std::{collections::HashSet, sync::mpsc};
+mod lyrics;
+
+#[derive(Clone, Debug)]
+pub enum Effect {
+    Play(Value),
+    Command(Value),
+    Download(Value),
+    Login,
+    Pick(String),
+    Open(String),
+    Offline(String),
+}
+#[derive(Clone)]
+enum Kind {
+    Feed {
+        tab: usize,
+        generation: u64,
+        append: bool,
+    },
+    Settings,
+    SettingsSaved,
+    ImportedTheme,
+    Theme,
+    Image(String),
+    Resolve {
+        account_generation: u64,
+        playback_generation: u64,
+        queued: bool,
+        media: Box<Media>,
+        audio: bool,
+        quality: String,
+        preview: bool,
+        download: bool,
+        resume: bool,
+        context: Option<Value>,
+    },
+    Queue,
+    QueueChanged,
+    History,
+    Lyrics(uuid::Uuid, lyrics::ReplyKind),
+    Account(u64),
+    AccountStatus(u64),
+    Ignore,
+}
+struct Reply {
+    id: u64,
+    image: Option<egui::ColorImage>,
+    retry_after: Option<std::time::Duration>,
+    kind: Kind,
+    result: std::result::Result<Value, String>,
+}
+#[derive(Default)]
+struct Feed {
+    page: Page,
+    loading: bool,
+    error: Option<String>,
+    generation: u64,
+    request: Option<BrowseRequest>,
+    last_token: Option<String>,
+    last_attempt: Option<(BrowseRequest, bool)>,
+    failures: u8,
+    retry_at: Option<std::time::Instant>,
+    scroll_offset: f32,
+    restore_scroll: Option<f32>,
+    history: std::collections::VecDeque<Navigation>,
+}
+struct Navigation {
+    request: BrowseRequest,
+    page: Option<Page>,
+    scroll_offset: f32,
+}
+impl Feed {
+    fn remember(&mut self) {
+        let Some(request) = self.request.clone() else {
+            return;
+        };
+        let page = std::mem::take(&mut self.page);
+        self.history.push_back(Navigation {
+            request,
+            page: ((!page.items.is_empty() || !self.loading && self.error.is_none())
+                && page.retained_bytes() <= 2 * 1024 * 1024)
+                .then_some(page),
+            scroll_offset: self.scroll_offset,
+        });
+        while self.history.len() > 12 {
+            self.history.pop_front();
+        }
+        let mut retained = 0;
+        for entry in self.history.iter_mut().rev() {
+            if let Some(page) = &entry.page {
+                retained += page.retained_bytes();
+                if retained > 2 * 1024 * 1024 {
+                    entry.page = None;
+                }
+            }
+        }
+    }
+}
+pub struct MobileApp {
+    engine: Arc<Engine>,
+    tx: mpsc::Sender<Reply>,
+    rx: mpsc::Receiver<Reply>,
+    pub tab: usize,
+    feeds: [Feed; 4],
+    query: String,
+    config: Config,
+    palette: ytui_core::theme::Palette,
+    pub effects: Vec<Effect>,
+    pub status: String,
+    pub settings_open: bool,
+    pub menu_open: bool,
+    pub player: Value,
+    pub downloads: Value,
+    player_open: bool,
+    queue_open: bool,
+    queue_pending: bool,
+    queue: Vec<Media>,
+    queue_selection: Option<String>,
+    history_open: bool,
+    recent: Vec<Media>,
+    lyrics: Option<lyrics::View>,
+    lyric_import: Option<uuid::Uuid>,
+    account_notice: Option<String>,
+    build_version: String,
+    popup: Option<(String, String)>,
+    feed_menu: bool,
+    add_download: bool,
+    download_draft_original: Option<Config>,
+    network_enabled: bool,
+    pending_feed: [Option<u64>; 4],
+    pending_playback: Option<u64>,
+    images: HashMap<String, egui::TextureHandle>,
+    image_order: std::collections::VecDeque<String>,
+    image_pending: HashSet<String>,
+    image_failures: HashMap<String, (u8, std::time::Instant)>,
+    tasks: HashMap<u64, tokio::task::AbortHandle>,
+    dark: bool,
+    safe_top: f32,
+    safe_bottom: f32,
+    safe_left: f32,
+    safe_right: f32,
+    phase: f32,
+    last_frame: std::time::Instant,
+    visual_levels: [f32; 3],
+    volume: f32,
+    speed: f32,
+    settings_original: Option<Config>,
+    settings_pending: bool,
+    account_generation: u64,
+    playback_generation: u64,
+}
+impl MobileApp {
+    pub fn new(engine: Arc<Engine>, ctx: &egui::Context) -> Self {
+        Self::with_network(engine, ctx, true)
+    }
+    pub(crate) fn with_network(
+        engine: Arc<Engine>,
+        ctx: &egui::Context,
+        network_enabled: bool,
+    ) -> Self {
+        let (tx, rx) = mpsc::channel();
+        let mut app = Self {
+            engine,
+            tx,
+            rx,
+            tab: 1,
+            feeds: Default::default(),
+            query: String::new(),
+            config: Config::default(),
+            palette: ytui_core::theme::builtin("ytui-dark").expect("palette"),
+            effects: Vec::new(),
+            status: "Ready".into(),
+            settings_open: false,
+            menu_open: false,
+            player: json!({}),
+            downloads: json!([]),
+            player_open: false,
+            queue_open: false,
+            queue_pending: false,
+            queue: Vec::new(),
+            queue_selection: None,
+            history_open: false,
+            recent: Vec::new(),
+            lyrics: None,
+            lyric_import: None,
+            account_notice: None,
+            build_version: env!("CARGO_PKG_VERSION").into(),
+            popup: None,
+            feed_menu: false,
+            add_download: false,
+            download_draft_original: None,
+            network_enabled,
+            pending_feed: [None; 4],
+            pending_playback: None,
+            images: HashMap::new(),
+            image_order: Default::default(),
+            image_pending: HashSet::new(),
+            image_failures: HashMap::new(),
+            tasks: HashMap::new(),
+            dark: true,
+            safe_top: 0.0,
+            safe_bottom: 0.0,
+            safe_left: 0.0,
+            safe_right: 0.0,
+            phase: 0.0,
+            last_frame: std::time::Instant::now(),
+            visual_levels: [0.0; 3],
+            volume: 0.7,
+            speed: 1.0,
+            settings_original: None,
+            settings_pending: false,
+            account_generation: 0,
+            playback_generation: 0,
+        };
+        app.request(ctx, json!({"op":"settings"}), Kind::Settings);
+        app.request(ctx, json!({"op":"theme","dark":true}), Kind::Theme);
+        app.request(
+            ctx,
+            json!({"op":"account"}),
+            Kind::AccountStatus(app.engine.account_intent()),
+        );
+        if app.network_enabled {
+            app.navigate(ctx, BrowseRequest::Home, false);
+        }
+        app
+    }
+    fn request(&mut self, ctx: &egui::Context, mut data: Value, kind: Kind) -> u64 {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let id = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        data["request_id"] = json!(id);
+        let engine = self.engine.clone();
+        let tx = self.tx.clone();
+        let ctx = ctx.clone();
+        let task = runtime().spawn(async move {
+            let mut image = None;
+            let mut retry_after = None;
+            let result = if matches!(&kind, Kind::Image(_)) {
+                let work = async {
+                    let media: Media = serde_json::from_value(data["media"].clone())?;
+                    let width = data["width"].as_u64().unwrap_or(240).clamp(32, 768) as u32;
+                    let pixels = engine.thumbnail(&media, width, width).await?.to_rgba8();
+                    let size = [pixels.width() as usize, pixels.height() as usize];
+                    image = Some(egui::ColorImage::from_rgba_unmultiplied(size, &pixels));
+                    Ok::<Value, anyhow::Error>(Value::Null)
+                };
+                work.await
+                    .map_err(|e| ytui_providers::diagnostic(&format!("{e:#}")))
+            } else {
+                engine.request(data).await.map_err(|e| {
+                    retry_after = e
+                        .downcast_ref::<ytui_providers::browse::FeedRetry>()
+                        .map(|r| r.after);
+                    ytui_providers::diagnostic(&format!("{e:#}"))
+                })
+            };
+            let _ = tx.send(Reply {
+                id,
+                kind,
+                result,
+                image,
+                retry_after,
+            });
+            ctx.request_repaint();
+        });
+        self.tasks.insert(id, task.abort_handle());
+        id
+    }
+    fn change_account(&mut self, ctx: &egui::Context, mut request: Value) {
+        let intent = self.engine.begin_account_change();
+        self.account_generation += 1;
+        self.playback_generation += 1;
+        request["account_intent"] = json!(intent);
+        self.request(ctx, request, Kind::Account(intent));
+    }
+    fn navigate(&mut self, ctx: &egui::Context, query: BrowseRequest, append: bool) {
+        if self.tab == 0 || !self.network_enabled {
+            return;
+        }
+        if let Some(id) = self.pending_feed[self.tab].take() {
+            self.engine.cancel(id);
+        }
+        let tab = self.tab;
+        let feed = &mut self.feeds[tab];
+        if feed
+            .last_attempt
+            .as_ref()
+            .is_none_or(|(old, _)| old != &query)
+        {
+            feed.failures = 0;
+        }
+        feed.retry_at = None;
+        feed.last_attempt = Some((query.clone(), append));
+        if !append {
+            if feed.request.as_ref() != Some(&query) {
+                feed.remember();
+                feed.scroll_offset = 0.0;
+                feed.restore_scroll = None;
+            }
+            feed.generation += 1;
+            feed.last_token = None;
+            feed.request = Some(query.clone());
+        }
+        if let BrowseRequest::Continue(token) = &query {
+            if feed.last_token.as_ref() == Some(token) {
+                return;
+            }
+            feed.last_token = Some(token.clone());
+        }
+        feed.loading = true;
+        feed.error = None;
+        let generation = feed.generation;
+        self.pending_feed[tab]=Some(self.request(ctx,json!({"op":"browse","tab":tab,"request":query,"offset":if append {self.feeds[tab].page.items.len()} else {0}}),Kind::Feed{tab,generation,append}));
+    }
+    fn navigate_back(&mut self, ctx: &egui::Context) -> bool {
+        let Some(previous) = self.feeds[self.tab].history.pop_back() else {
+            return false;
+        };
+        if let Some(id) = self.pending_feed[self.tab].take() {
+            self.engine.cancel(id);
+        }
+        let feed = &mut self.feeds[self.tab];
+        feed.generation += 1;
+        feed.loading = false;
+        feed.error = None;
+        feed.retry_at = None;
+        feed.failures = 0;
+        feed.last_token = None;
+        feed.last_attempt = Some((previous.request.clone(), false));
+        feed.request = Some(previous.request.clone());
+        feed.scroll_offset = previous.scroll_offset;
+        let reload = previous.page.is_none();
+        feed.restore_scroll = reload.then_some(previous.scroll_offset);
+        feed.page = previous.page.unwrap_or_default();
+        if reload {
+            self.navigate(ctx, previous.request, false);
+        }
+        true
+    }
+    pub fn change_tab(&mut self, ctx: &egui::Context, tab: usize) {
+        if tab > 3 {
+            return;
+        }
+        self.tab = tab;
+        if tab > 0 && self.feeds[tab].request.is_none() {
+            self.navigate(
+                ctx,
+                if tab == 3 {
+                    BrowseRequest::Cliamp
+                } else {
+                    BrowseRequest::Home
+                },
+                false,
+            );
+        }
+    }
+    fn save_settings(&mut self, ctx: &egui::Context) {
+        if self.settings_pending {
+            return;
+        }
+        self.settings_pending = true;
+        self.request(
+            ctx,
+            json!({"op":"save_settings","config":self.config}),
+            Kind::SettingsSaved,
+        );
+    }
+    fn resolve(
+        &mut self,
+        ctx: &egui::Context,
+        media: Media,
+        preview: bool,
+        download: bool,
+        resume: bool,
+    ) {
+        let queued = self
+            .queue_selection
+            .take()
+            .is_some_and(|url| url == media.url)
+            && !download
+            && !preview;
+        let audio = matches!(
+            media.kind,
+            ytui_core::MediaKind::Song | ytui_core::MediaKind::Station
+        ) || self.config.download.audio && download;
+        if download && media.live {
+            self.status =
+                "Live recording is not available; play or queue the station instead".into();
+            return;
+        }
+        if media.collection() {
+            if download {
+                self.effects.push(Effect::Command(json!({"op":"download_playlist","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2||ytui_core::http_url(&media.url).is_ok_and(|url|url.host_str()==Some("music.youtube.com")),"audio":audio,"quality":self.config.download.quality})));
+                self.status = "Preparing the complete playlist in the background…".into();
+            } else {
+                self.navigate(ctx, BrowseRequest::Collection(media.id.clone()), false);
+            }
+            return;
+        }
+        self.status = if download {
+            "Preparing download…"
+        } else {
+            "Resolving playback…"
+        }
+        .into();
+        if !download {
+            self.playback_generation += 1;
+            if let Some(old) = self.pending_playback.take() {
+                self.engine.cancel(old);
+            }
+        }
+        let context = (!download && !preview && !queued)
+            .then(|| self.collection_context(&media))
+            .flatten();
+        let quality = self.config.download.quality.clone();
+        let id = self.request(
+            ctx,
+            json!({"op":"resolve","media":media,"audio":audio,"quality":quality}),
+            Kind::Resolve {
+                account_generation: self.account_generation,
+                playback_generation: self.playback_generation,
+                queued,
+                media: Box::new(media),
+                audio,
+                quality,
+                preview,
+                download,
+                resume,
+                context,
+            },
+        );
+        if !download {
+            self.pending_playback = Some(id);
+        }
+    }
+    fn poll(&mut self, ctx: &egui::Context) {
+        for _ in 0..4 {
+            let Ok(reply) = self.rx.try_recv() else {
+                return;
+            };
+            self.tasks.remove(&reply.id);
+            if matches!(&reply.kind,Kind::Account(intent)|Kind::AccountStatus(intent) if *intent!=self.engine.account_intent())
+            {
+                continue;
+            }
+            if self.pending_playback == Some(reply.id) {
+                self.pending_playback = None;
+            }
+            if let Kind::Resolve {
+                account_generation,
+                playback_generation,
+                download,
+                ..
+            } = &reply.kind
+                && (*account_generation != self.account_generation
+                    || (!download && *playback_generation != self.playback_generation))
+            {
+                continue;
+            }
+            match (reply.kind, reply.result) {
+                (
+                    Kind::Feed {
+                        tab,
+                        generation,
+                        append,
+                    },
+                    result,
+                ) => {
+                    let feed = &mut self.feeds[tab];
+                    if generation != feed.generation {
+                        continue;
+                    }
+                    feed.loading = false;
+                    self.pending_feed[tab] = None;
+                    match result
+                        .and_then(|v| serde_json::from_value::<Page>(v).map_err(|e| e.to_string()))
+                    {
+                        Ok(mut page) => {
+                            feed.failures = 0;
+                            feed.retry_at = None;
+                            if append {
+                                let known = feed
+                                    .page
+                                    .items
+                                    .iter()
+                                    .map(|m| m.url.clone())
+                                    .collect::<HashSet<_>>();
+                                page.items.retain(|m| !known.contains(&m.url));
+                                feed.page.items.extend(page.items);
+                                feed.page.continuation = page.continuation;
+                                feed.page.notice = page.notice;
+                            } else {
+                                feed.page = page;
+                                if let Some(offset) = feed.restore_scroll.take() {
+                                    feed.scroll_offset = offset;
+                                }
+                            }
+                            // Bounded retained window while preserving continuation for long feeds.
+                            if feed.page.items.len() > 2000 {
+                                let drain = feed.page.items.len() - 2000;
+                                feed.page.items.drain(..drain);
+                                feed.scroll_offset =
+                                    (feed.scroll_offset - drain as f32 * 160.0).max(0.0);
+                            }
+                        }
+                        Err(error) => {
+                            feed.error = Some(error);
+                            if let Some(after) = reply.retry_after
+                                && feed.failures < 3
+                            {
+                                feed.failures += 1;
+                                feed.retry_at = Some(
+                                    std::time::Instant::now()
+                                        + after.max(std::time::Duration::from_secs(
+                                            1_u64 << feed.failures,
+                                        )),
+                                );
+                            }
+                            feed.last_token = None;
+                        }
+                    }
+                }
+                (Kind::Settings, Ok(value)) => {
+                    if let Ok(config) = serde_json::from_value(value) {
+                        self.config = config;
+                    }
+                }
+                (Kind::SettingsSaved, Err(error)) => {
+                    self.settings_pending = false;
+                    self.settings_open = true;
+                    self.status = error;
+                }
+                (Kind::SettingsSaved, Ok(_)) => {
+                    self.settings_pending = false;
+                    self.settings_original = None;
+                    self.request(ctx, json!({"op":"theme","dark":self.dark}), Kind::Theme);
+                    self.effects.push(Effect::Command(
+                        json!({"op":"settings","config":self.config}),
+                    ));
+                    self.status = "Settings saved".into();
+                }
+                (Kind::ImportedTheme, Ok(value)) => {
+                    if let Ok(palette) = serde_json::from_value(value) {
+                        self.palette = palette;
+                        self.theme_bars();
+                    }
+                    self.request(ctx, json!({"op":"settings"}), Kind::Settings);
+                    self.settings_original = None;
+                }
+                (Kind::Theme, Ok(value)) => {
+                    if let Ok(palette) = serde_json::from_value(value) {
+                        self.palette = palette;
+                        self.theme_bars();
+                    }
+                }
+                (Kind::Image(url), _result) => {
+                    self.image_pending.remove(&url);
+                    if let Some(image) = reply.image {
+                        self.image_failures.remove(&url);
+                        let texture =
+                            ctx.load_texture(url.clone(), image, egui::TextureOptions::LINEAR);
+                        let bytes = texture.size()[0] * texture.size()[1] * 4;
+                        while self.images.len() >= 40
+                            || self
+                                .images
+                                .values()
+                                .map(|image| image.size()[0] * image.size()[1] * 4)
+                                .sum::<usize>()
+                                + bytes
+                                > 24 * 1024 * 1024
+                        {
+                            let Some(old) = self.image_order.pop_front() else {
+                                break;
+                            };
+                            self.images.remove(&old);
+                        }
+                        self.images.insert(url.clone(), texture);
+                        self.image_order.push_back(url);
+                    } else {
+                        let attempts = self
+                            .image_failures
+                            .get(&url)
+                            .map_or(1, |(n, _)| n.saturating_add(1));
+                        if self.image_failures.len() >= 512
+                            && let Some(old) = self.image_failures.keys().next().cloned()
+                        {
+                            self.image_failures.remove(&old);
+                        }
+                        self.image_failures.insert(
+                            url,
+                            (
+                                attempts,
+                                std::time::Instant::now()
+                                    + std::time::Duration::from_secs(
+                                        2_u64.pow(attempts.min(5) as u32),
+                                    ),
+                            ),
+                        );
+                    }
+                }
+                (
+                    Kind::Resolve {
+                        mut media,
+                        audio,
+                        quality,
+                        preview,
+                        download,
+                        resume,
+                        queued,
+                        context,
+                        ..
+                    },
+                    Ok(stream),
+                ) => {
+                    if !download
+                        && (!audio || self.config.music_player_style.ends_with("-fullscreen"))
+                    {
+                        self.player_open = true;
+                    }
+                    if media.title == media.url {
+                        if let Some(title) = stream["title"].as_str().filter(|s| !s.is_empty()) {
+                            media.title = title.into();
+                        }
+                        if let Some(creator) = stream["creator"].as_str() {
+                            media.creator = creator.into();
+                        }
+                        if let Some(thumbnail) = stream["thumbnail"].as_str() {
+                            media.thumbnail = thumbnail.into();
+                        }
+                    }
+                    let request = json!({"media":media,"stream":stream,"audio":audio,"quality":quality,"preview":preview,"resume":resume,"queued":queued,"context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context});
+                    self.effects.push(if download {
+                        Effect::Download(request)
+                    } else {
+                        Effect::Play(request)
+                    });
+                    self.status = if download {
+                        "Download queued"
+                    } else {
+                        "Starting playback"
+                    }
+                    .into();
+                }
+                (Kind::Queue, result) => {
+                    self.queue_pending = false;
+                    match result {
+                        Ok(value) => self.queue = serde_json::from_value(value).unwrap_or_default(),
+                        Err(error) => self.status = error,
+                    }
+                }
+                (Kind::QueueChanged, result) => {
+                    self.queue_pending = false;
+                    match result {
+                        Ok(value) => {
+                            self.queue =
+                                serde_json::from_value(value["items"].clone()).unwrap_or_default()
+                        }
+                        Err(error) => {
+                            self.status = error;
+                            if self.queue_open {
+                                self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+                            }
+                        }
+                    }
+                }
+                (Kind::History, Ok(value)) => {
+                    self.recent = serde_json::from_value(value).unwrap_or_default()
+                }
+                (Kind::Lyrics(id, kind), result) => self.lyric_reply(id, reply.id, kind, result),
+                (Kind::AccountStatus(_), Ok(value)) => {
+                    self.account_notice = value["notice"].as_str().map(String::from);
+                    if let Some(notice) = value["notice"].as_str() {
+                        self.status = notice.into();
+                    }
+                }
+                (Kind::Account(_), Ok(value)) => {
+                    self.account_notice = value["notice"].as_str().map(String::from);
+                    self.account_generation += 1;
+                    self.playback_generation += 1;
+                    for tab in 1..=2 {
+                        if let Some(id) = self.pending_feed[tab].take() {
+                            self.engine.cancel(id);
+                        }
+                        let feed = &mut self.feeds[tab];
+                        feed.generation += 1;
+                        feed.page = Page::default();
+                        feed.history.clear();
+                        feed.restore_scroll = None;
+                        feed.request = None;
+                        feed.loading = false;
+                        feed.error = None;
+                    }
+                    self.status = value["notice"].as_str().unwrap_or("Account updated").into();
+                    if matches!(self.tab, 1 | 2) {
+                        self.navigate(ctx, BrowseRequest::Home, false);
+                    }
+                }
+                (_, Err(error)) => {
+                    self.status = error;
+                }
+                _ => {}
+            }
+        }
+        ctx.request_repaint();
+    }
+    pub fn platform_status(&mut self, ctx: &egui::Context, value: Value) {
+        if let Some(version) = value["app_version"].as_str() {
+            self.build_version = version.into();
+        }
+        self.safe_left =
+            value["inset_left"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
+        self.safe_right =
+            value["inset_right"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
+        self.safe_top = value["inset_top"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
+        self.safe_bottom =
+            value["inset_bottom"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
+        if let Some(dark) = value["dark"].as_bool()
+            && dark != self.dark
+        {
+            self.dark = dark;
+            if self.config.theme == "system" {
+                self.request(ctx, json!({"op":"theme","dark":dark}), Kind::Theme);
+            }
+        }
+        if let Some(downloads) = value.get("downloads") {
+            self.downloads = downloads.clone();
+        }
+        if let Some(player) = value.get("player") {
+            if let Some(v) = player["volume"].as_f64() {
+                self.volume = v as f32;
+            }
+            if let Some(v) = player["speed"].as_f64() {
+                self.speed = v as f32;
+            }
+            self.player = player.clone();
+        }
+        if let Some(events) = value["events"].as_array() {
+            for event in events {
+                match event["kind"].as_str().unwrap_or_default() {
+                    "cookies" => {
+                        self.change_account(
+                            ctx,
+                            json!({"op":"import_cookies","header":event["text"]}),
+                        );
+                    }
+                    "theme_file" => {
+                        self.request(
+                            ctx,
+                            json!({"op":"import_theme","text":event["text"]}),
+                            Kind::ImportedTheme,
+                        );
+                    }
+                    "lyrics_file" => self.import_lyrics(event["text"].as_str().unwrap_or_default()),
+                    "cookie_file" => {
+                        self.change_account(
+                            ctx,
+                            json!({"op":"import_cookie_file","text":event["text"]}),
+                        );
+                    }
+                    "show_player" => {
+                        self.player_open = true;
+                    }
+                    "history_cleared" => {
+                        self.request(ctx, json!({"op":"history_list"}), Kind::History);
+                    }
+                    "history_updated" if self.history_open => {
+                        self.request(ctx, json!({"op":"history_list"}), Kind::History);
+                    }
+                    "shared" => {
+                        if let Some(raw) = event["text"].as_str()
+                            && let Ok(url) = ytui_core::http_url(raw.trim())
+                            && ytui_core::youtube_host(url.host_str().unwrap_or_default())
+                        {
+                            self.change_tab(
+                                ctx,
+                                if url.host_str() == Some("music.youtube.com") {
+                                    2
+                                } else {
+                                    1
+                                },
+                            );
+                        }
+                        self.query = event["text"].as_str().unwrap_or_default().trim().to_owned();
+                    }
+                    "tracks" => {
+                        self.popup = Some((
+                            "Tracks".into(),
+                            event["text"].as_str().unwrap_or_default().into(),
+                        ));
+                    }
+                    "back" => {
+                        if self.add_download {
+                            self.add_download = false;
+                            if let Some(original) = self.download_draft_original.take() {
+                                self.config = original;
+                            }
+                        } else if self.settings_open {
+                            self.settings_open = false;
+                            if let Some(original) = self.settings_original.take() {
+                                self.config = original;
+                            }
+                        } else if self.menu_open {
+                            self.menu_open = false;
+                        } else if self.lyrics.is_some() {
+                            self.close_lyrics();
+                        } else if self.popup.is_some() {
+                            self.popup = None;
+                        } else if self.queue_open {
+                            self.queue_open = false;
+                        } else if self.history_open {
+                            self.history_open = false;
+                        } else if self.player_open {
+                            self.player_open = false;
+                        } else if !self.navigate_back(ctx) {
+                            self.effects
+                                .push(Effect::Command(json!({"op":"background"})));
+                        }
+                    }
+                    "error" | "notice" => {
+                        self.status = event["text"]
+                            .as_str()
+                            .unwrap_or("Android operation failed")
+                            .into()
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    pub fn frame(&mut self, ctx: &egui::Context) {
+        self.poll(ctx);
+        if self.feeds[self.tab]
+            .retry_at
+            .is_some_and(|at| std::time::Instant::now() >= at)
+        {
+            self.feeds[self.tab].retry_at = None;
+            if let Some((query, append)) = self.feeds[self.tab].last_attempt.clone() {
+                self.navigate(ctx, query, append);
+            }
+        }
+        let now = std::time::Instant::now();
+        let playing = self.player["playing"].as_bool().unwrap_or(false);
+        let buffering = self.player["buffering"].as_bool().unwrap_or(false);
+        let animate = playing
+            && !buffering
+            && !self.config.reduced_motion
+            && matches!(self.tab, 2 | 3)
+            && self.config.music_player_style != "classic";
+        if animate {
+            self.phase = (self.phase
+                + (now - self.last_frame).as_secs_f32() * std::f32::consts::TAU / 4.0)
+                % std::f32::consts::TAU;
+            self.visual_levels = [
+                self.player["left"].as_f64().unwrap_or(0.0) as f32,
+                self.player["right"].as_f64().unwrap_or(0.0) as f32,
+                self.player["peak"].as_f64().unwrap_or(0.0) as f32,
+            ];
+        }
+        self.last_frame = now;
+        let mut style = (*ctx.style()).clone();
+        style.spacing.interact_size = Vec2::new(48.0, 48.0);
+        style.spacing.item_spacing = Vec2::new(8.0, 8.0);
+        style
+            .text_styles
+            .insert(egui::TextStyle::Body, egui::FontId::monospace(16.0));
+        style
+            .text_styles
+            .insert(egui::TextStyle::Button, egui::FontId::monospace(15.0));
+        for font in style.text_styles.values_mut() {
+            font.family = egui::FontFamily::Monospace;
+        }
+        style.visuals = if self.palette.light {
+            egui::Visuals::light()
+        } else {
+            egui::Visuals::dark()
+        };
+        style.visuals.panel_fill = c(self.palette.background);
+        style.visuals.window_fill = c(self.palette.surface);
+        style.visuals.override_text_color = Some(c(self.palette.text));
+        style.visuals.selection.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.inactive.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.inactive.weak_bg_fill = c(self.palette.selection);
+        style.visuals.widgets.inactive.bg_stroke =
+            egui::Stroke::new(1.0_f32, c(self.palette.muted));
+        style.visuals.widgets.hovered.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.hovered.weak_bg_fill = c(self.palette.selection);
+        style.visuals.widgets.hovered.bg_stroke =
+            egui::Stroke::new(1.5_f32, c(self.palette.accent));
+        style.visuals.widgets.active.bg_fill = c(self.palette.selection);
+        style.visuals.widgets.active.bg_stroke = egui::Stroke::new(2.0_f32, c(self.palette.accent));
+        ctx.set_style(style);
+        let width = ctx.content_rect().width();
+        let tablet = width >= 700.0;
+        if self.safe_top > 0.0 {
+            egui::TopBottomPanel::top("safe-top")
+                .exact_height(self.safe_top)
+                .show(ctx, |_| {});
+        }
+        if self.safe_bottom > 0.0 {
+            egui::TopBottomPanel::bottom("safe-bottom")
+                .exact_height(self.safe_bottom)
+                .show(ctx, |_| {});
+        }
+        if self.safe_left > 0.0 {
+            egui::SidePanel::left("safe-left")
+                .exact_width(self.safe_left)
+                .resizable(false)
+                .show(ctx, |_| {});
+        }
+        if self.safe_right > 0.0 {
+            egui::SidePanel::right("safe-right")
+                .exact_width(self.safe_right)
+                .resizable(false)
+                .show(ctx, |_| {});
+        }
+        egui::TopBottomPanel::top("header").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    RichText::new("ytui")
+                        .monospace()
+                        .strong()
+                        .color(c(self.palette.accent)),
+                );
+                ui.label(["Files", "YouTube", "Music", "Radio"][self.tab]);
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button("Menu").clicked() {
+                        self.menu_open = true;
+                    }
+                    if ui.button("Settings").clicked() {
+                        self.settings_open = true;
+                    }
+                });
+            });
+        });
+        egui::TopBottomPanel::bottom("navigation").show(ctx, |ui| {
+            ui.columns(4, |columns| {
+                for (tab, label) in ["Files", "YouTube", "Music", "Radio"].iter().enumerate() {
+                    if columns[tab]
+                        .add_sized(
+                            [columns[tab].available_width(), 48.0],
+                            egui::Button::new(*label).selected(self.tab == tab),
+                        )
+                        .clicked()
+                    {
+                        self.change_tab(ctx, tab);
+                    }
+                }
+            });
+        });
+        egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
+            ui.add(
+                egui::Label::new(
+                    RichText::new(&self.status)
+                        .small()
+                        .color(c(self.palette.muted)),
+                )
+                .truncate(),
+            );
+        });
+        let has_media = self.player["title"].as_str().is_some_and(|s| !s.is_empty());
+        if has_media {
+            egui::TopBottomPanel::bottom("mini-player").show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    if ui.button(if playing { "Pause" } else { "Play" }).clicked() {
+                        self.command("pause");
+                    }
+                    let title_width = (ui.available_width() - 72.0).max(40.0);
+                    if ui
+                        .add_sized(
+                            [title_width, 48.0],
+                            egui::Button::new(
+                                self.player["title"].as_str().unwrap_or("Now playing"),
+                            )
+                            .truncate(),
+                        )
+                        .clicked()
+                    {
+                        self.player_open = true;
+                    }
+                    if ui.button("Next").clicked() {
+                        self.command("next");
+                    }
+                });
+                let progress = progress(&self.player);
+                ui.add(egui::ProgressBar::new(progress).fill(c(self.palette.accent)));
+            });
+        }
+        if !tablet
+            && has_media
+            && matches!(self.tab, 2 | 3)
+            && self.config.music_player_style != "classic"
+            && !self.config.music_player_style.ends_with("-fullscreen")
+        {
+            egui::TopBottomPanel::bottom("music-presentation")
+                .default_height(160.0)
+                .min_height(96.0)
+                .max_height(240.0)
+                .resizable(true)
+                .show(ctx, |ui| {
+                    self.visualizer(ui, ui.available_height().max(80.0));
+                });
+        }
+        egui::CentralPanel::default().show(ctx, |ui| {
+            if tablet && matches!(self.tab, 2 | 3) {
+                ui.columns(2, |cols| {
+                    self.catalog(ctx, &mut cols[0]);
+                    self.player_panel(ctx, &mut cols[1], false);
+                });
+            } else {
+                self.catalog(ctx, ui);
+            }
+        });
+        if self.settings_open {
+            self.settings(ctx);
+        }
+        if self.menu_open {
+            self.menu(ctx);
+        }
+        if self.add_download {
+            self.download_form(ctx);
+        }
+        if self.feed_menu {
+            self.feeds(ctx);
+        }
+        if self.player_open {
+            let mut open = true;
+            let safe = self.safe_rect(ctx);
+            egui::Window::new("Now playing")
+                .open(&mut open)
+                .constrain_to(safe)
+                .default_pos(safe.left_top() + Vec2::splat(8.0))
+                .default_size((safe.width() - 16.0, safe.height() - 16.0))
+                .vscroll(true)
+                .show(ctx, |ui| {
+                    self.player_panel(ctx, ui, true);
+                });
+            self.player_open = open;
+        }
+        if self.queue_open {
+            let mut open = true;
+            egui::Window::new("Playback queue")
+                .constrain_to(self.safe_rect(ctx))
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical()
+                        .max_height(500.0)
+                        .show_rows(ui, 56.0, self.queue.len(), |ui, range| {
+                            let count = self.queue.len();
+                            for i in range {
+                                let media = self.queue[i].clone();
+                                ui.horizontal(|ui| {
+                                    let width = (ui.available_width() - 176.0).max(48.0);
+                                    if ui.add_sized([width,48.0],egui::Button::new(&media.title).truncate()).clicked() {
+                                        self.queue_selection = Some(media.url.clone());
+                                        self.resolve(ctx, media.clone(), false, false, false);
+                                        self.queue_open = false;
+                                    }
+                                    let mut target = None;
+                                    if ui.add_enabled(!self.queue_pending && i>0,egui::Button::new("↑")).clicked() {target=Some(i-1);}
+                                    if ui.add_enabled(!self.queue_pending && i+1<count,egui::Button::new("↓")).clicked() {target=Some(i+1);}
+                                    if let Some(to) = target {
+                                        self.queue_pending=true;
+                                        self.request(ctx,json!({"op":"queue_move","from":i,"to":to,"url":media.url}),Kind::QueueChanged);
+                                    }
+                                    if ui.add_enabled(!self.queue_pending,egui::Button::new("×")).clicked() {
+                                        self.queue_pending=true;
+                                        self.request(
+                                            ctx,
+                                            json!({"op":"queue_remove","index":i,"url":media.url}),
+                                            Kind::QueueChanged,
+                                        );
+                                    }
+                                });
+                            }
+                        });
+                });
+            self.queue_open &= open;
+        }
+        if self.history_open {
+            let mut open = true;
+            egui::Window::new("Recently played")
+                .constrain_to(self.safe_rect(ctx))
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    if ui.button("Clear history and resume positions").clicked() {
+                        self.command("history_clear");
+                    }
+                    if self.recent.is_empty() {
+                        ui.label("Local playback history is empty.");
+                    }
+                    egui::ScrollArea::vertical().max_height(500.0).show_rows(
+                        ui,
+                        64.0,
+                        self.recent.len(),
+                        |ui, range| {
+                            for i in range {
+                                let media = self.recent[i].clone();
+                                if ui
+                                    .add_sized(
+                                        [ui.available_width(), 48.0],
+                                        egui::Button::new(&media.title).truncate(),
+                                    )
+                                    .clicked()
+                                {
+                                    self.resolve(ctx, media, false, false, false);
+                                    self.history_open = false;
+                                }
+                            }
+                        },
+                    );
+                });
+            self.history_open &= open;
+        }
+        self.lyrics_window(ctx);
+        if let Some((title, text)) = self.popup.clone() {
+            let mut open = true;
+            egui::Window::new(title)
+                .constrain_to(self.safe_rect(ctx))
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical()
+                        .max_height(500.0)
+                        .show(ui, |ui| {
+                            ui.label(text);
+                        });
+                });
+            if !open {
+                self.popup = None;
+            }
+        }
+        ctx.request_repaint_after(
+            if animate && (self.player_open || tablet && matches!(self.tab, 2 | 3)) {
+                std::time::Duration::from_millis(33)
+            } else if has_media {
+                std::time::Duration::from_millis(250)
+            } else {
+                std::time::Duration::from_secs(1)
+            },
+        );
+    }
+    fn theme_bars(&mut self) {
+        #[cfg(target_os = "android")]
+        self.effects.push(Effect::Command(
+            json!({"op":"theme","light":self.palette.light,"background":self.palette.background}),
+        ));
+    }
+    pub fn wants_audio_frames(&self) -> bool {
+        matches!(self.tab, 2 | 3)
+            && self.player["playing"].as_bool().unwrap_or(false)
+            && !self.config.reduced_motion
+            && (self.config.music_player_style.starts_with("vu")
+                || self.config.music_player_style.starts_with("orbit"))
+    }
+    fn safe_rect(&self, ctx: &egui::Context) -> egui::Rect {
+        let mut rect = ctx.content_rect();
+        rect.min.y += self.safe_top;
+        rect.max.y -= self.safe_bottom;
+        rect.min.x += self.safe_left;
+        rect.max.x -= self.safe_right;
+        if rect.height() < 100.0 || rect.width() < 100.0 {
+            ctx.content_rect()
+        } else {
+            rect
+        }
+    }
+    fn command(&mut self, op: &str) {
+        self.effects.push(Effect::Command(json!({"op":op})));
+    }
+    fn open_queue(&mut self, ctx: &egui::Context) {
+        self.queue_open = true;
+        self.queue_pending = true;
+        self.request(ctx, json!({"op":"queue"}), Kind::Queue);
+    }
+    fn collection_context(&self, media: &Media) -> Option<Value> {
+        if !matches!(self.tab, 2 | 3) || media.live || media.collection() {
+            return None;
+        }
+        let request = self.feeds[self.tab].request.as_ref()?;
+        if !matches!(
+            request,
+            BrowseRequest::Collection(_)
+                | BrowseRequest::Details(_)
+                | BrowseRequest::CliampTracks(_)
+        ) || !self.feeds[self.tab]
+            .page
+            .items
+            .iter()
+            .any(|m| m.url == media.url)
+        {
+            return None;
+        }
+        Some(
+            json!({"op":"prepare_context","context_id":uuid::Uuid::new_v4().to_string(),"request":request,"source_url":media.url,"source_id":media.id,"music":self.tab==2}),
+        )
+    }
+    fn catalog(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        if self.tab == 0 {
+            self.download_list(ui);
+            return;
+        }
+        ui.horizontal(|ui| {
+            let width = (ui.available_width() - 170.0).max(48.0);
+            let response = ui.add_sized(
+                [width, 48.0],
+                egui::TextEdit::singleline(&mut self.query)
+                    .desired_width(width)
+                    .hint_text("Search or URL"),
+            );
+            let enter = response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+            if ui.button("Search").clicked() || enter {
+                let query = self.query.trim().to_owned();
+                if ytui_core::http_url(&query).is_ok() {
+                    match linked_media(&query, self.tab) {
+                        Ok(media) => self.resolve(ctx, media, false, false, false),
+                        Err(error) => self.status = error.to_string(),
+                    }
+                } else if !query.is_empty() {
+                    self.navigate(
+                        ctx,
+                        if self.tab == 3 {
+                            BrowseRequest::RadioSearch(query)
+                        } else {
+                            BrowseRequest::Search(query)
+                        },
+                        false,
+                    );
+                }
+            }
+            if ui.button("Feeds").clicked() {
+                self.feed_menu = true;
+            }
+        });
+        let categories = self.feeds[self.tab].page.categories.clone();
+        egui::ScrollArea::horizontal()
+            .id_salt("categories")
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    for category in categories {
+                        if ui.button(category.title).clicked() {
+                            self.navigate(ctx, category.request, false);
+                        }
+                    }
+                });
+            });
+        ui.horizontal(|ui| {
+            if !self.feeds[self.tab].history.is_empty() && ui.button("Back").clicked() {
+                self.navigate_back(ctx);
+            }
+            ui.add(
+                egui::Label::new(
+                    RichText::new(&self.feeds[self.tab].page.title).color(c(self.palette.accent)),
+                )
+                .truncate(),
+            );
+        });
+        if let Some(error) = self.feeds[self.tab].error.clone() {
+            ui.colored_label(
+                c(self.palette.error),
+                "Could not load this feed. Check your connection or choose another source.",
+            );
+            ui.collapsing("Connection details", |ui| {
+                ui.label(error);
+            });
+            let retrying = self.feeds[self.tab].retry_at.is_some();
+            if retrying {
+                ui.label("Reconnecting automatically after the service cooldown…");
+            }
+            if ui
+                .add_enabled(!retrying, egui::Button::new("Retry"))
+                .clicked()
+                && let Some(request) = self.feeds[self.tab].request.clone()
+            {
+                self.feeds[self.tab].failures = 0;
+                self.navigate(ctx, request, false);
+            }
+        }
+        if self.feeds[self.tab].loading {
+            ui.spinner();
+        }
+        let count = self.feeds[self.tab].page.items.len();
+        let mut near_end = false;
+        let scroll = egui::ScrollArea::vertical()
+            .id_salt(("feed", self.tab, self.feeds[self.tab].generation))
+            .vertical_scroll_offset(self.feeds[self.tab].scroll_offset)
+            .max_height((ui.available_height() - 32.0).max(80.0))
+            .auto_shrink([false, false])
+            .show_rows(ui, 152.0, count, |ui, range| {
+                near_end = range.end.saturating_add(6) >= count;
+                for index in range {
+                    let media = self.feeds[self.tab].page.items[index].clone();
+                    self.media_card(ctx, ui, &media);
+                }
+            });
+        self.feeds[self.tab].scroll_offset = scroll.state.offset.y;
+        if near_end
+            && !self.feeds[self.tab].loading
+            && self.feeds[self.tab].error.is_none()
+            && let Some(token) = self.feeds[self.tab].page.continuation.clone()
+        {
+            self.navigate(ctx, BrowseRequest::Continue(token), true);
+        }
+        if count == 0 && !self.feeds[self.tab].loading && self.feeds[self.tab].error.is_none() {
+            ui.label("No items returned. Choose another feed or search.");
+        }
+    }
+    fn media_card(&mut self, ctx: &egui::Context, ui: &mut egui::Ui, media: &Media) {
+        let width = ui.available_width();
+        ui.allocate_ui_with_layout(
+            Vec2::new(width, 152.0),
+            egui::Layout::top_down(egui::Align::Min),
+            |ui| {
+                egui::Frame::new()
+                    .fill(c(self.palette.surface))
+                    .stroke(egui::Stroke::new(1.0_f32, c(self.palette.selection)))
+                    .inner_margin(8.0)
+                    .show(ui, |ui| {
+                        ui.set_min_width((width - 16.0).max(1.0));
+                        ui.horizontal_top(|ui| {
+                            if self.config.thumbnails && !media.thumbnail.is_empty() {
+                                if let Some(image) = self.images.get(&media.thumbnail) {
+                                    ui.add(
+                                        egui::Image::new(image)
+                                            .fit_to_exact_size(Vec2::splat(80.0)),
+                                    );
+                                } else {
+                                    ui.allocate_space(Vec2::splat(80.0));
+                                    if self.image_pending.len() < 8
+                                        && self
+                                            .image_failures
+                                            .get(&media.thumbnail)
+                                            .is_none_or(|(_, at)| std::time::Instant::now() >= *at)
+                                        && self.image_pending.insert(media.thumbnail.clone())
+                                    {
+                                        self.request(
+                                            ctx,
+                                            json!({"op":"image","media":media}),
+                                            Kind::Image(media.thumbnail.clone()),
+                                        );
+                                    }
+                                }
+                            }
+                            ui.vertical(|ui| {
+                                if ui
+                                    .add(
+                                        egui::Button::new(RichText::new(&media.title).strong())
+                                            .truncate(),
+                                    )
+                                    .clicked()
+                                {
+                                    self.resolve(ctx, media.clone(), false, false, false);
+                                }
+                                ui.add(
+                                    egui::Label::new(
+                                        RichText::new(format!(
+                                            "{} · {}",
+                                            media.creator,
+                                            media.label()
+                                        ))
+                                        .small(),
+                                    )
+                                    .truncate(),
+                                );
+                                ui.horizontal(|ui| {
+                                    if ui.button("Preview").clicked() {
+                                        self.resolve(ctx, media.clone(), true, false, false);
+                                    }
+                                    if ui.button("+").clicked() {
+                                        self.status="Adding to the queue…".into();
+                                        self.request(ctx,if media.collection(){json!({"op":"enqueue_collection","request":BrowseRequest::Collection(media.id.clone()),"music":self.tab==2})}else{json!({"op":"enqueue","media":media})},Kind::Ignore);
+                                    }
+                                    ui.menu_button("More", |ui| {
+                                        if ui.button("Download").clicked() {
+                                            self.resolve(ctx, media.clone(), false, true, false);
+                                            ui.close();
+                                        }
+                                        if ui.button("Save / favorite").clicked() {
+                                            self.request(
+                                                ctx,
+                                                json!({"op":"save_media","media":media}),
+                                                Kind::Ignore,
+                                            );
+                                            ui.close();
+                                        }
+                                        if ui.button("Resume").clicked() {
+                                            self.resolve(ctx, media.clone(), false, false, true);
+                                            ui.close();
+                                        }
+                                        if ui.button("Open in browser").clicked() {
+                                            self.effects.push(Effect::Open(media.url.clone()));
+                                            ui.close();
+                                        }
+                                    });
+                                });
+                            });
+                        });
+                    });
+            },
+        );
+    }
+    fn player_panel(&mut self, ctx: &egui::Context, ui: &mut egui::Ui, expanded: bool) {
+        let title = self.player["title"]
+            .as_str()
+            .unwrap_or("Choose a song or station")
+            .to_owned();
+        ui.heading(title);
+        if let Some(station) = self.player["station"].as_str().filter(|s| !s.is_empty()) {
+            ui.label(RichText::new(format!("Live · {station}")).color(c(self.palette.muted)));
+        }
+        if let Some(creator) = self.player["media"]["creator"]
+            .as_str()
+            .filter(|s| !s.is_empty())
+        {
+            ui.label(RichText::new(creator).color(c(self.palette.muted)));
+        }
+        if let Some(error) = self.player["error"].as_str() {
+            ui.colored_label(c(self.palette.error), error);
+        }
+        if self.player["video"].as_bool().unwrap_or(false)
+            && self.player["title"].as_str().is_some()
+        {
+            let w = ui.available_width();
+            let width = self.player["video_width"].as_f64().unwrap_or(0.0);
+            let height = self.player["video_height"].as_f64().unwrap_or(0.0);
+            let aspect = if width > 0.0 && height > 0.0 {
+                (width / height).clamp(0.25, 4.0) as f32
+            } else {
+                16.0 / 9.0
+            };
+            let (rect, _) = ui.allocate_exact_size(Vec2::new(w, w / aspect), egui::Sense::click());
+            #[cfg(target_os = "android")]
+            crate::platform::paint_video(ui, rect);
+            #[cfg(not(target_os = "android"))]
+            ui.painter().rect_filled(rect, 0.0, Color32::BLACK);
+            if let Some(text) = self.player["captions"].as_str().filter(|s| !s.is_empty()) {
+                ui.painter().text(
+                    rect.center_bottom() - egui::vec2(0.0, 12.0),
+                    egui::Align2::CENTER_BOTTOM,
+                    text,
+                    egui::FontId::proportional(18.0),
+                    Color32::WHITE,
+                );
+            }
+        } else if matches!(self.tab, 2 | 3) {
+            self.visualizer(ui, if expanded { 280.0 } else { 220.0 });
+        }
+        if self.player["preview"].as_bool().unwrap_or(false) {
+            ui.label("Muted preview");
+            ui.horizontal(|ui| {
+                if ui.button("End preview").clicked() {
+                    self.command("preview_end");
+                }
+                if ui.button("Play full").clicked() {
+                    let context=self.player.get("media").and_then(|m|serde_json::from_value::<Media>(m.clone()).ok()).and_then(|media|self.collection_context(&media));
+                    self.effects.push(Effect::Command(json!({"op":"preview_play_full","context_id":context.as_ref().map(|c|c["context_id"].clone()),"context":context})));
+                }
+            });
+            return;
+        }
+        let duration = self.player["duration"].as_f64().unwrap_or(0.0).max(0.0);
+        let mut position = self.player["position"].as_f64().unwrap_or(0.0);
+        if duration > 0.0 {
+            ui.horizontal(|ui| {
+                ui.label(timestamp(position));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(timestamp(duration));
+                });
+            });
+            ui.spacing_mut().slider_width = ui.available_width();
+            let response = ui.add(
+                egui::Slider::new(&mut position, 0.0..=duration)
+                    .show_value(false)
+                    .handle_shape(egui::style::HandleShape::Circle),
+            );
+            if let Some(segments) = self.player["segments"].as_array() {
+                let rail = response.rect.shrink2(egui::vec2(18.0, 0.0));
+                for segment in segments {
+                    let a = (segment["start"].as_f64().unwrap_or(0.0) / duration).clamp(0.0, 1.0)
+                        as f32;
+                    let b =
+                        (segment["end"].as_f64().unwrap_or(0.0) / duration).clamp(0.0, 1.0) as f32;
+                    if b > a {
+                        ui.painter().rect_filled(
+                            egui::Rect::from_min_max(
+                                egui::pos2(rail.left() + rail.width() * a, rail.center().y - 2.0),
+                                egui::pos2(rail.left() + rail.width() * b, rail.center().y + 2.0),
+                            ),
+                            1.0,
+                            c(self.palette.warning),
+                        );
+                    }
+                }
+            }
+            if response.drag_stopped() || response.clicked() {
+                self.effects
+                    .push(Effect::Command(json!({"op":"seek","seconds":position})));
+            }
+        }
+        ui.spacing_mut().slider_width = (ui.available_width() - 148.0).max(80.0);
+        ui.horizontal_wrapped(|ui| {
+            for (label, op) in [
+                ("Previous", "previous"),
+                ("-10s", "back"),
+                ("Play / pause", "pause"),
+                ("+10s", "forward"),
+                ("Next", "next"),
+            ] {
+                if ui.button(label).clicked() {
+                    self.command(op);
+                }
+            }
+        });
+        if ui
+            .add(
+                egui::Slider::new(&mut self.volume, 0.0..=1.0)
+                    .text("Volume")
+                    .handle_shape(egui::style::HandleShape::Circle)
+                    .custom_formatter(|v, _| format!("{:.0}%", v * 100.0)),
+            )
+            .changed()
+        {
+            self.effects
+                .push(Effect::Command(json!({"op":"volume","value":self.volume})));
+        }
+        if ui
+            .add(
+                egui::Slider::new(&mut self.speed, 0.25..=4.0)
+                    .text("Speed")
+                    .handle_shape(egui::style::HandleShape::Circle)
+                    .custom_formatter(|v, _| format!("{v:.2}x")),
+            )
+            .changed()
+        {
+            self.effects
+                .push(Effect::Command(json!({"op":"speed","value":self.speed})));
+        }
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("Queue").clicked() {
+                self.open_queue(ctx);
+            }
+            if ui.button("Shuffle").clicked() {
+                self.command("shuffle");
+            }
+            if ui.button("Repeat").clicked() {
+                self.command("repeat");
+            }
+            ui.menu_button("Tracks / captions", |ui| {
+                for track in self.player["tracks"]
+                    .as_array()
+                    .cloned()
+                    .unwrap_or_default()
+                {
+                    if ui
+                        .button(track["label"].as_str().unwrap_or("Track"))
+                        .clicked()
+                    {
+                        self.effects.push(Effect::Command(
+                            json!({"op":"track","group":track["group"],"index":track["index"]}),
+                        ));
+                        ui.close();
+                    }
+                }
+                if ui.button("Toggle captions").clicked() {
+                    self.command("captions_toggle");
+                    ui.close();
+                }
+            });
+            if ui.button("Stop").clicked() {
+                self.command("stop");
+            }
+        });
+        if matches!(self.tab, 2 | 3) {
+            let current = self.config.music_player_style.clone();
+            egui::ComboBox::from_label("Player style")
+                .selected_text(&current)
+                .show_ui(ui, |ui| {
+                    for style in ytui_core::MUSIC_PLAYER_STYLES {
+                        ui.selectable_value(
+                            &mut self.config.music_player_style,
+                            style.to_string(),
+                            *style,
+                        );
+                    }
+                });
+            if current != self.config.music_player_style {
+                self.save_settings(ctx);
+            }
+        }
+        let segments = self.player["segments"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
+        if !segments.is_empty() {
+            ui.menu_button("SponsorBlock sections", |ui| {
+                for segment in &segments {
+                    let start = segment["start"].as_f64().unwrap_or(0.0);
+                    let end = segment["end"].as_f64().unwrap_or(0.0);
+                    if ui
+                        .button(format!(
+                            "Watch {} ({}–{})",
+                            segment["category"].as_str().unwrap_or("section"),
+                            timestamp(start),
+                            timestamp(end)
+                        ))
+                        .clicked()
+                    {
+                        self.effects.push(Effect::Command(
+                            json!({"op":"sponsor_watch","start":start,"end":end}),
+                        ));
+                        ui.close();
+                    }
+                }
+            });
+        }
+        if ui.button("Replay skipped segment").clicked() {
+            self.command("sponsor_replay");
+        }
+    }
+    fn visualizer(&mut self, ui: &mut egui::Ui, height: f32) {
+        let (rect, _) = ui.allocate_exact_size(
+            Vec2::new(ui.available_width(), height),
+            egui::Sense::hover(),
+        );
+        let p = ui.painter_at(rect);
+        let center = rect.center();
+        let radius = rect.width().min(rect.height()) * 0.43;
+        let style = self.config.music_player_style.as_str();
+        if style.starts_with("vu") {
+            for channel in 0..2 {
+                let x = rect.left() + rect.width() * (0.15 + channel as f32 * 0.5);
+                let w = rect.width() * 0.2;
+                for led in 0..18 {
+                    let y = rect.bottom() - 12.0 - led as f32 * (height - 24.0) / 18.0;
+                    let fill = if (led as f32) / 18.0 <= self.visual_levels[channel] {
+                        if led > 15 {
+                            c(self.palette.warning)
+                        } else {
+                            c(self.palette.accent)
+                        }
+                    } else {
+                        c(self.palette.surface)
+                    };
+                    p.rect_filled(
+                        egui::Rect::from_min_size(egui::pos2(x, y - 8.0), Vec2::new(w, 6.0)),
+                        1.0,
+                        fill,
+                    );
+                }
+            }
+        } else if style.starts_with("orbit") {
+            for ring in 0..4 {
+                p.circle_stroke(
+                    center,
+                    radius * (0.2 + ring as f32 * 0.18 + self.visual_levels[0] * 0.12),
+                    egui::Stroke::new(
+                        2.0_f32,
+                        c(if ring % 2 == 0 {
+                            self.palette.accent
+                        } else {
+                            self.palette.success
+                        }),
+                    ),
+                );
+            }
+            let pos =
+                center + Vec2::angled(self.phase) * radius * (0.5 + self.visual_levels[2] * 0.3);
+            p.circle_filled(pos, 5.0, c(self.palette.warning));
+        } else {
+            let classic = style == "classic";
+            let side = if classic {
+                rect.width().min(rect.height() - 12.0)
+            } else {
+                (rect.width() / 1.55).min(rect.height() - 12.0)
+            };
+            let x = rect.center().x - side * if classic { 0.5 } else { 0.775 };
+            let y = rect.center().y - side * 0.5;
+            let center = egui::pos2(x + side * 1.04, rect.center().y);
+            let radius = side * 0.5;
+            if !classic {
+                p.circle_filled(center, radius, Color32::from_rgb(25, 25, 29));
+                for ring in 1..9 {
+                    p.circle_stroke(
+                        center,
+                        radius * ring as f32 / 9.0,
+                        egui::Stroke::new(1.0_f32, Color32::from_gray(45)),
+                    );
+                }
+                p.circle_filled(center, radius * 0.27, c(self.palette.accent));
+                p.line_segment(
+                    [center, center + Vec2::angled(self.phase) * radius * 0.25],
+                    egui::Stroke::new(3.0_f32, Color32::BLACK),
+                );
+            }
+            let sleeve = egui::Rect::from_min_size(egui::pos2(x, y), Vec2::splat(side));
+            if let Some(media) = self
+                .player
+                .get("media")
+                .and_then(|v| serde_json::from_value::<Media>(v.clone()).ok())
+            {
+                let pixels = (side * ui.ctx().pixels_per_point())
+                    .ceil()
+                    .clamp(240.0, 768.0) as u32;
+                let pixels = pixels.div_ceil(64) * 64;
+                let art_key = format!("{}#art-{pixels}", media.thumbnail);
+                if let Some(image) = self.images.get(&art_key) {
+                    let [w, h] = image.size();
+                    let (u, v) = if w > h {
+                        ((1.0 - h as f32 / w as f32) * 0.5, 0.0)
+                    } else {
+                        (0.0, (1.0 - w as f32 / h as f32) * 0.5)
+                    };
+                    p.image(
+                        image.id(),
+                        sleeve,
+                        egui::Rect::from_min_max(egui::pos2(u, v), egui::pos2(1.0 - u, 1.0 - v)),
+                        Color32::WHITE,
+                    );
+                } else {
+                    p.rect_filled(sleeve, 2.0, c(self.palette.surface));
+                    if !media.thumbnail.is_empty()
+                        && self.image_pending.len() < 8
+                        && self
+                            .image_failures
+                            .get(&art_key)
+                            .is_none_or(|(_, at)| std::time::Instant::now() >= *at)
+                        && self.image_pending.insert(art_key.clone())
+                    {
+                        self.request(
+                            ui.ctx(),
+                            json!({"op":"image","media":media,"width":pixels}),
+                            Kind::Image(art_key),
+                        );
+                    }
+                }
+            }
+        }
+    }
+    fn settings(&mut self, ctx: &egui::Context) {
+        self.settings_original
+            .get_or_insert_with(|| self.config.clone());
+        let mut saved = false;
+        let mut open = true;
+        egui::Window::new("Settings")
+            .constrain_to(self.safe_rect(ctx))
+            .open(&mut open)
+            .vscroll(true)
+            .default_width(380.0)
+            .show(ctx, |ui| {
+                ui.label("Appearance");
+                egui::ComboBox::from_label("Theme")
+                    .selected_text(&self.config.theme)
+                    .show_ui(ui, |ui| {
+                        for theme in ytui_core::theme::THEMES {
+                            ui.selectable_value(&mut self.config.theme, theme.to_string(), *theme);
+                        }
+                    });
+                if ui.button("Import Omarchy / Caelestia palette").clicked() {
+                    self.effects.push(Effect::Pick("theme".into()));
+                }
+                ui.checkbox(&mut self.config.thumbnails, "Cached thumbnails");
+                ui.checkbox(&mut self.config.reduced_motion, "Reduced motion");
+                ui.checkbox(
+                    &mut self.config.playback_history,
+                    "Local playback history and resume",
+                );
+                egui::ComboBox::from_label("Music player")
+                    .selected_text(&self.config.music_player_style)
+                    .show_ui(ui, |ui| {
+                        for mode in ytui_core::MUSIC_PLAYER_STYLES {
+                            ui.selectable_value(
+                                &mut self.config.music_player_style,
+                                mode.to_string(),
+                                *mode,
+                            );
+                        }
+                    });
+                ui.separator();
+                ui.label("Playback / downloads");
+                egui::ComboBox::from_label("Quality")
+                    .selected_text(&self.config.download.quality)
+                    .show_ui(ui, |ui| {
+                        for q in ["best", "1080", "720", "480", "360"] {
+                            ui.selectable_value(&mut self.config.download.quality, q.into(), q);
+                        }
+                    });
+                ui.checkbox(&mut self.config.download.audio, "Audio-only downloads");
+                egui::ComboBox::from_label("SponsorBlock")
+                    .selected_text(&self.config.playback_sponsorblock)
+                    .show_ui(ui, |ui| {
+                        for mode in ["skip", "mark", "off"] {
+                            ui.selectable_value(
+                                &mut self.config.playback_sponsorblock,
+                                mode.into(),
+                                mode,
+                            );
+                        }
+                    });
+                ui.separator();
+                ui.label("Account storage");
+                ui.small("Imported sessions use Android Keystore encryption. Reload retries a stored session without importing it again.");
+                if let Some(notice)=&self.account_notice {ui.label(notice);}
+                if ui.button("Reload stored account").clicked(){self.change_account(ctx,json!({"op":"reload_account"}));}
+                ui.separator();
+                ui.label("Network proxy (optional)");
+                let mut proxy = self.config.proxy.clone().unwrap_or_default();
+                if ui.text_edit_singleline(&mut proxy).changed() {
+                    self.config.proxy = if proxy.trim().is_empty() {
+                        None
+                    } else {
+                        Some(proxy)
+                    };
+                }
+                if ui
+                    .add_enabled(!self.settings_pending, egui::Button::new("Save settings"))
+                    .clicked()
+                {
+                    saved = true;
+                    self.save_settings(ctx);
+                    self.settings_open = false;
+                }
+            });
+        self.settings_open &= open;
+        if !self.settings_open
+            && !saved
+            && let Some(original) = self.settings_original.take()
+        {
+            self.config = original;
+        }
+    }
+    fn feeds(&mut self, ctx: &egui::Context) {
+        let mut open = true;
+        egui::Window::new("Feeds and library")
+            .constrain_to(self.safe_rect(ctx))
+            .open(&mut open)
+            .show(ctx, |ui| {
+                let choices = if self.tab == 3 {
+                    vec![
+                        ("Cliamp channels", BrowseRequest::Cliamp),
+                        ("Saved stations", BrowseRequest::Favorites),
+                        (
+                            "Country: Germany",
+                            BrowseRequest::RadioCountry("Germany".into()),
+                        ),
+                    ]
+                } else {
+                    vec![
+                        ("For you", BrowseRequest::Home),
+                        ("Subscriptions", BrowseRequest::Subscriptions),
+                        ("Liked", BrowseRequest::Liked),
+                        ("Watch later", BrowseRequest::WatchLater),
+                        ("Library", BrowseRequest::Library),
+                        (
+                            "Saved locally",
+                            BrowseRequest::SavedMedia {
+                                query: String::new(),
+                            },
+                        ),
+                    ]
+                };
+                for (label, request) in choices {
+                    if ui.button(label).clicked() {
+                        self.navigate(ctx, request, false);
+                        self.feed_menu = false;
+                    }
+                }
+            });
+        self.feed_menu &= open;
+    }
+    fn menu(&mut self, ctx: &egui::Context) {
+        let mut open = true;
+        egui::Window::new("Actions").constrain_to(self.safe_rect(ctx)).open(&mut open).show(ctx,|ui|{
+            if ui.add_enabled(self.player.get("media").is_some(),egui::Button::new("Lyrics / local LRC")).clicked(){self.open_lyrics(ctx);self.menu_open=false;}
+            if ui.button("Sleep timer: 30 minutes").clicked(){self.effects.push(Effect::Command(json!({"op":"sleep","seconds":1800})));}
+            if ui.button("Cancel sleep timer").clicked(){self.command("sleep_cancel");}
+
+        if ui.button("Connect YouTube account").clicked(){self.effects.push(Effect::Login);self.menu_open=false;}
+        if ui.button("Import cookie file").clicked(){self.effects.push(Effect::Pick("cookies".into()));}
+        if ui.button("Disconnect account").clicked(){self.change_account(ctx,json!({"op":"disconnect"}));self.effects.push(Effect::Command(json!({"op":"disconnect"})));}
+        if ui.button("Saved media").clicked(){self.navigate(ctx,BrowseRequest::Favorites,false);self.menu_open=false;}
+        if ui.button("Playback queue").clicked(){self.open_queue(ctx);self.menu_open=false;}
+        if ui.button("Recently played").clicked(){self.history_open=true;self.request(ctx,json!({"op":"history_list"}),Kind::History);self.menu_open=false;}
+        if ui.button("Refresh feed").clicked()&& let Some(req)=self.feeds[self.tab].request.clone(){self.navigate(ctx,req,false);}
+        if ui.button("About / mobile parity").clicked(){self.popup=Some(("About ytui Android".into(),format!("ytui Android {}\nRust engine {}\nRevision {}\n\nRust UI and engine · Media3 playback\nNative YouTube signature challenges may still fail.\nAndroid cannot access other browsers' private cookies.\nLinux desktop services and external cliamp are not Android services.\nSee docs/android/PARITY.md for platform differences and qualification gates.",self.build_version,env!("CARGO_PKG_VERSION"),option_env!("YTUI_ANDROID_REVISION").unwrap_or("source checkout"))));}
+    });
+        self.menu_open &= open;
+    }
+    fn download_form(&mut self, ctx: &egui::Context) {
+        self.download_draft_original
+            .get_or_insert_with(|| self.config.clone());
+        let mut open = true;
+        egui::Window::new("Add download")
+            .constrain_to(self.safe_rect(ctx))
+            .open(&mut open)
+            .vscroll(true)
+            .show(ctx, |ui| {
+                ui.label("Video or playlist URL");
+                ui.add_sized(
+                    [ui.available_width(), 48.0],
+                    egui::TextEdit::singleline(&mut self.query)
+                        .hint_text("https://www.youtube.com/…"),
+                );
+                ui.checkbox(&mut self.config.download.audio, "Audio only");
+                egui::ComboBox::from_label("Maximum quality")
+                    .selected_text(&self.config.download.quality)
+                    .show_ui(ui, |ui| {
+                        for q in ["1080", "720", "480", "360", "best"] {
+                            ui.selectable_value(&mut self.config.download.quality, q.into(), q);
+                        }
+                    });
+                if ui.button("Download").clicked() {
+                    match linked_media(
+                        self.query.trim(),
+                        if self.config.download.audio { 2 } else { 1 },
+                    ) {
+                        Ok(media) => {
+                            self.resolve(ctx, media, false, true, false);
+                            self.add_download = false;
+                        }
+                        Err(error) => self.status = error.to_string(),
+                    }
+                }
+            });
+        self.add_download &= open;
+        if !self.add_download
+            && let Some(original) = self.download_draft_original.take()
+        {
+            self.config = original;
+        }
+    }
+    fn download_list(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.heading("Offline downloads");
+            if ui.button("Add URL").clicked() {
+                self.add_download = true;
+            }
+        });
+        let items = self.downloads.as_array().cloned().unwrap_or_default();
+        if items.is_empty() {
+            ui.label("Download a video, song or playlist from its More menu.");
+        }
+        egui::ScrollArea::vertical().show_rows(ui, 168.0, items.len(), |ui, range| {
+            for index in range {
+                let item = &items[index];
+                ui.group(|ui| {
+                    ui.set_min_height(152.0);
+                    ui.add(
+                        egui::Label::new(item["title"].as_str().unwrap_or("Download")).truncate(),
+                    );
+                    let state = item["state"].as_str().unwrap_or("Queued");
+                    ui.add(egui::Label::new(state).truncate());
+                    ui.add(egui::ProgressBar::new(
+                        item["progress"].as_f64().unwrap_or(0.0) as f32,
+                    ));
+                    let id = item["id"].as_str().unwrap_or("");
+                    ui.horizontal(|ui| {
+                        if ui
+                            .add_enabled(state == "Complete", egui::Button::new("Play offline"))
+                            .clicked()
+                        {
+                            self.effects.push(Effect::Offline(id.into()));
+                        }
+                        ui.menu_button("Actions", |ui| {
+                            if state == "Complete" && ui.button("Export file…").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_export","id":id})));
+                                ui.close();
+                            }
+                            if !id.starts_with("export:") && ui.button("Pause / retry").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_toggle","id":id})));
+                                ui.close();
+                            }
+                            if ui.button("Remove").clicked() {
+                                self.effects
+                                    .push(Effect::Command(json!({"op":"download_remove","id":id})));
+                                ui.close();
+                            }
+                        });
+                    });
+                });
+            }
+        });
+    }
+}
+fn c(rgb: (u8, u8, u8)) -> Color32 {
+    Color32::from_rgb(rgb.0, rgb.1, rgb.2)
+}
+fn progress(player: &Value) -> f32 {
+    let duration = player["duration"].as_f64().unwrap_or(0.0);
+    if duration > 0.0 {
+        (player["position"].as_f64().unwrap_or(0.0) / duration).clamp(0.0, 1.0) as f32
+    } else {
+        0.0
+    }
+}
+
+fn linked_media(raw: &str, tab: usize) -> Result<Media> {
+    let url = ytui_core::normalize_media_url(raw)?;
+    let parsed = ytui_core::http_url(&url)?;
+    let playlist = ytui_core::is_playlist_url(&url);
+    let id = if playlist {
+        parsed
+            .query_pairs()
+            .find(|(key, _)| key == "list")
+            .map(|(_, value)| value.into_owned())
+            .unwrap_or_default()
+    } else {
+        String::new()
+    };
+    Ok(Media {
+        url: url.clone(),
+        title: url,
+        id,
+        kind: if playlist {
+            ytui_core::MediaKind::Playlist
+        } else if tab == 3 {
+            ytui_core::MediaKind::Station
+        } else if tab == 2 {
+            ytui_core::MediaKind::Song
+        } else {
+            ytui_core::MediaKind::Video
+        },
+        live: tab == 3,
+        ..Default::default()
+    })
+}
+fn timestamp(seconds: f64) -> String {
+    let n = seconds.max(0.0) as u64;
+    if n >= 3600 {
+        format!("{}:{:02}:{:02}", n / 3600, n / 60 % 60, n % 60)
+    } else {
+        format!("{}:{:02}", n / 60, n % 60)
+    }
+}
+
+impl Drop for MobileApp {
+    fn drop(&mut self) {
+        for task in self.tasks.values() {
+            task.abort();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub(super) fn test_app() -> (MobileApp, egui::Context, tempfile::TempDir) {
+        let root = tempfile::tempdir().unwrap();
+        let ctx = egui::Context::default();
+        let engine =
+            Arc::new(Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap());
+        let mut app = MobileApp::with_network(engine, &ctx, false);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        while !app.tasks.is_empty() {
+            app.poll(&ctx);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "Local startup requests stalled"
+            );
+            std::thread::yield_now();
+        }
+        (app, ctx, root)
+    }
+    fn deliver(
+        app: &MobileApp,
+        kind: Kind,
+        result: std::result::Result<Value, String>,
+        retry_after: Option<std::time::Duration>,
+    ) {
+        app.tx
+            .send(Reply {
+                id: u64::MAX,
+                image: None,
+                retry_after,
+                kind,
+                result,
+            })
+            .unwrap();
+    }
+    #[test]
+    fn pasted_playlist_links_expand_but_watch_links_keep_single_video_intent() {
+        let playlist =
+            linked_media("https://music.youtube.com/playlist?list=PLsynthetic", 2).unwrap();
+        assert!(playlist.collection());
+        assert_eq!(playlist.id, "PLsynthetic");
+        assert!(
+            !linked_media(
+                "https://www.youtube.com/watch?v=abcdefghijk&list=PLsynthetic",
+                1
+            )
+            .unwrap()
+            .collection()
+        );
+        assert_eq!(
+            linked_media("youtu.be/abcdefghijk", 2).unwrap().kind,
+            ytui_core::MediaKind::Song
+        );
+        assert!(linked_media("file:///private/media", 1).is_err());
+        assert!(linked_media("https://name:secret@youtube.com/playlist?list=PLx", 1).is_err());
+    }
+    #[test]
+    fn a_pending_download_keeps_its_requested_quality_when_settings_change() {
+        let (mut app, ctx, _root) = test_app();
+        app.config.download.quality = "1080".into();
+        deliver(
+            &app,
+            Kind::Resolve {
+                account_generation: app.account_generation,
+                playback_generation: app.playback_generation,
+                queued: false,
+                media: Box::new(Media {
+                    url: "https://media.test/video".into(),
+                    title: "Fixture".into(),
+                    ..Default::default()
+                }),
+                audio: false,
+                quality: "360".into(),
+                preview: false,
+                download: true,
+                resume: false,
+                context: None,
+            },
+            Ok(json!({"url":"https://media.test/selected-360"})),
+            None,
+        );
+        app.poll(&ctx);
+        let [Effect::Download(request)] = app.effects.as_slice() else {
+            panic!("Missing download request")
+        };
+        assert_eq!(request["quality"], "360");
+        assert_eq!(app.config.download.quality, "1080");
+    }
+    #[test]
+    fn stale_playback_and_account_replies_cannot_start_media() {
+        let (mut app, ctx, _root) = test_app();
+        app.account_generation = 3;
+        app.playback_generation = 5;
+        for (account, playback) in [(2, 5), (3, 4)] {
+            deliver(
+                &app,
+                Kind::Resolve {
+                    account_generation: account,
+                    playback_generation: playback,
+                    queued: false,
+                    media: Box::default(),
+                    audio: true,
+                    quality: "360".into(),
+                    preview: false,
+                    download: false,
+                    resume: false,
+                    context: None,
+                },
+                Ok(json!({"url":"https://media.test/old"})),
+                None,
+            );
+        }
+        app.poll(&ctx);
+        assert!(app.effects.is_empty());
+        deliver(
+            &app,
+            Kind::Resolve {
+                account_generation: 3,
+                playback_generation: 5,
+                queued: false,
+                media: Box::default(),
+                audio: true,
+                quality: "360".into(),
+                preview: false,
+                download: false,
+                resume: false,
+                context: None,
+            },
+            Ok(json!({"url":"https://media.test/current"})),
+            None,
+        );
+        app.poll(&ctx);
+        assert!(matches!(app.effects.as_slice(), [Effect::Play(_)]));
+    }
+    #[test]
+    fn feed_retry_respects_server_cooldown_preserves_content_and_is_bounded() {
+        let (mut app, ctx, _root) = test_app();
+        app.feeds[1].page.items.push(Media {
+            title: "Keep me".into(),
+            ..Default::default()
+        });
+        let before = std::time::Instant::now();
+        for attempt in 1..=4 {
+            app.feeds[1].retry_at = None;
+            deliver(
+                &app,
+                Kind::Feed {
+                    tab: 1,
+                    generation: 0,
+                    append: true,
+                },
+                Err("429".into()),
+                Some(std::time::Duration::from_secs(60)),
+            );
+            app.poll(&ctx);
+            assert_eq!(app.feeds[1].page.items[0].title, "Keep me");
+            assert_eq!(app.feeds[1].failures, attempt.min(3));
+            if attempt <= 3 {
+                assert!(
+                    app.feeds[1].retry_at.unwrap().duration_since(before)
+                        >= std::time::Duration::from_secs(60)
+                );
+            } else {
+                assert!(app.feeds[1].retry_at.is_none());
+            }
+        }
+        app.feeds[1].generation = 1;
+        deliver(
+            &app,
+            Kind::Feed {
+                tab: 1,
+                generation: 0,
+                append: false,
+            },
+            Ok(serde_json::to_value(Page::default()).unwrap()),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.feeds[1].page.items.len(), 1);
+    }
+    #[test]
+    fn modal_geometry_respects_system_bars_and_download_cancel_restores_preferences() {
+        let (mut app, ctx, _root) = test_app();
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    Vec2::new(412.0, 915.0),
+                )),
+                ..Default::default()
+            },
+            |ctx| app.frame(ctx),
+        );
+        app.safe_top = 32.0;
+        app.safe_bottom = 24.0;
+        app.safe_left = 12.0;
+        app.safe_right = 20.0;
+        let safe = app.safe_rect(&ctx);
+        assert_eq!(safe.top(), 32.0);
+        assert_eq!(safe.bottom(), 891.0);
+        assert_eq!(safe.left(), 12.0);
+        assert_eq!(safe.right(), 392.0);
+        app.add_download = true;
+        app.download_draft_original = Some(app.config.clone());
+        let original = app.config.download.audio;
+        app.config.download.audio = !original;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.add_download);
+        assert_eq!(app.config.download.audio, original);
+    }
+    #[test]
+    fn android_back_closes_overlays_before_backgrounding() {
+        let (mut app, ctx, _root) = test_app();
+        app.settings_open = true;
+        app.player_open = true;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.settings_open);
+        assert!(app.player_open);
+        assert!(app.effects.is_empty());
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.player_open);
+        assert!(app.effects.is_empty());
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(matches!(app.effects.as_slice(),[Effect::Command(v)] if v["op"]=="background"));
+    }
+    #[test]
+    fn back_restores_feed_position_rejects_late_replies_and_disconnect_clears_private_history() {
+        let (mut app, ctx, _root) = test_app();
+        app.tab = 1;
+        let feed = &mut app.feeds[1];
+        feed.request = Some(BrowseRequest::Home);
+        feed.page.title = "Home".into();
+        feed.page.items.push(Media {
+            title: "Previous card".into(),
+            ..Default::default()
+        });
+        feed.scroll_offset = 640.0;
+        feed.remember();
+        feed.request = Some(BrowseRequest::Search("new search".into()));
+        feed.generation = 4;
+        feed.loading = true;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(app.effects.is_empty());
+        assert_eq!(app.feeds[1].page.title, "Home");
+        assert_eq!(app.feeds[1].scroll_offset, 640.0);
+        assert!(!app.feeds[1].loading);
+        deliver(
+            &app,
+            Kind::Feed {
+                tab: 1,
+                generation: 4,
+                append: false,
+            },
+            Ok(serde_json::to_value(Page::default()).unwrap()),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.feeds[1].page.items[0].title, "Previous card");
+        // An evicted history page reloads automatically, then restores the offset.
+        app.feeds[1].remember();
+        app.feeds[1].history.back_mut().unwrap().page = None;
+        app.feeds[1].request = Some(BrowseRequest::Search("another page".into()));
+        assert!(app.navigate_back(&ctx));
+        app.feeds[1].scroll_offset = 0.0;
+        let generation = app.feeds[1].generation;
+        deliver(
+            &app,
+            Kind::Feed {
+                tab: 1,
+                generation,
+                append: false,
+            },
+            Ok(serde_json::to_value(Page {
+                title: "Reloaded Home".into(),
+                ..Default::default()
+            })
+            .unwrap()),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.feeds[1].scroll_offset, 640.0);
+        app.feeds[1].remember();
+        deliver(
+            &app,
+            Kind::Account(app.engine.account_intent()),
+            Ok(json!({"connected":false})),
+            None,
+        );
+        app.poll(&ctx);
+        assert!(app.feeds[1].history.is_empty());
+        assert!(app.feeds[1].page.items.is_empty());
+    }
+    #[test]
+    fn navigation_retains_recent_pages_with_a_bounded_memory_and_depth_budget() {
+        let mut feed = Feed::default();
+        for i in 0..40 {
+            feed.request = Some(BrowseRequest::Search(i.to_string()));
+            feed.page.items = (0..4)
+                .map(|_| Media {
+                    title: "x".repeat(125_000),
+                    ..Default::default()
+                })
+                .collect();
+            feed.remember();
+        }
+        assert_eq!(feed.history.len(), 12);
+        assert!(
+            feed.history
+                .iter()
+                .filter_map(|n| n.page.as_ref())
+                .map(Page::retained_bytes)
+                .sum::<usize>()
+                <= 2 * 1024 * 1024
+        );
+        assert!(feed.history.back().unwrap().page.is_some());
+        assert!(feed.history.front().unwrap().page.is_none());
+    }
+    #[test]
+    fn dismissing_a_loading_queue_cannot_be_undone_by_its_reply() {
+        let (mut app, ctx, _root) = test_app();
+        app.open_queue(&ctx);
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert!(!app.queue_open);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        while !app.tasks.is_empty() {
+            app.poll(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(!app.queue_open);
+        assert!(!app.queue_pending);
+    }
+    #[test]
+    fn every_music_style_renders_and_pause_reduced_motion_and_cancel_preserve_state() {
+        let (mut app, ctx, _root) = test_app();
+        let input = || egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                Vec2::new(412.0, 915.0),
+            )),
+            ..Default::default()
+        };
+        app.tab = 2;
+        app.player_open = true;
+        app.player = json!({"title":"Synthetic song","playing":true,"duration":180,"position":60,"left":0.4,"right":0.7,"peak":0.8});
+        for &style in ytui_core::MUSIC_PLAYER_STYLES {
+            app.config.music_player_style = style.into();
+            app.last_frame = std::time::Instant::now() - std::time::Duration::from_millis(50);
+            let previous = app.phase;
+            let output = ctx.run(input(), |ctx| app.frame(ctx));
+            assert!(!output.shapes.is_empty());
+            if style == "classic" {
+                assert_eq!(previous, app.phase);
+            } else {
+                assert!(app.phase > previous);
+            }
+        }
+        app.player["playing"] = json!(false);
+        let frozen = app.phase;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        assert_eq!(app.phase, frozen);
+        app.player["playing"] = json!(true);
+        app.config.reduced_motion = true;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        assert_eq!(app.phase, frozen);
+        app.player_open = false;
+        app.settings_open = true;
+        let original = app.config.download.audio;
+        let _ = ctx.run(input(), |ctx| app.frame(ctx));
+        app.config.download.audio = !original;
+        app.platform_status(&ctx, json!({"events":[{"kind":"back"}]}));
+        assert_eq!(app.config.download.audio, original);
+        assert!(app.effects.is_empty());
+    }
+    #[test]
+    fn collection_continuation_is_scoped_to_the_selected_finite_music_or_radio_feed() {
+        let (mut app, _ctx, _root) = test_app();
+        app.tab = 2;
+        let mut song = Media {
+            id: "fixture-song".into(),
+            url: "https://media.test/song".into(),
+            kind: ytui_core::MediaKind::Song,
+            ..Default::default()
+        };
+        app.feeds[2].request = Some(BrowseRequest::Collection("fixture-album".into()));
+        app.feeds[2].page.items.push(song.clone());
+        let context = app.collection_context(&song).unwrap();
+        assert_eq!(context["source_id"], song.id);
+        assert_eq!(context["music"], true);
+        assert_ne!(
+            context["context_id"],
+            app.collection_context(&song).unwrap()["context_id"]
+        );
+        app.feeds[2].request = Some(BrowseRequest::Home);
+        assert!(app.collection_context(&song).is_none());
+        app.tab = 3;
+        app.feeds[3].request = Some(BrowseRequest::CliampTracks(
+            "https://radio.cliamp.stream/library".into(),
+        ));
+        app.feeds[3].page.items.push(song.clone());
+        assert_eq!(app.collection_context(&song).unwrap()["music"], false);
+        song.live = true;
+        assert!(app.collection_context(&song).is_none());
+    }
+    #[test]
+    fn phone_tablet_and_all_theme_layouts_render_without_network() {
+        let (mut app, ctx, _root) = test_app();
+        for name in ytui_core::theme::THEMES {
+            app.palette = ytui_core::theme::builtin(name).unwrap();
+            for size in [
+                Vec2::new(360.0, 800.0),
+                Vec2::new(412.0, 915.0),
+                Vec2::new(1280.0, 800.0),
+            ] {
+                for tab in 0..4 {
+                    app.tab = tab;
+                    let out = ctx.run(
+                        egui::RawInput {
+                            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                            ..Default::default()
+                        },
+                        |ctx| app.frame(ctx),
+                    );
+                    assert!(!out.shapes.is_empty());
+                }
+            }
+        }
+        for open in 0..5 {
+            app.settings_open = open == 0;
+            app.menu_open = open == 1;
+            app.player_open = open == 2;
+            app.queue_open = open == 3;
+            app.history_open = open == 4;
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(360.0, 800.0),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| app.frame(ctx),
+            );
+        }
+        assert!(app.effects.is_empty());
+    }
+    #[test]
+    fn delayed_account_status_cannot_overwrite_a_newer_import_or_disconnect() {
+        let (mut app, ctx, _root) = test_app();
+        let previous = app.engine.account_intent();
+        let current = app.engine.begin_account_change();
+        app.status = "Current action".into();
+        deliver(
+            &app,
+            Kind::AccountStatus(previous),
+            Ok(json!({"notice":"Old startup failure"})),
+            None,
+        );
+        deliver(
+            &app,
+            Kind::Account(previous),
+            Ok(json!({"notice":"Old import"})),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.status, "Current action");
+        assert!(app.account_notice.is_none());
+        deliver(
+            &app,
+            Kind::AccountStatus(current),
+            Ok(json!({"notice":"Current account notice"})),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.status, "Current account notice");
+    }
+    #[test]
+    fn phone_navigation_responds_to_touch_sized_pointer_input() {
+        let (mut app, ctx, _root) = test_app();
+        let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(400.0, 800.0));
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(screen),
+                ..Default::default()
+            },
+            |ctx| app.frame(ctx),
+        );
+        for pressed in [true, false] {
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(screen),
+                    events: vec![
+                        egui::Event::PointerMoved(egui::pos2(250.0, 770.0)),
+                        egui::Event::PointerButton {
+                            pos: egui::pos2(250.0, 770.0),
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: Default::default(),
+                        },
+                    ],
+                    ..Default::default()
+                },
+                |ctx| app.frame(ctx),
+            );
+        }
+        assert_eq!(app.tab, 2);
+    }
+}

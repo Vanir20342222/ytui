@@ -1,0 +1,821 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "field-shorthand",
+      "args": [
+        "-O",
+        "id,title,width"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "a/b\nÉpisode: \"1\"\n𝐀\n1280"
+      ]
+    },
+    {
+      "name": "when-prefix-case",
+      "args": [
+        "-O",
+        "VIDEO:id",
+        "--print",
+        "video:%(id)s:%(width)05d"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "a/b",
+        "a/b:01280"
+      ]
+    },
+    {
+      "name": "debug-shorthand",
+      "args": [
+        "-O",
+        "id,width,direct,height="
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "id = \"a/b\"\nwidth = 1280\ndirect = false\nheight = NA"
+      ]
+    },
+    {
+      "name": "debug-single",
+      "args": [
+        "-O",
+        "title="
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "title = \"\\u00c9pisode: \\\"1\\\"\\n\\ud835\\udc00\""
+      ]
+    },
+    {
+      "name": "literal-not-shorthand",
+      "args": [
+        "-O",
+        "title)",
+        "-O",
+        "pre-x",
+        "-O",
+        "{x",
+        "-O",
+        "unknown: id"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "title)",
+        "pre-x",
+        "{x",
+        "unknown: id"
+      ]
+    },
+    {
+      "name": "empty-kept-no-alternate",
+      "args": [
+        "-O",
+        "[%(format_id,id)s]",
+        "-O",
+        "%(format_id|x)s|"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "[]",
+        "|"
+      ]
+    },
+    {
+      "name": "missing-defaults",
+      "args": [
+        "-O",
+        "%(height)s %(height|-)s %(height)05d %(height|)s"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "NA - NA "
+      ]
+    },
+    {
+      "name": "padding-compat",
+      "args": [
+        "-O",
+        "%(playlist_index)s %(playlist_autonumber)s %(playlist_index)d"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "003 2 3"
+      ]
+    },
+    {
+      "name": "booleans",
+      "args": [
+        "-O",
+        "%(direct)s %(direct)d %(direct)j"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "False 0 false"
+      ]
+    },
+    {
+      "name": "json-ascii",
+      "args": [
+        "-O",
+        "%(title)j",
+        "-O",
+        "%(title)#j"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "\"\\u00c9pisode: \\\"1\\\"\\n\\ud835\\udc00\"",
+        "\"\\u00c9pisode: \\\"1\\\"\\n\\ud835\\udc00\""
+      ]
+    },
+    {
+      "name": "json-unicode",
+      "args": [
+        "-O",
+        "%(title)+j"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "\"Épisode: \\\"1\\\"\\n𝐀\""
+      ]
+    },
+    {
+      "name": "json-width",
+      "args": [
+        "-O",
+        "%(id)-7j|%(id)7.3j|%(width)06j"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "\"a/b\"  |    \"a/|  1280"
+      ]
+    },
+    {
+      "name": "unsanitized",
+      "args": [
+        "-O",
+        "%(title)s/%(id)s",
+        "-O",
+        "%(title).3s"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "Épisode: \"1\"\n𝐀/a/b",
+        "Épi"
+      ]
+    },
+    {
+      "name": "filename-urls",
+      "args": [
+        "-O",
+        "filename,urls"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "out/Épisode [a_b].mp4\nhttps://example.test/m.mp4"
+      ]
+    },
+    {
+      "name": "pair-urls",
+      "args": [
+        "-O",
+        "urls",
+        "-g"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/v.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "v+a",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120,
+        "requested_formats": [
+          {
+            "format_id": "v",
+            "url": "https://example.test/v.mp4",
+            "ext": "mp4"
+          },
+          {
+            "format_id": "a",
+            "url": "https://example.test/a.m4a",
+            "ext": "m4a"
+          }
+        ]
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "https://example.test/v.mp4\nhttps://example.test/a.m4a",
+        "https://example.test/v.mp4\nhttps://example.test/a.m4a"
+      ]
+    },
+    {
+      "name": "get-order",
+      "args": [
+        "--get-filename",
+        "-g",
+        "--get-id",
+        "-e"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "Épisode: \"1\"\n𝐀",
+        "a/b",
+        "https://example.test/m.mp4",
+        "out/Épisode [a_b].mp4"
+      ]
+    },
+    {
+      "name": "templates-before-get",
+      "args": [
+        "-e",
+        "-O",
+        "%(ext)s"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "mp4",
+        "Épisode: \"1\"\n𝐀"
+      ]
+    },
+    {
+      "name": "custom-placeholder",
+      "args": [
+        "-O",
+        "%(height)s"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "<none>",
+      "expected": [
+        "<none>"
+      ]
+    },
+    {
+      "name": "empty-and-dash",
+      "args": [
+        "-O",
+        "%(format_id)s",
+        "-O",
+        "-"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "",
+        "-"
+      ]
+    },
+    {
+      "name": "unknown-field-na",
+      "args": [
+        "-O",
+        "missing_field"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "NA"
+      ]
+    },
+    {
+      "name": "traversal",
+      "args": [
+        "-O",
+        "id.0"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "a"
+      ]
+    },
+    {
+      "name": "dict-shorthand",
+      "args": [
+        "-O",
+        "{id,ext}"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "{\"id\": \"a/b\", \"ext\": \"mp4\"}"
+      ]
+    },
+    {
+      "name": "quoted-conversion",
+      "args": [
+        "-O",
+        "%(title)q"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "expected": [
+        "'Épisode: \"1\"\n𝐀'"
+      ]
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "replacement-format-spec",
+      "args": [
+        "-O",
+        "%(width&{:>6})s"
+      ],
+      "info": {
+        "id": "a/b",
+        "title": "Épisode: \"1\"\n𝐀",
+        "ext": "mp4",
+        "url": "https://example.test/m.mp4",
+        "webpage_url": "https://example.test/watch",
+        "extractor": "html5",
+        "extractor_key": "HTML5",
+        "direct": false,
+        "formats": [],
+        "format_id": "",
+        "filesize": 1024,
+        "width": 1280,
+        "height": null,
+        "playlist_index": 3,
+        "playlist_autonumber": 2,
+        "playlist_count": 12,
+        "n_entries": 4,
+        "__last_playlist_index": 120
+      },
+      "filename": "out/Épisode [a_b].mp4",
+      "na_placeholder": "NA",
+      "native_policy": "replacement format specs are rejected before extraction",
+      "expected": [
+        "  1280"
+      ]
+    }
+  ]
+}

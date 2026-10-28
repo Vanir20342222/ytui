@@ -1,0 +1,7 @@
+# Netscape HTTP Cookie File
+# Synthetic deterministic reference data
+
+.example.test	TRUE	/	FALSE	0	sid	root
+.example.test	TRUE	/app	FALSE	0	sid	app
+.example.test	TRUE	/app/deep	FALSE	0	sid	deep
+.example.test	TRUE	/	FALSE	0	sid	replaced-root

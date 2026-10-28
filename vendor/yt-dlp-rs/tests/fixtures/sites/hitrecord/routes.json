@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://hitrecord.org/api/web/records/2954362",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"A Very Different World (HITRECORD x ACLU)\", \"source_url\": {\"mp4_url\": \"https://hitrecord.test/v.mp4\"}, \"body\": \"<p>A <b>very</b> different &amp; world</p>\", \"duration\": 139327, \"created_at_i\": \"1471557582\", \"user\": {\"username\": \"Zuzi.C12\", \"id\": 362811}, \"total_views_count\": 7, \"hearts_count\": 3, \"comments_count\": \"1\", \"tags\": [{\"text\": \"zuzi\"}, {\"text\": \"\"}, {\"text\": 5}, \"x\", {\"text\": \"aclu\"}]}"
+  },
+  {
+   "url": "https://hitrecord.org/api/web/records/2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Plain\", \"source_url\": {\"mp4_url\": \"https://hitrecord.test/v.mp4\"}, \"user\": {\"id\": null}, \"tags\": []}"
+  },
+  {
+   "url": "https://hitrecord.org/api/web/records/3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"No source\"}"
+  },
+  {
+   "url": "https://hitrecord.org/api/web/records/4",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"source_url\": {\"mp4_url\": \"https://hitrecord.test/v.mp4\"}}"
+  },
+  {
+   "url": "https://hitrecord.org/api/web/records/5",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Float id\", \"source_url\": {\"mp4_url\": \"https://hitrecord.test/v.mp4\"}, \"user\": {\"id\": 2.5, \"username\": 7}}"
+  },
+  {
+   "url": "https://hitrecord.test/v.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

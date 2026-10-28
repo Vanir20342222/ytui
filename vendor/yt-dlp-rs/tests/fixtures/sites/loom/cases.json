@@ -1,0 +1,6 @@
+[
+ {"url": "https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523", "args": ["-J"]},
+ {"url": "https://www.loom.com/embed/ddcf1c1ad21f451ea7468b1e33917e4e", "args": ["--print", "id"]},
+ {"url": "https://www.loom.com/share/0123456789abcdef0123456789abcdef", "args": ["-J"]},
+ {"url": "https://www.loom.com/share/43d05f362f734614a2e81b4694a3a523", "args": ["--no-progress", "-f", "http-cdn", "-o", "%(id)s.%(ext)s"]}
+]

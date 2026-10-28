@@ -1,0 +1,42 @@
+{
+ "routes": [
+  {
+   "url": "https://www.youtube.com/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "home.html"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/search?prettyPrint=false",
+   "request_body": [
+    "TOKENS"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "page2.json"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/search?prettyPrint=false",
+   "request_body": [
+    "CAI%3D"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "sorted.json"
+  },
+  {
+   "url": "https://www.youtube.com/youtubei/v1/search?prettyPrint=false",
+   "request_body": [
+    "test query",
+    "EgIQAfABAQ=="
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "page1.json"
+  }
+ ]
+}

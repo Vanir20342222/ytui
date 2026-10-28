@@ -1,0 +1,7 @@
+[
+ {"url": "http://movingimage.nls.uk/film/3561", "args": ["-j"]},
+ {"url": "http://movingimage.nls.uk/film/3561", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s"]},
+ {"url": "https://movingimage.nls.uk/film/2", "args": ["-j"]},
+ {"url": "https://movingimage.nls.uk/film/3", "args": ["-j"]},
+ {"url": "https://movingimage.nls.uk/film/4", "args": ["-j"]}
+]

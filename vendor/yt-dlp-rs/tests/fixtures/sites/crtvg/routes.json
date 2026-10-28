@@ -1,0 +1,53 @@
+{
+ "routes": [
+  {
+   "url": "https://www.crtvg.es/tvg/a-carta/os-caimans-do-tea-5839623",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head>\n<meta property=\"og:title\" content=\"Os caim&aacute;ns do Tea | CRTVG\">\n<meta name=\"twitter:title\" content=\"Twitter title\">\n<meta name=\"description\" content=\"Unha descrici&oacute;n\">\n<meta name=\"twitter:image\" content=\"https://crtvg.test/t.jpg\">\n</head><body><script>var url = \"https://crtvg.test/vod/a\";</script></body></html>"
+  },
+  {
+   "url": "https://crtvg.es/tvg/a-carta/a-parabolica-love-story",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta name=\"twitter:title\" content=\"A parab&oacute;lica\"></head>\n<body><script>var  url='https://crtvg.test/vod/b';</script></body></html>"
+  },
+  {
+   "url": "https://www.crtvg.es/tvg/a-carta/none-1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>nothing</body></html>"
+  },
+  {
+   "url": "https://www.crtvg.es/tvg/a-carta/gone-1234567",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Gone\"></head><body><script>var url = \"https://crtvg.test/vod/gone\";</script></body></html>"
+  },
+  {
+   "url": "https://crtvg.test/vod/a/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "playlist.m3u8"
+  },
+  {
+   "url": "https://crtvg.test/vod/a/manifest.mpd",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "manifest.mpd"
+  },
+  {
+   "url": "https://crtvg.test/vod/b/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "playlist.m3u8"
+  }
+ ]
+}

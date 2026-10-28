@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.qingting.fm/channels/378005/programs/22257411/", "args": ["-j"]},
+ {"url": "https://www.qingting.fm/channels/378005/programs/22257411/", "args": ["-F"]},
+ {"url": "https://www.qingting.fm/channels/378005/programs/22257411/", "args": ["--print", "%(id)s|%(title)s|%(channel)s|%(channel_id)s|%(uploader)s|%(ext)s"]},
+ {"url": "https://www.qingting.fm/channels/378005/programs/22257411/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://m.qtfm.cn/vchannels/1/programs/2/", "args": ["-j"]},
+ {"url": "https://m.qtfm.cn/vchannels/1/programs/3/", "args": ["-j"]}
+]

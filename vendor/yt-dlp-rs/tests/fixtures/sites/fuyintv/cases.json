@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.fuyin.tv/html/2733/44129.html", "args": ["-j"]},
+ {"url": "https://fuyin.tv/html/1/2.html", "args": ["-j"]},
+ {"url": "https://fuyin.tv/html/1/2.html", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.fuyin.tv/html/1/3.html", "args": ["-j"]},
+ {"url": "https://www.fuyin.tv/html/1/4.html", "args": ["-j"]}
+]

@@ -1,0 +1,14 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT2S">
+  <BaseURL>assets/</BaseURL><Period><BaseURL>period/</BaseURL>
+    <AdaptationSet mimeType="video/mp4" codecs="avc1.64001f"><BaseURL>video/</BaseURL>
+      <Representation id="video" bandwidth="600000" width="960" height="540"><BaseURL>main/</BaseURL>
+        <SegmentList timescale="1" duration="1"><Initialization sourceURL="blob.mp4" range="0-15"/><SegmentURL media="blob.mp4" mediaRange="16-31"/><SegmentURL media="blob.mp4" mediaRange="32-63"/></SegmentList>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" codecs="mp4a.40.2" lang="en"><BaseURL>audio/</BaseURL>
+      <Representation id="audio" bandwidth="128000">
+        <SegmentList timescale="1" duration="1"><Initialization sourceURL="blob.mp4" range="0-7"/><SegmentURL media="blob.mp4" mediaRange="8-23"/><SegmentURL media="blob.mp4" mediaRange="24-47"/></SegmentList>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

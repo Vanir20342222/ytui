@@ -1,0 +1,60 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"10REvJCewCY\", \"title\": \"China, Indonesia vow\", \"description\": \"Maritime & more\", \"thumbnail\": \"https://cgtn.test/t.jpg\", \"formats\": [{\"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://cgtn.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\"}], \"categories\": [\"China\"], \"creators\": [\"CGTN\"], \"timestamp\": 1622950200, \"webpage_url\": \"https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html\", \"original_url\": \"https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html\", \"webpage_url_basename\": \"index.html\", \"webpage_url_domain\": \"news.cgtn.com\", \"extractor\": \"CGTN\", \"extractor_key\": \"CGTN\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cgtn.test/t.jpg\", \"id\": \"0\"}], \"display_id\": \"10REvJCewCY\", \"fulltitle\": \"China, Indonesia vow\", \"upload_date\": \"20210606\", \"release_year\": null, \"creator\": \"CGTN\", \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://cgtn.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\", \"_filename\": \"China, Indonesia vow [10REvJCewCY].mp4\", \"filename\": \"China, Indonesia vow [10REvJCewCY].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/China-Indonesia-vow-10REvJCewCY/index.html",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(categories)s|%(creators)s|%(creator)s|%(timestamp)s|%(upload_date)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "10REvJCewCY|China, Indonesia vow|Maritime & more|https://cgtn.test/t.jpg|['China']|['CGTN']|CGTN|1622950200|20210606"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/Bare-x1/index.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"x1\", \"title\": \"CGTN video #x1\", \"description\": null, \"thumbnail\": null, \"formats\": [{\"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://cgtn.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\"}], \"categories\": null, \"creators\": null, \"timestamp\": null, \"webpage_url\": \"https://news.cgtn.com/news/2021-06-06/Bare-x1/index.html\", \"original_url\": \"https://news.cgtn.com/news/2021-06-06/Bare-x1/index.html\", \"webpage_url_basename\": \"index.html\", \"webpage_url_domain\": \"news.cgtn.com\", \"extractor\": \"CGTN\", \"extractor_key\": \"CGTN\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"x1\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://cgtn.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\", \"_filename\": \"CGTN video #x1 [x1].mp4\", \"filename\": \"CGTN video #x1 [x1].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [CGTN] unable to extract datetime_str; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [CGTN] unable to extract category; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [CGTN] unable to extract OpenGraph title; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [CGTN] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://news.cgtn.com/news/2021-06-06/None-x2/index.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CGTN] x2: Unable to extract download_url; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

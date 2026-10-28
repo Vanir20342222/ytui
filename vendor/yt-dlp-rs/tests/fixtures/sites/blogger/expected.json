@@ -1,0 +1,95 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"BLOGGER-video-3c740e3a49197e16-796\", \"title\": \"BLOGGER-video-3c740e3a49197e16-796\", \"formats\": [{\"ext\": \"mp4\", \"url\": \"https://rr3.blogger.test/videoplayback?id=3c740e&itag=18&mime=video/mp4&dur=76.068&source=blogger\", \"format_id\": \"18\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"18 - unknown\"}, {\"ext\": \"mp4\", \"url\": \"https://rr3.blogger.test/videoplayback?id=3c740e&itag=22&mime=video%2Fmp4&dur=76.068\", \"format_id\": \"22\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"22 - unknown\"}], \"thumbnail\": \"https://i9.ytimg.test/vi_blogger/BLOG.jpg\", \"duration\": 76.068, \"webpage_url\": \"https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw\", \"original_url\": \"https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw\", \"webpage_url_basename\": \"video.g\", \"webpage_url_domain\": \"blogger.com\", \"extractor\": \"blogger.com\", \"extractor_key\": \"Blogger\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://i9.ytimg.test/vi_blogger/BLOG.jpg\", \"id\": \"0\"}], \"display_id\": \"BLOGGER-video-3c740e3a49197e16-796\", \"fulltitle\": \"BLOGGER-video-3c740e3a49197e16-796\", \"duration_string\": \"1:16\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"ext\": \"mp4\", \"url\": \"https://rr3.blogger.test/videoplayback?id=3c740e&itag=22&mime=video%2Fmp4&dur=76.068\", \"format_id\": \"22\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"22 - unknown\", \"_filename\": \"BLOGGER-video-3c740e3a49197e16-796 [BLOGGER-video-3c740e3a49197e16-796].mp4\", \"filename\": \"BLOGGER-video-3c740e3a49197e16-796 [BLOGGER-video-3c740e3a49197e16-796].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[blogger.com] Extracting URL: https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDST...FpC1amSl_9GuLWODjPgw",
+    "[blogger.com] AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw: Downloading webpage",
+    "[info] Available formats for BLOGGER-video-3c740e3a49197e16-796:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "18 mp4 unknown    | https | unknown unknown",
+    "22 mp4 unknown    | https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(thumbnail)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "BLOGGER-video-3c740e3a49197e16-796|BLOGGER-video-3c740e3a49197e16-796|76.068|https://i9.ytimg.test/vi_blogger/BLOG.jpg|22"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw",
+   "args": [
+    "--no-progress",
+    "-o",
+    "o.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[blogger.com] Extracting URL: https://www.blogger.com/video.g?token=AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDST...FpC1amSl_9GuLWODjPgw",
+    "[blogger.com] AD6v5dzEe9hfcARr5Hlq1WTkYy6t-fXH3BBahVhGvVHe5szdEUBEloSEDSTA8-b111089KbfWuBvTN7fnbxMtymsHhXAXwVvyzHH4Qch2cfLQdGxKQrrEuFpC1amSl_9GuLWODjPgw: Downloading webpage",
+    "[info] BLOGGER-video-3c740e3a49197e16-796: Downloading 1 format(s): 22",
+    "[download] Destination: o.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "o.mp4": 792
+   }
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "args": [
+    "--print",
+    "%(id)s|%(extractor)s|%(original_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "BLOGGER-video-3c740e3a49197e16-796|blogger.com|https://blog.example.test/post"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.blogger.com/video.g?token=missing",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [blogger.com] missing: Unable to extract JSON data; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

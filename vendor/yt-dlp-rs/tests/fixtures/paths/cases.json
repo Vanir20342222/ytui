@@ -1,0 +1,246 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "env": {
+  "HOME": "/home/fixture",
+  "YTDLP_RS_DIR": "vars"
+ },
+ "info": {
+  "id": "a1",
+  "title": "T: one",
+  "ext": "mp4",
+  "url": "https://example.test/media.mp4",
+  "webpage_url": "https://example.test/watch",
+  "extractor": "generic",
+  "extractor_key": "Generic",
+  "direct": true,
+  "formats": []
+ },
+ "playlist": {
+  "id": "pl",
+  "title": "List",
+  "extractor": "generic",
+  "extractor_key": "Generic",
+  "webpage_url": "https://example.test/list",
+  "_type": "playlist",
+  "playlist_index": 0,
+  "playlist_count": 3,
+  "n_entries": 3,
+  "__last_playlist_index": 3
+ },
+ "cases": [
+  {
+   "name": "none",
+   "args": [],
+   "expected": {
+    "media": "T： one [a1].mp4",
+    "subtitle": "T： one [a1].mp4",
+    "infojson": "T： one [a1].info.json",
+    "pl_infojson": "List [pl].info.json"
+   }
+  },
+  {
+   "name": "home",
+   "args": [
+    "-P",
+    "downloads"
+   ],
+   "expected": {
+    "media": "downloads/T： one [a1].mp4",
+    "subtitle": "downloads/T： one [a1].mp4",
+    "infojson": "downloads/T： one [a1].info.json",
+    "pl_infojson": "downloads/List [pl].info.json"
+   }
+  },
+  {
+   "name": "home-trailing-slash-and-space",
+   "args": [
+    "-P",
+    " out/ "
+   ],
+   "expected": {
+    "media": "out/T： one [a1].mp4",
+    "subtitle": "out/T： one [a1].mp4",
+    "infojson": "out/T： one [a1].info.json",
+    "pl_infojson": "out/List [pl].info.json"
+   }
+  },
+  {
+   "name": "typed-paths",
+   "args": [
+    "-P",
+    "base",
+    "-P",
+    "SUBTITLE,infojson:meta"
+   ],
+   "expected": {
+    "media": "base/T： one [a1].mp4",
+    "subtitle": "base/meta/T： one [a1].mp4",
+    "infojson": "base/meta/T： one [a1].info.json",
+    "pl_infojson": "base/List [pl].info.json"
+   }
+  },
+  {
+   "name": "absolute-typed-path",
+   "args": [
+    "-P",
+    "base",
+    "-P",
+    "infojson:/abs/meta"
+   ],
+   "expected": {
+    "media": "base/T： one [a1].mp4",
+    "subtitle": "base/T： one [a1].mp4",
+    "infojson": "/abs/meta/T： one [a1].info.json",
+    "pl_infojson": "base/List [pl].info.json"
+   }
+  },
+  {
+   "name": "absolute-template",
+   "args": [
+    "-P",
+    "base",
+    "-o",
+    "/abs/%(id)s.%(ext)s"
+   ],
+   "expected": {
+    "media": "/abs/a1.mp4",
+    "subtitle": "/abs/a1.mp4",
+    "infojson": "/abs/a1.info.json",
+    "pl_infojson": "/abs/pl.info.json"
+   }
+  },
+  {
+   "name": "home-expansion",
+   "args": [
+    "-P",
+    "~/v",
+    "-o",
+    "$YTDLP_RS_DIR/${YTDLP_RS_DIR}/$UNSET_X/%(id)s.%(ext)s"
+   ],
+   "expected": {
+    "media": "/home/fixture/v/vars/vars/$UNSET_X/a1.mp4",
+    "subtitle": "/home/fixture/v/vars/vars/$UNSET_X/a1.mp4",
+    "infojson": "/home/fixture/v/vars/vars/$UNSET_X/a1.info.json",
+    "pl_infojson": "/home/fixture/v/vars/vars/$UNSET_X/pl.info.json"
+   }
+  },
+  {
+   "name": "typed-templates",
+   "args": [
+    "-o",
+    "m/%(title)s.%(ext)s",
+    "-o",
+    "infojson:j/%(id)s",
+    "-o",
+    "subtitle:s/%(id)s.%(ext)s",
+    "-o",
+    "pl_infojson:p/%(title)s"
+   ],
+   "expected": {
+    "media": "m/T： one.mp4",
+    "subtitle": "s/a1.mp4",
+    "infojson": "j/a1.info.json",
+    "pl_infojson": "p/List.info.json"
+   }
+  },
+  {
+   "name": "infojson-ext-mismatch",
+   "args": [
+    "-o",
+    "infojson:%(id)s.webm"
+   ],
+   "expected": {
+    "media": "T： one [a1].mp4",
+    "subtitle": "T： one [a1].mp4",
+    "infojson": "a1.webm.info.json",
+    "pl_infojson": "List [pl].info.json"
+   }
+  },
+  {
+   "name": "empty-default",
+   "args": [
+    "-o",
+    ""
+   ],
+   "expected": {
+    "media": "T： one [a1].mp4",
+    "subtitle": "T： one [a1].mp4",
+    "infojson": "T： one [a1].info.json",
+    "pl_infojson": "List [pl].info.json"
+   }
+  },
+  {
+   "name": "empty-typed",
+   "args": [
+    "-o",
+    "infojson:",
+    "-o",
+    "subtitle:"
+   ],
+   "expected": {
+    "media": "T： one [a1].mp4",
+    "subtitle": "",
+    "infojson": "",
+    "pl_infojson": "List [pl].info.json"
+   }
+  },
+  {
+   "name": "non-type-prefix",
+   "args": [
+    "-o",
+    "c:%(id)s.%(ext)s",
+    "-P",
+    "x:y"
+   ],
+   "expected": {
+    "media": "x:y/c:a1.mp4",
+    "subtitle": "x:y/c:a1.mp4",
+    "infojson": "x:y/c:a1.info.json",
+    "pl_infojson": "x:y/c:pl.info.json"
+   }
+  },
+  {
+   "name": "restrict-default",
+   "args": [
+    "--restrict-filenames",
+    "-P",
+    "h"
+   ],
+   "expected": {
+    "media": "h/T_-_one-[a1].mp4",
+    "subtitle": "h/T_-_one-[a1].mp4",
+    "infojson": "h/T_-_one-[a1].info.json",
+    "pl_infojson": "h/List-[pl].info.json"
+   }
+  },
+  {
+   "name": "trim-infojson",
+   "args": [
+    "--trim-filenames",
+    "3"
+   ],
+   "expected": {
+    "media": "T： .mp4",
+    "subtitle": "T： .mp4",
+    "infojson": "T： .info.json",
+    "pl_infojson": "Lis.info.json"
+   }
+  },
+  {
+   "name": "windows-paths",
+   "args": [
+    "--windows-filenames",
+    "-P",
+    "a/./b/../c ",
+    "-o",
+    "x?/%(title)s.%(ext)s"
+   ],
+   "expected": {
+    "media": "a/c/x#/T： one.mp4",
+    "subtitle": "a/c/x#/T： one.mp4",
+    "infojson": "a/c/x#/T： one.info.json",
+    "pl_infojson": "a/c/x#/List.info.json"
+   }
+  }
+ ]
+}

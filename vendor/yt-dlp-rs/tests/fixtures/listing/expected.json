@@ -1,0 +1,207 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "declaration_ids": [
+    "a64",
+    "a128",
+    "v360",
+    "v720"
+  ],
+  "formats": [
+    {
+      "format_id": "a64",
+      "stream_kind": "audio_only",
+      "ext": "m4a",
+      "width": null,
+      "height": null,
+      "filesize": 1024,
+      "tbr": 64,
+      "language": "en",
+      "format_note": "Low audio"
+    },
+    {
+      "format_id": "a128",
+      "stream_kind": "audio_only",
+      "ext": "m4a",
+      "width": null,
+      "height": null,
+      "filesize": null,
+      "tbr": 128,
+      "language": "nb",
+      "format_note": "Main audio"
+    },
+    {
+      "format_id": "v360",
+      "stream_kind": "video_only",
+      "ext": "mp4",
+      "width": 640,
+      "height": 360,
+      "filesize": 2048,
+      "tbr": 400,
+      "language": null,
+      "format_note": "Low video"
+    },
+    {
+      "format_id": "v720",
+      "stream_kind": "video_only",
+      "ext": "mp4",
+      "width": 1280,
+      "height": 720,
+      "filesize": 4096,
+      "tbr": 1000,
+      "language": null,
+      "format_note": "High video"
+    }
+  ],
+  "flows": [
+    {
+      "name": "plain",
+      "simulate": "list_only",
+      "status": "ok",
+      "selection_calls": 0,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [],
+      "json_selected_ids": null,
+      "events": [
+        "list",
+        "table"
+      ]
+    },
+    {
+      "name": "valid-list-only",
+      "simulate": "list_only",
+      "status": "ok",
+      "selection_calls": 0,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [],
+      "json_selected_ids": null,
+      "events": [
+        "list",
+        "table"
+      ]
+    },
+    {
+      "name": "unavailable-list-only",
+      "simulate": "list_only",
+      "status": "ok",
+      "selection_calls": 0,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [],
+      "json_selected_ids": null,
+      "events": [
+        "list",
+        "table"
+      ]
+    },
+    {
+      "name": "json-pair",
+      "simulate": true,
+      "status": "ok",
+      "selection_calls": 1,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [
+        "v720",
+        "a128"
+      ],
+      "json_selected_ids": [
+        "v720",
+        "a128"
+      ],
+      "events": [
+        "list",
+        "table",
+        "select",
+        "json"
+      ]
+    },
+    {
+      "name": "simulate-pair",
+      "simulate": true,
+      "status": "ok",
+      "selection_calls": 1,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [
+        "v720",
+        "a128"
+      ],
+      "json_selected_ids": null,
+      "events": [
+        "list",
+        "table",
+        "select"
+      ]
+    },
+    {
+      "name": "reference-print-json",
+      "simulate": "list_only",
+      "status": "ok",
+      "selection_calls": 0,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [],
+      "json_selected_ids": [],
+      "events": [
+        "list",
+        "table",
+        "json"
+      ]
+    },
+    {
+      "name": "combined-unavailable",
+      "simulate": true,
+      "status": "unavailable",
+      "selection_calls": 1,
+      "listed_ids": [
+        "a128",
+        "a64",
+        "v360",
+        "v720"
+      ],
+      "selected_ids": [],
+      "json_selected_ids": null,
+      "events": [
+        "list",
+        "table",
+        "select"
+      ]
+    },
+    {
+      "name": "malformed-before-listing",
+      "simulate": null,
+      "status": "syntax_error",
+      "selection_calls": 0,
+      "listed_ids": [],
+      "selected_ids": [],
+      "json_selected_ids": null,
+      "events": []
+    }
+  ]
+}

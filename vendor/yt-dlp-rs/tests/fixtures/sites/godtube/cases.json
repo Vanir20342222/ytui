@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.godtube.com/watch/?v=0wwWUv", "args": ["-j"]},
+ {"url": "https://www.godtube.com/watch/?v=0wwWUv", "args": ["-F"]},
+ {"url": "https://www.godtube.com/watch/?v=0wwWUv", "args": ["--print", "%(id)s|%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(duration)s|%(thumbnail)s"]},
+ {"url": "https://www.godtube.com/watch/?v=0wwWUv", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://godtube.com/watch/?v=Bare1", "args": ["-j"]},
+ {"url": "https://godtube.com/watch/?v=NoFile", "args": ["-j"]},
+ {"url": "https://godtube.com/watch/?v=Gone", "args": ["-j"]}
+]

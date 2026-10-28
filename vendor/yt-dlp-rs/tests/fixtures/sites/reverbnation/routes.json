@@ -1,0 +1,47 @@
+{
+ "routes": [
+  {
+   "url": "https://api.reverbnation.com/song/16965047",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "16965047.json"
+  },
+  {
+   "url": "https://api.reverbnation.com/song/2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"name\": \"Bare\", \"url\": \"https://c2.reverbnation.com/audio/2.mp3\", \"image\": \"\", \"thumbnail\": null}"
+  },
+  {
+   "url": "https://api.reverbnation.com/song/3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://c2.reverbnation.com/audio/2.mp3\"}"
+  },
+  {
+   "url": "https://api.reverbnation.com/song/4",
+   "status": 404,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://c2.reverbnation.com/audio_player/ec_stream_song/16965047?x=1",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "media.mp3"
+  },
+  {
+   "url": "https://c2.reverbnation.com/audio/2.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "media.mp3"
+  }
+ ]
+}

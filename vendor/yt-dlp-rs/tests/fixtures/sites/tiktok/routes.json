@@ -1,0 +1,71 @@
+{
+ "routes": [
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000001",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "video.html"
+  },
+  {
+   "url": "https://www.tiktok.com/@_/video/7300000000000000001",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "video.html"
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000009",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "private.html"
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000002",
+   "request_headers": {
+    "Cookie": "_wafchallengeid=eyJ2Ijp7ImEiOiJZMmhoYkd4bGJtZGxMWE5oYkhRPSIsImMiOiI1alpOa3VuVlBtcUpHUXFjNytMVW0vK2xoRE1raEVmL2JPdkM2NjhlQjNzPSJ9LCJzIjoieCIsImQiOiJOREkwTWc9PSJ9"
+   },
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "video2.html"
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000002",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "challenge.html"
+  },
+  {
+   "url": "https://vm.tiktok.com/ZMabc123/",
+   "status": 301,
+   "headers": {
+    "Location": "https://www.tiktok.com/@dancer/video/7300000000000000001?_r=1"
+   },
+   "body": ""
+  },
+  {
+   "url": "https://www.tiktok.com/@dancer/video/7300000000000000001?_r=1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "video.html"
+  },
+  {
+   "url": "https://v19-webapp-prime.tiktok.com/video/media-video-hvc1/",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-hvc1"
+  },
+  {
+   "url": "https://v16-webapp-prime.tiktok.com/video/540.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-540"
+  }
+ ]
+}

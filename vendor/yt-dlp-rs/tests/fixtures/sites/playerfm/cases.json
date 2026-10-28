@@ -1,0 +1,8 @@
+[
+ {"url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix", "args": ["-j"]},
+ {"url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(filesize)s|%(upload_date)s|%(creators)s|%(creator)s|%(ext)s"]},
+ {"url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.player.fm/x/plain", "args": ["-j"]},
+ {"url": "https://player.fm/x/empty", "args": ["-j"]},
+ {"url": "https://player.fm/x/nourl", "args": ["-j"]}
+]

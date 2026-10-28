@@ -1,0 +1,321 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "filenames": [
+  {
+   "name": "default-template",
+   "filename": "a/Title [id].mp4",
+   "ext": "mp4",
+   "expected": "a/Title [id].info.json"
+  },
+  {
+   "name": "other-real-ext",
+   "filename": "Title.webm",
+   "ext": "mp4",
+   "expected": "Title.webm.info.json"
+  },
+  {
+   "name": "no-ext",
+   "filename": "Title",
+   "ext": "mp4",
+   "expected": "Title.info.json"
+  },
+  {
+   "name": "playlist-na-ext",
+   "filename": "Title [x].NA",
+   "ext": null,
+   "expected": "Title [x].info.json"
+  },
+  {
+   "name": "trailing-dot",
+   "filename": "Title.",
+   "ext": null,
+   "expected": "Title.info.json"
+  },
+  {
+   "name": "leading-dot-only",
+   "filename": ".hidden",
+   "ext": null,
+   "expected": ".hidden.info.json"
+  },
+  {
+   "name": "leading-dots-ext",
+   "filename": "..foo",
+   "ext": "foo",
+   "expected": "..foo.info.json"
+  },
+  {
+   "name": "double-dot",
+   "filename": "a..mp4",
+   "ext": "mp4",
+   "expected": "a..info.json"
+  },
+  {
+   "name": "dotted-directory",
+   "filename": "dir.d/name",
+   "ext": null,
+   "expected": "dir.d/name.info.json"
+  },
+  {
+   "name": "compound",
+   "filename": "x.tar.gz",
+   "ext": "gz",
+   "expected": "x.tar.info.json"
+  },
+  {
+   "name": "existing-info-json",
+   "filename": "x.info.json",
+   "ext": "mp4",
+   "expected": "x.info.json.info.json"
+  },
+  {
+   "name": "dots-only",
+   "filename": "...",
+   "ext": null,
+   "expected": "....info.json"
+  },
+  {
+   "name": "unicode",
+   "filename": "Épisode 影像.webm",
+   "ext": "webm",
+   "expected": "Épisode 影像.info.json"
+  }
+ ],
+ "playlist_names": [
+  {
+   "name": "counts-and-missing",
+   "template": "%(title)s-%(playlist_index)s-%(n_entries)s-%(playlist_count)s-%(ext)s-%(url)s.%(ext)s",
+   "na_placeholder": "NA",
+   "playlist": {
+    "id": "p",
+    "title": "Plist",
+    "webpage_url": "http://example.com/p",
+    "extractor": "generic",
+    "extractor_key": "Generic"
+   },
+   "playlist_count": 14,
+   "n_entries": 2,
+   "last_playlist_index": 12,
+   "expected": "Plist-00-2-14-NA-NA.info.json"
+  },
+  {
+   "name": "default",
+   "template": "%(title)s [%(id)s].%(ext)s",
+   "na_placeholder": "NA",
+   "playlist": {
+    "id": "p",
+    "title": "Plist",
+    "webpage_url": "http://example.com/p",
+    "extractor": "generic",
+    "extractor_key": "Generic"
+   },
+   "playlist_count": 2,
+   "n_entries": 2,
+   "last_playlist_index": 2,
+   "expected": "Plist [p].info.json"
+  },
+  {
+   "name": "empty-placeholder",
+   "template": "%(title)s.%(ext)s",
+   "na_placeholder": "",
+   "playlist": {
+    "id": "p",
+    "title": "Plist",
+    "webpage_url": "http://example.com/p",
+    "extractor": "generic",
+    "extractor_key": "Generic"
+   },
+   "playlist_count": 1,
+   "n_entries": 1,
+   "last_playlist_index": 1,
+   "expected": "Plist.info.json"
+  },
+  {
+   "name": "dir-and-fallback",
+   "template": "meta/%(format_id|fmt)s-%(playlist_autonumber)s-%(extractor_key)s.%(ext)s",
+   "na_placeholder": "NA",
+   "playlist": {
+    "id": "p",
+    "title": "Plist",
+    "webpage_url": "http://example.com/p",
+    "extractor": "generic",
+    "extractor_key": "Generic"
+   },
+   "playlist_count": 3,
+   "n_entries": 0,
+   "last_playlist_index": 0,
+   "expected": "meta/fmt-NA-Generic.info.json"
+  },
+  {
+   "name": "zero-padded-index",
+   "template": "%(playlist_index)03d-%(id)s",
+   "na_placeholder": "NA",
+   "playlist": {
+    "id": "p",
+    "title": "Plist",
+    "webpage_url": "http://example.com/p",
+    "extractor": "generic",
+    "extractor_key": "Generic"
+   },
+   "playlist_count": 5,
+   "n_entries": 1,
+   "last_playlist_index": 2,
+   "expected": "000-p.info.json"
+  }
+ ],
+ "sanitize": [
+  {
+   "name": "private-keys-and-nulls",
+   "info": {
+    "id": "x",
+    "epoch": 5,
+    "title": "T",
+    "requested_subtitles": {
+     "en": {
+      "ext": "vtt"
+     }
+    },
+    "requested_formats": [
+     {}
+    ],
+    "playlist_autonumber": 2,
+    "playlist_index": 3,
+    "filesize": null,
+    "__last_playlist_index": 4,
+    "original_url": "u",
+    "filepath": "f",
+    "_filename": "f",
+    "filename": "f",
+    "infojson_filename": "i",
+    "requested_downloads": [],
+    "entries": [],
+    "requested_entries": []
+   },
+   "expected": {
+    "id": "x",
+    "epoch": 5,
+    "title": "T",
+    "playlist_index": 3,
+    "_type": "video"
+   }
+  },
+  {
+   "name": "nested-cleaning-keeps-list-nulls",
+   "info": {
+    "id": "x",
+    "epoch": 5,
+    "formats": [
+     {
+      "format_id": "a",
+      "filesize": null,
+      "__x": 1,
+      "url": "u"
+     }
+    ],
+    "list": [
+     null,
+     {
+      "filepath": 1
+     }
+    ]
+   },
+   "expected": {
+    "id": "x",
+    "epoch": 5,
+    "formats": [
+     {
+      "format_id": "a",
+      "url": "u"
+     }
+    ],
+    "list": [
+     null,
+     {}
+    ],
+    "_type": "video"
+   }
+  },
+  {
+   "name": "existing-type-kept",
+   "info": {
+    "_type": "playlist",
+    "id": "p",
+    "epoch": 9,
+    "playlist_count": 4
+   },
+   "expected": {
+    "_type": "playlist",
+    "id": "p",
+    "epoch": 9,
+    "playlist_count": 4
+   }
+  },
+  {
+   "name": "defaults-appended",
+   "info": {
+    "id": "x",
+    "epoch": 1,
+    "ext": "mp4"
+   },
+   "expected": {
+    "id": "x",
+    "epoch": 1,
+    "ext": "mp4",
+    "_type": "video"
+   }
+  }
+ ],
+ "json_text": [
+  {
+   "name": "separators",
+   "value": {
+    "a": [
+     1,
+     2.5,
+     true,
+     null
+    ],
+    "o": {},
+    "e": []
+   },
+   "expected": "{\"a\": [1, 2.5, true, null], \"o\": {}, \"e\": []}"
+  },
+  {
+   "name": "unicode-and-escapes",
+   "value": {
+    "t": "Ép\u0001\"/\\ \n\t𝐀"
+   },
+   "expected": "{\"t\": \"Ép\\u0001\\\"/\\\\ \\n\\t𝐀\"}"
+  },
+  {
+   "name": "nested",
+   "value": {
+    "x": {
+     "y": [
+      {
+       "z": -0.5
+      }
+     ]
+    }
+   },
+   "expected": "{\"x\": {\"y\": [{\"z\": -0.5}]}}"
+  },
+  {
+   "name": "float-exponent",
+   "value": {
+    "f": 1e+16
+   },
+   "expected": "{\"f\": 1e+16}"
+  }
+ ],
+ "source_only": [
+  {
+   "name": "version-omitted",
+   "info": {
+    "id": "x",
+    "epoch": 1
+   },
+   "upstream_extra_key": "_version",
+   "native_policy": "yt-dlp-rs is not an upstream release, so _version is omitted"
+  }
+ ]
+}

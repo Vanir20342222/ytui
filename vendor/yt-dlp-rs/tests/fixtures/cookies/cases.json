@@ -1,0 +1,763 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "file_cases": [
+    {
+      "name": "domain-secure-path-http-only",
+      "file": "scope.txt",
+      "requests": [
+        {
+          "url": "https://example.test/app/item"
+        },
+        {
+          "url": "http://sub.example.test/app/item"
+        },
+        {
+          "url": "https://sub.example.test/application"
+        },
+        {
+          "url": "https://unrelated.test/"
+        },
+        {
+          "url": "https://notexample.test/"
+        }
+      ],
+      "session_names": [
+        "http_only"
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "domain",
+                "D"
+              ],
+              [
+                "http_only",
+                "H"
+              ],
+              [
+                "path",
+                "P"
+              ],
+              [
+                "secure",
+                "S"
+              ]
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "domain",
+                "D"
+              ],
+              [
+                "http_only",
+                "H"
+              ],
+              [
+                "path",
+                "P"
+              ]
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "domain",
+                "D"
+              ],
+              [
+                "http_only",
+                "H"
+              ],
+              [
+                "secure",
+                "S"
+              ]
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "unrelated",
+                "U"
+              ]
+            ]
+          },
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "domain",
+            "value": "D"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/app",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "path",
+            "value": "P"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": true,
+            "expires": 4102444800,
+            "name": "secure",
+            "value": "S"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "http_only",
+            "value": "H"
+          },
+          {
+            "domain": ".unrelated.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "unrelated",
+            "value": "U"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "host-only-exact",
+      "file": "host-only.txt",
+      "requests": [
+        {
+          "url": "https://example.test/"
+        },
+        {
+          "url": "https://unrelated.test/"
+        }
+      ],
+      "session_names": [],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "host",
+                "H"
+              ]
+            ]
+          },
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": "example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "host",
+            "value": "H"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "expiry-session",
+      "file": "sessions-expiry.txt",
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "session_names": [
+        "session_zero",
+        "session_blank"
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "future",
+                "future"
+              ],
+              [
+                "session_blank",
+                "blank"
+              ],
+              [
+                "session_zero",
+                "zero"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 1,
+            "name": "past",
+            "value": "past"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "future",
+            "value": "future"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "session_blank",
+            "value": "blank"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "session_zero",
+            "value": "zero"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "duplicate-path-order",
+      "file": "duplicate-paths.txt",
+      "requests": [
+        {
+          "url": "https://example.test/app/deep/file",
+          "check_order": true
+        },
+        {
+          "url": "https://example.test/app",
+          "check_order": true
+        },
+        {
+          "url": "https://example.test/application",
+          "check_order": true
+        }
+      ],
+      "session_names": [
+        "sid"
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "sid",
+                "app"
+              ],
+              [
+                "sid",
+                "deep"
+              ],
+              [
+                "sid",
+                "replaced-root"
+              ]
+            ],
+            "ordered_parts": [
+              "sid=deep",
+              "sid=app",
+              "sid=replaced-root"
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "sid",
+                "app"
+              ],
+              [
+                "sid",
+                "replaced-root"
+              ]
+            ],
+            "ordered_parts": [
+              "sid=app",
+              "sid=replaced-root"
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "sid",
+                "replaced-root"
+              ]
+            ],
+            "ordered_parts": [
+              "sid=replaced-root"
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "sid",
+            "value": "replaced-root"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/app",
+            "secure": false,
+            "expires": null,
+            "name": "sid",
+            "value": "app"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/app/deep",
+            "secure": false,
+            "expires": null,
+            "name": "sid",
+            "value": "deep"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "nameless",
+      "file": "nameless.txt",
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "session_names": [],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                null,
+                "nameless-value"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": null,
+            "value": "nameless-value"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    }
+  ],
+  "response_cases": [
+    {
+      "name": "response-domain-secure",
+      "events": [
+        {
+          "url": "https://example.test/login",
+          "set_cookie": [
+            "domain=D; Domain=.example.test; Path=/; Expires=Fri, 01 Jan 2100 00:00:00 GMT",
+            "secure=S; Domain=.example.test; Path=/; Secure"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://sub.example.test/path"
+        },
+        {
+          "url": "http://sub.example.test/path"
+        },
+        {
+          "url": "https://unrelated.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "domain",
+                "D"
+              ],
+              [
+                "secure",
+                "S"
+              ]
+            ]
+          },
+          {
+            "pairs": [
+              [
+                "domain",
+                "D"
+              ]
+            ]
+          },
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "domain",
+            "value": "D"
+          },
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": true,
+            "expires": null,
+            "name": "secure",
+            "value": "S"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "response-default-path",
+      "events": [
+        {
+          "url": "https://example.test/account/login",
+          "set_cookie": [
+            "sid=session; HttpOnly"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://example.test/account/page"
+        },
+        {
+          "url": "https://example.test/accounts/page"
+        },
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "sid",
+                "session"
+              ]
+            ]
+          },
+          {
+            "pairs": []
+          },
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": "example.test",
+            "path": "/account",
+            "secure": false,
+            "expires": null,
+            "name": "sid",
+            "value": "session"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "response-max-age-delete",
+      "events": [
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=one; Path=/"
+          ]
+        },
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=deleted; Path=/; Max-Age=0"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "response-expired-delete",
+      "events": [
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=one; Path=/"
+          ]
+        },
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=deleted; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "response-domain-rejected",
+      "events": [
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "bad=one; Domain=unrelated.test; Path=/"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://example.test/"
+        },
+        {
+          "url": "https://unrelated.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": []
+          },
+          {
+            "pairs": []
+          }
+        ],
+        "saved_records": [],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "response-replacement",
+      "events": [
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=one; Path=/"
+          ]
+        },
+        {
+          "url": "https://example.test/",
+          "set_cookie": [
+            "sid=two; Path=/"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "sid",
+                "two"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": "example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "sid",
+            "value": "two"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "host-only-python-subdomain",
+      "file": "host-only.txt",
+      "requests": [
+        {
+          "url": "https://sub.example.test/"
+        }
+      ],
+      "session_names": [],
+      "native_policy": "Python default CookiePolicy sends host-only Netscape cookies to subdomains; native RFC6265 host-only policy forbids this",
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "host",
+                "H"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": "example.test",
+            "path": "/",
+            "secure": false,
+            "expires": 4102444800,
+            "name": "host",
+            "value": "H"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    },
+    {
+      "name": "malformed-skipped",
+      "file": "malformed.txt",
+      "requests": [
+        {
+          "url": "https://example.test/"
+        }
+      ],
+      "session_names": [],
+      "native_policy": "Upstream skips malformed row lengths/expiry with warnings; native rejects the entire cookie file",
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "good",
+                "value"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".example.test",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "good",
+            "value": "value"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": true
+      }
+    },
+    {
+      "name": "public-suffix-no-psl",
+      "events": [
+        {
+          "url": "https://example.co.uk/",
+          "set_cookie": [
+            "wide=value; Domain=.co.uk; Path=/"
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://other.co.uk/"
+        }
+      ],
+      "native_policy": "Public-suffix rejection is not established: Python default policy has no full PSL and native PSL support is explicitly deferred",
+      "expected": {
+        "requests": [
+          {
+            "pairs": [
+              [
+                "wide",
+                "value"
+              ]
+            ]
+          }
+        ],
+        "saved_records": [
+          {
+            "domain": ".co.uk",
+            "path": "/",
+            "secure": false,
+            "expires": null,
+            "name": "wide",
+            "value": "value"
+          }
+        ],
+        "saved_sessions_zero": true,
+        "warning": false
+      }
+    }
+  ]
+}

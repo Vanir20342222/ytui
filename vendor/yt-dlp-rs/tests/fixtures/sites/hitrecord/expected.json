@@ -1,0 +1,98 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://hitrecord.org/records/2954362",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2954362\", \"url\": \"https://hitrecord.test/v.mp4\", \"title\": \"A Very Different World (HITRECORD x ACLU)\", \"description\": \"A very different & world\", \"duration\": 139.327, \"timestamp\": 1471557582, \"uploader\": \"Zuzi.C12\", \"uploader_id\": \"362811\", \"view_count\": 7, \"like_count\": 3, \"comment_count\": 1, \"tags\": [\"zuzi\", \"aclu\"], \"webpage_url\": \"https://hitrecord.org/records/2954362\", \"original_url\": \"https://hitrecord.org/records/2954362\", \"webpage_url_basename\": \"2954362\", \"webpage_url_domain\": \"hitrecord.org\", \"extractor\": \"HitRecord\", \"extractor_key\": \"HitRecord\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2954362\", \"fulltitle\": \"A Very Different World (HITRECORD x ACLU)\", \"duration_string\": \"2:19\", \"upload_date\": \"20160818\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"A Very Different World (HITRECORD x ACLU) [2954362].mp4\", \"filename\": \"A Very Different World (HITRECORD x ACLU) [2954362].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://hitrecord.org/records/2954362",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(duration)s|%(upload_date)s|%(uploader)s|%(uploader_id)s|%(view_count)s|%(like_count)s|%(comment_count)s|%(tags)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "2954362|A Very Different World (HITRECORD x ACLU)|A very different & world|139.327|20160818|Zuzi.C12|362811|7|3|1|['zuzi', 'aclu']"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://hitrecord.org/records/2954362",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[HitRecord] Extracting URL: https://hitrecord.org/records/2954362",
+    "[HitRecord] 2954362: Downloading JSON metadata",
+    "[info] 2954362: Downloading 1 format(s): 0",
+    "[download] Destination: 2954362.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "2954362.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.hitrecord.org/records/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"url\": \"https://hitrecord.test/v.mp4\", \"title\": \"Plain\", \"description\": null, \"timestamp\": null, \"uploader\": null, \"uploader_id\": \"None\", \"view_count\": null, \"like_count\": null, \"comment_count\": null, \"tags\": null, \"webpage_url\": \"https://www.hitrecord.org/records/2\", \"original_url\": \"https://www.hitrecord.org/records/2\", \"webpage_url_basename\": \"2\", \"webpage_url_domain\": \"hitrecord.org\", \"extractor\": \"HitRecord\", \"extractor_key\": \"HitRecord\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Plain [2].mp4\", \"filename\": \"Plain [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://hitrecord.org/records/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 3: An extractor error has occurred. (caused by KeyError('source_url')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://hitrecord.org/records/4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 4: An extractor error has occurred. (caused by KeyError('title')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://hitrecord.org/records/5",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"5\", \"url\": \"https://hitrecord.test/v.mp4\", \"title\": \"Float id\", \"description\": null, \"timestamp\": null, \"uploader\": null, \"uploader_id\": \"2.5\", \"view_count\": null, \"like_count\": null, \"comment_count\": null, \"tags\": null, \"webpage_url\": \"https://hitrecord.org/records/5\", \"original_url\": \"https://hitrecord.org/records/5\", \"webpage_url_basename\": \"5\", \"webpage_url_domain\": \"hitrecord.org\", \"extractor\": \"HitRecord\", \"extractor_key\": \"HitRecord\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"5\", \"fulltitle\": \"Float id\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Float id [5].mp4\", \"filename\": \"Float id [5].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

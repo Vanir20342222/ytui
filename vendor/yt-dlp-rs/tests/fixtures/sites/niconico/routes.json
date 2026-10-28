@@ -1,0 +1,134 @@
+{
+ "routes": [
+  {
+   "url": "https://www.nicovideo.jp/api/watch/v3_guest/sm9",
+   "ignore_query": [
+    "actionTrackId"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"meta\": {\"status\": 200}, \"data\": {\"client\": {\"watchTrackId\": \"TRACK_1\"}, \"media\": {\"domand\": {\"videos\": [{\"id\": \"video-h264-1080p\", \"isAvailable\": true, \"qualityLevel\": 4}, {\"id\": \"video-h264-720p\", \"isAvailable\": true, \"qualityLevel\": 3}, {\"id\": \"video-h264-360p\", \"isAvailable\": false, \"qualityLevel\": 1}], \"audios\": [{\"id\": \"audio-aac-192kbps\", \"isAvailable\": true, \"bitRate\": 192000, \"samplingRate\": 48000, \"qualityLevel\": 1}, {\"id\": \"audio-aac-64kbps\", \"isAvailable\": true, \"bitRate\": 64000, \"samplingRate\": 48000, \"qualityLevel\": 0}], \"accessRightKey\": \"KEY123\"}}, \"genre\": {\"label\": \"ゲーム\"}, \"tag\": {\"items\": [{\"name\": \"ゲーム\"}, {\"name\": \"\"}, {\"name\": \"sm9\"}]}, \"video\": {\"id\": \"sm9\", \"title\": \"新・豪血寺一族\", \"description\": \"<b>レッツゴー</b><br>陰陽師\", \"duration\": 320, \"registeredAt\": \"2007-03-06T00:33:00+09:00\", \"count\": {\"view\": 21000000, \"comment\": 5000000, \"like\": 100}, \"thumbnail\": {\"url\": \"https://nicovideo.cdn.nimg.jp/thumbnails/9/9\", \"middleUrl\": \"https://nicovideo.cdn.nimg.jp/thumbnails/9/9.M\", \"largeUrl\": null, \"player\": \"https://img.cdn.nimg.jp/s/nicovideo/thumbnails/9/9.original/a960x540l?key=x\", \"ogp\": \"https://img.cdn.nimg.jp/s/nicovideo/thumbnails/9/9.original/r1280x720l?key=y\"}}, \"owner\": {\"id\": 4, \"nickname\": \"中の\"}, \"channel\": null, \"payment\": {\"video\": {\"isPpv\": false, \"isAdmission\": false, \"isPremium\": false, \"isContinuationBenefit\": false}}}}"
+  },
+  {
+   "url": "https://www.nicovideo.jp/api/watch/v3_guest/sm404",
+   "ignore_query": [
+    "actionTrackId"
+   ],
+   "status": 404,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"meta\": {\"status\": 404, \"errorCode\": \"NOT_FOUND\"}, \"data\": {\"reasonCode\": \"RIGHT_HOLDER_DELETE_VIDEO\"}}"
+  },
+  {
+   "url": "https://www.nicovideo.jp/api/watch/v3_guest/sm400",
+   "ignore_query": [
+    "actionTrackId"
+   ],
+   "status": 400,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"meta\": {\"status\": 400, \"errorCode\": \"FORBIDDEN\"}, \"data\": {\"reasonCode\": \"DOMESTIC_VIDEO\"}}"
+  },
+  {
+   "url": "https://www.nicovideo.jp/api/watch/v3_guest/so5",
+   "ignore_query": [
+    "actionTrackId"
+   ],
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"meta\": {\"status\": 200}, \"data\": {\"video\": {\"id\": \"so5\", \"title\": \"Premium\"}, \"payment\": {\"video\": {\"isPremium\": true}}}}"
+  },
+  {
+   "url": "https://www.nicovideo.jp/api/watch/v3_guest/sm500",
+   "ignore_query": [
+    "actionTrackId"
+   ],
+   "status": 500,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://nvapi.nicovideo.jp/v1/watch/sm9/access-rights/hls?actionTrackId=TRACK_1",
+   "request_body": [
+    "\"outputs\": [[\"video-h264-1080p\", \"audio-aac-192kbps\"], [\"video-h264-1080p\", \"audio-aac-64kbps\"], [\"video-h264-720p\", \"audio-aac-192kbps\"]"
+   ],
+   "request_headers": {
+    "x-access-right-key": "KEY123",
+    "x-frontend-id": "6"
+   },
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"data\": {\"contentUrl\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\"}}"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-VERSION:6\n#EXT-X-INDEPENDENT-SEGMENTS\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio-aac-192kbps\",NAME=\"Main Audio\",DEFAULT=YES,URI=\"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-192kbps.m3u8?session=abc\"\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio-aac-64kbps\",NAME=\"Main Audio\",DEFAULT=YES,URI=\"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-64kbps.m3u8?session=abc\"\n#EXT-X-STREAM-INF:BANDWIDTH=2296000,AVERAGE-BANDWIDTH=2100000,CODECS=\"avc1.4d4028,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=29.970,AUDIO=\"audio-aac-192kbps\"\nhttps://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-1080p.m3u8?session=abc\n#EXT-X-STREAM-INF:BANDWIDTH=1100000,AVERAGE-BANDWIDTH=1000000,CODECS=\"avc1.4d401f,mp4a.40.2\",RESOLUTION=1280x720,FRAME-RATE=29.970,AUDIO=\"audio-aac-64kbps\"\nhttps://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-720p.m3u8?session=abc\n#EXT-X-STREAM-INF:BANDWIDTH=1300000,AVERAGE-BANDWIDTH=1200000,CODECS=\"avc1.4d401f,mp4a.40.2\",RESOLUTION=1280x720,FRAME-RATE=29.970,AUDIO=\"audio-aac-192kbps\"\nhttps://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-720p.m3u8?session=abc\n"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-192kbps.m3u8?session=abc",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-VERSION:6\n#EXT-X-TARGETDURATION:6\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:6.0,\nhttps://delivery.domand.test/hlsbid/sm9/playlists/seg/audio-aac-192kbps-1.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/seg/audio-aac-192kbps-1.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body": "segment-audio-aac-192kbps"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-64kbps.m3u8?session=abc",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-VERSION:6\n#EXT-X-TARGETDURATION:6\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:6.0,\nhttps://delivery.domand.test/hlsbid/sm9/playlists/seg/audio-aac-64kbps-1.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/seg/audio-aac-64kbps-1.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body": "segment-audio-aac-64kbps"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-1080p.m3u8?session=abc",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-VERSION:6\n#EXT-X-TARGETDURATION:6\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:6.0,\nhttps://delivery.domand.test/hlsbid/sm9/playlists/seg/video-h264-1080p-1.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/seg/video-h264-1080p-1.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body": "segment-video-h264-1080p"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-720p.m3u8?session=abc",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-VERSION:6\n#EXT-X-TARGETDURATION:6\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:6.0,\nhttps://delivery.domand.test/hlsbid/sm9/playlists/seg/video-h264-720p-1.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://delivery.domand.test/hlsbid/sm9/playlists/seg/video-h264-720p-1.ts",
+   "headers": {
+    "Content-Type": "video/mp2t"
+   },
+   "body": "segment-video-h264-720p"
+  }
+ ]
+}

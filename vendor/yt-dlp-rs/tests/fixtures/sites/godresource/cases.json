@@ -1,0 +1,8 @@
+[
+ {"url": "https://new.godresource.com/video/A01mTKjyf6w", "args": ["-j"]},
+ {"url": "https://new.godresource.com/video/A01mTKjyf6w", "args": ["--print", "%(id)s|%(title)s|%(thumbnail)s|%(view_count)s|%(channel)s|%(channel_id)s|%(timestamp)s|%(modified_timestamp)s|%(modified_date)s|%(is_live)s|%(live_status)s"]},
+ {"url": "https://new.godresource.com/video/b2", "args": ["-j"]},
+ {"url": "https://new.godresource.com/video/b2", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://new.godresource.com/video/c3", "args": ["-j"]},
+ {"url": "https://new.godresource.com/video/d4", "args": ["-j"]}
+]

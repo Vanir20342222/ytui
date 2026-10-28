@@ -1,0 +1,5 @@
+[
+ {"url": "https://blog.example.test/post", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://blog.example.test/post", "args": ["--flat-playlist", "-j"]},
+ {"url": "https://blog.example.test/post", "args": ["--flat-playlist", "--print", "%(playlist_index)s|%(id)s|%(url)s|%(ie_key)s"]}
+]

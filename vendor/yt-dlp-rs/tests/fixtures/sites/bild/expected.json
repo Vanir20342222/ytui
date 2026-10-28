@@ -1,0 +1,93 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"38184146\", \"title\": \"Das k\\u00f6nnen die  neuen iPads\", \"description\": \"Apple hat \\\"neue\\\" iPads\", \"formats\": [{\"url\": \"https://bild.test/v.mp4\", \"format_id\": \"http-mp4\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-mp4 - unknown\"}, {\"format_id\": \"hls-800\", \"format_index\": null, \"url\": \"https://bild.test/hls/low.m3u8\", \"manifest_url\": \"https://bild.test/hls/master.m3u8\", \"tbr\": 800.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 640, \"height\": 360, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-800 - 640x360\"}, {\"format_id\": \"hls-2500\", \"format_index\": null, \"url\": \"https://bild.test/hls/high.m3u8\", \"manifest_url\": \"https://bild.test/hls/master.m3u8\", \"tbr\": 2500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.4d401f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-2500 - 1280x720\"}], \"thumbnail\": \"https://bild.test/poster.jpg\", \"duration\": 196, \"webpage_url\": \"http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html\", \"original_url\": \"http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html\", \"webpage_url_basename\": \"das-koennen-die-neuen-ipads-38184146.bild.html\", \"webpage_url_domain\": \"bild.de\", \"extractor\": \"Bild\", \"extractor_key\": \"Bild\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://bild.test/poster.jpg\", \"id\": \"0\"}], \"display_id\": \"38184146\", \"fulltitle\": \"Das k\\u00f6nnen die  neuen iPads\", \"duration_string\": \"3:16\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls-2500\", \"format_index\": null, \"url\": \"https://bild.test/hls/high.m3u8\", \"manifest_url\": \"https://bild.test/hls/master.m3u8\", \"tbr\": 2500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.4d401f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-2500 - 1280x720\", \"_filename\": \"Das k\\u00f6nnen die  neuen iPads [38184146].mp4\", \"filename\": \"Das k\\u00f6nnen die  neuen iPads [38184146].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [Bild] Skipping unsupported format type: \"video/webm\""
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bild] Extracting URL: http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+    "[Bild] 38184146: Downloading JSON metadata",
+    "[Bild] 38184146: Downloading m3u8 information",
+    "[info] Available formats for 38184146:",
+    "ID       EXT RESOLUTION |  FILESIZE   TBR PROTO | VCODEC      ACODEC",
+    "-----------------------------------------------------------------------",
+    "http-mp4 mp4 unknown    |                 https | unknown     unknown",
+    "hls-800  mp4 640x360    | ~18.69MiB  800k m3u8  | avc1.4d401e mp4a.40.2",
+    "hls-2500 mp4 1280x720   | ~58.41MiB 2500k m3u8  | avc1.4d401f mp4a.40.2"
+   ],
+   "stderr": [
+    "WARNING: [Bild] Skipping unsupported format type: \"video/webm\""
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(duration)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "38184146|Das können die  neuen iPads|Apple hat \"neue\" iPads|196"
+   ],
+   "stderr": [
+    "WARNING: [Bild] Skipping unsupported format type: \"video/webm\""
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+   "args": [
+    "--no-progress",
+    "-f",
+    "http-mp4",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bild] Extracting URL: http://www.bild.de/video/clip/apple-ipad-air/das-koennen-die-neuen-ipads-38184146.bild.html",
+    "[Bild] 38184146: Downloading JSON metadata",
+    "[Bild] 38184146: Downloading m3u8 information",
+    "[info] 38184146: Downloading 1 format(s): http-mp4",
+    "[download] Destination: 38184146.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [Bild] Skipping unsupported format type: \"video/webm\""
+   ],
+   "files": {
+    "38184146.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.bild.de/x/plain-2,auto=true.bild.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2\", \"title\": \"Plain\", \"description\": null, \"formats\": [{\"url\": \"https://bild.test/v.mp4\", \"format_id\": \"http-mp4\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-mp4 - unknown\"}], \"thumbnail\": null, \"webpage_url\": \"https://www.bild.de/x/plain-2,auto=true.bild.html\", \"original_url\": \"https://www.bild.de/x/plain-2,auto=true.bild.html\", \"webpage_url_basename\": \"plain-2,auto=true.bild.html\", \"webpage_url_domain\": \"bild.de\", \"extractor\": \"Bild\", \"extractor_key\": \"Bild\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2\", \"fulltitle\": \"Plain\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://bild.test/v.mp4\", \"format_id\": \"http-mp4\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"http-mp4 - unknown\", \"_filename\": \"Plain [2].mp4\", \"filename\": \"Plain [2].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

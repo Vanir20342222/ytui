@@ -1,0 +1,6 @@
+ID   EXT RESOLUTION | FILESIZE   TBR PROTO | VCODEC        VBR ACODEC      ABR MORE INFO
+----------------------------------------------------------------------------------------------
+a128 m4a audio only |           128k http  | audio only        mp4a.40.2  128k [nb] Main audio
+a64  m4a audio only |  1.00KiB   64k http  | audio only        mp4a.40.2   64k [en] Low audio
+v360 mp4 640x360    |  2.00KiB  400k http  | avc1.42001e  400k video only      Low video
+v720 mp4 1280x720   |  4.00KiB 1000k http  | avc1.42001e 1000k video only      High video

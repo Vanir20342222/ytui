@@ -1,0 +1,236 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "archive_contents": "\r\n \t\r\n   youtube CaseID \t\r\nunknown unrelated record\ncustom media Episode A\rüniçode Café 影像\r\nος Greek\nmedia  two inner  spaces\r\n\u001cyoutube 001\u001f\r\nmalformed-unrelated-record\r\n",
+  "cases": [
+    {
+      "name": "plain",
+      "info": {
+        "id": "CaseID",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Youtube",
+        "direct": true
+      },
+      "expected_archive_id": "youtube CaseID",
+      "expected_hit": true
+    },
+    {
+      "name": "extractor-case",
+      "info": {
+        "id": "CaseID",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "YOUTUBE",
+        "direct": true
+      },
+      "expected_archive_id": "youtube CaseID",
+      "expected_hit": true
+    },
+    {
+      "name": "id-case",
+      "info": {
+        "id": "caseid",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Youtube",
+        "direct": true
+      },
+      "expected_archive_id": "youtube caseid",
+      "expected_hit": false
+    },
+    {
+      "name": "internal-spaces",
+      "info": {
+        "id": "Episode A",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Custom Media",
+        "direct": true
+      },
+      "expected_archive_id": "custom media Episode A",
+      "expected_hit": true
+    },
+    {
+      "name": "unicode",
+      "info": {
+        "id": "Café 影像",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "ÜNIÇODE",
+        "direct": true
+      },
+      "expected_archive_id": "üniçode Café 影像",
+      "expected_hit": true
+    },
+    {
+      "name": "unicode-key-case",
+      "info": {
+        "id": "Café 影像",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "üniçode",
+        "direct": true
+      },
+      "expected_archive_id": "üniçode Café 影像",
+      "expected_hit": true
+    },
+    {
+      "name": "unicode-id-case",
+      "info": {
+        "id": "café 影像",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "ÜNIÇODE",
+        "direct": true
+      },
+      "expected_archive_id": "üniçode café 影像",
+      "expected_hit": false
+    },
+    {
+      "name": "greek-key-case",
+      "info": {
+        "id": "Greek",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "ΟΣ",
+        "direct": true
+      },
+      "expected_archive_id": "ος Greek",
+      "expected_hit": true
+    },
+    {
+      "name": "double-internal-spaces",
+      "info": {
+        "id": "inner  spaces",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Media  Two",
+        "direct": true
+      },
+      "expected_archive_id": "media  two inner  spaces",
+      "expected_hit": true
+    },
+    {
+      "name": "numeric-id-preserved",
+      "info": {
+        "id": "001",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Youtube",
+        "direct": true
+      },
+      "expected_archive_id": "youtube 001",
+      "expected_hit": true
+    },
+    {
+      "name": "other-key",
+      "info": {
+        "id": "CaseID",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Other",
+        "direct": true
+      },
+      "expected_archive_id": "other CaseID",
+      "expected_hit": false
+    },
+    {
+      "name": "unrecorded",
+      "info": {
+        "id": "New item",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Youtube",
+        "direct": true
+      },
+      "expected_archive_id": "youtube New item",
+      "expected_hit": false
+    }
+  ],
+  "record_cases": [
+    {
+      "name": "append-unicode",
+      "info": {
+        "id": "New Épisode 影像",
+        "title": "Synthetic archive fixture",
+        "ext": "mp4",
+        "url": "http://example.invalid/media.mp4",
+        "webpage_url": "http://example.invalid/page",
+        "extractor": "fixture",
+        "extractor_key": "Custom Media",
+        "direct": true
+      },
+      "expected_archive_id": "custom media New Épisode 影像"
+    }
+  ],
+  "reference_flows": [
+    {
+      "name": "archived-before-selection",
+      "selection_calls": 0,
+      "listing_calls": 0,
+      "record_calls": 0,
+      "archive_changed": false,
+      "result_hit": true
+    },
+    {
+      "name": "plain-simulation-no-write",
+      "selection_calls": 1,
+      "listing_calls": 0,
+      "record_calls": 0,
+      "archive_changed": false,
+      "result_hit": false
+    },
+    {
+      "name": "listing-no-write",
+      "selection_calls": 0,
+      "listing_calls": 1,
+      "record_calls": 0,
+      "archive_changed": false,
+      "result_hit": false
+    },
+    {
+      "name": "reference-forced-simulation-write",
+      "selection_calls": 1,
+      "listing_calls": 0,
+      "record_calls": 1,
+      "archive_changed": true,
+      "result_hit": true
+    }
+  ]
+}

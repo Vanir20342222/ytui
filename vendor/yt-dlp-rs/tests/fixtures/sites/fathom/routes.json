@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://fathom.video/share/G9mkjkspnohVVZ_L5nrsoPycyWcB8y7s",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div id=\"app\" data-page=\"{&quot;component&quot;: &quot;x&quot;, &quot;props&quot;: {&quot;call&quot;: {&quot;id&quot;: 123456, &quot;video_url&quot;: &quot;https://fathom.test/hls/master.m3u8&quot;, &quot;started_at&quot;: &quot;2024-07-31T15:44:12.000Z&quot;}, &quot;head&quot;: {&quot;title&quot;: &quot;Fathom Demo&quot;}, &quot;duration&quot;: 1234.5}}\"></div></body></html>"
+  },
+  {
+   "url": "https://www.fathom.video/share/b2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div id=\"app\" data-page=\"{&quot;component&quot;: &quot;x&quot;, &quot;props&quot;: {&quot;call&quot;: {&quot;id&quot;: &quot;s2&quot;, &quot;video_url&quot;: &quot;https://fathom.test/hls/video.m3u8&quot;}, &quot;duration&quot;: &quot;abc&quot;}}\"></div></body></html>"
+  },
+  {
+   "url": "https://fathom.video/share/c3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div id=\"app\" data-page=\"{&quot;component&quot;: &quot;x&quot;, &quot;props&quot;: {&quot;head&quot;: {}}}\"></div></body></html>"
+  },
+  {
+   "url": "https://fathom.video/share/d4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://fathom.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://fathom.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://fathom.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://fathom.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

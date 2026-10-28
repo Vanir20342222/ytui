@@ -1,0 +1,113 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"20448876\", \"title\": \"Video Marketing Minute: Personalized Video\", \"timestamp\": 1458140101, \"duration\": 137, \"view_count\": 9, \"comment_count\": 0, \"uploader_id\": \"12258964\", \"uploader\": \"Rasmus Bysted\", \"thumbnails\": [{\"id\": \"quad50\", \"url\": \"https://video.twentythree.net/20448876/quad50.jpg\", \"width\": 50, \"height\": 50, \"filesize\": null, \"resolution\": \"50x50\"}, {\"id\": \"large\", \"url\": \"https://video.twentythree.net/20448876/large.jpg\", \"width\": 1024, \"height\": null, \"filesize\": 40000}], \"formats\": [{\"format_id\": \"audio\", \"url\": \"https://video.twentythree.net/20448876/audio.mp3\", \"filesize\": 1000, \"vcodec\": \"none\", \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio - audio only\"}, {\"format_id\": \"mobile_high\", \"url\": \"https://video.twentythree.net/20448876/mobile.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 5000, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mobile_high - 640x360\"}, {\"format_id\": \"hd\", \"url\": \"https://video.twentythree.net/20448876/hd.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\"}], \"webpage_url\": \"https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1\", \"original_url\": \"https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1\", \"webpage_url_basename\": \"player.html\", \"webpage_url_domain\": \"video.twentythree.net\", \"extractor\": \"23video\", \"extractor_key\": \"TwentyThreeVideo\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://video.twentythree.net/20448876/large.jpg\", \"display_id\": \"20448876\", \"fulltitle\": \"Video Marketing Minute: Personalized Video\", \"duration_string\": \"2:17\", \"upload_date\": \"20160316\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hd\", \"url\": \"https://video.twentythree.net/20448876/hd.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\", \"_filename\": \"Video Marketing Minute\\uff1a Personalized Video [20448876].mp4\", \"filename\": \"Video Marketing Minute\\uff1a Personalized Video [20448876].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[23video] Extracting URL: https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+    "[23video] 20448876: Downloading JSON metadata",
+    "[info] Available formats for 20448876:",
+    "ID          EXT RESOLUTION |  FILESIZE PROTO | VCODEC     ACODEC",
+    "-----------------------------------------------------------------",
+    "audio       mp3 audio only |  1000.00B https | audio only mp3",
+    "mobile_high mp4 640x360    |   4.88KiB https | unknown    unknown",
+    "hd          mp4 1280x720   |           https | unknown    unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+   "args": [
+    "--list-thumbnails"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[23video] Extracting URL: https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+    "[23video] 20448876: Downloading JSON metadata",
+    "[info] Available thumbnails for 20448876:",
+    "ID     Width Height  URL",
+    "quad50 50    50      https://video.twentythree.net/20448876/quad50.jpg",
+    "large  1024  unknown https://video.twentythree.net/20448876/large.jpg"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(timestamp)s|%(duration)s|%(uploader)s|%(uploader_id)s|%(view_count)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "20448876|Video Marketing Minute: Personalized Video|1458140101|137|Rasmus Bysted|12258964|9"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+   "args": [
+    "--no-progress",
+    "-f",
+    "hd",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[23video] Extracting URL: https://video.twentythree.net/v.ihtml/player.html?showDescriptions=0&source=site&photo%5fid=20448876&autoPlay=1",
+    "[23video] 20448876: Downloading JSON metadata",
+    "[info] 20448876: Downloading 1 format(s): hd",
+    "[download] Destination: 20448876.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "20448876.mp4": 792
+   }
+  },
+  {
+   "url": "http://www.filmweb.no/trailere/article1264921.ece",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"20448876\", \"title\": \"Video Marketing Minute: Personalized Video\", \"timestamp\": 1458140101, \"duration\": 137, \"view_count\": 9, \"comment_count\": 0, \"uploader_id\": \"12258964\", \"uploader\": \"Rasmus Bysted\", \"thumbnails\": [{\"id\": \"quad50\", \"url\": \"https://video.twentythree.net/20448876/quad50.jpg\", \"width\": 50, \"height\": 50, \"filesize\": null, \"resolution\": \"50x50\"}, {\"id\": \"large\", \"url\": \"https://video.twentythree.net/20448876/large.jpg\", \"width\": 1024, \"height\": null, \"filesize\": 40000}], \"formats\": [{\"format_id\": \"audio\", \"url\": \"https://video.twentythree.net/20448876/audio.mp3\", \"filesize\": 1000, \"vcodec\": \"none\", \"protocol\": \"https\", \"ext\": \"mp3\", \"audio_ext\": \"mp3\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"acodec\": \"mp3\", \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio - audio only\"}, {\"format_id\": \"mobile_high\", \"url\": \"https://video.twentythree.net/20448876/mobile.mp4\", \"width\": 640, \"height\": 360, \"filesize\": 5000, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mobile_high - 640x360\"}, {\"format_id\": \"hd\", \"url\": \"https://video.twentythree.net/20448876/hd.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\"}], \"original_url\": \"http://www.filmweb.no/trailere/article1264921.ece\", \"webpage_url\": \"http://www.filmweb.no/trailere/article1264921.ece\", \"webpage_url_basename\": \"article1264921.ece\", \"webpage_url_domain\": \"filmweb.no\", \"extractor\": \"23video\", \"extractor_key\": \"TwentyThreeVideo\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://video.twentythree.net/20448876/large.jpg\", \"display_id\": \"20448876\", \"fulltitle\": \"Video Marketing Minute: Personalized Video\", \"duration_string\": \"2:17\", \"upload_date\": \"20160316\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hd\", \"url\": \"https://video.twentythree.net/20448876/hd.mp4\", \"width\": 1280, \"height\": 720, \"filesize\": null, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 1280x720\", \"_filename\": \"Video Marketing Minute\\uff1a Personalized Video [20448876].mp4\", \"filename\": \"Video Marketing Minute\\uff1a Personalized Video [20448876].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://www.filmweb.no/filmnytt/article1265000.ece",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(extractor)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "20448876|Video Marketing Minute: Personalized Video|23video|http://www.filmweb.no/filmnytt/article1265000.ece"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

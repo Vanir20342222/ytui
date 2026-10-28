@@ -1,0 +1,95 @@
+{
+ "routes": [
+  {
+   "url": "https://kick.com/api/v1/video/8dd97a8d-e17f-48fb-8bc3-565f88dbc9ea",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 1, \"source\": \"https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8\", \"views\": 1234, \"created_at\": \"2023-12-25T23:35:17.000000Z\", \"livestream\": {\"session_title\": \"VOD title\", \"slug\": \"vod-slug\", \"duration\": 3600000, \"thumbnail\": \"https://images.kick.com/video_thumbnails/x.jpg\", \"is_mature\": false, \"is_live\": false, \"categories\": [{\"name\": \"Just Chatting\"}, {\"name\": \"Chess\"}], \"channel\": {\"id\": 668, \"slug\": \"xqc\", \"user_id\": 676, \"user\": {\"username\": \"xQc\", \"bio\": \"Bio text\"}}}}"
+  },
+  {
+   "url": "https://kick.com/api/v2/clips/clip_01GYXVB5Y8PWAPWCWMSBCFB05X/play",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"clip\": {\"id\": \"clip_01GYXVB5Y8PWAPWCWMSBCFB05X\", \"title\": \"Clip title\", \"clip_url\": \"https://clips.kick.com/clips/x/master.m3u8\", \"thumbnail_url\": \"https://clips.kick.com/clips/x/thumb.png\", \"duration\": 30, \"views\": 99, \"likes\": 5, \"created_at\": \"2023-04-20T00:00:00Z\", \"is_mature\": true, \"category\": {\"name\": \"IRL\"}, \"channel\": {\"id\": \"17\", \"slug\": \"mxddy\"}, \"creator\": {\"id\": 5, \"username\": \"Clipper\"}}}"
+  },
+  {
+   "url": "https://kick.com/api/v2/channels/buddha",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 123, \"user_id\": \"456\", \"playback_url\": \"https://stream.kick.com/live/master.m3u8\", \"user\": {\"id\": 456, \"username\": \"buddha\", \"bio\": \"Streamer bio\"}, \"livestream\": {\"slug\": \"live-slug\", \"session_title\": \"Live now\", \"created_at\": \"2024-01-01 10:00:00\", \"start_time\": \"2024-01-01 10:00:00\", \"viewer_count\": 500, \"is_mature\": false, \"thumbnail\": {\"url\": \"https://images.kick.com/live/x.webp\"}, \"channel_id\": 123}, \"recent_categories\": [{\"name\": \"GTA V\"}]}"
+  },
+  {
+   "url": "https://kick.com/api/v2/channels/offline",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 1, \"livestream\": null}"
+  },
+  {
+   "url": "https://stream.kick.com/ivs/v1/abc/media/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://stream.kick.com/ivs/v1/abc/media/hls/1080p60/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://stream.kick.com/ivs/v1/abc/media/hls/480p30/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://clips.kick.com/clips/x/master.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://clips.kick.com/clips/x/1080p60/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://clips.kick.com/clips/x/480p30/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://stream.kick.com/live/master.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://stream.kick.com/live/1080p60/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://stream.kick.com/live/480p30/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  }
+ ]
+}

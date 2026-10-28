@@ -1,0 +1,61 @@
+{
+ "routes": [
+  {
+   "url": "https://rutube.ru/api/video/3eac3b4561676c17df9132a9a1e62e3e/?format=json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": \"3eac3b4561676c17df9132a9a1e62e3e\", \"title\": \"Раненный кенгуру забежал в аптеку\", \"description\": \"Intro text\\n0:00 Start\\n1:05 - Middle part\\n\", \"thumbnail_url\": \"https://pic.rutubelist.test/video/a.jpg\", \"duration\": 81, \"author\": {\"id\": 29790, \"name\": \"NTDRussian\"}, \"created_ts\": \"2013-10-16T17:13:22\", \"category\": {\"name\": \"Новости\"}, \"is_adult\": false, \"hits\": 1234, \"comments_count\": 5, \"is_livestream\": false}"
+  },
+  {
+   "url": "https://rutube.ru/api/play/options/3eac3b4561676c17df9132a9a1e62e3e/?format=json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"video_balancer\": {\"m3u8\": \"https://bl.rutube.test/route/x.m3u8?i=1\", \"default\": \"https://bl.rutube.test/progressive.mp4\"}, \"captions\": [{\"code\": \"en\", \"file\": \"https://pic.rutubelist.test/cap/en.vtt\", \"langTitle\": \"English\"}, {\"file\": \"https://pic.rutubelist.test/cap/ru.srt\"}]}"
+  },
+  {
+   "url": "https://rutube.ru/api/play/options/8083783/?p=tok&format=json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"effective_video\": \"a10e53b86e8f349080f718582ce4c661\", \"video_balancer\": {\"default\": \"https://bl.rutube.test/embed.mp4\"}}"
+  },
+  {
+   "url": "https://rutube.ru/api/video/a10e53b86e8f349080f718582ce4c661/?p=tok&format=json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": \"a10e53b86e8f349080f718582ce4c661\", \"title\": \"Embedded\", \"is_adult\": true, \"duration\": 10}"
+  },
+  {
+   "url": "https://rutube.ru/api/video/00000000000000000000000000000000/?format=json",
+   "status": 404,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://bl.rutube.test/route/x.m3u8?i=1",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360,CODECS=\"avc1.4d401e,mp4a.40.2\"\nhttps://bl.rutube.test/route/360.m3u8\n"
+  },
+  {
+   "url": "https://bl.rutube.test/route/360.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body": "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\nseg.ts\n#EXT-X-ENDLIST\n"
+  },
+  {
+   "url": "https://bl.rutube.test/progressive.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-rutube"
+  }
+ ]
+}

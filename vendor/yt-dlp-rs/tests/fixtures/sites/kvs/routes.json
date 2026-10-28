@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://www.example.test/videos/10000/some-clip/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "page.html"
+  },
+  {
+   "url": "https://www.example.test/get_file/1/b9d4545ef0f23690821a8cecd767ab31extra/10000/10000_720p.mp4/?br=900",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://www.example.test/get_file/1/plain/10000/10000_480.mp4/",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://old.example.test/v/7",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Old player</title></head><body><script>kt_player('kt_player', 'https://old.example.test/player/kt_player.swf?v=3.1.2', '100%', '100%', flashvars);\nvar flashvars = {\"video_id\": 7, \"license_code\": \"$111\", \"preview_url\": \"https://old.example.test/p.jpg\", \"video_url\": \"https://old.example.test/get_file/7/x.mp4\"};</script></body></html>"
+  },
+  {
+   "url": "https://old.example.test/v/8",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>No vars</title><script src=\"https://old.example.test/kt_player.js?v=5.0\"></script></head><body></body></html>"
+  },
+  {
+   "url": "https://old.example.test/v/9",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>No preview</title><script src=\"https://old.example.test/kt_player.js?v=5.0\"></script></head><body><script>var flashvars = {video_id: '9', license_code: '$1'};</script></body></html>"
+  }
+ ]
+}

@@ -1,0 +1,132 @@
+{
+ "routes": [
+  {
+   "url": "https://media.example.test/shows/clip.smil",
+   "headers": {
+    "Content-Type": "application/smil+xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\n <head>\n  <meta name=\"title\" content=\"Show &amp; tell\"/>\n  <meta name=\"abstract\" content=\"An abstract\"/>\n  <meta name=\"description\" content=\"ignored\"/>\n  <meta name=\"date\" content=\"2021-05-04\"/>\n  <meta base=\"https://cdn.example.test/vod\"/>\n </head>\n <body>\n  <switch>\n   <video src=\"hi.mp4\" system-bitrate=\"1500000\" width=\"1280\" height=\"720\" size=\"12345\"/>\n   <video src=\"lo.mp4\" systemBitrate=\"400000\" width=\"640\" height=\"360\"/>\n   <video src=\"hi.mp4\" system-bitrate=\"9\"/>\n   <video src=\"https://other.example.test/abs.mp4\"/>\n   <video src=\"https://other.example.test/gone.mp4\" ext=\"webm\"/>\n   <audio src=\"sound.m4a\"/>\n   <image src=\"https://media.example.test/poster.jpg\" type=\"poster\" width=\"640\" height=\"360\"/>\n   <image src=\"https://media.example.test/thumb.jpg\"/>\n   <textstream src=\"https://media.example.test/en.vtt\" systemLanguage=\"en\"/>\n   <textstream src=\"https://media.example.test/de.srt\" lang=\"de\" type=\"application/x-subrip\"/>\n   <textstream src=\"https://media.example.test/x.ttml\"/>\n  </switch>\n </body>\n</smil>"
+  },
+  {
+   "url": "https://media.example.test/plain.smil",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<smil><body><video src=\"https://cdn.example.test/vod/lo.mp4\"/></body></smil>"
+  },
+  {
+   "url": "https://cdn.example.test/vod/hi.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://cdn.example.test/vod/lo.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://cdn.example.test/vod/sound.m4a",
+   "headers": {
+    "Content-Type": "audio/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://other.example.test/abs.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://other.example.test/gone.mp4",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/plain"
+   },
+   "body": "gone"
+  },
+  {
+   "url": "https://media.example.test/en.vtt",
+   "headers": {
+    "Content-Type": "text/vtt"
+   },
+   "body": "WEBVTT\n\n00:00.000 --> 00:01.000\nHi\n"
+  },
+  {
+   "url": "https://media.example.test/manifests.smil",
+   "headers": {
+    "Content-Type": "application/smil+xml"
+   },
+   "body": "<smil><head><meta base=\"https://cdn.example.test/live\"/></head><body><switch>\n<video src=\"two.m3u8\"/>\n<video src=\"single.m3u8\" system-bitrate=\"900000\" width=\"1920\" height=\"1080\"/>\n<video src=\"stream\" proto=\"m3u8\" ext=\"ts\"/>\n<video src=\"segmented.mpd\"/>\n<video src=\"missing.m3u8\"/>\n</switch></body></smil>"
+  },
+  {
+   "url": "https://cdn.example.test/live/two.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "two.m3u8"
+  },
+  {
+   "url": "https://cdn.example.test/live/single.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "single.m3u8"
+  },
+  {
+   "url": "https://cdn.example.test/live/stream",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "single.m3u8"
+  },
+  {
+   "url": "https://cdn.example.test/live/segmented.mpd",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "segmented.mpd"
+  },
+  {
+   "url": "https://cdn.example.test/live/low/index.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "single.m3u8"
+  },
+  {
+   "url": "https://cdn.example.test/live/high/index.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "single.m3u8"
+  },
+  {
+   "url": "https://www.example.test/watch",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8",
+    "Last-Modified": "Tue, 04 May 2021 10:00:00 GMT"
+   },
+   "body": "<html><head><title>Watch page</title><meta property=\"og:video\" content=\"https://media.example.test/shows/clip.smil\"><meta property=\"og:description\" content=\"Page description\"><meta property=\"og:image\" content=\"https://www.example.test/og.jpg\"></head><body>hi</body></html>"
+  },
+  {
+   "url": "https://www.example.test/plainwatch",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Plain watch</title><meta property=\"og:video\" content=\"https://media.example.test/plain.smil\"><meta name=\"rating\" content=\"RTA-5042-1996-1400-1577-RTA\"></head><body>hi</body></html>"
+  },
+  {
+   "url": "https://www.example.test/gonewatch",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Gone</title><meta property=\"og:video\" content=\"https://media.example.test/gone.smil\"></head><body>hi</body></html>"
+  }
+ ]
+}

@@ -1,0 +1,55 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://tatiana.tumblr.com/post/54196191430/orphan-black-dvd",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"54196191430\", \"title\": \"Orphan Black summary\", \"description\": \"First paragraph\\n\\nSecond\", \"uploader_id\": \"tatiana\", \"uploader_url\": \"https://tatiana.tumblr.com/\", \"timestamp\": 1372531936, \"like_count\": 44, \"repost_count\": 3, \"tags\": [\"orphan black\", \"tv\"], \"age_limit\": 0, \"formats\": [{\"url\": \"https://va.media.tumblr.com/tumblr_x_480.mp4\", \"format_id\": \"sd\", \"height\": 480, \"quality\": 0, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"480p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"sd - 480p\"}, {\"url\": \"https://va.media.tumblr.com/tumblr_x_720.mp4\", \"format_id\": \"hd\", \"height\": 720, \"quality\": 1, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 720p\"}], \"duration\": 196, \"thumbnail\": \"https://64.media.tumblr.com/poster.jpg\", \"webpage_url\": \"http://tatiana.tumblr.com/post/54196191430/orphan-black-dvd\", \"original_url\": \"http://tatiana.tumblr.com/post/54196191430/orphan-black-dvd\", \"webpage_url_basename\": \"orphan-black-dvd\", \"webpage_url_domain\": \"tatiana.tumblr.com\", \"extractor\": \"Tumblr\", \"extractor_key\": \"Tumblr\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://64.media.tumblr.com/poster.jpg\", \"id\": \"0\"}], \"display_id\": \"54196191430\", \"fulltitle\": \"Orphan Black summary\", \"duration_string\": \"3:16\", \"upload_date\": \"20130629\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://va.media.tumblr.com/tumblr_x_720.mp4\", \"format_id\": \"hd\", \"height\": 720, \"quality\": 1, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 720p\", \"_filename\": \"Orphan Black summary [54196191430].mp4\", \"filename\": \"Orphan Black summary [54196191430].mp4\", \"__write_download_archive\": false}], \"url\": \"https://va.media.tumblr.com/tumblr_x_720.mp4\", \"format_id\": \"hd\", \"height\": 720, \"quality\": 1, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hd - 720p\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.tumblr.com/linker/1111",
+   "args": [
+    "--print",
+    "%(id)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "clip|https://media.example.test/clip.mp4"
+   ],
+   "stderr": [
+    "WARNING: [Tumblr] 1111: Unrecognized providers, please report: foo"
+   ],
+   "files": {}
+  },
+  {
+   "url": "http://tatiana.tumblr.com/post/54196191430",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Tumblr] Downloading login page",
+    "[Tumblr] Extracting URL: http://tatiana.tumblr.com/post/54196191430",
+    "[Tumblr] 54196191430: Downloading webpage",
+    "[Tumblr] 54196191430: Downloading JSON metadata",
+    "[Tumblr] 54196191430: Downloading iframe page",
+    "[info] 54196191430: Downloading 1 format(s): hd",
+    "[download] Destination: 54196191430.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "54196191430.mp4": 19
+   }
+  }
+ ]
+}

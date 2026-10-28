@@ -1,0 +1,77 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://weibo.com/7827771738/N4xlMvjhI",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"4910815147462302\", \"extractor_key\": \"Weibo\", \"extractor\": \"Weibo\", \"formats\": [{\"url\": \"https://f.video.weibocdn.test/o0/480.mp4?label=mp4_hd\", \"format\": \"\\u6807\\u6e05 480P\", \"format_id\": \"mp4_hd\", \"ext\": \"mp4\", \"width\": 852, \"height\": 480, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"852x480\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.77, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}}, {\"url\": \"https://f.video.weibocdn.test/o0/720.mp4?label=mp4_720p\", \"format\": \"\\u9ad8\\u6e05 720P\", \"format_id\": \"mp4_720p\", \"ext\": \"mp4\", \"tbr\": 1500, \"vcodec\": \"h264\", \"fps\": 30, \"width\": 1280, \"height\": 720, \"filesize\": 22000000, \"acodec\": \"aac\", \"asr\": 44100, \"audio_channels\": 2, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"_old_archive_ids\": [\"weibomobile 4910815147462302\"], \"display_id\": \"N4xlMvjhI\", \"title\": \"A very long title with a line break that keeps going and going well p...\", \"alt_title\": \"A very long title with a line\\nbreak that keeps going and going well past seventy-two characters\", \"description\": \"\\u3010#\\u5fae\\u535a# \\u3011post text\", \"duration\": 117, \"timestamp\": 1683000000, \"thumbnail\": \"https://wx1.sinaimg.test/large/cover.jpg\", \"uploader\": \"\\u75af\\u72c2\\u7684\\u5c0f\\u7f8a\\u80e1\", \"uploader_id\": \"7827771738\", \"uploader_url\": \"https://weibo.com/u/7827771738\", \"like_count\": 1200, \"repost_count\": 33, \"tags\": [\"\\u5fae\\u535a\", \"test\"], \"webpage_url\": \"https://weibo.com/7827771738/N4xlMvjhI\", \"original_url\": \"https://weibo.com/7827771738/N4xlMvjhI\", \"webpage_url_basename\": \"N4xlMvjhI\", \"webpage_url_domain\": \"weibo.com\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://wx1.sinaimg.test/large/cover.jpg\", \"id\": \"0\"}], \"fulltitle\": \"A very long title with a line break that keeps going and going well p...\", \"duration_string\": \"1:57\", \"upload_date\": \"20230502\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"url\": \"https://f.video.weibocdn.test/o0/720.mp4?label=mp4_720p\", \"format\": \"\\u9ad8\\u6e05 720P\", \"format_id\": \"mp4_720p\", \"ext\": \"mp4\", \"tbr\": 1500, \"vcodec\": \"h264\", \"fps\": 30, \"width\": 1280, \"height\": 720, \"filesize\": 22000000, \"acodec\": \"aac\", \"asr\": 44100, \"audio_channels\": 2, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"_filename\": \"A very long title with a line break that keeps going and going well p... [4910815147462302].mp4\", \"filename\": \"A very long title with a line break that keeps going and going well p... [4910815147462302].mp4\", \"__write_download_archive\": false}], \"url\": \"https://f.video.weibocdn.test/o0/720.mp4?label=mp4_720p\", \"format\": \"\\u9ad8\\u6e05 720P\", \"format_id\": \"mp4_720p\", \"ext\": \"mp4\", \"tbr\": 1500, \"vcodec\": \"h264\", \"fps\": 30, \"width\": 1280, \"height\": 720, \"filesize\": 22000000, \"acodec\": \"aac\", \"asr\": 44100, \"audio_channels\": 2, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://weibo.com/1234/Mix5000",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"Mix5000\", \"_type\": \"playlist\", \"entries\": [{\"id\": \"1034:111\", \"extractor_key\": \"Weibo\", \"extractor\": \"Weibo\", \"formats\": [{\"url\": \"https://f.video.weibocdn.test/mix1.mp4\", \"format_id\": \"mp4_ld\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"format\": \"mp4_ld - unknown\"}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"_old_archive_ids\": [\"weibomobile 1034:111\"], \"title\": \"Clip one\", \"alt_title\": \"Clip one\", \"duration\": 10, \"tags\": null, \"playlist_count\": 2, \"playlist\": \"Mix5000\", \"playlist_id\": \"Mix5000\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://weibo.com/1234/Mix5000\", \"n_entries\": 2, \"webpage_url\": \"https://weibo.com/1234/Mix5000\", \"webpage_url_basename\": \"Mix5000\", \"webpage_url_domain\": \"weibo.com\", \"playlist_index\": 1, \"__last_playlist_index\": 2, \"playlist_autonumber\": 1, \"display_id\": \"1034:111\", \"fulltitle\": \"Clip one\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"url\": \"https://f.video.weibocdn.test/mix1.mp4\", \"format_id\": \"mp4_ld\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"format\": \"mp4_ld - unknown\", \"_filename\": \"Clip one [1034_111].mp4\", \"filename\": \"Clip one [1034_111].mp4\", \"__write_download_archive\": false}], \"url\": \"https://f.video.weibocdn.test/mix1.mp4\", \"format_id\": \"mp4_ld\", \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"mp4_ld - unknown\"}, {\"id\": \"1034:222\", \"extractor_key\": \"Weibo\", \"extractor\": \"Weibo\", \"formats\": [{\"url\": \"https://f.video.weibocdn.test/mix2.mp4\", \"format_id\": \"mp4_ld\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"format\": \"mp4_ld - unknown\"}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"_old_archive_ids\": [\"weibomobile 1034:222\"], \"title\": \"Clip two\", \"alt_title\": \"Clip two\", \"tags\": null, \"playlist_count\": 2, \"playlist\": \"Mix5000\", \"playlist_id\": \"Mix5000\", \"playlist_title\": null, \"playlist_uploader\": null, \"playlist_uploader_id\": null, \"playlist_channel\": null, \"playlist_channel_id\": null, \"playlist_webpage_url\": \"https://weibo.com/1234/Mix5000\", \"n_entries\": 2, \"webpage_url\": \"https://weibo.com/1234/Mix5000\", \"webpage_url_basename\": \"Mix5000\", \"webpage_url_domain\": \"weibo.com\", \"playlist_index\": 2, \"__last_playlist_index\": 2, \"playlist_autonumber\": 2, \"display_id\": \"1034:222\", \"fulltitle\": \"Clip two\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"url\": \"https://f.video.weibocdn.test/mix2.mp4\", \"format_id\": \"mp4_ld\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"format\": \"mp4_ld - unknown\", \"_filename\": \"Clip two [1034_222].mp4\", \"filename\": \"Clip two [1034_222].mp4\", \"__write_download_archive\": false}], \"url\": \"https://f.video.weibocdn.test/mix2.mp4\", \"format_id\": \"mp4_ld\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"mp4_ld - unknown\"}], \"webpage_url\": \"https://weibo.com/1234/Mix5000\", \"original_url\": \"https://weibo.com/1234/Mix5000\", \"webpage_url_basename\": \"Mix5000\", \"webpage_url_domain\": \"weibo.com\", \"extractor\": \"Weibo\", \"extractor_key\": \"Weibo\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://m.weibo.cn/status/4189191225395228",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"4189191225395228\", \"extractor_key\": \"Weibo\", \"extractor\": \"Weibo\", \"formats\": [{\"url\": \"https://f.video.weibocdn.test/fb.mp4?label=mp4_ld&template=640x360.25.0\", \"format_id\": \"mp4_ld\", \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"format\": \"mp4_ld - 640x360\"}, {\"url\": \"https://f.video.weibocdn.test/fb-hd.mp4?label=mp4_hd&template=852x480.25.0\", \"format_id\": \"mp4_hd\", \"width\": 852, \"height\": 480, \"filesize\": 4000, \"tbr\": 900, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"852x480\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.77, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"format\": \"mp4_hd - 852x480\"}], \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"_old_archive_ids\": [\"weibomobile 4189191225395228\"], \"title\": \"Fallback\", \"alt_title\": \"Fallback\", \"tags\": null, \"webpage_url\": \"https://m.weibo.cn/status/4189191225395228\", \"original_url\": \"https://m.weibo.cn/status/4189191225395228\", \"webpage_url_basename\": \"4189191225395228\", \"webpage_url_domain\": \"m.weibo.cn\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"4189191225395228\", \"fulltitle\": \"Fallback\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://weibo.com/\"}, \"url\": \"https://f.video.weibocdn.test/fb-hd.mp4?label=mp4_hd&template=852x480.25.0\", \"format_id\": \"mp4_hd\", \"width\": 852, \"height\": 480, \"filesize\": 4000, \"tbr\": 900, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"852x480\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.77, \"format\": \"mp4_hd - 852x480\", \"_filename\": \"Fallback [4189191225395228].mp4\", \"filename\": \"Fallback [4189191225395228].mp4\", \"__write_download_archive\": false}], \"url\": \"https://f.video.weibocdn.test/fb-hd.mp4?label=mp4_hd&template=852x480.25.0\", \"format_id\": \"mp4_hd\", \"width\": 852, \"height\": 480, \"filesize\": 4000, \"tbr\": 900, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"852x480\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.77, \"format\": \"mp4_hd - 852x480\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://weibo.com/tv/show/1034:4797699866951785?from=old_pc_videoshow",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "4189191225395228|Fallback|https://weibo.com/0/4189191225395228"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://weibo.com/7827771738/N4xlMvjhI",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Weibo] Extracting URL: https://weibo.com/7827771738/N4xlMvjhI",
+    "[Weibo] N4xlMvjhI: Downloading JSON metadata",
+    "[Weibo] N4xlMvjhI: Generating first-visit guest request",
+    "[Weibo] N4xlMvjhI: Running first-visit callback to get guest cookies",
+    "[Weibo] N4xlMvjhI: Downloading JSON metadata",
+    "[info] 4910815147462302: Downloading 1 format(s): mp4_720p",
+    "[download] Destination: 4910815147462302.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "4910815147462302.mp4": 18
+   }
+  }
+ ]
+}

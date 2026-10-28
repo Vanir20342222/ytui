@@ -1,0 +1,92 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.qingting.fm/channels/378005/programs/22257411/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"22257411\", \"title\": \"\\u6b66\\u6797\\u5916\\u4f20 1\", \"channel_id\": \"378005\", \"channel\": \"Radio\", \"uploader\": \"Host\", \"url\": \"https://od.qingting.test/m4a/5f8a.m4a\", \"vcodec\": \"none\", \"acodec\": \"m4a\", \"ext\": \"m4a\", \"webpage_url\": \"https://www.qingting.fm/channels/378005/programs/22257411/\", \"original_url\": \"https://www.qingting.fm/channels/378005/programs/22257411/\", \"webpage_url_basename\": \"22257411\", \"webpage_url_domain\": \"qingting.fm\", \"extractor\": \"QingTing\", \"extractor_key\": \"QingTing\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"22257411\", \"fulltitle\": \"\\u6b66\\u6797\\u5916\\u4f20 1\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\", \"_filename\": \"\\u6b66\\u6797\\u5916\\u4f20 1 [22257411].m4a\", \"filename\": \"\\u6b66\\u6797\\u5916\\u4f20 1 [22257411].m4a\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.qingting.fm/channels/378005/programs/22257411/",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[QingTing] Extracting URL: https://www.qingting.fm/channels/378005/programs/22257411/",
+    "[QingTing] 22257411: Downloading webpage",
+    "[info] Available formats for 22257411:",
+    "ID EXT RESOLUTION | PROTO | VCODEC     ACODEC",
+    "---------------------------------------------",
+    "0  m4a audio only | https | audio only m4a"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.qingting.fm/channels/378005/programs/22257411/",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(channel)s|%(channel_id)s|%(uploader)s|%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "22257411|武林外传 1|Radio|378005|Host|m4a"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.qingting.fm/channels/378005/programs/22257411/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[QingTing] Extracting URL: https://www.qingting.fm/channels/378005/programs/22257411/",
+    "[QingTing] 22257411: Downloading webpage",
+    "[info] 22257411: Downloading 1 format(s): 0",
+    "[download] Destination: 22257411.m4a",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "22257411.m4a": 792
+   }
+  },
+  {
+   "url": "https://m.qtfm.cn/vchannels/1/programs/2/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead",
+    "ERROR: [QingTing] 2: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://m.qtfm.cn/vchannels/1/programs/3/",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [QingTing] 3: Unable to extract program info; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

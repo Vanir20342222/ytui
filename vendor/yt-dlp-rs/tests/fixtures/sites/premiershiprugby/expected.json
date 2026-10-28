@@ -1,0 +1,80 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"0_mbkb7ldt\", \"display_id\": \"full-match-harlequins-v-newcastle-falcons\", \"title\": \"Full Match: Harlequins v Newcastle Falcons\", \"formats\": [{\"format_id\": \"200\", \"format_index\": null, \"url\": \"https://prl.test/hls/video.m3u8\", \"manifest_url\": \"https://prl.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\"}], \"subtitles\": {\"en\": [{\"url\": \"https://prl.test/hls/subs_en.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}], \"de\": [{\"url\": \"https://prl.test/hls/subs_de.m3u8\", \"ext\": \"vtt\", \"protocol\": \"m3u8_native\"}]}, \"thumbnail\": \"https://prl.test/t.jpg\", \"duration\": 6093, \"tags\": [\"video\"], \"categories\": [\"Full Match\", \"Harlequins\"], \"webpage_url\": \"https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons\", \"original_url\": \"https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons\", \"webpage_url_basename\": \"full-match-harlequins-v-newcastle-falcons\", \"webpage_url_domain\": \"premiershiprugby.com\", \"extractor\": \"PremiershipRugby\", \"extractor_key\": \"PremiershipRugby\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://prl.test/t.jpg\", \"id\": \"0\"}], \"fulltitle\": \"Full Match: Harlequins v Newcastle Falcons\", \"duration_string\": \"1:41:33\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"200\", \"format_index\": null, \"url\": \"https://prl.test/hls/video.m3u8\", \"manifest_url\": \"https://prl.test/hls/master.m3u8\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"200 - 320x240\", \"_filename\": \"Full Match\\uff1a Harlequins v Newcastle Falcons [0_mbkb7ldt].mp4\", \"filename\": \"Full Match\\uff1a Harlequins v Newcastle Falcons [0_mbkb7ldt].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(duration)s|%(tags)s|%(categories)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "0_mbkb7ldt|full-match-harlequins-v-newcastle-falcons|Full Match: Harlequins v Newcastle Falcons|6093|['video']|['Full Match', 'Harlequins']"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.premiershiprugby.com/watch/plain",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"s2\", \"display_id\": \"plain\", \"title\": \"PremiershipRugby video #s2\", \"formats\": [{\"format_id\": \"0\", \"format_index\": null, \"url\": \"https://prl.test/hls/video.m3u8\", \"ext\": \"m3u8\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"m3u8\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}], \"subtitles\": {}, \"thumbnail\": null, \"tags\": null, \"categories\": [], \"webpage_url\": \"https://www.premiershiprugby.com/watch/plain\", \"original_url\": \"https://www.premiershiprugby.com/watch/plain\", \"webpage_url_basename\": \"plain\", \"webpage_url_domain\": \"premiershiprugby.com\", \"extractor\": \"PremiershipRugby\", \"extractor_key\": \"PremiershipRugby\", \"playlist\": null, \"playlist_index\": null, \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"0\", \"format_index\": null, \"url\": \"https://prl.test/hls/video.m3u8\", \"ext\": \"m3u8\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"m3u8\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\", \"_filename\": \"PremiershipRugby video #s2 [s2].m3u8\", \"filename\": \"PremiershipRugby video #s2 [s2].m3u8\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.premiershiprugby.com/watch/no-hero",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: no-hero: An extractor error has occurred. (caused by KeyError('heroMedia')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.premiershiprugby.com/watch/no-data",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: no-data: An extractor error has occurred. (caused by KeyError('data')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.premiershiprugby.com/watch/no-id",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: no-id: An extractor error has occurred. (caused by KeyError('sourceSystemId')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

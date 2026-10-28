@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "http://movingimage.nls.uk/film/3561",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>player({file: \"https://mi.test/hls/master.m3u8\", image : 'https://mi.test/t.jpg'});</script>\n<span class=\"field_title\">Title:</span> <span class=\"field_content\">[SHETLAND WOOL &amp; KNITTING]</span>\n<span class=\"field_title\">Description:</span><span class=\"field_content\">Wool &quot;knit&quot;</span>\n<span class=\"field_title\">Running time:</span>\n<span class=\"field_content\">16.38 mins</span></body></html>"
+  },
+  {
+   "url": "https://movingimage.nls.uk/film/2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>file:\"https://mi.test/hls/video.m3u8\"</script><span class=\"field_title\">Title:</span><span class=\"field_content\">(Plain)</span></html>"
+  },
+  {
+   "url": "https://movingimage.nls.uk/film/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>file:\"https://mi.test/hls/video.m3u8\"</script></html>"
+  },
+  {
+   "url": "https://movingimage.nls.uk/film/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>none</html>"
+  },
+  {
+   "url": "https://mi.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://mi.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://mi.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://mi.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

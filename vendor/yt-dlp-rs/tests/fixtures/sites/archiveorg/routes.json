@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://archive.org/embed/film1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><play-av playlist=\"[{&quot;orig&quot;: &quot;film.mp4&quot;, &quot;title&quot;: &quot;Film&quot;, &quot;tracks&quot;: [{&quot;kind&quot;: &quot;subtitles&quot;, &quot;label&quot;: &quot;English&quot;, &quot;file&quot;: &quot;/download/film1/film.en.vtt&quot;}, {&quot;kind&quot;: &quot;chapters&quot;, &quot;label&quot;: &quot;c&quot;, &quot;file&quot;: &quot;x&quot;}]}]\" other=\"x\"></play-av></body></html>"
+  },
+  {
+   "url": "https://archive.org/metadata/film1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"metadata\": {\"identifier\": \"film1\", \"title\": \"The Film\", \"description\": [\"<p>Line one</p>\", \"line two\"], \"uploader\": \"uploader@example.test\", \"creator\": [\"Studio\", \"\"], \"licenseurl\": \"http://creativecommons.org/licenses/by/3.0/\", \"date\": \"1968-12-09\", \"publicdate\": \"2010-01-01 00:00:00\", \"venue\": \"Hall\", \"year\": \"1968\"}, \"files\": [{\"name\": \"film.mp4\", \"source\": \"original\", \"format\": \"MPEG4\", \"size\": \"1000\", \"width\": \"640\", \"height\": \"480\", \"length\": \"123.5\"}, {\"name\": \"film.ogv\", \"source\": \"derivative\", \"format\": \"Ogg Video\", \"original\": \"film.mp4\", \"size\": \"800\"}, {\"name\": \"film.thumbs/x.jpg\", \"format\": \"Thumbnail\", \"original\": \"film.mp4\", \"width\": \"160\", \"size\": \"12\"}, {\"name\": \"film private.mp4\", \"source\": \"derivative\", \"original\": \"film.mp4\", \"private\": \"true\"}, {\"name\": \"film hd.mp4\", \"source\": \"derivative\", \"original\": \"film.mp4\", \"format\": \"h.264 HD\"}, {\"name\": \"other.txt\", \"original\": \"film.mp4\"}], \"reviews\": [{\"review_id\": \"r1\", \"reviewer\": \"fan\", \"reviewtitle\": \"Great\", \"reviewbody\": \"Loved it\", \"createdate\": \"2011-02-03 04:05:06\"}]}"
+  },
+  {
+   "url": "https://archive.org/embed/album1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><play-av playlist=\"[{&quot;orig&quot;: &quot;01 Song.mp3&quot;, &quot;title&quot;: &quot;Song&quot;, &quot;artist&quot;: &quot;Band&quot;}, {&quot;orig&quot;: &quot;02 Other.flac&quot;, &quot;title&quot;: &quot;Other&quot;, &quot;artist&quot;: &quot;Band&quot;}]\" other=\"x\"></play-av></body></html>"
+  },
+  {
+   "url": "https://archive.org/metadata/album1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"metadata\": {\"identifier\": \"album1\", \"title\": \"Album\", \"creator\": \"Band\", \"addeddate\": \"2015-05-05\"}, \"files\": [{\"name\": \"01 Song.mp3\", \"source\": \"original\", \"format\": \"VBR MP3\", \"track\": \"01\", \"album\": \"Album\", \"length\": \"02:03\", \"title\": \"Song title\"}, {\"name\": \"02 Other.flac\", \"source\": \"original\", \"format\": \"Flac\", \"track\": \"2\", \"length\": \"61\"}]}"
+  },
+  {
+   "url": "https://archive.org/embed/broken1",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>nothing</html>"
+  },
+  {
+   "url": "https://archive.org/download/film1/film.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-ia"
+  }
+ ]
+}

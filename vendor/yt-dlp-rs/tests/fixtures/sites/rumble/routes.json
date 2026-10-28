@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://rumble.com/embedJS/u3/?request=video&ver=2&v=vb0ofn",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "embed.json"
+  },
+  {
+   "url": "https://rumble.com/embedJS/u3/?request=video&ver=2&v=vgone1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"sys\": {\"msg\": \"Video not found\"}}"
+  },
+  {
+   "url": "https://rumble.com/vdmum1-moose-the-dog.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body_file": "page.html"
+  },
+  {
+   "url": "https://sp.rmbl.ws/s8/2/360.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-rumble"
+  }
+ ]
+}

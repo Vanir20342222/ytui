@@ -1,0 +1,122 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.example.test/videos/10000/some-clip/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"10000\", \"display_id\": \"some-clip\", \"title\": \"Some clip & more | Example\", \"thumbnail\": \"https://www.example.test/contents/10000/preview.jpg\", \"formats\": [{\"url\": \"https://www.example.test/get_file/1/b9d4545ef0f23690821a8cecd767ab31extra/10000/10000_720p.mp4/?br=900\", \"format_id\": \"720p\", \"ext\": \"mp4\", \"height\": 720, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/videos/10000/some-clip/\"}, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"720p - 720p\"}, {\"url\": \"https://www.example.test/get_file/1/plain/10000/10000_480.mp4/\", \"format_id\": \"Low_quality\", \"ext\": \"mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/videos/10000/some-clip/\"}, \"quality\": 1, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"Low_quality - unknown\"}], \"description\": \"OG text\", \"webpage_url\": \"https://www.example.test/videos/10000/some-clip/\", \"original_url\": \"https://www.example.test/videos/10000/some-clip/\", \"webpage_url_basename\": \"some-clip\", \"webpage_url_domain\": \"example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://www.example.test/contents/10000/preview.jpg\", \"id\": \"0\"}], \"fulltitle\": \"Some clip & more | Example\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://www.example.test/get_file/1/plain/10000/10000_480.mp4/\", \"format_id\": \"Low_quality\", \"ext\": \"mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.example.test/videos/10000/some-clip/\"}, \"quality\": 1, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"Low_quality - unknown\", \"_filename\": \"Some clip & more \\uff5c Example [10000].mp4\", \"filename\": \"Some clip & more \\uff5c Example [10000].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/videos/10000/some-clip/",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://www.example.test/videos/10000/some-clip/",
+    "[generic] some-clip: Downloading webpage",
+    "[generic] some-clip: Extracting information",
+    "[info] Available formats for 10000:",
+    "ID          EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "----------------------------------------------------",
+    "720p        mp4 720p       | https | unknown unknown",
+    "Low_quality mp4 unknown    | https | unknown unknown"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/videos/10000/some-clip/",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(thumbnail)s|%(description)s|%(format_id)s|%(height)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "10000|some-clip|Some clip & more | Example|https://www.example.test/contents/10000/preview.jpg|OG text|Low_quality|NA"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.example.test/videos/10000/some-clip/",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[generic] Extracting URL: https://www.example.test/videos/10000/some-clip/",
+    "[generic] some-clip: Downloading webpage",
+    "[generic] some-clip: Extracting information",
+    "[info] 10000: Downloading 1 format(s): Low_quality",
+    "[download] Destination: 10000.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {
+    "10000.mp4": 792
+   }
+  },
+  {
+   "url": "https://old.example.test/v/7",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"7\", \"title\": \"Old player\", \"thumbnail\": \"https://old.example.test/p.jpg\", \"formats\": [{\"url\": \"https://old.example.test/get_file/7/x.mp4\", \"format_id\": \"video_url\", \"ext\": \"mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://old.example.test/v/7\"}, \"quality\": 1, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"video_url - unknown\"}], \"webpage_url\": \"https://old.example.test/v/7\", \"original_url\": \"https://old.example.test/v/7\", \"webpage_url_basename\": \"7\", \"webpage_url_domain\": \"old.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://old.example.test/p.jpg\", \"id\": \"0\"}], \"display_id\": \"7\", \"fulltitle\": \"Old player\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://old.example.test/get_file/7/x.mp4\", \"format_id\": \"video_url\", \"ext\": \"mp4\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://old.example.test/v/7\"}, \"quality\": 1, \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"format\": \"video_url - unknown\", \"_filename\": \"Old player [7].mp4\", \"filename\": \"Old player [7].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] Untested major version (3.1.2) in player engine - download may fail.",
+    "WARNING: [generic] unable to extract display_id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: \"id\" field is not a string - forcing string conversion, there is an error in extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://old.example.test/v/8",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [generic] Unable to extract flashvars; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://old.example.test/v/9",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "WARNING: [generic] unable to extract display_id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "ERROR: An extractor error has occurred. (caused by KeyError('preview_url')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

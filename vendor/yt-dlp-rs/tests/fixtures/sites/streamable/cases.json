@@ -1,0 +1,15 @@
+[
+ {"url": "https://streamable.com/dnd1", "args": ["-j"]},
+ {"url": "https://streamable.com/e/dnd1", "args": ["-F"]},
+ {"url": "https://streamable.com/dnd1", "args": ["--print", "%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(duration)s|%(duration_string)s|%(view_count)s|%(format_id)s"]},
+ {"url": "https://streamable.com/dnd1", "args": ["--no-progress", "-f", "mp4", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://streamable.com/busy", "args": ["-j"]},
+ {"url": "https://streamable.com/gone", "args": ["-j"]},
+ {"url": "https://blog.example.test/post", "args": ["-j"]},
+ {"url": "https://blog.example.test/post", "args": ["--print", "%(original_url)s|%(webpage_url)s|%(extractor)s|%(playlist)s"]},
+ {"url": "https://blog.example.test/two", "args": ["-s"]},
+ {"url": "https://blog.example.test/two", "args": ["-J"]},
+ {"url": "https://blog.example.test/two", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://blog.example.test/two", "args": ["--flat-playlist", "-j"]},
+ {"url": "https://blog.example.test/two", "args": ["--print", "%(playlist_index)s|%(original_url)s|%(webpage_url)s|%(playlist_title)s|%(id)s"]}
+]

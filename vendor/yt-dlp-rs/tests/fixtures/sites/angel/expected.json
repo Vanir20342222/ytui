@@ -1,0 +1,49 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed\", \"title\": \"Tuttle Twins: When Laws Go Bad\", \"description\": \"OG description\", \"formats\": [{\"format_id\": \"800\", \"format_index\": null, \"url\": \"https://stream.angel.test/hd/low.m3u8\", \"manifest_url\": \"https://stream.angel.test/hd/master.m3u8\", \"tbr\": 800.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 640, \"height\": 360, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"800 - 640x360\"}, {\"format_id\": \"2500\", \"format_index\": null, \"url\": \"https://stream.angel.test/hd/high.m3u8\", \"manifest_url\": \"https://stream.angel.test/hd/master.m3u8\", \"tbr\": 2500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.4d401f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"2500 - 1280x720\"}], \"subtitles\": {}, \"thumbnail\": \"https://images.angelstudios.test/image/upload/angel-app/tuttle/ep1.jpg\", \"thumbnails\": [{\"url\": \"https://images.angelstudios.test/ld.jpg\", \"id\": \"0\"}], \"duration\": 1283, \"timestamp\": 1643889600, \"webpage_url\": \"https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad\", \"original_url\": \"https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad\", \"webpage_url_basename\": \"when-laws-go-bad\", \"webpage_url_domain\": \"angel.com\", \"extractor\": \"Angel\", \"extractor_key\": \"Angel\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed\", \"fulltitle\": \"Tuttle Twins: When Laws Go Bad\", \"duration_string\": \"21:23\", \"upload_date\": \"20220203\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"2500\", \"format_index\": null, \"url\": \"https://stream.angel.test/hd/high.m3u8\", \"manifest_url\": \"https://stream.angel.test/hd/master.m3u8\", \"tbr\": 2500.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.4d401f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"2500 - 1280x720\", \"_filename\": \"Tuttle Twins\\uff1a When Laws Go Bad [2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed].mp4\", \"filename\": \"Tuttle Twins\\uff1a When Laws Go Bad [2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Angel] Extracting URL: https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/ep...e-1/when-laws-go-bad",
+    "[Angel] 2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed: Downloading webpage",
+    "[Angel] 2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed: Downloading HD m3u8 information",
+    "[info] Available formats for 2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed:",
+    "ID   EXT RESOLUTION |   FILESIZE   TBR PROTO | VCODEC      ACODEC",
+    "--------------------------------------------------------------------",
+    "800  mp4 640x360    | ~122.36MiB  800k m3u8  | avc1.4d401e mp4a.40.2",
+    "2500 mp4 1280x720   | ~382.36MiB 2500k m3u8  | avc1.4d401f mp4a.40.2"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.angel.com/watch/tuttle-twins/episode/2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed/season-1/episode-1/when-laws-go-bad",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(duration)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "2f3d0382-ba82-4f76-8b8c-89a0ee5ab5ed|Tuttle Twins: When Laws Go Bad|OG description|https://images.angelstudios.test/image/upload/angel-app/tuttle/ep1.jpg|1643889600|1283"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+[
+ {"url": "https://www.aph.gov.au/News_and_Events/Watch_Read_Listen/ParlView/video/abc-123", "args": ["-j"]},
+ {"url": "https://www.aph.gov.au/News_and_Events/Watch_Read_Listen/ParlView/video/abc-123", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(duration)s|%(timestamp)s|%(upload_date)s|%(thumbnail)s"]},
+ {"url": "https://www.aph.gov.au/News_and_Events/Watch_Read_Listen/ParlView/video/b2", "args": ["-j"]},
+ {"url": "https://www.aph.gov.au/News_and_Events/Watch_Read_Listen/ParlView/video/c3", "args": ["-j"]},
+ {"url": "https://www.aph.gov.au/News_and_Events/Watch_Read_Listen/ParlView/video/d4", "args": ["-j"]}
+]

@@ -1,0 +1,53 @@
+{
+ "routes": [
+  {
+   "url": "http://embed.crooksandliars.com/embed/8RUoRhRi",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>var manifest = {\"title\": \"Fox & Friends Says Protecting Atheists\", \"description\": \"Fox News, Fox & Friends Weekend\", \"poster\": \"//cl.test/p.jpg\", \"created\": \"1410490800\", \"author\": \"Heather\", \"duration\": 236, \"flavors\": [{\"url\": \"https://cl.test/high.mp4\", \"type\": \"mp4_high\", \"mime\": \"video/mp4\"}, {\"url\": \"https://cl.test/low.webm\", \"type\": \"webm_low\", \"mime\": \"video/webm\"}, {\"url\": \"https://cl.test/a.mp3\", \"type\": \"mp3\", \"mime\": \"audio/mpeg\"}, {\"url\": \"https://cl.test/odd.mp4\", \"type\": \"odd\", \"mime\": \"video/mp4\"}]};\nvar other = {\"a\": 1};</script></html>"
+  },
+  {
+   "url": "http://embed.crooksandliars.com/embed/b2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>var manifest = {\"title\": \"Plain\", \"flavors\": []};</script></html>"
+  },
+  {
+   "url": "http://embed.crooksandliars.com/embed/c3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><script>var manifest = {\"title\": \"No mime\", \"flavors\": [{\"url\": \"x\"}]};</script></html>"
+  },
+  {
+   "url": "http://embed.crooksandliars.com/embed/d4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html>none</html>"
+  },
+  {
+   "url": "https://page.test/cl.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>CL</title></head><body><iframe width=1 src=\"//embed.crooksandliars.com/v/b2?x=1&amp;y=2\"></iframe></body></html>"
+  },
+  {
+   "url": "https://page.test/cl2.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>CL2</title></head><body><param name=\"movie\" value='https://embed.crooksandliars.com/embed/b2'><iframe src=\"https://embed.crooksandliars.com/embed/8RUoRhRi\"></iframe></body></html>"
+  },
+  {
+   "url": "https://cl.test/high.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

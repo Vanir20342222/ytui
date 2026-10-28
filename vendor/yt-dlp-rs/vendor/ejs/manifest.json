@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "project": "https://github.com/yt-dlp/ejs",
+  "version": "0.8.0",
+  "license": "Unlicense; bundled dependency notices retained in yt.solver.lib.js",
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "verification_source": "https://github.com/yt-dlp/yt-dlp/blob/897341241f2bfb2439fe0367f4c7c9ccd29a3828/yt_dlp/extractor/youtube/jsc/_builtin/vendor/_info.py",
+  "files": {
+    "yt.solver.lib.js": {
+      "sha3_512": "1ee3753a8222fc855f5c39db30a9ccbb7967dbe1fb810e86dc9a89aa073a0907f294c720e9b65427d560a35aa1ce6af19ef854d9126a05ca00afe03f72047733",
+      "url": "https://github.com/yt-dlp/ejs/releases/download/0.8.0/yt.solver.lib.js"
+    },
+    "yt.solver.core.js": {
+      "sha3_512": "c163a6f376db6ce3da47d516a28a8f2a0554ae95c58dc766f0a6e2b3894f2cef1ee07fa84beb442fa471aac4f300985added1657c7c94c4d1cfefe68920ab599",
+      "url": "https://github.com/yt-dlp/ejs/releases/download/0.8.0/yt.solver.core.js"
+    },
+    "LICENSE": {
+      "sha3_512": "587f68bd56153fa2ce8d41a2a1936d1bd3ecd520519c0e5f069f596ecee01d13198e5b970a219579efbd058f4af5bfe62bfb4be1b48be73dd512a6069c87cf57",
+      "url": "https://github.com/yt-dlp/ejs/blob/0.8.0/LICENSE"
+    }
+  }
+}

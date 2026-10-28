@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://media.example.test/lists/show.xspf",
+   "headers": {
+    "Content-Type": "application/xspf+xml"
+   },
+   "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\" xmlns:s1=\"http://static.streamone.nl/player/ns/0\">\n <trackList>\n  <track>\n   <title>First &amp; best</title>\n   <annotation>About it</annotation>\n   <image>https://media.example.test/a.jpg</image>\n   <duration>10500</duration>\n   <location s1:label=\"Hi\" s1:width=\"1280\" s1:height=\"720\">media/a.mp4</location>\n   <location s1:label=\"Lo\" s1:width=\"x\">https://cdn.example.test/a-lo.mp4</location>\n  </track>\n  <track>\n   <location>/b.mp4</location>\n   <location></location>\n  </track>\n </trackList>\n</playlist>"
+  },
+  {
+   "url": "https://media.example.test/lists/media/a.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://cdn.example.test/a-lo.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://media.example.test/b.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://media.example.test/plain.xml",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<playlist xmlns=\"http://xspf.org/ns/0/\"><trackList><track><location>https://media.example.test/b.mp4</location></track></trackList></playlist>"
+  },
+  {
+   "url": "https://media.example.test/empty.xspf",
+   "headers": {
+    "Content-Type": "text/xml"
+   },
+   "body": "<playlist xmlns=\"http://xspf.org/ns/0/\"><trackList/></playlist>"
+  }
+ ]
+}

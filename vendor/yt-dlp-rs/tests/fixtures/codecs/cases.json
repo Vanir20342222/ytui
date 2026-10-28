@@ -1,0 +1,756 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "parse_codecs": [
+  {
+   "input": "",
+   "result": {},
+   "warnings": []
+  },
+  {
+   "input": "avc1.77.30, mp4a.40.2",
+   "result": {
+    "vcodec": "avc1.77.30",
+    "acodec": "mp4a.40.2",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "mp4a.40.2",
+   "result": {
+    "vcodec": "none",
+    "acodec": "mp4a.40.2",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "mp4a.40.5,avc1.42001e",
+   "result": {
+    "vcodec": "avc1.42001e",
+    "acodec": "mp4a.40.5",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "avc3.640028",
+   "result": {
+    "vcodec": "avc3.640028",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": ", h264,,newcodec,aac",
+   "result": {
+    "vcodec": "h264",
+    "acodec": "aac",
+    "dynamic_range": null
+   },
+   "warnings": [
+    "WARNING: Unknown codec newcodec"
+   ]
+  },
+  {
+   "input": "av01.0.05M.08",
+   "result": {
+    "vcodec": "av01.0.05M.08",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "vp9.2",
+   "result": {
+    "vcodec": "vp9.2",
+    "acodec": "none",
+    "dynamic_range": "HDR10"
+   },
+   "warnings": []
+  },
+  {
+   "input": "vp09.02.50.10.01.09.18.09.00",
+   "result": {
+    "vcodec": "vp09.02.50.10.01.09.18.09.00",
+    "acodec": "none",
+    "dynamic_range": "HDR10"
+   },
+   "warnings": []
+  },
+  {
+   "input": "av01.0.12M.10.0.110.09.16.09.0",
+   "result": {
+    "vcodec": "av01.0.12M.10.0.110.09.16.09.0",
+    "acodec": "none",
+    "dynamic_range": "HDR10"
+   },
+   "warnings": []
+  },
+  {
+   "input": "dvhe",
+   "result": {
+    "vcodec": "dvhe",
+    "acodec": "none",
+    "dynamic_range": "DV"
+   },
+   "warnings": []
+  },
+  {
+   "input": "fLaC",
+   "result": {
+    "vcodec": "none",
+    "acodec": "flac",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "theora, vorbis",
+   "result": {
+    "vcodec": "theora",
+    "acodec": "vorbis",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "unknownvcodec, unknownacodec",
+   "result": {
+    "vcodec": "unknownvcodec",
+    "acodec": "unknownacodec"
+   },
+   "warnings": [
+    "WARNING: Unknown codec unknownvcodec",
+    "WARNING: Unknown codec unknownacodec"
+   ]
+  },
+  {
+   "input": "unknownnonsense",
+   "result": {},
+   "warnings": [
+    "WARNING: Unknown codec unknownnonsense"
+   ]
+  },
+  {
+   "input": "avc1.4D401E",
+   "result": {
+    "vcodec": "avc1.4D401E",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "AVC1.4D401E,MP4A.40.2",
+   "result": {
+    "vcodec": "avc1.4D401E",
+    "acodec": "mp4a.40.2",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "hvc1.2.4.L123.B0,ec-3",
+   "result": {
+    "vcodec": "hvc1.2.4.L123.B0",
+    "acodec": "ec-3",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "vp8, vorbis",
+   "result": {
+    "vcodec": "vp8",
+    "acodec": "vorbis",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "opus",
+   "result": {
+    "vcodec": "none",
+    "acodec": "opus",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "vp09.00.10.08",
+   "result": {
+    "vcodec": "vp09.00.10.08",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "stpp.ttml.im1t",
+   "result": {
+    "vcodec": "none",
+    "acodec": "none",
+    "dynamic_range": null,
+    "scodec": "stpp.ttml.im1t"
+   },
+   "warnings": []
+  },
+  {
+   "input": "wvtt",
+   "result": {
+    "vcodec": "none",
+    "acodec": "none",
+    "dynamic_range": null,
+    "scodec": "wvtt"
+   },
+   "warnings": []
+  },
+  {
+   "input": "avc1,avc1.64001f,mp4a",
+   "result": {
+    "vcodec": "avc1",
+    "acodec": "mp4a",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "dvh1.05.06",
+   "result": {
+    "vcodec": "dvh1.05.06",
+    "acodec": "none",
+    "dynamic_range": "DV"
+   },
+   "warnings": []
+  },
+  {
+   "input": "av01.0.08M.10.0.110",
+   "result": {
+    "vcodec": "av01.0.08M.10.0.110",
+    "acodec": "none",
+    "dynamic_range": "HDR10"
+   },
+   "warnings": []
+  },
+  {
+   "input": "mp3",
+   "result": {
+    "vcodec": "none",
+    "acodec": "mp3",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "ac-3",
+   "result": {
+    "vcodec": "none",
+    "acodec": "ac-3",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "eac3",
+   "result": {
+    "vcodec": "none",
+    "acodec": "eac3",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "dtsc",
+   "result": {
+    "vcodec": "none",
+    "acodec": "dtsc",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "ac-4.02.01.01",
+   "result": {
+    "vcodec": "none",
+    "acodec": "ac-4.02.01.01",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "h263",
+   "result": {
+    "vcodec": "h263",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "mp4v.20.8",
+   "result": {
+    "vcodec": "mp4v.20.8",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "hev1.1.6.L93.B0",
+   "result": {
+    "vcodec": "hev1.1.6.L93.B0",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": " avc1.42e01e , mp4a.40.2 ,",
+   "result": {
+    "vcodec": "avc1.42e01e",
+    "acodec": "mp4a.40.2",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "\"avc1\"",
+   "result": {},
+   "warnings": [
+    "WARNING: Unknown codec \"avc1\""
+   ]
+  },
+  {
+   "input": "avc1.00042",
+   "result": {
+    "vcodec": "avc1.00042",
+    "acodec": "none",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "vorbis",
+   "result": {
+    "vcodec": "none",
+    "acodec": "vorbis",
+    "dynamic_range": null
+   },
+   "warnings": []
+  },
+  {
+   "input": "flac,opus",
+   "result": {
+    "vcodec": "none",
+    "acodec": "flac",
+    "dynamic_range": null
+   },
+   "warnings": []
+  }
+ ],
+ "compatible_ext": [
+  {
+   "vcodecs": [
+    "avc1.4d401e"
+   ],
+   "acodecs": [
+    "mp4a.40.2"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": null,
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    "vp09.02.10.10"
+   ],
+   "acodecs": [
+    "opus"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "webm"
+  },
+  {
+   "vcodecs": [
+    "vp9"
+   ],
+   "acodecs": [
+    "mp4a.40.2"
+   ],
+   "vexts": [
+    "webm"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "opus"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": null,
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "webm"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "webm"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "mp3"
+   ],
+   "preferences": null,
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "ts"
+   ],
+   "aexts": [
+    "ts"
+   ],
+   "preferences": null,
+   "ext": "ts"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "ts"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "mp4a",
+    "opus"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a",
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "mp4a",
+    "opus"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a",
+    "webm"
+   ],
+   "preferences": [
+    "mp4"
+   ],
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "mp4a"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "webm",
+    "mp4"
+   ],
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "mp4a"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "mkv"
+   ],
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "mp4a"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "webm"
+   ],
+   "ext": "webm"
+  },
+  {
+   "vcodecs": [
+    "vp9"
+   ],
+   "acodecs": [
+    "opus"
+   ],
+   "vexts": [
+    "webm"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": [
+    "mp4",
+    "webm"
+   ],
+   "ext": "webm"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "mov"
+   ],
+   "ext": "mov"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "mov"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "avi",
+    "mov"
+   ],
+   "ext": "mov"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [],
+   "preferences": null,
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [],
+   "acodecs": [
+    "opus"
+   ],
+   "vexts": [],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    "hev1.1.6"
+   ],
+   "acodecs": [
+    "ec-3"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": null,
+   "ext": "mp4"
+  },
+  {
+   "vcodecs": [
+    "av01.0.05M.08"
+   ],
+   "acodecs": [
+    "opus"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "webm"
+   ],
+   "preferences": null,
+   "ext": "webm"
+  },
+  {
+   "vcodecs": [
+    "avc1"
+   ],
+   "acodecs": [
+    "vorbis"
+   ],
+   "vexts": [
+    "mp4"
+   ],
+   "aexts": [
+    "ogg"
+   ],
+   "preferences": null,
+   "ext": "mkv"
+  },
+  {
+   "vcodecs": [
+    null
+   ],
+   "acodecs": [
+    null
+   ],
+   "vexts": [
+    "flv"
+   ],
+   "aexts": [
+    "m4a"
+   ],
+   "preferences": [
+    "flv",
+    "mkv"
+   ],
+   "ext": "mkv"
+  }
+ ]
+}

@@ -1,0 +1,117 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.bilibili.com/video/BV1xx411c7mD/",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"uploader\": \"UP\\u4e3b\", \"uploader_id\": \"122541\", \"like_count\": 300, \"tags\": [\"\\u52a8\\u753b\", \"test\"], \"thumbnail\": \"http://i2.hdslb.com/bfs/archive/cover.jpg\", \"description\": \"A description\", \"timestamp\": 1258430000, \"view_count\": 5000, \"comment_count\": 42, \"id\": \"BV1xx411c7mD\", \"_old_archive_ids\": [\"bilibili 170001_part1\"], \"title\": \"\\u5b57\\u5e55\\u541b\\u4ea4\\u6d41\\u573a\\u6240\", \"http_headers\": {\"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}, \"formats\": [{\"url\": \"https://upos.bilivideo.test/a-30280.m4s?e=1\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"tbr\": 319.999, \"filesize\": 4000, \"format_id\": \"30280\", \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 319.999, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}, \"format\": \"30280 - audio only\"}, {\"url\": \"https://upos.bilivideo.test/v-30064.m4s?e=1\", \"ext\": \"mp4\", \"fps\": 29.412, \"width\": 1280, \"height\": 720, \"vcodec\": \"hev1.1.6.L120.90\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"tbr\": 900.0, \"filesize\": null, \"quality\": 64, \"format_id\": \"30064\", \"format\": \"720P \\u51c6\\u9ad8\\u6e05\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 900.0, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"filesize_approx\": 20362500, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}}, {\"url\": \"https://upos.bilivideo.test/v-30080.m4s?e=1\", \"ext\": \"mp4\", \"fps\": 29.412, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.640032\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"tbr\": 2000.0, \"filesize\": 9000, \"quality\": 80, \"format_id\": \"30080\", \"format\": \"1080P \\u9ad8\\u6e05\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}}], \"duration\": 181.0, \"chapters\": [{\"title\": \"Intro\", \"start_time\": 0, \"end_time\": 30}, {\"title\": \"Main\", \"start_time\": 30, \"end_time\": 181}], \"subtitles\": {}, \"webpage_url\": \"https://www.bilibili.com/video/BV1xx411c7mD/\", \"original_url\": \"https://www.bilibili.com/video/BV1xx411c7mD/\", \"webpage_url_basename\": \"BV1xx411c7mD\", \"webpage_url_domain\": \"bilibili.com\", \"extractor\": \"BiliBili\", \"extractor_key\": \"BiliBili\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://i2.hdslb.com/bfs/archive/cover.jpg\", \"id\": \"0\"}], \"display_id\": \"BV1xx411c7mD\", \"fulltitle\": \"\\u5b57\\u5e55\\u541b\\u4ea4\\u6d41\\u573a\\u6240\", \"duration_string\": \"3:01\", \"upload_date\": \"20091117\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"requested_formats\": [{\"url\": \"https://upos.bilivideo.test/v-30080.m4s?e=1\", \"ext\": \"mp4\", \"fps\": 29.412, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.640032\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"tbr\": 2000.0, \"filesize\": 9000, \"quality\": 80, \"format_id\": \"30080\", \"format\": \"1080P \\u9ad8\\u6e05\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}}, {\"url\": \"https://upos.bilivideo.test/a-30280.m4s?e=1\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"tbr\": 319.999, \"filesize\": 4000, \"format_id\": \"30280\", \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 319.999, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}, \"format\": \"30280 - audio only\"}], \"format\": \"1080P \\u9ad8\\u6e05+30280 - audio only\", \"format_id\": \"30080+30280\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"filesize_approx\": 13000, \"tbr\": 2319.999, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"fps\": 29.412, \"dynamic_range\": \"SDR\", \"vcodec\": \"avc1.640032\", \"vbr\": 2000.0, \"aspect_ratio\": 1.78, \"acodec\": \"mp4a.40.2\", \"abr\": 319.999, \"_filename\": \"\\u5b57\\u5e55\\u541b\\u4ea4\\u6d41\\u573a\\u6240 [BV1xx411c7mD].mp4\", \"filename\": \"\\u5b57\\u5e55\\u541b\\u4ea4\\u6d41\\u573a\\u6240 [BV1xx411c7mD].mp4\", \"__write_download_archive\": false}], \"requested_formats\": [{\"url\": \"https://upos.bilivideo.test/v-30080.m4s?e=1\", \"ext\": \"mp4\", \"fps\": 29.412, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.640032\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"tbr\": 2000.0, \"filesize\": 9000, \"quality\": 80, \"format_id\": \"30080\", \"format\": \"1080P \\u9ad8\\u6e05\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2000.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}}, {\"url\": \"https://upos.bilivideo.test/a-30280.m4s?e=1\", \"ext\": \"m4a\", \"acodec\": \"mp4a.40.2\", \"vcodec\": \"none\", \"tbr\": 319.999, \"filesize\": 4000, \"format_id\": \"30280\", \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 319.999, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1xx411c7mD/\"}, \"format\": \"30280 - audio only\"}], \"format\": \"1080P \\u9ad8\\u6e05+30280 - audio only\", \"format_id\": \"30080+30280\", \"ext\": \"mp4\", \"protocol\": \"https+https\", \"language\": null, \"format_note\": null, \"filesize_approx\": 13000, \"tbr\": 2319.999, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"fps\": 29.412, \"dynamic_range\": \"SDR\", \"vcodec\": \"avc1.640032\", \"vbr\": 2000.0, \"stretched_ratio\": null, \"aspect_ratio\": 1.78, \"acodec\": \"mp4a.40.2\", \"abr\": 319.999, \"asr\": null, \"audio_channels\": null, \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/BV1an1",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"BV1an1\", \"title\": \"Anthology\", \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"BiliBili\", \"_type\": \"url\", \"url\": \"https://www.bilibili.com/video/BV1an1?p=1\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"BiliBili\", \"_type\": \"url\", \"url\": \"https://www.bilibili.com/video/BV1an1?p=2\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://www.bilibili.com/video/BV1an1\", \"original_url\": \"https://www.bilibili.com/video/BV1an1\", \"webpage_url_basename\": \"BV1an1\", \"webpage_url_domain\": \"bilibili.com\", \"extractor\": \"BiliBili\", \"extractor_key\": \"BiliBili\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/BV1an1?p=2",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"description\": \"\", \"timestamp\": 1600000000, \"view_count\": 12, \"id\": \"BV1an1_p2\", \"_old_archive_ids\": [\"bilibili 9001_part2\"], \"title\": \"Anthology p02 Two\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1an1?p=2\"}, \"formats\": [{\"url\": \"https://upos.bilivideo.test/legacy-32.mp4?e=2\", \"filesize\": 3000, \"quality\": 32, \"format_id\": \"32\", \"format_note\": \"480P\", \"duration\": 60.0, \"height\": 480, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"480p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1an1?p=2\"}, \"format\": \"32 - 480p (480P)\"}, {\"url\": \"https://upos.bilivideo.test/legacy-64.mp4?e=2\", \"filesize\": 7000, \"quality\": 64, \"format_id\": \"64\", \"format_note\": \"720P \\u51c6\\u9ad8\\u6e05\", \"duration\": 60.0, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1an1?p=2\"}, \"format\": \"64 - 720p (720P \\u51c6\\u9ad8\\u6e05)\"}], \"duration\": 60.0, \"chapters\": null, \"subtitles\": {}, \"webpage_url\": \"https://www.bilibili.com/video/BV1an1?p=2\", \"original_url\": \"https://www.bilibili.com/video/BV1an1?p=2\", \"webpage_url_basename\": \"BV1an1\", \"webpage_url_domain\": \"bilibili.com\", \"extractor\": \"BiliBili\", \"extractor_key\": \"BiliBili\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"BV1an1_p2\", \"fulltitle\": \"Anthology p02 Two\", \"duration_string\": \"1:00\", \"upload_date\": \"20200913\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\", \"Referer\": \"https://www.bilibili.com/video/BV1an1?p=2\"}, \"url\": \"https://upos.bilivideo.test/legacy-64.mp4?e=2\", \"filesize\": 7000, \"quality\": 64, \"format_id\": \"64\", \"format_note\": \"720P \\u51c6\\u9ad8\\u6e05\", \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"format\": \"64 - 720p (720P \\u51c6\\u9ad8\\u6e05)\", \"_filename\": \"Anthology p02 Two [BV1an1_p2].mp4\", \"filename\": \"Anthology p02 Two [BV1an1_p2].mp4\", \"__write_download_archive\": false}], \"url\": \"https://upos.bilivideo.test/legacy-64.mp4?e=2\", \"filesize\": 7000, \"quality\": 64, \"format_id\": \"64\", \"format_note\": \"720P \\u51c6\\u9ad8\\u6e05\", \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"format\": \"64 - 720p (720P \\u51c6\\u9ad8\\u6e05)\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/BV1gone",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [BiliBili] 1gone: This video may be deleted or geo-restricted. You might want to try a VPN or a proxy server (with --proxy)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/av404",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [BiliBili] 404: Unable to extract initial state; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/BV1xx411c7mD/",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[BiliBili] Extracting URL: https://www.bilibili.com/video/BV1xx411c7mD/",
+    "[BiliBili] 1xx411c7mD: Downloading webpage",
+    "[BiliBili] BV1xx411c7mD: Extracting videos in anthology",
+    "[BiliBili] BV1xx411c7mD: Downloading wbi sign",
+    "[BiliBili] BV1xx411c7mD: Downloading video formats for cid 279786",
+    "[BiliBili] Format(s) 1080P 高码率 are missing; you have to become a premium member to download them. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies",
+    "[BiliBili] 170001: Extracting chapters",
+    "[BiliBili] BV1xx411c7mD: Extracting subtitle info 279786",
+    "[info] Available subtitles for BV1xx411c7mD:",
+    "Language Formats",
+    "danmaku  xml"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.bilibili.com/video/BV1xx411c7mD/",
+   "args": [
+    "--no-progress",
+    "-f",
+    "30280",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[BiliBili] Extracting URL: https://www.bilibili.com/video/BV1xx411c7mD/",
+    "[BiliBili] 1xx411c7mD: Downloading webpage",
+    "[BiliBili] BV1xx411c7mD: Extracting videos in anthology",
+    "[BiliBili] BV1xx411c7mD: Downloading wbi sign",
+    "[BiliBili] BV1xx411c7mD: Downloading video formats for cid 279786",
+    "[BiliBili] Format(s) 1080P 高码率 are missing; you have to become a premium member to download them. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies",
+    "[BiliBili] 170001: Extracting chapters",
+    "[info] BV1xx411c7mD: Downloading 1 format(s): 30280",
+    "[download] Destination: BV1xx411c7mD.m4a",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "BV1xx411c7mD.m4a": 20
+   }
+  }
+ ]
+}

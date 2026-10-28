@@ -1,0 +1,174 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"nPripu9l\", \"title\": \"Big Buck Bunny Trailer\", \"description\": \"Big Buck Bunny is a short animated film.\", \"thumbnail\": \"https://cdn.jwplayer.com/v2/media/nPripu9l/poster.jpg?width=720\", \"timestamp\": 1227796140, \"duration\": 32.0, \"subtitles\": {\"English\": [{\"url\": \"https://cdn.jwplayer.com/tracks/en.vtt\", \"ext\": \"vtt\"}]}, \"alt_title\": null, \"genre\": null, \"channel\": null, \"season_number\": null, \"episode_number\": null, \"release_year\": null, \"age_limit\": null, \"formats\": [{\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-2.m4a\", \"vcodec\": \"none\", \"ext\": \"m4a\", \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\"}, {\"format_id\": \"1\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/nPripu9l.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1 - unknown\"}, {\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-1.mp4\", \"width\": 320, \"height\": 180, \"tbr\": 343, \"filesize\": 1371000, \"ext\": \"mp4\", \"format_id\": \"180p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x180\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"180p - 320x180\"}, {\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"720p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 6000000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\"}], \"webpage_url\": \"http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js\", \"original_url\": \"http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js\", \"webpage_url_basename\": \"nPripu9l-ALJ3XQCI.js\", \"webpage_url_domain\": \"content.jwplatform.com\", \"extractor\": \"JWPlatform\", \"extractor_key\": \"JWPlatform\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cdn.jwplayer.com/v2/media/nPripu9l/poster.jpg?width=720\", \"id\": \"0\"}], \"display_id\": \"nPripu9l\", \"fulltitle\": \"Big Buck Bunny Trailer\", \"duration_string\": \"32\", \"upload_date\": \"20081127\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"720p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 6000000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\", \"_filename\": \"Big Buck Bunny Trailer [nPripu9l].mp4\", \"filename\": \"Big Buck Bunny Trailer [nPripu9l].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[JWPlatform] Extracting URL: http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+    "[JWPlatform] nPripu9l: Downloading JSON metadata",
+    "[JWPlatform] nPripu9l: Downloading m3u8 information",
+    "[info] Available formats for nPripu9l:",
+    "ID   EXT RESOLUTION | FILESIZE   TBR PROTO | VCODEC     ACODEC",
+    "---------------------------------------------------------------",
+    "0    m4a audio only |                https | audio only unknown",
+    "1    mp4 unknown    |                m3u8  | unknown    unknown",
+    "180p mp4 320x180    |  1.31MiB  343k https | unknown    unknown",
+    "720p mp4 1280x720   | ≈5.72MiB 1500k https | unknown    unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[JWPlatform] Extracting URL: http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+    "[JWPlatform] nPripu9l: Downloading JSON metadata",
+    "[JWPlatform] nPripu9l: Downloading m3u8 information",
+    "[info] Available subtitles for nPripu9l:",
+    "Language Formats",
+    "English  vtt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(timestamp)s|%(duration)s|%(format_id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "nPripu9l|Big Buck Bunny Trailer|Big Buck Bunny is a short animated film.|1227796140|32.0|720p"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+   "args": [
+    "--no-progress",
+    "-f",
+    "720p",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[JWPlatform] Extracting URL: http://content.jwplatform.com/players/nPripu9l-ALJ3XQCI.js",
+    "[JWPlatform] nPripu9l: Downloading JSON metadata",
+    "[JWPlatform] nPripu9l: Downloading m3u8 information",
+    "[info] nPripu9l: Downloading 1 format(s): 720p",
+    "[download] Destination: nPripu9l.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "nPripu9l.mp4": 792
+   }
+  },
+  {
+   "url": "jwplatform:Untitle1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: Untitle1: An extractor error has occurred. (caused by KeyError('title')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cdn.jwplayer.com/v2/media/Missing1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [JWPlatform] Missing1: Unable to download JSON metadata: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://news.example.test/iframe",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(extractor)s|%(webpage_url)s|%(original_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "nPripu9l|Big Buck Bunny Trailer|JWPlatform|https://cdn.jwplayer.com/players/nPripu9l|https://news.example.test/iframe"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://news.example.test/div",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"nPripu9l\", \"title\": \"Big Buck Bunny Trailer\", \"description\": \"Big Buck Bunny is a short animated film.\", \"thumbnail\": \"https://cdn.jwplayer.com/v2/media/nPripu9l/poster.jpg?width=720\", \"timestamp\": 1227796140, \"duration\": 32.0, \"subtitles\": {\"English\": [{\"url\": \"https://cdn.jwplayer.com/tracks/en.vtt\", \"ext\": \"vtt\"}]}, \"alt_title\": null, \"genre\": null, \"channel\": null, \"season_number\": null, \"episode_number\": null, \"release_year\": null, \"age_limit\": null, \"formats\": [{\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-2.m4a\", \"vcodec\": \"none\", \"ext\": \"m4a\", \"protocol\": \"https\", \"audio_ext\": \"m4a\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": null, \"tbr\": null, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - audio only\"}, {\"format_id\": \"1\", \"format_index\": null, \"url\": \"https://cdn.jwplayer.com/manifests/nPripu9l.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"1 - unknown\"}, {\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-1.mp4\", \"width\": 320, \"height\": 180, \"tbr\": 343, \"filesize\": 1371000, \"ext\": \"mp4\", \"format_id\": \"180p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x180\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"180p - 320x180\"}, {\"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"720p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 6000000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\"}], \"original_url\": \"https://news.example.test/div\", \"webpage_url\": \"jwplatform:nPripu9l\", \"webpage_url_basename\": \"nPripu9l\", \"webpage_url_domain\": null, \"extractor\": \"JWPlatform\", \"extractor_key\": \"JWPlatform\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cdn.jwplayer.com/v2/media/nPripu9l/poster.jpg?width=720\", \"id\": \"0\"}], \"display_id\": \"nPripu9l\", \"fulltitle\": \"Big Buck Bunny Trailer\", \"duration_string\": \"32\", \"upload_date\": \"20081127\", \"requested_subtitles\": null, \"_has_drm\": null, \"url\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\", \"width\": 1280, \"height\": 720, \"tbr\": 1500, \"filesize\": null, \"ext\": \"mp4\", \"format_id\": \"720p\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 6000000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720p - 1280x720\", \"_filename\": \"Big Buck Bunny Trailer [nPripu9l].mp4\", \"filename\": \"Big Buck Bunny Trailer [nPripu9l].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://news.example.test/input",
+   "args": [
+    "--print",
+    "%(id)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "nPripu9l|https://content.jwplatform.com/players/nPripu9l"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://news.example.test/two",
+   "args": [
+    "--flat-playlist",
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"two\", \"title\": \"Two page\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"JWPlatform\", \"_type\": \"url\", \"url\": \"https://cdn.jwplayer.com/players/nPripu9l\", \"extractor\": \"JWPlatform\", \"extractor_key\": \"JWPlatform\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"JWPlatform\", \"_type\": \"url\", \"url\": \"https://cdn.jwplayer.com/players/Untitle1\", \"extractor\": \"JWPlatform\", \"extractor_key\": \"JWPlatform\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://news.example.test/two\", \"original_url\": \"https://news.example.test/two\", \"webpage_url_basename\": \"two\", \"webpage_url_domain\": \"news.example.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

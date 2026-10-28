@@ -1,0 +1,76 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"9183\", \"display_id\": \"food-wars-episodio-01\", \"title\": \"Food Wars, Episodio 01\", \"description\": \"Soma Yukihira\", \"thumbnail\": \"https://ptv.test/t.jpg\", \"timestamp\": 1473926400, \"duration\": 1440, \"view_count\": 1500, \"formats\": [{\"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://ptv.test/hls/video.m3u8\", \"manifest_url\": \"https://ptv.test/hls/master.m3u8?a=1&b=2\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\"}], \"webpage_url\": \"https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183\", \"original_url\": \"https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183\", \"webpage_url_basename\": \"9183\", \"webpage_url_domain\": \"animemanga.popcorntv.it\", \"extractor\": \"PopcornTV\", \"extractor_key\": \"PopcornTV\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://ptv.test/t.jpg\", \"id\": \"0\"}], \"fulltitle\": \"Food Wars, Episodio 01\", \"duration_string\": \"24:00\", \"upload_date\": \"20160915\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls-200\", \"format_index\": null, \"url\": \"https://ptv.test/hls/video.m3u8\", \"manifest_url\": \"https://ptv.test/hls/master.m3u8?a=1&b=2\", \"tbr\": 200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 320, \"height\": 240, \"vcodec\": \"avc1.42c00d\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"320x240\", \"aspect_ratio\": 1.33, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-200 - 320x240\", \"_filename\": \"Food Wars, Episodio 01 [9183].mp4\", \"filename\": \"Food Wars, Episodio 01 [9183].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [PopcornTV] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://animemanga.popcorntv.it/guarda/food-wars-episodio-01/9183",
+   "args": [
+    "--print",
+    "%(id)s|%(display_id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(duration)s|%(view_count)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "9183|food-wars-episodio-01|Food Wars, Episodio 01|Soma Yukihira|https://ptv.test/t.jpg|1473926400|1440|1500"
+   ],
+   "stderr": [
+    "WARNING: [PopcornTV] Ignoring subtitle tracks found in the HLS manifest; if any subtitle tracks are missing, please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/smash-cut/10",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"10\", \"display_id\": \"smash-cut\", \"title\": \"Smash Cut\", \"description\": null, \"thumbnail\": null, \"timestamp\": null, \"view_count\": null, \"formats\": [{\"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://ptv.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\"}], \"webpage_url\": \"https://cinema.popcorntv.it/guarda/smash-cut/10\", \"original_url\": \"https://cinema.popcorntv.it/guarda/smash-cut/10\", \"webpage_url_basename\": \"10\", \"webpage_url_domain\": \"cinema.popcorntv.it\", \"extractor\": \"PopcornTV\", \"extractor_key\": \"PopcornTV\", \"playlist\": null, \"playlist_index\": null, \"fulltitle\": \"Smash Cut\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"hls\", \"format_index\": null, \"url\": \"https://ptv.test/hls/video.m3u8\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls - unknown\", \"_filename\": \"Smash Cut [10].mp4\", \"filename\": \"Smash Cut [10].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: [PopcornTV] unable to extract description; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [PopcornTV] unable to extract thumbnail URL; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [PopcornTV] unable to extract timestamp; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [PopcornTV] unable to extract duration; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U",
+    "WARNING: [PopcornTV] unable to extract view count; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/x/11",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: 11: An extractor error has occurred. (caused by KeyError('href')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://cinema.popcorntv.it/guarda/x/12",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [PopcornTV] 12: Unable to extract content; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

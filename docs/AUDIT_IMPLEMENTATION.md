@@ -60,7 +60,7 @@ isolation, shared discovery and redirect downgrade fixes.
   [39921186366](https://github.com/Vanir20342222/ytui/actions/runs/39921186366).
   Later commits need their own CI evidence.
 - Archived red repros stay in `docs/audit`. Regular green tests are in
-  `crates/ytui/tests/audit_regressions.rs`; `tools/test-app-audit.sh --real` adds
+  `apps/desktop/tests/audit_regressions.rs`; `tools/test-app-audit.sh --real` adds
   the actual FFmpeg case without copying/deleting test source files.
 
 No test imports real browser credentials, changes VPN/desktop preferences, or

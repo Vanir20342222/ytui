@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.reddit.com/r/videos/comments/vid123/my_video/", "args": ["-J"]},
+ {"url": "https://www.reddit.com/r/videos/comments/vid123/my_video/", "args": ["-F"]},
+ {"url": "https://www.reddit.com/r/pics/comments/txt123/text_post/", "args": ["-J"]},
+ {"url": "https://www.reddit.com/r/clips/comments/lnk123/clip/", "args": ["-j"]},
+ {"url": "https://old.reddit.com/r/funny/comments/xp1234/crosspost/", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(duration)s|%(format_id)s"]},
+ {"url": "https://www.reddit.com/r/secret/comments/prv123/hidden/", "args": ["-j"]},
+ {"url": "https://www.reddit.com/r/videos/comments/vid123/my_video/", "args": ["-f", "fallback", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

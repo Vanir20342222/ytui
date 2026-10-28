@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "https://player.fm/series/chapo-trap-house/movie-mindset-33-casino-feat-felix.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 478606546, \"url\": \"https://chtbl.com/track/ABC/pdst.fm/e/playerfm.test/a.mp3\", \"title\": \"Movie Mindset 33 - Casino feat. Felix\", \"description\": \"<p>The first episode &amp; more</p>\", \"duration\": \"6830\", \"image\": {\"url\": \"not a url\"}, \"series\": {\"image\": {\"url\": \"https://playerfm.test/s.png\"}, \"author\": \"Chapo Trap House\"}, \"size\": 778, \"publishedAt\": 1745406000}"
+  },
+  {
+   "url": "https://www.player.fm/x/plain.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 5, \"url\": \"https://playerfm.test/b\", \"image\": {\"url\": \"https://playerfm.test/i.jpg\"}, \"series\": {\"author\": \"\", \"image\": {\"url\": \"https://playerfm.test/s.png\"}}}"
+  },
+  {
+   "url": "https://player.fm/x/empty.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://player.fm/x/nourl.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"id\": 6, \"title\": \"No url\"}"
+  },
+  {
+   "url": "https://playerfm.test/a.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  }
+ ]
+}

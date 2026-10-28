@@ -1,0 +1,117 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.nicovideo.jp/watch/sm9",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"availability\": \"public\", \"display_id\": \"sm9\", \"formats\": [{\"format_id\": \"audio-aac-64kbps\", \"format_note\": \"Main Audio, low\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-64kbps.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 0, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": 0, \"abr\": 64.0, \"asr\": 48000, \"acodec\": \"aac\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 64.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio-aac-64kbps - audio only (Main Audio, low)\"}, {\"format_id\": \"audio-aac-192kbps\", \"format_note\": \"Main Audio, high\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-192kbps.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": 1, \"abr\": 192.0, \"asr\": 48000, \"acodec\": \"aac\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 192.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio-aac-192kbps - audio only (Main Audio, high)\"}, {\"format_id\": \"video-h264-720p\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-720p.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"tbr\": 936.0, \"ext\": \"mp4\", \"fps\": 29.97, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 3, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.4d401f\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 936.0, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-h264-720p - 1280x720\"}, {\"format_id\": \"video-h264-1080p\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-1080p.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"tbr\": 2036.0, \"ext\": \"mp4\", \"fps\": 29.97, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 4, \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.4d4028\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2036.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-h264-1080p - 1920x1080\"}], \"genres\": [\"\\u30b2\\u30fc\\u30e0\"], \"release_timestamp\": null, \"subtitles\": {}, \"tags\": [\"\\u30b2\\u30fc\\u30e0\", \"sm9\"], \"thumbnails\": [{\"ext\": \"jpg\", \"id\": \"url\", \"preference\": 0, \"url\": \"https://nicovideo.cdn.nimg.jp/thumbnails/9/9\"}, {\"ext\": \"jpg\", \"id\": \"middleUrl\", \"preference\": 1, \"url\": \"https://nicovideo.cdn.nimg.jp/thumbnails/9/9.M\"}, {\"ext\": \"jpg\", \"id\": \"player\", \"preference\": 3, \"url\": \"https://img.cdn.nimg.jp/s/nicovideo/thumbnails/9/9.original/a960x540l?key=x\", \"width\": 960, \"height\": 540, \"resolution\": \"960x540\"}, {\"ext\": \"jpg\", \"id\": \"ogp\", \"preference\": 4, \"url\": \"https://img.cdn.nimg.jp/s/nicovideo/thumbnails/9/9.original/r1280x720l?key=y\", \"width\": 1280, \"height\": 720, \"resolution\": \"1280x720\"}], \"channel\": \"\\u4e2d\\u306e\", \"channel_id\": \"4\", \"uploader\": \"\\u4e2d\\u306e\", \"uploader_id\": \"4\", \"id\": \"sm9\", \"title\": \"\\u65b0\\u30fb\\u8c6a\\u8840\\u5bfa\\u4e00\\u65cf\", \"description\": \"\\u30ec\\u30c3\\u30c4\\u30b4\\u30fc\\n\\u9670\\u967d\\u5e2b\", \"duration\": 320, \"timestamp\": 1173108780, \"comment_count\": 5000000, \"like_count\": 100, \"view_count\": 21000000, \"webpage_url\": \"https://www.nicovideo.jp/watch/sm9\", \"original_url\": \"https://www.nicovideo.jp/watch/sm9\", \"webpage_url_basename\": \"sm9\", \"webpage_url_domain\": \"nicovideo.jp\", \"extractor\": \"niconico\", \"extractor_key\": \"Niconico\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://img.cdn.nimg.jp/s/nicovideo/thumbnails/9/9.original/r1280x720l?key=y\", \"fulltitle\": \"\\u65b0\\u30fb\\u8c6a\\u8840\\u5bfa\\u4e00\\u65cf\", \"duration_string\": \"5:20\", \"upload_date\": \"20070305\", \"release_year\": null, \"genre\": \"\\u30b2\\u30fc\\u30e0\", \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"requested_formats\": [{\"format_id\": \"video-h264-1080p\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-1080p.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"tbr\": 2036.0, \"ext\": \"mp4\", \"fps\": 29.97, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 4, \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.4d4028\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2036.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-h264-1080p - 1920x1080\"}, {\"format_id\": \"audio-aac-192kbps\", \"format_note\": \"Main Audio, high\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-192kbps.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": 1, \"abr\": 192.0, \"asr\": 48000, \"acodec\": \"aac\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 192.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio-aac-192kbps - audio only (Main Audio, high)\"}], \"format\": \"video-h264-1080p - 1920x1080+audio-aac-192kbps - audio only (Main Audio, high)\", \"format_id\": \"video-h264-1080p+audio-aac-192kbps\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native+m3u8_native\", \"format_note\": \"Main Audio, high\", \"tbr\": 2228.0, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"fps\": 29.97, \"dynamic_range\": \"SDR\", \"vcodec\": \"avc1.4d4028\", \"vbr\": 2036.0, \"aspect_ratio\": 1.78, \"acodec\": \"aac\", \"abr\": 192.0, \"asr\": 48000, \"_filename\": \"\\u65b0\\u30fb\\u8c6a\\u8840\\u5bfa\\u4e00\\u65cf [sm9].mp4\", \"filename\": \"\\u65b0\\u30fb\\u8c6a\\u8840\\u5bfa\\u4e00\\u65cf [sm9].mp4\", \"__write_download_archive\": false}], \"requested_formats\": [{\"format_id\": \"video-h264-1080p\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/video-h264-1080p.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"tbr\": 2036.0, \"ext\": \"mp4\", \"fps\": 29.97, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 4, \"has_drm\": false, \"width\": 1920, \"height\": 1080, \"vcodec\": \"avc1.4d4028\", \"acodec\": \"none\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 2036.0, \"resolution\": \"1920x1080\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"video-h264-1080p - 1920x1080\"}, {\"format_id\": \"audio-aac-192kbps\", \"format_note\": \"Main Audio, high\", \"format_index\": null, \"url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/media/audio-aac-192kbps.m3u8?session=abc\", \"manifest_url\": \"https://delivery.domand.test/hlsbid/sm9/playlists/variants/master.m3u8?session=abc\", \"language\": null, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": 1, \"has_drm\": false, \"vcodec\": \"none\", \"source_preference\": 1, \"abr\": 192.0, \"asr\": 48000, \"acodec\": \"aac\", \"audio_ext\": \"mp4\", \"video_ext\": \"none\", \"vbr\": 0, \"tbr\": 192.0, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio-aac-192kbps - audio only (Main Audio, high)\"}], \"format\": \"video-h264-1080p - 1920x1080+audio-aac-192kbps - audio only (Main Audio, high)\", \"format_id\": \"video-h264-1080p+audio-aac-192kbps\", \"ext\": \"mp4\", \"protocol\": \"m3u8_native+m3u8_native\", \"language\": null, \"format_note\": \"Main Audio, high\", \"filesize_approx\": null, \"tbr\": 2228.0, \"width\": 1920, \"height\": 1080, \"resolution\": \"1920x1080\", \"fps\": 29.97, \"dynamic_range\": \"SDR\", \"vcodec\": \"avc1.4d4028\", \"vbr\": 2036.0, \"stretched_ratio\": null, \"aspect_ratio\": 1.78, \"acodec\": \"aac\", \"abr\": 192.0, \"asr\": 48000, \"audio_channels\": null, \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.nicovideo.jp/watch/sm404",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [niconico] sm404: Removed by rights-holder request"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.nicovideo.jp/watch/sm400",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [niconico] sm400: This video is not available from your location due to geo restriction"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://sp.nicovideo.jp/watch/so5",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [niconico] so5: Premium members only. Use --cookies, --cookies-from-browser, --username and --password, --netrc-cmd, or --netrc (niconico) to provide account credentials. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.nicovideo.jp/watch/sm500",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [niconico] sm500: Unable to fetch data: HTTP Error 500: OK (caused by <HTTPError 500: OK>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.nicovideo.jp/watch/sm9",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[niconico] Extracting URL: https://www.nicovideo.jp/watch/sm9",
+    "[niconico] sm9: Downloading API JSON",
+    "[niconico] sm9: Downloading JSON metadata",
+    "[niconico] sm9: Downloading m3u8 information",
+    "[info] Available formats for sm9:",
+    "ID                EXT RESOLUTION FPS |  FILESIZE   TBR PROTO | VCODEC        VBR ACODEC      ABR ASR MORE INFO",
+    "---------------------------------------------------------------------------------------------------------------------",
+    "audio-aac-64kbps  mp4 audio only     | ~ 2.44MiB   64k m3u8  | audio only        aac         64k 48k Main Audio, low",
+    "audio-aac-192kbps mp4 audio only     | ~ 7.32MiB  192k m3u8  | audio only        aac        192k 48k Main Audio, high",
+    "video-h264-720p   mp4 1280x720    30 | ~35.71MiB  936k m3u8  | avc1.4d401f  936k video only",
+    "video-h264-1080p  mp4 1920x1080   30 | ~77.67MiB 2036k m3u8  | avc1.4d4028 2036k video only"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.nicovideo.jp/watch/sm9",
+   "args": [
+    "--no-progress",
+    "-f",
+    "audio-aac-64kbps",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[niconico] Extracting URL: https://www.nicovideo.jp/watch/sm9",
+    "[niconico] sm9: Downloading API JSON",
+    "[niconico] sm9: Downloading JSON metadata",
+    "[niconico] sm9: Downloading m3u8 information",
+    "[info] sm9: Downloading 1 format(s): audio-aac-64kbps",
+    "[hlsnative] Downloading m3u8 manifest",
+    "[hlsnative] Total fragments: 1",
+    "[download] Destination: sm9.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "sm9.mp4": 24
+   }
+  }
+ ]
+}

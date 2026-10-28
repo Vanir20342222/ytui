@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "https://audioboom.com/posts/7398103",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"OG\"></head><body><div data-react-class=\"V5DetailPagePlayer\" data-react-props=\"{&quot;clips&quot;: [{&quot;clipURLPriorToLoading&quot;: &quot;https://audioboom.test/posts/7398103.mp3&quot;, &quot;title&quot;: &quot;Asim Chaudhry &amp; friends&quot;, &quot;description&quot;: null, &quot;formattedDescription&quot;: &quot;&lt;p&gt;Joining us &lt;b&gt;this week&lt;/b&gt;&lt;/p&gt;&quot;, &quot;duration&quot;: 4000.99, &quot;author&quot;: &quot;Off The Ball&quot;, &quot;author_url&quot;: &quot;https://audioboom.com/channels/5128&quot;}]}\"></div></body></html>"
+  },
+  {
+   "url": "https://audioboom.test/posts/7398103.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  },
+  {
+   "url": "https://audioboom.com/posts/2",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"Fallback title\"><meta property=\"og:audio\" content=\"https://audioboom.test/posts/2.mp3\">\n<meta property=\"og:description\" content=\"OG description\"><meta name=\"weibo:audio:duration\" content=\"12.5\"><meta property=\"og:audio:artist\" content=\"Artist\">\n</head><body><div class=\"avatar flex-shrink-0\">\n <a href=\"https://audioboom.com/channels/9\">x</a></div></body></html>"
+  },
+  {
+   "url": "https://audioboom.com/posts/3",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html>nothing</html>"
+  }
+ ]
+}

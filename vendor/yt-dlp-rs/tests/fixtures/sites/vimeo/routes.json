@@ -1,0 +1,137 @@
+{
+ "routes": [
+  {
+   "url": "https://player.vimeo.com/video/54469442",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "player.html"
+  },
+  {
+   "url": "https://vimeo.com/76979871",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "page.html"
+  },
+  {
+   "url": "https://vimeo.com/11111111",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body_file": "nopage.html"
+  },
+  {
+   "url": "https://player.vimeo.com/video/76979871/config?h=abc",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "config.json"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/54469442/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/54469442/audio/high.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/54469442/audio/medium.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/54469442/v/360.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/54469442/v/720.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://akfire.vimeocdn.com/54469442/video/master.mpd?base64_init=1",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "master.mpd"
+  },
+  {
+   "url": "https://akfire.vimeocdn.com/54469442/sep/video/master.mpd?base64_init=1",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "master.mpd"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/76979871/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/76979871/audio/high.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/76979871/audio/medium.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/76979871/v/360.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://skyfire.vimeocdn.com/76979871/v/720.m3u8",
+   "headers": {
+    "Content-Type": "application/x-mpegURL"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://akfire.vimeocdn.com/76979871/video/master.mpd?base64_init=1",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "master.mpd"
+  },
+  {
+   "url": "https://akfire.vimeocdn.com/76979871/sep/video/master.mpd?base64_init=1",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "master.mpd"
+  },
+  {
+   "url": "https://vod-progressive.akamaized.net/54469442/540.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-vimeo"
+  }
+ ]
+}

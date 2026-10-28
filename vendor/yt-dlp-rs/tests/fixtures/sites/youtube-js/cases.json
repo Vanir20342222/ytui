@@ -1,0 +1,6 @@
+[
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["-F"], "requires": ["deno"]},
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["--print", "%(formats.:.url)j"], "requires": ["deno"]},
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["--no-progress", "-f", "136", "-o", "%(id)s.%(ext)s"], "requires": ["deno"]},
+ {"url": "https://www.youtube.com/watch?v=BaW_jenozKc", "args": ["--no-progress", "-f", "140", "--fixup", "never", "-o", "%(id)s.%(ext)s"], "requires": ["deno"]}
+]

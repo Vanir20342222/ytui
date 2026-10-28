@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://www.ebay.com/itm/194509326719",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>WiFi antenna | eBay</title></head><body>\n<script>var c = {\"x\": 1, \"video\": {\"playlistMap\": {\"MP4\": \"https://ebay.test/v.mp4\", \"HLS\": \"https://ebay.test/hls/master.m3u8\", \"DASH\": \"https://ebay.test/dash/manifest.mpd\"}, \"y\": [1]}, \"z\": 2};</script></body></html>"
+  },
+  {
+   "url": "https://ebay.com/itm/2",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>{\"video\": {\"playlistMap\": {\"HLS\": \"https://ebay.test/hls/missing.m3u8\"}}}</script></body></html>"
+  },
+  {
+   "url": "https://www.ebay.com/itm/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>No video</title></head><body>nothing</body></html>"
+  },
+  {
+   "url": "https://www.ebay.com/itm/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>No map</title></head><body><script>\"video\": {\"other\": 1}</script></body></html>"
+  },
+  {
+   "url": "https://ebay.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://ebay.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://ebay.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://ebay.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://ebay.test/dash/manifest.mpd",
+   "headers": {
+    "Content-Type": "application/dash+xml"
+   },
+   "body_file": "manifest.mpd"
+  }
+ ]
+}

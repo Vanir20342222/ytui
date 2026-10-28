@@ -1,0 +1,39 @@
+{
+ "routes": [
+  {
+   "url": "http://cjsw.com/program/freshly-squeezed/episode/20170620",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>CJSW</title></head><body>\n<h1 class=\"episode-header__title\" id=\"t\">Freshly Squeezed &ndash; Episode June 20, 2017</h1>\n<div data-showname=\"Freshly Squeezed\"></div>\n<p>A <b>great</b> show &amp; more</p><p>second</p>\n<button class=\"play\" data-audio-src=\"https://cjsw.test/audio/91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3?x=1\">Play</button>\n</body></html>"
+  },
+  {
+   "url": "https://www.cjsw.com/program/road-pops/episode/20170707/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>\n<div data-audio-title='Road &quot;Pops&quot;'></div>\n<button data-audio-src='https://cjsw.test/audio/road'>Play</button>\n</body></html>"
+  },
+  {
+   "url": "https://cjsw.com/program/none/episode/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><h1 class=\"episode-header__title\">Nothing</h1></body></html>"
+  },
+  {
+   "url": "https://cjsw.com/program/untitled/episode/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><button data-audio-src=\"https://cjsw.test/audio/x.mp3\">Play</button></body></html>"
+  },
+  {
+   "url": "https://cjsw.test/audio/91d9f016-a2e7-46c5-8dcb-7cbcd7437c41.mp3?x=1",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  }
+ ]
+}

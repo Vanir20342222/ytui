@@ -1,0 +1,13 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT5S">
+  <BaseURL>assets/</BaseURL><Period><BaseURL>period/</BaseURL>
+    <AdaptationSet mimeType="video/mp4" codecs="avc1.64001f"><BaseURL>video/</BaseURL>
+      <SegmentTemplate timescale="10" duration="20" startNumber="5" initialization="init-$RepresentationID$.mp4" media="$RepresentationID$-$Number$.m4s?bandwidth=$Bandwidth$"/>
+      <Representation id="low" bandwidth="400000" width="640" height="360"><BaseURL>low/</BaseURL></Representation>
+      <Representation id="high" bandwidth="900000" width="1280" height="720"><BaseURL>high/</BaseURL></Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" codecs="mp4a.40.2" lang="en"><BaseURL>audio/</BaseURL>
+      <SegmentTemplate timescale="10" duration="20" startNumber="5" initialization="init-$RepresentationID$.mp4" media="$RepresentationID$-$Number$.m4s"/>
+      <Representation id="audio" bandwidth="128000"/>
+    </AdaptationSet>
+  </Period>
+</MPD>

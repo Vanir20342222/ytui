@@ -1,0 +1,118 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.godtube.com/watch/?v=0wwWUv",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"0wwWUv\", \"url\": \"http://cdn.godtube.test/0wwWUv.mp4\", \"title\": \"Bold & Beautiful\", \"thumbnail\": \"http://cdn.godtube.test/0wwWUv.jpg\", \"timestamp\": 1366914660, \"uploader\": \"Nikki Strebeck\", \"duration\": 210, \"webpage_url\": \"https://www.godtube.com/watch/?v=0wwWUv\", \"original_url\": \"https://www.godtube.com/watch/?v=0wwWUv\", \"webpage_url_basename\": \"watch\", \"webpage_url_domain\": \"godtube.com\", \"extractor\": \"GodTube\", \"extractor_key\": \"GodTube\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://cdn.godtube.test/0wwWUv.jpg\", \"id\": \"0\"}], \"display_id\": \"0wwWUv\", \"fulltitle\": \"Bold & Beautiful\", \"duration_string\": \"3:30\", \"upload_date\": \"20130425\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"Bold & Beautiful [0wwWUv].mp4\", \"filename\": \"Bold & Beautiful [0wwWUv].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.godtube.com/watch/?v=0wwWUv",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[GodTube] Extracting URL: https://www.godtube.com/watch/?v=0wwWUv",
+    "[GodTube] 0wwWUv: Downloading player config XML",
+    "[GodTube] 0wwWUv: Downloading media XML",
+    "[info] Available formats for 0wwWUv:",
+    "ID EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "-------------------------------------------",
+    "0  mp4 unknown    | http  | unknown unknown"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.godtube.com/watch/?v=0wwWUv",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(uploader)s|%(timestamp)s|%(upload_date)s|%(duration)s|%(thumbnail)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "0wwWUv|Bold & Beautiful|Nikki Strebeck|1366914660|20130425|210|http://cdn.godtube.test/0wwWUv.jpg"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.godtube.com/watch/?v=0wwWUv",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[GodTube] Extracting URL: https://www.godtube.com/watch/?v=0wwWUv",
+    "[GodTube] 0wwWUv: Downloading player config XML",
+    "[GodTube] 0wwWUv: Downloading media XML",
+    "[info] 0wwWUv: Downloading 1 format(s): 0",
+    "[download] Destination: 0wwWUv.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work."
+   ],
+   "files": {
+    "0wwWUv.mp4": 792
+   }
+  },
+  {
+   "url": "https://godtube.com/watch/?v=Bare1",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"Bare1\", \"url\": \"http://cdn.godtube.test/0wwWUv.mp4\", \"title\": \"GodTube video #Bare1\", \"thumbnail\": \"x.jpg\", \"timestamp\": null, \"uploader\": null, \"webpage_url\": \"https://godtube.com/watch/?v=Bare1\", \"original_url\": \"https://godtube.com/watch/?v=Bare1\", \"webpage_url_basename\": \"watch\", \"webpage_url_domain\": \"godtube.com\", \"extractor\": \"GodTube\", \"extractor_key\": \"GodTube\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"x.jpg\", \"id\": \"0\"}], \"display_id\": \"Bare1\", \"fulltitle\": null, \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format_id\": \"0\", \"format\": \"0 - unknown\", \"_filename\": \"GodTube video #Bare1 [Bare1].mp4\", \"filename\": \"GodTube video #Bare1 [Bare1].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work.",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://godtube.com/watch/?v=NoFile",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work.",
+    "ERROR: 'NoneType' object has no attribute 'text'"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://godtube.com/watch/?v=Gone",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: The program functionality for this site has been marked as broken, and will probably not work.",
+    "ERROR: [GodTube] Gone: Unable to download XML: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  }
+ ]
+}

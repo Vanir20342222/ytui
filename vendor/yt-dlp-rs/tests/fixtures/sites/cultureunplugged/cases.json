@@ -1,0 +1,8 @@
+[
+ {"url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West", "args": ["-j"]},
+ {"url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West", "args": ["--list-thumbnails"]},
+ {"url": "http://www.cultureunplugged.com/documentary/watch-online/play/53662/The-Next--Best-West", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(description)s|%(creator)s|%(creators)s|%(duration)s|%(view_count)s|%(thumbnail)s"]},
+ {"url": "https://www.cultureunplugged.com/play/2", "args": ["-j"]},
+ {"url": "https://cultureunplugged.com/play/3/x", "args": ["-j"]},
+ {"url": "https://cultureunplugged.com/play/4/x", "args": ["-j"]}
+]

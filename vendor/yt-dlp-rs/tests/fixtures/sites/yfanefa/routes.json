@@ -1,0 +1,67 @@
+{
+ "routes": [
+  {
+   "url": "https://www.yfanefa.com/record/2717",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Bridlington | Yorkshire Film Archive</title></head><body>\n<script>iwPlayer.options[\"video.1\"] = {\"url\": \"https://yf.test/hls/master.m3u8\", \"signature\": \"\", \"preview\": \"https://yf.test/p.jpg\", \"duration\": \"1234\"};</script></body></html>"
+  },
+  {
+   "url": "https://yfanefa.com/news/x/y/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:title\" content=\"OG\"><title>T | Yorkshire Film Archive</title></head><body>\n<script>iwPlayer.options[\"v\"]= {\"url\": \"https://yf.test/v.mp4\", \"signature\": \"?sig=1\", \"preview\": \"bad\"}</script></body></html>"
+  },
+  {
+   "url": "https://www.yfanefa.com/record/3",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><script>iwPlayer.options[\"v\"] = {\"preview\": \"x\"};</script></body></html>"
+  },
+  {
+   "url": "https://www.yfanefa.com/record/4",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://yf.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://yf.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://yf.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://yf.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://yf.test/v.mp4?sig=1",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  }
+ ]
+}

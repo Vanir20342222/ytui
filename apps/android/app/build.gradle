@@ -1,0 +1,94 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+def requestedVersionCode = System.getenv('YTUI_ANDROID_VERSION_CODE') ?: '2'
+if (!(requestedVersionCode ==~ /[1-9][0-9]{0,9}/) || requestedVersionCode.toLong() > 2100000000L)
+    throw new GradleException('YTUI_ANDROID_VERSION_CODE must be an integer from 1 to 2100000000')
+def requestedVersionName = System.getenv('YTUI_ANDROID_VERSION_NAME') ?: '0.2.0-alpha.12-mobile.2'
+if (!(requestedVersionName ==~ /[A-Za-z0-9.+_-]{1,64}/))
+    throw new GradleException('YTUI_ANDROID_VERSION_NAME must contain 1–64 letters, digits, dots, plus, underscore or hyphen')
+def signingPath = System.getenv('YTUI_ANDROID_KEYSTORE')
+def sourceRevision = System.getenv('YTUI_ANDROID_REVISION') ?: 'unknown'
+if (!(sourceRevision ==~ /[a-f0-9]{7,40}|unknown/))
+    throw new GradleException('YTUI_ANDROID_REVISION must be a Git revision or unknown')
+def signingAlias = System.getenv('YTUI_ANDROID_KEY_ALIAS')
+def signingStorePassword = System.getenv('YTUI_ANDROID_STORE_PASSWORD')
+def signingKeyPassword = System.getenv('YTUI_ANDROID_KEY_PASSWORD')
+def signingReady = signingPath && signingAlias && signingStorePassword && signingKeyPassword && file(signingPath).isFile()
+def androidProject = project
+gradle.taskGraph.whenReady { graph ->
+    // Check the graph too: aggregate tasks such as assemble/build also package
+    // release artifacts even when their command-line names omit "Release".
+    if (graph.allTasks.any { it.project == androidProject && it.name in ['assembleRelease', 'packageRelease', 'bundleRelease'] } && !signingReady)
+        throw new GradleException('Release builds require YTUI_ANDROID_KEYSTORE, YTUI_ANDROID_KEY_ALIAS, YTUI_ANDROID_STORE_PASSWORD and YTUI_ANDROID_KEY_PASSWORD; no debug-key fallback is used')
+}
+android {
+    namespace 'dev.ytui.android'
+    compileSdk 35
+    ndkVersion '27.2.12479018'
+    defaultConfig {
+        applicationId 'dev.ytui.android'
+        minSdk 26
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+        targetSdk 35
+        versionCode requestedVersionCode.toInteger()
+        versionName requestedVersionName
+        buildConfigField 'String', 'SOURCE_REVISION', '"' + sourceRevision + '"'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildFeatures { buildConfig true; compose true }
+    kotlinOptions { jvmTarget = '17' }
+    sourceSets { main { jniLibs.srcDirs = [rootProject.file('../../target/android-jni')]; assets.srcDirs = ['src/main/assets',rootProject.file('../../target/android-assets')] }; androidTest { assets.srcDirs = [rootProject.file('../../target/android-test-assets'),rootProject.file('../../vendor/yt-dlp-rs/vendor/ejs'),rootProject.file('../../vendor/yt-dlp-rs/tests/fixtures/youtube/challenges')] } }
+    packaging { jniLibs { useLegacyPackaging false } }
+    signingConfigs {
+        if (signingReady) {
+            release {
+                storeFile file(signingPath)
+                storePassword signingStorePassword
+                keyAlias signingAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        debug { debuggable true }
+        release {
+            debuggable false
+            minifyEnabled false
+            if (signingReady) signingConfig signingConfigs.release
+        }
+    }
+    lint { abortOnError true; checkReleaseBuilds true }
+}
+dependencies {
+    implementation 'androidx.annotation:annotation-experimental:1.4.1'
+    implementation 'androidx.games:games-activity:4.4.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation platform('androidx.compose:compose-bom:2025.05.01')
+    implementation 'androidx.activity:activity-compose:1.10.1'
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.9.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'androidx.media3:media3-exoplayer:1.8.0'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.8.0'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.8.0'
+    implementation 'androidx.media3:media3-session:1.8.0'
+    implementation 'androidx.media3:media3-ui:1.8.0'
+    implementation 'androidx.media3:media3-database:1.8.0'
+    implementation 'androidx.javascriptengine:javascriptengine:1.1.1'
+    implementation 'androidx.work:work-runtime:2.10.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation platform('androidx.compose:compose-bom:2025.05.01')
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+}

@@ -1,0 +1,11 @@
+[
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["-J"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["-j"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["-s"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["-F"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["--flat-playlist", "-J"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["--print", "%(playlist_index)s|%(id)s|%(title)s|%(description)s|%(duration)s|%(thumbnail)s|%(format_id)s|%(width)s|%(manifest_url)s|%(playlist_title)s"]},
+ {"url": "https://media.example.test/lists/show.xspf", "args": ["--no-progress", "-o", "%(playlist_index)s.%(ext)s"]},
+ {"url": "https://media.example.test/plain.xml", "args": ["-j"]},
+ {"url": "https://media.example.test/empty.xspf", "args": ["-J"]}
+]

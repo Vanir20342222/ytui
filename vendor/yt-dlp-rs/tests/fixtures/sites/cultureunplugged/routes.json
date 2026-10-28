@@ -1,0 +1,32 @@
+{
+ "routes": [
+  {
+   "url": "http://www.cultureunplugged.com/movie-data/cu-53662.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cu.test/v.mp4\", \"title\": \"The Next, Best West\", \"synopsis\": \"A synopsis\", \"producer\": \"Coldstream Creative\", \"duration\": \"2203\", \"views\": 42, \"small_thumb\": \"https://cu.test/s.jpg\", \"large_thumb\": \"https://cu.test/l.jpg\"}"
+  },
+  {
+   "url": "http://www.cultureunplugged.com/movie-data/cu-2.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cu.test/v.mp4\", \"title\": \"Plain\", \"large_thumb\": \"https://cu.test/l.jpg\", \"small_thumb\": \"\"}"
+  },
+  {
+   "url": "http://www.cultureunplugged.com/movie-data/cu-3.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"No url\"}"
+  },
+  {
+   "url": "http://www.cultureunplugged.com/movie-data/cu-4.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"url\": \"https://cu.test/v.mp4\"}"
+  }
+ ]
+}

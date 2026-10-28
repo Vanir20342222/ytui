@@ -1,0 +1,8 @@
+[
+ {"url": "https://player.vimeo.com/video/54469442", "args": ["-J"]},
+ {"url": "https://player.vimeo.com/video/54469442", "args": ["-F"]},
+ {"url": "https://vimeo.com/76979871", "args": ["-J"]},
+ {"url": "https://vimeo.com/11111111", "args": ["-j"]},
+ {"url": "https://vimeo.com/123456789/abcdef0123", "args": ["-j"]},
+ {"url": "https://player.vimeo.com/video/54469442", "args": ["-f", "http-540p", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

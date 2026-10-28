@@ -1,0 +1,6 @@
+[
+ {"url": "https://odysee.com/@Mantega:1/First-day-LBRY:1", "args": ["-J"]},
+ {"url": "https://lbry.tv/@Mantega:1/First-day-LBRY:1", "args": ["-F"]},
+ {"url": "https://odysee.com/@Mantega:1/missing:2", "args": ["-j"]},
+ {"url": "https://odysee.com/@Mantega:1/First-day-LBRY:1", "args": ["-f", "original", "--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

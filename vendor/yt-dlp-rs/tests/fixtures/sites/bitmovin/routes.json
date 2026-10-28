@@ -1,0 +1,74 @@
+{
+ "routes": [
+  {
+   "url": "https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/config",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"sources\": {\"hls\": \"https://bitmovin.test/hls/master.m3u8\", \"title\": \"Developing Osteopathic Residents\", \"poster\": \"https://bitmovin.test/p.jpg\"}}"
+  },
+  {
+   "url": "https://streams.bitmovin.com/b2/config",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"sources\": {\"hls\": \"https://bitmovin.test/hls/video.m3u8\", \"title\": 5}}"
+  },
+  {
+   "url": "https://streams.bitmovin.com/c3/config",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"sources\": {}}"
+  },
+  {
+   "url": "https://streams.bitmovin.com/d4/config",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://page.test/one.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>One</title></head><body><iframe src=\"https://streams.bitmovin.com/b2/embed?x=1&amp;y=2\" width=1></iframe></body></html>"
+  },
+  {
+   "url": "https://page.test/two.html",
+   "headers": {
+    "Content-Type": "text/html"
+   },
+   "body": "<html><head><title>Two</title></head><body><iframe src=\"//streams.bitmovin.com/b2/embed\"></iframe><iframe src='https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed'></iframe><iframe src=\"https://streams.bitmovin.com/x\"></iframe></body></html>"
+  },
+  {
+   "url": "https://bitmovin.test/hls/master.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://bitmovin.test/hls/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://bitmovin.test/hls/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://bitmovin.test/hls/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

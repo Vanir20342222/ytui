@@ -1,0 +1,9 @@
+[
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585", "args": ["-j"]},
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585", "args": ["-F"]},
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3611585", "args": ["--print", "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(upload_date)s"]},
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=2", "args": ["-j"]},
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=3", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://player.maariv.co.il/public/player.html?player=maariv-desktop&media=4", "args": ["-j"]},
+ {"url": "https://page.test/m.html", "args": ["-j"]}
+]

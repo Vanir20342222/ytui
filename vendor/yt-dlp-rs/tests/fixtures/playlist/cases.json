@@ -1,0 +1,1361 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "normalization": "Actual CLI option validation, materialized PlaylistEntries and orderedSet, then reverse. Only one-based source indices subtract one to expose native zero-based selection. Request order/first-seen dedup and warning presence remain significant. Native ASCII/i64/16KiB/1024-segment policy and eager-only scope are explicit exclusions.",
+  "cases": [
+    {
+      "name": "all-default",
+      "items": null,
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "all-colon",
+      "items": ":",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "all-hyphen",
+      "items": "-",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "all-step-one",
+      "items": "::1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "all-step-two",
+      "items": "::2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "all-reverse",
+      "items": "::-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "single-first",
+      "items": "1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "single-last",
+      "items": "-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "single-before-last",
+      "items": "-2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "zero-nohit",
+      "items": "0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-zero-nohit",
+      "items": "-0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "positive-sign",
+      "items": "+2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "inclusive-colon",
+      "items": "2:4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        2,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "inclusive-hyphen",
+      "items": "2-4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        2,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "first-four",
+      "items": ":4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "open-from-third",
+      "items": "3:",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "open-hyphen",
+      "items": "3-",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-end",
+      "items": ":-6",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-bounds",
+      "items": "-3:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-hyphen-bounds",
+      "items": "-3--1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "mixed-hyphen-negative",
+      "items": "3--1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "open-hyphen-negative",
+      "items": "--2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-negative-start",
+      "items": "-1:6:-2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9,
+        7,
+        5
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-mixed-bounds",
+      "items": "9:-6:-2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        8,
+        6,
+        4
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-third",
+      "items": "3::-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2,
+        1,
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-explicit-last",
+      "items": ":-1:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "positive-backwards-empty",
+      "items": "10:1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-forwards-empty",
+      "items": "1:10:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-legacy-empty",
+      "items": "1-3:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "positive-inf",
+      "items": "1:inf:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "positive-infinite",
+      "items": "1:infinite:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-start-inf",
+      "items": "-2:inf",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-start-infinite",
+      "items": "-2:infinite",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-step-inf-empty",
+      "items": ":inf:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-step-infinite-open",
+      "items": ":infinite:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "zero-phase",
+      "items": "0-2:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-zero-range",
+      "items": "-0:-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "zero-end-empty",
+      "items": "1:0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-zero-end-empty",
+      "items": "1:-0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-open-step",
+      "items": "1-:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-missing-start-step",
+      "items": "-:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-zero-negative-end",
+      "items": "0--2:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "out-of-range-single",
+      "items": "20",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "out-of-range-start",
+      "items": "11::3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "last-large-step",
+      "items": "10::3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "last-negative-start",
+      "items": "-1::3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-phase-clip",
+      "items": "-15::2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        3,
+        5,
+        7,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-phase-nohits",
+      "items": "-15::15",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-phase-clip",
+      "items": "15::-2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        8,
+        6,
+        4,
+        2,
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-phase-three",
+      "items": "14::-3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        7,
+        4,
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-phase-four",
+      "items": "20:1:-4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        7,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "negative-phase-jump",
+      "items": "-1000::997",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        7
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-phase-jump",
+      "items": "1000::-997",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "duplicates-request-order",
+      "items": "4,2,4,1:3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "duplicates-ranges",
+      "items": "2-4,3-4,3",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        2,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "mixed-order",
+      "items": "-1,1,5:7,2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        9,
+        0,
+        4,
+        5,
+        6,
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "nohits-all",
+      "items": "20,0,11:15",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "signed-plus-range",
+      "items": "+1:+4:+2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        2
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-start",
+      "items": null,
+      "start": 2,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-end",
+      "items": null,
+      "start": 1,
+      "end": 2,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-unbounded-end",
+      "items": null,
+      "start": 1,
+      "end": -1,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-over-end",
+      "items": null,
+      "start": 1,
+      "end": 20,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-out-of-range-start",
+      "items": null,
+      "start": 11,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "legacy-same-bound",
+      "items": null,
+      "start": 3,
+      "end": 3,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        2
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-default",
+      "items": null,
+      "start": 1,
+      "end": null,
+      "reverse": true,
+      "length": 10,
+      "expected_indices": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-legacy-start",
+      "items": null,
+      "start": 2,
+      "end": null,
+      "reverse": true,
+      "length": 10,
+      "expected_indices": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-duplicate-order",
+      "items": "4,2,4,1:3",
+      "start": 1,
+      "end": null,
+      "reverse": true,
+      "length": 10,
+      "expected_indices": [
+        2,
+        0,
+        1,
+        3
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "reverse-already-reversed",
+      "items": "::-1",
+      "start": 1,
+      "end": null,
+      "reverse": true,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "items-override-start",
+      "items": "1:3",
+      "start": 5,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        0,
+        1,
+        2
+      ],
+      "expected_warning": true
+    },
+    {
+      "name": "items-override-end",
+      "items": "2:4",
+      "start": 1,
+      "end": 3,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        2,
+        3
+      ],
+      "expected_warning": true
+    },
+    {
+      "name": "items-override-unbounded",
+      "items": "2,4",
+      "start": 2,
+      "end": -1,
+      "reverse": false,
+      "length": 10,
+      "expected_indices": [
+        1,
+        3
+      ],
+      "expected_warning": true
+    },
+    {
+      "name": "empty-None",
+      "items": null,
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty-:",
+      "items": ":",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty-::-1",
+      "items": "::-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty-0",
+      "items": "0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty--1",
+      "items": "-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty-1:infinite:2",
+      "items": "1:infinite:2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "empty-4,2,4",
+      "items": "4,2,4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 0,
+      "expected_indices": [],
+      "expected_warning": false
+    },
+    {
+      "name": "singleton-reverse",
+      "items": "::-1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 1,
+      "expected_indices": [
+        0
+      ],
+      "expected_warning": false
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "invalid-items-0",
+      "items": "",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-1",
+      "items": " ",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-2",
+      "items": "1, 2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-3",
+      "items": " 1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-4",
+      "items": "1 ",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-5",
+      "items": "1,,2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-6",
+      "items": ",1",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-7",
+      "items": "1,",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-8",
+      "items": "1:2:0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-9",
+      "items": "1:2:-0",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-10",
+      "items": "1:::2",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-11",
+      "items": "1:2:3:4",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-12",
+      "items": "inf",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-13",
+      "items": "1:Inf",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-14",
+      "items": "1:infinity",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-15",
+      "items": "1:+inf",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-16",
+      "items": "1.5",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-17",
+      "items": "1:two",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-items-18",
+      "items": "Ⅲ",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-legacy-start-zero",
+      "items": null,
+      "start": 0,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-legacy-start-negative",
+      "items": null,
+      "start": -1,
+      "end": null,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-legacy-end-zero",
+      "items": null,
+      "start": 1,
+      "end": 0,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-legacy-end-negative",
+      "items": null,
+      "start": 1,
+      "end": -2,
+      "reverse": false,
+      "length": 10
+    },
+    {
+      "name": "invalid-bounds-with-override",
+      "items": "1",
+      "start": 3,
+      "end": 2,
+      "reverse": false,
+      "length": 10
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "source-arabic-digits",
+      "items": "١:٣",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "native_policy": "Non-ASCII decimal grammar is explicitly rejected.",
+      "expected_indices": [
+        0,
+        1,
+        2
+      ],
+      "expected_warning": false
+    },
+    {
+      "name": "source-fullwidth-digits",
+      "items": "１:３",
+      "start": 1,
+      "end": null,
+      "reverse": false,
+      "length": 10,
+      "native_policy": "Non-ASCII decimal grammar is explicitly rejected.",
+      "expected_indices": [
+        0,
+        1,
+        2
+      ],
+      "expected_warning": false
+    }
+  ]
+}

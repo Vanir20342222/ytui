@@ -1,0 +1,15 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Saved YouTube HLS fixture",
+    "lengthSeconds": "2",
+    "isLiveContent": false
+  },
+  "streamingData": {
+    "hlsManifestUrl": "{{ORIGIN}}/hls/master.m3u8",
+    "dashManifestUrl": "{{ORIGIN}}/forbidden.mpd"
+  }
+}

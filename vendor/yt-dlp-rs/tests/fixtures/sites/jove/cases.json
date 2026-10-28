@@ -1,0 +1,9 @@
+[
+ {"url": "http://www.jove.com/video/2744/electrode-positioning", "args": ["-j"]},
+ {"url": "http://www.jove.com/video/2744/electrode-positioning", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(upload_date)s|%(comment_count)s"]},
+ {"url": "http://www.jove.com/video/2744/electrode-positioning", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.jove.com/video/2", "args": ["-j"]},
+ {"url": "https://jove.com/video/3", "args": ["-j"]},
+ {"url": "https://jove.com/video/4", "args": ["-j"]},
+ {"url": "https://jove.com/video/5", "args": ["-j"]}
+]

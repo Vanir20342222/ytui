@@ -1,0 +1,8 @@
+[
+ {"url": "https://ok.ru/video/20079905452?fromTime=5", "args": ["-J"]},
+ {"url": "https://ok.ru/videoembed/555-1", "args": ["-J"]},
+ {"url": "https://ok.ru/video/777", "args": ["--print", "%(id)s|%(extractor)s"]},
+ {"url": "https://ok.ru/video/888", "args": ["--print", "id"]},
+ {"url": "https://ok.ru/video/999", "args": ["--print", "id"]},
+ {"url": "https://ok.ru/video/20079905452", "args": ["--no-progress", "-f", "hd", "-o", "%(id)s.%(ext)s"]}
+]

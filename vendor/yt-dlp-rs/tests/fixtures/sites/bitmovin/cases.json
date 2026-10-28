@@ -1,0 +1,10 @@
+[
+ {"url": "https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed", "args": ["-j"]},
+ {"url": "https://streams.bitmovin.com/cqkl1t5giv3lrce7pjbg/embed", "args": ["--list-subs"]},
+ {"url": "https://streams.bitmovin.com/b2", "args": ["-j"]},
+ {"url": "https://streams.bitmovin.com/c3", "args": ["-j"]},
+ {"url": "https://streams.bitmovin.com/d4", "args": ["-j"]},
+ {"url": "https://page.test/one.html", "args": ["-j"]},
+ {"url": "https://page.test/two.html", "args": ["-J", "--flat-playlist"]},
+ {"url": "https://page.test/two.html", "args": ["--print", "%(id)s|%(title)s"]}
+]

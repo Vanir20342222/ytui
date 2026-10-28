@@ -1,0 +1,133 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://embed.crooksandliars.com/embed/8RUoRhRi",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"url\": \"https://cl.test/high.mp4\", \"id\": \"8RUoRhRi\", \"title\": \"Fox & Friends Says Protecting Atheists\", \"description\": \"Fox News, Fox & Friends Weekend\", \"thumbnail\": \"https://cl.test/p.jpg\", \"timestamp\": 1410490800, \"uploader\": \"Heather\", \"duration\": 236, \"formats\": [{\"url\": \"https://cl.test/odd.mp4\", \"format_id\": \"odd\", \"quality\": -1, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"odd - unknown\"}, {\"url\": \"https://cl.test/low.webm\", \"format_id\": \"webm_low\", \"quality\": 0, \"protocol\": \"https\", \"ext\": \"webm\", \"video_ext\": \"webm\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"webm_low - unknown\"}, {\"url\": \"https://cl.test/high.mp4\", \"format_id\": \"mp4_high\", \"quality\": 3, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4_high - unknown\"}], \"webpage_url\": \"https://embed.crooksandliars.com/embed/8RUoRhRi\", \"original_url\": \"https://embed.crooksandliars.com/embed/8RUoRhRi\", \"webpage_url_basename\": \"8RUoRhRi\", \"webpage_url_domain\": \"embed.crooksandliars.com\", \"extractor\": \"CrooksAndLiars\", \"extractor_key\": \"CrooksAndLiars\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://cl.test/p.jpg\", \"id\": \"0\"}], \"display_id\": \"8RUoRhRi\", \"fulltitle\": \"Fox & Friends Says Protecting Atheists\", \"duration_string\": \"3:56\", \"upload_date\": \"20140912\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"mp4_high\", \"quality\": 3, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4_high - unknown\", \"_filename\": \"Fox & Friends Says Protecting Atheists [8RUoRhRi].mp4\", \"filename\": \"Fox & Friends Says Protecting Atheists [8RUoRhRi].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://embed.crooksandliars.com/embed/8RUoRhRi",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[CrooksAndLiars] Extracting URL: https://embed.crooksandliars.com/embed/8RUoRhRi",
+    "[CrooksAndLiars] 8RUoRhRi: Downloading webpage",
+    "[info] Available formats for 8RUoRhRi:",
+    "ID       EXT  RESOLUTION | PROTO | VCODEC  ACODEC",
+    "--------------------------------------------------",
+    "odd      mp4  unknown    | https | unknown unknown",
+    "webm_low webm unknown    | https | unknown unknown",
+    "mp4_high mp4  unknown    | https | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://embed.crooksandliars.com/embed/8RUoRhRi",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(timestamp)s|%(uploader)s|%(duration)s|%(url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "8RUoRhRi|Fox & Friends Says Protecting Atheists|Fox News, Fox & Friends Weekend|https://cl.test/p.jpg|1410490800|Heather|236|https://cl.test/high.mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://embed.crooksandliars.com/embed/8RUoRhRi",
+   "args": [
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[CrooksAndLiars] Extracting URL: https://embed.crooksandliars.com/embed/8RUoRhRi",
+    "[CrooksAndLiars] 8RUoRhRi: Downloading webpage",
+    "[info] 8RUoRhRi: Downloading 1 format(s): mp4_high",
+    "[download] Destination: 8RUoRhRi.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "8RUoRhRi.mp4": 792
+   }
+  },
+  {
+   "url": "https://embed.crooksandliars.com/v/b2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CrooksAndLiars] b2: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://embed.crooksandliars.com/embed/c3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: c3: An extractor error has occurred. (caused by KeyError('mime')); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://embed.crooksandliars.com/embed/d4",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [CrooksAndLiars] d4: Unable to extract manifest JSON; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/cl.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor",
+    "ERROR: [CrooksAndLiars] b2: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://page.test/cl2.html",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"cl2\", \"title\": \"CL2\", \"timestamp\": null, \"description\": null, \"thumbnail\": null, \"age_limit\": null, \"_type\": \"playlist\", \"entries\": [{\"ie_key\": \"CrooksAndLiars\", \"_type\": \"url\", \"url\": \"https://embed.crooksandliars.com/embed/b2\", \"extractor\": \"CrooksAndLiars\", \"extractor_key\": \"CrooksAndLiars\", \"__x_forwarded_for_ip\": null}, {\"ie_key\": \"CrooksAndLiars\", \"_type\": \"url\", \"url\": \"https://embed.crooksandliars.com/embed/8RUoRhRi\", \"extractor\": \"CrooksAndLiars\", \"extractor_key\": \"CrooksAndLiars\", \"__x_forwarded_for_ip\": null}], \"webpage_url\": \"https://page.test/cl2.html\", \"original_url\": \"https://page.test/cl2.html\", \"webpage_url_basename\": \"cl2.html\", \"webpage_url_domain\": \"page.test\", \"extractor\": \"generic\", \"extractor_key\": \"Generic\", \"release_year\": null, \"playlist_count\": 2, \"__files_to_move\": {}}"
+   ],
+   "stderr": [
+    "WARNING: [generic] Falling back on generic information extractor"
+   ],
+   "files": {}
+  }
+ ]
+}

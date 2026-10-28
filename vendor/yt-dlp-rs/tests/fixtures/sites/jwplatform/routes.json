@@ -1,0 +1,68 @@
+{
+ "routes": [
+  {
+   "url": "https://cdn.jwplayer.com/v2/media/nPripu9l",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Big Buck Bunny Trailer\", \"description\": \"Big Buck Bunny is a short film.\", \"kind\": \"Single Item\", \"playlist\": [{\"title\": \"Big Buck Bunny Trailer\", \"mediaid\": \"nPripu9l\", \"link\": \"https://cdn.jwplayer.com/previews/nPripu9l\", \"image\": \"https://cdn.jwplayer.com/v2/media/nPripu9l/poster.jpg?width=720\", \"duration\": 32, \"pubdate\": 1227796140, \"description\": \"Big Buck Bunny is a short <b>animated</b> film.\", \"sources\": [{\"file\": \"https://cdn.jwplayer.com/manifests/nPripu9l.m3u8\", \"type\": \"application/vnd.apple.mpegurl\"}, {\"file\": \"https://cdn.jwplayer.com/videos/nPripu9l-1.mp4\", \"type\": \"video/mp4\", \"height\": 180, \"width\": 320, \"label\": \"180p\", \"bitrate\": 343000, \"filesize\": 1371000, \"framerate\": 24}, {\"file\": \"https://cdn.jwplayer.com/videos/nPripu9l-2.m4a\", \"type\": \"audio/mp4\", \"label\": \"AAC Audio\", \"bitrate\": 113000}, {\"file\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\", \"type\": \"video/mp4\", \"height\": 720, \"width\": 1280, \"label\": \"720p\", \"bitrate\": 1500000}], \"tracks\": [{\"file\": \"https://cdn.jwplayer.com/strips/nPripu9l-120.vtt\", \"kind\": \"thumbnails\"}, {\"file\": \"https://cdn.jwplayer.com/tracks/en.vtt\", \"kind\": \"captions\", \"label\": \"English\"}]}]}"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/manifests/nPripu9l.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "media.m3u8"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/videos/nPripu9l-3.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "a.mp4"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/v2/media/Untitle1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"playlist\": [{\"mediaid\": \"Untitle1\", \"sources\": [{\"file\": \"https://cdn.jwplayer.com/videos/nPripu9l-3.mp4\"}]}]}"
+  },
+  {
+   "url": "https://cdn.jwplayer.com/v2/media/Missing1",
+   "status": 404,
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://news.example.test/iframe",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Iframe page</title></head><body><iframe src=\\\"https://cdn.jwplayer.com/players/nPripu9l-ALJ3XQCI.html\\\"></iframe></body></html>"
+  },
+  {
+   "url": "https://news.example.test/div",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Div page</title></head><body><div class=\"v\" data-video-jw-id=\"nPripu9l\"></div></body></html>"
+  },
+  {
+   "url": "https://news.example.test/input",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Input page</title></head><body><input type=\"hidden\" value=\"//content.jwplatform.com/players/nPripu9l-x.js\"></body></html>"
+  },
+  {
+   "url": "https://news.example.test/two",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Two page</title></head><body><script src=\"https://cdn.jwplayer.com/players/nPripu9l-A.js\"></script><iframe src='https://cdn.jwplayer.com/players/Untitle1-B.html'></iframe><script src=\"https://cdn.jwplayer.com/players/nPripu9l-C.js\"></script></body></html>"
+  }
+ ]
+}

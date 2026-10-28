@@ -1,0 +1,8 @@
+[
+ {"url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909", "args": ["-j"]},
+ {"url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(ext)s"]},
+ {"url": "http://sztv.hu/hirek/cserkeszek-nepszerusitettek-a-kornyezettudatos-eletmodot-a-savaria-teren-20130909", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "http://www.tvszombathely.hu/x/bare-2", "args": ["-j"]},
+ {"url": "http://www.tvszombathely.hu/x/notitle-3", "args": ["-j"]},
+ {"url": "http://www.tvszombathely.hu/x/nofile-4", "args": ["-j"]}
+]

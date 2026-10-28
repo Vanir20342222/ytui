@@ -1,0 +1,457 @@
+{
+  "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+  "cases": [
+    {
+      "name": "empty",
+      "args": [],
+      "expected_headers": {}
+    },
+    {
+      "name": "custom",
+      "args": [
+        "--add-headers",
+        "X-Test:value"
+      ],
+      "expected_headers": {
+        "x-test": "value"
+      }
+    },
+    {
+      "name": "case-insensitive-last",
+      "args": [
+        "--add-headers",
+        "X-Test:first",
+        "--add-headers",
+        "x-TEST:second"
+      ],
+      "expected_headers": {
+        "x-test": "second"
+      }
+    },
+    {
+      "name": "first-colon",
+      "args": [
+        "--add-headers",
+        "X-URL:https://example.test:8443/path:a"
+      ],
+      "expected_headers": {
+        "x-url": "https://example.test:8443/path:a"
+      }
+    },
+    {
+      "name": "trim-value",
+      "args": [
+        "--add-headers",
+        "X-Test: \t value with spaces \t "
+      ],
+      "expected_headers": {
+        "x-test": "value with spaces"
+      }
+    },
+    {
+      "name": "empty-value",
+      "args": [
+        "--add-headers",
+        "X-Empty:"
+      ],
+      "expected_headers": {
+        "x-empty": ""
+      }
+    },
+    {
+      "name": "whitespace-value",
+      "args": [
+        "--add-headers",
+        "X-Empty: \t "
+      ],
+      "expected_headers": {
+        "x-empty": ""
+      }
+    },
+    {
+      "name": "equals-value",
+      "args": [
+        "--add-headers=X-Test:a=b"
+      ],
+      "expected_headers": {
+        "x-test": "a=b"
+      }
+    },
+    {
+      "name": "underscore-name",
+      "args": [
+        "--add-headers",
+        "X_Test:yes"
+      ],
+      "expected_headers": {
+        "x_test": "yes"
+      }
+    },
+    {
+      "name": "header-user-agent",
+      "args": [
+        "--add-headers",
+        "User-Agent:custom"
+      ],
+      "expected_headers": {
+        "user-agent": "custom"
+      }
+    },
+    {
+      "name": "header-referer",
+      "args": [
+        "--add-headers",
+        "Referer:https://example.test/custom"
+      ],
+      "expected_headers": {
+        "referer": "https://example.test/custom"
+      }
+    },
+    {
+      "name": "user-agent",
+      "args": [
+        "--user-agent",
+        "Fixture custom UA"
+      ],
+      "expected_headers": {
+        "user-agent": "Fixture custom UA"
+      }
+    },
+    {
+      "name": "referer",
+      "args": [
+        "--referer",
+        "https://example.test/page"
+      ],
+      "expected_headers": {
+        "referer": "https://example.test/page"
+      }
+    },
+    {
+      "name": "convenience-trim",
+      "args": [
+        "--user-agent",
+        "  Custom UA  ",
+        "--referer",
+        " https://example.test/page "
+      ],
+      "expected_headers": {
+        "user-agent": "Custom UA",
+        "referer": "https://example.test/page"
+      }
+    },
+    {
+      "name": "convenience-empty",
+      "args": [
+        "--user-agent",
+        "",
+        "--referer",
+        ""
+      ],
+      "expected_headers": {
+        "user-agent": "",
+        "referer": ""
+      }
+    },
+    {
+      "name": "convenience-after",
+      "args": [
+        "--add-headers",
+        "user-agent:header",
+        "--add-headers",
+        "referer:header",
+        "--user-agent",
+        "flag-UA",
+        "--referer",
+        "flag-ref"
+      ],
+      "expected_headers": {
+        "user-agent": "flag-UA",
+        "referer": "flag-ref"
+      }
+    },
+    {
+      "name": "convenience-before",
+      "args": [
+        "--user-agent",
+        "flag-UA",
+        "--referer",
+        "flag-ref",
+        "--add-headers",
+        "User-Agent:header",
+        "--add-headers",
+        "Referer:header"
+      ],
+      "expected_headers": {
+        "user-agent": "flag-UA",
+        "referer": "flag-ref"
+      }
+    },
+    {
+      "name": "repeated-convenience",
+      "args": [
+        "--user-agent",
+        "first",
+        "--user-agent",
+        "last",
+        "--referer",
+        "first",
+        "--referer",
+        "last"
+      ],
+      "expected_headers": {
+        "user-agent": "last",
+        "referer": "last"
+      }
+    },
+    {
+      "name": "multiple",
+      "args": [
+        "--add-headers",
+        "Accept:video/mp4",
+        "--add-headers",
+        "Accept-Language:fr",
+        "--add-headers",
+        "Authorization:Bearer fixture-only-token"
+      ],
+      "expected_headers": {
+        "accept": "video/mp4",
+        "accept-language": "fr",
+        "authorization": "Bearer fixture-only-token"
+      }
+    },
+    {
+      "name": "empty-convenience-beats-header",
+      "args": [
+        "--add-headers",
+        "User-Agent:custom",
+        "--user-agent",
+        ""
+      ],
+      "expected_headers": {
+        "user-agent": ""
+      }
+    },
+    {
+      "name": "abbreviated-option",
+      "args": [
+        "--add-header",
+        "X-Test:value"
+      ],
+      "expected_headers": {
+        "x-test": "value"
+      }
+    }
+  ],
+  "request_cases": [
+    {
+      "name": "fixed-defaults",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {},
+      "extractor": {},
+      "expected_headers": {
+        "user-agent": "Fixture-Default-UA",
+        "accept": "*/*"
+      }
+    },
+    {
+      "name": "global-overrides-default",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "user-agent": "Global UA",
+        "X-Test": "global"
+      },
+      "extractor": {},
+      "expected_headers": {
+        "user-agent": "Global UA",
+        "accept": "*/*",
+        "x-test": "global"
+      }
+    },
+    {
+      "name": "extractor-overrides-global",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "X-Test": "global",
+        "Referer": "global-ref"
+      },
+      "extractor": {
+        "x-TEST": "extractor",
+        "referer": "page-ref"
+      },
+      "expected_headers": {
+        "user-agent": "Fixture-Default-UA",
+        "accept": "*/*",
+        "x-test": "extractor",
+        "referer": "page-ref"
+      }
+    },
+    {
+      "name": "extractor-user-agent",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "User-Agent": "Global UA"
+      },
+      "extractor": {
+        "user-agent": "Site UA"
+      },
+      "expected_headers": {
+        "user-agent": "Site UA",
+        "accept": "*/*"
+      }
+    },
+    {
+      "name": "extractor-empty-remains",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "X-Test": "global"
+      },
+      "extractor": {
+        "x-test": ""
+      },
+      "expected_headers": {
+        "user-agent": "Fixture-Default-UA",
+        "accept": "*/*",
+        "x-test": ""
+      }
+    },
+    {
+      "name": "merge-trims-values",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "X-Global": "  global  "
+      },
+      "extractor": {
+        "X-Site": "  site  "
+      },
+      "expected_headers": {
+        "user-agent": "Fixture-Default-UA",
+        "accept": "*/*",
+        "x-global": "global",
+        "x-site": "site"
+      }
+    },
+    {
+      "name": "cookie-removed",
+      "defaults": {
+        "User-Agent": "Fixture-Default-UA",
+        "Accept": "*/*"
+      },
+      "global": {
+        "Cookie": "fixture=value"
+      },
+      "extractor": {
+        "cookie": "site=value"
+      },
+      "native_policy": "Source _calc_headers strips unscoped Cookie; native rejects raw user Cookie compatibility loading",
+      "expected_headers": {
+        "user-agent": "Fixture-Default-UA",
+        "accept": "*/*"
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "no-colon",
+      "args": [
+        "--add-headers",
+        "broken"
+      ]
+    },
+    {
+      "name": "empty-name",
+      "args": [
+        "--add-headers",
+        ":value"
+      ]
+    },
+    {
+      "name": "name-space",
+      "args": [
+        "--add-headers",
+        "X Test:value"
+      ]
+    },
+    {
+      "name": "name-padding",
+      "args": [
+        "--add-headers",
+        " X-Test:value"
+      ]
+    },
+    {
+      "name": "before-colon-space",
+      "args": [
+        "--add-headers",
+        "X-Test :value"
+      ]
+    },
+    {
+      "name": "multiple-names",
+      "args": [
+        "--add-headers",
+        "X-One,X-Two:value"
+      ]
+    },
+    {
+      "name": "punctuation-name",
+      "args": [
+        "--add-headers",
+        "X!Test:value"
+      ]
+    }
+  ],
+  "source_only_cases": [
+    {
+      "name": "cookie",
+      "args": [
+        "--add-headers",
+        "Cookie:fixture=value"
+      ],
+      "native_policy": "Native rejects raw Cookie compatibility loading; scoped Netscape/response cookies are separate",
+      "expected_headers": {
+        "cookie": "fixture=value"
+      }
+    },
+    {
+      "name": "unicode-name",
+      "args": [
+        "--add-headers",
+        "X-É:fixture"
+      ],
+      "native_policy": "Native rejects non-ASCII header names even though source option regex accepts Unicode word characters",
+      "expected_headers": {
+        "x-é": "fixture"
+      }
+    },
+    {
+      "name": "embedded-newline",
+      "args": [
+        "--add-headers",
+        "X-Test:one\r\ntwo"
+      ],
+      "native_policy": "Native rejects embedded CR/LF; source parser and HTTPHeaderDict alone do not enforce transport validity",
+      "expected_headers": {
+        "x-test": "one\r\ntwo"
+      }
+    }
+  ]
+}

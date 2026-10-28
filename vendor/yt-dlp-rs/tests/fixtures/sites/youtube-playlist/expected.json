@@ -1,0 +1,50 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.youtube.com/playlist?list=PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re\", \"title\": \"Test Playlist\", \"availability\": \"public\", \"channel_follower_count\": null, \"description\": \"A playlist description\", \"tags\": [\"one\", \"two\"], \"thumbnails\": [], \"modified_date\": \"20240105\", \"view_count\": 5678, \"playlist_count\": 3, \"channel\": \"Playlist Owner\", \"channel_id\": \"UCabcdefghijklmnopqrstuv\", \"uploader_id\": \"@Owner\", \"uploader\": \"Playlist Owner\", \"channel_url\": \"https://www.youtube.com/channel/UCabcdefghijklmnopqrstuv\", \"uploader_url\": \"https://www.youtube.com/@Owner\", \"_type\": \"playlist\", \"entries\": [{\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"BaW_jenozKc\", \"url\": \"https://www.youtube.com/watch?v=BaW_jenozKc\", \"title\": \"First video\", \"description\": null, \"duration\": 10, \"channel_id\": \"UC0123456789abcdefghijkl\", \"channel\": \"Uploader Name\", \"channel_url\": \"https://www.youtube.com/channel/UC0123456789abcdefghijkl\", \"uploader\": \"Uploader Name\", \"uploader_id\": \"@Uploader\", \"uploader_url\": \"https://www.youtube.com/@Uploader\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/BaW_jenozKc/hqdefault.jpg\", \"height\": 94, \"width\": 168}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 1200, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"YYYYYYYYYYY\", \"url\": \"https://www.youtube.com/watch?v=YYYYYYYYYYY\", \"title\": \"Second video\", \"description\": null, \"duration\": 3723, \"channel_id\": \"UC0123456789abcdefghijkl\", \"channel\": \"Uploader Name\", \"channel_url\": \"https://www.youtube.com/channel/UC0123456789abcdefghijkl\", \"uploader\": \"Uploader Name\", \"uploader_id\": \"@Uploader\", \"uploader_url\": \"https://www.youtube.com/@Uploader\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/YYYYYYYYYYY/hqdefault.jpg\", \"height\": 94, \"width\": 168}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 1200, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"ZZZZZZZZZZZ\", \"url\": \"https://www.youtube.com/watch?v=ZZZZZZZZZZZ\", \"title\": \"Third video\", \"description\": null, \"duration\": 120, \"channel_id\": \"UC0123456789abcdefghijkl\", \"channel\": \"Uploader Name\", \"channel_url\": \"https://www.youtube.com/channel/UC0123456789abcdefghijkl\", \"uploader\": \"Uploader Name\", \"uploader_id\": \"@Uploader\", \"uploader_url\": \"https://www.youtube.com/@Uploader\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/ZZZZZZZZZZZ/hqdefault.jpg\", \"height\": 94, \"width\": 168}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 1200, \"live_status\": null, \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}], \"extractor_key\": \"YoutubeTab\", \"extractor\": \"youtube:tab\", \"webpage_url\": \"https://www.youtube.com/playlist?list=PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re\", \"original_url\": \"https://www.youtube.com/playlist?list=PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re\", \"webpage_url_basename\": \"playlist\", \"webpage_url_domain\": \"youtube.com\", \"release_year\": null, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/playlist?list=PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "BaW_jenozKc|First video|10|https://www.youtube.com/watch?v=BaW_jenozKc",
+    "YYYYYYYYYYY|Second video|3723|https://www.youtube.com/watch?v=YYYYYYYYYYY",
+    "ZZZZZZZZZZZ|Third video|120|https://www.youtube.com/watch?v=ZZZZZZZZZZZ"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=BaW_jenozKc&list=PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(playlist_id)s|%(id)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re|BaW_jenozKc",
+    "PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re|YYYYYYYYYYY",
+    "PLwiyx1dc3P2JR9N8gQaQN_BCvlSlap7re|ZZZZZZZZZZZ"
+   ],
+   "stderr": [],
+   "files": {}
+  }
+ ]
+}

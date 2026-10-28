@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://rtrfm.com.au/show-episode/breakfast-2021-11-11/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><meta property=\"og:description\" content=\"Wake up &amp; listen\"></head><body>\n<a onclick=\"window.playShow('breakfast', '2021-11-11', 'Breakfast with Taylah')\">Play</a></body></html>"
+  },
+  {
+   "url": "https://www.rtrfm.com.au/shows/old/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><a onclick=\".playShowFrom(&quot;x&quot;); .playShowFrom(\\'old\\', \\'2020-01-02\\', \\'Old Show\\')\">Play</a>\n<script>x.playShowFrom(\"old\", \"2020-01-02\", \"Old Show\")</script></body></html>"
+  },
+  {
+   "url": "https://rtrfm.com.au/shows/none/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>nothing</body></html>"
+  },
+  {
+   "url": "https://rtrfm.com.au/shows/nokey/",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<script>x.playShow(\"nokey\", \"2020-01-03\", \"No Key\")</script>"
+  },
+  {
+   "url": "https://restreams.rtrfm.com.au/rzz?n=breakfast&d=2021-11-11",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"u\": \"https://rtrfm.test/a.mp3\"}"
+  },
+  {
+   "url": "https://restreams.rtrfm.com.au/rzz?n=old&d=2020-01-02",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"u\": \"https://rtrfm.test/old.mp4\"}"
+  },
+  {
+   "url": "https://restreams.rtrfm.com.au/rzz?n=nokey&d=2020-01-03",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{}"
+  },
+  {
+   "url": "https://rtrfm.test/a.mp3",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  }
+ ]
+}

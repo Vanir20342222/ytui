@@ -1,0 +1,86 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3l4omssdl632g\", \"formats\": [{\"format_id\": \"hls-1200\", \"format_index\": null, \"url\": \"https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/720p/video.m3u8\", \"manifest_url\": \"https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/playlist.m3u8\", \"tbr\": 1200.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 1280, \"height\": 720, \"vcodec\": \"avc1.64001f\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"hls-1200 - 1280x720\"}, {\"format_id\": \"blob\", \"quality\": 1, \"url\": \"https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aabcdefghijklmnop&cid=bafkreivid\", \"width\": 1280, \"height\": 720, \"filesize\": 123456, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"blob - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aabcdefghijklmnop&cid=bafkreicap\", \"ext\": \"vtt\"}]}, \"thumbnail\": \"https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/thumbnail.jpg\", \"alt_title\": \"Alt text\", \"uploader\": \"The Poster\", \"uploader_id\": \"poster.bsky.social\", \"uploader_url\": \"https://bsky.app/profile/poster.bsky.social\", \"channel_id\": \"did:plc:abcdefghijklmnop\", \"channel_url\": \"https://bsky.app/profile/did:plc:abcdefghijklmnop\", \"like_count\": 12, \"repost_count\": 3, \"comment_count\": 4, \"timestamp\": 1729731642, \"tags\": [\"porn\", \"nudity\"], \"age_limit\": 18, \"description\": \"A long post\\nabout cats and dogs and many other animals that keeps going past seventy-two characters\", \"title\": \"A long post about cats and dogs and many other animals that keeps goi...\", \"webpage_url\": \"https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g\", \"original_url\": \"https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g\", \"webpage_url_basename\": \"3l4omssdl632g\", \"webpage_url_domain\": \"bsky.app\", \"extractor\": \"Bluesky\", \"extractor_key\": \"Bluesky\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://video.bsky.app/watch/did:plc:abcdefghijklmnop/bafkreivid/thumbnail.jpg\", \"id\": \"0\"}], \"display_id\": \"3l4omssdl632g\", \"fulltitle\": \"A long post about cats and dogs and many other animals that keeps goi...\", \"upload_date\": \"20241024\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"blob\", \"quality\": 1, \"url\": \"https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aabcdefghijklmnop&cid=bafkreivid\", \"width\": 1280, \"height\": 720, \"filesize\": 123456, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"blob - 1280x720\", \"_filename\": \"A long post about cats and dogs and many other animals that keeps goi... [3l4omssdl632g].mp4\", \"filename\": \"A long post about cats and dogs and many other animals that keeps goi... [3l4omssdl632g].mp4\", \"__write_download_archive\": false}], \"format_id\": \"blob\", \"quality\": 1, \"url\": \"https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aabcdefghijklmnop&cid=bafkreivid\", \"width\": 1280, \"height\": 720, \"filesize\": 123456, \"ext\": \"mp4\", \"protocol\": \"https\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"blob - 1280x720\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bluesky] Extracting URL: https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g",
+    "[Bluesky] 3l4omssdl632g: Downloading JSON metadata",
+    "[Bluesky] 3l4omssdl632g: Downloading m3u8 information",
+    "[Bluesky] 3l4omssdl632g: Fetching service endpoint",
+    "[info] Available formats for 3l4omssdl632g:",
+    "ID       EXT RESOLUTION |   FILESIZE   TBR PROTO | VCODEC      ACODEC",
+    "------------------------------------------------------------------------",
+    "hls-1200 mp4 1280x720   |            1200k m3u8  | avc1.64001f mp4a.40.2",
+    "blob     mp4 1280x720   |  120.56KiB       https | unknown     unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "at://poster.bsky.social/app.bsky.feed.post/3extpost00001",
+   "args": [
+    "--print",
+    "%(id)s|%(webpage_url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "clip|https://media.example.test/clip.mp4"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://bsky.app/profile/poster.bsky.social/post/3textonly0001",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Bluesky] 3textonly0001: No video could be found in this post"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g",
+   "args": [
+    "-f",
+    "blob",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Bluesky] Extracting URL: https://bsky.app/profile/poster.bsky.social/post/3l4omssdl632g",
+    "[Bluesky] 3l4omssdl632g: Downloading JSON metadata",
+    "[Bluesky] 3l4omssdl632g: Downloading m3u8 information",
+    "[Bluesky] 3l4omssdl632g: Fetching service endpoint",
+    "[info] 3l4omssdl632g: Downloading 1 format(s): blob",
+    "[download] Destination: 3l4omssdl632g.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "3l4omssdl632g.mp4": 17
+   }
+  }
+ ]
+}

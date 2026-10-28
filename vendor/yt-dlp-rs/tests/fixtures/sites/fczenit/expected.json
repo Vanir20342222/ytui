@@ -1,0 +1,97 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.fc-zenit.ru/video/41044/",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"41044\", \"title\": \"Goal of the week\", \"thumbnail\": \"http://fc-zenit.test/p.jpg\", \"formats\": [{\"format_id\": \"0\", \"url\": \"http://fc-zenit.test/nolabel.mp4\", \"height\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"0 - unknown\"}, {\"format_id\": \"HD\", \"url\": \"http://fc-zenit.test/vhd.mp4\", \"height\": null, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"HD - unknown\"}, {\"format_id\": \"720\", \"url\": \"http://fc-zenit.test/v720.mp4\", \"height\": 720, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720 - 720p\"}], \"duration\": 93.5, \"timestamp\": 1471873200, \"tags\": [\"Football\", \"Zenit\"], \"webpage_url\": \"https://www.fc-zenit.ru/video/41044/\", \"original_url\": \"https://www.fc-zenit.ru/video/41044/\", \"webpage_url_basename\": \"41044\", \"webpage_url_domain\": \"fc-zenit.ru\", \"extractor\": \"Fczenit\", \"extractor_key\": \"Fczenit\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"http://fc-zenit.test/p.jpg\", \"id\": \"0\"}], \"display_id\": \"41044\", \"fulltitle\": \"Goal of the week\", \"duration_string\": \"1:33\", \"upload_date\": \"20160822\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"format_id\": \"720\", \"url\": \"http://fc-zenit.test/v720.mp4\", \"height\": 720, \"protocol\": \"http\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": \"720p\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"720 - 720p\", \"_filename\": \"Goal of the week [41044].mp4\", \"filename\": \"Goal of the week [41044].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/41044/",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Fczenit] Extracting URL: https://www.fc-zenit.ru/video/41044/",
+    "[Fczenit] 41044: Downloading webpage",
+    "[Fczenit] LMNO123: Downloading JSON metadata",
+    "[info] Available formats for 41044:",
+    "ID  EXT RESOLUTION | PROTO | VCODEC  ACODEC",
+    "--------------------------------------------",
+    "0   mp4 unknown    | http  | unknown unknown",
+    "HD  mp4 unknown    | http  | unknown unknown",
+    "720 mp4 720p       | http  | unknown unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/41044/",
+   "args": [
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(timestamp)s|%(tags)s|%(format_id)s|%(height)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "41044|Goal of the week|93.5|1471873200|['Football', 'Zenit']|720|720"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/41044/",
+   "args": [
+    "--no-progress",
+    "-f",
+    "720",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[Fczenit] Extracting URL: https://www.fc-zenit.ru/video/41044/",
+    "[Fczenit] 41044: Downloading webpage",
+    "[Fczenit] LMNO123: Downloading JSON metadata",
+    "[info] 41044: Downloading 1 format(s): 720",
+    "[download] Destination: 41044.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "41044.mp4": 792
+   }
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/2",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Fczenit] 2: Unable to extract msi id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://www.fc-zenit.ru/video/3",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [Fczenit] 3: Unable to extract msi id; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  }
+ ]
+}

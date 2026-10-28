@@ -1,0 +1,6 @@
+[
+ {"url": "https://benprunty.bandcamp.com/track/lanius-battle", "args": ["-J"]},
+ {"url": "https://youtube-dl.bandcamp.com/track/youtube-dl-test-song", "args": ["-J"]},
+ {"url": "https://youtube-dl.bandcamp.com/track/youtube-dl-test-song", "args": ["-F"]},
+ {"url": "https://benprunty.bandcamp.com/track/lanius-battle", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]}
+]

@@ -1,0 +1,88 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://www.youtube.com/@Chan/videos",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"UCchannelchannelchannel1\", \"channel\": \"Test Channel\", \"channel_id\": \"UCchannelchannelchannel1\", \"title\": \"Test Channel - Videos\", \"availability\": \"public\", \"channel_follower_count\": 1230000, \"description\": \"The Test Channel channel\", \"tags\": [\"gaming\", \"long form\", \"tech\"], \"thumbnails\": [{\"url\": \"https://yt3.googleusercontent.com/banner=w1060-fcrop64\", \"height\": 175, \"width\": 1060, \"preference\": -10, \"id\": \"0\", \"resolution\": \"1060x175\"}, {\"url\": \"https://yt3.googleusercontent.com/banner=s0\", \"id\": \"banner_uncropped\", \"preference\": -5}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s900-c-k\", \"height\": 900, \"width\": 900, \"id\": \"2\", \"resolution\": \"900x900\"}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s0\", \"id\": \"avatar_uncropped\", \"preference\": 1}], \"uploader_id\": \"@Chan\", \"uploader_url\": \"https://www.youtube.com/@Chan\", \"channel_is_verified\": true, \"modified_date\": null, \"view_count\": null, \"playlist_count\": 3, \"uploader\": \"Test Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCchannelchannelchannel1\", \"_type\": \"playlist\", \"entries\": [{\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"AAAAAAAAAAA\", \"url\": \"https://www.youtube.com/watch?v=AAAAAAAAAAA\", \"title\": \"Channel video one\", \"description\": \"About Channel video one\", \"duration\": 754, \"channel_id\": null, \"channel\": null, \"channel_url\": null, \"uploader\": null, \"uploader_id\": null, \"uploader_url\": null, \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg?sqp=x\", \"height\": 94, \"width\": 168}, {\"url\": \"https://i.ytimg.com/vi/AAAAAAAAAAA/maxresdefault.jpg\", \"height\": 720, \"width\": 1280}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 1234, \"live_status\": null, \"channel_is_verified\": true, \"__x_forwarded_for_ip\": null}, {\"_type\": \"url\", \"ie_key\": \"Youtube\", \"id\": \"BBBBBBBBBBB\", \"url\": \"https://www.youtube.com/watch?v=BBBBBBBBBBB\", \"title\": \"Channel video two\", \"description\": \"About Channel video two\", \"duration\": 3723, \"channel_id\": null, \"channel\": null, \"channel_url\": null, \"uploader\": null, \"uploader_id\": null, \"uploader_url\": null, \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/BBBBBBBBBBB/hqdefault.jpg?sqp=x\", \"height\": 94, \"width\": 168}, {\"url\": \"https://i.ytimg.com/vi/BBBBBBBBBBB/maxresdefault.jpg\", \"height\": 720, \"width\": 1280}], \"timestamp\": null, \"release_timestamp\": null, \"availability\": null, \"view_count\": 0, \"live_status\": \"was_live\", \"channel_is_verified\": null, \"__x_forwarded_for_ip\": null}, {\"title\": \"Lockup video\", \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/DDDDDDDDDDD/hqdefault.jpg\", \"height\": 270, \"width\": 480}], \"duration\": 201, \"view_count\": 5600, \"timestamp\": null, \"live_status\": null, \"availability\": null, \"channel_url\": null, \"uploader_url\": null, \"creators\": null, \"ie_key\": \"Youtube\", \"id\": \"DDDDDDDDDDD\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/watch?v=DDDDDDDDDDD\", \"__x_forwarded_for_ip\": null}], \"extractor_key\": \"YoutubeTab\", \"extractor\": \"youtube:tab\", \"webpage_url\": \"https://www.youtube.com/@Chan/videos\", \"original_url\": \"https://www.youtube.com/@Chan/videos\", \"webpage_url_basename\": \"videos\", \"webpage_url_domain\": \"youtube.com\", \"release_year\": null, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/videos",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(id)s|%(title)s|%(duration)s|%(view_count)s|%(live_status)s|%(url)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "AAAAAAAAAAA|Channel video one|754|1234|NA|https://www.youtube.com/watch?v=AAAAAAAAAAA",
+    "BBBBBBBBBBB|Channel video two|3723|0|was_live|https://www.youtube.com/watch?v=BBBBBBBBBBB",
+    "DDDDDDDDDDD|Lockup video|201|5600|NA|https://www.youtube.com/watch?v=DDDDDDDDDDD"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/shorts",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"UCchannelchannelchannel1\", \"channel\": \"Test Channel\", \"channel_id\": \"UCchannelchannelchannel1\", \"title\": \"Test Channel - Shorts\", \"availability\": \"public\", \"channel_follower_count\": 1230000, \"description\": \"The Test Channel channel\", \"tags\": [\"gaming\", \"long form\", \"tech\"], \"thumbnails\": [{\"url\": \"https://yt3.googleusercontent.com/banner=w1060-fcrop64\", \"height\": 175, \"width\": 1060, \"preference\": -10, \"id\": \"0\", \"resolution\": \"1060x175\"}, {\"url\": \"https://yt3.googleusercontent.com/banner=s0\", \"id\": \"banner_uncropped\", \"preference\": -5}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s900-c-k\", \"height\": 900, \"width\": 900, \"id\": \"2\", \"resolution\": \"900x900\"}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s0\", \"id\": \"avatar_uncropped\", \"preference\": 1}], \"uploader_id\": \"@Chan\", \"uploader_url\": \"https://www.youtube.com/@Chan\", \"channel_is_verified\": true, \"modified_date\": null, \"view_count\": null, \"playlist_count\": 2, \"uploader\": \"Test Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCchannelchannelchannel1\", \"_type\": \"playlist\", \"entries\": [{\"title\": \"Short one\", \"view_count\": 12000, \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SSSSSSSSSS1/frame0.jpg\", \"height\": 1920, \"width\": 1080}], \"ie_key\": \"Youtube\", \"id\": \"SSSSSSSSSS1\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/shorts/SSSSSSSSSS1\", \"__x_forwarded_for_ip\": null}, {\"title\": \"Short two\", \"view_count\": 1, \"thumbnails\": [{\"url\": \"https://i.ytimg.com/vi/SSSSSSSSSS2/frame0.jpg\", \"height\": 1920, \"width\": 1080}], \"ie_key\": \"Youtube\", \"id\": \"SSSSSSSSSS2\", \"_type\": \"url\", \"url\": \"https://www.youtube.com/shorts/SSSSSSSSSS2\", \"__x_forwarded_for_ip\": null}], \"extractor_key\": \"YoutubeTab\", \"extractor\": \"youtube:tab\", \"webpage_url\": \"https://www.youtube.com/@Chan/shorts\", \"original_url\": \"https://www.youtube.com/@Chan/shorts\", \"webpage_url_basename\": \"shorts\", \"webpage_url_domain\": \"youtube.com\", \"release_year\": null, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/@Solo",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "%(playlist_id)s|%(playlist_title)s|%(id)s|%(title)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "UCsolosolosolosolosolo12|Solo Channel - Videos|CCCCCCCCCCC|Solo video"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/about",
+   "args": [
+    "-J",
+    "--flat-playlist"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"@Chan\", \"channel\": \"Test Channel\", \"channel_id\": \"UCchannelchannelchannel1\", \"title\": \"Test Channel\", \"availability\": \"public\", \"channel_follower_count\": 1230000, \"description\": \"The Test Channel channel\", \"tags\": [\"gaming\", \"long form\", \"tech\"], \"thumbnails\": [{\"url\": \"https://yt3.googleusercontent.com/banner=w1060-fcrop64\", \"height\": 175, \"width\": 1060, \"preference\": -10, \"id\": \"0\", \"resolution\": \"1060x175\"}, {\"url\": \"https://yt3.googleusercontent.com/banner=s0\", \"id\": \"banner_uncropped\", \"preference\": -5}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s900-c-k\", \"height\": 900, \"width\": 900, \"id\": \"2\", \"resolution\": \"900x900\"}, {\"url\": \"https://yt3.googleusercontent.com/avatar=s0\", \"id\": \"avatar_uncropped\", \"preference\": 1}], \"uploader_id\": \"@Chan\", \"uploader_url\": \"https://www.youtube.com/@Chan\", \"channel_is_verified\": true, \"modified_date\": null, \"view_count\": null, \"playlist_count\": 0, \"uploader\": \"Test Channel\", \"channel_url\": \"https://www.youtube.com/channel/UCchannelchannelchannel1\", \"_type\": \"playlist\", \"entries\": [], \"webpage_url\": \"https://www.youtube.com/@Chan/about\", \"original_url\": \"https://www.youtube.com/@Chan/about\", \"webpage_url_basename\": \"about\", \"webpage_url_domain\": \"youtube.com\", \"extractor\": \"youtube:tab\", \"extractor_key\": \"YoutubeTab\", \"release_year\": null, \"__files_to_move\": {}}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://www.youtube.com/@Chan/streams",
+   "args": [
+    "--flat-playlist",
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [youtube:tab] @Chan: This channel does not have a streams tab"
+   ],
+   "files": {}
+  }
+ ]
+}

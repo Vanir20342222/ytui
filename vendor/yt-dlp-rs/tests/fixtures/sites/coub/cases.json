@@ -1,0 +1,6 @@
+[
+ {"url": "http://coub.com/view/5u5n1", "args": ["-J"]},
+ {"url": "coub:5u5n1", "args": ["--print", "%(id)s|%(webpage_url)s|%(extractor)s"]},
+ {"url": "https://coub.com/embed/gone1", "args": ["--print", "id"]},
+ {"url": "http://coub.com/view/5u5n1", "args": ["--no-progress", "-f", "html5-video-high", "-o", "%(id)s.%(ext)s"]}
+]

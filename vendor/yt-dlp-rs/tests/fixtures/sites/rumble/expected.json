@@ -1,0 +1,85 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://rumble.com/embed/vb0ofn",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"vb0ofn\", \"title\": \"Winter-loving dog helps girls dig a snow fort & more\", \"formats\": [{\"acodec\": \"aac\", \"vcodec\": \"none\", \"url\": \"https://sp.rmbl.ws/s8/2/audio.aac\", \"format_id\": \"audio\", \"format_note\": null, \"fps\": null, \"tbr\": 96, \"protocol\": \"https\", \"ext\": \"aac\", \"audio_ext\": \"aac\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 96, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 1236000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio - audio only\"}, {\"acodec\": \"none\", \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/timeline.mp4\", \"format_id\": \"timeline-180p\", \"format_note\": \"Timeline\", \"fps\": null, \"tbr\": 100, \"width\": 320, \"height\": 180, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 100, \"resolution\": \"320x180\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 1287500, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"timeline-180p - 320x180 (Timeline)\"}, {\"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/360.mp4\", \"format_id\": \"mp4-360p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 650, \"filesize\": 8000000, \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-360p - 640x360\"}, {\"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/720.mp4\", \"format_id\": \"mp4-720p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 2000, \"filesize\": 26000000, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-720p - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://rumble.com/cc/en.vtt\", \"name\": \"English\", \"ext\": \"vtt\"}]}, \"thumbnails\": [{\"url\": \"https://sp.rmbl.ws/s8/1/thumb.jpg\", \"width\": 1280, \"height\": 720, \"id\": \"0\", \"resolution\": \"1280x720\"}], \"timestamp\": 1612662578, \"channel\": \"LovingMontana\", \"channel_url\": \"https://rumble.com/c/c-546523\", \"duration\": 103, \"uploader\": \"LovingMontana\", \"live_status\": \"not_live\", \"webpage_url\": \"https://rumble.com/embed/vb0ofn\", \"original_url\": \"https://rumble.com/embed/vb0ofn\", \"webpage_url_basename\": \"vb0ofn\", \"webpage_url_domain\": \"rumble.com\", \"extractor\": \"RumbleEmbed\", \"extractor_key\": \"RumbleEmbed\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://sp.rmbl.ws/s8/1/thumb.jpg\", \"display_id\": \"vb0ofn\", \"fulltitle\": \"Winter-loving dog helps girls dig a snow fort & more\", \"duration_string\": \"1:43\", \"upload_date\": \"20210207\", \"release_year\": null, \"is_live\": false, \"was_live\": false, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://sp.rmbl.ws/s8/2/720.mp4\", \"format_id\": \"mp4-720p\", \"fps\": 29.97, \"tbr\": 2000, \"filesize\": 26000000, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-720p - 1280x720\", \"_filename\": \"Winter-loving dog helps girls dig a snow fort & more [vb0ofn].mp4\", \"filename\": \"Winter-loving dog helps girls dig a snow fort & more [vb0ofn].mp4\", \"__write_download_archive\": false}], \"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/720.mp4\", \"format_id\": \"mp4-720p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 2000, \"filesize\": 26000000, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-720p - 1280x720\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rumble.com/embed/vb0ofn",
+   "args": [
+    "-F"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[RumbleEmbed] Extracting URL: https://rumble.com/embed/vb0ofn",
+    "[RumbleEmbed] vb0ofn: Downloading JSON metadata",
+    "[info] Available formats for vb0ofn:",
+    "ID            EXT RESOLUTION FPS |  FILESIZE   TBR PROTO | VCODEC      VBR ACODEC     ABR MORE INFO",
+    "---------------------------------------------------------------------------------------------------",
+    "audio         aac audio only     | ≈ 1.18MiB   96k https | audio only      aac        96k",
+    "timeline-180p mp4 320x180        | ≈ 1.23MiB  100k https | unknown    100k video only     Timeline",
+    "mp4-360p      mp4 640x360     30 |   7.63MiB  650k https | unknown         unknown",
+    "mp4-720p      mp4 1280x720    30 |  24.80MiB 2000k https | unknown         unknown"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rumble.com/vdmum1-moose-the-dog.html",
+   "args": [
+    "-j"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"vb0ofn\", \"title\": \"Winter-loving dog helps girls dig a snow fort & more\", \"formats\": [{\"acodec\": \"aac\", \"vcodec\": \"none\", \"url\": \"https://sp.rmbl.ws/s8/2/audio.aac\", \"format_id\": \"audio\", \"format_note\": null, \"fps\": null, \"tbr\": 96, \"protocol\": \"https\", \"ext\": \"aac\", \"audio_ext\": \"aac\", \"video_ext\": \"none\", \"vbr\": 0, \"abr\": 96, \"resolution\": \"audio only\", \"aspect_ratio\": null, \"filesize_approx\": 1236000, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"audio - audio only\"}, {\"acodec\": \"none\", \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/timeline.mp4\", \"format_id\": \"timeline-180p\", \"format_note\": \"Timeline\", \"fps\": null, \"tbr\": 100, \"width\": 320, \"height\": 180, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"abr\": 0, \"vbr\": 100, \"resolution\": \"320x180\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"filesize_approx\": 1287500, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"timeline-180p - 320x180 (Timeline)\"}, {\"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/360.mp4\", \"format_id\": \"mp4-360p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 650, \"filesize\": 8000000, \"width\": 640, \"height\": 360, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-360p - 640x360\"}, {\"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/720.mp4\", \"format_id\": \"mp4-720p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 2000, \"filesize\": 26000000, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-720p - 1280x720\"}], \"subtitles\": {\"en\": [{\"url\": \"https://rumble.com/cc/en.vtt\", \"name\": \"English\", \"ext\": \"vtt\"}]}, \"thumbnails\": [{\"url\": \"https://sp.rmbl.ws/s8/1/thumb.jpg\", \"width\": 1280, \"height\": 720, \"id\": \"0\", \"resolution\": \"1280x720\"}], \"timestamp\": 1612662578, \"channel\": \"LovingMontana\", \"channel_url\": \"https://rumble.com/c/c-546523\", \"duration\": 103, \"uploader\": \"LovingMontana\", \"live_status\": \"not_live\", \"original_url\": \"https://rumble.com/vdmum1-moose-the-dog.html\", \"webpage_url\": \"https://rumble.com/vdmum1-moose-the-dog.html\", \"webpage_url_basename\": \"vdmum1-moose-the-dog.html\", \"webpage_url_domain\": \"rumble.com\", \"extractor\": \"RumbleEmbed\", \"extractor_key\": \"RumbleEmbed\", \"view_count\": 3456, \"like_count\": 1200, \"dislike_count\": 12, \"description\": \"Moose the dog helps.\", \"playlist\": null, \"playlist_index\": null, \"thumbnail\": \"https://sp.rmbl.ws/s8/1/thumb.jpg\", \"display_id\": \"vb0ofn\", \"fulltitle\": \"Winter-loving dog helps girls dig a snow fort & more\", \"duration_string\": \"1:43\", \"upload_date\": \"20210207\", \"release_year\": null, \"is_live\": false, \"was_live\": false, \"requested_subtitles\": null, \"_has_drm\": null, \"acodec\": null, \"vcodec\": null, \"url\": \"https://sp.rmbl.ws/s8/2/720.mp4\", \"format_id\": \"mp4-720p\", \"format_note\": null, \"fps\": 29.97, \"tbr\": 2000, \"filesize\": 26000000, \"width\": 1280, \"height\": 720, \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"1280x720\", \"dynamic_range\": \"SDR\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"mp4-720p - 1280x720\", \"_filename\": \"Winter-loving dog helps girls dig a snow fort & more [vb0ofn].mp4\", \"filename\": \"Winter-loving dog helps girls dig a snow fort & more [vb0ofn].mp4\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rumble.com/embed/vgone1",
+   "args": [
+    "-j"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "WARNING: [RumbleEmbed] vgone1: Video not found",
+    "WARNING: Extractor failed to obtain \"title\". Creating a generic title instead",
+    "ERROR: [RumbleEmbed] vgone1: No video formats found!; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://rumble.com/embed/vb0ofn",
+   "args": [
+    "-f",
+    "mp4-360p",
+    "--no-progress",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[RumbleEmbed] Extracting URL: https://rumble.com/embed/vb0ofn",
+    "[RumbleEmbed] vb0ofn: Downloading JSON metadata",
+    "[info] vb0ofn: Downloading 1 format(s): mp4-360p",
+    "[download] Destination: vb0ofn.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "vb0ofn.mp4": 19
+   }
+  }
+ ]
+}

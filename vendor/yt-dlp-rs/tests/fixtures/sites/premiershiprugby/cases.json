@@ -1,0 +1,8 @@
+[
+ {"url": "https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons", "args": ["-j"]},
+ {"url": "https://www.premiershiprugby.com/watch/full-match-harlequins-v-newcastle-falcons", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(duration)s|%(tags)s|%(categories)s"]},
+ {"url": "https://www.premiershiprugby.com/watch/plain", "args": ["-j"]},
+ {"url": "https://www.premiershiprugby.com/watch/no-hero", "args": ["-j"]},
+ {"url": "https://www.premiershiprugby.com/watch/no-data", "args": ["-j"]},
+ {"url": "https://www.premiershiprugby.com/watch/no-id", "args": ["-j"]}
+]

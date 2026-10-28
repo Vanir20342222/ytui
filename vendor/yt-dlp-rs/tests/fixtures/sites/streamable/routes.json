@@ -1,0 +1,46 @@
+{
+ "routes": [
+  {
+   "url": "https://ajax.streamable.com/videos/dnd1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body_file": "dnd1.json"
+  },
+  {
+   "url": "https://ajax.streamable.com/videos/busy",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"status\": 1, \"files\": {}}"
+  },
+  {
+   "url": "https://cdn-cf-east.streamable.com/video/mp4/dnd1.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "media.mp4"
+  },
+  {
+   "url": "https://cdn-cf-east.streamable.com/video/mp4-mobile/dnd1.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body_file": "media.mp4"
+  },
+  {
+   "url": "https://blog.example.test/post",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Post</title></head><body><iframe src=\"https://streamable.com/e/dnd1\"></iframe></body></html>"
+  },
+  {
+   "url": "https://blog.example.test/two",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title>Two</title><meta name=\"description\" content=\"Two embeds\"></head><body><iframe src='//streamable.com/e/dnd1?a=1&amp;b=2'></iframe><iframe width=\"1\" src=\"https://streamable.com/s/dnd1/x\"></iframe><iframe src=\"https://streamable.com/e/dnd1?a=1&amp;b=2\"></iframe><iframe src=\"https://streamable.com/\"></iframe></body></html>"
+  }
+ ]
+}

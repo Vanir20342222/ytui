@@ -1,0 +1,6 @@
+[
+ {"url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one", "args": ["-j"]},
+ {"url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one", "args": ["-F"]},
+ {"url": "http://www.thisamericanlife.org/radio-archives/episode/487/harper-high-school-part-one", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s|%(ext)s|%(protocol)s"]},
+ {"url": "http://www.thisamericanlife.org/play_full.php?play=2", "args": ["-j"]}
+]

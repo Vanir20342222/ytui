@@ -1,0 +1,9 @@
+[
+ {"url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461", "args": ["-j"]},
+ {"url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461", "args": ["-F"]},
+ {"url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(ext)s"]},
+ {"url": "https://www.oneplace.com/ministries/a-daily-walk/listen/living-in-the-last-days-part-2-958461", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://www.oneplace.com/ministries/x/listen/meta-only-2", "args": ["-j"]},
+ {"url": "https://www.oneplace.com/ministries/x/listen/og-3", "args": ["-j"]},
+ {"url": "https://www.oneplace.com/ministries/x/listen/none-4", "args": ["-j"]}
+]

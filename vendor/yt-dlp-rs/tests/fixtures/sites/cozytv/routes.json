@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://api.cozy.tv/cache/beardson/replay/2021-11-19_1",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"pokemon pt2\", \"user\": \"Beardson\", \"date\": \"2021-11-19T20:01:02.000Z\", \"duration\": 7981}"
+  },
+  {
+   "url": "https://api.cozy.tv/cache/x/replay/b2",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"user\": \"\", \"date\": \"garbage\", \"duration\": 12.5}"
+  },
+  {
+   "url": "https://api.cozy.tv/cache/x/replay/c3",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"Gone\"}"
+  },
+  {
+   "url": "https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/index.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "https://cozycdn.foxtrotstream.xyz/replays/beardson/2021-11-19_1/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  },
+  {
+   "url": "https://cozycdn.foxtrotstream.xyz/replays/x/b2/index.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  }
+ ]
+}

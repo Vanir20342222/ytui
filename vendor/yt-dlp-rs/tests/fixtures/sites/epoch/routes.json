@@ -1,0 +1,60 @@
+{
+ "routes": [
+  {
+   "url": "https://www.theepochtimes.com/rex-lee-on-intrusive-apps_4661688.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><head><title> Rex Lee\n on apps </title></head><body>\n<div class=\"player\" id=\"videobox\" data-id=\"a3dd732c-4750\"><div>inner</div></div></body></html>"
+  },
+  {
+   "url": "https://www.theepochtimes.com/nodata_2.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div id=\"videobox\">x</div></body></html>"
+  },
+  {
+   "url": "https://www.theepochtimes.com/nobox_3.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body>none</body></html>"
+  },
+  {
+   "url": "https://www.theepochtimes.com/unclosed_4.html",
+   "headers": {
+    "Content-Type": "text/html; charset=utf-8"
+   },
+   "body": "<html><body><div id=\"videobox\" data-id=\"u\">x</body></html>"
+  },
+  {
+   "url": "http://vs1.youmaker.com/assets/a3dd732c-4750/playlist.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "master.m3u8"
+  },
+  {
+   "url": "http://vs1.youmaker.com/assets/a3dd732c-4750/video.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "video.m3u8"
+  },
+  {
+   "url": "http://vs1.youmaker.com/assets/a3dd732c-4750/subs_en.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_en.m3u8"
+  },
+  {
+   "url": "http://vs1.youmaker.com/assets/a3dd732c-4750/subs_de.m3u8",
+   "headers": {
+    "Content-Type": "application/vnd.apple.mpegurl"
+   },
+   "body_file": "subs_de.m3u8"
+  }
+ ]
+}

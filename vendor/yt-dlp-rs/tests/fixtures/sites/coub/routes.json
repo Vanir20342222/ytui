@@ -1,0 +1,25 @@
+{
+ "routes": [
+  {
+   "url": "http://coub.com/api/v2/coubs/5u5n1.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"title\": \"The Matrix Moonwalk\", \"picture\": \"https://coub-anubis.test/cover.jpg\", \"duration\": \"4.6\", \"published_at\": \"\", \"created_at\": \"2015-09-25T17:45:23Z\", \"channel\": {\"title\": \"Peter Sweet\", \"permalink\": \"stone-cold\"}, \"views_count\": 0, \"views_increase_count\": 120, \"likes_count\": \"8\", \"recoubs_count\": 2, \"age_restricted\": null, \"age_restricted_by_admin\": false, \"file_versions\": {\"html5\": {\"video\": {\"high\": {\"url\": \"https://coub.test/v-high.mp4\", \"size\": 900}, \"med\": {\"url\": \"https://coub.test/v-med.mp4\", \"size\": 500}, \"bad\": \"x\"}, \"audio\": {\"high\": {\"url\": \"https://coub.test/a-high.mp3\", \"size\": 100}, \"low\": {\"url\": \"\"}}, \"other\": {}}, \"iphone\": {\"url\": \"https://coub.test/iphone.mp4\"}, \"mobile\": {\"audio_url\": \"https://coub.test/mobile.mp3\"}}}"
+  },
+  {
+   "url": "http://coub.com/api/v2/coubs/gone1.json",
+   "headers": {
+    "Content-Type": "application/json"
+   },
+   "body": "{\"error\": \"Coub not found\"}"
+  },
+  {
+   "url": "https://coub.test/v-high.mp4",
+   "headers": {
+    "Content-Type": "video/mp4"
+   },
+   "body": "0000ftypisom-coub"
+  }
+ ]
+}

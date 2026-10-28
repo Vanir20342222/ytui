@@ -745,3 +745,58 @@ cancellation/tool metadata and player recovery, plus real M4A/Opus/FLAC conversi
 and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata,
 duplicate invocation and missing output records on hook failure (M3/M8). Final
 counts and reproducible commands are in docs/VALIDATION.md.
+
+### M9: Android and monorepo (in progress)
+
+**Current Android UI decision (2026-10-28):** the user's Tab S9 acceptance found
+broken text input, theme switching and desktop-only account instructions. The
+user authorized changing the stack. Keep the Rust engine and use native Jetpack
+Compose for Android screens, retaining terminal styling/themes and private state.
+This supersedes the initial Rust-UI choice below. See
+[native UI migration](docs/android/NATIVE_UI_MIGRATION.md) and require new actual
+input/theme/account tests before recommending its APK.
+
+The user chose a Rust engine **and Rust UI**, with APK sideloading, targeting
+Nothing Phone (3a) and Samsung Galaxy Tab S9. Desktop lives in `apps/desktop`;
+portable providers/themes are shared with the new Rust mobile engine/egui UI.
+Android platform adapters supply decoding/background media, downloads, input,
+notifications and file access. No Python subprocess runs on Android.
+See [Android implementation plan](docs/android/PLAN.md),
+[actual parity gaps](docs/android/PARITY.md), [build/use](docs/android/README.md)
+and [validation evidence](docs/android/VALIDATION.md). M9 is not complete until
+live/mobile/device gates and remaining capability gaps are addressed.
+
+The mobile acceptance suite exercises actual JNI, saved-player challenges in
+Android's isolated runtime, synthetic media decoding/PCM, preview restoration,
+offline downloads and repeated UI teardown/recreation. Device logs are checked
+for Rust panics as well as JUnit failures. Original upstream source/licenses and
+documented narrow Android adapters are retained in `vendor/{yt-dlp-rs,winit,eframe}`.
+Public YouTube is an explicit separate workflow input; no account or live-service
+success is inferred from the deterministic checks.
+
+Finite Music/radio collection continuation, local recent/previous/forward history,
+and MediaSession navigation are implemented with decoder-start commits and manual
+queue priority. Timed lyrics now have reviewed online lookup, local LRC import,
+follow/seek, edits and per-song timing adjustment. Their bounded private store is
+separate from queue/resume state to keep playback writes small. Runtime follow-up
+and notification race evidence remain tracked in `docs/android/VALIDATION.md`;
+these additions do not close the physical-device, live-service or signing gates.
+
+Android session persistence now uses Keystore AES-GCM envelopes and private legacy
+migration. Unreadable credentials fail closed while keeping offline libraries
+usable. Imports parse in memory and superseded account actions cannot reconnect
+after logout. Actual encryption/migration/tamper device checks are tracked
+separately from host tests in the Android validation record.
+
+The signed-APK path now validates release versions and requires a private owner
+identity, including through aggregate Gradle tasks. Main-only signing requires
+prior successful checks for the same revision; Rust builds before signing secrets
+are loaded. A disposable local release build passed packaging/signature checks,
+and its private fixture identity was removed. Owner key setup and device update
+acceptance remain open. Mobile native cookies now stay in an in-memory jar.
+
+The next follow-up wires live ICY song metadata without changing station identity,
+retains requested download quality through retry/preparation, removes unused
+catalogs from download records, and prevents uncached external captions breaking
+offline playback. Deterministic device regressions exercise the actual stream and
+cache paths; their latest results remain in the Android validation record.

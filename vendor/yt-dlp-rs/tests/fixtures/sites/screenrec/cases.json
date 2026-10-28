@@ -1,0 +1,6 @@
+[
+ {"url": "https://screenrec.com/share/DasLtbknYo", "args": ["-j"]},
+ {"url": "https://screenrec.com/share/DasLtbknYo", "args": ["--print", "%(id)s|%(title)s|%(description)s|%(thumbnail)s"]},
+ {"url": "https://www.screenrec.com/share/Bbbbbbbbbb", "args": ["-j"]},
+ {"url": "https://screenrec.com/share/Cccccccccc", "args": ["-j"]}
+]

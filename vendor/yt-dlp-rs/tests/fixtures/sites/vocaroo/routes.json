@@ -1,0 +1,34 @@
+{
+ "routes": [
+  {
+   "url": "https://media1.vocaroo.com/mp3/1de8yA3LNe77",
+   "headers": {
+    "Content-Type": "audio/mpeg",
+    "x-bz-upload-timestamp": "1704067200123"
+   },
+   "body_file": "a.mp3"
+  },
+  {
+   "url": "https://media1.vocaroo.com/mp3/12WqtjLnpj6g",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  },
+  {
+   "url": "https://media1.vocaroo.com/mp3/abcdefghij",
+   "status": 404,
+   "headers": {
+    "Content-Type": "text/plain"
+   },
+   "body": "x"
+  },
+  {
+   "url": "https://media.vocaroo.com/mp3/abcd1234",
+   "headers": {
+    "Content-Type": "audio/mpeg"
+   },
+   "body_file": "a.mp3"
+  }
+ ]
+}

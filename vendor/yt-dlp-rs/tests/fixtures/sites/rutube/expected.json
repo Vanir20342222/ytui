@@ -1,0 +1,85 @@
+{
+ "upstream_commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+ "cases": [
+  {
+   "url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"3eac3b4561676c17df9132a9a1e62e3e\", \"title\": \"\\u0420\\u0430\\u043d\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043a\\u0435\\u043d\\u0433\\u0443\\u0440\\u0443 \\u0437\\u0430\\u0431\\u0435\\u0436\\u0430\\u043b \\u0432 \\u0430\\u043f\\u0442\\u0435\\u043a\\u0443\", \"description\": \"Intro text\\n0:00 Start\\n1:05 - Middle part\\n\", \"thumbnail\": \"https://pic.rutubelist.test/video/a.jpg\", \"duration\": 81, \"uploader\": \"NTDRussian\", \"uploader_id\": \"29790\", \"timestamp\": 1381943602, \"categories\": [\"\\u041d\\u043e\\u0432\\u043e\\u0441\\u0442\\u0438\"], \"age_limit\": 0, \"view_count\": 1234, \"comment_count\": 5, \"is_live\": false, \"chapters\": [{\"start_time\": 0, \"title\": \"Start\", \"end_time\": 65}, {\"start_time\": 65, \"title\": \"Middle part\", \"end_time\": 81}], \"formats\": [{\"url\": \"https://bl.rutube.test/progressive.mp4\", \"format_id\": \"default\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"default - unknown\"}, {\"format_id\": \"m3u8-800\", \"format_index\": null, \"url\": \"https://bl.rutube.test/route/360.m3u8\", \"manifest_url\": \"https://bl.rutube.test/route/x.m3u8?i=1\", \"tbr\": 800.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 640, \"height\": 360, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"m3u8-800 - 640x360\"}], \"subtitles\": {\"en\": [{\"url\": \"https://pic.rutubelist.test/cap/en.vtt\", \"name\": \"English\", \"ext\": \"vtt\"}], \"ru\": [{\"url\": \"https://pic.rutubelist.test/cap/ru.srt\", \"ext\": \"srt\"}]}, \"webpage_url\": \"https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/\", \"original_url\": \"https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/\", \"webpage_url_basename\": \"3eac3b4561676c17df9132a9a1e62e3e\", \"webpage_url_domain\": \"rutube.ru\", \"extractor\": \"rutube\", \"extractor_key\": \"Rutube\", \"playlist\": null, \"playlist_index\": null, \"thumbnails\": [{\"url\": \"https://pic.rutubelist.test/video/a.jpg\", \"id\": \"0\"}], \"display_id\": \"3eac3b4561676c17df9132a9a1e62e3e\", \"fulltitle\": \"\\u0420\\u0430\\u043d\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043a\\u0435\\u043d\\u0433\\u0443\\u0440\\u0443 \\u0437\\u0430\\u0431\\u0435\\u0436\\u0430\\u043b \\u0432 \\u0430\\u043f\\u0442\\u0435\\u043a\\u0443\", \"duration_string\": \"1:21\", \"upload_date\": \"20131016\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"format_id\": \"m3u8-800\", \"url\": \"https://bl.rutube.test/route/360.m3u8\", \"manifest_url\": \"https://bl.rutube.test/route/x.m3u8?i=1\", \"tbr\": 800.0, \"ext\": \"mp4\", \"protocol\": \"m3u8_native\", \"has_drm\": false, \"width\": 640, \"height\": 360, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"resolution\": \"640x360\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"m3u8-800 - 640x360\", \"_filename\": \"\\u0420\\u0430\\u043d\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043a\\u0435\\u043d\\u0433\\u0443\\u0440\\u0443 \\u0437\\u0430\\u0431\\u0435\\u0436\\u0430\\u043b \\u0432 \\u0430\\u043f\\u0442\\u0435\\u043a\\u0443 [3eac3b4561676c17df9132a9a1e62e3e].mp4\", \"filename\": \"\\u0420\\u0430\\u043d\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043a\\u0435\\u043d\\u0433\\u0443\\u0440\\u0443 \\u0437\\u0430\\u0431\\u0435\\u0436\\u0430\\u043b \\u0432 \\u0430\\u043f\\u0442\\u0435\\u043a\\u0443 [3eac3b4561676c17df9132a9a1e62e3e].mp4\", \"__write_download_archive\": false}], \"format_id\": \"m3u8-800\", \"format_index\": null, \"url\": \"https://bl.rutube.test/route/360.m3u8\", \"manifest_url\": \"https://bl.rutube.test/route/x.m3u8?i=1\", \"tbr\": 800.0, \"ext\": \"mp4\", \"fps\": null, \"protocol\": \"m3u8_native\", \"preference\": null, \"quality\": null, \"has_drm\": false, \"width\": 640, \"height\": 360, \"vcodec\": \"avc1.4d401e\", \"acodec\": \"mp4a.40.2\", \"dynamic_range\": \"SDR\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"resolution\": \"640x360\", \"aspect_ratio\": 1.78, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"m3u8-800 - 640x360\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/",
+   "args": [
+    "--list-subs"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[rutube] Extracting URL: https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading video JSON",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading options JSON",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading m3u8 information",
+    "[info] Available subtitles for 3eac3b4561676c17df9132a9a1e62e3e:",
+    "Language Name    Formats",
+    "en       English vtt",
+    "ru               srt"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rutube.ru/play/embed/8083783?p=tok",
+   "args": [
+    "-J"
+   ],
+   "exit": 0,
+   "stdout": [
+    "{\"id\": \"a10e53b86e8f349080f718582ce4c661\", \"title\": \"Embedded\", \"description\": null, \"thumbnail\": null, \"duration\": 10, \"uploader\": null, \"uploader_id\": null, \"timestamp\": null, \"categories\": null, \"age_limit\": 18, \"view_count\": null, \"comment_count\": null, \"is_live\": null, \"chapters\": [], \"extractor_key\": \"Rutube\", \"formats\": [{\"url\": \"https://bl.rutube.test/embed.mp4\", \"format_id\": \"default\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"default - unknown\"}], \"subtitles\": {}, \"webpage_url\": \"https://rutube.ru/play/embed/8083783?p=tok\", \"original_url\": \"https://rutube.ru/play/embed/8083783?p=tok\", \"webpage_url_basename\": \"8083783\", \"webpage_url_domain\": \"rutube.ru\", \"extractor\": \"rutube:embed\", \"playlist\": null, \"playlist_index\": null, \"display_id\": \"a10e53b86e8f349080f718582ce4c661\", \"fulltitle\": \"Embedded\", \"duration_string\": \"10\", \"release_year\": null, \"requested_subtitles\": null, \"_has_drm\": null, \"requested_downloads\": [{\"url\": \"https://bl.rutube.test/embed.mp4\", \"format_id\": \"default\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"dynamic_range\": \"SDR\", \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"default - unknown\", \"_filename\": \"Embedded [a10e53b86e8f349080f718582ce4c661].mp4\", \"filename\": \"Embedded [a10e53b86e8f349080f718582ce4c661].mp4\", \"__write_download_archive\": false}], \"url\": \"https://bl.rutube.test/embed.mp4\", \"format_id\": \"default\", \"protocol\": \"https\", \"ext\": \"mp4\", \"video_ext\": \"mp4\", \"audio_ext\": \"none\", \"vbr\": null, \"abr\": null, \"tbr\": null, \"resolution\": null, \"dynamic_range\": \"SDR\", \"aspect_ratio\": null, \"filesize_approx\": null, \"http_headers\": {\"User-Agent\": \"fixture\", \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Accept-Language\": \"en-us,en;q=0.5\", \"Sec-Fetch-Mode\": \"navigate\"}, \"format\": \"default - unknown\", \"_type\": \"video\"}"
+   ],
+   "stderr": [],
+   "files": {}
+  },
+  {
+   "url": "https://rutube.ru/video/00000000000000000000000000000000/",
+   "args": [
+    "--print",
+    "id"
+   ],
+   "exit": 1,
+   "stdout": [],
+   "stderr": [
+    "ERROR: [rutube] 00000000000000000000000000000000: Unable to download video JSON: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)"
+   ],
+   "files": {}
+  },
+  {
+   "url": "https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/",
+   "args": [
+    "--no-progress",
+    "-f",
+    "default",
+    "-o",
+    "%(id)s.%(ext)s"
+   ],
+   "exit": 0,
+   "stdout": [
+    "[rutube] Extracting URL: https://rutube.ru/video/3eac3b4561676c17df9132a9a1e62e3e/",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading video JSON",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading options JSON",
+    "[rutube] 3eac3b4561676c17df9132a9a1e62e3e: Downloading m3u8 information",
+    "[info] 3eac3b4561676c17df9132a9a1e62e3e: Downloading 1 format(s): default",
+    "[download] Destination: 3eac3b4561676c17df9132a9a1e62e3e.mp4",
+    "[download] Download completed"
+   ],
+   "stderr": [],
+   "files": {
+    "3eac3b4561676c17df9132a9a1e62e3e.mp4": 19
+   }
+  }
+ ]
+}

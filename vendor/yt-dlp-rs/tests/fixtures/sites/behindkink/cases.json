@@ -1,0 +1,7 @@
+[
+ {"url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/", "args": ["-j"]},
+ {"url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/", "args": ["--print", "%(id)s|%(display_id)s|%(title)s|%(upload_date)s|%(age_limit)s|%(thumbnail)s|%(description)s"]},
+ {"url": "http://www.behindkink.com/2014/12/05/what-are-you-passionate-about-marley-blaze/", "args": ["--no-progress", "-o", "%(id)s.%(ext)s"]},
+ {"url": "https://behindkink.com/2015/01/02/bare", "args": ["-j"]},
+ {"url": "https://behindkink.com/2015/01/03/none", "args": ["-j"]}
+]
