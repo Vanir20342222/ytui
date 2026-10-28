@@ -24,6 +24,8 @@ keys: updates require the same signing key. Do not uninstall a working install
 without exporting wanted data; uninstalling removes private account/library and
 offline media. Stable, signed, in-place updates need a separately configured
 release keystore and release process. No private signing key is checked in.
+The manual [signed-build workflow and identity setup](SIGNING.md) provide that
+build path without committing secrets; an owner must configure the identity.
 
 ## Navigate
 
@@ -88,6 +90,9 @@ temporary file. Settings → Reload stored account retries the saved envelope. A
 missing/invalid key or damaged envelope clears active authentication and keeps the
 offline library usable; reconnect/import or disconnect to recover. Hardware key
 backing depends on the device. The app never falls back to new plaintext storage.
+Native extraction builds its cookie jar in memory too. Recognized stale private
+cookie staging files from earlier builds are removed at startup; unrelated files
+are preserved and a cleanup failure is reported.
 
 Android uses the system VPN normally. An explicit HTTP proxy can be set in
 Settings; credential-bearing/SOCKS proxies are rejected on mobile rather than

@@ -124,6 +124,7 @@ pub struct MobileApp {
     lyrics: Option<lyrics::View>,
     lyric_import: Option<uuid::Uuid>,
     account_notice: Option<String>,
+    build_version: String,
     popup: Option<(String, String)>,
     feed_menu: bool,
     add_download: bool,
@@ -186,6 +187,7 @@ impl MobileApp {
             lyrics: None,
             lyric_import: None,
             account_notice: None,
+            build_version: env!("CARGO_PKG_VERSION").into(),
             popup: None,
             feed_menu: false,
             add_download: false,
@@ -687,6 +689,9 @@ impl MobileApp {
         ctx.request_repaint();
     }
     pub fn platform_status(&mut self, ctx: &egui::Context, value: Value) {
+        if let Some(version) = value["app_version"].as_str() {
+            self.build_version = version.into();
+        }
         self.safe_left =
             value["inset_left"].as_f64().unwrap_or(0.0) as f32 / ctx.pixels_per_point();
         self.safe_right =
@@ -1856,7 +1861,7 @@ impl MobileApp {
         if ui.button("Playback queue").clicked(){self.open_queue(ctx);self.menu_open=false;}
         if ui.button("Recently played").clicked(){self.history_open=true;self.request(ctx,json!({"op":"history_list"}),Kind::History);self.menu_open=false;}
         if ui.button("Refresh feed").clicked()&& let Some(req)=self.feeds[self.tab].request.clone(){self.navigate(ctx,req,false);}
-        if ui.button("About / mobile parity").clicked(){self.popup=Some(("About ytui Android".into(),"Rust UI and engine · Media3 playback\nNative YouTube signature challenges may still fail.\nAndroid cannot access other browsers' private cookies.\nLinux desktop services and external cliamp are not Android services.\nSee docs/android/PARITY.md for platform differences and qualification gates.".into()));}
+        if ui.button("About / mobile parity").clicked(){self.popup=Some(("About ytui Android".into(),format!("ytui Android {}\nRust engine {}\nRevision {}\n\nRust UI and engine · Media3 playback\nNative YouTube signature challenges may still fail.\nAndroid cannot access other browsers' private cookies.\nLinux desktop services and external cliamp are not Android services.\nSee docs/android/PARITY.md for platform differences and qualification gates.",self.build_version,env!("CARGO_PKG_VERSION"),option_env!("YTUI_ANDROID_REVISION").unwrap_or("source checkout"))));}
     });
         self.menu_open &= open;
     }

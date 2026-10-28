@@ -2,6 +2,17 @@
 # Build Rust UI/engine and package an installable Android APK; installs nothing.
 set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+variant="${YTUI_ANDROID_VARIANT:-debug}"
+case "$variant" in
+    debug) gradle_variant=Debug ;;
+    release)
+        gradle_variant=Release
+        for signing_var in YTUI_ANDROID_KEYSTORE YTUI_ANDROID_KEY_ALIAS YTUI_ANDROID_STORE_PASSWORD YTUI_ANDROID_KEY_PASSWORD; do
+            [[ -n "${!signing_var:-}" ]] || { echo "Release build requires $signing_var; see docs/android/SIGNING.md." >&2; exit 1; }
+        done
+        ;;
+    *) echo 'YTUI_ANDROID_VARIANT must be debug or release.' >&2; exit 1 ;;
+esac
 sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 [[ -n "$sdk" && -d "$sdk" ]] || { echo 'Set ANDROID_HOME to an installed Android SDK.' >&2; exit 1; }
 ndk="${ANDROID_NDK_HOME:-$sdk/ndk/27.2.12479018}"
@@ -35,4 +46,4 @@ mkdir -p "$root/target/android-assets/notices"
 cp -R -- "$notices_stage/notices/." "$root/target/android-assets/notices/"
 cp -- "$root/LICENSE" "$root/target/android-assets/ytui-LICENSE"
 
-"$root/apps/android/gradlew" -p "$root/apps/android" --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+"$root/apps/android/gradlew" -p "$root/apps/android" --no-daemon ":app:assemble$gradle_variant" ":app:test${gradle_variant}UnitTest" ":app:lint$gradle_variant"

@@ -35,3 +35,5 @@ Thumbs.db
 /apps/android/local.properties
 *.keystore
 *.jks
+/apps/android/signing.properties
+/apps/android/keystore.properties

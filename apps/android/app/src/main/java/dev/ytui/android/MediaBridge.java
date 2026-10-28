@@ -79,6 +79,7 @@ public final class MediaBridge {
     try {
       JSONObject value =
           new JSONObject()
+              .put("app_version", BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")")
               .put("inset_top", topInset)
               .put("inset_bottom", bottomInset)
               .put("inset_left", leftInset)

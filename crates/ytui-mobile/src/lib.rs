@@ -64,6 +64,10 @@ impl Engine {
             session:None,notice:Some("Stored account is unavailable; reconnect or disconnect it. Saved media and downloads are intact.".into()),
         });
         let session = stored.session.map(Arc::new);
+        let mut account_notice = stored.notice;
+        if account::clear_transient_auth(cache).is_err() {
+            account_notice=Some("An older private session staging file could not be removed; reconnect or clear the app cache after stopping playback.".into());
+        }
         let client = ytui_providers::http_client(config.proxy.as_deref())?;
         Ok(Self {
             settings_commit: Mutex::new(()),
@@ -72,7 +76,7 @@ impl Engine {
             config: Mutex::new(config.clone()),
             state: Mutex::new(state),
             session: Mutex::new(session.clone()),
-            account_notice: Mutex::new(stored.notice),
+            account_notice: Mutex::new(account_notice),
             account_intent: std::sync::atomic::AtomicU64::new(0),
             browser: Mutex::new(Browser::new(client.clone(), session, config.account_index)),
             radio: Mutex::new(
@@ -780,19 +784,10 @@ impl Engine {
             .unwrap_or(&config.download.quality)
             .to_owned();
         let cookies = self.session.lock().expect("session").clone();
-        let cookie_dir = self.cache.join("transient-auth");
         let permit = extractor_slots().acquire_owned().await?;
         let data = tokio::task::spawn_blocking(move || -> Result<Value> {
             let _permit = permit;
-            let cookie_file = if let Some(session) = cookies {
-                Some(session.export(&cookie_dir)?)
-            } else {
-                None
-            };
-            let jar = cookie_file
-                .as_ref()
-                .map(|f| yt_dlp_rs::CookieJar::load(f.path()).map(Arc::new))
-                .transpose()?;
+            let jar = cookies.as_deref().map(account::native_jar).transpose()?;
             let client = yt_dlp_rs::YoutubeDl::with_options(
                 yt_dlp_rs::YoutubeOptions {
                     no_playlist: true,

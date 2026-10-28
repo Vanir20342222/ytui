@@ -1,4 +1,22 @@
 plugins { id 'com.android.application' }
+def requestedVersionCode = System.getenv('YTUI_ANDROID_VERSION_CODE') ?: '1'
+if (!(requestedVersionCode ==~ /[1-9][0-9]{0,9}/) || requestedVersionCode.toLong() > 2100000000L)
+    throw new GradleException('YTUI_ANDROID_VERSION_CODE must be an integer from 1 to 2100000000')
+def requestedVersionName = System.getenv('YTUI_ANDROID_VERSION_NAME') ?: '0.2.0-alpha.12-mobile.1'
+if (!(requestedVersionName ==~ /[A-Za-z0-9.+_-]{1,64}/))
+    throw new GradleException('YTUI_ANDROID_VERSION_NAME must contain 1–64 letters, digits, dots, plus, underscore or hyphen')
+def signingPath = System.getenv('YTUI_ANDROID_KEYSTORE')
+def signingAlias = System.getenv('YTUI_ANDROID_KEY_ALIAS')
+def signingStorePassword = System.getenv('YTUI_ANDROID_STORE_PASSWORD')
+def signingKeyPassword = System.getenv('YTUI_ANDROID_KEY_PASSWORD')
+def signingReady = signingPath && signingAlias && signingStorePassword && signingKeyPassword && file(signingPath).isFile()
+def androidProject = project
+gradle.taskGraph.whenReady { graph ->
+    // Check the graph too: aggregate tasks such as assemble/build also package
+    // release artifacts even when their command-line names omit "Release".
+    if (graph.allTasks.any { it.project == androidProject && it.name in ['assembleRelease', 'packageRelease', 'bundleRelease'] } && !signingReady)
+        throw new GradleException('Release builds require YTUI_ANDROID_KEYSTORE, YTUI_ANDROID_KEY_ALIAS, YTUI_ANDROID_STORE_PASSWORD and YTUI_ANDROID_KEY_PASSWORD; no debug-key fallback is used')
+}
 android {
     namespace 'dev.ytui.android'
     compileSdk 35
@@ -8,15 +26,32 @@ android {
         minSdk 26
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
         targetSdk 35
-        versionCode 1
-        versionName '0.2.0-alpha.12-mobile.1'
+        versionCode requestedVersionCode.toInteger()
+        versionName requestedVersionName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     buildFeatures { buildConfig true }
     sourceSets { main { jniLibs.srcDirs = [rootProject.file('../../target/android-jni')]; assets.srcDirs = ['src/main/assets',rootProject.file('../../target/android-assets')] }; androidTest { assets.srcDirs = [rootProject.file('../../target/android-test-assets'),rootProject.file('../../vendor/yt-dlp-rs/vendor/ejs'),rootProject.file('../../vendor/yt-dlp-rs/tests/fixtures/youtube/challenges')] } }
     packaging { jniLibs { useLegacyPackaging false } }
-    buildTypes { debug { debuggable true }; release { minifyEnabled false } }
+    signingConfigs {
+        if (signingReady) {
+            release {
+                storeFile file(signingPath)
+                storePassword signingStorePassword
+                keyAlias signingAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        debug { debuggable true }
+        release {
+            debuggable false
+            minifyEnabled false
+            if (signingReady) signingConfig signingConfigs.release
+        }
+    }
     lint { abortOnError true; checkReleaseBuilds true }
 }
 dependencies {

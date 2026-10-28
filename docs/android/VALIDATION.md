@@ -7,7 +7,7 @@ public-provider checks and hardware acceptance are recorded separately.
 
 ## Passed checks
 
-- Qualified lyrics/navigation checkpoint: **306 passed, 0 failed, 31 explicitly ignored**.
+- Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.
   Formatting and strict all-target workspace Clippy passed. ARM64 Android-specific
   JNI/GLES code also passed strict cross-target Clippy.
 - Mobile checks cover all 13 theme entries at 360×800, 412×915 and 1280×800 logical
@@ -18,7 +18,7 @@ public-provider checks and hardware acceptance are recorded separately.
   failed-write rollback; native format selection and SponsorBlock-off privacy.
   These are headless Rust UI checks, not hardware performance measurements.
 - Desktop saved-player Node challenge vectors: **2 passed**. Hosted
-  [Rust run 40640008640](https://github.com/Vanir20342222/ytui/actions/runs/40640008640)
+  [Rust run 40641207981](https://github.com/Vanir20342222/ytui/actions/runs/40641207981)
   passed desktop/shared checks, real FFmpeg/mpv/local-playlist checks and release
   build after the monorepo move. Desktop launchers/state paths are unchanged.
 - Complete local Android build: ARM64 and x86-64 native libraries, dependency
@@ -26,8 +26,8 @@ public-provider checks and hardware acceptance are recorded separately.
   and Android Lint with **0 errors**. APK inspection passed signing, ZIP and
   **16 KiB ELF** alignment, both ABIs, JNI/GameActivity symbols and bundled notices.
 - Accelerated API 35
-  [Android run 40640008655](https://github.com/Vanir20342222/ytui/actions/runs/40640008655)
-  passed **8 device tests, 0 failures, zero Rust panics**. The separate opt-in public YouTube case
+  [Android run 40641208084](https://github.com/Vanir20342222/ytui/actions/runs/40641208084)
+  passed **10 device tests, 0 failures, zero Rust panics**. The separate opt-in public YouTube case
   was explicitly skipped in this default, account-free run. Passed device checks:
   - Generated MP4 actually decodes into the Rust GLES surface and produces PCM
     levels; pause and volume persistence across stream changes work.
@@ -45,6 +45,9 @@ public-provider checks and hardware acceptance are recorded separately.
   - Actual EOF album continuation, remote Previous/Next and pause/resume,
     history navigation, manual queue priority and failed-item retention pass.
   - JNI lyric save/load retains exact timestamps/Unicode and rejects invalid edits.
+  - Actual Android Keystore encryption uses fresh nonces and rejects tampering.
+    Rust/JNI import stores ciphertext, migrates a synthetic plaintext account,
+    fails closed on a damaged envelope, recovers and removes it on disconnect.
 
 The run's device-evidence artifact contains JUnit results, continuous logcat,
 exit information and an actual 1080×2400 player screenshot. Visual inspection
@@ -53,13 +56,13 @@ local test media, not evidence of public YouTube playback or audible output.
 
 ## Development APK
 
-Qualified checkpoint: source `ab121c4` (PR merge revision `878fcd2`).
-[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40640008655/artifacts/12795745730).
+Qualified checkpoint: source `59675e0` (PR merge revision `b5c48f3`).
+[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40641208084/artifacts/12795433805).
 The ZIP contains `outputs/apk/debug/app-debug.apk` and `SHA256-and-checks.txt`.
 The APK's SHA256 is:
 
 ```text
-0d91a7500ca287d962e6c3b12fbea05cb389da512c63ab7c11277bbe064c9efe
+fc2654bcca9e7e845968200286bcd7c3cf6bdede83e0a2047eb8299d15c0d4ab
 ```
 
 Artifacts expire after 30 days. This debug APK is not a stable signed release;
@@ -220,7 +223,7 @@ An added JNI device case checks exact timings and failed-edit rollback. Its
 emulator case passed in `40640008655`; live LRCLIB/device keyboard acceptance
 remains separate.
 
-### Keystore follow-up (device qualification pending)
+### Keystore follow-up
 
 Account storage now seals sessions before atomic persistence with Android
 Keystore AES-GCM, fresh 96-bit nonces, authenticated app/version context and a
@@ -231,11 +234,35 @@ temporary file. Focused Rust tests cover corrupt-account recovery and cookie
 file bounds/pipes. New Android cases exercise actual Keystore randomization,
 tamper rejection, Rust/JNI encrypted import, plaintext migration, damaged-envelope
 recovery and disconnect using a disposable synthetic account only. They skip
-instead of overwriting an existing account. Emulator qualification is pending.
+instead of overwriting an existing account. Run `40641208084` passed both added
+cases, the other eight device tests and the zero-panic gate. Only the public
+YouTube test was skipped; the account tests ran against synthetic data.
 
 Account actions also carry a monotonically increasing intent checked under the
 commit lock. A delayed import cannot reconnect after a newer disconnect; stale
 startup/import UI replies cannot overwrite the current account status.
+
+### Signing and in-memory native auth follow-up (qualification pending)
+
+The manual main-only signed-build workflow requires prior successful checks for
+the same source revision and owner-supplied Environment secrets. Gradle rejects
+missing signing material even through aggregate assemble tasks, validates version
+metadata and never falls back to debug signing. A disposable local identity is
+used to check the build path; it is not an owner release identity. About shows
+version/code and source revision. No release/tag is published by this workflow.
+The local signed build passed both Rust ABIs, eight release Java unit tests,
+release lint, signature/16 KiB inspection, expected version metadata and the
+non-debuggable-manifest check. Direct and aggregate release builds without a key
+failed as expected; invalid version fields were rejected and normal debug builds
+still configure without signing secrets. The disposable private key/password
+were removed after verification; only public reports remain. The hosted signing
+workflow still requires the owner's environment setup and is not yet exercised.
+
+Mobile native extraction now builds its scoped cookie jar directly in memory,
+removing the old transient Netscape export step. Startup removes only recognized
+regular files in its own old staging directory, preserves unrelated files and
+refuses symlinked staging directories. Host tests cover HTTPS/domain/path scope
+and selective cleanup; a new full APK/runtime qualification remains required.
 
 ### Physical/live release gates
 

@@ -779,3 +779,10 @@ migration. Unreadable credentials fail closed while keeping offline libraries
 usable. Imports parse in memory and superseded account actions cannot reconnect
 after logout. Actual encryption/migration/tamper device checks are tracked
 separately from host tests in the Android validation record.
+
+The signed-APK path now validates release versions and requires a private owner
+identity, including through aggregate Gradle tasks. Main-only signing requires
+prior successful checks for the same revision; Rust builds before signing secrets
+are loaded. A disposable local release build passed packaging/signature checks,
+and its private fixture identity was removed. Owner key setup and device update
+acceptance remain open. Mobile native cookies now stay in an in-memory jar.
