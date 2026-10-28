@@ -48,8 +48,14 @@ that metadata-only difference in subsequent runs.
 
 ### Tested development APK
 
-[Download APK and inspection report](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12807657622).
-Extract `outputs/apk/debug/app-debug.apk` from the ZIP. Version is
+[Download the APK directly](https://github.com/Vanir20342222/ytui/releases/download/android-native-preview-2026-10-28/ytui-android-0.2.0-alpha.12-mobile.2.apk)
+or open the [preview assets and checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-native-preview-2026-10-28).
+No GitHub sign-in or ZIP extraction is needed. The preview publisher verifies
+the checkpoint's Android/Rust/Secret scan successes and exact SHA256, then
+publishes the existing APK without rebuilding or re-signing it.
+The [original artifact and reports](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12807657622)
+remain available to signed-in GitHub users; extract
+`outputs/apk/debug/app-debug.apk` from that ZIP. Version is
 **`0.2.0-alpha.12-mobile.2`**, code **2**, with ARM64/x86-64 and Android 8/API 26+.
 Local independent inspection verified signing, ZIP and 16 KiB ELF alignment,
 both Rust ABIs, required JNI exports and notices. APK SHA256:

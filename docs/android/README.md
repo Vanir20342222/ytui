@@ -19,6 +19,14 @@ YouTube acceptance is still required; earlier failed APKs are historical only.
 
 ## Install an APK
 
+The [tested native UI preview](https://github.com/Vanir20342222/ytui/releases/tag/android-native-preview-2026-10-28)
+provides a direct `.apk` download without GitHub sign-in or ZIP extraction.
+Download the APK under **Assets**, open it from Android's Files app, and permit
+installation from that source when prompted. Its checksum and inspection report
+are attached. This publishes the exact tested artifact without rebuilding or
+changing its signing identity; it remains a development preview.
+
+For other CI builds, sign in to GitHub in your browser first.
 Open the repository's **Actions → Android → successful run → Artifacts** and
 download `ytui-android-<commit>`. Extract the ZIP and install `app-debug.apk` using
 Android's file manager, permitting installation from that source when prompted.
