@@ -748,6 +748,14 @@ counts and reproducible commands are in docs/VALIDATION.md.
 
 ### M9: Android and monorepo (in progress)
 
+**Current Android UI decision (2026-10-28):** the user's Tab S9 acceptance found
+broken text input, theme switching and desktop-only account instructions. The
+user authorized changing the stack. Keep the Rust engine and use native Jetpack
+Compose for Android screens, retaining terminal styling/themes and private state.
+This supersedes the initial Rust-UI choice below. See
+[native UI migration](docs/android/NATIVE_UI_MIGRATION.md) and require new actual
+input/theme/account tests before recommending its APK.
+
 The user chose a Rust engine **and Rust UI**, with APK sideloading, targeting
 Nothing Phone (3a) and Samsung Galaxy Tab S9. Desktop lives in `apps/desktop`;
 portable providers/themes are shared with the new Rust mobile engine/egui UI.
