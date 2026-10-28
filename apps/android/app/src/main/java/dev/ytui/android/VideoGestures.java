@@ -14,6 +14,17 @@ final class VideoGestures {
             view.getContext(),
             new GestureDetector.SimpleOnGestureListener() {
               @Override
+              public boolean onDown(MotionEvent event) {
+                return true;
+              }
+
+              @Override
+              public boolean onSingleTapUp(MotionEvent event) {
+                view.performClick();
+                return true;
+              }
+
+              @Override
               public boolean onDoubleTap(MotionEvent event) {
                 PlaybackService service = PlaybackService.current;
                 if (service == null || !MobileSettings.enabled("gestures")) return false;

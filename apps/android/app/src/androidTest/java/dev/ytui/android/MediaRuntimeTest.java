@@ -276,15 +276,20 @@ public final class MediaRuntimeTest {
           });
       androidx.test.uiautomator.UiObject2 exitFullscreen =
           device.findObject(
-              androidx.test.uiautomator.By.res(BuildConfig.APPLICATION_ID, "exo_fullscreen"));
+              androidx.test.uiautomator.By.res(
+                  java.util.regex.Pattern.compile(".*:id/exo_(minimal_)?fullscreen")));
       if (exitFullscreen == null) {
-        device.click(device.getDisplayWidth() / 2, device.getDisplayHeight() / 2);
+        device.click(device.getDisplayWidth() / 4, device.getDisplayHeight() / 3);
         exitFullscreen =
             device.wait(
                 androidx.test.uiautomator.Until.findObject(
-                    androidx.test.uiautomator.By.res(BuildConfig.APPLICATION_ID, "exo_fullscreen")),
+                    androidx.test.uiautomator.By.res(
+                        java.util.regex.Pattern.compile(".*:id/exo_(minimal_)?fullscreen"))),
                 5000);
       }
+      capture("native-video-controls.png");
+      device.dumpWindowHierarchy(
+          new File(context.getExternalFilesDir(null), "native-video-controls.xml"));
       assertNotNull("The native fullscreen exit button must be reachable", exitFullscreen);
       exitFullscreen.click();
       await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);

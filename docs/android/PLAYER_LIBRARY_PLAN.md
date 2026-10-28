@@ -135,3 +135,9 @@ Manual capture review also caught a doubled vertical offset on the vinyl label;
 top-origin alignment and a measured hub-position assertion now keep it centred
 on the spinning record. Fullscreen navigation checks wait for the resumed window
 to own input focus, so Back cannot accidentally target the previous dialog.
+The next exit-button check exposed a missing fullscreen control after a surface
+tap. Surface single taps now explicitly invoke the native player's click
+handling; double taps retain seeking and child controls keep their own events.
+The test accepts both native full/minimal toolbar layouts and retains a control
+screenshot/accessibility hierarchy before asserting, so remaining failures have
+concrete evidence.
