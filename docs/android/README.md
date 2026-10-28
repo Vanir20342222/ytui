@@ -1,7 +1,7 @@
 # Android development preview (M9)
 
 The Android app has a shared Rust engine and a native Jetpack Compose UI with
-monospaced terminal styling. Android supplies text fields, keyboard, touch and
+artwork-first media grids, sans-serif typography and rounded native controls. Android supplies text fields, keyboard, touch and
 adaptive layouts. Media3 handles hardware video/captions, background playback,
 MediaSession notifications and durable downloads;
 WorkManager prepares full playlists. There is no Python or mpv executable on
@@ -47,14 +47,15 @@ build path without committing secrets; an owner must configure the identity.
 First installations default to 1080p with H.264/AAC preference for mobile decoding
 and portable file export; audio-only playback still selects the best audio.
 Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
-Use the bottom tabs for Downloads, YouTube, Music and Radio. Search accepts words
+Use the bottom navigation for YouTube, Music, Radio and Downloads. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
 server responses. The top **⋮** menu, **Settings** and **Sign in / Account** provide touch controls.
-Tap a card's play, preview, queue, download or save action. Downloads → Add URL
+Tap artwork to play/open it. The card's **⋮** menu contains preview, queue, save
+and download actions. Downloads → Add URL
 accepts a video or dedicated playlist link, with audio-only and quality choices.
 A watch link with `list=` keeps single-video intent. Tap the current player
 to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, queue
-and visualizer controls. Tablet layouts keep catalog and player side by side.
+and visualizer controls. Tablet layouts use a navigation rail and keep the catalog and active player side by side.
 Android Back closes overlays, then returns to the previous feed with its scroll
 position, before putting the app in the background. Each tab retains up to twelve
 navigation steps and 2 MiB of cached previous pages. Disconnecting clears account navigation history. The queue's

@@ -555,6 +555,12 @@ internal class YtuiViewModel : ViewModel() {
                         .put("playing", !player.value.playing)
                         .put("paused", player.value.playing)
                 )
+        if (op == "volume" || op == "speed") {
+            val value = fields.firstOrNull { it.first == "value" }?.second as? Number
+            if (value != null && value.toDouble().isFinite()) {
+                player.value = PlayerState(player.value.value.copyJson().put(op, value))
+            }
+        }
         effect(op, *fields)
     }
 

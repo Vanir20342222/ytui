@@ -66,6 +66,15 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Install emulator image with bounded download recovery
+        run: |
+          for attempt in 1 2 3; do
+            if sdkmanager 'system-images;android-35;google_apis;x86_64'; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            echo "System-image download failed; retrying ($attempt/3)."
+          done
       - name: Run actual JNI, isolated solver and media instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
