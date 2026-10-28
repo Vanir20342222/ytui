@@ -88,6 +88,33 @@ fn bridge_call(method: &str, text: Option<&str>) -> Result<String> {
         Ok(env.get_string((&s).into())?.into())
     }
 }
+
+pub(crate) fn account_cipher(method: &str, text: &str) -> Result<String> {
+    let result = (|| -> Result<String> {
+        let (vm, class) = BRIDGE.get().context("Missing Android bridge")?;
+        let mut env = vm.attach_current_thread()?;
+        let class: &JClass = class.as_obj().into();
+        let input = env.new_string(text)?;
+        let value = match env.call_static_method(
+            class,
+            method,
+            "(Ljava/lang/String;)Ljava/lang/String;",
+            &[JValue::Object(&input)],
+        ) {
+            Ok(v) => v.l()?,
+            Err(e) => {
+                let _ = env.exception_clear();
+                return Err(e.into());
+            }
+        };
+        Ok(env.get_string((&value).into())?.into())
+    })();
+    // Keystore errors can contain implementation data. Never include the input,
+    // JNI exception text or serialized session in startup/import diagnostics.
+    result.map_err(|_| {
+        anyhow::anyhow!("Android Keystore could not access the account; reconnect or disconnect it")
+    })
+}
 #[unsafe(no_mangle)]
 fn android_main(app: AndroidApp) {
     let result = (|| -> Result<()> {

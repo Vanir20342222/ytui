@@ -1,4 +1,4 @@
-# Android validation record — 2026-10-27 (M9)
+# Android validation record — 2026-10-28 (M9)
 
 Android is a development preview. No physical Nothing Phone (3a) or Galaxy Tab S9
 has been connected. No personal cookies, browser database, VPN or desktop
@@ -7,7 +7,7 @@ public-provider checks and hardware acceptance are recorded separately.
 
 ## Passed checks
 
-- Qualified export/navigation checkpoint: **297 passed, 0 failed, 31 explicitly ignored**.
+- Qualified lyrics/navigation checkpoint: **306 passed, 0 failed, 31 explicitly ignored**.
   Formatting and strict all-target workspace Clippy passed. ARM64 Android-specific
   JNI/GLES code also passed strict cross-target Clippy.
 - Mobile checks cover all 13 theme entries at 360×800, 412×915 and 1280×800 logical
@@ -18,16 +18,16 @@ public-provider checks and hardware acceptance are recorded separately.
   failed-write rollback; native format selection and SponsorBlock-off privacy.
   These are headless Rust UI checks, not hardware performance measurements.
 - Desktop saved-player Node challenge vectors: **2 passed**. Hosted
-  [Rust run 40579287156](https://github.com/Vanir20342222/ytui/actions/runs/40579287156)
+  [Rust run 40640008640](https://github.com/Vanir20342222/ytui/actions/runs/40640008640)
   passed desktop/shared checks, real FFmpeg/mpv/local-playlist checks and release
   build after the monorepo move. Desktop launchers/state paths are unchanged.
 - Complete local Android build: ARM64 and x86-64 native libraries, dependency
-  notices, Gradle wrapper, debug/instrumentation APK assembly, **5 Java unit tests**
+  notices, Gradle wrapper, debug/instrumentation APK assembly, **8 Java unit tests**
   and Android Lint with **0 errors**. APK inspection passed signing, ZIP and
   **16 KiB ELF** alignment, both ABIs, JNI/GameActivity symbols and bundled notices.
 - Accelerated API 35
-  [Android run 40579287370](https://github.com/Vanir20342222/ytui/actions/runs/40579287370)
-  passed **6 device tests, 0 failures, zero Rust panics**. The separate opt-in public YouTube case
+  [Android run 40640008655](https://github.com/Vanir20342222/ytui/actions/runs/40640008655)
+  passed **8 device tests, 0 failures, zero Rust panics**. The separate opt-in public YouTube case
   was explicitly skipped in this default, account-free run. Passed device checks:
   - Generated MP4 actually decodes into the Rust GLES surface and produces PCM
     levels; pause and volume persistence across stream changes work.
@@ -42,6 +42,9 @@ public-provider checks and hardware acceptance are recorded separately.
   - JNI contracts/direct-buffer bounds and empty audio EOS input are checked.
   - Android's isolated JavaScript runtime has no browser/network/cookie APIs;
     original saved YouTube n/signature vectors return the exact expected maps.
+  - Actual EOF album continuation, remote Previous/Next and pause/resume,
+    history navigation, manual queue priority and failed-item retention pass.
+  - JNI lyric save/load retains exact timestamps/Unicode and rejects invalid edits.
 
 The run's device-evidence artifact contains JUnit results, continuous logcat,
 exit information and an actual 1080×2400 player screenshot. Visual inspection
@@ -50,13 +53,13 @@ local test media, not evidence of public YouTube playback or audible output.
 
 ## Development APK
 
-Qualified checkpoint: source `07fc290` (PR merge revision `b4fa78f`).
-[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40579287370/artifacts/12768717641).
+Qualified checkpoint: source `ab121c4` (PR merge revision `878fcd2`).
+[APK and inspection reports](https://github.com/Vanir20342222/ytui/actions/runs/40640008655/artifacts/12795745730).
 The ZIP contains `outputs/apk/debug/app-debug.apk` and `SHA256-and-checks.txt`.
 The APK's SHA256 is:
 
 ```text
-fb8ed1d65e39b2ccda06c3b4ba46ae5d34751f164fc2a152169629d2314aa26e
+0d91a7500ca287d962e6c3b12fbea05cb389da512c63ab7c11277bbe064c9efe
 ```
 
 Artifacts expire after 30 days. This debug APK is not a stable signed release;
@@ -149,7 +152,7 @@ Safe-area contracts also include left/right display cutouts for phone landscape;
 headless geometry checks cover all four edges. Physical rotation acceptance
 remains separate.
 
-## Playback continuation/history follow-up (runtime qualification pending)
+## Playback continuation/history follow-up
 
 Finite Music albums/playlists and cliamp track libraries now prepare their full
 remaining collection in the background after the first decoder start. Manual
@@ -192,6 +195,8 @@ Run `40590717413` passed remote pause/resume, EOF, history and all other cases,
 but rapid preview entry still triggered the System UI Stop race. Already-ongoing
 playback now leaves Media3's foreground notification untouched; the deadline
 placeholder is used only when the service is not already in foreground playback.
+Run `40640008655` passed the entire regression, including rapid preview entry,
+stream switches, remote pause/resume/Previous/Next and EOF continuation.
 
 The cloud host lacks `/dev/kvm`; its software emulator was unreliable and an
 earlier instrumentation attempt crashed. Those attempts are not counted as
@@ -199,7 +204,7 @@ passes. The accelerated hosted emulator supplied the successful runtime evidence
 
 ## Acceptance still required
 
-### Timed lyrics follow-up (device qualification pending)
+### Timed lyrics follow-up
 
 The Rust lyric window replaces the old plain popup. It supports reviewed LRCLIB
 title/artist lookup, version selection, virtualized timed follow and line seeking,
@@ -212,7 +217,25 @@ sent. Tests cover Unicode/timestamps, offsets, all themes at phone/tablet sizes,
 late replies, invalid edits, persistence rollback and library capacity. Android
 document tests reject malformed/truncated UTF-8, excessive bytes and stuck streams.
 An added JNI device case checks exact timings and failed-edit rollback. Its
-emulator result and live LRCLIB/device keyboard acceptance remain separate.
+emulator case passed in `40640008655`; live LRCLIB/device keyboard acceptance
+remains separate.
+
+### Keystore follow-up (device qualification pending)
+
+Account storage now seals sessions before atomic persistence with Android
+Keystore AES-GCM, fresh 96-bit nonces, authenticated app/version context and a
+non-exportable 256-bit key. Legacy private files migrate; a failed cleanup is
+reported. A bad/missing key fails closed without deleting the saved envelope or
+breaking offline library access. Document parsing no longer needs a plaintext
+temporary file. Focused Rust tests cover corrupt-account recovery and cookie
+file bounds/pipes. New Android cases exercise actual Keystore randomization,
+tamper rejection, Rust/JNI encrypted import, plaintext migration, damaged-envelope
+recovery and disconnect using a disposable synthetic account only. They skip
+instead of overwriting an existing account. Emulator qualification is pending.
+
+Account actions also carry a monotonically increasing intent checked under the
+commit lock. A delayed import cannot reconnect after a newer disconnect; stale
+startup/import UI replies cannot overwrite the current account status.
 
 ### Physical/live release gates
 

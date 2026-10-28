@@ -36,6 +36,86 @@ public final class RuntimeTest {
   }
 
   @Test
+  public void androidKeystoreUsesRandomAuthenticatedEnvelopes() throws Exception {
+    String text = "{\"fixture\":\"Grüße 🎵\"}";
+    String first = AccountCipher.seal(text), second = AccountCipher.seal(text);
+    assertNotEquals(first, second);
+    assertEquals(text, AccountCipher.open(first));
+    assertEquals(text, AccountCipher.open(second));
+    int split = first.indexOf(':');
+    byte[] bytes =
+        android.util.Base64.decode(first.substring(split + 1), android.util.Base64.NO_WRAP);
+    bytes[bytes.length - 1] ^= 1;
+    String changed =
+        first.substring(0, split + 1)
+            + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+    assertThrows(Exception.class, () -> AccountCipher.open(changed));
+    assertThrows(Exception.class, () -> AccountCipher.open("unknown-envelope"));
+    assertThrows(Exception.class, () -> AccountCipher.seal("x".repeat(2 * 1024 * 1024 + 1)));
+  }
+
+  @Test
+  public void rustAccountImportPersistsOnlyCiphertextAndDisconnectRemovesIt() throws Exception {
+    android.content.Context context =
+        InstrumentationRegistry.getInstrumentation().getTargetContext();
+    File plain = new File(context.getFilesDir(), "account.json"),
+        encrypted = new File(context.getFilesDir(), "account.enc");
+    org.junit.Assume.assumeFalse(
+        "Account test requires a disposable disconnected install",
+        plain.exists()
+            || encrypted.exists()
+            || PlaybackService.rpc(new JSONObject().put("op", "account")).optBoolean("connected"));
+    try {
+      String document =
+          "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSAPISID\tsynthetic-only\n";
+      PlaybackService.rpc(new JSONObject().put("op", "import_cookie_file").put("text", document));
+      assertTrue(
+          PlaybackService.rpc(new JSONObject().put("op", "account")).getBoolean("connected"));
+      assertFalse(plain.exists());
+      assertTrue(encrypted.isFile());
+      String envelope =
+          new String(java.nio.file.Files.readAllBytes(encrypted.toPath()), StandardCharsets.UTF_8);
+      assertFalse(envelope.contains("synthetic-only"));
+      JSONObject decoded = new JSONObject(AccountCipher.open(envelope));
+      assertEquals(
+          "synthetic-only", decoded.getJSONArray("cookies").getJSONObject(0).getString("value"));
+      // Exercise real Rust migration using only this disposable synthetic account.
+      java.nio.file.Files.write(
+          plain.toPath(), decoded.toString().getBytes(StandardCharsets.UTF_8));
+      assertTrue(encrypted.delete());
+      assertTrue(
+          PlaybackService.rpc(new JSONObject().put("op", "reload_account"))
+              .getBoolean("connected"));
+      assertFalse(plain.exists());
+      assertTrue(encrypted.isFile());
+      String migrated =
+          new String(java.nio.file.Files.readAllBytes(encrypted.toPath()), StandardCharsets.UTF_8);
+      assertEquals(
+          "synthetic-only",
+          new JSONObject(AccountCipher.open(migrated))
+              .getJSONArray("cookies")
+              .getJSONObject(0)
+              .getString("value"));
+      // A damaged envelope clears active auth and retains the file for recovery.
+      byte[] corrupt = migrated.getBytes(StandardCharsets.UTF_8);
+      corrupt[corrupt.length - 6] ^= 1;
+      java.nio.file.Files.write(encrypted.toPath(), corrupt);
+      JSONObject unavailable = PlaybackService.rpc(new JSONObject().put("op", "reload_account"));
+      assertFalse(unavailable.getBoolean("connected"));
+      assertFalse(unavailable.toString().contains("synthetic-only"));
+      assertTrue(encrypted.isFile());
+      java.nio.file.Files.write(encrypted.toPath(), migrated.getBytes(StandardCharsets.UTF_8));
+      assertTrue(
+          PlaybackService.rpc(new JSONObject().put("op", "reload_account"))
+              .getBoolean("connected"));
+    } finally {
+      PlaybackService.rpc(new JSONObject().put("op", "disconnect"));
+    }
+    assertFalse(plain.exists());
+    assertFalse(encrypted.exists());
+  }
+
+  @Test
   public void localLyricJniPreservesTimingsAndRejectsAnInvalidEdit() throws Exception {
     String url = "https://media.test/android-lyrics";
     try {

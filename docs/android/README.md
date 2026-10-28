@@ -81,6 +81,14 @@ embedded browser) or a Netscape cookie file selected by the user. Another browse
 private database is inaccessible on normal Android. Disconnect clears the app's
 session; local saved media/queue stay. Never send cookies to a bug report.
 
+Android encrypts persisted sessions using AES-GCM and a non-exportable key in
+Android Keystore. Earlier private plaintext imports migrate on load; if cleanup
+fails the app reports it. New document imports parse in memory without a plaintext
+temporary file. Settings → Reload stored account retries the saved envelope. A
+missing/invalid key or damaged envelope clears active authentication and keeps the
+offline library usable; reconnect/import or disconnect to recover. Hardware key
+backing depends on the device. The app never falls back to new plaintext storage.
+
 Android uses the system VPN normally. An explicit HTTP proxy can be set in
 Settings; credential-bearing/SOCKS proxies are rejected on mobile rather than
 routing only part of the app. With an explicit proxy, use cookie-file import

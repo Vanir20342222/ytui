@@ -491,6 +491,64 @@ async fn settings_reject_invalid_modes_without_overwriting_previous_values() {
     }
 }
 #[tokio::test]
+async fn an_old_import_cannot_reconnect_after_a_newer_disconnect_or_replace_a_new_account() {
+    let (e, _root) = engine();
+    let old = e.begin_account_change();
+    let current = e.begin_account_change();
+    assert!(
+        e.request(
+            json!({"op":"import_cookies","header":"SAPISID=synthetic-old","account_intent":old})
+        )
+        .await
+        .is_err()
+    );
+    e.request(json!({"op":"import_cookies","header":"SAPISID=synthetic-current","account_intent":current})).await.unwrap();
+    let disconnect = e.begin_account_change();
+    e.request(json!({"op":"disconnect","account_intent":disconnect}))
+        .await
+        .unwrap();
+    assert!(
+        e.request(
+            json!({"op":"import_cookies","header":"SAPISID=synthetic-old","account_intent":current})
+        )
+        .await
+        .is_err()
+    );
+    assert!(
+        !e.request(json!({"op":"account"})).await.unwrap()["connected"]
+            .as_bool()
+            .unwrap()
+    );
+}
+#[tokio::test]
+async fn unreadable_account_does_not_break_offline_library_or_expose_session_bytes() {
+    let (e, root) = engine();
+    let m = media("abcdefghijk");
+    e.request(json!({"op":"save_media","media":m}))
+        .await
+        .unwrap();
+    std::fs::write(
+        root.path().join("files/account.json"),
+        "{\"privateMarkerThatMustNeverBeReported\":",
+    )
+    .unwrap();
+    let restored = Engine::new(&root.path().join("files"), &root.path().join("cache")).unwrap();
+    let status = restored.request(json!({"op":"account"})).await.unwrap();
+    assert_eq!(status["connected"], false);
+    assert!(status["notice"].as_str().unwrap().contains("reconnect"));
+    assert!(!status.to_string().contains("privateMarker"));
+    assert_eq!(
+        restored.request(json!({"op":"saved"})).await.unwrap()[0]["url"],
+        m.url
+    );
+    assert!(
+        root.path().join("files/account.json").exists(),
+        "A read failure must not destroy the account document"
+    );
+    restored.request(json!({"op":"disconnect"})).await.unwrap();
+    assert!(restored.request(json!({"op":"account"})).await.unwrap()["notice"].is_null());
+}
+#[tokio::test]
 async fn authentication_import_is_scoped_and_disconnect_preserves_local_media() {
     let (e, root) = engine();
     assert!(

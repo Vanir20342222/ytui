@@ -41,7 +41,8 @@ enum Kind {
     QueueChanged,
     History,
     Lyrics(uuid::Uuid, lyrics::ReplyKind),
-    Account,
+    Account(u64),
+    AccountStatus(u64),
     Ignore,
 }
 struct Reply {
@@ -122,6 +123,7 @@ pub struct MobileApp {
     recent: Vec<Media>,
     lyrics: Option<lyrics::View>,
     lyric_import: Option<uuid::Uuid>,
+    account_notice: Option<String>,
     popup: Option<(String, String)>,
     feed_menu: bool,
     add_download: bool,
@@ -183,6 +185,7 @@ impl MobileApp {
             recent: Vec::new(),
             lyrics: None,
             lyric_import: None,
+            account_notice: None,
             popup: None,
             feed_menu: false,
             add_download: false,
@@ -212,6 +215,11 @@ impl MobileApp {
         };
         app.request(ctx, json!({"op":"settings"}), Kind::Settings);
         app.request(ctx, json!({"op":"theme","dark":true}), Kind::Theme);
+        app.request(
+            ctx,
+            json!({"op":"account"}),
+            Kind::AccountStatus(app.engine.account_intent()),
+        );
         if app.network_enabled {
             app.navigate(ctx, BrowseRequest::Home, false);
         }
@@ -257,6 +265,13 @@ impl MobileApp {
         });
         self.tasks.insert(id, task.abort_handle());
         id
+    }
+    fn change_account(&mut self, ctx: &egui::Context, mut request: Value) {
+        let intent = self.engine.begin_account_change();
+        self.account_generation += 1;
+        self.playback_generation += 1;
+        request["account_intent"] = json!(intent);
+        self.request(ctx, request, Kind::Account(intent));
     }
     fn navigate(&mut self, ctx: &egui::Context, query: BrowseRequest, append: bool) {
         if self.tab == 0 || !self.network_enabled {
@@ -408,6 +423,10 @@ impl MobileApp {
                 return;
             };
             self.tasks.remove(&reply.id);
+            if matches!(&reply.kind,Kind::Account(intent)|Kind::AccountStatus(intent) if *intent!=self.engine.account_intent())
+            {
+                continue;
+            }
             if self.pending_playback == Some(reply.id) {
                 self.pending_playback = None;
             }
@@ -631,7 +650,14 @@ impl MobileApp {
                     self.recent = serde_json::from_value(value).unwrap_or_default()
                 }
                 (Kind::Lyrics(id, kind), result) => self.lyric_reply(id, reply.id, kind, result),
-                (Kind::Account, Ok(_)) => {
+                (Kind::AccountStatus(_), Ok(value)) => {
+                    self.account_notice = value["notice"].as_str().map(String::from);
+                    if let Some(notice) = value["notice"].as_str() {
+                        self.status = notice.into();
+                    }
+                }
+                (Kind::Account(_), Ok(value)) => {
+                    self.account_notice = value["notice"].as_str().map(String::from);
                     self.account_generation += 1;
                     self.playback_generation += 1;
                     for tab in 1..=2 {
@@ -647,7 +673,7 @@ impl MobileApp {
                         feed.loading = false;
                         feed.error = None;
                     }
-                    self.status = "Account updated".into();
+                    self.status = value["notice"].as_str().unwrap_or("Account updated").into();
                     if matches!(self.tab, 1 | 2) {
                         self.navigate(ctx, BrowseRequest::Home, false);
                     }
@@ -692,12 +718,9 @@ impl MobileApp {
             for event in events {
                 match event["kind"].as_str().unwrap_or_default() {
                     "cookies" => {
-                        self.account_generation += 1;
-                        self.playback_generation += 1;
-                        self.request(
+                        self.change_account(
                             ctx,
                             json!({"op":"import_cookies","header":event["text"]}),
-                            Kind::Account,
                         );
                     }
                     "theme_file" => {
@@ -709,12 +732,9 @@ impl MobileApp {
                     }
                     "lyrics_file" => self.import_lyrics(event["text"].as_str().unwrap_or_default()),
                     "cookie_file" => {
-                        self.account_generation += 1;
-                        self.playback_generation += 1;
-                        self.request(
+                        self.change_account(
                             ctx,
                             json!({"op":"import_cookie_file","text":event["text"]}),
-                            Kind::Account,
                         );
                     }
                     "show_player" => {
@@ -1751,6 +1771,12 @@ impl MobileApp {
                             );
                         }
                     });
+                ui.separator();
+                ui.label("Account storage");
+                ui.small("Imported sessions use Android Keystore encryption. Reload retries a stored session without importing it again.");
+                if let Some(notice)=&self.account_notice {ui.label(notice);}
+                if ui.button("Reload stored account").clicked(){self.change_account(ctx,json!({"op":"reload_account"}));}
+                ui.separator();
                 ui.label("Network proxy (optional)");
                 let mut proxy = self.config.proxy.clone().unwrap_or_default();
                 if ui.text_edit_singleline(&mut proxy).changed() {
@@ -1825,7 +1851,7 @@ impl MobileApp {
 
         if ui.button("Connect YouTube account").clicked(){self.effects.push(Effect::Login);self.menu_open=false;}
         if ui.button("Import cookie file").clicked(){self.effects.push(Effect::Pick("cookies".into()));}
-        if ui.button("Disconnect account").clicked(){self.account_generation+=1; self.playback_generation+=1; self.request(ctx,json!({"op":"disconnect"}),Kind::Account);self.effects.push(Effect::Command(json!({"op":"disconnect"})));}
+        if ui.button("Disconnect account").clicked(){self.change_account(ctx,json!({"op":"disconnect"}));self.effects.push(Effect::Command(json!({"op":"disconnect"})));}
         if ui.button("Saved media").clicked(){self.navigate(ctx,BrowseRequest::Favorites,false);self.menu_open=false;}
         if ui.button("Playback queue").clicked(){self.open_queue(ctx);self.menu_open=false;}
         if ui.button("Recently played").clicked(){self.history_open=true;self.request(ctx,json!({"op":"history_list"}),Kind::History);self.menu_open=false;}
@@ -2240,7 +2266,12 @@ mod tests {
         app.poll(&ctx);
         assert_eq!(app.feeds[1].scroll_offset, 640.0);
         app.feeds[1].remember();
-        deliver(&app, Kind::Account, Ok(json!({"connected":false})), None);
+        deliver(
+            &app,
+            Kind::Account(app.engine.account_intent()),
+            Ok(json!({"connected":false})),
+            None,
+        );
         app.poll(&ctx);
         assert!(app.feeds[1].history.is_empty());
         assert!(app.feeds[1].page.items.is_empty());
@@ -2398,6 +2429,36 @@ mod tests {
             );
         }
         assert!(app.effects.is_empty());
+    }
+    #[test]
+    fn delayed_account_status_cannot_overwrite_a_newer_import_or_disconnect() {
+        let (mut app, ctx, _root) = test_app();
+        let previous = app.engine.account_intent();
+        let current = app.engine.begin_account_change();
+        app.status = "Current action".into();
+        deliver(
+            &app,
+            Kind::AccountStatus(previous),
+            Ok(json!({"notice":"Old startup failure"})),
+            None,
+        );
+        deliver(
+            &app,
+            Kind::Account(previous),
+            Ok(json!({"notice":"Old import"})),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.status, "Current action");
+        assert!(app.account_notice.is_none());
+        deliver(
+            &app,
+            Kind::AccountStatus(current),
+            Ok(json!({"notice":"Current account notice"})),
+            None,
+        );
+        app.poll(&ctx);
+        assert_eq!(app.status, "Current account notice");
     }
     #[test]
     fn phone_navigation_responds_to_touch_sized_pointer_input() {

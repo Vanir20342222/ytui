@@ -12,6 +12,7 @@ use ytui_core::{BrowseRequest, Config, Media, Page};
 use ytui_providers::{
     auth::Session, browse::Browser, images::ImageCache, paths::atomic_write, radio::Radio,
 };
+mod account;
 mod lyrics;
 
 #[derive(Clone, Default, Serialize, Deserialize)]
@@ -35,6 +36,8 @@ pub struct Engine {
     config: Mutex<Config>,
     state: Mutex<MobileState>,
     session: Mutex<Option<Arc<Session>>>,
+    account_notice: Mutex<Option<String>>,
+    account_intent: std::sync::atomic::AtomicU64,
     browser: Mutex<Browser>,
     radio: Mutex<Radio>,
     images: Mutex<ImageCache>,
@@ -57,8 +60,10 @@ impl Engine {
         });
         config.validate()?;
         let state = read_json(&root.join("library.json"))?.unwrap_or_default();
-        let session: Option<Session> = read_json(&root.join("account.json"))?;
-        let session = session.map(Arc::new);
+        let stored=account::load(root).unwrap_or_else(|_|account::Stored {
+            session:None,notice:Some("Stored account is unavailable; reconnect or disconnect it. Saved media and downloads are intact.".into()),
+        });
+        let session = stored.session.map(Arc::new);
         let client = ytui_providers::http_client(config.proxy.as_deref())?;
         Ok(Self {
             settings_commit: Mutex::new(()),
@@ -67,6 +72,8 @@ impl Engine {
             config: Mutex::new(config.clone()),
             state: Mutex::new(state),
             session: Mutex::new(session.clone()),
+            account_notice: Mutex::new(stored.notice),
+            account_intent: std::sync::atomic::AtomicU64::new(0),
             browser: Mutex::new(Browser::new(client.clone(), session, config.account_index)),
             radio: Mutex::new(
                 Radio::new(client.clone(), config.radio_servers.clone())
@@ -109,7 +116,30 @@ impl Engine {
             c.cancel();
         }
     }
-    pub async fn request(&self, request: Value) -> Result<Value> {
+    pub fn account_intent(&self) -> u64 {
+        self.account_intent
+            .load(std::sync::atomic::Ordering::SeqCst)
+    }
+    pub fn begin_account_change(&self) -> u64 {
+        self.account_intent
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+            + 1
+    }
+    fn check_account_intent(&self, r: &Value) -> Result<()> {
+        ensure!(
+            r["account_intent"].as_u64() == Some(self.account_intent()),
+            "Account action was superseded"
+        );
+        Ok(())
+    }
+    pub async fn request(&self, mut request: Value) -> Result<Value> {
+        if matches!(
+            request["op"].as_str(),
+            Some("import_cookie_file" | "import_cookies" | "disconnect" | "reload_account")
+        ) && request["account_intent"].is_null()
+        {
+            request["account_intent"] = json!(self.begin_account_change());
+        }
         let id = request["request_id"].as_u64().unwrap_or(0);
         let cancel = CancellationToken::new();
         if id > 0 {
@@ -473,7 +503,25 @@ impl Engine {
                     )
                 }
             }
-            "account" => Ok(json!({"connected":self.session.lock().expect("session").is_some()})),
+            "account" => Ok(
+                json!({"connected":self.session.lock().expect("session").is_some(),"notice":self.account_notice.lock().expect("account notice").clone()}),
+            ),
+            "reload_account" => {
+                let _commit = self.settings_commit.lock().expect("settings commit");
+                self.check_account_intent(r)?;
+                let stored=account::load(&self.root).unwrap_or_else(|_|account::Stored {
+                    session:None,notice:Some("Stored account is unavailable; reconnect or disconnect it. Saved media and downloads are intact.".into()),
+                });
+                let config = self.config.lock().expect("config").clone();
+                let client = ytui_providers::http_client(config.proxy.as_deref())?;
+                let session = stored.session.map(Arc::new);
+                *self.browser.lock().expect("browser") =
+                    Browser::new(client, session.clone(), config.account_index);
+                *self.session.lock().expect("session") = session.clone();
+                *self.account_notice.lock().expect("account notice") = stored.notice.clone();
+                self.activate_context(None);
+                Ok(json!({"connected":session.is_some(),"notice":stored.notice}))
+            }
             "lyrics" => {
                 let media: Media = serde_json::from_value(r["media"].clone())?;
                 let proxy = self.config.lock().expect("config").proxy.clone();
@@ -486,30 +534,27 @@ impl Engine {
             "lyrics_get" | "lyrics_save" | "lyrics_remove" => self.local_lyrics(r),
             "import_cookie_file" => {
                 let _commit = self.settings_commit.lock().expect("settings commit");
-                use std::io::Write;
+                self.check_account_intent(r)?;
                 let text = r["text"].as_str().context("Missing cookie document")?;
                 ensure!(
                     text.len() <= 2 * 1024 * 1024,
                     "Cookie document exceeds limit"
                 );
-                let mut file = tempfile::NamedTempFile::new_in(&self.cache)?;
-                file.write_all(text.as_bytes())?;
-                let session = ytui_providers::auth::import_netscape(file.path())?;
+                let session = ytui_providers::auth::parse_netscape(text)?;
                 let config = self.config.lock().expect("config").clone();
                 let client = ytui_providers::http_client(config.proxy.as_deref())?;
-                atomic_write(
-                    &self.root.join("account.json"),
-                    &serde_json::to_vec(&session)?,
-                )?;
+                let notice = account::save(&self.root, &session)?;
+                *self.account_notice.lock().expect("account notice") = notice.clone();
                 let session = Arc::new(session);
                 *self.session.lock().expect("session") = Some(session.clone());
                 self.activate_context(None);
                 *self.browser.lock().expect("browser") =
                     Browser::new(client, Some(session), config.account_index);
-                Ok(json!({"connected":true}))
+                Ok(json!({"connected":true,"notice":notice}))
             }
             "import_cookies" => {
                 let _commit = self.settings_commit.lock().expect("settings commit");
+                self.check_account_intent(r)?;
                 let cookies = if let Some(header) = r["header"].as_str() {
                     ensure!(
                         header.len() <= 2 * 1024 * 1024,
@@ -532,10 +577,8 @@ impl Engine {
                     serde_json::from_value(r["cookies"].clone())?
                 };
                 let session = Arc::new(Session::new(cookies)?);
-                atomic_write(
-                    &self.root.join("account.json"),
-                    &serde_json::to_vec(session.as_ref())?,
-                )?;
+                let notice = account::save(&self.root, &session)?;
+                *self.account_notice.lock().expect("account notice") = notice.clone();
                 *self.session.lock().expect("session") = Some(session.clone());
                 self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();
@@ -544,15 +587,13 @@ impl Engine {
                     Some(session),
                     config.account_index,
                 );
-                Ok(json!({"connected":true}))
+                Ok(json!({"connected":true,"notice":notice}))
             }
             "disconnect" => {
                 let _commit = self.settings_commit.lock().expect("settings commit");
-                match std::fs::remove_file(self.root.join("account.json")) {
-                    Ok(()) => {}
-                    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-                    Err(e) => return Err(e.into()),
-                };
+                self.check_account_intent(r)?;
+                account::remove(&self.root)?;
+                *self.account_notice.lock().expect("account notice") = None;
                 *self.session.lock().expect("session") = None;
                 self.activate_context(None);
                 let config = self.config.lock().expect("config").clone();

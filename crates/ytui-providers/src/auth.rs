@@ -144,7 +144,31 @@ impl Session {
 }
 
 pub fn import_netscape(path: &Path) -> Result<Session> {
-    let data = std::fs::read_to_string(path).context("Cannot read Netscape cookie file")?;
+    use std::io::Read;
+    let mut options = std::fs::OpenOptions::new();
+    options.read(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NONBLOCK);
+    }
+    let file = options
+        .open(path)
+        .context("Cannot read Netscape cookie file")?;
+    let metadata = file.metadata()?;
+    ensure!(
+        metadata.is_file() && metadata.len() <= 2 * 1024 * 1024,
+        "Choose a regular cookie file up to 2 MiB"
+    );
+    let mut data = String::new();
+    file.take(2 * 1024 * 1024 + 1)
+        .read_to_string(&mut data)
+        .context("Cannot read UTF-8 cookie document")?;
+    parse_netscape(&data)
+}
+
+/// Parse a user-selected document without writing a plaintext intermediate file.
+pub fn parse_netscape(data: &str) -> Result<Session> {
     ensure!(data.len() <= 2 * 1024 * 1024, "Cookie file exceeds 2 MiB");
     let mut cookies = Vec::new();
     for line in data.lines() {
@@ -172,4 +196,48 @@ pub fn import_netscape(path: &Path) -> Result<Session> {
         });
     }
     Session::new(cookies)
+}
+
+#[cfg(test)]
+mod document_tests {
+    use super::*;
+    #[test]
+    fn in_memory_cookie_import_and_file_import_agree_without_unbounded_reads() {
+        let text = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSAPISID\tsynthetic-only\n";
+        let parsed = parse_netscape(text).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("session.txt");
+        std::fs::write(&path, text).unwrap();
+        assert_eq!(
+            import_netscape(&path)
+                .unwrap()
+                .headers("https://www.youtube.com")
+                .unwrap()
+                .0,
+            parsed.headers("https://www.youtube.com").unwrap().0
+        );
+        assert!(parse_netscape(&"x".repeat(2 * 1024 * 1024 + 1)).is_err());
+        std::fs::OpenOptions::new()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_len(2 * 1024 * 1024 + 1)
+            .unwrap();
+        assert!(import_netscape(&path).is_err());
+        assert!(import_netscape(dir.path()).is_err());
+    }
+    #[cfg(unix)]
+    #[test]
+    fn cookie_pipe_is_rejected_without_waiting_for_a_writer() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("session.pipe");
+        assert!(
+            std::process::Command::new("mkfifo")
+                .arg(&path)
+                .status()
+                .unwrap()
+                .success()
+        );
+        assert!(import_netscape(&path).is_err());
+    }
 }

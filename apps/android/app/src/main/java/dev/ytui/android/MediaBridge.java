@@ -67,6 +67,14 @@ public final class MediaBridge {
     return ScriptRuntime.evaluate(script);
   }
 
+  public static String sealAccount(String text) throws Exception {
+    return AccountCipher.seal(text);
+  }
+
+  public static String openAccount(String envelope) throws Exception {
+    return AccountCipher.open(envelope);
+  }
+
   public static String snapshot() {
     try {
       JSONObject value =

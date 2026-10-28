@@ -773,3 +773,9 @@ follow/seek, edits and per-song timing adjustment. Their bounded private store i
 separate from queue/resume state to keep playback writes small. Runtime follow-up
 and notification race evidence remain tracked in `docs/android/VALIDATION.md`;
 these additions do not close the physical-device, live-service or signing gates.
+
+Android session persistence now uses Keystore AES-GCM envelopes and private legacy
+migration. Unreadable credentials fail closed while keeping offline libraries
+usable. Imports parse in memory and superseded account actions cannot reconnect
+after logout. Actual encryption/migration/tamper device checks are tracked
+separately from host tests in the Android validation record.
