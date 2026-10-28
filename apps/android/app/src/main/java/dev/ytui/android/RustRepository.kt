@@ -349,6 +349,7 @@ internal class YtuiViewModel : ViewModel() {
                                     it.isBlank() || it == "null"
                                 },
                             loading = false,
+                            scrollIndex = feeds[index].value.scrollIndex,
                         )
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -361,6 +362,7 @@ internal class YtuiViewModel : ViewModel() {
                             errorCode = (error as? RpcError)?.code ?: "",
                             failedRequest = request,
                             failedAppend = append,
+                            scrollIndex = feeds[index].value.scrollIndex,
                         )
                     val retryDelay = (error as? RpcError)?.retryDelay(retry)
                     if (retryDelay != null) {

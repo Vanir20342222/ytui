@@ -54,6 +54,32 @@ adds Rust, Kotlin and native UI regressions. Theme/import updates are serialized
 seek gestures retain their draft position, SponsorBlock marks/replay remain
 reachable, and visualizer sampling/animation runs only while visible/playing.
 
+### Second run: graphics/launcher failure and text contrast review
+
+[Run 40658107009](https://github.com/Vanir20342222/ytui/actions/runs/40658107009)
+at `743cd00` passed **14 cases**, failed video visibility and keyboard visibility,
+and explicitly skipped the public case. The new continuation-cooldown guard
+passed. Screenshots revealed a **Pixel Launcher ANR dialog covering the app**;
+logcat places the launcher ANR before the test app started. The emulator's
+Goldfish host-FFmpeg AVC bridge also reported invalid color-buffer IDs. This run
+is not qualified and its development APK is not recommended.
+
+The follow-up uses current SwiftShader mode with cold snapshots disabled, stops
+only the unused Pixel Launcher before disposable-emulator tests, explicitly
+allows its software keyboard with a virtual hardware keyboard, and fails on any
+app ANR. Generated offline video fixtures on Goldfish/Ranchu debug emulators use
+Android's real `c2.android`/`OMX.google` software codec, avoiding the invalid
+host-FFmpeg buffer bridge. Normal app/device codec selection is unchanged.
+Emulator decoding therefore does **not** establish physical hardware decoding.
+
+Visual review also exposed a genuine root text-color bug: MaterialTheme did not
+supply LocalContentColor for a plain root Column, leaving headings/body black on
+dark palettes. The root now supplies the shared foreground color explicitly.
+Theme checks now verify foreground text layout color and painted background for
+all 13 entries, including System, and reject a covering system ANR dialog.
+Visible video keeps the screen awake only while playing; in-flight feed replies
+retain the user's current scroll index. The full rerun remains required.
+
 ## Passed historical backend checks
 
 - Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.

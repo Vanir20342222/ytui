@@ -9,7 +9,8 @@ Android. The account sign-in web page is the only WebView screen.
 
 This is a development preview, not a claim of full desktop parity or completed
 Nothing Phone (3a) / Galaxy Tab S9 acceptance. Read [PARITY.md](PARITY.md) and
-[VALIDATION.md](VALIDATION.md) before treating it as a daily driver.
+[VALIDATION.md](VALIDATION.md) before treating it as a daily driver. The
+[device acceptance checklist](DEVICE_ACCEPTANCE.md) covers the native UI re-test.
 
 ## Install an APK
 
@@ -55,7 +56,7 @@ Notification/media-session controls use those same actions. History is local and
 can be disabled or cleared with resume positions. A stopped/killed process does
 not retain derived collection context; select the collection again to rebuild it.
 
-Menu → **Lyrics / local LRC** opens a song-specific view. Review title and artist
+Menu → **Lyrics** opens a song-specific view. Review title and artist
 before choosing Find on LRCLIB; no automatic lookup or cookies are sent. Choose
 a returned version or import a UTF-8 LRC/plain text document (up to 512 KiB).
 Enable **Follow playing line** for automatic scrolling; timed lines support tap-to-seek. Positive Delay shows lines
@@ -63,7 +64,7 @@ later; edits and adjustments save locally for that media URL. Timing pauses when
 another song is playing. The local lyric library holds up to 100 songs / 8 MiB;
 Remove saved lyrics frees an entry without changing saved media or the queue.
 
-For a completed offline download, open **Actions → Export file…** and choose a
+For a completed offline download, tap **Export file…** and choose a
 destination in Android's document picker. Original MP4/M4A/WebM containers are
 copied without re-encoding; compatible separate video/audio tracks are combined
 into one MP4 or WebM file. Export runs in a foreground worker, reads only completed

@@ -256,125 +256,131 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                 large = RoundedCornerShape(6.dp),
             ),
     ) {
-        Column(
-            Modifier.fillMaxSize()
-                .background(background)
-                .testTag("app-background")
-                .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
-                .safeDrawingPadding()
-                .imePadding()
-        ) {
-            Row(
-                Modifier.fillMaxWidth().padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+        CompositionLocalProvider(LocalContentColor provides foreground) {
+            Column(
+                Modifier.fillMaxSize()
+                    .background(background)
+                    .testTag("app-background")
+                    .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
+                    .safeDrawingPadding()
+                    .imePadding()
             ) {
-                Text("ytui", color = accent, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    listOf("Downloads", "YouTube", "Music", "Radio")[tab],
-                    Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Action(
-                    if (account.optBoolean("connected")) "Account ●" else "Sign in",
-                    "account-button",
+                Row(
+                    Modifier.fillMaxWidth().padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    dialog = "account"
-                }
-                Action("Settings", "settings-button") { dialog = "settings" }
-                Box {
-                    Action("⋮", "menu-button") { menu = true }
-                    DropdownMenu(menu, { menu = false }) {
-                        for ((label, name) in
-                            listOf(
-                                "Playback queue" to "queue",
-                                "Recently played" to "history",
-                                "Lyrics" to "lyrics",
-                                "Sleep timer" to "sleep",
-                                "About" to "about",
-                            )) {
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    menu = false
-                                    dialog = name
-                                    if (name == "queue") vm.loadQueue()
-                                    if (name == "history") vm.loadHistory()
-                                    if (name == "lyrics") vm.player.value.media?.let(vm::lyricLoad)
-                                },
-                            )
-                        }
-                        DropdownMenuItem(
-                            text = { Text("Refresh feed") },
-                            onClick = {
-                                menu = false
-                                vm.navigate(request = vm.feeds[tab].value.request, remember = false)
-                            },
-                        )
+                    Text("ytui", color = accent, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        listOf("Downloads", "YouTube", "Music", "Radio")[tab],
+                        Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Action(
+                        if (account.optBoolean("connected")) "Account ●" else "Sign in",
+                        "account-button",
+                    ) {
+                        dialog = "account"
                     }
-                }
-            }
-            HorizontalDivider()
-            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
-                val tablet = maxWidth >= 840.dp
-                Row(Modifier.fillMaxSize()) {
-                    if (tablet)
-                        Column(
-                            Modifier.width(132.dp).fillMaxHeight().padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            TabButtons(tab, vm::chooseTab, vertical = true)
-                        }
-                    Box(Modifier.weight(1f).fillMaxHeight()) {
-                        if (tab == 0) DownloadsPane(vm)
-                        else
-                            key(tab) {
-                                BrowsePane(
-                                    vm,
-                                    tab,
-                                    onAccount = { dialog = "account" },
-                                    onFeeds = { dialog = "feeds" },
+                    Action("Settings", "settings-button") { dialog = "settings" }
+                    Box {
+                        Action("⋮", "menu-button") { menu = true }
+                        DropdownMenu(menu, { menu = false }) {
+                            for ((label, name) in
+                                listOf(
+                                    "Playback queue" to "queue",
+                                    "Recently played" to "history",
+                                    "Lyrics" to "lyrics",
+                                    "Sleep timer" to "sleep",
+                                    "About" to "about",
+                                )) {
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        menu = false
+                                        dialog = name
+                                        if (name == "queue") vm.loadQueue()
+                                        if (name == "history") vm.loadHistory()
+                                        if (name == "lyrics")
+                                            vm.player.value.media?.let(vm::lyricLoad)
+                                    },
                                 )
                             }
-                    }
-                    if (tablet) {
-                        VerticalDivider()
-                        Column(
-                            Modifier.widthIn(max = 360.dp)
-                                .fillMaxWidth(0.34f)
-                                .fillMaxHeight()
-                                .verticalScroll(rememberScrollState())
-                                .padding(12.dp)
-                        ) {
-                            PlayerPane(
-                                vm,
-                                expanded = false,
-                                showSurface = !playerOpen,
-                                onQueue = {
-                                    dialog = "queue"
-                                    vm.loadQueue()
+                            DropdownMenuItem(
+                                text = { Text("Refresh feed") },
+                                onClick = {
+                                    menu = false
+                                    vm.navigate(
+                                        request = vm.feeds[tab].value.request,
+                                        remember = false,
+                                    )
                                 },
                             )
                         }
                     }
                 }
-            }
-            if (LocalConfiguration.current.screenWidthDp < 840) PlayerDock(vm)
-            Text(
-                status,
-                Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (LocalConfiguration.current.screenWidthDp < 840)
-                Row(
-                    Modifier.fillMaxWidth().padding(6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    TabButtons(tab, vm::chooseTab)
+                HorizontalDivider()
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                    val tablet = maxWidth >= 840.dp
+                    Row(Modifier.fillMaxSize()) {
+                        if (tablet)
+                            Column(
+                                Modifier.width(132.dp).fillMaxHeight().padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                TabButtons(tab, vm::chooseTab, vertical = true)
+                            }
+                        Box(Modifier.weight(1f).fillMaxHeight()) {
+                            if (tab == 0) DownloadsPane(vm)
+                            else
+                                key(tab) {
+                                    BrowsePane(
+                                        vm,
+                                        tab,
+                                        onAccount = { dialog = "account" },
+                                        onFeeds = { dialog = "feeds" },
+                                    )
+                                }
+                        }
+                        if (tablet) {
+                            VerticalDivider()
+                            Column(
+                                Modifier.widthIn(max = 360.dp)
+                                    .fillMaxWidth(0.34f)
+                                    .fillMaxHeight()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(12.dp)
+                            ) {
+                                PlayerPane(
+                                    vm,
+                                    expanded = false,
+                                    showSurface = !playerOpen,
+                                    onQueue = {
+                                        dialog = "queue"
+                                        vm.loadQueue()
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
+                if (LocalConfiguration.current.screenWidthDp < 840) PlayerDock(vm)
+                Text(
+                    status,
+                    Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (LocalConfiguration.current.screenWidthDp < 840)
+                    Row(
+                        Modifier.fillMaxWidth().padding(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        TabButtons(tab, vm::chooseTab)
+                    }
+            }
         }
         if (playerOpen)
             Panel("Now playing", { vm.playerOpen.value = false }, full = true) {
@@ -796,8 +802,12 @@ private fun PlayerPane(
             update = { view ->
                 val actual = PlaybackService.current?.player
                 if (view.player !== actual) view.player = actual
+                view.keepScreenOn = player.playing
             },
-            onRelease = { it.player = null },
+            onRelease = {
+                it.keepScreenOn = false
+                it.player = null
+            },
         )
     } else if (showSurface && tab in 2..3 && player.media != null) Visualizer(player, config)
     player.value

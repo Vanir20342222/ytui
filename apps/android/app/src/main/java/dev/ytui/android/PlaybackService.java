@@ -67,7 +67,32 @@ public final class PlaybackService extends MediaSessionService {
                         .setEnableAudioTrackPlaybackParams(playbackParams)
                         .build();
                   }
-                }.setEnableDecoderFallback(true))
+                }.setEnableDecoderFallback(true)
+                    .setMediaCodecSelector(
+                        (mime, secure, tunneling) -> {
+                          java.util.List<androidx.media3.exoplayer.mediacodec.MediaCodecInfo>
+                              decoders =
+                                  androidx.media3.exoplayer.mediacodec.MediaCodecSelector.DEFAULT
+                                      .getDecoderInfos(mime, secure, tunneling);
+                          // Goldfish's host-FFmpeg AVC bridge can report decoded frames
+                          // backed by invalid color-buffer IDs under software GPUs.
+                          // Offline fixtures use Android's real software codec instead;
+                          // normal apps/devices keep the default hardware selection.
+                          if (BuildConfig.DEBUG
+                              && MediaBridge.offlineUi
+                              && mime.startsWith("video/")
+                              && (android.os.Build.HARDWARE.equals("ranchu")
+                                  || android.os.Build.HARDWARE.equals("goldfish"))) {
+                            java.util.List<androidx.media3.exoplayer.mediacodec.MediaCodecInfo>
+                                software = new java.util.ArrayList<>();
+                            for (androidx.media3.exoplayer.mediacodec.MediaCodecInfo decoder :
+                                decoders)
+                              if (decoder.name.startsWith("c2.android.")
+                                  || decoder.name.startsWith("OMX.google.")) software.add(decoder);
+                            if (!software.isEmpty()) return software;
+                          }
+                          return decoders;
+                        }))
             .build();
     player.setAudioAttributes(
         new AudioAttributes.Builder()

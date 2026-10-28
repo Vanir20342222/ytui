@@ -1,9 +1,11 @@
 package dev.ytui.android
 
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ActivityScenario
@@ -44,6 +46,11 @@ class NativeUiTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+        Assert.assertFalse(
+            "A system ANR dialog is covering the app",
+            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                .hasObject(androidx.test.uiautomator.By.res("android", "aerr_close")),
+        )
     }
 
     @After
@@ -97,17 +104,33 @@ class NativeUiTest {
             }
             compose.onNodeWithText("Close").performClick()
             compose.waitForIdle()
-            val expected =
-                JSONObject(NativeBridge.request(json("op" to "theme", "dark" to false).toString()))
+            val dark =
+                InstrumentationRegistry.getInstrumentation()
+                    .targetContext
+                    .resources
+                    .configuration
+                    .uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
+            val palette =
+                JSONObject(NativeBridge.request(json("op" to "theme", "dark" to dark).toString()))
                     .getJSONObject("data")
-                    .getJSONArray("background")
+            val expected = palette.getJSONArray("background")
             val actual = compose.onNodeWithTag("app-background").captureToImage().toPixelMap()[0, 0]
-            // Theme is checked as drawn pixels, not just a changed preference string.
-            if (theme != "system") {
-                Assert.assertEquals(expected.getInt(0) / 255f, actual.red, 0.03f)
-                Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
-                Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
+            Assert.assertEquals(expected.getInt(0) / 255f, actual.red, 0.03f)
+            Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
+            Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
+            val layouts = mutableListOf<TextLayoutResult>()
+            compose.onNodeWithText("For you").performSemanticsAction(
+                SemanticsActions.GetTextLayoutResult
+            ) {
+                it(layouts)
             }
+            Assert.assertTrue("The feed heading should expose a text layout", layouts.isNotEmpty())
+            val textColor = layouts.single().layoutInput.style.color
+            val ink = palette.getJSONArray("text")
+            Assert.assertEquals(ink.getInt(0) / 255f, textColor.red, 0.03f)
+            Assert.assertEquals(ink.getInt(1) / 255f, textColor.green, 0.03f)
+            Assert.assertEquals(ink.getInt(2) / 255f, textColor.blue, 0.03f)
             val saved =
                 JSONObject(NativeBridge.request(json("op" to "settings").toString()))
                     .getJSONObject("data")
