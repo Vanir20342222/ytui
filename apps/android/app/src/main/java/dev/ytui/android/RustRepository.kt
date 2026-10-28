@@ -29,8 +29,15 @@ internal fun JSONObject.copyJson() = JSONObject(toString())
 
 internal fun JSONArray.objects() = (0 until length()).mapNotNull { optJSONObject(it) }
 
-internal class RpcError(val code: String, message: String, val retryMs: Long = 0) :
-    Exception(message)
+internal class RpcError(
+    val code: String,
+    message: String,
+    val retryMs: Long = 0,
+    val retryable: Boolean = false,
+) : Exception(message) {
+    fun retryDelay(attempt: Int): Long? =
+        if (retryable && attempt in 0..2) maxOf(retryMs, 2000L shl attempt) else null
+}
 
 /** Blocking JNI never runs on Android's main thread; cancellation reaches Rust immediately. */
 internal object RustRpc {
@@ -50,6 +57,7 @@ internal object RustRpc {
                                 reply.optString("code"),
                                 reply.optString("error", "Request failed"),
                                 reply.optLong("retry_after_ms"),
+                                reply.optBoolean("retryable"),
                             )
                         if (continuation.isActive)
                             continuation.resume(
@@ -116,6 +124,8 @@ internal data class FeedState(
     val notice: String? = null,
     val generation: Long = 0,
     val scrollIndex: Int = 0,
+    val failedRequest: Any? = null,
+    val failedAppend: Boolean = false,
 )
 
 internal data class PlayerState(val value: JSONObject = JSONObject()) {
@@ -226,10 +236,12 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     fun systemTheme(dark: Boolean) {
-        if (config.value.optString("theme", "system") == "system")
-            viewModelScope.launch {
-                runCatching { palette.value = RustRpc.objectCall("theme", "dark" to dark) }
+        task {
+            settingsLock.withLock {
+                if (config.value.optString("theme", "system") == "system")
+                    palette.value = RustRpc.objectCall("theme", "dark" to dark)
             }
+        }
     }
 
     suspend fun snapshot() =
@@ -246,9 +258,11 @@ internal class YtuiViewModel : ViewModel() {
                     "notice" -> status.value = text
                     "theme_file" ->
                         task {
-                            palette.value = RustRpc.objectCall("import_theme", "text" to text)
-                            config.value = RustRpc.objectCall("settings")
-                            status.value = "Palette applied"
+                            settingsLock.withLock {
+                                palette.value = RustRpc.objectCall("import_theme", "text" to text)
+                                config.value = RustRpc.objectCall("settings")
+                                status.value = "Palette applied"
+                            }
                         }
                     "cookie_file" -> {
                         val intent = event.optLong("account_intent", -1)
@@ -345,9 +359,12 @@ internal class YtuiViewModel : ViewModel() {
                             loading = false,
                             error = error.message,
                             errorCode = (error as? RpcError)?.code ?: "",
+                            failedRequest = request,
+                            failedAppend = append,
                         )
-                    if (error is RpcError && error.retryMs > 0 && retry < 3) {
-                        delay(error.retryMs.coerceAtLeast(2000))
+                    val retryDelay = (error as? RpcError)?.retryDelay(retry)
+                    if (retryDelay != null) {
+                        delay(retryDelay)
                         if (feeds[index].value.generation == generation)
                             navigate(index, request, append, remember = false, retry = retry + 1)
                     }
@@ -359,6 +376,15 @@ internal class YtuiViewModel : ViewModel() {
         feeds[tab.value].value.continuation?.let {
             navigate(request = json("Continue" to it), append = true)
         }
+    }
+
+    fun retryFeed() {
+        val feed = feeds[tab.value].value
+        navigate(
+            request = feed.failedRequest ?: feed.request,
+            append = feed.failedAppend,
+            remember = false,
+        )
     }
 
     fun back(): Boolean {
@@ -510,6 +536,16 @@ internal class YtuiViewModel : ViewModel() {
                         .put("paused", player.value.playing)
                 )
         effect(op, *fields)
+    }
+
+    fun promotePreview() {
+        val media = player.value.media?.let(::MediaCard) ?: return
+        val context = context(media)
+        effect(
+            "preview_play_full",
+            "context" to context,
+            "context_id" to context?.optString("context_id"),
+        )
     }
 
     fun save(media: MediaCard) = task {

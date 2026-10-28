@@ -50,3 +50,14 @@ transition; it is not the production Android input/theme acceptance evidence.
 Do not recommend the replacement APK or mark this migration complete until its
 new runtime tests pass. Do not count the prior preview's fixture checks as proof
 that its physical-device UI worked.
+
+## Implementation checkpoint
+
+`a0d448f` replaces production hosting with ComponentActivity/Compose, native text
+fields, immediate shared palettes, account error actions, explicit auth completion
+and native Media3 video. Both ABIs, 315 Rust tests, 9 Android unit tests, lint,
+strict host/ARM64 Clippy and APK inspection passed locally. The first emulator run
+passed all four native input/theme/account/wide-layout tests and ten other backend
+cases, but failed video visibility (one public case skipped). The TextureView /
+retained-frame follow-up and feed/control hardening require another full run.
+The user's Tab S9 re-test is still pending; the previous APK is not UI-qualified.

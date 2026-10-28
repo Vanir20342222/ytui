@@ -102,40 +102,49 @@ public final class MediaRuntimeTest {
               .put(
                   "stream", new JSONObject().put("url", android.net.Uri.fromFile(media).toString()))
               .put("audio", false);
+      long initialFrames = MediaBridge.videoFrames.get();
       MediaBridge.execute(new JSONObject().put("op", "play").put("request", request).toString());
       MediaBridge.event("show_player", "");
       await(
           "Video decoder never advanced",
           () -> status().optDouble("position") > 0.2 && status().optBoolean("playing"));
-      await("Video decoder did not submit a native frame", () -> MediaBridge.videoFrames.get() > 0);
+      await(
+          "Video decoder did not submit a native frame",
+          () -> MediaBridge.videoFrames.get() > initialFrames);
       AudioTap.enabled = true;
       await("Decoded audio never produced visualizer levels", () -> AudioTap.levels != 0);
-      android.graphics.Bitmap screenshot =
-          InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-      if (screenshot != null) {
-        int red = 0, green = 0, blue = 0;
-        for (int y = 0; y < screenshot.getHeight(); y += 3)
-          for (int x = 0; x < screenshot.getWidth(); x += 3) {
-            int pixel = screenshot.getPixel(x, y),
-                r = android.graphics.Color.red(pixel),
-                g = android.graphics.Color.green(pixel),
-                b = android.graphics.Color.blue(pixel);
-            if (r > 180 && g < 90 && b < 90) red++;
-            if (g > 180 && r < 90 && b < 90) green++;
-            if (b > 180 && r < 90 && g < 90) blue++;
-          }
-        assertTrue(
-            "Decoded video was not visible in the native Android surface",
-            red > 100 && green > 100 && blue > 100);
-        try (FileOutputStream out =
-            new FileOutputStream(new File(context.getExternalFilesDir(null), "video-player.png"))) {
-          screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
-        } finally {
-          screenshot.recycle();
-        }
-      }
+      // Freeze a decoded frame before screenshot synchronization can outlast the
+      // short fixture. Require visible RGB pixels, not just decoder callbacks.
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
+      await(
+          "Decoded video was not visible in the native Android surface",
+          () -> {
+            android.graphics.Bitmap screenshot =
+                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+            if (screenshot == null) return false;
+            try {
+              int red = 0, green = 0, blue = 0;
+              for (int y = 0; y < screenshot.getHeight(); y += 3)
+                for (int x = 0; x < screenshot.getWidth(); x += 3) {
+                  int pixel = screenshot.getPixel(x, y),
+                      r = android.graphics.Color.red(pixel),
+                      g = android.graphics.Color.green(pixel),
+                      b = android.graphics.Color.blue(pixel);
+                  if (r > 180 && g < 90 && b < 90) red++;
+                  if (g > 180 && r < 90 && b < 90) green++;
+                  if (b > 180 && r < 90 && g < 90) blue++;
+                }
+              try (FileOutputStream out =
+                  new FileOutputStream(
+                      new File(context.getExternalFilesDir(null), "video-player.png"))) {
+                screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+              }
+              return red > 100 && green > 100 && blue > 100;
+            } finally {
+              screenshot.recycle();
+            }
+          });
       double position = status().getDouble("position");
       java.util.concurrent.CountDownLatch replaced = new java.util.concurrent.CountDownLatch(1);
       java.util.concurrent.atomic.AtomicReference<Exception> replaceError =
@@ -215,6 +224,8 @@ public final class MediaRuntimeTest {
       command("stop");
       firstGeneration = RustActivity.generations.get();
     } finally {
+      command("stop");
+      AudioTap.enabled = false;
       media.delete();
     }
     await("Android UI did not close", () -> RustActivity.shutdowns.get() > cleanShutdowns);
@@ -225,11 +236,11 @@ public final class MediaRuntimeTest {
         alive.await(5, java.util.concurrent.TimeUnit.SECONDS));
     try (ActivityScenario<RustActivity> reopened = RuntimeTest.launchOffline()) {
       await(
-          "Rust UI did not restart in the existing app process",
+          "Android UI did not restart in the existing app process",
           () -> RustActivity.generations.get() > firstGeneration);
     }
     await(
-        "Reopened Rust UI did not clean up",
+        "Reopened Android UI did not clean up",
         () -> RustActivity.shutdowns.get() >= cleanShutdowns + 2);
     java.util.concurrent.CountDownLatch closedAgain = new java.util.concurrent.CountDownLatch(1);
     MediaBridge.main.post(closedAgain::countDown);

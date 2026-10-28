@@ -1056,7 +1056,7 @@ fn mobile_error(error: &anyhow::Error) -> Value {
     let retry = error
         .downcast_ref::<ytui_providers::browse::FeedRetry>()
         .map(|r| r.after.as_millis().min(u64::MAX as u128) as u64);
-    json!({"ok":false,"code":code,"error":message,"retry_after_ms":retry})
+    json!({"ok":false,"code":code,"error":message,"retryable":retry.is_some(),"retry_after_ms":retry})
 }
 #[cfg(test)]
 mod mobile_error_tests {
@@ -1079,6 +1079,20 @@ mod mobile_error_tests {
         ));
         assert_eq!(value["code"], "anonymous_home_empty");
         assert!(value["error"].as_str().unwrap().contains("Search"));
+    }
+    #[test]
+    fn transient_transport_errors_remain_retryable_without_a_service_delay() {
+        let error = ytui_providers::browse::FeedRetry::new(
+            "Temporary connection failure",
+            std::time::Duration::ZERO,
+        );
+        let value = mobile_error(&error.into());
+        assert_eq!(value["retryable"], true);
+        assert_eq!(value["retry_after_ms"], 0);
+        assert_eq!(
+            mobile_error(&anyhow::anyhow!("Bad request"))["retryable"],
+            false
+        );
     }
 }
 #[cfg(target_os = "android")]

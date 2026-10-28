@@ -27,6 +27,33 @@ explicitly ignored**, formatting and strict host/ARM64 Clippy. Native UI emulato
 results will be recorded after the new suite runs. Earlier test counts below describe
 their specific Rust/legacy UI/backend checkpoints only.
 
+### First native UI emulator run
+
+[Run 40655604212](https://github.com/Vanir20342222/ytui/actions/runs/40655604212)
+at `a0d448f` passed **14 cases**, including all four new native keyboard/theme/
+account/wide-layout checks. One generated-video visibility check failed, and the
+separate public YouTube case was explicitly skipped. This is not a qualified APK.
+
+Actual shell/IME text entry and Unicode editing worked, every shared theme's
+preference persisted and non-system palettes matched painted pixels, the
+protected-feed account action opened native sign-in/import controls, Cancel did
+not connect an account, and landscape tabs/panels stayed reachable.
+
+The decoder produced frames/PCM, but the screenshot lacked visible RGB video.
+The follow-up uses a native TextureView inside Compose's layered player dialog;
+the regression now pauses on a decoded frame before screenshot synchronization
+can outlast the eight-second fixture, retains screenshot evidence even on
+failure, and checks actual colored pixels. Full media/preview/volume/offline
+regressions must pass after this change. This does not qualify public YouTube.
+
+Review also found that a zero-delay transient feed error lost its retryability,
+and scroll prefetch could restart a failed continuation during its cooldown.
+The follow-up retains an explicit retryable flag, bounded backoff, a no-prefetch
+error guard and continuation-specific retry while preserving loaded cards. It
+adds Rust, Kotlin and native UI regressions. Theme/import updates are serialized;
+seek gestures retain their draft position, SponsorBlock marks/replay remain
+reachable, and visualizer sampling/animation runs only while visible/playing.
+
 ## Passed historical backend checks
 
 - Qualified Keystore/navigation checkpoint: **311 passed, 0 failed, 31 explicitly ignored**.

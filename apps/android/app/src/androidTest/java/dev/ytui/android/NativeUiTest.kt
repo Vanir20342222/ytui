@@ -1,6 +1,7 @@
 package dev.ytui.android
 
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.core.view.ViewCompat
@@ -35,7 +36,13 @@ class NativeUiTest {
                 .getJSONObject("data")
         scenario = RuntimeTest.launchOffline()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("search-field").fetchSemanticsNodes().isNotEmpty()
+            compose
+                .onAllNodes(
+                    hasTestTag("app-background") and
+                        SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Ready")
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
@@ -64,6 +71,7 @@ class NativeUiTest {
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input")
         compose.onNodeWithTag("search-field").performTextInput(" Grüße")
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input Grüße")
+        MediaRuntimeTest.capture("native-search.png")
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("search-field").assertIsDisplayed()
         compose.onNodeWithTag("settings-button").performClick()
@@ -104,6 +112,7 @@ class NativeUiTest {
                 JSONObject(NativeBridge.request(json("op" to "settings").toString()))
                     .getJSONObject("data")
             Assert.assertEquals(theme, saved.getString("theme"))
+            MediaRuntimeTest.capture("native-theme-$index.png")
         }
     }
 
@@ -123,6 +132,7 @@ class NativeUiTest {
         compose.onNodeWithText("Account needed").assertIsDisplayed()
         compose.onNodeWithTag("feed-account-action").performClick()
         compose.onNodeWithTag("account-import").assertIsDisplayed()
+        MediaRuntimeTest.capture("native-account.png")
         compose
             .onNodeWithTag("cookie-header-field")
             .performScrollTo()
@@ -145,6 +155,37 @@ class NativeUiTest {
     }
 
     @Test
+    fun continuationFailureDoesNotTriggerAnImmediateScrollRetry() {
+        val reference = java.util.concurrent.atomic.AtomicReference<YtuiViewModel>()
+        scenario.onActivity {
+            val vm = androidx.lifecycle.ViewModelProvider(it)[YtuiViewModel::class.java]
+            reference.set(vm)
+            vm.feeds[1].value =
+                FeedState(
+                    cards =
+                        listOf(
+                            MediaCard(
+                                json(
+                                    "title" to "Retained result",
+                                    "url" to "https://media.invalid/retained",
+                                )
+                            )
+                        ),
+                    continuation = "fixture:invalid-endpoint",
+                    error = "Service cooldown",
+                    generation = 500,
+                    failedAppend = true,
+                )
+        }
+        compose.waitForIdle()
+        android.os.SystemClock.sleep(600)
+        Assert.assertEquals(500L, reference.get().feeds[1].value.generation)
+        Assert.assertEquals("Retained result", reference.get().feeds[1].value.cards.single().title)
+        // If a prefetch accidentally runs, the synthetic endpoint is rejected
+        // before any HTTP request; no public provider is contacted by this test.
+    }
+
+    @Test
     fun wideLayoutKeepsTabsSettingsAndPlayerPanelsReachable() {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         try {
@@ -162,6 +203,7 @@ class NativeUiTest {
                 compose.onNodeWithText(label).performClick()
                 compose.onNodeWithText("Close").assertIsDisplayed().performClick()
             }
+            MediaRuntimeTest.capture("native-tablet.png")
         } finally {
             device.setOrientationNatural()
             device.unfreezeRotation()

@@ -30,6 +30,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -156,6 +158,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val account by vm.account.collectAsState()
     val playerOpen by vm.playerOpen.collectAsState()
     val status by vm.status.collectAsState()
+    val ready by vm.ready.collectAsState()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val keyboard = LocalSoftwareKeyboardController.current
     val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
@@ -257,6 +260,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
             Modifier.fillMaxSize()
                 .background(background)
                 .testTag("app-background")
+                .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
                 .safeDrawingPadding()
                 .imePadding()
         ) {
@@ -540,7 +544,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             vm.sharedQuery.value = ""
         }
     }
-    LaunchedEffect(list, feed.continuation, feed.loading) {
+    LaunchedEffect(list, feed.continuation, feed.loading, feed.error) {
         snapshotFlow { list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
             .distinctUntilChanged()
             .collect { last ->
@@ -548,7 +552,8 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                     feed.cards.isNotEmpty() &&
                         last >= feed.cards.size - 5 &&
                         feed.continuation != null &&
-                        !feed.loading
+                        !feed.loading &&
+                        feed.error == null
                 )
                     vm.more()
             }
@@ -625,9 +630,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                                 Action("Sign in / import cookies", "feed-account-action") {
                                     onAccount()
                                 }
-                                Action("Retry") {
-                                    vm.navigate(request = feed.request, remember = false)
-                                }
+                                Action("Retry") { vm.retryFeed() }
                             }
                             Text(
                                 "Search and video URLs remain available without a personalized feed."
@@ -647,7 +650,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                         "Search for a video, song or station. Sign in for your personalized feeds."
                     )
                 }
-            if (feed.continuation != null && !feed.loading)
+            if (feed.continuation != null && !feed.loading && feed.error == null)
                 item { Action("Load more") { vm.more() } }
         }
     }
@@ -781,7 +784,13 @@ private fun PlayerPane(
         ?.let { Text("Live · $it", color = MaterialTheme.colorScheme.primary) }
     if (player.video && showSurface && player.media != null) {
         AndroidView(
-            factory = { context -> PlayerView(context).apply { useController = false } },
+            factory = { context ->
+                // TextureView participates in Compose dialog clipping and z-order;
+                // media decoding remains in Media3's hardware decoder.
+                android.view.LayoutInflater.from(context)
+                    .inflate(R.layout.ytui_player, android.widget.FrameLayout(context), false)
+                    as PlayerView
+            },
             modifier =
                 Modifier.fillMaxWidth().aspectRatio(16f / 9f).testTag("native-video-surface"),
             update = { view ->
@@ -790,7 +799,7 @@ private fun PlayerPane(
             },
             onRelease = { it.player = null },
         )
-    } else if (tab in 2..3 && player.media != null) Visualizer(vm, player, config)
+    } else if (showSurface && tab in 2..3 && player.media != null) Visualizer(player, config)
     player.value
         .optString("error")
         .takeUnless { it.isBlank() || it == "null" }
@@ -799,7 +808,7 @@ private fun PlayerPane(
         Text("Muted preview")
         FlowRow {
             Action("End preview") { vm.command("preview_end") }
-            Action("Play full") { vm.command("preview_play_full") }
+            Action("Play full") { vm.promotePreview() }
         }
         return
     }
@@ -809,14 +818,54 @@ private fun PlayerPane(
             Spacer(Modifier.weight(1f))
             Text(time(player.duration))
         }
-        var seek by remember(player.position) { mutableFloatStateOf(player.position) }
+        var seek by remember(player.media?.optString("url")) { mutableStateOf<Float?>(null) }
         Slider(
-            seek.coerceIn(0f, player.duration),
+            (seek ?: player.position).coerceIn(0f, player.duration),
             { seek = it },
             valueRange = 0f..player.duration,
-            onValueChangeFinished = { vm.command("seek", "seconds" to seek) },
+            onValueChangeFinished = {
+                seek?.let { vm.command("seek", "seconds" to it) }
+                seek = null
+            },
             modifier = Modifier.fillMaxWidth().testTag("seek-slider"),
         )
+        val segments = player.value.optJSONArray("segments")?.objects() ?: emptyList()
+        if (segments.isNotEmpty()) {
+            val accent = MaterialTheme.colorScheme.primary
+            val muted = MaterialTheme.colorScheme.outline
+            Canvas(Modifier.fillMaxWidth().height(8.dp).testTag("sponsor-marks")) {
+                drawRect(muted.copy(alpha = 0.25f))
+                segments.forEach { mark ->
+                    val start = mark.optDouble("start").toFloat().coerceIn(0f, player.duration)
+                    val end = mark.optDouble("end").toFloat().coerceIn(start, player.duration)
+                    drawRect(
+                        accent,
+                        Offset(start / player.duration * size.width, 0f),
+                        androidx.compose.ui.geometry.Size(
+                            (end - start) / player.duration * size.width,
+                            size.height,
+                        ),
+                    )
+                }
+            }
+            Text(
+                "Marked segments · tap to watch without skipping",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(segments) { mark ->
+                    Action(
+                        "${mark.optString("category")} ${time(mark.optDouble("start").toFloat())}"
+                    ) {
+                        vm.command(
+                            "sponsor_watch",
+                            "start" to mark.optDouble("start"),
+                            "end" to mark.optDouble("end"),
+                        )
+                    }
+                }
+            }
+        }
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Action("Previous") { vm.command("previous") }
@@ -880,12 +929,14 @@ private fun PlayerPane(
 }
 
 @Composable
-private fun Visualizer(vm: YtuiViewModel, player: PlayerState, config: JSONObject) {
+private fun Visualizer(player: PlayerState, config: JSONObject) {
     val style = config.optString("music_player_style", "classic")
     val reduced = config.optBoolean("reduced_motion")
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+    val visible = lifecycleState.isAtLeast(Lifecycle.State.STARTED)
     var phase by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(player.playing, reduced) {
-        if (player.playing && !reduced) {
+    LaunchedEffect(player.playing, reduced, style, visible) {
+        if (player.playing && !reduced && style != "classic" && visible) {
             var previous = 0L
             while (true) withInfiniteAnimationFrameNanos { now ->
                 if (previous != 0L) phase = (phase + (now - previous) / 1_000_000_000f * 90) % 360
@@ -893,21 +944,27 @@ private fun Visualizer(vm: YtuiViewModel, player: PlayerState, config: JSONObjec
             }
         }
     }
-    DisposableEffect(player.playing, style, reduced) {
+    DisposableEffect(player.playing, style, reduced, visible) {
         AudioTap.enabled =
-            player.playing && !reduced && (style.startsWith("vu") || style.startsWith("orbit"))
+            visible &&
+                player.playing &&
+                !reduced &&
+                (style.startsWith("vu") || style.startsWith("orbit"))
         onDispose { AudioTap.enabled = false }
     }
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
-    val left = player.value.optDouble("left", 0.0).toFloat().coerceIn(0f, 1f)
-    val right = player.value.optDouble("right", 0.0).toFloat().coerceIn(0f, 1f)
     val media = player.media?.let(::MediaCard) ?: return
     Box(
         Modifier.fillMaxWidth().height(240.dp).testTag("music-visualizer"),
         contentAlignment = Alignment.CenterStart,
     ) {
-        if (style == "classic") Artwork(media, Modifier.size(228.dp).align(Alignment.Center))
+        if (style == "classic")
+            Artwork(
+                media,
+                Modifier.size(228.dp).align(Alignment.Center),
+                config.optBoolean("thumbnails", true),
+            )
         else if (style.startsWith("vinyl")) {
             Canvas(Modifier.fillMaxSize()) {
                 val radius = min(size.height * 0.48f, size.width * 0.32f)
@@ -930,9 +987,16 @@ private fun Visualizer(vm: YtuiViewModel, player: PlayerState, config: JSONObjec
                     drawCircle(Color.Black, radius * 0.025f, center)
                 }
             }
-            Artwork(media, Modifier.fillMaxHeight(0.94f).aspectRatio(1f))
+            Artwork(
+                media,
+                Modifier.fillMaxHeight(0.94f).aspectRatio(1f),
+                config.optBoolean("thumbnails", true),
+            )
         } else if (style.startsWith("vu"))
             Canvas(Modifier.fillMaxSize()) {
+                val packed = if (AudioTap.enabled) AudioTap.levels else 0L
+                val left = (packed and 65535) / 65535f
+                val right = ((packed ushr 16) and 65535) / 65535f
                 for (i in 0..23) {
                     val level = if (i < 12) left else right
                     val height = (0.08f + level * (0.5f + 0.5f * sin(phase / 30 + i))) * size.height
@@ -945,6 +1009,9 @@ private fun Visualizer(vm: YtuiViewModel, player: PlayerState, config: JSONObjec
             }
         else
             Canvas(Modifier.fillMaxSize()) {
+                val packed = if (AudioTap.enabled) AudioTap.levels else 0L
+                val left = (packed and 65535) / 65535f
+                val right = ((packed ushr 16) and 65535) / 65535f
                 val center = Offset(size.width / 2, size.height / 2)
                 val radius = size.minDimension * 0.28f
                 drawCircle(accent.copy(alpha = 0.2f), radius, center, style = Stroke(3f))
