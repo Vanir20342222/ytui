@@ -1462,10 +1462,12 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
             val label = maxWidth * 0.16f
             Artwork(
                 media,
-                Modifier.offset(x = maxWidth * 0.65f - label / 2, y = maxHeight / 2 - label / 2)
+                Modifier.align(Alignment.TopStart)
+                    .offset(x = maxWidth * 0.65f - label / 2, y = maxHeight / 2 - label / 2)
                     .size(label)
                     .graphicsLayer { rotationZ = phase }
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .testTag("vinyl-record-label"),
                 config.optBoolean("thumbnails", true),
             )
             Artwork(

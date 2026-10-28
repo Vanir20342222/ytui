@@ -126,3 +126,12 @@ run also contains the two older player/assertion failures described above.
 Neither a skipped default live case nor local decoding fixtures erase that
 separate failed network acceptance result. Do not retry aggressively or import
 personal credentials into hosted CI to make it pass.
+
+`5ba553f` passes populated covers, all three visualizers, folder/local-only
+guards and decoded fullscreen pixels. The remaining failure is fullscreen Back
+navigation; an explicit AndroidX Back callback and actual exit-button/reopen/Back
+checks repair that final transition. No failed artifact is published as qualified.
+Manual capture review also caught a doubled vertical offset on the vinyl label;
+top-origin alignment and a measured hub-position assertion now keep it centred
+on the spinning record. Fullscreen navigation checks wait for the resumed window
+to own input focus, so Back cannot accidentally target the previous dialog.

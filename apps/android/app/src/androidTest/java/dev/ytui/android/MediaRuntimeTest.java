@@ -71,6 +71,22 @@ public final class MediaRuntimeTest {
     return new JSONObject(MediaBridge.playerSnapshot);
   }
 
+  static boolean fullscreenHasInputFocus() {
+    java.util.concurrent.atomic.AtomicBoolean focused =
+        new java.util.concurrent.atomic.AtomicBoolean();
+    InstrumentationRegistry.getInstrumentation()
+        .runOnMainSync(
+            () -> {
+              for (android.app.Activity activity :
+                  androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry.getInstance()
+                      .getActivitiesInStage(androidx.test.runner.lifecycle.Stage.RESUMED)) {
+                if (activity instanceof FullscreenActivity && activity.hasWindowFocus())
+                  focused.set(true);
+              }
+            });
+    return focused.get();
+  }
+
   static void surfaceEvidence() {
     if (android.os.Build.VERSION.SDK_INT < 29) return;
     java.util.concurrent.CountDownLatch recorded = new java.util.concurrent.CountDownLatch(1);
@@ -220,7 +236,10 @@ public final class MediaRuntimeTest {
       fullscreen.click();
       await(
           "Fullscreen did not enter landscape",
-          () -> FullscreenActivity.visible && device.getDisplayWidth() > device.getDisplayHeight());
+          () ->
+              FullscreenActivity.visible
+                  && fullscreenHasInputFocus()
+                  && device.getDisplayWidth() > device.getDisplayHeight());
       assertEquals(
           "Fullscreen must reuse the prepared decoder",
           fullscreenGeneration,
@@ -255,13 +274,38 @@ public final class MediaRuntimeTest {
               frame.recycle();
             }
           });
-      device.pressBack();
+      androidx.test.uiautomator.UiObject2 exitFullscreen =
+          device.findObject(
+              androidx.test.uiautomator.By.res(BuildConfig.APPLICATION_ID, "exo_fullscreen"));
+      if (exitFullscreen == null) {
+        device.click(device.getDisplayWidth() / 2, device.getDisplayHeight() / 2);
+        exitFullscreen =
+            device.wait(
+                androidx.test.uiautomator.Until.findObject(
+                    androidx.test.uiautomator.By.res(BuildConfig.APPLICATION_ID, "exo_fullscreen")),
+                5000);
+      }
+      assertNotNull("The native fullscreen exit button must be reachable", exitFullscreen);
+      exitFullscreen.click();
       await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);
       assertEquals(fullscreenGeneration, PlaybackService.current.generation);
       assertEquals(
           "Surface switches must not overwrite startup latency",
           inlineFirstFrameMs,
           status().getLong("first_frame_ms"));
+      fullscreen =
+          device.wait(
+              androidx.test.uiautomator.Until.findObject(
+                  androidx.test.uiautomator.By.desc("Fullscreen video")),
+              5000);
+      assertNotNull("Focused player must return after leaving fullscreen", fullscreen);
+      fullscreen.click();
+      await(
+          "Fullscreen must reopen", () -> FullscreenActivity.visible && fullscreenHasInputFocus());
+      InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+      device.pressBack();
+      await("Android Back must exit fullscreen", () -> !FullscreenActivity.visible);
+      assertEquals(fullscreenGeneration, PlaybackService.current.generation);
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
       command("repeat");

@@ -369,6 +369,22 @@ class CatalogUiTest {
                     .assertIsDisplayed()
                     .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
                 compose.onNodeWithTag("player-pause").assertIsDisplayed()
+                if (style == "vinyl") {
+                    val record =
+                        compose.onNodeWithTag("music-visualizer").fetchSemanticsNode().boundsInRoot
+                    val label =
+                        compose
+                            .onNodeWithTag("vinyl-record-label")
+                            .fetchSemanticsNode()
+                            .boundsInRoot
+                    Assert.assertEquals(
+                        "Record art must stay at its hub",
+                        record.center.y,
+                        label.center.y,
+                        3f,
+                    )
+                    Assert.assertEquals(record.left + record.width * 0.65f, label.center.x, 3f)
+                }
                 MediaRuntimeTest.capture("native-player-$style.png")
             }
             compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()

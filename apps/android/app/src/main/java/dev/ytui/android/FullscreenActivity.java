@@ -2,6 +2,7 @@ package dev.ytui.android;
 
 import android.os.Bundle;
 import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.*;
 import androidx.lifecycle.Lifecycle;
 import androidx.media3.ui.PlayerView;
@@ -21,6 +22,15 @@ public final class FullscreenActivity extends ComponentActivity {
       return;
     }
     visible = true;
+    getOnBackPressedDispatcher()
+        .addCallback(
+            this,
+            new OnBackPressedCallback(true) {
+              @Override
+              public void handleOnBackPressed() {
+                finish();
+              }
+            });
     ComposeHost.fullscreenChanged(true);
     WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     WindowInsetsControllerCompat bars =
