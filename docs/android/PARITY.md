@@ -7,7 +7,7 @@ theme application and account navigation; these require native UI re-acceptance.
 
 | Area | Android implementation | Qualification / remaining work |
 | --- | --- | --- |
-| Application UI | Native Jetpack Compose controls/IME, phone bottom tabs and tablet split pane; bounded Back history | Native input/theme/account emulator regressions added; results and physical Tab S9 re-test pending. Rotation, cutouts, gestures and accessibility review remain required |
+| Application UI | Native Jetpack Compose controls/IME, phone bottom tabs and tablet split pane; bounded Back history | Native input/theme/account/layout checks pass in the 17-case emulator checkpoint; physical Tab S9 re-test pending. Cutouts, gestures and accessibility review remain required |
 | Themes | 13 theme entries including system; shared dark/light palettes and document import | System light/dark maps to ytui dark/light; GNOME/Omarchy/Caelestia services are Linux-only, import their files instead |
 | Browsing | Shared Rust YouTube/Music feeds, search, categories, shelves, continuations, bounded transient retries | Personalized/anonymous live feeds must pass on devices/network; no generated catalog substituted for provider failure |
 | Images | Sized bounded disk/memory cache, virtualized rows and bounded async decode | Cold-cache images necessarily need a first fetch; device rendering/jank/memory measurements required |

@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 40
     env:
       CARGO_INCREMENTAL: '0'
+      # Keep app and instrumentation Gradle invocations on the same build marker.
+      YTUI_ANDROID_REVISION: ${{ github.sha }}
       YTUI_ANDROID_PUBLIC_URL: ${{ inputs.public_url }}
     steps:
       - uses: actions/checkout@v4

@@ -12,6 +12,11 @@ Nothing Phone (3a) / Galaxy Tab S9 acceptance. Read [PARITY.md](PARITY.md) and
 [VALIDATION.md](VALIDATION.md) before treating it as a daily driver. The
 [device acceptance checklist](DEVICE_ACCEPTANCE.md) covers the native UI re-test.
 
+The [tested native UI APK and checksum](VALIDATION.md#tested-development-apk)
+cover source `4b2e988`: 17 emulator checks pass, including actual keyboard input,
+all-theme contrast, account navigation and visible generated video. Real device/
+YouTube acceptance is still required; earlier failed APKs are historical only.
+
 ## Install an APK
 
 Open the repository's **Actions → Android → successful run → Artifacts** and

@@ -5,6 +5,69 @@ has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
+## Current native UI checkpoint: passed emulator checks
+
+Source **`4b2e988`**, PR merge revision **`494627636f39e34b4be5fbb18ee2fa8bd012a616`**.
+[Android run 40668747753](https://github.com/Vanir20342222/ytui/actions/runs/40668747753),
+[Rust run 40668747755](https://github.com/Vanir20342222/ytui/actions/runs/40668747755)
+and [Secret scan 40668747792](https://github.com/Vanir20342222/ytui/actions/runs/40668747792)
+passed. This supersedes the failed native UI development attempts below.
+
+- **317 offline Rust tests passed**, 0 failed, 31 explicitly ignored; formatting
+  and strict workspace Clippy passed. ARM64 JNI cross-target Clippy passed during
+  the native-host migration; both native ABIs rebuilt successfully in this run.
+- **12 Android JVM unit tests passed** in both debug and release configurations.
+  Kotlin/Java compilation, instrumentation assembly, debug/release lint passed.
+- **17 accelerated API 35 emulator checks passed**, 0 failures, 0 errors. The
+  separate public YouTube case was explicitly skipped. Continuous logcat has
+  **zero Rust panic markers and zero app ANRs**.
+- All six native UI checks pass: actual software-keyboard visibility and shell/
+  Unicode text input; all 13 shared themes' painted background, foreground and
+  persistence; account-error navigation, header editing and explicit sign-in
+  cancellation; wide-layout tabs/panels; cooldown prefetch; playlist/Music URL intent.
+- Generated video is visibly rendered in the full screenshot, with actual RGB
+  pixels. Pause, quality replacement/position, volume across stream changes,
+  muted preview restoration and cache-only playback pass. Concurrent export now
+  preserves the media session and playback notification; muxed output decodes
+  with PCM, audio copies byte-for-byte and cancellation leaves no output file.
+- EOF/manual queue/history/controller navigation, ICY metadata/session titles,
+  JNI bounds, isolated original n/signature challenge vectors, lyrics and
+  Keystore tamper/migration/disconnect checks pass again.
+
+The [device evidence](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12808525396)
+contains JUnit results, logs, a visible generated-video screenshot and 16 native
+UI screenshots (13 themes, keyboard input, account controls and wide layout).
+Representative keyboard, dark/light theme, account, wide-layout and video images
+were visually inspected; all 13 palettes also have automated color checks.
+Offline debug emulator video uses Android's real
+software codec to avoid Goldfish's host-FFmpeg buffer bridge; this does not prove
+physical hardware decoding or audible output. The instrumentation re-invocation
+used an unknown About build marker; functional source/version matches the APK.
+The workflow now carries the source marker across all Gradle steps to prevent
+that metadata-only difference in subsequent runs.
+
+### Tested development APK
+
+[Download APK and inspection report](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12807657622).
+Extract `outputs/apk/debug/app-debug.apk` from the ZIP. Version is
+**`0.2.0-alpha.12-mobile.2`**, code **2**, with ARM64/x86-64 and Android 8/API 26+.
+Local independent inspection verified signing, ZIP and 16 KiB ELF alignment,
+both Rust ABIs, required JNI exports and notices. APK SHA256:
+
+```text
+2587c533994e69a340730fbe7ba6400cbf80f6216844dfa46ad3bd711fd84791
+```
+
+This is an emulator-checked development preview, not a stable signed release.
+Artifacts expire after 30 days. Different debug signing identities cannot update
+each other in place; follow [installation/update guidance](README.md#install-an-apk)
+and preserve wanted app data before replacing an installation.
+
+**Still required:** [Tab S9/phone acceptance](DEVICE_ACCEPTANCE.md), real YouTube/
+account/network and audible output checks, hardware/OEM background behavior,
+remaining capability gaps and stable owner signing. Public playback is not
+qualified by these generated fixtures. M9 and PR #20 remain draft.
+
 ## Physical UI failure and native migration (2026-10-28)
 
 The user installed the earlier development APK on a Galaxy Tab S9 and reported
