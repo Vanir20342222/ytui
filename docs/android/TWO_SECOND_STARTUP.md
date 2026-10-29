@@ -154,3 +154,24 @@ Direct app playback registers the service session only after source preparation
 and synchronous state publication, so Media3's first notification update cannot
 be scheduled from the empty onCreate state. Controller-bound sessions retain
 Media3's normal registration behavior.
+
+### Fourth hosted run: inherited animation layer
+
+Run 40873191482 passed the restart regression and all other native checks; the
+prepared-start pixel check failed. Its cropped window image contained the feed
+while a later full-screen image showed video over a translucent player/feed.
+The native view could inherit an in-progress music fade because the root changed
+AnimatedVisibility's parameters after receiving the new video snapshot. Removing
+enter/exit parameters did not remove that existing graphics layer.
+
+Video now lives in a separate direct composition branch with no AnimatedVisibility
+ancestor. Music retains its transitions. A one-frame lag between the root's distinct
+mode flow and the player snapshot shows a plain placeholder instead of creating a
+native video view inside the music animation. This fixes actual compositing rather
+than weakening the pixel assertion; the 2000 ms copy-completion deadline remains.
+
+The direct route also compares the selected stream with the quality actually
+offered in the response under the same height cap/codec preference. Unsolved
+adaptive challenges must not silently turn offered 1080p into a 360p muxed fallback,
+or audio-only selection into a video download. An offline TLS regression verifies
+the full route restores offered 1080p. Faster starts do not change quality policy.

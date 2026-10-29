@@ -410,18 +410,8 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                     }
                 }
                 if (!fullscreen) {
-                    val animate = !config.optBoolean("reduced_motion") && !videoPlayer
-                    AnimatedVisibility(
-                        visible = playerOpen,
-                        enter =
-                            if (animate)
-                                fadeIn(tween(160)) + slideInVertically(tween(220)) { it / 8 }
-                            else EnterTransition.None,
-                        exit =
-                            if (animate)
-                                fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 10 }
-                            else ExitTransition.None,
-                    ) {
+                    @Composable
+                    fun PlaybackPanel(allowVideoSurface: Boolean) {
                         Panel(
                             "Now playing",
                             { vm.playerOpen.value = false },
@@ -431,6 +421,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         ) {
                             FocusedPlayer(
                                 vm,
+                                allowVideoSurface = allowVideoSurface,
                                 minimize = { vm.playerOpen.value = false },
                                 onQueue = {
                                     dialog = "queue"
@@ -438,6 +429,26 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                                 },
                                 onMore = { dialog = "player-options" },
                             )
+                        }
+                    }
+                    // Changing animation parameters mid-transition retains the old
+                    // graphics layer. A native video view must never inherit it.
+                    if (videoPlayer) {
+                        if (playerOpen) PlaybackPanel(allowVideoSurface = true)
+                    } else {
+                        val animate = !config.optBoolean("reduced_motion")
+                        AnimatedVisibility(
+                            visible = playerOpen,
+                            enter =
+                                if (animate)
+                                    fadeIn(tween(160)) + slideInVertically(tween(220)) { it / 8 }
+                                else EnterTransition.None,
+                            exit =
+                                if (animate)
+                                    fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 10 }
+                                else ExitTransition.None,
+                        ) {
+                            PlaybackPanel(allowVideoSurface = false)
                         }
                     }
                 }

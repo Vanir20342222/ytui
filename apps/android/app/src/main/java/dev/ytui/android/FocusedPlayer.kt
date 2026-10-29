@@ -67,6 +67,7 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
 @Composable
 internal fun FocusedPlayer(
     vm: YtuiViewModel,
+    allowVideoSurface: Boolean,
     minimize: () -> Unit,
     onQueue: () -> Unit,
     onMore: () -> Unit,
@@ -172,12 +173,16 @@ internal fun FocusedPlayer(
                 modifier.then(if (player.video) Modifier else dismiss),
                 contentAlignment = Alignment.Center,
             ) {
-                if (player.video)
+                if (player.video && allowVideoSurface)
                     VideoSurface(
                         Modifier.width(minOf(maxWidth, maxHeight * (16f / 9f)))
                             .aspectRatio(16f / 9f)
                     )
-                else {
+                else if (player.video) {
+                    // The root's distinct mode flow can lag the player snapshot
+                    // by one frame. Never create a native view in the music animation.
+                    Spacer(Modifier.fillMaxSize().background(Color.Black))
+                } else {
                     val ratio =
                         if (config.optString("music_player_style", "classic") == "classic") 1f
                         else 1.35f

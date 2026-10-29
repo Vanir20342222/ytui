@@ -604,6 +604,76 @@ impl Extractor for Youtube {
     }
 }
 
+// Missing JS solutions must not turn a requested adaptive stream into a lower
+// muxed fallback merely to shorten startup. Compare only the selector's codec
+// preference and height cap, not higher formats excluded by that policy.
+fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option<u32>, bool) {
+    let formats: Vec<&Value> = acquired
+        .player_responses
+        .iter()
+        .flat_map(|response| {
+            ["formats", "adaptiveFormats"]
+                .into_iter()
+                .flat_map(move |key| {
+                    response
+                        .get("streamingData")
+                        .and_then(|data| data.get(key))
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                })
+        })
+        .collect();
+    if format.starts_with("bestaudio") {
+        return (
+            None,
+            formats.iter().any(|entry| {
+                entry["mimeType"]
+                    .as_str()
+                    .is_some_and(|mime| mime.starts_with("audio/"))
+            }),
+        );
+    }
+    if !format.starts_with("bestvideo") {
+        return (None, false);
+    }
+    let cap = format
+        .split("height<=")
+        .nth(1)
+        .and_then(|tail| {
+            tail.chars()
+                .take_while(char::is_ascii_digit)
+                .collect::<String>()
+                .parse::<u32>()
+                .ok()
+        })
+        .unwrap_or(u32::MAX);
+    let prefer_avc = format.contains("vcodec^=avc1");
+    let height = |avc: bool| {
+        formats
+            .iter()
+            .filter(|entry| {
+                let mime = entry["mimeType"].as_str().unwrap_or_default();
+                mime.starts_with("video/") && (!avc || mime.contains("avc1"))
+            })
+            .filter_map(|entry| {
+                entry["height"]
+                    .as_u64()
+                    .and_then(|value| u32::try_from(value).ok())
+            })
+            .filter(|height| *height <= cap)
+            .max()
+    };
+    (
+        if prefer_avc {
+            height(true).or_else(|| height(false))
+        } else {
+            height(false)
+        },
+        false,
+    )
+}
+
 impl Extractor for ConfiguredYoutube {
     fn key(&self) -> &'static str {
         "Youtube"
@@ -634,6 +704,7 @@ impl Extractor for ConfiguredYoutube {
                     watch::acquire_direct(client, &id, &visitor)
                 })
                 .and_then(|acquired| {
+                    let offered = offered_playback_quality(&acquired, format);
                     let info = extract_acquired(
                         client,
                         url,
@@ -645,7 +716,18 @@ impl Extractor for ConfiguredYoutube {
                     // Selection is repeated by the caller after normal processing;
                     // this copy only determines whether the fast response is usable.
                     let mut selected = info.clone();
+                    crate::info::fill_format_fields(&mut selected.formats);
+                    let extractor_fields: Vec<&str> = selected.format_sort_fields.iter().map(String::as_str).collect();
+                    let sorter = crate::format_sort::FormatSorter::new(&[], &extractor_fields, false, false)
+                        .map_err(|error| Error::FormatSelection(error.0))?;
+                    crate::info::sort_formats(&mut selected.formats, &sorter);
                     selected.select_format(Some(format))?;
+                    if offered.0.is_some_and(|height| selected.height.unwrap_or(0) < height) {
+                        return Err(unsupported("direct player needs full acquisition to preserve offered video quality"));
+                    }
+                    if offered.1 && selected.vcodec.as_deref() != Some("none") {
+                        return Err(unsupported("direct player needs full acquisition for audio-only formats"));
+                    }
                     Ok(info)
                 });
             match fast {

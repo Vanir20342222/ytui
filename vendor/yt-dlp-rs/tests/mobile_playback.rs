@@ -137,3 +137,14 @@ fn full_fallback_preserves_rate_limit_instead_of_querying_more_clients() {
     let requests = proxy.requests.lock().unwrap();
     assert_eq!(requests.len(), 3, "requests: {requests:?}");
 }
+
+#[test]
+fn direct_challenges_do_not_silently_downgrade_offered_1080p_to_a_muxed_360p_fallback() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-quality-fallback");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap();
+    assert_eq!(info.height, Some(1080));
+    assert_eq!(info.extra["ytui_playback_route"], "full");
+    assert_eq!(proxy.requests.lock().unwrap().len(), 3);
+}
