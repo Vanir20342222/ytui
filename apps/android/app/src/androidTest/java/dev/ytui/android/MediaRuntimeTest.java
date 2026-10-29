@@ -249,11 +249,11 @@ public final class MediaRuntimeTest {
       fullscreen.click();
       await(
           "Fullscreen did not enter landscape",
-          () ->
-              FullscreenActivity.visible
-                  && fullscreenHasInputFocus()
-                  && device.getDisplayWidth() > device.getDisplayHeight());
+          () -> FullscreenActivity.visible && device.getDisplayWidth() > device.getDisplayHeight());
       acknowledgeSystemFullscreenHint(device);
+      await(
+          "Fullscreen must receive input after the system hint",
+          MediaRuntimeTest::fullscreenHasInputFocus);
       assertEquals(
           "Fullscreen must reuse the prepared decoder",
           fullscreenGeneration,
@@ -319,8 +319,9 @@ public final class MediaRuntimeTest {
               5000);
       assertNotNull("Focused player must return after leaving fullscreen", fullscreen);
       fullscreen.click();
-      await(
-          "Fullscreen must reopen", () -> FullscreenActivity.visible && fullscreenHasInputFocus());
+      await("Fullscreen must reopen", () -> FullscreenActivity.visible);
+      acknowledgeSystemFullscreenHint(device);
+      await("Reopened fullscreen must receive input", MediaRuntimeTest::fullscreenHasInputFocus);
       InstrumentationRegistry.getInstrumentation().waitForIdleSync();
       device.pressBack();
       await("Android Back must exit fullscreen", () -> !FullscreenActivity.visible);
