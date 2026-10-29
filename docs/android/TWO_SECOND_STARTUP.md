@@ -149,3 +149,8 @@ the same 2000 ms deadline/RGB thresholds. This avoids charging unrelated full-sc
 capture overhead to playback while still requiring actual composed video pixels;
 a TextureView buffer, poster or playing flag cannot pass it. Full-screen RGB and
 native-control regressions continue separately in the existing media tests.
+
+Direct app playback registers the service session only after source preparation
+and synchronous state publication, so Media3's first notification update cannot
+be scheduled from the empty onCreate state. Controller-bound sessions retain
+Media3's normal registration behavior.

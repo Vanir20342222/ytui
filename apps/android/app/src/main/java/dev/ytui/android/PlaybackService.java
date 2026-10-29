@@ -186,8 +186,6 @@ public final class PlaybackService extends MediaSessionService {
                     new Intent(this, RustActivity.class).setAction("dev.ytui.OPEN_PLAYER"),
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT))
             .build();
-    // The Rust UI starts playback directly, so no MediaController bind adds it for us.
-    addSession(session);
     player.addListener(
         new Player.Listener() {
           @Override
@@ -464,6 +462,10 @@ public final class PlaybackService extends MediaSessionService {
         // a delayed Stop to the newly playing session.
         play(new JSONObject(intent.getStringExtra("request")));
         sessionPlayer.metadataChanged();
+        // Direct app playback has no controller bind to register the session.
+        // Register only now, so its first notification update sees BUFFERING
+        // rather than the empty onCreate state.
+        if (!getSessions().contains(session)) addSession(session);
       } catch (Exception e) {
         error = "Invalid playback request";
         publish();
