@@ -61,7 +61,7 @@ public final class FullscreenActivity extends ComponentActivity {
     visible = true;
     MediaBridge.uiVisible = true;
     PlaybackService service = PlaybackService.current;
-    if (view != null && service != null) view.setPlayer(service.session.getPlayer());
+    if (view != null && service != null) view.setPlayer(service.controlsPlayer);
     MediaBridge.notifyUi();
   }
 

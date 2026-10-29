@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -182,6 +183,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val dark = isSystemInDarkTheme()
     val palette by vm.palette.collectAsState()
     val config by vm.config.collectAsState()
+    val mobile by vm.mobile.collectAsState()
     val tab by vm.tab.collectAsState()
     val account by vm.account.collectAsState()
     val playerOpen by vm.playerOpen.collectAsState()
@@ -424,6 +426,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                             { vm.playerOpen.value = false },
                             full = true,
                             scroll = false,
+                            swipeToClose = mobile.optBoolean("gestures", true),
                         ) {
                             FocusedPlayer(
                                 vm,
@@ -481,20 +484,20 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                                 "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media."
                             )
                             Text(
-                                "Real device/network acceptance and owner release signing remain required."
+                                "Development preview. Device playback, network and update checks are tracked in the validation report."
                             )
                             Action("Radio artwork credits") {
                                 vm.effect(
                                     "open",
                                     "url" to
-                                        "https://github.com/Vanir20342222/ytui/blob/feat/android-playback-library/docs/android/RADIO_ARTWORK.md",
+                                        "https://github.com/Vanir20342222/ytui/blob/main/docs/android/RADIO_ARTWORK.md",
                                 )
                             }
                             Action("Mobile documentation") {
                                 vm.effect(
                                     "open",
                                     "url" to
-                                        "https://github.com/Vanir20342222/ytui/tree/feat/android-monorepo/docs/android",
+                                        "https://github.com/Vanir20342222/ytui/tree/main/docs/android",
                                 )
                             }
                         }
@@ -590,10 +593,11 @@ internal fun Panel(
     close: () -> Unit,
     full: Boolean = false,
     scroll: Boolean = true,
+    swipeToClose: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     // A player is a screen in the activity, not a second Android window.
-    // Keeping its SurfaceView in that window avoids decoder/surface handoffs
+    // Keeping its video view in that window avoids decoder/surface handoffs
     // through a dialog while the same activity continues to own playback.
     @Composable
     fun Body() {
@@ -602,14 +606,18 @@ internal fun Panel(
                 .fillMaxWidth(if (full) 1f else 0.96f)
                 .fillMaxHeight(if (full) 1f else 0.94f)
                 .safeDrawingPadding()
-                .imePadding(),
+                .imePadding()
+                .semantics { if (full) paneTitle = title },
             shape = RoundedCornerShape(if (full) 0.dp else 28.dp),
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(Modifier.padding(if (full) 16.dp else 24.dp)) {
                 Row(
-                    Modifier.fillMaxWidth().pointerInput(full) {
-                        if (full) {
+                    Modifier.fillMaxWidth().testTag("panel-header").pointerInput(
+                        full,
+                        swipeToClose,
+                    ) {
+                        if (full && swipeToClose) {
                             var distance = 0f
                             detectVerticalDragGestures(
                                 onDragStart = { distance = 0f },

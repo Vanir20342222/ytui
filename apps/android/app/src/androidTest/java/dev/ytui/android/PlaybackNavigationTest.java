@@ -281,7 +281,8 @@ public final class PlaybackNavigationTest {
           1,
           PlaybackService.rpcArray(new JSONObject().put("op", "history_list")).length());
       long start = android.os.SystemClock.elapsedRealtime();
-      MediaRuntimeTest.command("next");
+      InstrumentationRegistry.getInstrumentation()
+          .runOnMainSync(() -> PlaybackService.current.controlsPlayer.seekToNext());
       playing("Second");
       long elapsed = android.os.SystemClock.elapsedRealtime() - start;
       assertTrue("Fixture Next exceeded three seconds: " + elapsed, elapsed < 3000);
