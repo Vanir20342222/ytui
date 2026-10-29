@@ -131,3 +131,21 @@ and continue, losing the service cooldown. It now returns the original rate-limi
 error immediately. An additional offline TLS case verifies direct acquisition →
 watch fallback → first-client 429 makes exactly three requests and never queries
 another client. All successful CLI/download acquisition defaults remain unchanged.
+
+### Third hosted run: restart and capture costs
+
+Run 40869934177 exposed a real restart failure: System UI issued a delayed Stop
+to the new session, and the service was released about two seconds after starting.
+New playback now publishes its buffering state to the session before notification
+initialization, and a preparation notification is reused only when its platform
+session token matches the current service. External Stop commands remain honored.
+An actual notification/service regression exercises three consecutive sessions.
+
+The stricter full-display readback also exceeded the deadline at 2053 ms despite
+a 990 ms native view-frame event. The pixel probe now uses asynchronous PixelCopy
+of the shown, focused native player's rectangle in the actual activity window,
+including its overlays. It records copy completion before PNG encoding and keeps
+the same 2000 ms deadline/RGB thresholds. This avoids charging unrelated full-screen
+capture overhead to playback while still requiring actual composed video pixels;
+a TextureView buffer, poster or playing flag cannot pass it. Full-screen RGB and
+native-control regressions continue separately in the existing media tests.

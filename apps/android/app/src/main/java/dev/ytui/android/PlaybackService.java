@@ -455,18 +455,41 @@ public final class PlaybackService extends MediaSessionService {
       stopSelf(id);
       return START_NOT_STICKY;
     }
-    if ("play".equals(intent.getAction()) && !isPlaybackOngoing()) {
+    boolean startsPlayback = "play".equals(intent.getAction());
+    boolean preparingForeground = startsPlayback && !isPlaybackOngoing();
+    if (startsPlayback) {
+      try {
+        // The external session must leave EMPTY before notification updates run.
+        // Otherwise System UI can remove the preparation notification and send
+        // a delayed Stop to the newly playing session.
+        play(new JSONObject(intent.getStringExtra("request")));
+        sessionPlayer.metadataChanged();
+      } catch (Exception e) {
+        error = "Invalid playback request";
+        publish();
+        stopForeground(STOP_FOREGROUND_REMOVE);
+        stopSelf();
+        return START_NOT_STICKY;
+      }
+    }
+    if (preparingForeground) {
       android.app.NotificationManager notifications =
           getSystemService(android.app.NotificationManager.class);
-      // Android's foreground deadline starts before decoder/buffering completion.
-      // Reuse an existing media notification. Replacing it with a non-media
-      // placeholder makes System UI remove the session and issue a delayed Stop.
       android.app.Notification preparing = null;
       for (android.service.notification.StatusBarNotification active :
           notifications.getActiveNotifications()) {
+        android.app.Notification notification = active.getNotification();
+        // A notification left over from a destroyed service has a different
+        // platform token. Reusing it attaches the new foreground service to a
+        // retired session and can trigger a System UI Stop.
         if (active.getId() == NotificationIds.PLAYBACK
-            && "ytui-playback".equals(active.getNotification().getChannelId())) {
-          preparing = active.getNotification();
+            && "ytui-playback".equals(notification.getChannelId())
+            && session
+                .getPlatformToken()
+                .equals(
+                    notification.extras.getParcelable(
+                        android.app.Notification.EXTRA_MEDIA_SESSION))) {
+          preparing = notification;
           break;
         }
       }
@@ -484,18 +507,7 @@ public final class PlaybackService extends MediaSessionService {
                 .build();
       startForeground(NotificationIds.PLAYBACK, preparing);
     }
-    int result = super.onStartCommand(intent, flags, id);
-    if (intent != null && "play".equals(intent.getAction())) {
-      try {
-        play(new JSONObject(intent.getStringExtra("request")));
-      } catch (Exception e) {
-        error = "Invalid playback request";
-        publish();
-        stopForeground(STOP_FOREGROUND_REMOVE);
-        stopSelf();
-      }
-    }
-    return result;
+    return super.onStartCommand(intent, flags, id);
   }
 
   void play(JSONObject request) throws JSONException {

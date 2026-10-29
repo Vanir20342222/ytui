@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaRuntimeTest {
-  static volatile long screenshotCapturedAt;
 
   @org.junit.Rule
   public final org.junit.rules.ExternalResource nativeControlPolling =
@@ -164,7 +163,6 @@ public final class MediaRuntimeTest {
       throws IOException {
     android.graphics.Bitmap frame =
         InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-    screenshotCapturedAt = android.os.SystemClock.elapsedRealtime();
     if (frame == null) return false;
     try {
       if (landscape && frame.getWidth() <= frame.getHeight()) return false;

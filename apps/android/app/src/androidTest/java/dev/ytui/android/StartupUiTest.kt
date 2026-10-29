@@ -113,18 +113,17 @@ class StartupUiTest {
                                     android.os.SystemClock.elapsedRealtime(),
                                 )
                             if (observed < 0 || observed > 2000) break
-                            rgb =
-                                MediaRuntimeTest.videoVisible(
+                            val sample =
+                                VisibleVideoProbe.capture(
+                                    scenario,
+                                    PlaybackService.current.startupToken,
                                     "startup-${if(prepared) "prepared" else "cold"}.png",
-                                    false,
-                                    true,
                                 )
-                            // Capture completion is a conservative presentation bound;
-                            // file encoding and pixel analysis are excluded from it.
+                            rgb = sample.rgb
                             observed =
                                 StartupTimings.elapsed(
                                     PlaybackService.current.startupToken,
-                                    MediaRuntimeTest.screenshotCapturedAt,
+                                    sample.capturedAt,
                                 )
                             if (!rgb) Thread.sleep(16)
                         } while (!rgb)
