@@ -16,6 +16,9 @@ fast generated-media fixtures: live startup remains unqualified.
   from the same response, before full native acquisition. Quality/codec preference,
   account/expiry and throttling rules remain in force; CLI/download enumeration
   is unchanged.
+  When a direct video is below the selected height cap (or Best is selected),
+  manifests remain necessary to discover a better resolution. A regression
+  preserves a 720p HLS option instead of prematurely accepting direct 360p.
 - The single pooled extractor was discarded when switching audio/video modes.
   A bounded four-client LRU retains account/network/quality/mode isolation while
   reusing the HTTP connection pools when switching back. Account invalidation
@@ -42,7 +45,7 @@ fast generated-media fixtures: live startup remains unqualified.
 
 ## Verification and open gate
 
-Ten offline TLS tests cover successful video/audio without optional requests,
+Eleven offline TLS tests cover successful video/audio without optional requests,
 manifest-only HLS without a watch-page refetch, restricted/challenged fallback,
 visitor reuse, quality preservation and rate limits. Core regressions cover ready
 cache lock bypass, joined-request labeling and bounded mode-specific client reuse.

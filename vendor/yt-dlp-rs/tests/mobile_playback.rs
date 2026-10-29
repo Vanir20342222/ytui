@@ -184,3 +184,25 @@ fn manifest_only_direct_response_keeps_necessary_hls_without_watch_refetch() {
     assert!(requests.iter().all(|request| !request.contains("/watch?")));
     assert!(requests[1].contains("manifest.test/hls/master.m3u8"));
 }
+
+#[test]
+fn optional_manifest_is_required_when_it_can_improve_a_lower_direct_resolution() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-quality");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap();
+    assert_eq!(info.extra["ytui_playback_route"], "direct");
+    assert_eq!(
+        info.height,
+        Some(720),
+        "Do not start the direct 360p fallback while HLS offers 720p"
+    );
+    assert!(
+        proxy
+            .requests
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|url| url.contains("manifest.test/hls/master.m3u8"))
+    );
+}

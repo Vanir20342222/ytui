@@ -1,0 +1,32 @@
+{
+  "routes": [
+    {
+      "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "player.json"
+    },
+    {
+      "url": "https://manifest.test/hls/master.m3u8",
+      "headers": {
+        "Content-Type": "application/vnd.apple.mpegurl"
+      },
+      "body_file": "master.m3u8"
+    },
+    {
+      "url": "https://manifest.test/hls/itag/95/file/index.m3u8",
+      "headers": {
+        "Content-Type": "application/vnd.apple.mpegurl"
+      },
+      "body_file": "media.m3u8"
+    },
+    {
+      "url": "https://manifest.test/hls/itag/96/file/index.m3u8",
+      "headers": {
+        "Content-Type": "application/vnd.apple.mpegurl"
+      },
+      "body_file": "media.m3u8"
+    }
+  ]
+}

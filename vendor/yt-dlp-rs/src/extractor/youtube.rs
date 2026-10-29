@@ -652,17 +652,7 @@ fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option
     if !format.starts_with("bestvideo") {
         return (None, false);
     }
-    let cap = format
-        .split("height<=")
-        .nth(1)
-        .and_then(|tail| {
-            tail.chars()
-                .take_while(char::is_ascii_digit)
-                .collect::<String>()
-                .parse::<u32>()
-                .ok()
-        })
-        .unwrap_or(u32::MAX);
+    let cap = playback_height_cap(format);
     let prefer_avc = format.contains("vcodec^=avc1");
     let height = |avc: bool| {
         formats
@@ -689,10 +679,25 @@ fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option
     )
 }
 
+fn playback_height_cap(format: &str) -> u32 {
+    format
+        .split("height<=")
+        .nth(1)
+        .and_then(|tail| {
+            tail.chars()
+                .take_while(char::is_ascii_digit)
+                .collect::<String>()
+                .parse::<u32>()
+                .ok()
+        })
+        .unwrap_or(u32::MAX)
+}
+
 fn validate_playback(
     info: VideoInfo,
     format: &str,
     offered: (Option<u32>, bool),
+    pending_manifests: bool,
 ) -> Result<VideoInfo> {
     // Repeat only selection on a clone; preserve the normal caller's processing.
     let mut selected = info.clone();
@@ -717,6 +722,14 @@ fn validate_playback(
     if offered.1 && selected.vcodec.as_deref() != Some("none") {
         return Err(unsupported(
             "direct player needs full acquisition for audio-only formats",
+        ));
+    }
+    if pending_manifests
+        && selected.vcodec.as_deref() != Some("none")
+        && selected.height.unwrap_or(0) < playback_height_cap(format)
+    {
+        return Err(unsupported(
+            "manifest discovery is needed before accepting a lower video resolution",
         ));
     }
     Ok(info)
@@ -763,6 +776,15 @@ impl Extractor for ConfiguredYoutube {
                 })
                 .and_then(|acquired| {
                     let offered = offered_playback_quality(&acquired, format);
+                    let has_manifest = acquired.player_responses.iter().any(|response| {
+                        ["hlsManifestUrl", "dashManifestUrl"].iter().any(|key| {
+                            response
+                                .get("streamingData")
+                                .and_then(|data| data.get(key))
+                                .and_then(Value::as_str)
+                                .is_some_and(|url| !url.is_empty())
+                        })
+                    });
                     let parse = |direct_streams_only| -> Result<VideoInfo> {
                         let info = extract_acquired(
                             client,
@@ -773,18 +795,14 @@ impl Extractor for ConfiguredYoutube {
                             &acquired,
                             direct_streams_only,
                         )?;
-                        validate_playback(info, format, offered)
+                        validate_playback(
+                            info,
+                            format,
+                            offered,
+                            direct_streams_only && has_manifest,
+                        )
                     };
                     parse(true).or_else(|error| {
-                        let has_manifest = acquired.player_responses.iter().any(|response| {
-                            ["hlsManifestUrl", "dashManifestUrl"].iter().any(|key| {
-                                response
-                                    .get("streamingData")
-                                    .and_then(|data| data.get(key))
-                                    .and_then(Value::as_str)
-                                    .is_some_and(|url| !url.is_empty())
-                            })
-                        });
                         if has_manifest {
                             parse(false)
                         } else {
