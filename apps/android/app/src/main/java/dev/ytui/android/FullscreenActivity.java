@@ -41,6 +41,9 @@ public final class FullscreenActivity extends ComponentActivity {
     view = (PlayerView) getLayoutInflater().inflate(R.layout.ytui_player, null);
     view.setBackgroundColor(android.graphics.Color.BLACK);
     view.setUseController(true);
+    view.setControllerAnimationEnabled(
+        !getIntent().getBooleanExtra("reduced_motion", false)
+            && android.animation.ValueAnimator.areAnimatorsEnabled());
     view.setShowSubtitleButton(true);
     view.setShowShuffleButton(true);
     view.setFullscreenButtonState(true);

@@ -268,56 +268,59 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     suspend fun snapshot() =
-        snapshotLock.withLock {
-            val value = withContext(Dispatchers.Default) { JSONObject(MediaBridge.snapshot()) }
-            value.optJSONObject("player")?.let {
-                val pending = seekTarget
-                if (pending != null) {
-                    val same = pending.first == it.optJSONObject("media")?.optString("url")
-                    if (
-                        !same ||
-                            kotlin.math.abs(it.optDouble("position") - pending.second) < 1.25 ||
-                            android.os.SystemClock.elapsedRealtime() >= seekDeadline
-                    )
-                        seekTarget = null
-                    else it.put("position", pending.second)
+        withContext(Dispatchers.Main.immediate) {
+            snapshotLock.withLock {
+                val value = withContext(Dispatchers.Default) { JSONObject(MediaBridge.snapshot()) }
+                value.optJSONObject("player")?.let {
+                    val pending = seekTarget
+                    if (pending != null) {
+                        val same = pending.first == it.optJSONObject("media")?.optString("url")
+                        if (
+                            !same ||
+                                kotlin.math.abs(it.optDouble("position") - pending.second) < 1.25 ||
+                                android.os.SystemClock.elapsedRealtime() >= seekDeadline
+                        )
+                            seekTarget = null
+                        else it.put("position", pending.second)
+                    }
+                    player.value = PlayerState(it)
                 }
-                player.value = PlayerState(it)
-            }
-            value.optJSONArray("downloads")?.let { downloads.value = it.objects() }
-            value.optJSONArray("events")?.objects()?.forEach { event ->
-                val text = event.optString("text")
-                when (event.optString("kind")) {
-                    "storage_updated" -> {
-                        mobile.value = withContext(Dispatchers.IO) { MobileSettings.snapshot() }
-                        OfflineStore.dirty = true
-                    }
-                    "show_player" -> playerOpen.value = true
-                    "shared" -> sharedQuery.value = text
-                    "error" -> {
-                        status.value = text
-                        actionError.value = text
-                    }
-                    "theme_file" ->
-                        task {
-                            settingsLock.withLock {
-                                palette.value = RustRpc.objectCall("import_theme", "text" to text)
-                                config.value = RustRpc.objectCall("settings")
-                                status.value = "Palette applied"
-                            }
+                value.optJSONArray("downloads")?.let { downloads.value = it.objects() }
+                value.optJSONArray("events")?.objects()?.forEach { event ->
+                    val text = event.optString("text")
+                    when (event.optString("kind")) {
+                        "storage_updated" -> {
+                            mobile.value = withContext(Dispatchers.IO) { MobileSettings.snapshot() }
+                            OfflineStore.dirty = true
                         }
-                    "cookie_file" -> {
-                        val intent = event.optLong("account_intent", -1)
-                        if (intent == NativeBridge.accountIntent())
-                            acceptAccount("import_cookie_file", intent, "text" to text)
+                        "show_player" -> playerOpen.value = true
+                        "shared" -> sharedQuery.value = text
+                        "error" -> {
+                            status.value = text
+                            actionError.value = text
+                        }
+                        "theme_file" ->
+                            task {
+                                settingsLock.withLock {
+                                    palette.value =
+                                        RustRpc.objectCall("import_theme", "text" to text)
+                                    config.value = RustRpc.objectCall("settings")
+                                    status.value = "Palette applied"
+                                }
+                            }
+                        "cookie_file" -> {
+                            val intent = event.optLong("account_intent", -1)
+                            if (intent == NativeBridge.accountIntent())
+                                acceptAccount("import_cookie_file", intent, "text" to text)
+                        }
+                        "cookies" -> changeAccount("import_cookies", "header" to text)
+                        "account_updated" -> refreshAccount()
+                        "history_updated",
+                        "history_cleared" -> loadHistory()
+                        "lyrics_file" ->
+                            if (event.optString("request_token") == lyricToken)
+                                importedLyrics.value = text
                     }
-                    "cookies" -> changeAccount("import_cookies", "header" to text)
-                    "account_updated" -> refreshAccount()
-                    "history_updated",
-                    "history_cleared" -> loadHistory()
-                    "lyrics_file" ->
-                        if (event.optString("request_token") == lyricToken)
-                            importedLyrics.value = text
                 }
             }
         }

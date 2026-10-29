@@ -18,6 +18,27 @@ import org.junit.runner.RunWith;
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaRuntimeTest {
   @org.junit.Rule
+  public final org.junit.rules.ExternalResource nativeControlPolling =
+      new org.junit.rules.ExternalResource() {
+        private long previous;
+
+        @Override
+        protected void before() {
+          androidx.test.uiautomator.Configurator config =
+              androidx.test.uiautomator.Configurator.getInstance();
+          previous = config.getWaitForIdleTimeout();
+          // The moving time bar never stays idle for the default ten seconds;
+          // a snapshot taken then observes only the already auto-hidden toolbar.
+          config.setWaitForIdleTimeout(100);
+        }
+
+        @Override
+        protected void after() {
+          androidx.test.uiautomator.Configurator.getInstance().setWaitForIdleTimeout(previous);
+        }
+      };
+
+  @org.junit.Rule
   public androidx.test.rule.GrantPermissionRule notifications =
       androidx.test.rule.GrantPermissionRule.grant(
           android.os.Build.VERSION.SDK_INT >= 33

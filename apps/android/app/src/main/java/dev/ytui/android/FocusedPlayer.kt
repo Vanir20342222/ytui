@@ -24,6 +24,7 @@ import androidx.media3.ui.PlayerView
 @androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
 @Composable
 internal fun VideoSurface(modifier: Modifier = Modifier) {
+    val reduced by rememberUpdatedState(LocalReducedMotion.current)
     AndroidView(
         factory = { context ->
             (android.view.LayoutInflater.from(context)
@@ -31,16 +32,25 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
                     as PlayerView)
                 .apply {
                     useController = true
+                    setControllerAnimationEnabled(
+                        !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
+                    )
                     setShowSubtitleButton(true)
                     setShowShuffleButton(true)
                     setFullscreenButtonClickListener {
-                        context.startActivity(Intent(context, FullscreenActivity::class.java))
+                        context.startActivity(
+                            Intent(context, FullscreenActivity::class.java)
+                                .putExtra("reduced_motion", reduced)
+                        )
                     }
                     VideoGestures.attach(this)
                 }
         },
         modifier = modifier.background(Color.Black).testTag("native-video-surface"),
         update = { view ->
+            view.setControllerAnimationEnabled(
+                !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
+            )
             val actual = PlaybackService.current?.session?.player
             if (view.player !== actual) view.player = actual
             view.keepScreenOn = actual?.playWhenReady == true
@@ -141,7 +151,10 @@ internal fun FocusedPlayer(
                     MediaIconButton(Glyph.Queue, "Playback queue", action = onQueue)
                     if (player.video)
                         MediaIconButton(Glyph.Expand, "Fullscreen video", "fullscreen-button") {
-                            context.startActivity(Intent(context, FullscreenActivity::class.java))
+                            context.startActivity(
+                                Intent(context, FullscreenActivity::class.java)
+                                    .putExtra("reduced_motion", config.optBoolean("reduced_motion"))
+                            )
                         }
                     MediaIconButton(
                         Glyph.More,

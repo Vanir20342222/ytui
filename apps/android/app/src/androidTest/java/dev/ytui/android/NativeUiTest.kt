@@ -19,8 +19,10 @@ import org.junit.runner.RunWith
 
 /** These checks exercise the actual Android UI, not Rust's headless egui frames. */
 @RunWith(AndroidJUnit4::class)
+@OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 class NativeUiTest {
-    @get:Rule val compose = createEmptyComposeRule()
+    @get:Rule
+    val compose = createEmptyComposeRule(effectContext = kotlinx.coroutines.Dispatchers.Main)
     @get:Rule
     val notifications =
         androidx.test.rule.GrantPermissionRule.grant(

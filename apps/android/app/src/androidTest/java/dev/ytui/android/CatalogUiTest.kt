@@ -28,8 +28,10 @@ import org.junit.runner.RunWith
  * Populated screens use only original generated artwork and loopback HTTP. Never fake live feeds.
  */
 @RunWith(AndroidJUnit4::class)
+@OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 class CatalogUiTest {
-    @get:Rule val compose = createEmptyComposeRule()
+    @get:Rule
+    val compose = createEmptyComposeRule(effectContext = kotlinx.coroutines.Dispatchers.Main)
     @get:Rule
     val notifications =
         androidx.test.rule.GrantPermissionRule.grant(

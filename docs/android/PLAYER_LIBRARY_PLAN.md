@@ -152,3 +152,10 @@ app input focus before dismissing the system hint prevented acknowledgment from
 ever running. Entry/re-entry now acknowledges the OS hint before waiting for
 app input focus. The retained screenshot and `ImmersiveModeConfirmation` window
 log establish this specific cause; no further production change was needed.
+The next capture confirms the tutorial is gone. Its timestamps show UIAutomator
+waiting 5.7 seconds for global idleness while the native toolbar auto-hides after
+5 seconds; native-control queries now use a scoped 100 ms idle interval, restored
+after the test. A separate rare Compose test-frame continuation constructed a
+dialog on a Default worker. Snapshot application explicitly returns to Main,
+and Compose test effects use Main too. Native video controls now respect both
+system animation disabling and the app's reduced-motion preference.
