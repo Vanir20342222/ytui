@@ -159,3 +159,10 @@ after the test. A separate rare Compose test-frame continuation constructed a
 dialog on a Default worker. Snapshot application explicitly returns to Main,
 and Compose test effects use Main too. Native video controls now respect both
 system animation disabling and the app's reduced-motion preference.
+`05f7f67` passes the UI-thread repair but catches an inline TextureView displaying
+stale background pixels while the software decoder continues submitting frames.
+Video now uses Media3's recommended SurfaceView path with its AndroidView/Compose
+surface-sync workaround. The same visible RGB checks remain; failure evidence
+also collects SurfaceView PixelCopy output. [Media3 surface guidance](https://developer.android.com/media/media3/ui/surface)
+describes SurfaceView's frame-timing, power and HDR advantages; no device timing
+claim is inferred from that guidance.

@@ -173,6 +173,42 @@ public final class MediaRuntimeTest {
           }
         }
       }
+      if (surface instanceof android.view.SurfaceView
+          && surface.getWidth() > 0
+          && surface.getHeight() > 0
+          && ((android.view.SurfaceView) surface).getHolder().getSurface().isValid()) {
+        android.view.SurfaceView target = (android.view.SurfaceView) surface;
+        android.util.Log.i(
+            "NativeVideoEvidence", "surface_valid=" + target.getHolder().getSurface().isValid());
+        android.graphics.Bitmap frame =
+            android.graphics.Bitmap.createBitmap(
+                target.getWidth(), target.getHeight(), android.graphics.Bitmap.Config.ARGB_8888);
+        try {
+          android.view.PixelCopy.request(
+              target,
+              frame,
+              result -> {
+                try {
+                  android.util.Log.i("NativeVideoEvidence", "pixel_copy=" + result);
+                  if (result == android.view.PixelCopy.SUCCESS)
+                    try (FileOutputStream out =
+                        new FileOutputStream(
+                            new File(
+                                MediaBridge.context.getExternalFilesDir(null),
+                                "video-surface.png"))) {
+                      frame.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+                    }
+                } catch (IOException ignored) {
+                } finally {
+                  frame.recycle();
+                }
+              },
+              MediaBridge.main);
+        } catch (IllegalArgumentException unavailable) {
+          android.util.Log.i("NativeVideoEvidence", "surface became unavailable during capture");
+          frame.recycle();
+        }
+      }
     }
     if (view instanceof android.view.ViewGroup) {
       android.view.ViewGroup group = (android.view.ViewGroup) view;
