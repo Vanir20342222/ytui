@@ -958,14 +958,21 @@ impl Engine {
                 }
                 let cookies = self.session.lock().expect("session").clone();
                 let pool = self.resolver.clone();
+                let background = if r["speculative"].as_bool().unwrap_or(false) {
+                    Some(background_extractor_slots().try_acquire_owned()?)
+                } else {
+                    None
+                };
                 let permit = extractor_slots().acquire_owned().await?;
                 let data = tokio::task::spawn_blocking(move || -> Result<Value> {
                     let _permit = permit;
+                    let _background = background;
                     let client = pool.client(&client_key, || {
                         let jar = cookies.as_deref().map(account::native_jar).transpose()?;
                         Ok(yt_dlp_rs::YoutubeDl::with_options(
                             yt_dlp_rs::YoutubeOptions {
                                 no_playlist: true,
+                                playback_format: Some(mobile_format(audio, &quality)?),
                                 js_runtime: if cfg!(target_os = "android") {
                                     Some("ytui-android-js".into())
                                 } else {
@@ -991,6 +998,12 @@ impl Engine {
             })
             .await
     }
+}
+fn background_extractor_slots() -> Arc<tokio::sync::Semaphore> {
+    static BACKGROUND: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
+    BACKGROUND
+        .get_or_init(|| Arc::new(tokio::sync::Semaphore::new(1)))
+        .clone()
 }
 fn extractor_slots() -> Arc<tokio::sync::Semaphore> {
     static EXTRACTORS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();

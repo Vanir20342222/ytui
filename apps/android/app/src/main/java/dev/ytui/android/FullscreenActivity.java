@@ -12,6 +12,7 @@ import androidx.media3.ui.PlayerView;
 public final class FullscreenActivity extends ComponentActivity {
   static volatile boolean visible;
   private PlayerView view;
+  private VisibleFrameTracker frames;
 
   @Override
   protected void onCreate(Bundle state) {
@@ -51,6 +52,7 @@ public final class FullscreenActivity extends ComponentActivity {
         fullscreen -> {
           if (!fullscreen) finish();
         });
+    frames = new VisibleFrameTracker(view);
     VideoGestures.attach(view);
     setContentView(view);
   }
@@ -61,13 +63,13 @@ public final class FullscreenActivity extends ComponentActivity {
     visible = true;
     MediaBridge.uiVisible = true;
     PlaybackService service = PlaybackService.current;
-    if (view != null && service != null) view.setPlayer(service.controlsPlayer);
+    if (view != null && service != null) frames.bind(service.controlsPlayer);
     MediaBridge.notifyUi();
   }
 
   @Override
   protected void onPause() {
-    if (view != null) view.setPlayer(null);
+    if (view != null) frames.bind(null);
     super.onPause();
   }
 
@@ -87,7 +89,7 @@ public final class FullscreenActivity extends ComponentActivity {
   @Override
   protected void onDestroy() {
     visible = false;
-    if (view != null) view.setPlayer(null);
+    if (view != null) frames.bind(null);
     ComposeHost.fullscreenChanged(false);
     super.onDestroy();
   }

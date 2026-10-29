@@ -23,6 +23,10 @@ collect_evidence() {
     adb pull /sdcard/Android/data/$test_package/files/video-error.png "$evidence/video-error.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/$test_package/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/$test_package/files/video-surface.png "$evidence/video-surface.png" > /dev/null 2>&1 || true
+    adb pull /sdcard/Android/data/$test_package/files/startup-timings.txt "$evidence/startup-timings.txt" > /dev/null 2>&1 || true
+    for state in cold prepared; do
+        adb pull /sdcard/Android/data/$test_package/files/startup-$state.png "$evidence/startup-$state.png" > /dev/null 2>&1 || true
+    done
     mkdir -p "$evidence/native-ui"
     for screenshot in native-search native-account native-tablet native-catalog native-catalog-error native-music native-wide-catalog native-player native-player-{vinyl,vu,orbit} native-settings native-card-menu native-video-fullscreen native-video-return native-video-controls native-theme-{0..12}; do
         adb pull "/sdcard/Android/data/$test_package/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true

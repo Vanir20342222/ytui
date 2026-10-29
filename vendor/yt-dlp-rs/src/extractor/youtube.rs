@@ -32,12 +32,17 @@ pub struct YoutubeOptions {
     pub include_translated_subtitles: bool,
     /// Upstream `noplaylist`: a watch URL with `list=` downloads just its video.
     pub no_playlist: bool,
+    /// Mobile playback only: try a single direct player response before the
+    /// full watch-page/client acquisition. Validate the requested selector first.
+    /// None preserves CLI/download acquisition and format discovery.
+    pub playback_format: Option<String>,
 }
 
 struct ConfiguredYoutube {
     include_translated_subtitles: bool,
     no_playlist: bool,
     runtime: Option<challenge::Runtime>,
+    playback_format: Option<String>,
 }
 
 impl Youtube {
@@ -47,6 +52,7 @@ impl Youtube {
         ConfiguredYoutube {
             include_translated_subtitles: options.include_translated_subtitles,
             no_playlist: options.no_playlist,
+            playback_format: options.playback_format,
             runtime: options.js_runtime.map(challenge::Runtime::new),
         }
     }
@@ -222,8 +228,7 @@ impl streams::Solver for JsSolver<'_> {
             "[youtube] {}: Downloading player {key}",
             self.video_id
         ));
-        let Ok(player) = player_assets::get(self.client, &url)
-        else {
+        let Ok(player) = player_assets::get(self.client, &url) else {
             crate::screen::warning(&format!(
                 "[youtube] {}: Download of {key} failed",
                 self.video_id
@@ -288,6 +293,17 @@ fn extract_clients(
         crate::screen::extracting_url(&format!("https://www.youtube.com/watch?v={id}"))
     ));
     let acquired = watch::acquire(client, id, runtime)?;
+    extract_acquired(client, url, id, runtime, translated_manual, acquired)
+}
+
+fn extract_acquired(
+    client: &Client,
+    url: &Url,
+    id: &str,
+    runtime: Option<&challenge::Runtime>,
+    translated_manual: bool,
+    acquired: watch::Acquired,
+) -> Result<VideoInfo> {
     let first = |key: &str| {
         acquired
             .player_responses
@@ -591,6 +607,29 @@ impl Extractor for ConfiguredYoutube {
         crate::screen::set_extractor("youtube");
         let page = Url::parse(&format!("https://www.youtube.com/watch?v={id}"))?;
         let _ = page;
+        if let Some(format) = self.playback_format.as_deref() {
+            let fast = watch::acquire_direct(client, &id).and_then(|acquired| {
+                let info = extract_acquired(
+                    client,
+                    url,
+                    &id,
+                    self.runtime.as_ref(),
+                    self.include_translated_subtitles,
+                    acquired,
+                )?;
+                // Selection is repeated by the caller after normal processing;
+                // this copy only determines whether the fast response is usable.
+                let mut selected = info.clone();
+                selected.select_format(Some(format))?;
+                Ok(info)
+            });
+            match fast {
+                Ok(info) => return Ok(Some(info)),
+                // A second request cannot fix a rate limit. Keep Retry-After.
+                Err(error) if watch::rate_limited(&error) => return Err(error),
+                Err(_) => {} // restricted/missing/challenged formats use full acquisition
+            }
+        }
         let info = extract_clients(
             client,
             url,

@@ -1,0 +1,11 @@
+{
+  "routes": [
+    {
+      "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "player.json"
+    }
+  ]
+}

@@ -43,6 +43,7 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
                                 .putExtra("reduced_motion", reduced)
                         )
                     }
+                    tag = VisibleFrameTracker(this)
                     VideoGestures.attach(this)
                 }
         },
@@ -52,12 +53,12 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
                 !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
             )
             val actual = PlaybackService.current?.controlsPlayer
-            if (view.player !== actual) view.player = actual
+            (view.tag as VisibleFrameTracker).bind(actual)
             view.keepScreenOn = actual?.playWhenReady == true
         },
         onRelease = {
             it.keepScreenOn = false
-            it.player = null
+            (it.tag as VisibleFrameTracker).bind(null)
         },
     )
 }

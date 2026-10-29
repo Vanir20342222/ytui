@@ -563,3 +563,80 @@ pub(super) fn acquire(
         player_url: player_url_found,
     })
 }
+
+/// A single direct player call on the existing account/proxy-scoped HTTP client.
+/// VisionOS does not need a watch page, signature timestamp or player JavaScript.
+pub(super) fn acquire_direct(client: &Client, video_id: &str) -> Result<Acquired> {
+    let config = innertube::client("visionos").expect("visionos client");
+    let empty = Map::new();
+    let response = player_response(client, config, video_id, &empty, &empty, None, None)?;
+    direct_response(video_id, response)
+}
+
+fn direct_response(video_id: &str, response: Value) -> Result<Acquired> {
+    if response
+        .pointer("/videoDetails/videoId")
+        .and_then(Value::as_str)
+        != Some(video_id)
+        || response
+            .pointer("/playabilityStatus/status")
+            .and_then(Value::as_str)
+            != Some("OK")
+        || !response.get("streamingData").is_some_and(Value::is_object)
+    {
+        return Err(super::unsupported(
+            "direct player response requires full acquisition",
+        ));
+    }
+    Ok(Acquired {
+        webpage: String::new(),
+        initial_data: None,
+        player_responses: vec![response.clone()],
+        responses: vec![streams::ClientResponse {
+            client: "visionos",
+            response,
+            player_token_provided: false,
+            available_at: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map_or(0, |elapsed| elapsed.as_secs() as i64),
+        }],
+        player_url: None,
+    })
+}
+
+pub(super) fn rate_limited(error: &Error) -> bool {
+    match error {
+        Error::Http(source) | Error::HttpRetryAfter { source, .. } => {
+            source.status() == Some(reqwest::StatusCode::TOO_MANY_REQUESTS)
+        }
+        Error::ExtractorRequest { source, .. } | Error::Webpage { source, .. } => {
+            rate_limited(source)
+        }
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod direct_tests {
+    use super::*;
+    #[test]
+    fn direct_response_rejects_wrong_id_restrictions_and_missing_streams() {
+        let valid = json!({"videoDetails":{"videoId":"BaW_jenozKc"},
+            "playabilityStatus":{"status":"OK"},"streamingData":{}});
+        assert!(direct_response("BaW_jenozKc", valid.clone()).is_ok());
+        assert!(direct_response("ABCDEFGHIJK", valid.clone()).is_err());
+        for status in [
+            "LOGIN_REQUIRED",
+            "UNPLAYABLE",
+            "ERROR",
+            "LIVE_STREAM_OFFLINE",
+        ] {
+            let mut response = valid.clone();
+            response["playabilityStatus"]["status"] = status.into();
+            assert!(direct_response("BaW_jenozKc", response).is_err());
+        }
+        let mut response = valid;
+        response["streamingData"] = Value::Null;
+        assert!(direct_response("BaW_jenozKc", response).is_err());
+    }
+}

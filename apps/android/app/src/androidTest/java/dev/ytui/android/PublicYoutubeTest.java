@@ -38,6 +38,7 @@ public final class PublicYoutubeTest {
               .put("url", url)
               .put("title", "Public YouTube acceptance")
               .put("kind", "video");
+      long timing = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true);
       JSONObject resolved =
           new JSONObject(
               NativeBridge.request(
@@ -49,9 +50,14 @@ public final class PublicYoutubeTest {
                       .toString()));
       assertTrue(
           "Native public extraction: " + resolved.optString("error"), resolved.optBoolean("ok"));
+      StartupTimings.resolved(
+          timing,
+          android.os.SystemClock.elapsedRealtime(),
+          resolved.getJSONObject("data").optBoolean("resolution_cache_hit"));
       JSONObject request =
           new JSONObject()
               .put("media", media)
+              .put("startup_token", timing)
               .put("stream", resolved.getJSONObject("data"))
               .put("audio", false);
       MediaBridge.execute(new JSONObject().put("op", "play").put("request", request).toString());
@@ -62,6 +68,12 @@ public final class PublicYoutubeTest {
               MediaRuntimeTest.status().optDouble("position") > 3
                   && MediaRuntimeTest.status().optBoolean("playing"));
       assertTrue(MediaRuntimeTest.status().isNull("error"));
+      MediaRuntimeTest.await(
+          "Public YouTube never rendered into a visible view",
+          () -> StartupTimings.total(timing) > 0);
+      assertTrue(
+          "Live tap-to-visible target missed: " + StartupTimings.report(),
+          StartupTimings.total(timing) <= 2000);
       MediaRuntimeTest.command("stop");
     }
   }

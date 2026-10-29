@@ -18,6 +18,15 @@ public final class ScriptRuntime {
     return connection;
   }
 
+  static void warm() {
+    // Connect only: no script evaluation, network requests or access to account data.
+    try {
+      connection();
+    } catch (RuntimeException unavailable) {
+      /* lazy solve reports support errors */
+    }
+  }
+
   public static String evaluate(String script) {
     final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
     JavaScriptIsolate isolate = null;

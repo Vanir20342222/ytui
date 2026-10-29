@@ -29,7 +29,13 @@ public final class PlaybackService extends MediaSessionService {
   boolean pendingStart, navigationPending, contextReady, contextPreparing, waitingForContext;
   int queuedNext;
   String activeContext = "", playbackQuality = "1080", relatedForUrl = "";
-  long startupAt, firstFrameMs, startMs;
+  long startupAt, firstFrameMs, startMs, startupToken;
+
+  void visibleFrame() {
+    StartupTimings.output(startupToken, SystemClock.elapsedRealtime(), true);
+    publish();
+  }
+
   long streamMetadataUpdates;
   String sponsorMode = "skip";
   String error = "", streamTitle = "", captionText = "", pendingQueueUrl = "", errorTrace = "";
@@ -520,6 +526,8 @@ public final class PlaybackService extends MediaSessionService {
     startupAt = SystemClock.elapsedRealtime();
     firstFrameMs = startMs = 0;
     currentRequest = request;
+    startupToken = request.optLong("startup_token");
+    StartupTimings.handoff(startupToken, startupAt);
     pendingStart = !request.optBoolean("preview");
     navigationPending = false;
     playbackQuality = request.optString("quality", playbackQuality);
@@ -645,6 +653,8 @@ public final class PlaybackService extends MediaSessionService {
     if (!pendingStart || !player.isPlaying() || currentRequest.optBoolean("preview")) return;
     pendingStart = false;
     startMs = SystemClock.elapsedRealtime() - startupAt;
+    if (currentRequest.optBoolean("audio"))
+      StartupTimings.output(startupToken, SystemClock.elapsedRealtime(), false);
     try {
       JSONObject started = new JSONObject(currentRequest.toString());
       String contextId = contextId();
@@ -1199,6 +1209,8 @@ public final class PlaybackService extends MediaSessionService {
   }
 
   void navigate(boolean previous) {
+    long timing =
+        StartupTimings.begin(SystemClock.elapsedRealtime(), !currentRequest.optBoolean("audio"));
     boolean shuffle = player.getShuffleModeEnabled();
     String contextId = contextId(), quality = playbackQuality;
     long version = ++generation;
@@ -1234,6 +1246,7 @@ public final class PlaybackService extends MediaSessionService {
               return;
             }
             boolean audio = PlaybackPolicy.audioOnly(media.optString("kind"));
+            StartupTimings.mediaType(timing, !audio);
             String savedId = media.optString("offline_id");
             JSONObject request =
                 !savedId.isEmpty() && !savedId.equals("null")
@@ -1253,7 +1266,13 @@ public final class PlaybackService extends MediaSessionService {
               request =
                   new JSONObject().put("media", media).put("stream", stream).put("audio", audio);
             }
+            StartupTimings.resolved(
+                timing,
+                SystemClock.elapsedRealtime(),
+                request.optBoolean("offline")
+                    || request.getJSONObject("stream").optBoolean("resolution_cache_hit"));
             request
+                .put("startup_token", timing)
                 .put("quality", quality)
                 .put("queued", queued)
                 .put("history_index", historyIndex)
@@ -1436,7 +1455,9 @@ public final class PlaybackService extends MediaSessionService {
               .put("next_preloaded", PlaybackCache.ready)
               .put("start_ms", startMs)
               .put("first_frame_ms", firstFrameMs)
+              .put("tap_to_output_ms", StartupTimings.total(startupToken))
               .put("buffering", player.getPlaybackState() == Player.STATE_BUFFERING)
+              .put("buffered_ms", player.getTotalBufferedDuration())
               .put("position", player.getCurrentPosition() / 1000.0)
               .put("duration", Math.max(0, player.getDuration()) / 1000.0)
               .put("video", !currentRequest.optBoolean("audio", true))

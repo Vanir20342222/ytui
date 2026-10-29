@@ -73,6 +73,7 @@ import kotlin.math.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -713,6 +714,21 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         snapshotFlow { grid.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { vm.rememberScroll(tab, it) }
+    }
+    val focused by vm.playerOpen.collectAsState()
+    val cardsByKey = remember(feed.cards) { feed.cards.associateBy { it.key } }
+    LaunchedEffect(grid, feed.cards, focused) {
+        if (!focused)
+            snapshotFlow {
+                    val visible =
+                        grid.layoutInfo.visibleItemsInfo.mapNotNull { info -> cardsByKey[info.key] }
+                    visible.take(3)
+                }
+                .distinctUntilChanged()
+                .collectLatest { cards ->
+                    delay(400)
+                    vm.prepareVisible(cards)
+                }
     }
     LaunchedEffect(feed.generation) {
         if (grid.firstVisibleItemIndex != feed.scrollIndex) grid.scrollToItem(feed.scrollIndex)
@@ -1598,6 +1614,7 @@ private fun SettingsPanel(
                     "Offline & storage" to Glyph.Download,
                     "Video information" to Glyph.Info,
                     "Network" to Glyph.Link,
+                    "Performance" to Glyph.Info,
                     "Privacy" to Glyph.History,
                     "Account" to Glyph.Account,
                 )) {
@@ -1743,6 +1760,41 @@ private fun SettingsPanel(
                     vm.updateConfig(dark) { it.put("playback_history", value) }
                 }
             }
+        if (category == "Performance") {
+            val player by vm.player.collectAsState()
+            val report = remember(player) { StartupTimings.report() }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            SettingGroup(
+                "Playback startup",
+                "Local measurements, including extraction and visible video output",
+            ) {
+                Text(
+                    report,
+                    Modifier.testTag("startup-timings"),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(
+                    {
+                        val clipboard =
+                            context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(
+                            android.content.ClipData.newPlainText(
+                                "ytui startup timings",
+                                BuildConfig.VERSION_NAME +
+                                    "\n" +
+                                    BuildConfig.SOURCE_REVISION +
+                                    "\n" +
+                                    report,
+                            )
+                        )
+                    },
+                    Modifier.testTag("copy-startup-timings"),
+                ) {
+                    Text("Copy timing report")
+                }
+            }
+        }
         if (category == "Network")
             SettingGroup(
                 "Network",
@@ -1770,7 +1822,7 @@ private fun SettingsPanel(
             SettingGroup("Fast playback") {
                 for ((key, label) in
                     listOf(
-                        "preload_next" to "Preload next item",
+                        "preload_next" to "Preload visible and next items",
                         "preload_mobile" to "Preload on mobile data",
                         "autoplay_related" to "Related media autoplay",
                         "prefer_offline" to "Prefer saved offline media",

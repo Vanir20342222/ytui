@@ -20,6 +20,9 @@ final class PlaybackCache {
       new ThreadPoolExecutor(2, 2, 0L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1));
   private static final AtomicLong intent = new AtomicLong();
   private static Future<?> current;
+  private static final AtomicLong requestIds = new AtomicLong(1_000_000_000L);
+  private static volatile long activeRequest;
+  private static String upcomingScope = "";
   private static final ConcurrentHashMap<Long, CacheWriter> writers = new ConcurrentHashMap<>();
   static volatile String upcomingUrl = "";
   static volatile boolean ready;
@@ -50,16 +53,19 @@ final class PlaybackCache {
 
   static synchronized void cancel() {
     intent.incrementAndGet();
+    if (activeRequest != 0) NativeBridge.cancel(activeRequest);
     if (current != null) current.cancel(true);
     for (CacheWriter writer : writers.values()) writer.cancel();
     preloader.purge();
     upcomingUrl = "";
+    upcomingScope = "";
     ready = false;
   }
 
   static boolean allowed(JSONObject media) {
     if (!MobileSettings.enabled("preload_next")
         || media.optBoolean("live")
+        || "station".equals(media.optString("kind"))
         || !media.isNull("offline_id")) return false;
     Uri uri = Uri.parse(media.optString("url"));
     String host = uri.getHost();
@@ -68,7 +74,7 @@ final class PlaybackCache {
       return false;
     ConnectivityManager cm =
         (ConnectivityManager) MediaBridge.context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    return MobileSettings.enabled("preload_mobile") || !cm.isActiveNetworkMetered();
+    return cm != null && (MobileSettings.enabled("preload_mobile") || !cm.isActiveNetworkMetered());
   }
 
   static synchronized void prefetch(JSONObject media, boolean audio, String quality) {
@@ -77,21 +83,39 @@ final class PlaybackCache {
       return;
     }
     String url = media.optString("url");
-    if (url.equals(upcomingUrl) && current != null && (!current.isDone() || ready)) return;
+    String scope =
+        audio
+            + ":"
+            + quality
+            + ":"
+            + NativeBridge.accountIntent()
+            + ":"
+            + NetworkSettings.revision.get();
+    if (url.equals(upcomingUrl)
+        && scope.equals(upcomingScope)
+        && current != null
+        && (!current.isDone() || ready)) return;
     cancel();
     long token = intent.get();
     long account = NativeBridge.accountIntent();
     long network = NetworkSettings.revision.get();
     upcomingUrl = url;
+    upcomingScope = scope;
+    long requestId = requestIds.incrementAndGet();
+    activeRequest = requestId;
     try {
       current =
           preloader.submit(
               () -> {
                 try {
+                  // The current decoder's initial buffer takes priority over speculation.
+                  if (!waitForBuffer(token)) return;
                   JSONObject stream =
                       PlaybackService.rpc(
                           new JSONObject()
                               .put("op", "resolve")
+                              .put("request_id", requestId)
+                              .put("speculative", true)
                               .put("media", media)
                               .put("audio", audio)
                               .put("quality", quality));
@@ -110,6 +134,8 @@ final class PlaybackCache {
                   }
                 } catch (Exception ignored) {
                   /* speculative failure never interrupts current playback */
+                } finally {
+                  if (activeRequest == requestId) activeRequest = 0;
                 }
               });
     } catch (RejectedExecutionException busy) {
@@ -117,12 +143,37 @@ final class PlaybackCache {
     }
   }
 
+  private static boolean waitForBuffer(long token) throws Exception {
+    long until = android.os.SystemClock.elapsedRealtime() + 15000;
+    while (token == intent.get() && !Thread.currentThread().isInterrupted()) {
+      JSONObject status = new JSONObject(MediaBridge.playerSnapshot);
+      if (!status.optBoolean("buffering")
+          && (!status.optBoolean("playing") || status.optLong("buffered_ms") >= 2000)) return true;
+      if (android.os.SystemClock.elapsedRealtime() >= until) return false;
+      Thread.sleep(100);
+    }
+    return false;
+  }
+
   private static void warm(JSONObject stream, String url, int bytes, long token) throws Exception {
     if (token != intent.get()) return;
     CacheWriter writer =
         new CacheWriter(
             source(stream).createDataSource(),
-            new DataSpec.Builder().setUri(url).setLength(bytes).build(),
+            new DataSpec.Builder()
+                .setUri(url)
+                .setKey(
+                    stream.isNull(
+                            url.equals(stream.optString("audio_url"))
+                                ? "audio_cache_key"
+                                : "cache_key")
+                        ? null
+                        : stream.optString(
+                            url.equals(stream.optString("audio_url"))
+                                ? "audio_cache_key"
+                                : "cache_key"))
+                .setLength(bytes)
+                .build(),
             new byte[32 * 1024],
             (length, cached, added) -> {
               if (token != intent.get() || Thread.currentThread().isInterrupted())
