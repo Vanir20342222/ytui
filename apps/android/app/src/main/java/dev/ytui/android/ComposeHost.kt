@@ -40,7 +40,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -56,7 +55,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -259,212 +257,223 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
             LocalContentColor provides foreground,
             LocalReducedMotion provides config.optBoolean("reduced_motion"),
         ) {
-            Box(
-                Modifier.fillMaxSize()
-                    .background(background)
-                    .testTag("app-background")
-                    .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
-                    .safeDrawingPadding()
-                    .imePadding()
-            ) {
-                Column(Modifier.fillMaxSize()) {
-                    Row(
-                        Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(accent),
-                            contentAlignment = Alignment.Center,
+            Box(Modifier.fillMaxSize()) {
+                Box(
+                    Modifier.fillMaxSize()
+                        .background(background)
+                        .testTag("app-background")
+                        .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
+                        .safeDrawingPadding()
+                        .imePadding()
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .heightIn(min = 64.dp)
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            MediaIcon(Glyph.Play, Modifier.size(22.dp), colors.onPrimary)
-                        }
-                        Text(
-                            "ytui",
-                            Modifier.padding(start = 9.dp).weight(1f),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = (-1).sp,
-                        )
-                        MediaIconButton(
-                            Glyph.Account,
-                            if (account.optBoolean("connected")) "Your account" else "Sign in",
-                            "account-button",
-                        ) {
-                            dialog = "account"
-                        }
-                        MediaIconButton(Glyph.Settings, "Settings", "settings-button") {
-                            dialog = "settings"
-                        }
-                        Box {
-                            MediaIconButton(Glyph.More, "More options", "menu-button") {
-                                menu = true
+                            Box(
+                                Modifier.size(32.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(accent),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                MediaIcon(Glyph.Play, Modifier.size(22.dp), colors.onPrimary)
                             }
-                            DropdownMenu(menu, { menu = false }) {
-                                for ((label, name, icon) in
-                                    listOf(
-                                        Triple("Playback queue", "queue", Glyph.Queue),
-                                        Triple("Recently played", "history", Glyph.History),
-                                        Triple("Lyrics", "lyrics", Glyph.Lyrics),
-                                        Triple("Sleep timer", "sleep", Glyph.Sleep),
-                                        Triple("About", "about", Glyph.Info),
-                                    )) {
-                                    DropdownMenuItem(
-                                        text = { Text(label) },
-                                        leadingIcon = { MediaIcon(icon) },
-                                        onClick = {
-                                            menu = false
-                                            dialog = name
-                                            if (name == "queue") vm.loadQueue()
-                                            if (name == "history") vm.loadHistory()
-                                            if (name == "lyrics")
-                                                vm.player.value.media?.let(vm::lyricLoad)
-                                        },
-                                    )
+                            Text(
+                                "ytui",
+                                Modifier.padding(start = 9.dp).weight(1f),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = (-1).sp,
+                            )
+                            MediaIconButton(
+                                Glyph.Account,
+                                if (account.optBoolean("connected")) "Your account" else "Sign in",
+                                "account-button",
+                            ) {
+                                dialog = "account"
+                            }
+                            MediaIconButton(Glyph.Settings, "Settings", "settings-button") {
+                                dialog = "settings"
+                            }
+                            Box {
+                                MediaIconButton(Glyph.More, "More options", "menu-button") {
+                                    menu = true
                                 }
-                                if (tab > 0)
-                                    DropdownMenuItem(
-                                        text = { Text("Refresh feed") },
-                                        onClick = {
-                                            menu = false
-                                            vm.navigate(
-                                                request = vm.feeds[tab].value.request,
-                                                remember = false,
-                                            )
-                                        },
-                                    )
-                            }
-                        }
-                    }
-                    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
-                        val tablet = maxWidth >= 840.dp
-                        Row(Modifier.fillMaxSize()) {
-                            if (tablet) AppNavigation(tab, vm::chooseTab, vertical = true)
-                            Box(Modifier.weight(1f).fillMaxHeight()) {
-                                if (tab == 0) OfflineLibrary(vm)
-                                else
-                                    key(tab) {
-                                        BrowsePane(
-                                            vm,
-                                            tab,
-                                            onAccount = { dialog = "account" },
-                                            onFeeds = { dialog = "feeds" },
-                                        )
-                                    }
-                            }
-                            if (tablet && hasPlayer) {
-                                Surface(
-                                    Modifier.width(336.dp)
-                                        .fillMaxHeight()
-                                        .padding(start = 8.dp, end = 20.dp, bottom = 20.dp),
-                                    shape = RoundedCornerShape(24.dp),
-                                    color = colors.surfaceContainerLow,
-                                ) {
-                                    Column(
-                                        Modifier.verticalScroll(rememberScrollState())
-                                            .padding(20.dp),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                                    ) {
-                                        Text(
-                                            "NOW PLAYING",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = colors.onSurfaceVariant,
-                                            letterSpacing = 1.8.sp,
-                                        )
-                                        PlayerPane(
-                                            vm,
-                                            expanded = false,
-                                            showSurface = !playerOpen && !fullscreen,
-                                            onQueue = {
-                                                dialog = "queue"
-                                                vm.loadQueue()
+                                DropdownMenu(menu, { menu = false }) {
+                                    for ((label, name, icon) in
+                                        listOf(
+                                            Triple("Playback queue", "queue", Glyph.Queue),
+                                            Triple("Recently played", "history", Glyph.History),
+                                            Triple("Lyrics", "lyrics", Glyph.Lyrics),
+                                            Triple("Sleep timer", "sleep", Glyph.Sleep),
+                                            Triple("About", "about", Glyph.Info),
+                                        )) {
+                                        DropdownMenuItem(
+                                            text = { Text(label) },
+                                            leadingIcon = { MediaIcon(icon) },
+                                            onClick = {
+                                                menu = false
+                                                dialog = name
+                                                if (name == "queue") vm.loadQueue()
+                                                if (name == "history") vm.loadHistory()
+                                                if (name == "lyrics")
+                                                    vm.player.value.media?.let(vm::lyricLoad)
                                             },
                                         )
                                     }
+                                    if (tab > 0)
+                                        DropdownMenuItem(
+                                            text = { Text("Refresh feed") },
+                                            onClick = {
+                                                menu = false
+                                                vm.navigate(
+                                                    request = vm.feeds[tab].value.request,
+                                                    remember = false,
+                                                )
+                                            },
+                                        )
                                 }
                             }
                         }
-                    }
-                    if (LocalConfiguration.current.screenWidthDp < 840) {
-                        if (!imeVisible) {
-                            PlayerDock(vm)
-                            AppNavigation(tab, vm::chooseTab)
+                        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                            val tablet = maxWidth >= 840.dp
+                            Row(Modifier.fillMaxSize()) {
+                                if (tablet) AppNavigation(tab, vm::chooseTab, vertical = true)
+                                Box(Modifier.weight(1f).fillMaxHeight()) {
+                                    if (tab == 0) OfflineLibrary(vm)
+                                    else
+                                        key(tab) {
+                                            BrowsePane(
+                                                vm,
+                                                tab,
+                                                onAccount = { dialog = "account" },
+                                                onFeeds = { dialog = "feeds" },
+                                            )
+                                        }
+                                }
+                                if (tablet && hasPlayer) {
+                                    Surface(
+                                        Modifier.width(336.dp)
+                                            .fillMaxHeight()
+                                            .padding(start = 8.dp, end = 20.dp, bottom = 20.dp),
+                                        shape = RoundedCornerShape(24.dp),
+                                        color = colors.surfaceContainerLow,
+                                    ) {
+                                        Column(
+                                            Modifier.verticalScroll(rememberScrollState())
+                                                .padding(20.dp),
+                                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                                        ) {
+                                            Text(
+                                                "NOW PLAYING",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = colors.onSurfaceVariant,
+                                                letterSpacing = 1.8.sp,
+                                            )
+                                            PlayerPane(
+                                                vm,
+                                                expanded = false,
+                                                showSurface = !playerOpen && !fullscreen,
+                                                onQueue = {
+                                                    dialog = "queue"
+                                                    vm.loadQueue()
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (LocalConfiguration.current.screenWidthDp < 840) {
+                            if (!imeVisible) {
+                                PlayerDock(vm)
+                                AppNavigation(tab, vm::chooseTab)
+                            }
                         }
                     }
                 }
-            }
-            if (playerOpen && !fullscreen)
-                Panel("Now playing", { vm.playerOpen.value = false }, full = true, scroll = false) {
-                    FocusedPlayer(
-                        vm,
-                        minimize = { vm.playerOpen.value = false },
-                        onQueue = {
-                            dialog = "queue"
-                            vm.loadQueue()
-                        },
-                        onMore = { dialog = "player-options" },
-                    )
-                }
-            when (dialog) {
-                "player-options" ->
-                    Panel("Playback options", { dialog = "" }) {
-                        PlayerPane(
+                if (playerOpen && !fullscreen)
+                    Panel(
+                        "Now playing",
+                        { vm.playerOpen.value = false },
+                        full = true,
+                        scroll = false,
+                    ) {
+                        FocusedPlayer(
                             vm,
-                            expanded = true,
-                            showSurface = false,
+                            minimize = { vm.playerOpen.value = false },
                             onQueue = {
                                 dialog = "queue"
                                 vm.loadQueue()
                             },
+                            onMore = { dialog = "player-options" },
                         )
                     }
-                "settings" ->
-                    SettingsPanel(vm, dark, onAccount = { dialog = "account" }) { dialog = "" }
-                "account" -> AccountPanel(vm) { dialog = "" }
-                "feeds" -> FeedPanel(vm) { dialog = "" }
-                "queue" -> QueuePanel(vm) { dialog = "" }
-                "history" -> HistoryPanel(vm) { dialog = "" }
-                "lyrics" ->
-                    LyricsPanel(vm) {
-                        vm.lyricClose()
-                        dialog = ""
-                    }
-                "sleep" ->
-                    Panel("Sleep timer", { dialog = "" }) {
-                        for (minutes in listOf(15, 30, 60, 120)) Action("$minutes minutes") {
-                            vm.command("sleep", "seconds" to minutes * 60)
-                            dialog = ""
-                        }
-                        Action("Cancel timer") {
-                            vm.command("sleep_cancel")
-                            dialog = ""
-                        }
-                    }
-                "about" ->
-                    Panel("About ytui", { dialog = "" }) {
-                        Text(
-                            "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}\nDevelopment preview"
-                        )
-                        Text(
-                            "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media."
-                        )
-                        Text(
-                            "Real device/network acceptance and owner release signing remain required."
-                        )
-                        Action("Radio artwork credits") {
-                            vm.effect(
-                                "open",
-                                "url" to
-                                    "https://github.com/Vanir20342222/ytui/blob/feat/android-playback-library/docs/android/RADIO_ARTWORK.md",
+                when (dialog) {
+                    "player-options" ->
+                        Panel("Playback options", { dialog = "" }) {
+                            PlayerPane(
+                                vm,
+                                expanded = true,
+                                showSurface = false,
+                                onQueue = {
+                                    dialog = "queue"
+                                    vm.loadQueue()
+                                },
                             )
                         }
-                        Action("Mobile documentation") {
-                            vm.effect(
-                                "open",
-                                "url" to
-                                    "https://github.com/Vanir20342222/ytui/tree/feat/android-monorepo/docs/android",
-                            )
+                    "settings" ->
+                        SettingsPanel(vm, dark, onAccount = { dialog = "account" }) { dialog = "" }
+                    "account" -> AccountPanel(vm) { dialog = "" }
+                    "feeds" -> FeedPanel(vm) { dialog = "" }
+                    "queue" -> QueuePanel(vm) { dialog = "" }
+                    "history" -> HistoryPanel(vm) { dialog = "" }
+                    "lyrics" ->
+                        LyricsPanel(vm) {
+                            vm.lyricClose()
+                            dialog = ""
                         }
-                    }
+                    "sleep" ->
+                        Panel("Sleep timer", { dialog = "" }) {
+                            for (minutes in listOf(15, 30, 60, 120)) Action("$minutes minutes") {
+                                vm.command("sleep", "seconds" to minutes * 60)
+                                dialog = ""
+                            }
+                            Action("Cancel timer") {
+                                vm.command("sleep_cancel")
+                                dialog = ""
+                            }
+                        }
+                    "about" ->
+                        Panel("About ytui", { dialog = "" }) {
+                            Text(
+                                "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}\nDevelopment preview"
+                            )
+                            Text(
+                                "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media."
+                            )
+                            Text(
+                                "Real device/network acceptance and owner release signing remain required."
+                            )
+                            Action("Radio artwork credits") {
+                                vm.effect(
+                                    "open",
+                                    "url" to
+                                        "https://github.com/Vanir20342222/ytui/blob/feat/android-playback-library/docs/android/RADIO_ARTWORK.md",
+                                )
+                            }
+                            Action("Mobile documentation") {
+                                vm.effect(
+                                    "open",
+                                    "url" to
+                                        "https://github.com/Vanir20342222/ytui/tree/feat/android-monorepo/docs/android",
+                                )
+                            }
+                        }
+                }
             }
         }
     }
@@ -558,12 +567,11 @@ internal fun Panel(
     scroll: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Dialog(close, DialogProperties(usePlatformDefaultWidth = false)) {
-        val window = (LocalView.current.parent as? DialogWindowProvider)?.window
-        val reduced = LocalReducedMotion.current
-        SideEffect {
-            window?.setWindowAnimations(if (full && !reduced) R.style.PlayerDialogAnimation else 0)
-        }
+    // A player is a screen in the activity, not a second Android window.
+    // Keeping its SurfaceView in that window avoids decoder/surface handoffs
+    // through a dialog while the same activity continues to own playback.
+    @Composable
+    fun Body() {
         Surface(
             Modifier.widthIn(max = if (full) 1600.dp else 680.dp)
                 .fillMaxWidth(if (full) 1f else 0.96f)
@@ -615,6 +623,11 @@ internal fun Panel(
                 )
             }
         }
+    }
+    if (full) {
+        Body()
+    } else {
+        Dialog(close, DialogProperties(usePlatformDefaultWidth = false)) { Body() }
     }
 }
 

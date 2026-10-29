@@ -187,21 +187,40 @@ internal object ArtworkCache {
             return it
         }
         return slots.withPermit {
-            memory.get(key)
-                ?: withContext(Dispatchers.IO) {
-                    val data =
-                        NativeBridge.thumbnail(media.value.toString(), size)
-                            ?: return@withContext null
-                    if (
-                        data.size < 3 ||
-                            data[0] !in 1..768 ||
-                            data[1] !in 1..768 ||
-                            data.size != data[0] * data[1] + 2
-                    )
-                        return@withContext null
-                    Bitmap.createBitmap(data, 2, data[0], data[0], data[1], Bitmap.Config.ARGB_8888)
-                        .also { memory.put(key, it) }
+            for (attempt in 0..2) {
+                currentCoroutineContext().ensureActive()
+                memory.get(key)?.let {
+                    return@withPermit it
                 }
+                val decoded =
+                    withContext(Dispatchers.IO) {
+                        val data =
+                            NativeBridge.thumbnail(media.value.toString(), size)
+                                ?: return@withContext null
+                        currentCoroutineContext().ensureActive()
+                        if (
+                            data.size < 3 ||
+                                data[0] !in 1..768 ||
+                                data[1] !in 1..768 ||
+                                data.size != data[0] * data[1] + 2
+                        )
+                            return@withContext null
+                        Bitmap.createBitmap(
+                                data,
+                                2,
+                                data[0],
+                                data[0],
+                                data[1],
+                                Bitmap.Config.ARGB_8888,
+                            )
+                            .also { memory.put(key, it) }
+                    }
+                if (decoded != null) return@withPermit decoded
+                // A transient image failure must not leave a permanent placeholder.
+                // Bound retries and release the coroutine promptly when a card leaves.
+                if (attempt < 2) delay(200L shl attempt)
+            }
+            null
         }
     }
 }

@@ -166,3 +166,13 @@ surface-sync workaround. The same visible RGB checks remain; failure evidence
 also collects SurfaceView PixelCopy output. [Media3 surface guidance](https://developer.android.com/media/media3/ui/surface)
 describes SurfaceView's frame-timing, power and HDR advantages; no device timing
 claim is inferred from that guidance.
+
+The `35c7616` device run still fails visible inline video (SurfaceView PixelCopy
+is black despite continued decoding) and the tablet catalog's decoded-cover
+wait. The focused player now stays in the activity window instead of a separate
+dialog window. Artwork retries transient failures at most twice with bounded
+backoff and cancellation checks; the catalog case deliberately fails its first
+cover request to exercise recovery. Failure evidence includes the catalog state
+and decoder-versus-displayed-surface ownership. Local debug build, 14 JVM tests,
+lint and instrumentation compilation pass; hosted pixel and tablet checks are
+still required before this change is qualified.

@@ -139,11 +139,23 @@ class CatalogUiTest {
                     generation = 100,
                 )
         }
-        compose.waitUntil(15_000) {
-            compose
-                .onAllNodesWithTag("artwork-${cards.first().key}", useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+        try {
+            compose.waitUntil(15_000) {
+                compose
+                    .onAllNodesWithTag("artwork-${cards.first().key}", useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+        } catch (error: Exception) {
+            MediaRuntimeTest.capture("native-catalog-error.png")
+            scenario.onActivity {
+                val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
+                android.util.Log.i(
+                    "CatalogEvidence",
+                    "tab=${vm.tab.value} cards=${vm.feeds[tab].value.cards.size} ready=${vm.ready.value} thumbnails=${vm.config.value.optBoolean("thumbnails")} requests=${covers.requests.get()} width=${it.resources.configuration.screenWidthDp} height=${it.resources.configuration.screenHeightDp}",
+                )
+            }
+            throw error
         }
         compose.waitForIdle()
         // Validate a rendered warm cover pixel, not merely an Image semantics node.
@@ -161,11 +173,17 @@ class CatalogUiTest {
 
     @Test
     fun artworkGridAdaptsAndCardActionsStayReachable() {
+        covers.failFirstCover = true
         val cards = populate(1)
         compose.onNodeWithTag("bottom-navigation").assertIsDisplayed()
         compose.onNodeWithTag("media-card-${cards[0].key}").assertIsDisplayed()
         compose.onAllNodesWithText("Preview").assertCountEquals(0)
         Assert.assertTrue("Real thumbnail HTTP/decode must run", covers.requests.get() > 0)
+        Assert.assertEquals(
+            "The first cover's transient failure must recover",
+            1,
+            covers.failures.get(),
+        )
         MediaRuntimeTest.capture("native-catalog.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         for (label in
@@ -417,6 +435,8 @@ class CatalogUiTest {
     private class CoverServer : AutoCloseable {
         private val socket = ServerSocket(0, 16, java.net.InetAddress.getByName("127.0.0.1"))
         val requests = AtomicInteger()
+        val failures = AtomicInteger()
+        @Volatile var failFirstCover = false
         private val images = (0..5).map(::cover)
         private val worker =
             Thread {
@@ -436,6 +456,17 @@ class CatalogUiTest {
                                     ?.toIntOrNull() ?: 0
                             val bytes = images[index.coerceIn(0, 5)]
                             requests.incrementAndGet()
+                            if (index == 0 && failFirstCover) {
+                                failFirstCover = false
+                                failures.incrementAndGet()
+                                client
+                                    .getOutputStream()
+                                    .write(
+                                        "HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                                            .toByteArray()
+                                    )
+                                return@use
+                            }
                             client.getOutputStream().apply {
                                 write(
                                     "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n\r\n"

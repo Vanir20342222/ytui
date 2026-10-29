@@ -157,7 +157,35 @@ public final class MediaRuntimeTest {
               + "x"
               + view.getHeight()
               + " bound="
-              + (playerView.getPlayer() != null));
+              + (playerView.getPlayer() != null)
+              + " visible="
+              + view.isShown()
+              + " view_surface_size="
+              + (playerView.getPlayer() == null ? "none" : playerView.getPlayer().getSurfaceSize())
+              + " decoder_surface_size="
+              + (PlaybackService.current == null
+                  ? "none"
+                  : PlaybackService.current.player.getSurfaceSize()));
+      if (PlaybackService.current != null && surface != null) {
+        try {
+          Object decoder = PlaybackService.current.player;
+          java.lang.reflect.Field output = decoder.getClass().getDeclaredField("videoOutput");
+          output.setAccessible(true);
+          Object actual = output.get(decoder);
+          Object expected =
+              surface instanceof android.view.SurfaceView
+                  ? ((android.view.SurfaceView) surface).getHolder().getSurface()
+                  : null;
+          android.util.Log.i(
+              "NativeVideoEvidence",
+              "decoder_output="
+                  + (actual == null ? "none" : actual.getClass().getSimpleName())
+                  + " owns_displayed_surface="
+                  + (expected != null && actual == expected));
+        } catch (ReflectiveOperationException unavailable) {
+          android.util.Log.i("NativeVideoEvidence", "decoder output inspection unavailable");
+        }
+      }
       if (surface instanceof android.view.TextureView) {
         android.view.TextureView texture = (android.view.TextureView) surface;
         android.util.Log.i("NativeVideoEvidence", "texture_available=" + texture.isAvailable());
