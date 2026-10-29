@@ -28,12 +28,12 @@ public final class NotificationRuntimeTest {
   public void consecutiveServiceSessionsRemainPlayingAfterNotificationReplacement()
       throws Exception {
     Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-    File file = new File(context.getCacheDir(), "notification-fixture.m4a");
+    File file = new File(context.getCacheDir(), "notification-fixture.mp4");
     try (InputStream input =
             InstrumentationRegistry.getInstrumentation()
                 .getContext()
                 .getAssets()
-                .open("fixture-audio.m4a");
+                .open("fixture.mp4");
         FileOutputStream output = new FileOutputStream(file)) {
       byte[] bytes = new byte[8192];
       int count;
@@ -43,18 +43,18 @@ public final class NotificationRuntimeTest {
       MediaRuntimeTest.command("stop");
       MediaRuntimeTest.await(
           "Old playback service did not finish", () -> PlaybackService.current == null);
-      for (int index = 0; index < 3; index++) {
+      for (int index = 0; index < 6; index++) {
         String url = "https://media.test/notification/" + index;
         JSONObject request =
             new JSONObject()
-                .put("audio", true)
+                .put("audio", index % 2 == 0)
                 .put("local", true)
                 .put(
                     "media",
                     new JSONObject()
                         .put("url", url)
                         .put("title", "Notification fixture")
-                        .put("kind", "song"))
+                        .put("kind", index % 2 == 0 ? "song" : "video"))
                 .put(
                     "stream",
                     new JSONObject().put("url", android.net.Uri.fromFile(file).toString()));
@@ -73,6 +73,22 @@ public final class NotificationRuntimeTest {
         assertTrue(
             "New playback was stopped after notification replacement",
             MediaRuntimeTest.status().optBoolean("playing"));
+        android.app.NotificationManager manager =
+            context.getSystemService(android.app.NotificationManager.class);
+        boolean posted = false;
+        for (android.service.notification.StatusBarNotification item :
+            manager.getActiveNotifications()) {
+          if (item.getId() == NotificationIds.PLAYBACK
+              && PlaybackService.current
+                  .session
+                  .getPlatformToken()
+                  .equals(
+                      item.getNotification()
+                          .extras
+                          .getParcelable(android.app.Notification.EXTRA_MEDIA_SESSION)))
+            posted = true;
+        }
+        assertTrue("Active playback needs the current session notification", posted);
         MediaRuntimeTest.command("stop");
         MediaRuntimeTest.await(
             "Stopped service did not finish", () -> PlaybackService.current == null);

@@ -454,7 +454,6 @@ public final class PlaybackService extends MediaSessionService {
       return START_NOT_STICKY;
     }
     boolean startsPlayback = "play".equals(intent.getAction());
-    boolean preparingForeground = startsPlayback && !isPlaybackOngoing();
     if (startsPlayback) {
       try {
         // The external session must leave EMPTY before notification updates run.
@@ -474,41 +473,10 @@ public final class PlaybackService extends MediaSessionService {
         return START_NOT_STICKY;
       }
     }
-    if (preparingForeground) {
-      android.app.NotificationManager notifications =
-          getSystemService(android.app.NotificationManager.class);
-      android.app.Notification preparing = null;
-      for (android.service.notification.StatusBarNotification active :
-          notifications.getActiveNotifications()) {
-        android.app.Notification notification = active.getNotification();
-        // A notification left over from a destroyed service has a different
-        // platform token. Reusing it attaches the new foreground service to a
-        // retired session and can trigger a System UI Stop.
-        if (active.getId() == NotificationIds.PLAYBACK
-            && "ytui-playback".equals(notification.getChannelId())
-            && session
-                .getPlatformToken()
-                .equals(
-                    notification.extras.getParcelable(
-                        android.app.Notification.EXTRA_MEDIA_SESSION))) {
-          preparing = notification;
-          break;
-        }
-      }
-      if (preparing == null)
-        preparing =
-            new android.app.Notification.Builder(this, "ytui-playback")
-                .setSmallIcon(R.drawable.ic_ytui)
-                .setContentTitle("ytui")
-                .setContentText("Preparing playback")
-                .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
-                .setStyle(
-                    new android.app.Notification.MediaStyle()
-                        .setMediaSession(session.getPlatformToken()))
-                .setOngoing(true)
-                .build();
-      startForeground(NotificationIds.PLAYBACK, preparing);
-    }
+    // Media3 owns the notification and foreground lifecycle. A hand-built
+    // notification can be posted before its asynchronous controller connects;
+    // an early default refresh then removes it and System UI sends Stop to
+    // the new session. Let the connected controller publish the first one.
     return super.onStartCommand(intent, flags, id);
   }
 

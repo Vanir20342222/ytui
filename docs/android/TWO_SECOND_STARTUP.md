@@ -175,3 +175,20 @@ offered in the response under the same height cap/codec preference. Unsolved
 adaptive challenges must not silently turn offered 1080p into a 360p muxed fallback,
 or audio-only selection into a video download. An offline TLS regression verifies
 the full route restores offered 1080p. Faster starts do not change quality policy.
+
+### Fifth hosted run: one notification owner
+
+Run 40876838187 passed the strict startup test: actual-window pixel-copy completion
+was 1507 ms cold and 656 ms prepared (view-frame events 519/390 ms). These are
+local generated media results, not live YouTube qualification.
+
+The separate media runtime regression still saw System UI remove notification 4
+and send Stop to the new playing session. Media3 1.8.0 source confirms its default
+notification manager removes notifications while its asynchronous internal controller
+is not connected. The app's independently posted preparation notification therefore
+raced with that manager even after source-first session registration. Playback now
+has one notification owner: Media3 creates the initial notification and manages
+foreground transitions when its controller connects. No external Stop is ignored.
+The restart regression now alternates six audio/video sessions and verifies the
+active notification belongs to the current session, in addition to continued
+playback. Full native rerun remains required.
