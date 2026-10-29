@@ -1,10 +1,18 @@
 # Android validation record (M9)
 
-## Player/library preview: signed and qualified (2026-10-29)
+## Current startup preview: mobile.5 (2026-10-29)
+
+Source `7d5267af5b360d211fe8f7e33d21e0ec21448e59` passes exact-main [Android](https://github.com/Vanir20342222/ytui/actions/runs/40910296881), [Rust](https://github.com/Vanir20342222/ytui/actions/runs/40910296725) and [Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/40910296780). 26 native runtime cases pass, no failures; one public opt-in case is explicitly skipped. Six alternating service restarts, all themes, keyboard/account navigation, offline folders and native/fullscreen video controls pass. No app ANR or Rust panic markers occur in the successful run.
+
+Exact-main window-copy completion: **1921 ms cold / 712 ms prepared**. Native view-frame events: 446/368 ms. Both pixel deadlines are unchanged at 2000 ms.
+
+[Download mobile.5](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.5/ytui-0.2.0-alpha.12-mobile.5.apk) · [Checksum, failed attempts and physical acceptance instructions](STARTUP_VALIDATION_2026-10-29.md). The public hash matches the private signed build, code 5, both ABIs, the same stable signing identity and package as mobile.4. 16 release JVM checks and lint pass. These are generated-media results; live YouTube latency, audible output and physical-device update acceptance remain open. M9 is not complete.
+
+## Earlier player/library preview: mobile.4 (2026-10-29)
 
 Source `cf8046508b96962f1b5ba9efc3529c4427d64b9f` passes [main Android](https://github.com/Vanir20342222/ytui/actions/runs/40837593351), [Rust](https://github.com/Vanir20342222/ytui/actions/runs/40837593137) and Secret scan. **24 runtime cases pass**, one public opt-in case skips; all 13 themes, visible video behind native controls, fullscreen return, native transports, offline folders/playlists and cover recovery pass. Logs contain zero app ANRs/Rust panic markers. The local signed release passes both ABI builds, 14 JVM tests, lint and signature/alignment/notices inspection.
 
-### Current direct APK
+### Earlier mobile.4 APK
 
 [Download 0.2.0-alpha.12-mobile.4](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) · [Public checksum/inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.4). Package `dev.ytui.android.stable`, launcher **ytui**, code **4**, Android 8+, ARM64/x86-64. Installs separately from old Preview apps; subsequent stable updates retain this signing identity. No GitHub signing secrets are required.
 
@@ -598,11 +606,6 @@ memory/CPU/frame latency and human audible confirmation. Advanced capability gap
 remain explicit in [PARITY.md](PARITY.md). M9 remains open.
 
 
-## M9 startup latency work, 2026-10-29 (in progress)
+## M9 startup latency work, 2026-10-29
 
-[Research, implementation and acceptance target](TWO_SECOND_STARTUP.md) documents
-mobile.5. The target is actual tap → visible native frame within 2000 ms, including
-extraction. Five offline direct-player request-budget/fallback tests passed;
-Android compilation/lint and 16 JVM tests passed. Hosted rebuilt-ABI runtime and
-physical Tab S9 timing results are pending. A fresh anonymous cloud probe failed
-extraction in 329 ms; this is an unsuccessful playback attempt, not target success.
+[Research and implementation](TWO_SECOND_STARTUP.md) and [mobile.5 qualification](STARTUP_VALIDATION_2026-10-29.md) distinguish the successful offline/native checks from the still-open physical Tab S9 / live YouTube two-second gate. Failed and infrastructure-contaminated attempts are preserved in those records.

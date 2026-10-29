@@ -2,15 +2,15 @@
 
 The app combines the shared Rust engine with a native Jetpack Compose phone/tablet UI. Media3 handles video, background playback, media controls and offline transfers. The explicit account sign-in page is its only WebView. No Python or mpv executable runs on Android.
 
-[Download mobile.4 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) · [Release/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.4) · [Validation](PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Actual gallery](../screenshots/android/README.md)
+[Download mobile.5 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.5/ytui-0.2.0-alpha.12-mobile.5.apk) · [Release/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.5) · [Startup validation](STARTUP_VALIDATION_2026-10-29.md) · [Actual gallery](../screenshots/android/README.md)
 
 ## Install an APK
 
-Open the downloaded APK in Android Files and allow installation from that source when prompted. Version **0.2.0-alpha.12-mobile.4**, code **4**, includes ARM64 for Galaxy Tab S9/Nothing Phone (3a) and x86-64 for emulators, requires Android 8/API 26+, and targets API 35. The public download hash and signing certificate were verified.
+Open the downloaded APK in Android Files and allow installation from that source when prompted. Version **0.2.0-alpha.12-mobile.5**, code **5**, includes ARM64 for Galaxy Tab S9/Nothing Phone (3a) and x86-64 for emulators, requires Android 8/API 26+, and targets API 35. The public download hash and signing certificate were verified.
 
 Open **ytui** (`dev.ytui.android.stable`). It installs alongside older Preview/original development apps, preserving their private data. Its account/settings/library are separate, so sign in and choose folders once. Future stable-channel updates use the same private identity. No GitHub signing-secret setup is needed; [recovery and updates](SIGNING.md) explain the encrypted owner backup. Debug Actions artifacts still install as **ytui Preview** and may have disposable identities.
 
-This is a development preview, with 24 passing runtime cases and one explicitly skipped public YouTube case. Real YouTube latency, audible output, physical-device updates and [parity/device gates](PARITY.md) remain open. [Device checklist](DEVICE_ACCEPTANCE.md).
+This is a development preview, with 26 passing runtime cases and one explicitly skipped public YouTube case. Real YouTube latency, audible output, physical-device updates and [parity/device gates](PARITY.md) remain open. [Device checklist](DEVICE_ACCEPTANCE.md).
 
 ## Navigate
 

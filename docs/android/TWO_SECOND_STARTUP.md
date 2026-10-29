@@ -192,3 +192,7 @@ foreground transitions when its controller connects. No external Stop is ignored
 The restart regression now alternates six audio/video sessions and verifies the
 active notification belongs to the current session, in addition to continued
 playback. Full native rerun remains required.
+
+### Qualified performance APK
+
+[mobile.5 qualification](STARTUP_VALIDATION_2026-10-29.md) records the successful exact-main native/Rust/security runs, signed/public APK verification and strict cold/prepared window-pixel times. The first exact-main attempt was contaminated by a Google SDK Setup ANR dialog; screenshots and failure evidence remain linked. The fresh same-source run retains all assertions and the 2000 ms deadline. Live Tab S9/YouTube acceptance remains open.

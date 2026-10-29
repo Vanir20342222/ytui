@@ -6,6 +6,12 @@ cd "$root"
 evidence="$root/target/android-device-evidence"
 test_package=dev.ytui.android.preview
 mkdir -p "$evidence"
+# Google SDK Setup can raise its own first-boot ANR before instrumentation and
+# obscure a correctly rendered app. It is not an app dependency. Disable only
+# on an emulator, retaining all app/system-dialog assertions during the suite.
+if [[ "$(adb shell getprop ro.kernel.qemu | tr -d '\r')" == 1 ]]; then
+    adb shell pm disable-user --user 0 com.google.android.googlesdksetup > /dev/null 2>&1 || true
+fi
 # Disposable emulator only. A first-boot Pixel Launcher ANR can cover the app
 # and steal IME focus; the launcher is not used by these activity tests.
 adb shell am force-stop com.google.android.apps.nexuslauncher || true
