@@ -402,6 +402,24 @@ public final class MediaRuntimeTest {
           });
       device.dumpWindowHierarchy(
           new File(context.getExternalFilesDir(null), "native-video-controls.xml"));
+      for (boolean pause : new boolean[] {true, false}) {
+        fullscreenExit(device);
+        androidx.test.uiautomator.UiObject2 toggle =
+            device.wait(
+                androidx.test.uiautomator.Until.findObject(
+                    androidx.test.uiautomator.By.res(
+                        java.util.regex.Pattern.compile(".*:id/exo_play_pause"))),
+                5000);
+        assertNotNull("The native play/pause button must be reachable", toggle);
+        toggle.click();
+        await(
+            "The native play/pause button must control playback",
+            () -> status().optBoolean("paused") == pause);
+        assertEquals(
+            "User pause must also govern reconnect intent",
+            pause,
+            PlaybackService.current.pausedByUser);
+      }
       exitFullscreen = fullscreenExit(device);
       exitFullscreen.click();
       await(

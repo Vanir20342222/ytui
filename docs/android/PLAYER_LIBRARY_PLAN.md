@@ -200,3 +200,14 @@ power/HDR advantages do not outweigh a failed visible-control presentation.
 Hardware/HDR/power acceptance remains a separate device check. The focused
 header also respects the gesture setting, has a pane announcement, and a native
 touch regression verifies that disabling gestures preserves icon minimization.
+
+`5d84e14` passes the disabled-gesture check, but TextureView alone still fails
+initial inline RGB rendering. The attached view and raw decoder both report
+996×560 while the texture bitmap is black. The native view now binds through a
+direct `ForwardingPlayer` adapter instead of the session's cached
+`ForwardingSimpleBasePlayer` state. Per-surface frame events reach the view
+directly; Next/Previous and user-pause/reconnect intent still route through ytui.
+The session keeps its separate live-metadata/controller adapter. The runtime
+case also exercises the real native play/pause button, and the blocked-playlist
+Next case uses the presentation adapter. Qualification is pending; this does not
+claim that decoding telemetry alone proves visible rendering.

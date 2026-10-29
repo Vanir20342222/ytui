@@ -51,7 +51,7 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
             view.setControllerAnimationEnabled(
                 !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
             )
-            val actual = PlaybackService.current?.session?.player
+            val actual = PlaybackService.current?.controlsPlayer
             if (view.player !== actual) view.player = actual
             view.keepScreenOn = actual?.playWhenReady == true
         },

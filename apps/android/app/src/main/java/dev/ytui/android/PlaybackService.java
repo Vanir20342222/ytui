@@ -17,6 +17,7 @@ import org.json.*;
 public final class PlaybackService extends MediaSessionService {
   static volatile PlaybackService current;
   ExoPlayer player;
+  Player controlsPlayer;
   MediaSession session;
   LiveMetadataPlayer sessionPlayer;
   final ExecutorService worker = Executors.newFixedThreadPool(3);
@@ -114,6 +115,7 @@ public final class PlaybackService extends MediaSessionService {
             MediaBridge.videoFrames.incrementAndGet());
     player.setVolume(prefs.getFloat("volume", 0.7f));
     player.setPlaybackSpeed(prefs.getFloat("speed", 1f));
+    controlsPlayer = new ControlsPlayer(player);
     session =
         new MediaSession.Builder(
                 this,
@@ -338,6 +340,74 @@ public final class PlaybackService extends MediaSessionService {
     streamMetadataUpdates++;
     sessionPlayer.metadataChanged();
     publish();
+  }
+
+  /**
+   * Keep per-surface frame events synchronous for PlayerView's shutter/texture lifecycle. The
+   * session's snapshot adapter remains responsible for external metadata/controllers.
+   */
+  private final class ControlsPlayer extends ForwardingPlayer {
+    ControlsPlayer(Player delegate) {
+      super(delegate);
+    }
+
+    @Override
+    public Player.Commands getAvailableCommands() {
+      return super.getAvailableCommands()
+          .buildUpon()
+          .add(Player.COMMAND_SEEK_TO_NEXT)
+          .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+          .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+          .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+          .build();
+    }
+
+    @Override
+    public boolean isCommandAvailable(int command) {
+      return getAvailableCommands().contains(command);
+    }
+
+    @Override
+    public void play() {
+      setPlayWhenReady(true);
+    }
+
+    @Override
+    public void pause() {
+      setPlayWhenReady(false);
+    }
+
+    @Override
+    public void setPlayWhenReady(boolean ready) {
+      pausedByUser = !ready;
+      if (ready && player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
+      super.setPlayWhenReady(ready);
+    }
+
+    @Override
+    public void stop() {
+      stopAndClear();
+    }
+
+    @Override
+    public void seekToNext() {
+      PlaybackService.this.next();
+    }
+
+    @Override
+    public void seekToNextMediaItem() {
+      PlaybackService.this.next();
+    }
+
+    @Override
+    public void seekToPrevious() {
+      PlaybackService.this.previous();
+    }
+
+    @Override
+    public void seekToPreviousMediaItem() {
+      navigate(true);
+    }
   }
 
   // MediaItem's fixed station title takes precedence in ExoPlayer metadata.
