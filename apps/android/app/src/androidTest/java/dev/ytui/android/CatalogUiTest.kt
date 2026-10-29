@@ -41,10 +41,12 @@ class CatalogUiTest {
         )
     private lateinit var scenario: ActivityScenario<RustActivity>
     private lateinit var original: JSONObject
+    private lateinit var originalMobile: JSONObject
     private lateinit var covers: CoverServer
 
     @Before
     fun launch() {
+        originalMobile = MobileSettings.snapshot()
         MediaBridge.execute(json("op" to "stop").toString())
         original =
             JSONObject(NativeBridge.request(json("op" to "settings").toString()))
@@ -80,6 +82,7 @@ class CatalogUiTest {
         MediaBridge.execute(json("op" to "stop").toString())
         scenario.close()
         covers.close()
+        MobileSettings.save(originalMobile)
         NativeBridge.request(json("op" to "save_settings", "config" to original).toString())
         MediaBridge.execute(json("op" to "settings", "config" to original).toString())
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
@@ -342,7 +345,7 @@ class CatalogUiTest {
             }
             compose.onNodeWithTag("mini-player").performClick()
             try {
-                // Dialog windows are attached by Android after Compose has become idle.
+                // Await the measured player layout and decoded artwork.
                 compose.waitUntil(10_000) {
                     compose.onNodeWithTag("music-visualizer").isDisplayed()
                 }
@@ -416,6 +419,24 @@ class CatalogUiTest {
             compose.onNodeWithText("Audio & subtitles").performScrollTo().performClick()
             compose.onNodeWithText("Toggle captions").performScrollTo().assertIsDisplayed()
             compose.onNodeWithContentDescription("Close").performClick()
+            scenario.onActivity {
+                ViewModelProvider(it)[YtuiViewModel::class.java].updateMobile("gestures", false)
+            }
+            compose.waitUntil(10_000) {
+                var disabled = false
+                scenario.onActivity {
+                    disabled =
+                        !ViewModelProvider(it)[YtuiViewModel::class.java]
+                            .mobile
+                            .value
+                            .optBoolean("gestures", true)
+                }
+                disabled
+            }
+            compose.onNodeWithTag("panel-header").performTouchInput {
+                swipe(center, center + androidx.compose.ui.geometry.Offset(0f, height * 3f), 300)
+            }
+            compose.onNodeWithTag("focused-player").assertIsDisplayed()
             compose.onNodeWithContentDescription("Minimize player").performClick()
             MediaBridge.execute(json("op" to "stop").toString())
             compose.waitUntil(10_000) {

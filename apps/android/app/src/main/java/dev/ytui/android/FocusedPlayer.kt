@@ -32,7 +32,6 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
                     as PlayerView)
                 .apply {
                     useController = true
-                    setEnableComposeSurfaceSyncWorkaround(true)
                     setControllerAnimationEnabled(
                         !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
                     )

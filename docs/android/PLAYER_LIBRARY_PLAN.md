@@ -188,3 +188,15 @@ visible video after returning. Music-only activity transitions respect reduced
 motion, video surfaces never animate between windows, and the covered catalog
 is removed from accessibility while the focused screen is open. These stronger
 checks need a new emulator pass before final publication.
+
+`3cd4028` passes all 24 default emulator cases (25 JUnit cases, one explicit
+public skip), Rust and Secret scan. There are no app ANRs or Rust panic markers.
+Inline/fullscreen/return RGB frames are visible. Manual capture review still
+finds a black frame behind the native fullscreen toolbar, which the separate
+frame/control assertions did not cover. Publication remains blocked while the
+test requires decoded colours and visible native controls in the same frame.
+The player now uses TextureView for consistent UI composition; SurfaceView's
+power/HDR advantages do not outweigh a failed visible-control presentation.
+Hardware/HDR/power acceptance remains a separate device check. The focused
+header also respects the gesture setting, has a pane announcement, and a native
+touch regression verifies that disabling gestures preserves icon minimization.

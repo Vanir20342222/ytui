@@ -155,21 +155,27 @@ public final class MediaRuntimeTest {
   }
 
   static boolean videoVisible(String filename, boolean landscape) throws IOException {
+    return videoVisible(filename, landscape, false);
+  }
+
+  static boolean videoVisible(String filename, boolean landscape, boolean dimmed)
+      throws IOException {
     android.graphics.Bitmap frame =
         InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
     if (frame == null) return false;
     try {
       if (landscape && frame.getWidth() <= frame.getHeight()) return false;
       int red = 0, green = 0, blue = 0;
+      int bright = dimmed ? 70 : 180, dark = dimmed ? 45 : 90;
       for (int y = 0; y < frame.getHeight(); y += 3)
         for (int x = 0; x < frame.getWidth(); x += 3) {
           int pixel = frame.getPixel(x, y);
           int r = android.graphics.Color.red(pixel);
           int g = android.graphics.Color.green(pixel);
           int b = android.graphics.Color.blue(pixel);
-          if (r > 180 && g < 90 && b < 90) red++;
-          if (g > 180 && r < 90 && b < 90) green++;
-          if (b > 180 && r < 90 && g < 90) blue++;
+          if (r > bright && g < dark && b < dark) red++;
+          if (g > bright && r < dark && b < dark) green++;
+          if (b > bright && r < dark && g < dark) blue++;
         }
       boolean visible = red > 100 && green > 100 && blue > 100;
       if (visible) {
@@ -387,7 +393,13 @@ public final class MediaRuntimeTest {
           "Fullscreen must display the decoded RGB fixture",
           () -> videoVisible("native-video-fullscreen.png", true));
       androidx.test.uiautomator.UiObject2 exitFullscreen = fullscreenExit(device);
-      capture("native-video-controls.png");
+      await(
+          "Video must remain visible behind the native controls",
+          () -> {
+            fullscreenExit(device);
+            // Media3 dims the video to 40% brightness while its controls are shown.
+            return videoVisible("native-video-controls.png", true, true);
+          });
       device.dumpWindowHierarchy(
           new File(context.getExternalFilesDir(null), "native-video-controls.xml"));
       exitFullscreen = fullscreenExit(device);
