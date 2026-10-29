@@ -119,6 +119,13 @@ class StartupUiTest {
                                     false,
                                     true,
                                 )
+                            // Capture completion is a conservative presentation bound;
+                            // file encoding and pixel analysis are excluded from it.
+                            observed =
+                                StartupTimings.elapsed(
+                                    PlaybackService.current.startupToken,
+                                    MediaRuntimeTest.screenshotCapturedAt,
+                                )
                             if (!rgb) Thread.sleep(16)
                         } while (!rgb)
                         confirmations.append(

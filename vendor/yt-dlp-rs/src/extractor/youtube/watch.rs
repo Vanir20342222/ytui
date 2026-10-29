@@ -497,6 +497,11 @@ pub(super) fn acquire(
             ) {
                 Ok(response) => response,
                 Err(error) => {
+                    // A server rate limit also applies to the full fallback;
+                    // do not discard Retry-After and query more clients.
+                    if rate_limited(&error) {
+                        return Err(error);
+                    }
                     crate::screen::warning(&crate::upstream_error_text(&error));
                     continue;
                 }

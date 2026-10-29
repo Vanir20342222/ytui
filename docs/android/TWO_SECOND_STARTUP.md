@@ -71,7 +71,7 @@ performs an explicit anonymous cold/cached resolution probe using temporary app
 state. It prints sanitized timing/failure categories only. This is not a decoder
 or visible-frame benchmark and is not run by default tests.
 
-### Evidence pending
+### Local and hosted evidence (qualification in progress)
 
 The six offline direct-player tests passed locally (paired 1080p, audio,
 restricted-response fallback, no extra request after 429, unchanged default
@@ -109,3 +109,25 @@ passed on that run.
 Background admission now waits before acquiring a per-video flight. This keeps
 the final settled row eligible after older cancelled blocking work finishes,
 while a tap on a waiting candidate can use foreground capacity independently.
+
+### Second hosted run
+
+Run 40867285845 passed startup playback and the new Performance/clipboard UI
+check: view-frame counters were 1204 ms cold and 859 ms prepared, and RGB screenshot
+requests started at 1749/902 ms. This is offline fixture evidence only. Capture
+completion is now recorded immediately after screenshot acquisition (before PNG
+encoding) and used as a conservative pixel-presentation upper bound, so a slow
+screenshot request cannot create a false deadline pass.
+
+The run had one existing account-navigation test failure: it queried Compose
+semantics during the brief root-free interval after finishing AuthActivity.
+Lifecycle logs show the app activity returning normally; the test now allows an
+empty root set while waiting for the actual account screen, keeping its ten-second
+deadline and final account-state assertions. No production account behavior was
+changed. Full rerun remains required before publication.
+
+The full multi-client fallback also used to discard per-client HTTP 429 errors
+and continue, losing the service cooldown. It now returns the original rate-limit
+error immediately. An additional offline TLS case verifies direct acquisition →
+watch fallback → first-client 429 makes exactly three requests and never queries
+another client. All successful CLI/download acquisition defaults remain unchanged.

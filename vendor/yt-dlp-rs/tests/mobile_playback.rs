@@ -110,3 +110,30 @@ fn missing_browse_context_bootstraps_once_and_reuses_visitor_without_watch_reque
     );
     assert!(requests.iter().all(|request| !request.contains("/watch?")));
 }
+
+#[test]
+fn full_fallback_preserves_rate_limit_instead_of_querying_more_clients() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-fallback-limited");
+    let dl = YoutubeDl::with_options(
+        YoutubeOptions {
+            no_playlist: true,
+            playback_format: Some(FORMAT.into()),
+            playback_visitor_data: Some("synthetic-visitor".into()),
+            js_runtime: Some("nonexistent-runtime-never-needed".into()),
+            ..Default::default()
+        },
+        HttpOptions {
+            proxy: Some(proxy.url.clone()),
+            no_check_certificates: true,
+            socket_timeout: Some(2.0),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let error = dl
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap_err();
+    assert!(error.to_string().contains("429"), "{error}");
+    let requests = proxy.requests.lock().unwrap();
+    assert_eq!(requests.len(), 3, "requests: {requests:?}");
+}
