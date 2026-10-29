@@ -57,3 +57,25 @@ The cloud's YouTube CONNECT denial remains. The owner must rerun mobile.6 on the
 Tab S9 and share Settings → Performance → Copy timing report, including Next,
 new videos and slow/failed attempts. The two-second live goal remains open until
 those actual device measurements meet it.
+
+## Qualified artifact
+
+[Download mobile.6 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.6/ytui-0.2.0-alpha.12-mobile.6.apk)
+· [Public checksum/inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.6).
+Source `97e0b758dfb9e6f4b703a84a029953018d5c596d`, code 6, package
+`dev.ytui.android.stable`, Android 8+, ARM64/x86-64. The permanent signing
+certificate matches mobile.5; install over the stable app without uninstalling.
+
+- [Exact-main Android](https://github.com/Vanir20342222/ytui/actions/runs/40946992360): 27 native cases pass, one public opt-in skip. Includes the real JNI eight-worker saturation test, cold/prepared video pixels, fullscreen/native controls, restarts, themes, input/account navigation and offline regressions. No app ANR/Rust panic markers.
+- [Exact-main Rust](https://github.com/Vanir20342222/ytui/actions/runs/40946992378): 331 workspace + eleven extractor + fifteen media/solver tests pass, 31 explicit ignores; formatting/strict Clippy pass.
+- [Exact-main secret scan](https://github.com/Vanir20342222/ytui/actions/runs/40946992269) passes. Signing credentials remain outside Git; the temporary finished-APK transfer is removed after public verification.
+- Both release ABIs, 18 JVM tests and lint pass. APK inspection verifies stable signature, source/version, alignment and notices. [Publisher](https://github.com/Vanir20342222/ytui/actions/runs/40949351492) transfers only the signed APK and never receives the signing key.
+
+Actual-window pixel confirmation is **1267 ms cold / 840 ms prepared**; native
+view-frame events are 571/390 ms. Both pixel deadlines remain 2000 ms. These are
+loopback generated-media tests, **not live YouTube acceptance**. The APK's public
+bytes were independently downloaded and match the signed local artifact:
+
+`b00f080a18bf105bf2f97db4486a9a9b418ba7aaf32277097593cd408236971b`
+
+Size: 56,188,294 bytes. Public release notes include the same remaining live gate.

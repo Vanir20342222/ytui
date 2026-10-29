@@ -1,6 +1,6 @@
 # Android APK signing and updates
 
-The current [mobile.5 APK and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.5) use the permanent certificate below. Source `7d5267af5b360d211fe8f7e33d21e0ec21448e59` passed exact-main checks; the public APK hash was independently verified. [Qualification](STARTUP_VALIDATION_2026-10-29.md).
+The current [mobile.6 APK and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.6) use the permanent certificate below. Source `97e0b758dfb9e6f4b703a84a029953018d5c596d` passed exact-main checks; the public APK hash was independently verified. [Qualification and open live gate](MOBILE6_STARTUP_FOLLOWUP.md).
 
 Development APKs from the Android workflow use debug identities. New debug
 builds use `dev.ytui.android.preview` and the launcher label **ytui Preview**.

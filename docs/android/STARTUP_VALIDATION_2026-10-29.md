@@ -63,3 +63,11 @@ most 20 attempts in memory, include pending/cancelled attempts, allowlist route
 labels, and contain no video IDs, titles, signed URLs, cookies or account data.
 Copying is explicit and nothing is uploaded automatically. The target includes
 resolution through the first visible native frame, not just decoder startup.
+
+## Subsequent physical report: live target failed
+
+The owner tested mobile.5 on the Tab S9 and reported completed video startup at
+11249/14617 ms, with 10407/12193 ms before resolution returned. Thus the original
+live gate is a failure, not a pending success inferred from fixtures. [Mobile.6
+follow-up](MOBILE6_STARTUP_FOLLOWUP.md) records concrete fixes, qualification and
+the new APK for another device measurement. Live two-second acceptance remains open.

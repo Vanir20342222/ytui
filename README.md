@@ -2,7 +2,7 @@
 
 A Rust monorepo for YouTube, YouTube Music, downloads and radio. The desktop app uses Lazygit-style terminal panes, keyboard navigation, thumbnails and mpv. [Android](docs/android/README.md) uses the shared Rust engine with a native Jetpack Compose UI for phones and tablets.
 
-[Download Android mobile.5](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.5/ytui-0.2.0-alpha.12-mobile.5.apk) · [Startup performance qualification](docs/android/STARTUP_VALIDATION_2026-10-29.md) · [Player/offline features and validation](docs/android/PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Phone/tablet gallery](docs/screenshots/android/README.md)
+[Download Android mobile.6](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.6/ytui-0.2.0-alpha.12-mobile.6.apk) · [Startup performance follow-up](docs/android/MOBILE6_STARTUP_FOLLOWUP.md) · [Player/offline features and validation](docs/android/PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Phone/tablet gallery](docs/screenshots/android/README.md)
 
 Omarchy + Ghostty + Brave Origin is the current desktop target; CachyOS/Caelestia remain compatibility targets.
 

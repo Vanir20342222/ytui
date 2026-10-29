@@ -1,6 +1,14 @@
 # Android validation record (M9)
 
-## Current startup preview: mobile.5 (2026-10-29)
+## Current startup follow-up: mobile.6 (2026-10-29)
+
+The real Tab S9 mobile.5 report **failed** the two-second live target (completed videos 11249/14617 ms). Mobile.6 fixes optional manifest I/O, HTTP pool churn, foreground request contention and inaccurate joined-preload labels. The live target remains open until the owner retests.
+
+Source `97e0b758dfb9e6f4b703a84a029953018d5c596d` passes exact-main [Android](https://github.com/Vanir20342222/ytui/actions/runs/40946992360), [Rust](https://github.com/Vanir20342222/ytui/actions/runs/40946992378) and [Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/40946992269). 27 native cases pass, one public opt-in case skips; no app ANR/Rust panic markers. The real JNI foreground-priority test resolves while all eight background workers are occupied. Generated-media window pixels are confirmed at 1267 ms cold / 840 ms prepared (view events 571/390 ms). These do not establish YouTube speed.
+
+The signed release passes both ABI builds, 18 JVM tests, lint, stable-certificate/package/version/source checks, ZIP/16 KiB ELF alignment and notices. Rust CI passes 331 workspace tests, eleven extractor cases and fifteen solver/media checks (357 pass, 31 explicit ignores). The [public mobile.6 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.6/ytui-0.2.0-alpha.12-mobile.6.apk) was independently downloaded and its hash matches the signed local build. [Checksum, findings and remaining live gate](MOBILE6_STARTUP_FOLLOWUP.md). M9 remains open.
+
+## Earlier startup preview: mobile.5 (2026-10-29)
 
 Source `7d5267af5b360d211fe8f7e33d21e0ec21448e59` passes exact-main [Android](https://github.com/Vanir20342222/ytui/actions/runs/40910296881), [Rust](https://github.com/Vanir20342222/ytui/actions/runs/40910296725) and [Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/40910296780). 26 native runtime cases pass, no failures; one public opt-in case is explicitly skipped. Six alternating service restarts, all themes, keyboard/account navigation, offline folders and native/fullscreen video controls pass. No app ANR or Rust panic markers occur in the successful run.
 
