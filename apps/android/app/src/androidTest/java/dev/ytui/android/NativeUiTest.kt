@@ -19,8 +19,10 @@ import org.junit.runner.RunWith
 
 /** These checks exercise the actual Android UI, not Rust's headless egui frames. */
 @RunWith(AndroidJUnit4::class)
+@OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 class NativeUiTest {
-    @get:Rule val compose = createEmptyComposeRule()
+    @get:Rule
+    val compose = createEmptyComposeRule(effectContext = kotlinx.coroutines.Dispatchers.Main)
     @get:Rule
     val notifications =
         androidx.test.rule.GrantPermissionRule.grant(
@@ -82,6 +84,7 @@ class NativeUiTest {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("search-field").assertIsDisplayed()
         compose.onNodeWithTag("settings-button").performClick()
+        compose.onNodeWithTag("settings-Network").performClick()
         compose
             .onNodeWithTag("proxy-field")
             .performScrollTo()
@@ -97,12 +100,13 @@ class NativeUiTest {
         for (index in 0 until themes.length()) {
             val theme = themes.getString(index)
             compose.onNodeWithTag("settings-button").performClick()
+            compose.onNodeWithTag("settings-Appearance").performClick()
             compose.onNodeWithTag("theme-selector").performClick()
             compose.onNodeWithTag("theme-$theme").performScrollTo().performClick()
             compose.waitUntil(10_000) {
                 compose.onAllNodesWithText("Theme: $theme").fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithText("Close").performClick()
+            compose.onNodeWithContentDescription("Close").performClick()
             compose.waitForIdle()
             val dark =
                 InstrumentationRegistry.getInstrumentation()
@@ -120,7 +124,7 @@ class NativeUiTest {
             Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
             Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
             val layouts = mutableListOf<TextLayoutResult>()
-            compose.onNodeWithText("For you").performSemanticsAction(
+            compose.onNodeWithTag("feed-heading").performSemanticsAction(
                 SemanticsActions.GetTextLayoutResult
             ) {
                 it(layouts)
@@ -255,7 +259,7 @@ class NativeUiTest {
                 listOf("Playback queue", "Recently played", "Lyrics", "Sleep timer", "About")) {
                 compose.onNodeWithTag("menu-button").performClick()
                 compose.onNodeWithText(label).performClick()
-                compose.onNodeWithText("Close").assertIsDisplayed().performClick()
+                compose.onNodeWithContentDescription("Close").assertIsDisplayed().performClick()
             }
             MediaRuntimeTest.capture("native-tablet.png")
         } finally {

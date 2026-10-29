@@ -8,12 +8,20 @@ import org.json.JSONObject;
 final class NetworkSettings {
   private static final ProxySelector original = ProxySelector.getDefault();
   static volatile boolean explicitProxy;
+  static final java.util.concurrent.atomic.AtomicLong revision =
+      new java.util.concurrent.atomic.AtomicLong();
+  private static String applied = "";
 
-  static void apply(JSONObject config) throws Exception {
+  static synchronized void apply(JSONObject config) throws Exception {
     String value = config.optString("proxy", "");
+    if (value.equals("null")) value = "";
+    if (value.equals(applied)) return;
     if (value.isEmpty() || value.equals("null")) {
       ProxySelector.setDefault(original);
       explicitProxy = false;
+      applied = "";
+      revision.incrementAndGet();
+      PlaybackCache.cancel();
       return;
     }
     URI uri = new URI(value);
@@ -35,6 +43,9 @@ final class NetworkSettings {
           public void connectFailed(URI target, SocketAddress address, java.io.IOException error) {}
         });
     explicitProxy = true;
+    applied = value;
+    revision.incrementAndGet();
+    PlaybackCache.cancel();
   }
 
   private NetworkSettings() {}

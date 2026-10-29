@@ -28,8 +28,10 @@ import org.junit.runner.RunWith
  * Populated screens use only original generated artwork and loopback HTTP. Never fake live feeds.
  */
 @RunWith(AndroidJUnit4::class)
+@OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 class CatalogUiTest {
-    @get:Rule val compose = createEmptyComposeRule()
+    @get:Rule
+    val compose = createEmptyComposeRule(effectContext = kotlinx.coroutines.Dispatchers.Main)
     @get:Rule
     val notifications =
         androidx.test.rule.GrantPermissionRule.grant(
@@ -137,11 +139,23 @@ class CatalogUiTest {
                     generation = 100,
                 )
         }
-        compose.waitUntil(15_000) {
-            compose
-                .onAllNodesWithTag("artwork-${cards.first().key}", useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+        try {
+            compose.waitUntil(15_000) {
+                compose
+                    .onAllNodesWithTag("artwork-${cards.first().key}", useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+        } catch (error: Exception) {
+            MediaRuntimeTest.capture("native-catalog-error.png")
+            scenario.onActivity {
+                val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
+                android.util.Log.i(
+                    "CatalogEvidence",
+                    "tab=${vm.tab.value} cards=${vm.feeds[tab].value.cards.size} ready=${vm.ready.value} thumbnails=${vm.config.value.optBoolean("thumbnails")} requests=${covers.requests.get()} width=${it.resources.configuration.screenWidthDp} height=${it.resources.configuration.screenHeightDp}",
+                )
+            }
+            throw error
         }
         compose.waitForIdle()
         // Validate a rendered warm cover pixel, not merely an Image semantics node.
@@ -159,11 +173,17 @@ class CatalogUiTest {
 
     @Test
     fun artworkGridAdaptsAndCardActionsStayReachable() {
+        covers.failFirstCover = true
         val cards = populate(1)
         compose.onNodeWithTag("bottom-navigation").assertIsDisplayed()
         compose.onNodeWithTag("media-card-${cards[0].key}").assertIsDisplayed()
         compose.onAllNodesWithText("Preview").assertCountEquals(0)
         Assert.assertTrue("Real thumbnail HTTP/decode must run", covers.requests.get() > 0)
+        Assert.assertEquals(
+            "The first cover's transient failure must recover",
+            1,
+            covers.failures.get(),
+        )
         MediaRuntimeTest.capture("native-catalog.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         for (label in
@@ -171,7 +191,28 @@ class CatalogUiTest {
             .onNodeWithText(label)
             .assertIsDisplayed()
         MediaRuntimeTest.capture("native-card-menu.png")
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
+        compose.onNodeWithText("Add to queue").performClick()
+        compose.waitUntil(10_000) {
+            var contains = false
+            scenario.onActivity {
+                contains =
+                    ViewModelProvider(it)[YtuiViewModel::class.java].queue.value.any {
+                        it.url == cards[0].url
+                    }
+            }
+            contains
+        }
+        MediaBridge.event("notice", "Playback added")
+        compose.waitForIdle()
+        compose.onAllNodesWithText("Added to queue").assertCountEquals(0)
+        compose.onAllNodesWithText("Playback added").assertCountEquals(0)
+        compose.onNodeWithTag("bottom-navigation").assertIsDisplayed()
+        val queued = PlaybackService.rpcArray(json("op" to "queue")).objects()
+        val index = queued.indexOfFirst { it.optString("url") == cards[0].url }
+        if (index >= 0)
+            PlaybackService.rpc(
+                json("op" to "queue_remove", "index" to index, "url" to cards[0].url)
+            )
         compose.waitForIdle()
         compose.onAllNodesWithText("Play now").assertCountEquals(0)
         // A tablet cold start avoids photographing old popup surfaces while wm
@@ -226,15 +267,44 @@ class CatalogUiTest {
         )
         MediaRuntimeTest.capture("native-music.png")
         compose.onNodeWithTag("settings-button").performClick()
-        compose.onNodeWithText("Appearance").assertIsDisplayed()
+        compose.onNodeWithTag("settings-Appearance").assertIsDisplayed().performClick()
         compose.onNodeWithTag("theme-selector").assertIsDisplayed()
         MediaRuntimeTest.capture("native-settings.png")
-        compose.onNodeWithText("Playback & downloads").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("settings-back").performClick()
+        compose.onNodeWithTag("settings-Network").performClick()
         compose
             .onNodeWithTag("proxy-field")
             .performScrollTo()
             .performTextInput("editable-native-field")
         compose.onNodeWithTag("proxy-field").assertTextContains("editable-native-field")
+    }
+
+    @Test
+    fun offlinePlaylistsUseEditableNativeFieldsAndRealRustPersistence() {
+        compose.onNodeWithTag("tab-0").performClick()
+        compose.onNodeWithTag("create-offline-playlist").performClick()
+        val title = "UI fixture " + java.util.UUID.randomUUID().toString().take(8)
+        compose.onNodeWithTag("offline-playlist-name").performTextInput(title)
+        compose.onNodeWithText("Create").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(title).performClick()
+        compose.onNodeWithTag("offline-playlist-edit-name").performTextReplacement("$title renamed")
+        compose.onNodeWithText("Rename").performClick()
+        compose.waitUntil(10_000) {
+            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
+                it.optString("title") == "$title renamed"
+            }
+        }
+        compose.onNodeWithText("Delete playlist").performClick()
+        compose.onNodeWithText("Delete").performClick()
+        compose.waitUntil(10_000) {
+            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().none {
+                it.optString("title").startsWith(title)
+            }
+        }
+        compose.onAllNodesWithText("$title renamed").assertCountEquals(0)
     }
 
     @Test
@@ -271,16 +341,82 @@ class CatalogUiTest {
                 MediaRuntimeTest.status().optBoolean("paused")
             }
             compose.onNodeWithTag("mini-player").performClick()
-            compose.onNodeWithTag("music-visualizer").assertIsDisplayed()
+            try {
+                // Dialog windows are attached by Android after Compose has become idle.
+                compose.waitUntil(10_000) {
+                    compose.onNodeWithTag("music-visualizer").isDisplayed()
+                }
+            } finally {
+                MediaRuntimeTest.capture("native-player.png")
+                android.util.Log.i(
+                    "PlayerLayoutTest",
+                    compose.onNodeWithTag("focused-player", useUnmergedTree = true).printToString(),
+                )
+            }
+            compose
+                .onNodeWithTag("music-visualizer")
+                .assertIsDisplayed()
+                .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
+            val focusedCover =
+                hasTestTag("artwork-${cards[0].key}") and
+                    hasAnyAncestor(hasTestTag("focused-player"))
+            // Vinyl deliberately draws the same art on the sleeve and record label.
+            fun loadedCoverVisible(): Boolean {
+                val nodes = compose.onAllNodes(focusedCover, useUnmergedTree = true)
+                return nodes.fetchSemanticsNodes().indices.any { nodes[it].isDisplayed() }
+            }
+            compose.waitUntil(10_000) { loadedCoverVisible() }
             MediaRuntimeTest.capture("native-player.png")
-            compose.onNodeWithTag("player-pause").performScrollTo().performClick()
+            for (style in listOf("vinyl", "vu", "orbit")) {
+                scenario.onActivity {
+                    ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(false) { config ->
+                        config.put("music_player_style", style)
+                    }
+                }
+                compose.waitUntil(10_000) {
+                    var selected = false
+                    scenario.onActivity {
+                        selected =
+                            ViewModelProvider(it)[YtuiViewModel::class.java]
+                                .config
+                                .value
+                                .optString("music_player_style") == style
+                    }
+                    selected && loadedCoverVisible()
+                }
+                compose
+                    .onNodeWithTag("music-visualizer")
+                    .assertIsDisplayed()
+                    .assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(160f))
+                compose.onNodeWithTag("player-pause").assertIsDisplayed()
+                if (style == "vinyl") {
+                    val record =
+                        compose.onNodeWithTag("music-visualizer").fetchSemanticsNode().boundsInRoot
+                    val label =
+                        compose
+                            .onNodeWithTag("vinyl-record-label")
+                            .fetchSemanticsNode()
+                            .boundsInRoot
+                    Assert.assertEquals(
+                        "Record art must stay at its hub",
+                        record.center.y,
+                        label.center.y,
+                        3f,
+                    )
+                    Assert.assertEquals(record.left + record.width * 0.65f, label.center.x, 3f)
+                }
+                MediaRuntimeTest.capture("native-player-$style.png")
+            }
+            compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
                 MediaRuntimeTest.status().optBoolean("playing")
             }
+            compose.onNodeWithTag("player-options").performClick()
             compose.onNodeWithTag("volume-slider").performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("Audio & subtitles").performScrollTo().performClick()
             compose.onNodeWithText("Toggle captions").performScrollTo().assertIsDisplayed()
-            compose.onNodeWithText("Close").performClick()
+            compose.onNodeWithContentDescription("Close").performClick()
+            compose.onNodeWithContentDescription("Minimize player").performClick()
             MediaBridge.execute(json("op" to "stop").toString())
             compose.waitUntil(10_000) {
                 compose.onAllNodesWithTag("mini-player").fetchSemanticsNodes().isEmpty()
@@ -299,6 +435,8 @@ class CatalogUiTest {
     private class CoverServer : AutoCloseable {
         private val socket = ServerSocket(0, 16, java.net.InetAddress.getByName("127.0.0.1"))
         val requests = AtomicInteger()
+        val failures = AtomicInteger()
+        @Volatile var failFirstCover = false
         private val images = (0..5).map(::cover)
         private val worker =
             Thread {
@@ -318,6 +456,17 @@ class CatalogUiTest {
                                     ?.toIntOrNull() ?: 0
                             val bytes = images[index.coerceIn(0, 5)]
                             requests.incrementAndGet()
+                            if (index == 0 && failFirstCover) {
+                                failFirstCover = false
+                                failures.incrementAndGet()
+                                client
+                                    .getOutputStream()
+                                    .write(
+                                        "HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                                            .toByteArray()
+                                    )
+                                return@use
+                            }
                             client.getOutputStream().apply {
                                 write(
                                     "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n\r\n"

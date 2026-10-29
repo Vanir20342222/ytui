@@ -1,0 +1,4 @@
+<resources><style name="PlayerDialogAnimation">
+    <item name="android:windowEnterAnimation">@anim/player_enter</item>
+    <item name="android:windowExitAnimation">@anim/player_exit</item>
+</style></resources>

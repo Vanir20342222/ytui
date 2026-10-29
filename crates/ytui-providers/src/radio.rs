@@ -2,7 +2,7 @@ use crate::browse::limited_text;
 use anyhow::{Context, Result, bail, ensure};
 use futures_util::{StreamExt, stream::FuturesUnordered};
 use serde_json::Value;
-use ytui_core::{BrowseRequest, Media, MediaKind, Page, http_url};
+use ytui_core::{BrowseRequest, Media, MediaKind, Page, Thumbnail, http_url};
 
 #[derive(Clone)]
 pub struct Radio {
@@ -374,6 +374,45 @@ impl Radio {
         unreachable!()
     }
 }
+/// Curated stock photography is a fallback; provider station logos always take precedence.
+fn station_art(mut media: Media, provider: &Value) -> Media {
+    let supplied = ["image", "artwork", "cover", "thumbnail", "logo", "favicon"]
+        .into_iter()
+        .filter_map(|key| provider.get(key).and_then(Value::as_str))
+        .find(|url| http_url(url).is_ok());
+    if let Some(url) = supplied {
+        media.thumbnail = url.into();
+        return media;
+    }
+    let genre = format!("{} {} {}", media.title, media.creator, media.description).to_lowercase();
+    let photo = if ["ambient", "meditat", "chill", "nature", "sleep"]
+        .iter()
+        .any(|s| genre.contains(s))
+    {
+        "photo-1470770841072-f978cf4d019e"
+    } else if ["jazz", "soul", "blues"].iter().any(|s| genre.contains(s)) {
+        "photo-1415201364774-f6f0bb35f28f"
+    } else if ["rock", "metal", "pop", "synth", "dance", "electro"]
+        .iter()
+        .any(|s| genre.contains(s))
+    {
+        "photo-1493225457124-a3eb161ffa5f"
+    } else {
+        "photo-1511379938547-c1f69419868d"
+    };
+    media.thumbnails = [128, 256, 512, 768]
+        .into_iter()
+        .map(|size| Thumbnail {
+            url: format!(
+                "https://images.unsplash.com/{photo}?w={size}&h={size}&fit=crop&auto=format"
+            ),
+            width: size,
+            height: size,
+        })
+        .collect();
+    media.thumbnail = media.thumbnails[2].url.clone();
+    media
+}
 pub fn parse_cliamp(data: &Value) -> Page {
     let items = data
         .get("stations")
@@ -383,32 +422,35 @@ pub fn parse_cliamp(data: &Value) -> Page {
         .filter_map(|s| {
             let url = s.get("stream")?.as_str()?;
             http_url(url).ok()?;
-            Some(Media {
-                id: s.get("id").and_then(Value::as_str).unwrap_or(url).into(),
-                title: s
-                    .get("name")
-                    .and_then(Value::as_str)
-                    .unwrap_or("Station")
-                    .into(),
-                creator: s
-                    .get("genre")
-                    .and_then(Value::as_str)
-                    .unwrap_or("cliamp radio")
-                    .into(),
-                url: url.into(),
-                kind: MediaKind::Station,
-                live: true,
-                tracks_url: s
-                    .get("tracks_url")
-                    .and_then(Value::as_str)
-                    .map(str::to_owned),
-                description: s
-                    .get("description")
-                    .and_then(Value::as_str)
-                    .unwrap_or_default()
-                    .into(),
-                ..Default::default()
-            })
+            Some(station_art(
+                Media {
+                    id: s.get("id").and_then(Value::as_str).unwrap_or(url).into(),
+                    title: s
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .unwrap_or("Station")
+                        .into(),
+                    creator: s
+                        .get("genre")
+                        .and_then(Value::as_str)
+                        .unwrap_or("cliamp radio")
+                        .into(),
+                    url: url.into(),
+                    kind: MediaKind::Station,
+                    live: true,
+                    tracks_url: s
+                        .get("tracks_url")
+                        .and_then(Value::as_str)
+                        .map(str::to_owned),
+                    description: s
+                        .get("description")
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .into(),
+                    ..Default::default()
+                },
+                s,
+            ))
         })
         .collect();
     Page {
@@ -466,37 +508,40 @@ pub fn parse_radio_browser(data: &Value) -> Page {
                 .filter(|s| !s.is_empty())
                 .or_else(|| s.get("url").and_then(Value::as_str))?;
             http_url(url).ok()?;
-            Some(Media {
-                id: s
-                    .get("stationuuid")
-                    .and_then(Value::as_str)
-                    .unwrap_or(url)
-                    .into(),
-                title: s
-                    .get("name")
-                    .and_then(Value::as_str)
-                    .unwrap_or("Station")
-                    .into(),
-                creator: s
-                    .get("country")
-                    .and_then(Value::as_str)
-                    .unwrap_or_default()
-                    .into(),
-                description: s
-                    .get("tags")
-                    .and_then(Value::as_str)
-                    .unwrap_or_default()
-                    .into(),
-                url: url.into(),
-                thumbnail: s
-                    .get("favicon")
-                    .and_then(Value::as_str)
-                    .unwrap_or_default()
-                    .into(),
-                kind: MediaKind::Station,
-                live: true,
-                ..Default::default()
-            })
+            Some(station_art(
+                Media {
+                    id: s
+                        .get("stationuuid")
+                        .and_then(Value::as_str)
+                        .unwrap_or(url)
+                        .into(),
+                    title: s
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .unwrap_or("Station")
+                        .into(),
+                    creator: s
+                        .get("country")
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .into(),
+                    description: s
+                        .get("tags")
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .into(),
+                    url: url.into(),
+                    thumbnail: s
+                        .get("favicon")
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .into(),
+                    kind: MediaKind::Station,
+                    live: true,
+                    ..Default::default()
+                },
+                s,
+            ))
         })
         .collect();
     Page {
@@ -509,6 +554,24 @@ pub fn parse_radio_browser(data: &Value) -> Page {
 mod tests {
     use super::*;
     use serde_json::json;
+    #[test]
+    fn station_art_prefers_provider_images_and_sizes_genre_photographs() {
+        let source = json!({"stations":[{"stream":"https://radio.test/live","name":"Lofi"},
+            {"stream":"https://radio.test/jazz","name":"Jazz","image":"https://radio.test/official.png"},
+            {"stream":"https://radio.test/ambient","name":"Ambient","image":"file:///unsafe"}]});
+        let page = parse_cliamp(&source);
+        assert!(page.items[0].thumbnail.contains("photo-1511379938547"));
+        assert_eq!(
+            page.items[0]
+                .thumbnails
+                .iter()
+                .map(|t| t.width)
+                .collect::<Vec<_>>(),
+            vec![128, 256, 512, 768]
+        );
+        assert_eq!(page.items[1].thumbnail, "https://radio.test/official.png");
+        assert!(page.items[2].thumbnail.contains("photo-1470770841072"));
+    }
     #[tokio::test]
     async fn wrapper_playlists_hls_and_directory_failover_are_bounded_and_scoped() {
         let (base, server)=crate::test_http::serve(|target| {

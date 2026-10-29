@@ -76,7 +76,11 @@ public final class RustActivity extends ComponentActivity {
 
   @Override
   protected void onStop() {
-    MediaBridge.uiVisible = false;
+    if (!FullscreenActivity.visible) {
+      MediaBridge.uiVisible = false;
+      if (!isChangingConfigurations() && PlaybackService.current != null)
+        PlaybackService.current.pauseForBackground();
+    }
     super.onStop();
   }
 
@@ -125,6 +129,30 @@ public final class RustActivity extends ComponentActivity {
     }
   }
 
+  void pickFolder(boolean audio) {
+    if (documentRequest != 0 || exportDownload != null) {
+      MediaBridge.event("error", "Finish or cancel the current file picker first");
+      return;
+    }
+    documentRequest = audio ? 46 : 47;
+    try {
+      startActivityForResult(
+          new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+              .putExtra(
+                  android.provider.DocumentsContract.EXTRA_INITIAL_URI,
+                  StorageLocations.initialDocument(audio))
+              .addFlags(
+                  Intent.FLAG_GRANT_READ_URI_PERMISSION
+                      | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                      | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                      | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION),
+          documentRequest);
+    } catch (RuntimeException error) {
+      documentRequest = 0;
+      MediaBridge.event("error", "No folder picker is available");
+    }
+  }
+
   void exportDownload(String id) {
     if (exportDownload != null) {
       MediaBridge.event("error", "Finish or cancel the open export picker first");
@@ -168,6 +196,20 @@ public final class RustActivity extends ComponentActivity {
   @Override
   protected void onActivityResult(int request, int result, Intent data) {
     super.onActivityResult(request, result, data);
+    if ((request == 46 || request == 47) && request == documentRequest) {
+      documentRequest = 0;
+      if (result == RESULT_OK && data != null && data.getData() != null)
+        OfflineStore.IO.execute(
+            () -> {
+              try {
+                StorageLocations.select(request == 46, data.getData(), data.getFlags());
+              } catch (Exception error) {
+                MediaBridge.event(
+                    "error", "Could not use this folder; select one with read/write access");
+              }
+            });
+      return;
+    }
     if (request == 43) {
       String id = exportDownload;
       exportDownload = null;

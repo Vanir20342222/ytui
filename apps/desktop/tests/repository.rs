@@ -14,10 +14,11 @@ fn pngs(dir: &Path, output: &mut Vec<PathBuf>) {
     }
 }
 #[test]
-fn every_committed_screenshot_is_wqhd_and_listed_in_the_manifest() {
+fn desktop_screenshots_are_wqhd_and_listed_in_the_manifest() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/screenshots");
     let mut paths = Vec::new();
     pngs(&dir, &mut paths);
+    paths.retain(|path| !path.starts_with(dir.join("android")));
     assert!(!paths.is_empty());
     let manifest: serde_json::Value =
         serde_json::from_slice(&fs::read(dir.join("manifest.json")).unwrap()).unwrap();
@@ -51,5 +52,43 @@ fn every_committed_screenshot_is_wqhd_and_listed_in_the_manifest() {
         actual.push(path.strip_prefix(&dir).unwrap().display().to_string());
     }
     actual.sort();
+    assert_eq!(actual, listed);
+}
+
+#[test]
+fn android_screenshots_keep_the_native_viewport_recorded_in_their_own_manifest() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/screenshots/android");
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(dir.join("manifest.json")).unwrap()).unwrap();
+    let mut paths = Vec::new();
+    pngs(&dir, &mut paths);
+    let mut actual = paths
+        .iter()
+        .map(|p| p.strip_prefix(&dir).unwrap().display().to_string())
+        .collect::<Vec<_>>();
+    let mut listed = Vec::new();
+    for capture in manifest["captures"].as_array().unwrap() {
+        let file = capture["file"].as_str().unwrap();
+        assert!(!file.contains("..") && !file.starts_with('/'));
+        let mut header = [0; 24];
+        fs::File::open(dir.join(file))
+            .unwrap()
+            .read_exact(&mut header)
+            .unwrap();
+        assert_eq!(&header[..8], b"\x89PNG\r\n\x1a\n");
+        for (key, start) in [("width", 16), ("height", 20)] {
+            let size = u32::from_be_bytes(header[start..start + 4].try_into().unwrap());
+            assert!((720..=8192).contains(&size));
+            assert_eq!(
+                u64::from(size),
+                capture[key].as_u64().unwrap(),
+                "{file} {key}"
+            );
+        }
+        listed.push(file.to_owned());
+    }
+    actual.sort();
+    listed.sort();
+    assert!(!actual.is_empty());
     assert_eq!(actual, listed);
 }

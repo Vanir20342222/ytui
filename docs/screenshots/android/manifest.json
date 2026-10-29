@@ -1,0 +1,30 @@
+{
+  "source": "Actual unedited API 35 emulator captures; original generated offline fixtures; source 5f34083, Android run 40712963078.",
+  "captures": [
+    {
+      "file": "music.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "player.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "settings.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "tablet.png",
+      "width": 2560,
+      "height": 1600
+    },
+    {
+      "file": "youtube.png",
+      "width": 1080,
+      "height": 2400
+    }
+  ]
+}

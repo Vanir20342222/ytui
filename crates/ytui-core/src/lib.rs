@@ -4,6 +4,7 @@ pub mod saved;
 pub use chapters::Chapter;
 pub mod history;
 pub mod media;
+pub mod offline;
 pub mod playback_history;
 pub mod queue;
 pub mod schedule;

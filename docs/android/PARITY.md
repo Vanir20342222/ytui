@@ -24,7 +24,7 @@ theme application and account navigation; these require native UI re-acceptance.
 | Settings | Native appearance/player/network/account controls with shared Rust validated config; live palette application | Desktop-specific backend/tool paths are not offered as mobile capabilities; complete advanced desktop forms/profile parity remains open |
 | Background | MediaSession foreground playback, download service, WorkManager preparation | OS power limits/Android 15 service limits and OEM battery management apply; real lockscreen/headset/Bluetooth/service recreation gates remain |
 | Linux integration | Desktop continues using mpv, MPRIS, browser import and desktop themes | MPRIS, system keyring, NetworkManager, Proton control, external cliamp and executable launch are intentionally desktop-only |
-| Distribution | Separate ytui Preview debug package, universal ARM64/x86-64 APKs; main-only signed-build workflow with explicit versions and private owner credentials; signature/16 KiB checks | Disposable local signed build passes; the owner's stable identity and hosted signing environment still need setup, followed by device update acceptance |
+| Distribution | Separate ytui Preview debug package, universal ARM64/x86-64 APKs; main-only signed-build workflow with explicit versions and private owner credentials; signature/16 KiB checks | Owner stable identity signs locally with a private SSH-encrypted recovery backup; no GitHub signing secrets required. Final APK publication and physical update acceptance remain open |
 
 Before promoting this preview, finish outstanding mobile capability gaps, qualify
 all three target usage modes (phone, tablet, desktop), configure a stable release

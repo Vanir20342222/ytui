@@ -52,6 +52,23 @@ public final class OfflineExport extends Worker {
     return work.getId();
   }
 
+  static void enqueueAuto(String id) {
+    if (!MobileSettings.enabled("auto_save_folders")) return;
+    try {
+      if (StorageLocations.record(id) != null) return;
+    } catch (Exception invalid) {
+      return;
+    }
+    OneTimeWorkRequest work =
+        new OneTimeWorkRequest.Builder(OfflineExport.class)
+            .setInputData(
+                new Data.Builder().putString("download", id).putBoolean("auto", true).build())
+            .addTag("ytui-folder-save")
+            .build();
+    WorkManager.getInstance(MediaBridge.context)
+        .enqueueUniqueWork("ytui-folder-" + id, ExistingWorkPolicy.KEEP, work);
+  }
+
   static void state(Context context, String id, String text) {
     if (context
         .getSharedPreferences("export-dismissed", Context.MODE_PRIVATE)
@@ -66,16 +83,44 @@ public final class OfflineExport extends Worker {
   @Override
   public Result doWork() {
     String id = getInputData().getString("download"), raw = getInputData().getString("destination");
-    if (id == null || raw == null) return Result.failure();
-    Uri destination = Uri.parse(raw);
+    boolean automatic = getInputData().getBoolean("auto", false);
+    if (id == null || (raw == null && !automatic)) return Result.failure();
+    Uri destination = raw == null ? null : Uri.parse(raw);
     try {
+      JSONObject request = null;
+      if (automatic) {
+        if (!MobileSettings.enabled("auto_save_folders")
+            || StorageLocations.prefs().getBoolean("removed:" + id, false)
+            || StorageLocations.record(id) != null) return Result.success();
+        request = OfflineStore.cachedRequest(id);
+        Uri tree = StorageLocations.folder(request.optBoolean("audio"));
+        if (tree == null) return Result.success();
+        if (!StorageLocations.granted(tree))
+          throw new IOException("Offline folder permission expired");
+        Plan plan = inspect(id);
+        destination =
+            android.provider.DocumentsContract.createDocument(
+                getApplicationContext().getContentResolver(),
+                android.provider.DocumentsContract.buildDocumentUriUsingTree(
+                    tree, android.provider.DocumentsContract.getTreeDocumentId(tree)),
+                plan.mime,
+                PlaybackPolicy.exportName(plan.title, plan.extension));
+        if (destination == null) throw new IOException("Could not create offline media file");
+      }
       setForegroundAsync(foreground()).get(15, TimeUnit.SECONDS);
       state(getApplicationContext(), getId().toString(), "Exporting file");
-      write(id, destination, this::isStopped);
+      write(
+          id,
+          destination,
+          () ->
+              isStopped()
+                  || automatic && StorageLocations.prefs().getBoolean("removed:" + id, false));
+      if (automatic) StorageLocations.remember(id, destination, request);
       state(getApplicationContext(), getId().toString(), "Export complete");
-      MediaBridge.event("notice", "Offline media exported");
+      MediaBridge.event("storage_updated", "");
       return Result.success();
     } catch (Exception error) {
+      if (automatic) StorageLocations.failed(id);
       // Stack locations and exception class only: never log signed URLs or URI grants.
       android.util.Log.e(
           "YtuiExport", error.getClass().getName() + " " + Arrays.toString(error.getStackTrace()));
@@ -87,8 +132,9 @@ public final class OfflineExport extends Worker {
               : "Export failed; choose a supported completed download or another destination");
       // ACTION_CREATE_DOCUMENT created this new output; remove a partial document on failure.
       try {
-        android.provider.DocumentsContract.deleteDocument(
-            getApplicationContext().getContentResolver(), destination);
+        if (destination != null)
+          android.provider.DocumentsContract.deleteDocument(
+              getApplicationContext().getContentResolver(), destination);
       } catch (Exception ignored) {
       }
       MediaBridge.event("error", "Export failed: " + safeReason(error));
@@ -105,7 +151,7 @@ public final class OfflineExport extends Worker {
   }
 
   static Plan inspect(String id) throws Exception {
-    JSONObject request = OfflineStore.offlineRequest(id);
+    JSONObject request = OfflineStore.cachedRequest(id);
     Download main = OfflineStore.manager().getDownloadIndex().getDownload(id);
     List<Download> parts = new ArrayList<>();
     parts.add(main);

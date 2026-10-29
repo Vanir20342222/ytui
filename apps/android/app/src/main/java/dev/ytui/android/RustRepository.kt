@@ -187,21 +187,40 @@ internal object ArtworkCache {
             return it
         }
         return slots.withPermit {
-            memory.get(key)
-                ?: withContext(Dispatchers.IO) {
-                    val data =
-                        NativeBridge.thumbnail(media.value.toString(), size)
-                            ?: return@withContext null
-                    if (
-                        data.size < 3 ||
-                            data[0] !in 1..768 ||
-                            data[1] !in 1..768 ||
-                            data.size != data[0] * data[1] + 2
-                    )
-                        return@withContext null
-                    Bitmap.createBitmap(data, 2, data[0], data[0], data[1], Bitmap.Config.ARGB_8888)
-                        .also { memory.put(key, it) }
+            for (attempt in 0..2) {
+                currentCoroutineContext().ensureActive()
+                memory.get(key)?.let {
+                    return@withPermit it
                 }
+                val decoded =
+                    withContext(Dispatchers.IO) {
+                        val data =
+                            NativeBridge.thumbnail(media.value.toString(), size)
+                                ?: return@withContext null
+                        currentCoroutineContext().ensureActive()
+                        if (
+                            data.size < 3 ||
+                                data[0] !in 1..768 ||
+                                data[1] !in 1..768 ||
+                                data.size != data[0] * data[1] + 2
+                        )
+                            return@withContext null
+                        Bitmap.createBitmap(
+                                data,
+                                2,
+                                data[0],
+                                data[0],
+                                data[1],
+                                Bitmap.Config.ARGB_8888,
+                            )
+                            .also { memory.put(key, it) }
+                    }
+                if (decoded != null) return@withPermit decoded
+                // A transient image failure must not leave a permanent placeholder.
+                // Bound retries and release the coroutine promptly when a card leaves.
+                if (attempt < 2) delay(200L shl attempt)
+            }
+            null
         }
     }
 }
@@ -212,18 +231,23 @@ internal class YtuiViewModel : ViewModel() {
     private val history = Array(4) { ArrayDeque<FeedState>() }
     private val feedJobs = arrayOfNulls<Job>(4)
     private var playbackJob: Job? = null
+    private var seekTarget: Pair<String, Float>? = null
+    private var seekDeadline = 0L
     private var accountEpoch = 0L
     private val settingsLock = Mutex()
     private val snapshotLock = Mutex()
+    val mobile = MutableStateFlow(JSONObject())
     val config = MutableStateFlow(JSONObject())
     val palette = MutableStateFlow(JSONObject())
     val themes = MutableStateFlow<List<String>>(emptyList())
     val account = MutableStateFlow(JSONObject())
     val player = MutableStateFlow(PlayerState())
     val downloads = MutableStateFlow<List<JSONObject>>(emptyList())
+    val offlinePlaylists = MutableStateFlow<List<JSONObject>>(emptyList())
     val queue = MutableStateFlow<List<MediaCard>>(emptyList())
     val recent = MutableStateFlow<List<MediaCard>>(emptyList())
     val status = MutableStateFlow("Ready")
+    val actionError = MutableStateFlow<String?>(null)
     val ready = MutableStateFlow(false)
     val playerOpen = MutableStateFlow(false)
     val sharedQuery = MutableStateFlow("")
@@ -234,6 +258,7 @@ internal class YtuiViewModel : ViewModel() {
         initialized = true
         viewModelScope.launch {
             runCatching {
+                    mobile.value = withContext(Dispatchers.IO) { MobileSettings.snapshot() }
                     config.value = RustRpc.objectCall("settings")
                     palette.value = RustRpc.objectCall("theme", "dark" to dark)
                     themes.value =
@@ -262,37 +287,59 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     suspend fun snapshot() =
-        snapshotLock.withLock {
-            val value = withContext(Dispatchers.Default) { JSONObject(MediaBridge.snapshot()) }
-            value.optJSONObject("player")?.let { player.value = PlayerState(it) }
-            value.optJSONArray("downloads")?.let { downloads.value = it.objects() }
-            value.optJSONArray("events")?.objects()?.forEach { event ->
-                val text = event.optString("text")
-                when (event.optString("kind")) {
-                    "show_player" -> playerOpen.value = true
-                    "shared" -> sharedQuery.value = text
-                    "error",
-                    "notice" -> status.value = text
-                    "theme_file" ->
-                        task {
-                            settingsLock.withLock {
-                                palette.value = RustRpc.objectCall("import_theme", "text" to text)
-                                config.value = RustRpc.objectCall("settings")
-                                status.value = "Palette applied"
-                            }
-                        }
-                    "cookie_file" -> {
-                        val intent = event.optLong("account_intent", -1)
-                        if (intent == NativeBridge.accountIntent())
-                            acceptAccount("import_cookie_file", intent, "text" to text)
+        withContext(Dispatchers.Main.immediate) {
+            snapshotLock.withLock {
+                val value = withContext(Dispatchers.Default) { JSONObject(MediaBridge.snapshot()) }
+                value.optJSONObject("player")?.let {
+                    val pending = seekTarget
+                    if (pending != null) {
+                        val same = pending.first == it.optJSONObject("media")?.optString("url")
+                        if (
+                            !same ||
+                                kotlin.math.abs(it.optDouble("position") - pending.second) < 1.25 ||
+                                android.os.SystemClock.elapsedRealtime() >= seekDeadline
+                        )
+                            seekTarget = null
+                        else it.put("position", pending.second)
                     }
-                    "cookies" -> changeAccount("import_cookies", "header" to text)
-                    "account_updated" -> refreshAccount()
-                    "history_updated",
-                    "history_cleared" -> loadHistory()
-                    "lyrics_file" ->
-                        if (event.optString("request_token") == lyricToken)
-                            importedLyrics.value = text
+                    player.value = PlayerState(it)
+                }
+                value.optJSONArray("downloads")?.let { downloads.value = it.objects() }
+                value.optJSONArray("events")?.objects()?.forEach { event ->
+                    val text = event.optString("text")
+                    when (event.optString("kind")) {
+                        "storage_updated" -> {
+                            mobile.value = withContext(Dispatchers.IO) { MobileSettings.snapshot() }
+                            OfflineStore.dirty = true
+                        }
+                        "show_player" -> playerOpen.value = true
+                        "shared" -> sharedQuery.value = text
+                        "error" -> {
+                            status.value = text
+                            actionError.value = text
+                        }
+                        "theme_file" ->
+                            task {
+                                settingsLock.withLock {
+                                    palette.value =
+                                        RustRpc.objectCall("import_theme", "text" to text)
+                                    config.value = RustRpc.objectCall("settings")
+                                    status.value = "Palette applied"
+                                }
+                            }
+                        "cookie_file" -> {
+                            val intent = event.optLong("account_intent", -1)
+                            if (intent == NativeBridge.accountIntent())
+                                acceptAccount("import_cookie_file", intent, "text" to text)
+                        }
+                        "cookies" -> changeAccount("import_cookies", "header" to text)
+                        "account_updated" -> refreshAccount()
+                        "history_updated",
+                        "history_cleared" -> loadHistory()
+                        "lyrics_file" ->
+                            if (event.optString("request_token") == lyricToken)
+                                importedLyrics.value = text
+                    }
                 }
             }
         }
@@ -313,6 +360,7 @@ internal class YtuiViewModel : ViewModel() {
         append: Boolean = false,
         remember: Boolean = true,
         retry: Int = 0,
+        autoPlay: Boolean = false,
     ) {
         if (index !in 1..3) return
         val previous = feeds[index].value
@@ -368,6 +416,8 @@ internal class YtuiViewModel : ViewModel() {
                             loading = false,
                             scrollIndex = feeds[index].value.scrollIndex,
                         )
+                    if (autoPlay && tab.value == index)
+                        incoming.firstOrNull { !it.collection && !it.live }?.let { play(it) }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (error: Exception) {
@@ -385,7 +435,14 @@ internal class YtuiViewModel : ViewModel() {
                     if (retryDelay != null) {
                         delay(retryDelay)
                         if (feeds[index].value.generation == generation)
-                            navigate(index, request, append, remember = false, retry = retry + 1)
+                            navigate(
+                                index,
+                                request,
+                                append,
+                                remember = false,
+                                retry = retry + 1,
+                                autoPlay = autoPlay,
+                            )
                     }
                 }
             }
@@ -459,22 +516,35 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     private fun context(media: MediaCard): JSONObject? {
-        val request = feeds[tab.value].value.request as? JSONObject ?: return null
-        if (
-            tab.value !in 2..3 ||
-                media.live ||
-                media.collection ||
-                listOf("Collection", "Details", "CliampTracks").none { request.has(it) }
-        )
+        if (media.live || media.collection) return null
+        val feed = feeds[tab.value].value
+        val request = feed.request as? JSONObject
+        val finite =
+            request != null && listOf("Collection", "Details", "CliampTracks").any(request::has)
+        val id =
+            media.value.optString("id").takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
+                ?: Uri.parse(media.url)
+                    .let { uri ->
+                        uri.getQueryParameter("v")
+                            ?: if (uri.host == "youtu.be") uri.lastPathSegment else null
+                    }
+                    ?.takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
+        if (!finite && (!mobile.value.optBoolean("autoplay_related", true) || id == null))
             return null
         return json(
-            "op" to "prepare_context",
-            "context_id" to UUID.randomUUID().toString(),
-            "request" to request,
-            "source_url" to media.url,
-            "source_id" to media.value.optString("id"),
-            "music" to (tab.value == 2),
-        )
+                "op" to "prepare_context",
+                "context_id" to UUID.randomUUID().toString(),
+                "request" to if (finite) request else json("Related" to id),
+                "source_url" to media.url,
+                "source_id" to id,
+                "music" to (tab.value == 2 || media.musicSource),
+            )
+            .apply { if (finite) put("items", JSONArray(feed.cards.take(500).map { it.value })) }
+    }
+
+    fun playCollection(media: MediaCard) {
+        if (media.collection)
+            navigate(request = json("Collection" to media.collectionId), autoPlay = true)
     }
 
     fun play(
@@ -507,35 +577,40 @@ internal class YtuiViewModel : ViewModel() {
         }
         val context = if (!preview && !download && !queued) context(media) else null
         val epoch = accountEpoch
+        val network = NetworkSettings.revision.get()
         if (!download) playbackJob?.cancel()
         val job = task {
+            actionError.value = null
             status.value = if (download) "Preparing download…" else "Resolving playback…"
+            val local =
+                if (!download && !preview && mobile.value.optBoolean("prefer_offline", true))
+                    withContext(Dispatchers.IO) { OfflineStore.find(media.value, audio, quality) }
+                else null
             val stream =
-                RustRpc.objectCall(
-                    "resolve",
-                    "media" to media.value,
-                    "audio" to audio,
-                    "quality" to quality,
-                )
-            if (epoch != accountEpoch) return@task
+                local?.optJSONObject("stream")
+                    ?: RustRpc.objectCall(
+                        "resolve",
+                        "media" to media.value,
+                        "audio" to audio,
+                        "quality" to quality,
+                    )
+            if (epoch != accountEpoch || network != NetworkSettings.revision.get()) return@task
             val item = media.value.copyJson()
-            if (item.optString("title") == media.url) {
-                item.put("title", stream.optString("title", media.title))
-                item.put("creator", stream.optString("creator"))
-                item.put("thumbnail", stream.optString("thumbnail"))
-            }
+            PlaybackService.mergeMetadata(item, stream)
             val request =
-                json(
-                    "media" to item,
-                    "stream" to stream,
-                    "audio" to audio,
-                    "quality" to quality,
-                    "preview" to preview,
-                    "resume" to resume,
-                    "queued" to queued,
-                    "context_id" to context?.optString("context_id"),
-                    "context" to context,
-                )
+                (local ?: JSONObject())
+                    .apply { put("media", item) }
+                    .apply {
+                        put("stream", stream)
+                        put("audio", audio)
+                        put("quality", quality)
+                        put("preview", preview)
+                        put("resume", resume)
+                        put("queued", queued)
+                        put("context_id", context?.optString("context_id"))
+                        put("context", context)
+                    }
+            /* request retains the cache-only source marker when saved offline. */
             effect(if (download) "download" else "play", "request" to request)
             if (
                 !download &&
@@ -552,6 +627,15 @@ internal class YtuiViewModel : ViewModel() {
     }
 
     fun command(op: String, vararg fields: Pair<String, Any?>) {
+        if (op == "seek") {
+            val seconds =
+                (fields.firstOrNull { it.first == "seconds" }?.second as? Number)?.toFloat()
+            if (seconds == null || !seconds.isFinite() || player.value.duration <= 0) return
+            val target = seconds.coerceIn(0f, player.value.duration)
+            seekTarget = (player.value.media?.optString("url") ?: "") to target
+            seekDeadline = android.os.SystemClock.elapsedRealtime() + 2000
+            player.value = PlayerState(player.value.value.copyJson().put("position", target))
+        }
         if (op == "pause")
             player.value =
                 PlayerState(
@@ -597,7 +681,68 @@ internal class YtuiViewModel : ViewModel() {
             )
         )
         loadQueue()
+        effect("queue_changed")
         status.value = "Added to queue"
+    }
+
+    fun loadOfflinePlaylists() = task {
+        offlinePlaylists.value = RustRpc.arrayCall("offline_playlists").objects()
+    }
+
+    fun createOfflinePlaylist(title: String) = task {
+        offlinePlaylists.value =
+            RustRpc.arrayCall("offline_playlist_create", "title" to title).objects()
+    }
+
+    fun updateOfflinePlaylist(id: String, title: String? = null, items: List<JSONObject>? = null) =
+        task {
+            val request = json("op" to "offline_playlist_update", "id" to id)
+            title?.let { request.put("title", it) }
+            items?.let { request.put("items", JSONArray(it)) }
+            offlinePlaylists.value = (RustRpc.call(request) as? JSONArray)?.objects() ?: emptyList()
+        }
+
+    fun deleteOfflinePlaylist(id: String) = task {
+        offlinePlaylists.value = RustRpc.arrayCall("offline_playlist_delete", "id" to id).objects()
+    }
+
+    fun playOffline(item: JSONObject) {
+        effect("offline", "id" to item.optString("id"))
+        if (!item.optBoolean("audio")) playerOpen.value = true
+    }
+
+    fun playOfflinePlaylist(playlist: JSONObject, start: Int = 0) {
+        val items = playlist.optJSONArray("items")?.objects() ?: return
+        val original = items.getOrNull(start) ?: return
+        val ids =
+            downloads.value
+                .filter { it.optString("state") == "Complete" }
+                .map { it.optString("id") }
+                .toSet()
+        val available = items.filter { it.optString("offline_id") in ids }
+        val selected =
+            if (start == 0) available.firstOrNull()
+            else original.takeIf { it.optString("offline_id") in ids }
+        if (selected == null) {
+            actionError.value =
+                "No saved copy is available. Save the media again or reconnect its folder."
+            return
+        }
+        val token = UUID.randomUUID().toString()
+        val context =
+            json(
+                "op" to "offline_context",
+                "context_id" to token,
+                "source_url" to selected.optString("url"),
+                "items" to JSONArray(available),
+            )
+        effect(
+            "offline",
+            "id" to selected.optString("offline_id"),
+            "context_id" to token,
+            "context" to context,
+        )
+        if (!PlaybackPolicy.audioOnly(selected.optString("kind"))) playerOpen.value = true
     }
 
     fun loadQueue() = task { queue.value = RustRpc.arrayCall("queue").objects().map(::MediaCard) }
@@ -606,11 +751,13 @@ internal class YtuiViewModel : ViewModel() {
         val result =
             RustRpc.objectCall("queue_move", "from" to index, "to" to to, "url" to media.url)
         queue.value = result.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+        effect("queue_changed")
     }
 
     fun removeQueue(index: Int, media: MediaCard) = task {
         val result = RustRpc.objectCall("queue_remove", "index" to index, "url" to media.url)
         queue.value = result.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+        effect("queue_changed")
     }
 
     fun loadHistory() = task {
@@ -627,10 +774,22 @@ internal class YtuiViewModel : ViewModel() {
             config.value = draft
             effect("settings", "config" to draft)
             status.value = "Settings applied"
+            actionError.value = null
+        }
+    }
+
+    fun updateMobile(key: String, value: Any) = task {
+        settingsLock.withLock {
+            mobile.value =
+                withContext(Dispatchers.IO) {
+                    MobileSettings.save(json(key to value))
+                    MobileSettings.snapshot()
+                }
         }
     }
 
     private fun invalidateAccount() {
+        PlaybackCache.cancel()
         accountEpoch++
         playbackJob?.cancel()
         for (index in 1..2) {
@@ -741,6 +900,7 @@ internal class YtuiViewModel : ViewModel() {
                 throw cancelled
             } catch (error: Exception) {
                 status.value = error.message ?: "Operation failed"
+                actionError.value = status.value
             }
         }
 

@@ -38,3 +38,5 @@ Thumbs.db
 *.jks
 /apps/android/signing.properties
 /apps/android/keystore.properties
+credentials.json
+ytui-android-signing-backup.age

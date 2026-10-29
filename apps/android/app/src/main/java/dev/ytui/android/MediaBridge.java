@@ -61,6 +61,8 @@ public final class MediaBridge {
   }
 
   static void event(String kind, String text, String token, long accountIntent) {
+    // Success/progress feedback belongs in controls and library state, never an overlay.
+    if ("notice".equals(kind)) return;
     try {
       events.add(
           new JSONObject()
@@ -181,15 +183,38 @@ public final class MediaBridge {
                 OfflineStore.add(request.getJSONObject("request"));
                 break;
               case "offline":
-                {
-                  JSONObject item = OfflineStore.offlineRequest(request.getString("id"));
-                  Intent intent =
-                      new Intent(context, PlaybackService.class)
-                          .setAction("play")
-                          .putExtra("request", item.toString());
-                  context.startForegroundService(intent);
-                  break;
-                }
+                OfflineStore.IO.execute(
+                    () -> {
+                      try {
+                        JSONObject item = OfflineStore.offlineRequest(request.getString("id"));
+                        if (request.has("context"))
+                          item.put("context", request.getJSONObject("context"));
+                        if (request.has("context_id"))
+                          item.put("context_id", request.getString("context_id"));
+                        main.post(
+                            () ->
+                                context.startForegroundService(
+                                    new Intent(context, PlaybackService.class)
+                                        .setAction("play")
+                                        .putExtra("request", item.toString())));
+                      } catch (Exception error) {
+                        event(
+                            "error",
+                            "Offline media is unavailable; reconnect its folder or save it again");
+                      }
+                    });
+                break;
+              case "folder_pick":
+                if (RustActivity.current() != null)
+                  RustActivity.current().pickFolder(request.optBoolean("audio"));
+                break;
+              case "folder_retry":
+                OfflineStore.exportPending();
+                break;
+              case "library_visible":
+                OfflineStore.libraryVisible = request.optBoolean("value");
+                if (OfflineStore.libraryVisible) OfflineStore.dirty = true;
+                break;
               case "download_remove":
                 OfflineStore.remove(request.getString("id"));
                 break;

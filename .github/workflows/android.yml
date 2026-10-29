@@ -43,6 +43,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install pinned Android build tools
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018'
+      - name: Check private signing and APK publication boundaries offline
+        run: python3 -m unittest discover -s tools/android -p 'test_*.py' -v
       - name: Build both Rust ABIs and check the Android host
         run: tools/android/build.sh
       - name: Build synthetic media fixtures and instrumentation APK

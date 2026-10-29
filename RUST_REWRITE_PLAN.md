@@ -1,5 +1,10 @@
 # ytui Rust rewrite plan
 
+M9 player/library follow-up is being qualified: bounded resolution/prefetch,
+responsive player/fullscreen, categorized settings and offline playlists/folders.
+[The implementation and acceptance tracker](docs/android/PLAYER_LIBRARY_PLAN.md)
+separates source completion from actual device/YouTube timing and signing gates.
+
 M9 mobile design follow-up (2026-10-28): the user rejected terminal styling on
 Android after confirming installation. A modern native media UI with responsive
 artwork grids, readable settings and a compact player passes 20 emulator cases,
