@@ -168,11 +168,17 @@ class NativeUiTest {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("account-sign-in").performScrollTo().performClick()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("sign-in-complete").fetchSemanticsNodes().isNotEmpty()
+            compose
+                .onAllNodesWithTag("sign-in-complete")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
         compose.onNodeWithTag("sign-in-cancel").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("account-import").fetchSemanticsNodes().isNotEmpty()
+            compose
+                .onAllNodesWithTag("account-import")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
         Assert.assertFalse(
             JSONObject(NativeBridge.request(json("op" to "account").toString()))

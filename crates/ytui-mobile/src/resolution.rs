@@ -56,6 +56,8 @@ impl Resolver {
             && scope.account == key.account
             && scope.account_index == key.account_index
             && scope.proxy == key.proxy
+            && scope.audio == key.audio
+            && scope.quality == key.quality
         {
             return Ok(client.clone());
         }
@@ -98,7 +100,9 @@ impl Resolver {
             cache.retain(|_, entry| entry.until > Instant::now());
             if !fresh && let Some(entry) = cache.get_mut(&key) {
                 entry.touched = Instant::now();
-                return Ok(entry.value.clone());
+                let mut value = entry.value.clone();
+                value["resolution_cache_hit"] = true.into();
+                return Ok(value);
             }
             if fresh {
                 cache.remove(&key);
@@ -223,7 +227,10 @@ mod tests {
             cache.get_or_resolve(key(), false, load()),
             cache.get_or_resolve(key(), false, load())
         );
-        assert_eq!(a.unwrap(), b.unwrap());
+        let a = a.unwrap();
+        let b = b.unwrap();
+        assert_eq!(a["url"], b["url"]);
+        assert_ne!(a["resolution_cache_hit"], b["resolution_cache_hit"]);
         assert_eq!(count.load(Ordering::SeqCst), 1);
         let mut other = key();
         other.account = 1;

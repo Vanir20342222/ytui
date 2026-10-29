@@ -596,3 +596,13 @@ network loss/VPN handoff/reconnect/rate-limit cooldown, process death, screen lo
 audio focus/headset/Bluetooth, notifications, background limits, measured
 memory/CPU/frame latency and human audible confirmation. Advanced capability gaps
 remain explicit in [PARITY.md](PARITY.md). M9 remains open.
+
+
+## M9 startup latency work, 2026-10-29 (in progress)
+
+[Research, implementation and acceptance target](TWO_SECOND_STARTUP.md) documents
+mobile.5. The target is actual tap → visible native frame within 2000 ms, including
+extraction. Five offline direct-player request-budget/fallback tests passed;
+Android compilation/lint and 16 JVM tests passed. Hosted rebuilt-ABI runtime and
+physical Tab S9 timing results are pending. A fresh anonymous cloud probe failed
+extraction in 329 ms; this is an unsuccessful playback attempt, not target success.

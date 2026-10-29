@@ -41,6 +41,7 @@ public final class MediaBridge {
 
   static void attach(Context ctx) {
     context = (android.app.Application) ctx.getApplicationContext();
+    main.postDelayed(ScriptRuntime::warm, 800);
     main.post(
         () -> {
           try {

@@ -547,6 +547,41 @@ internal class YtuiViewModel : ViewModel() {
             navigate(request = json("Collection" to media.collectionId), autoPlay = true)
     }
 
+    /** Prepare at most one settled row, off the touch path and without history/queue effects. */
+    suspend fun prepareVisible(cards: List<MediaCard>) {
+        if (
+            playbackJob?.isActive == true ||
+                playerOpen.value ||
+                player.value.value.optBoolean("playing")
+        )
+            return
+        val candidates =
+            cards.filter { !it.collection && !it.live && PlaybackCache.allowed(it.value) }.take(3)
+        val quality = config.value.optJSONObject("download")?.optString("quality", "1080") ?: "1080"
+        for ((index, media) in candidates.withIndex()) {
+            if (
+                playbackJob?.isActive == true ||
+                    playerOpen.value ||
+                    player.value.value.optBoolean("playing")
+            )
+                return
+            try {
+                RustRpc.objectCall(
+                    "resolve",
+                    "media" to media.value,
+                    "audio" to media.audio,
+                    "quality" to quality,
+                    "speculative" to true,
+                )
+                if (index == 0) PlaybackCache.prefetch(media.value, media.audio, quality)
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                return
+            } // no background retry storm or error overlay
+        }
+    }
+
     fun play(
         media: MediaCard,
         preview: Boolean = false,
@@ -575,6 +610,10 @@ internal class YtuiViewModel : ViewModel() {
             else navigate(request = json("Collection" to media.collectionId))
             return
         }
+        val timing =
+            if (!download && !preview)
+                StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), !audio)
+            else 0L
         val context = if (!preview && !download && !queued) context(media) else null
         val epoch = accountEpoch
         val network = NetworkSettings.revision.get()
@@ -595,6 +634,16 @@ internal class YtuiViewModel : ViewModel() {
                         "quality" to quality,
                     )
             if (epoch != accountEpoch || network != NetworkSettings.revision.get()) return@task
+            StartupTimings.resolved(
+                timing,
+                android.os.SystemClock.elapsedRealtime(),
+                local != null || stream.optBoolean("resolution_cache_hit"),
+            )
+            StartupTimings.route(
+                timing,
+                if (local != null) "offline"
+                else stream.optString("resolution_route", "direct-media"),
+            )
             val item = media.value.copyJson()
             PlaybackService.mergeMetadata(item, stream)
             val request =
@@ -602,6 +651,7 @@ internal class YtuiViewModel : ViewModel() {
                     .apply { put("media", item) }
                     .apply {
                         put("stream", stream)
+                        put("startup_token", timing)
                         put("audio", audio)
                         put("quality", quality)
                         put("preview", preview)

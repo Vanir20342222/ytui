@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaRuntimeTest {
+
   @org.junit.Rule
   public final org.junit.rules.ExternalResource nativeControlPolling =
       new org.junit.rules.ExternalResource() {

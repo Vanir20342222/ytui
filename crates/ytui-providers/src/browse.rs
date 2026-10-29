@@ -114,6 +114,38 @@ impl Browser {
             ],
         }
     }
+    /// Reuse only already-loaded context; playback never waits for feed bootstrap.
+    /// This identifier stays inside the same account/proxy-scoped Browser instance.
+    pub fn playback_visitor(&self, music: bool) -> Option<String> {
+        let caches = if music {
+            [&self.music, &self.web]
+        } else {
+            [&self.web, &self.music]
+        };
+        for cache in caches {
+            let Ok(guard) = cache.try_lock() else {
+                continue;
+            };
+            if let Some(context) = guard
+                .as_ref()
+                .filter(|c| c.loaded.elapsed() < Duration::from_secs(1800))
+                && let Some(value) = context
+                    .config
+                    .get("VISITOR_DATA")
+                    .or_else(|| {
+                        context
+                            .config
+                            .pointer("/INNERTUBE_CONTEXT/client/visitorData")
+                    })
+                    .and_then(Value::as_str)
+                    .filter(|value| !value.is_empty() && value.len() <= 8192)
+            {
+                return Some(value.to_owned());
+            }
+        }
+        None
+    }
+
     pub fn authenticated(&self) -> bool {
         self.session.is_some()
     }
@@ -1094,6 +1126,40 @@ mod tests {
         assert_eq!(page.items[1].id, "song");
         assert_eq!(page.continuation.as_deref(), Some("token"));
     }
+    #[tokio::test]
+    async fn playback_visitor_is_nonblocking_expiring_and_browser_scoped() {
+        let browser = Browser::new(reqwest::Client::new(), None, 0);
+        assert_eq!(browser.playback_visitor(false), None);
+        let mut guard = browser.web.lock().await;
+        *guard = Some(ClientContext {
+            config: json!({"VISITOR_DATA":"synthetic-web-visitor"}),
+            loaded: Instant::now(),
+            initial_home: None,
+        });
+        assert_eq!(browser.playback_visitor(false), None); // never waits on bootstrap
+        drop(guard);
+        assert_eq!(
+            browser.playback_visitor(false).as_deref(),
+            Some("synthetic-web-visitor")
+        );
+        assert_eq!(
+            Browser::new(reqwest::Client::new(), None, 1).playback_visitor(false),
+            None
+        );
+        browser.web.lock().await.as_mut().unwrap().loaded =
+            Instant::now() - Duration::from_secs(1801);
+        assert_eq!(browser.playback_visitor(false), None);
+        *browser.music.lock().await = Some(ClientContext {
+            config: json!({"INNERTUBE_CONTEXT":{"client":{"visitorData":"synthetic-music-visitor"}}}),
+            loaded: Instant::now(),
+            initial_home: None,
+        });
+        assert_eq!(
+            browser.playback_visitor(true).as_deref(),
+            Some("synthetic-music-visitor")
+        );
+    }
+
     #[test]
     fn combines_multiple_ytcfg_calls() {
         let c=extract_config("ytcfg.set({\"INNERTUBE_CLIENT_VERSION\":\"test\"});ytcfg.set({\"VISITOR_DATA\":\"x\"});").unwrap();

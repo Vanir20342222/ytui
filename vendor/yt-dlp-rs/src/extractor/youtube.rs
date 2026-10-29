@@ -32,12 +32,20 @@ pub struct YoutubeOptions {
     pub include_translated_subtitles: bool,
     /// Upstream `noplaylist`: a watch URL with `list=` downloads just its video.
     pub no_playlist: bool,
+    /// Mobile playback only: try a single direct player response before the
+    /// full watch-page/client acquisition. Validate the requested selector first.
+    /// None preserves CLI/download acquisition and format discovery.
+    pub playback_format: Option<String>,
+    /// Existing browse visitor context for this same account/network. Memory only.
+    pub playback_visitor_data: Option<String>,
 }
 
 struct ConfiguredYoutube {
     include_translated_subtitles: bool,
     no_playlist: bool,
     runtime: Option<challenge::Runtime>,
+    playback_format: Option<String>,
+    playback_visitor: std::sync::Mutex<Option<(String, std::time::Instant)>>,
 }
 
 impl Youtube {
@@ -47,6 +55,12 @@ impl Youtube {
         ConfiguredYoutube {
             include_translated_subtitles: options.include_translated_subtitles,
             no_playlist: options.no_playlist,
+            playback_format: options.playback_format,
+            playback_visitor: std::sync::Mutex::new(
+                options
+                    .playback_visitor_data
+                    .map(|visitor| (visitor, std::time::Instant::now())),
+            ),
             runtime: options.js_runtime.map(challenge::Runtime::new),
         }
     }
@@ -222,8 +236,7 @@ impl streams::Solver for JsSolver<'_> {
             "[youtube] {}: Downloading player {key}",
             self.video_id
         ));
-        let Ok(player) = player_assets::get(self.client, &url)
-        else {
+        let Ok(player) = player_assets::get(self.client, &url) else {
             crate::screen::warning(&format!(
                 "[youtube] {}: Download of {key} failed",
                 self.video_id
@@ -288,6 +301,17 @@ fn extract_clients(
         crate::screen::extracting_url(&format!("https://www.youtube.com/watch?v={id}"))
     ));
     let acquired = watch::acquire(client, id, runtime)?;
+    extract_acquired(client, url, id, runtime, translated_manual, acquired)
+}
+
+fn extract_acquired(
+    client: &Client,
+    url: &Url,
+    id: &str,
+    runtime: Option<&challenge::Runtime>,
+    translated_manual: bool,
+    acquired: watch::Acquired,
+) -> Result<VideoInfo> {
     let first = |key: &str| {
         acquired
             .player_responses
@@ -580,6 +604,76 @@ impl Extractor for Youtube {
     }
 }
 
+// Missing JS solutions must not turn a requested adaptive stream into a lower
+// muxed fallback merely to shorten startup. Compare only the selector's codec
+// preference and height cap, not higher formats excluded by that policy.
+fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option<u32>, bool) {
+    let formats: Vec<&Value> = acquired
+        .player_responses
+        .iter()
+        .flat_map(|response| {
+            ["formats", "adaptiveFormats"]
+                .into_iter()
+                .flat_map(move |key| {
+                    response
+                        .get("streamingData")
+                        .and_then(|data| data.get(key))
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                })
+        })
+        .collect();
+    if format.starts_with("bestaudio") {
+        return (
+            None,
+            formats.iter().any(|entry| {
+                entry["mimeType"]
+                    .as_str()
+                    .is_some_and(|mime| mime.starts_with("audio/"))
+            }),
+        );
+    }
+    if !format.starts_with("bestvideo") {
+        return (None, false);
+    }
+    let cap = format
+        .split("height<=")
+        .nth(1)
+        .and_then(|tail| {
+            tail.chars()
+                .take_while(char::is_ascii_digit)
+                .collect::<String>()
+                .parse::<u32>()
+                .ok()
+        })
+        .unwrap_or(u32::MAX);
+    let prefer_avc = format.contains("vcodec^=avc1");
+    let height = |avc: bool| {
+        formats
+            .iter()
+            .filter(|entry| {
+                let mime = entry["mimeType"].as_str().unwrap_or_default();
+                mime.starts_with("video/") && (!avc || mime.contains("avc1"))
+            })
+            .filter_map(|entry| {
+                entry["height"]
+                    .as_u64()
+                    .and_then(|value| u32::try_from(value).ok())
+            })
+            .filter(|height| *height <= cap)
+            .max()
+    };
+    (
+        if prefer_avc {
+            height(true).or_else(|| height(false))
+        } else {
+            height(false)
+        },
+        false,
+    )
+}
+
 impl Extractor for ConfiguredYoutube {
     fn key(&self) -> &'static str {
         "Youtube"
@@ -591,13 +685,73 @@ impl Extractor for ConfiguredYoutube {
         crate::screen::set_extractor("youtube");
         let page = Url::parse(&format!("https://www.youtube.com/watch?v={id}"))?;
         let _ = page;
-        let info = extract_clients(
+        if let Some(format) = self.playback_format.as_deref() {
+            // Do not hold a context lock across network I/O: a speculative
+            // visitor request must never block foreground extraction admission.
+            let visitor = self
+                .playback_visitor
+                .lock()
+                .expect("playback visitor")
+                .as_ref()
+                .filter(|(_, at)| at.elapsed() < std::time::Duration::from_secs(1800))
+                .map(|(value, _)| value.clone());
+            let fast = visitor
+                .map(Ok)
+                .unwrap_or_else(|| watch::acquire_visitor(client, &id))
+                .and_then(|visitor| {
+                    *self.playback_visitor.lock().expect("playback visitor") =
+                        Some((visitor.clone(), std::time::Instant::now()));
+                    watch::acquire_direct(client, &id, &visitor)
+                })
+                .and_then(|acquired| {
+                    let offered = offered_playback_quality(&acquired, format);
+                    let info = extract_acquired(
+                        client,
+                        url,
+                        &id,
+                        self.runtime.as_ref(),
+                        self.include_translated_subtitles,
+                        acquired,
+                    )?;
+                    // Selection is repeated by the caller after normal processing;
+                    // this copy only determines whether the fast response is usable.
+                    let mut selected = info.clone();
+                    crate::info::fill_format_fields(&mut selected.formats);
+                    let extractor_fields: Vec<&str> = selected.format_sort_fields.iter().map(String::as_str).collect();
+                    let sorter = crate::format_sort::FormatSorter::new(&[], &extractor_fields, false, false)
+                        .map_err(|error| Error::FormatSelection(error.0))?;
+                    crate::info::sort_formats(&mut selected.formats, &sorter);
+                    selected.select_format(Some(format))?;
+                    if offered.0.is_some_and(|height| selected.height.unwrap_or(0) < height) {
+                        return Err(unsupported("direct player needs full acquisition to preserve offered video quality"));
+                    }
+                    if offered.1 && selected.vcodec.as_deref() != Some("none") {
+                        return Err(unsupported("direct player needs full acquisition for audio-only formats"));
+                    }
+                    Ok(info)
+                });
+            match fast {
+                Ok(mut info) => {
+                    info.extra
+                        .insert("ytui_playback_route".into(), "direct".into());
+                    return Ok(Some(info));
+                }
+                // A second request cannot fix a rate limit. Keep Retry-After.
+                Err(error) if watch::rate_limited(&error) => return Err(error),
+                Err(_) => {} // restricted/missing/challenged formats use full acquisition
+            }
+        }
+        let mut info = extract_clients(
             client,
             url,
             &id,
             self.runtime.as_ref(),
             self.include_translated_subtitles,
         )?;
+        if self.playback_format.is_some() {
+            info.extra
+                .insert("ytui_playback_route".into(), "full".into());
+        }
         Ok(Some(info))
     }
 }

@@ -73,6 +73,7 @@ import kotlin.math.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -409,18 +410,8 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                     }
                 }
                 if (!fullscreen) {
-                    val animate = !config.optBoolean("reduced_motion") && !videoPlayer
-                    AnimatedVisibility(
-                        visible = playerOpen,
-                        enter =
-                            if (animate)
-                                fadeIn(tween(160)) + slideInVertically(tween(220)) { it / 8 }
-                            else EnterTransition.None,
-                        exit =
-                            if (animate)
-                                fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 10 }
-                            else ExitTransition.None,
-                    ) {
+                    @Composable
+                    fun PlaybackPanel(allowVideoSurface: Boolean) {
                         Panel(
                             "Now playing",
                             { vm.playerOpen.value = false },
@@ -430,6 +421,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         ) {
                             FocusedPlayer(
                                 vm,
+                                allowVideoSurface = allowVideoSurface,
                                 minimize = { vm.playerOpen.value = false },
                                 onQueue = {
                                     dialog = "queue"
@@ -437,6 +429,26 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                                 },
                                 onMore = { dialog = "player-options" },
                             )
+                        }
+                    }
+                    // Changing animation parameters mid-transition retains the old
+                    // graphics layer. A native video view must never inherit it.
+                    if (videoPlayer) {
+                        if (playerOpen) PlaybackPanel(allowVideoSurface = true)
+                    } else {
+                        val animate = !config.optBoolean("reduced_motion")
+                        AnimatedVisibility(
+                            visible = playerOpen,
+                            enter =
+                                if (animate)
+                                    fadeIn(tween(160)) + slideInVertically(tween(220)) { it / 8 }
+                                else EnterTransition.None,
+                            exit =
+                                if (animate)
+                                    fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 10 }
+                                else ExitTransition.None,
+                        ) {
+                            PlaybackPanel(allowVideoSurface = false)
                         }
                     }
                 }
@@ -713,6 +725,21 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         snapshotFlow { grid.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { vm.rememberScroll(tab, it) }
+    }
+    val focused by vm.playerOpen.collectAsState()
+    val cardsByKey = remember(feed.cards) { feed.cards.associateBy { it.key } }
+    LaunchedEffect(grid, feed.cards, focused) {
+        if (!focused)
+            snapshotFlow {
+                    val visible =
+                        grid.layoutInfo.visibleItemsInfo.mapNotNull { info -> cardsByKey[info.key] }
+                    visible.take(3)
+                }
+                .distinctUntilChanged()
+                .collectLatest { cards ->
+                    delay(400)
+                    vm.prepareVisible(cards)
+                }
     }
     LaunchedEffect(feed.generation) {
         if (grid.firstVisibleItemIndex != feed.scrollIndex) grid.scrollToItem(feed.scrollIndex)
@@ -1598,6 +1625,7 @@ private fun SettingsPanel(
                     "Offline & storage" to Glyph.Download,
                     "Video information" to Glyph.Info,
                     "Network" to Glyph.Link,
+                    "Performance" to Glyph.Info,
                     "Privacy" to Glyph.History,
                     "Account" to Glyph.Account,
                 )) {
@@ -1743,6 +1771,41 @@ private fun SettingsPanel(
                     vm.updateConfig(dark) { it.put("playback_history", value) }
                 }
             }
+        if (category == "Performance") {
+            val player by vm.player.collectAsState()
+            val report = remember(player) { StartupTimings.report() }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            SettingGroup(
+                "Playback startup",
+                "Local measurements, including extraction and visible video output",
+            ) {
+                Text(
+                    report,
+                    Modifier.testTag("startup-timings"),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(
+                    {
+                        val clipboard =
+                            context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(
+                            android.content.ClipData.newPlainText(
+                                "ytui startup timings",
+                                BuildConfig.VERSION_NAME +
+                                    "\n" +
+                                    BuildConfig.SOURCE_REVISION +
+                                    "\n" +
+                                    report,
+                            )
+                        )
+                    },
+                    Modifier.testTag("copy-startup-timings"),
+                ) {
+                    Text("Copy timing report")
+                }
+            }
+        }
         if (category == "Network")
             SettingGroup(
                 "Network",
@@ -1770,7 +1833,7 @@ private fun SettingsPanel(
             SettingGroup("Fast playback") {
                 for ((key, label) in
                     listOf(
-                        "preload_next" to "Preload next item",
+                        "preload_next" to "Preload visible and next items",
                         "preload_mobile" to "Preload on mobile data",
                         "autoplay_related" to "Related media autoplay",
                         "prefer_offline" to "Prefer saved offline media",

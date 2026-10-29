@@ -1,0 +1,32 @@
+{
+  "routes": [
+    {
+      "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+      "request_headers": {
+        "X-YouTube-Client-Name": "101"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"playabilityStatus\":{\"status\":\"LOGIN_REQUIRED\"}}"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=BaW_jenozKc&bpctr=9999999999&has_verified=1",
+      "headers": {
+        "Content-Type": "text/html"
+      },
+      "body": "<script>ytcfg.set({\"VISITOR_DATA\":\"synthetic-visitor\",\"STS\":20522,\"PLAYER_JS_URL\":\"/s/player/12345678/player_ias.vflset/en_US/base.js\"});</script>"
+    },
+    {
+      "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+      "request_headers": {
+        "X-YouTube-Client-Name": "7"
+      },
+      "status": 429,
+      "headers": {
+        "Retry-After": "30"
+      },
+      "body": "rate limited"
+    }
+  ]
+}

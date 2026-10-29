@@ -2360,6 +2360,8 @@ fn run() -> Result<bool, Box<dyn std::error::Error>> {
     }
     let mut downloader = YoutubeDl::with_options(
         YoutubeOptions {
+            playback_format: None,
+            playback_visitor_data: None,
             // `--js-runtimes deno[:PATH]`/`node[:PATH]` (`deno` is enabled by
             // default; `--no-js-runtimes` clears it): the last value for each,
             // a bare name looked up on PATH. Upstream prefers Deno's provider

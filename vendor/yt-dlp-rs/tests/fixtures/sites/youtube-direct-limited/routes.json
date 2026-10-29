@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+      "status": 429,
+      "headers": {
+        "Retry-After": "30"
+      },
+      "body": "rate limited"
+    }
+  ]
+}
