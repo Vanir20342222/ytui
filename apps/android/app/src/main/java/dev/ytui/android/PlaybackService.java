@@ -226,8 +226,10 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onRenderedFirstFrame() {
-            if (firstFrameMs == 0)
+            if (firstFrameMs == 0) {
               firstFrameMs = Math.max(1, SystemClock.elapsedRealtime() - startupAt);
+              StartupTimings.stage(startupToken, "decoder", firstFrameMs);
+            }
             publish();
           }
 
@@ -272,6 +274,9 @@ public final class PlaybackService extends MediaSessionService {
 
           @Override
           public void onPlaybackStateChanged(int state) {
+            if (state == Player.STATE_READY)
+              StartupTimings.stage(
+                  startupToken, "ready", SystemClock.elapsedRealtime() - startupAt);
             if (state == Player.STATE_ENDED) {
               if (currentRequest.optBoolean("preview")) {
                 finishPreview();
@@ -481,6 +486,10 @@ public final class PlaybackService extends MediaSessionService {
   }
 
   void play(JSONObject request) throws JSONException {
+    // Resolution is finished: hand cached bytes to the foreground reader and
+    // stop speculative prefix I/O competing with initial audio/video buffering.
+    // Cancellation retains completed cache spans and Rust stream leases.
+    PlaybackCache.cancel();
     if (request.optBoolean("preview")
         && previewRestore == null
         && currentRequest.optJSONObject("media") != null) {
@@ -1229,6 +1238,9 @@ public final class PlaybackService extends MediaSessionService {
             }
             boolean audio = PlaybackPolicy.audioOnly(media.optString("kind"));
             StartupTimings.mediaType(timing, !audio);
+            StartupTimings.stage(
+                timing, "selection", StartupTimings.elapsed(timing, SystemClock.elapsedRealtime()));
+            long offlineAt = SystemClock.elapsedRealtime();
             String savedId = media.optString("offline_id");
             JSONObject request =
                 !savedId.isEmpty() && !savedId.equals("null")
@@ -1236,6 +1248,7 @@ public final class PlaybackService extends MediaSessionService {
                     : MobileSettings.enabled("prefer_offline")
                         ? OfflineStore.find(media, audio, quality)
                         : null;
+            StartupTimings.stage(timing, "offline", SystemClock.elapsedRealtime() - offlineAt);
             if (request == null) {
               JSONObject stream =
                   rpc(
@@ -1253,6 +1266,8 @@ public final class PlaybackService extends MediaSessionService {
                 SystemClock.elapsedRealtime(),
                 request.optBoolean("offline")
                     || request.getJSONObject("stream").optBoolean("resolution_cache_hit"));
+            if (!request.optBoolean("offline"))
+              MediaBridge.recordResolutionTimings(timing, request.getJSONObject("stream"));
             StartupTimings.route(
                 timing,
                 request.optBoolean("offline")

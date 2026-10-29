@@ -162,4 +162,57 @@ class StartupUiTest {
             MobileSettings.save(original)
         }
     }
+
+    @Test
+    fun foregroundResolutionBypassesSaturatedBackgroundRpcWorkers() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val file = File(instrumentation.targetContext.cacheDir, "rpc-priority-fixture.mp4")
+        instrumentation.context.assets.open("fixture.mp4").use { input ->
+            file.outputStream().use { input.copyTo(it) }
+        }
+        val gate = java.util.concurrent.CountDownLatch(1)
+        val occupied = java.util.concurrent.CountDownLatch(8)
+        val poolField =
+            RustRpc::class.java.getDeclaredField("workers").apply { isAccessible = true }
+        val pool = poolField.get(RustRpc) as java.util.concurrent.ThreadPoolExecutor
+        val blockers = mutableListOf<java.util.concurrent.Future<*>>()
+        try {
+            MediaRuntimeTest.FixtureServer(file).use { server ->
+                RuntimeTest.launchOffline().use {
+                    kotlinx.coroutines.runBlocking { RustRpc.objectCall("settings") }
+                    repeat(8) {
+                        blockers +=
+                            pool.submit {
+                                occupied.countDown()
+                                gate.await()
+                            }
+                    }
+                    Assert.assertTrue(
+                        "Background workers did not reach the saturation fixture",
+                        occupied.await(10, java.util.concurrent.TimeUnit.SECONDS),
+                    )
+                    val stream =
+                        kotlinx.coroutines.runBlocking {
+                            kotlinx.coroutines.withTimeout(1500) {
+                                RustRpc.objectCall(
+                                    "resolve",
+                                    "media" to json("url" to server.url(), "kind" to "video"),
+                                    "audio" to false,
+                                    "quality" to "1080",
+                                )
+                            }
+                        }
+                    Assert.assertEquals(server.url(), stream.optString("url"))
+                    Assert.assertEquals("miss", stream.optString("resolution_cache_state"))
+                    Assert.assertEquals(
+                        1L,
+                        gate.count,
+                    ) // foreground finished while every background worker was still blocked
+                }
+            }
+        } finally {
+            gate.countDown()
+            blockers.forEach { it.get(10, java.util.concurrent.TimeUnit.SECONDS) }
+        }
+    }
 }

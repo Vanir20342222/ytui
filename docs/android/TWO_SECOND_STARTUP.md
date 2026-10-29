@@ -196,3 +196,11 @@ playback. Full native rerun remains required.
 ### Qualified performance APK
 
 [mobile.5 qualification](STARTUP_VALIDATION_2026-10-29.md) records the successful exact-main native/Rust/security runs, signed/public APK verification and strict cold/prepared window-pixel times. The first exact-main attempt was contaminated by a Google SDK Setup ANR dialog; screenshots and failure evidence remain linked. The fresh same-source run retains all assertions and the 2000 ms deadline. Live Tab S9/YouTube acceptance remains open.
+
+### Physical Tab S9 report: mobile.5 misses the live target
+
+The owner's completed video attempts took 11249/14617 ms to visible output, with
+10407/12193 ms spent before resolution returned. The live objective is not met.
+[mobile.6 findings and changes](MOBILE6_STARTUP_FOLLOWUP.md) address optional
+manifest I/O, pool churn, foreground admission and misleading joined-cache labels;
+new device measurements are required after qualification/publication.

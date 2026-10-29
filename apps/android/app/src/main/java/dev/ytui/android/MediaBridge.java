@@ -11,6 +11,12 @@ import org.json.*;
 /** Android platform adapters; providers, theme palettes and durable application state are Rust. */
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class MediaBridge {
+  static void recordResolutionTimings(long token, org.json.JSONObject stream) {
+    StartupTimings.cacheState(token, stream.optString("resolution_cache_state"));
+    for (String phase : StartupTimings.PHASES)
+      StartupTimings.stage(token, phase, stream.optLong("resolution_" + phase + "_ms", -1));
+  }
+
   static android.app.Application context;
   static final Handler main = new Handler(Looper.getMainLooper());
   static final ConcurrentLinkedQueue<JSONObject> events = new ConcurrentLinkedQueue<>();
