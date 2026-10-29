@@ -1,11 +1,6 @@
 # Native Android UI device acceptance (M9)
 
-The first physical Tab S9 preview failed input, theme and account navigation.
-Use the modern native UI build (`0.2.0-alpha.12-mobile.3`) for re-testing.
-Open the **ytui Preview** launcher; it installs separately from the older app,
-with its own account/settings/library. Your original installation stays intact.
-Check **⋮ → About** for the version and source revision; use the exact APK linked
-from the corresponding successful Android workflow run, not an earlier artifact.
+Use the [signed mobile.4 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) for the current checks. Open **ytui** (`dev.ytui.android.stable`), version **0.2.0-alpha.12-mobile.4**, code **4**. It installs separately from older Preview/original apps, retaining their private data. Account/settings/library are separate; reconnect and choose Music/Video folders once. About shows the exact source; [qualified build](PLAYER_LIBRARY_VALIDATION_2026-10-29.md) records the public checksum and certificate.
 
 This checklist supplements emulator tests. Do not send cookies, account files,
 authorization headers or signed media URLs in a bug report. Keep wanted app data
@@ -34,11 +29,11 @@ On the Samsung Tab S9, then the Nothing Phone (3a):
 6. Repeat with Music and Radio. Verify volume persists across station changes,
    station identity remains visible when ICY song titles change, and finite Music
    collections advance. Check queue/Previous/Next and lockscreen/headset controls.
-7. Select Vinyl, VU and Orbit under Music/Radio. Animation should stop on pause;
+7. Select Vinyl, VU and Orbit under Music/Radio. The song view should stay non-scrolling. Test category swipes, swipe-to-minimize and disabled gestures; icon minimization should always work. Animation should stop on pause;
    meters should react to decoded sound. Check reduced motion and backgrounding.
 8. Download an individual item and a dedicated playlist URL. Verify every entry,
    pause/retry/remove, offline playback after disconnecting the source network,
-   and exporting a completed file. MP3/FLAC transcoding is not offered on Android.
+   and exporting a completed file. Choose separate Music/Video folders, verify automatic compatible export, and create/rename/reorder/play a local offline playlist. MP3/FLAC transcoding is not offered on Android.
 9. Open queue, recently played, lyrics, sleep timer and About. Check lyric editing,
    local LRC import, timing offset and tap-to-seek against the current song.
 10. Repeat navigation in portrait, landscape and split screen. Catalog controls,

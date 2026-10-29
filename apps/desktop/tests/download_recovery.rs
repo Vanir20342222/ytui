@@ -133,7 +133,12 @@ async fn playlist_hooks_use_each_tracks_metadata_once_even_for_duplicate_output_
         r#"printf '%s|%s|%s\n' "$YTUI_VIDEO_ID" "$YTUI_TITLE" "$YTUI_OUTPUT_PATH" >> hooks"#,
     ));
     let (job, _) = fixture.run(fixture.job()).await;
-    assert_eq!(job.state, JobState::Done);
+    assert_eq!(
+        job.state,
+        JobState::Done,
+        "fixture download failed: {:?}",
+        job.error
+    );
     let calls = std::fs::read_to_string(fixture.root().join("hooks")).unwrap();
     let lines = calls.lines().collect::<Vec<_>>();
     assert_eq!(

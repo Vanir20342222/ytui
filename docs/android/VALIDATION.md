@@ -1,11 +1,22 @@
-# Android validation record — 2026-10-28 (M9)
+# Android validation record (M9)
+
+## Player/library preview: signed and qualified (2026-10-29)
+
+Source `cf8046508b96962f1b5ba9efc3529c4427d64b9f` passes [main Android](https://github.com/Vanir20342222/ytui/actions/runs/40837593351), [Rust](https://github.com/Vanir20342222/ytui/actions/runs/40837593137) and Secret scan. **24 runtime cases pass**, one public opt-in case skips; all 13 themes, visible video behind native controls, fullscreen return, native transports, offline folders/playlists and cover recovery pass. Logs contain zero app ANRs/Rust panic markers. The local signed release passes both ABI builds, 14 JVM tests, lint and signature/alignment/notices inspection.
+
+### Current direct APK
+
+[Download 0.2.0-alpha.12-mobile.4](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) · [Public checksum/inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.4). Package `dev.ytui.android.stable`, launcher **ytui**, code **4**, Android 8+, ARM64/x86-64. Installs separately from old Preview apps; subsequent stable updates retain this signing identity. No GitHub signing secrets are required.
+
+SHA256: `4eeaa2145a0b7b08328d940e84c16e1375e481c859f48ac5127e3598301b05c4`. The public download was independently checked. [Full qualification, fixes and open gates](PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Actual screenshots](../screenshots/android/README.md). Live YouTube latency, audible output and physical-device/update acceptance remain open. Earlier sections below are historical checkpoints.
+
 
 Android is a development preview. No physical Nothing Phone (3a) or Galaxy Tab S9
 has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
-## Current modern media UI checkpoint: passed
+## Earlier modern media UI checkpoint (2026-10-28): passed
 
 Source **`5f340830c7091aa4546be0e2290560ddbd0bc3ea`**, PR merge revision
 **`bb0aa7be25668696f6f41c74c165946799975c75`**.
@@ -42,7 +53,7 @@ All theme/keyboard/account captures, JUnit and logs are in the
 [device evidence](https://github.com/Vanir20342222/ytui/actions/runs/40712963078/artifacts/12828725236).
 Emulator software decoding does not establish physical hardware or audible output.
 
-### Current direct APK
+### Earlier direct APK
 
 [Download ytui Preview](https://github.com/Vanir20342222/ytui/releases/download/android-media-preview-2026-10-28/ytui-preview-0.2.0-alpha.12-mobile.3.apk)
 or open the [preview assets/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28).

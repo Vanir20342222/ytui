@@ -1,8 +1,13 @@
 {
-  "source": "Actual unedited API 35 emulator captures; original generated offline fixtures; source 5f34083, Android run 40712963078.",
+  "source": "Actual unedited API 35 emulator captures; original generated offline fixtures; source cf8046508b96962f1b5ba9efc3529c4427d64b9f, Android run 40837593351.",
   "captures": [
     {
       "file": "music.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "orbit.png",
       "width": 1080,
       "height": 2400
     },
@@ -20,6 +25,31 @@
       "file": "tablet.png",
       "width": 2560,
       "height": 1600
+    },
+    {
+      "file": "video-controls.png",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "file": "video-fullscreen.png",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "file": "video-return.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "vinyl.png",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "file": "vu.png",
+      "width": 1080,
+      "height": 2400
     },
     {
       "file": "youtube.png",

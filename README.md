@@ -1,11 +1,10 @@
 # ytui
 
-A Rust monorepo for YouTube, YouTube Music, downloads and radio. The desktop app
-is a terminal application; the new [Android development preview](docs/android/README.md)
-has a Rust touch UI for phones and tablets. The interface
-uses Lazygit-style panes, keyboard navigation, inline thumbnails and mpv playback.
-Omarchy + Ghostty + Brave Origin is the current desktop target; CachyOS/Caelestia
-remain historical compatibility targets.
+A Rust monorepo for YouTube, YouTube Music, downloads and radio. The desktop app uses Lazygit-style terminal panes, keyboard navigation, thumbnails and mpv. [Android](docs/android/README.md) uses the shared Rust engine with a native Jetpack Compose UI for phones and tablets.
+
+[Download Android mobile.4](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) · [Player/offline features and validation](docs/android/PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Phone/tablet gallery](docs/screenshots/android/README.md)
+
+Omarchy + Ghostty + Brave Origin is the current desktop target; CachyOS/Caelestia remain compatibility targets.
 
 This is the **0.2.0-alpha.12 candidate** ([audit fixes and acceptance](docs/AUDIT_IMPLEMENTATION.md)).
 [Local acceptance](docs/LOCAL_ACCEPTANCE_2026-10-26.md) records verified target-PC

@@ -1,55 +1,16 @@
 # Android development preview (M9)
 
-The Android app has a shared Rust engine and a native Jetpack Compose UI with
-artwork-first media grids, sans-serif typography and rounded native controls.
-Android supplies text fields, keyboard, touch and
-adaptive layouts. Media3 handles hardware video/captions, background playback,
-MediaSession notifications and durable downloads;
-WorkManager prepares full playlists. There is no Python or mpv executable on
-Android. The account sign-in web page is the only WebView screen.
+The app combines the shared Rust engine with a native Jetpack Compose phone/tablet UI. Media3 handles video, background playback, media controls and offline transfers. The explicit account sign-in page is its only WebView. No Python or mpv executable runs on Android.
 
-This is a development preview, not a claim of full desktop parity or completed
-Nothing Phone (3a) / Galaxy Tab S9 acceptance. Read [PARITY.md](PARITY.md) and
-[VALIDATION.md](VALIDATION.md) before treating it as a daily driver. The
-[device acceptance checklist](DEVICE_ACCEPTANCE.md) covers the native UI re-test.
-
-The [tested native UI APK and checksum](VALIDATION.md#current-direct-apk)
-cover source `5f34083`: 20 emulator checks pass, including actual keyboard input,
-all-theme contrast, account navigation and visible generated video. Real device/
-YouTube acceptance is still required; earlier failed APKs are historical only.
-
-[View actual phone, tablet, player and settings screenshots](../screenshots/android/README.md).
+[Download mobile.4 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.4/ytui-0.2.0-alpha.12-mobile.4.apk) · [Release/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.4) · [Validation](PLAYER_LIBRARY_VALIDATION_2026-10-29.md) · [Actual gallery](../screenshots/android/README.md)
 
 ## Install an APK
 
-The [tested native UI preview](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28)
-provides a direct `.apk` download without GitHub sign-in or ZIP extraction.
-Download the APK under **Assets**, open it from Android's Files app, and permit
-installation from that source when prompted. Its checksum and inspection report
-are attached. This publishes the exact tested artifact without rebuilding or
-changing its signing identity; it remains a development preview.
+Open the downloaded APK in Android Files and allow installation from that source when prompted. Version **0.2.0-alpha.12-mobile.4**, code **4**, includes ARM64 for Galaxy Tab S9/Nothing Phone (3a) and x86-64 for emulators, requires Android 8/API 26+, and targets API 35. The public download hash and signing certificate were verified.
 
-For other CI builds, sign in to GitHub in your browser first.
-Open the repository's **Actions → Android → successful run → Artifacts** and
-download `ytui-android-<commit>`. Extract the ZIP and install `app-debug.apk` using
-Android's file manager, permitting installation from that source when prompted.
-The APK includes ARM64 (both requested devices) and x86-64 (emulators), requires
-Android 8/API 26 or newer, and targets API 35. Verify its SHA256 using the included
-`SHA256-and-checks.txt`.
+Open **ytui** (`dev.ytui.android.stable`). It installs alongside older Preview/original development apps, preserving their private data. Its account/settings/library are separate, so sign in and choose folders once. Future stable-channel updates use the same private identity. No GitHub signing-secret setup is needed; [recovery and updates](SIGNING.md) explain the encrypted owner backup. Debug Actions artifacts still install as **ytui Preview** and may have disposable identities.
 
-New debug builds install as **ytui Preview** (`dev.ytui.android.preview`), alongside
-older APKs and the owner-signed stable channel (`dev.ytui.android.stable`). They do not remove or
-migrate the other app's private account/library/cache. Open the **ytui Preview**
-launcher to test the redesign; connect your account explicitly in that app.
-Release builds keep the original package and label.
-
-These APKs use development signing. Different CI runners can have different
-keys: updates require the same signing key. Do not uninstall a working install
-without exporting wanted data; uninstalling removes private account/library and
-offline media. Stable, signed, in-place updates need a separately configured
-release keystore and release process. No private signing key is checked in.
-The manual [signed-build workflow and identity setup](SIGNING.md) provide that
-build path without committing secrets; an owner must configure the identity.
+This is a development preview, with 24 passing runtime cases and one explicitly skipped public YouTube case. Real YouTube latency, audible output, physical-device updates and [parity/device gates](PARITY.md) remain open. [Device checklist](DEVICE_ACCEPTANCE.md).
 
 ## Navigate
 
@@ -57,7 +18,7 @@ First installations default to 1080p with H.264/AAC preference for mobile decodi
 and portable file export; audio-only playback still selects the best audio.
 Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
 Use the bottom navigation for YouTube, Music, Radio and Downloads. Search accepts words
-or a media URL. **Feeds** selects provider shelves; categories and pagination use
+or a media URL. **Browse** selects provider shelves; categories and pagination use
 server responses. The top **⋮** menu, **sliders** (Settings) and **profile** (Account) icons provide touch controls.
 Tap artwork to play/open it. The card's **⋮** menu contains preview, queue, save
 and download actions. Downloads → Add URL
@@ -78,6 +39,10 @@ played item; Next follows the manual queue, forward history, then collection.
 Notification/media-session controls use those same actions. History is local and
 can be disabled or cleared with resume positions. A stopped/killed process does
 not retain derived collection context; select the collection again to rebuild it.
+
+Outside a collection, **Related media** prepares the next item by default; disable it under Playback. Prefetch respects the mobile-data setting. For Music/Radio, tap the mini-player for the non-scrolling classic/Vinyl/VU/Orbit screen; use its down icon or enabled swipe gesture to minimize. Advanced options open separately. Video has native controls and a landscape fullscreen icon; quality remains available from Playback options.
+
+Downloads has **Offline**, **Playlists** and **Transfers** sections. Create and edit local offline playlists there. Settings → Offline & storage chooses separate Music and Video folders through Android's folder picker; compatible completed media can save there automatically. Private streaming cache stays separate and unavailable grants retain cached media. **My playlists** chips in YouTube/Music open the account's own collections.
 
 Menu → **Lyrics** opens a song-specific view. Review title and artist
 before choosing Find on LRCLIB; no automatic lookup or cookies are sent. Choose

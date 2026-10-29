@@ -1,4 +1,4 @@
 # Preserve upstream source and challenge fixture bytes when vendoring.
 vendor/** whitespace=-blank-at-eol,-blank-at-eof
-# Gradle's generated Windows launcher intentionally uses CRLF.
-*.bat text eol=crlf whitespace=cr-at-eol
+# Preserve generated Windows launcher CRLF bytes without text normalization.
+*.bat -text whitespace=cr-at-eol

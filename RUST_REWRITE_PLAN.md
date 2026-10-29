@@ -1,9 +1,6 @@
 # ytui Rust rewrite plan
 
-M9 player/library follow-up is being qualified: bounded resolution/prefetch,
-responsive player/fullscreen, categorized settings and offline playlists/folders.
-[The implementation and acceptance tracker](docs/android/PLAYER_LIBRARY_PLAN.md)
-separates source completion from actual device/YouTube timing and signing gates.
+M9 player/library follow-up (2026-10-29): **mobile.4** is published with private stable signing. Scoped prefetch, direct native video/frame controls, non-scrolling music styles, gestures/settings and offline playlists/folders pass 24 emulator cases (one opt-in public skip), 328 offline Rust tests and 14 release JVM tests. Main release/signature/alignment checks pass; [qualification and source](docs/android/PLAYER_LIBRARY_VALIDATION_2026-10-29.md) record live YouTube/device limits. M9 remains a preview; physical/live acceptance is distinct from source implementation.
 
 M9 mobile design follow-up (2026-10-28): the user rejected terminal styling on
 Android after confirming installation. A modern native media UI with responsive

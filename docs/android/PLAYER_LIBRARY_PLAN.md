@@ -1,5 +1,7 @@
 # Android player, latency and offline library follow-up (M9)
 
+Current source `cf8046508b96962f1b5ba9efc3529c4427d64b9f` is published as **mobile.4** after main Android/Rust/Secret checks and private signing. **24 runtime cases pass, one public opt-in case skips**. [Final qualification and remaining gates](PLAYER_LIBRARY_VALIDATION_2026-10-29.md) supersede the historical intermediate checkpoints below. Real YouTube latency and physical-device acceptance remain open.
+
 The user accepted the modern UI, then reported slow starts/Next/seeking and
 requested a focused player, fullscreen, transitions/gestures, simpler copy,
 visualizers, station artwork, richer settings, personal playlists and offline
