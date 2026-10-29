@@ -151,10 +151,14 @@ internal data class PlayerState(val value: JSONObject = JSONObject()) {
         get() = value.optBoolean("playing")
 
     val position: Float
-        get() = value.optDouble("position", 0.0).toFloat().coerceAtLeast(0f)
+        get() =
+            value.optDouble("position", 0.0).toFloat().takeIf { it.isFinite() }?.coerceAtLeast(0f)
+                ?: 0f
 
     val duration: Float
-        get() = value.optDouble("duration", 0.0).toFloat().coerceAtLeast(0f)
+        get() =
+            value.optDouble("duration", 0.0).toFloat().takeIf { it.isFinite() }?.coerceAtLeast(0f)
+                ?: 0f
 
     val video: Boolean
         get() = value.optBoolean("video")
@@ -177,7 +181,8 @@ internal object ArtworkCache {
         )
             return null
         val size = pixels.coerceIn(32, 768)
-        val key = "${media.key}:${media.value.optString("thumbnail")}:$size"
+        val key =
+            "${media.key}:${media.value.optString("thumbnail")}:${media.value.optJSONArray("thumbnails")}:$size"
         memory.get(key)?.let {
             return it
         }
@@ -555,6 +560,12 @@ internal class YtuiViewModel : ViewModel() {
                         .put("playing", !player.value.playing)
                         .put("paused", player.value.playing)
                 )
+        if (op == "volume" || op == "speed") {
+            val value = fields.firstOrNull { it.first == "value" }?.second as? Number
+            if (value != null && value.toDouble().isFinite()) {
+                player.value = PlayerState(player.value.value.copyJson().put(op, value))
+            }
+        }
         effect(op, *fields)
     }
 

@@ -44,7 +44,11 @@ baseline defects, milestones, migration requirements, and acceptance checks.
   remains Rust in `crates/ytui-mobile`. On 2026-10-28 the user authorized a
   stack change after reporting unusable text input/themes/account navigation on
   a physical Galaxy Tab S9. Android's current UI target is native Jetpack Compose
-  under `apps/android`, with the shared Rust engine and terminal visual style.
+  under `apps/android`, with the shared Rust engine. Later on 2026-10-28 the user
+  explicitly rejected terminal styling on mobile and requested a polished
+  YouTube/Netflix-inspired design: sans-serif typography, artwork-led browsing,
+  native navigation and touch-friendly settings. Keep all shared palettes; the
+  desktop terminal presentation is unaffected.
   Java/Kotlin also handle activity/media/storage/OS adapters and explicit account
   WebView sign-in. Do not replace application screens with a web UI.
 - Read `docs/android/{PLAN,PARITY,VALIDATION}.md` for mobile gates. Unit/fixture,

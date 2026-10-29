@@ -3,10 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.compose'
 }
-def requestedVersionCode = System.getenv('YTUI_ANDROID_VERSION_CODE') ?: '2'
+def requestedVersionCode = System.getenv('YTUI_ANDROID_VERSION_CODE') ?: '3'
 if (!(requestedVersionCode ==~ /[1-9][0-9]{0,9}/) || requestedVersionCode.toLong() > 2100000000L)
     throw new GradleException('YTUI_ANDROID_VERSION_CODE must be an integer from 1 to 2100000000')
-def requestedVersionName = System.getenv('YTUI_ANDROID_VERSION_NAME') ?: '0.2.0-alpha.12-mobile.2'
+def requestedVersionName = System.getenv('YTUI_ANDROID_VERSION_NAME') ?: '0.2.0-alpha.12-mobile.3'
 if (!(requestedVersionName ==~ /[A-Za-z0-9.+_-]{1,64}/))
     throw new GradleException('YTUI_ANDROID_VERSION_NAME must contain 1–64 letters, digits, dots, plus, underscore or hyphen')
 def signingPath = System.getenv('YTUI_ANDROID_KEYSTORE')
@@ -30,6 +30,7 @@ android {
     ndkVersion '27.2.12479018'
     defaultConfig {
         applicationId 'dev.ytui.android'
+        resValue 'string', 'app_name', 'ytui'
         minSdk 26
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
         targetSdk 35
@@ -54,7 +55,11 @@ android {
         }
     }
     buildTypes {
-        debug { debuggable true }
+        debug {
+            debuggable true
+            applicationIdSuffix '.preview'
+            resValue 'string', 'app_name', 'ytui Preview'
+        }
         release {
             debuggable false
             minifyEnabled false

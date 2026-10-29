@@ -1,0 +1,85 @@
+name: Publish tested Android preview
+on:
+  push:
+    branches: [feat/android-media-ui]
+    paths: [.github/workflows/android-preview.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: android-media-preview-2026-10-28
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Vanir20342222/ytui' && (github.ref == 'refs/heads/feat/android-media-ui' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # Publish only this reviewed checkpoint, never an arbitrary untested build.
+      YTUI_SOURCE: 5f340830c7091aa4546be0e2290560ddbd0bc3ea
+      YTUI_TAG: android-media-preview-2026-10-28
+      YTUI_APK: ytui-preview-0.2.0-alpha.12-mobile.3.apk
+      YTUI_SHA256: 2e184784b3052b3f15b2a66b0ea7636c8b6f46ed58fc0d1772372e45d7ccaf47
+    steps:
+      - name: Require successful checks for the tested source
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$YTUI_SOURCE&per_page=100" > "$RUNNER_TEMP/checks.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          runs = json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'checks.json').read_text())['workflow_runs']
+          passed = {r['name'] for r in runs if r['head_sha'] == os.environ['YTUI_SOURCE'] and r['status'] == 'completed' and r['conclusion'] == 'success'}
+          missing = {'Android', 'Rust', 'Secret scan'} - passed
+          if missing:
+              raise SystemExit('Missing successful checkpoint checks: ' + ', '.join(sorted(missing)))
+          PY
+      - name: Download the exact tested artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40712963078
+          artifact-ids: 12826609401
+          path: tested
+          merge-multiple: true
+      - name: Verify and prepare public assets
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, shutil
+          apk = pathlib.Path('tested/outputs/apk/debug/app-debug.apk')
+          digest = hashlib.file_digest(apk.open('rb'), 'sha256').hexdigest()
+          if digest != os.environ['YTUI_SHA256']:
+              raise SystemExit('Tested APK checksum mismatch; refusing publication')
+          output = pathlib.Path('preview')
+          output.mkdir()
+          shutil.copyfile(apk, output / os.environ['YTUI_APK'])
+          shutil.copyfile(apk.with_name('SHA256-and-checks.txt'), output / 'APK-inspection.txt')
+          (output / 'SHA256SUMS.txt').write_text(digest + '  ' + os.environ['YTUI_APK'] + '\n')
+          PY
+          cat > notes.md <<'NOTES'
+          Modern Android media UI **development preview**: shared Rust engine and native Compose artwork grids, phone/tablet navigation, mini-player and grouped settings. All 13 theme choices remain available.
+
+          Download the `.apk` below on Android and open it from Files. No GitHub sign-in or ZIP extraction is needed. Android 8+, ARM64 and x86-64; version `0.2.0-alpha.12-mobile.3`, code `3`.
+
+          This is the exact APK from [Android run 40712963078](https://github.com/Vanir20342222/ytui/actions/runs/40712963078), source `5f34083`, PR merge revision `bb0aa7be25668696f6f41c74c165946799975c75`. It is not rebuilt or re-signed. Check its checksum with `SHA256SUMS.txt`.
+
+          **Passed:** 317 offline Rust tests, 14 Android unit tests and 20 emulator checks, including real text input, all 13 themes, account navigation and visible generated-video playback. The separate public YouTube check was skipped.
+
+          **Still pending:** Galaxy Tab S9 / Nothing Phone (3a) acceptance, real YouTube/account playback, audible output and OEM background behavior. [Validation and limitations](https://github.com/Vanir20342222/ytui/blob/feat/android-media-ui/docs/android/VALIDATION.md). This does not mark M9 complete or replace the stable signing process.
+
+          **Installs as ytui Preview** (`dev.ytui.android.preview`) alongside the older app. No uninstall is needed; your old account/library/cache remain private and untouched. Open the ytui Preview launcher and connect your account there. Its settings/library are separate. Normal release identity is unchanged; future updates still require matching keys and owner stable signing remains pending.
+
+          [Phone/tablet screenshots](https://github.com/Vanir20342222/ytui/tree/feat/android-media-ui/docs/screenshots/android).
+          NOTES
+      - name: Publish a prerelease with direct APK downloads
+        run: |
+          if gh release view "$YTUI_TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease > existing.txt; then
+            test "$(cat existing.txt)" = true
+          else
+            gh release create "$YTUI_TAG" --repo "$GITHUB_REPOSITORY" --target "$YTUI_SOURCE" --title 'Android media UI — development preview (2026-10-28)' --notes-file notes.md --draft --prerelease --latest=false
+          fi
+          gh release upload "$YTUI_TAG" preview/* --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit "$YTUI_TAG" --repo "$GITHUB_REPOSITORY" --notes-file notes.md --draft=false --prerelease --latest=false

@@ -5,7 +5,109 @@ has been connected. No personal cookies, browser database, VPN or desktop
 appearance settings were used or changed by these tests. Fixture decoding,
 public-provider checks and hardware acceptance are recorded separately.
 
-## Current native UI checkpoint: passed emulator checks
+## Current modern media UI checkpoint: passed
+
+Source **`5f340830c7091aa4546be0e2290560ddbd0bc3ea`**, PR merge revision
+**`bb0aa7be25668696f6f41c74c165946799975c75`**.
+[Android 40712963078](https://github.com/Vanir20342222/ytui/actions/runs/40712963078),
+[Rust 40712962600](https://github.com/Vanir20342222/ytui/actions/runs/40712962600)
+and [Secret scan 40712962670](https://github.com/Vanir20342222/ytui/actions/runs/40712962670)
+passed. The UI now uses sans-serif typography, artwork grids, phone navigation /
+tablet rail, a mini-player and grouped native settings/account/download surfaces.
+
+- **317 offline Rust tests passed**, 0 failed, 31 explicitly ignored; formatting
+  and strict hosted Clippy pass. The hosted Rust media regression workflow passes.
+- **14 Android JVM tests pass**, including AA accent contrast across 381 colours
+  and finite progress with stopped/unknown/invalid telemetry. Debug/release
+  compile, unit tests and lint pass locally; hosted debug build/tests/lint pass.
+- **20 API 35 emulator cases passed**, 0 failures/errors; the separate public
+  YouTube case was explicitly skipped. Continuous logs contain **zero app ANRs
+  and zero Rust panic markers**.
+- Actual keyboard/Unicode input, all 13 theme backgrounds/foregrounds/persistence,
+  account navigation/cancel, native menus/panels, cooldown and URL intent pass.
+- New populated UI checks pass thumbnail HTTP/decode/rendered pixels, responsive
+  video grids and square Music covers, overflow actions, native settings and
+  real Media3 pause/resume/stop through mini-player and expanded transport.
+  The tablet setup cold-launches at 2560×1600; a separate case checks live rotation.
+- Existing visible RGB video, quality/position/pause, persisted volume, preview
+  restoration, cache-only playback, mux/copy/cancel exports alongside playback,
+  queue/EOF/history, ICY metadata, exact isolated challenge vectors, lyrics and
+  encrypted account/tamper/migration/disconnect checks also pass.
+
+[Phone/tablet/player/settings gallery](../screenshots/android/README.md) contains
+unaltered captures from this run; representative catalog, tablet, Music, settings
+and player images were visually reviewed. Generated artwork and catalog entries
+are test-only; no production provider failure is replaced with demo results.
+All theme/keyboard/account captures, JUnit and logs are in the
+[device evidence](https://github.com/Vanir20342222/ytui/actions/runs/40712963078/artifacts/12828725236).
+Emulator software decoding does not establish physical hardware or audible output.
+
+### Current direct APK
+
+[Download ytui Preview](https://github.com/Vanir20342222/ytui/releases/download/android-media-preview-2026-10-28/ytui-preview-0.2.0-alpha.12-mobile.3.apk)
+or open the [preview assets/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28).
+Version **`0.2.0-alpha.12-mobile.3`**, code **3**, ARM64/x86-64, Android 8/API 26+.
+Package **`dev.ytui.android.preview`**, launcher **ytui Preview**. It installs
+alongside the old package without uninstalling or changing its private data;
+account/settings/library are separate. The normal release identity is unchanged.
+
+The publisher checks successful Android/Rust/Secret scan runs and the exact APK
+hash, then republishes the existing tested artifact without rebuilding/re-signing.
+Independent inspection verified signing, ZIP / 16 KiB ELF alignment, both native
+ABIs, JNI exports, notices, app label, package and version. SHA256:
+
+```text
+2e184784b3052b3f15b2a66b0ea7636c8b6f46ed58fc0d1772372e45d7ccaf47
+```
+
+This is a development preview. Real Tab S9 / Nothing Phone, live YouTube/account,
+audible output, OEM background behaviour and owner stable signing remain open.
+Public YouTube playback is not qualified by these offline fixtures. See
+[device acceptance](DEVICE_ACCEPTANCE.md), [parity gaps](PARITY.md) and
+[signing/update requirements](SIGNING.md). Original artifacts expire; prerelease
+assets provide a direct download without a GitHub sign-in or ZIP extraction.
+
+## Modern media UI redesign: runtime validation in progress
+
+The user confirmed installation and explicitly requested replacing terminal
+styling with a YouTube/Netflix-inspired mobile design. Source `2c7cca5` adds
+artwork grids, native icon navigation, a mini-player and grouped native panels;
+see [the design and acceptance requirements](MEDIA_UI_REDESIGN.md).
+
+Local debug/release compilation, lint, APK signing/alignment/ABI inspection,
+317 offline Rust tests and 13 Android JVM tests passed. The hosted Rust and
+Secret scan workflows also passed for that source. New populated UI tests use
+original generated artwork over loopback HTTP; they never substitute for real
+provider feeds in the app.
+
+[First redesign Android run 40707245687](https://github.com/Vanir20342222/ytui/actions/runs/40707245687)
+planned 21 cases but the process stopped after two: the Music/settings case
+passed and the player case crashed with `current must not be NaN`. The deferred
+mini-player progress callback read a stopped zero-duration state between layout
+and recomposition. The remaining suite did not run; this APK is not qualified.
+[Failure evidence](https://github.com/Vanir20342222/ytui/actions/runs/40707245687/artifacts/12825705781)
+retains logs, JUnit and screenshots. The fix captures a finite normalized progress
+value, guards unknown telemetry and tests stopping playback with the UI attached.
+The subsequent [Android run 40710108292](https://github.com/Vanir20342222/ytui/actions/runs/40710108292)
+for `9e38ddf` passed **20 cases**, with the public YouTube case explicitly skipped.
+The stop/mini-player regression and all prior video, export, queue, ICY, account,
+solver and native UI cases passed. Fourteen Android unit tests pass in debug and
+release locally; hosted Rust and Secret scan also pass. Rendered warm artwork
+pixels are checked before screenshots. The first 2560×1600 screenshot caught an
+old popup surface during two emulator size/density overrides despite the grid
+geometry checks passing. Tablet screenshot setup now cold-launches the activity
+at the target viewport; the separate live-rotation test remains intact.
+
+Development packaging is being separated as `dev.ytui.android.preview` after an
+actual certificate comparison proved the installed mobile.2 APK and a new CI
+build cannot update each other. Normal release identity stays unchanged. The
+new package and cold-start screenshot setup pass in the current checkpoint above.
+
+The earlier metadata-only `fdd047c` Android run 40682419478 failed while installing
+the emulator system image (`Error on ZipFile unknown archive`), before any device
+tests ran. Bounded system-image download retries are now part of the workflow.
+
+## Previous native UI migration checkpoint: passed emulator checks
 
 Source **`4b2e988`**, PR merge revision **`494627636f39e34b4be5fbb18ee2fa8bd012a616`**.
 [Android run 40668747753](https://github.com/Vanir20342222/ytui/actions/runs/40668747753),
@@ -48,8 +150,14 @@ that metadata-only difference in subsequent runs.
 
 ### Tested development APK
 
-[Download APK and inspection report](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12807657622).
-Extract `outputs/apk/debug/app-debug.apk` from the ZIP. Version is
+[Download the APK directly](https://github.com/Vanir20342222/ytui/releases/download/android-native-preview-2026-10-28/ytui-android-0.2.0-alpha.12-mobile.2.apk)
+or open the [preview assets and checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-native-preview-2026-10-28).
+No GitHub sign-in or ZIP extraction is needed. The preview publisher verifies
+the checkpoint's Android/Rust/Secret scan successes and exact SHA256, then
+publishes the existing APK without rebuilding or re-signing it.
+The [original artifact and reports](https://github.com/Vanir20342222/ytui/actions/runs/40668747753/artifacts/12807657622)
+remain available to signed-in GitHub users; extract
+`outputs/apk/debug/app-debug.apk` from that ZIP. Version is
 **`0.2.0-alpha.12-mobile.2`**, code **2**, with ARM64/x86-64 and Android 8/API 26+.
 Local independent inspection verified signing, ZIP and 16 KiB ELF alignment,
 both Rust ABIs, required JNI exports and notices. APK SHA256:
@@ -66,7 +174,8 @@ and preserve wanted app data before replacing an installation.
 **Still required:** [Tab S9/phone acceptance](DEVICE_ACCEPTANCE.md), real YouTube/
 account/network and audible output checks, hardware/OEM background behavior,
 remaining capability gaps and stable owner signing. Public playback is not
-qualified by these generated fixtures. M9 and PR #20 remain draft.
+qualified by these generated fixtures. At that checkpoint PR #20 was draft; it has since been merged by the owner.
+M9 remains a development preview while the physical/live/signing gates are open.
 
 ## Physical UI failure and native migration (2026-10-28)
 

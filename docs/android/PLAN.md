@@ -9,6 +9,10 @@ Tab S9 input, theme and account navigation. The engine remains Rust. See
 [NATIVE_UI_MIGRATION.md](NATIVE_UI_MIGRATION.md) for the decision and acceptance
 gates; earlier egui render tests do not qualify the new UI.
 
+The user subsequently rejected terminal styling on mobile and requested a
+YouTube/Netflix-inspired presentation. [The media UI redesign](MEDIA_UI_REDESIGN.md)
+records the current visual requirements and acceptance checks.
+
 ## Architecture
 
 - `apps/desktop`: existing Rust terminal application, with unchanged binary names.

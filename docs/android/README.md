@@ -1,7 +1,8 @@
 # Android development preview (M9)
 
 The Android app has a shared Rust engine and a native Jetpack Compose UI with
-monospaced terminal styling. Android supplies text fields, keyboard, touch and
+artwork-first media grids, sans-serif typography and rounded native controls.
+Android supplies text fields, keyboard, touch and
 adaptive layouts. Media3 handles hardware video/captions, background playback,
 MediaSession notifications and durable downloads;
 WorkManager prepares full playlists. There is no Python or mpv executable on
@@ -12,19 +13,35 @@ Nothing Phone (3a) / Galaxy Tab S9 acceptance. Read [PARITY.md](PARITY.md) and
 [VALIDATION.md](VALIDATION.md) before treating it as a daily driver. The
 [device acceptance checklist](DEVICE_ACCEPTANCE.md) covers the native UI re-test.
 
-The [tested native UI APK and checksum](VALIDATION.md#tested-development-apk)
-cover source `4b2e988`: 17 emulator checks pass, including actual keyboard input,
+The [tested native UI APK and checksum](VALIDATION.md#current-direct-apk)
+cover source `5f34083`: 20 emulator checks pass, including actual keyboard input,
 all-theme contrast, account navigation and visible generated video. Real device/
 YouTube acceptance is still required; earlier failed APKs are historical only.
 
+[View actual phone, tablet, player and settings screenshots](../screenshots/android/README.md).
+
 ## Install an APK
 
+The [tested native UI preview](https://github.com/Vanir20342222/ytui/releases/tag/android-media-preview-2026-10-28)
+provides a direct `.apk` download without GitHub sign-in or ZIP extraction.
+Download the APK under **Assets**, open it from Android's Files app, and permit
+installation from that source when prompted. Its checksum and inspection report
+are attached. This publishes the exact tested artifact without rebuilding or
+changing its signing identity; it remains a development preview.
+
+For other CI builds, sign in to GitHub in your browser first.
 Open the repository's **Actions → Android → successful run → Artifacts** and
 download `ytui-android-<commit>`. Extract the ZIP and install `app-debug.apk` using
 Android's file manager, permitting installation from that source when prompted.
 The APK includes ARM64 (both requested devices) and x86-64 (emulators), requires
 Android 8/API 26 or newer, and targets API 35. Verify its SHA256 using the included
 `SHA256-and-checks.txt`.
+
+New debug builds install as **ytui Preview** (`dev.ytui.android.preview`), alongside
+older APKs and the normal release (`dev.ytui.android`). They do not remove or
+migrate the other app's private account/library/cache. Open the **ytui Preview**
+launcher to test the redesign; connect your account explicitly in that app.
+Release builds keep the original package and label.
 
 These APKs use development signing. Different CI runners can have different
 keys: updates require the same signing key. Do not uninstall a working install
@@ -39,14 +56,15 @@ build path without committing secrets; an owner must configure the identity.
 First installations default to 1080p with H.264/AAC preference for mobile decoding
 and portable file export; audio-only playback still selects the best audio.
 Existing quality choices are preserved. Choose Best explicitly for unrestricted formats.
-Use the bottom tabs for Downloads, YouTube, Music and Radio. Search accepts words
+Use the bottom navigation for YouTube, Music, Radio and Downloads. Search accepts words
 or a media URL. **Feeds** selects provider shelves; categories and pagination use
-server responses. The top **⋮** menu, **Settings** and **Sign in / Account** provide touch controls.
-Tap a card's play, preview, queue, download or save action. Downloads → Add URL
+server responses. The top **⋮** menu, **sliders** (Settings) and **profile** (Account) icons provide touch controls.
+Tap artwork to play/open it. The card's **⋮** menu contains preview, queue, save
+and download actions. Downloads → Add URL
 accepts a video or dedicated playlist link, with audio-only and quality choices.
 A watch link with `list=` keeps single-video intent. Tap the current player
 to open transport/volume/speed, quality, audio/caption tracks, SponsorBlock, queue
-and visualizer controls. Tablet layouts keep catalog and player side by side.
+and visualizer controls. Tablet layouts use a navigation rail and keep the catalog and active player side by side.
 Android Back closes overlays, then returns to the previous feed with its scroll
 position, before putting the app in the background. Each tab retains up to twelve
 navigation steps and 2 MiB of cached previous pages. Disconnecting clears account navigation history. The queue's

@@ -17,8 +17,9 @@ The desktop terminal application stays Rust and retains its launchers/state.
 Compose supplies Android input/IME, touch, accessibility, dialogs, adaptive
 layouts and theme composition. Media3 renders video directly into an Android
 surface with native captions; Rust still supplies extraction/policy and decoded
-PCM visualizer measurements. Keep the monospaced terminal styling and all shared
-palettes. No browser/web application UI is introduced.
+PCM visualizer measurements. The initial monospaced terminal presentation was
+superseded by the user's later [mobile media design request](MEDIA_UI_REDESIGN.md).
+Keep all shared palettes. No browser/web application UI is introduced.
 
 The existing Rust UI can remain an optional prototype/test target during the
 transition; it is not the production Android input/theme acceptance evidence.
@@ -66,6 +67,6 @@ The subsequent `4b2e988` checkpoint passed all 17 emulator cases (one separate
 public case skipped), including visible RGB video, six native UI regressions and
 concurrent export/playback after notification IDs were separated. All 317 Rust
 tests, 12 Android JVM tests, build/lint/security checks and APK inspection pass.
-See [the current validation record](VALIDATION.md#current-native-ui-checkpoint-passed-emulator-checks)
+See [the current validation record](VALIDATION.md#current-modern-media-ui-checkpoint-passed)
 for the tested APK/checksum. Native UI emulator migration gates pass; Tab S9 /
 Nothing Phone and real YouTube/account/hardware gates remain open.

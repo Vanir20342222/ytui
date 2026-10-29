@@ -1,7 +1,13 @@
 # Android APK signing and updates
 
-Development APKs from the Android workflow use debug identities. Android requires
-the same signing identity to update an installed package while retaining its
+Development APKs from the Android workflow use debug identities. New debug
+builds use `dev.ytui.android.preview` and the launcher label **ytui Preview**.
+This allows installing them alongside older `dev.ytui.android` development APKs
+without uninstalling or deleting existing private data. State and Keystore
+sessions are separate; no cross-app private data import is attempted. Release
+builds retain `dev.ytui.android` and the normal **ytui** launcher label.
+
+Android requires the same signing identity to update an installed package while retaining its
 private account/library/cache. A different key requires a separate application
 identity or uninstalling, which removes private state. Never uninstall a wanted
 installation just to bypass this check.

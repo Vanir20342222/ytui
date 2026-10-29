@@ -1,5 +1,14 @@
 # ytui Rust rewrite plan
 
+M9 mobile design follow-up (2026-10-28): the user rejected terminal styling on
+Android after confirming installation. A modern native media UI with responsive
+artwork grids, readable settings and a compact player passes 20 emulator cases,
+14 Android JVM tests and 317 offline Rust tests. Debug builds install separately
+as ytui Preview to preserve the existing app after a measured signing mismatch.
+[Design and acceptance](docs/android/MEDIA_UI_REDESIGN.md) and
+[actual screenshots](docs/screenshots/android/README.md) record the change;
+physical/live/signing gates remain separate.
+
 M5/M6/M7/M8 audio-reactive views (2026-10-27): Neon VU and Pulse Orbit add
 pane/fullscreen styles, optional mpv astats telemetry, paused/reduced-motion
 freeze and a real stereo-tone/player-switch fixture. See the audio-reactive

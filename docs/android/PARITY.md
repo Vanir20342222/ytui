@@ -7,7 +7,7 @@ theme application and account navigation; these require native UI re-acceptance.
 
 | Area | Android implementation | Qualification / remaining work |
 | --- | --- | --- |
-| Application UI | Native Jetpack Compose controls/IME, phone bottom tabs and tablet split pane; bounded Back history | Native input/theme/account/layout checks pass in the 17-case emulator checkpoint; physical Tab S9 re-test pending. Cutouts, gestures and accessibility review remain required |
+| Application UI | Native Compose media grids/IME, sans-serif type, phone navigation and tablet rail/player pane; bounded Back history | Native input/theme/account/layout checks pass in the 20-case emulator checkpoint; physical Tab S9 re-test pending. Cutouts, gestures and accessibility review remain required |
 | Themes | 13 theme entries including system; shared dark/light palettes and document import | System light/dark maps to ytui dark/light; GNOME/Omarchy/Caelestia services are Linux-only, import their files instead |
 | Browsing | Shared Rust YouTube/Music feeds, search, categories, shelves, continuations, bounded transient retries | Personalized/anonymous live feeds must pass on devices/network; no generated catalog substituted for provider failure |
 | Images | Sized bounded disk/memory cache, virtualized rows and bounded async decode | Cold-cache images necessarily need a first fetch; device rendering/jank/memory measurements required |
@@ -24,7 +24,7 @@ theme application and account navigation; these require native UI re-acceptance.
 | Settings | Native appearance/player/network/account controls with shared Rust validated config; live palette application | Desktop-specific backend/tool paths are not offered as mobile capabilities; complete advanced desktop forms/profile parity remains open |
 | Background | MediaSession foreground playback, download service, WorkManager preparation | OS power limits/Android 15 service limits and OEM battery management apply; real lockscreen/headset/Bluetooth/service recreation gates remain |
 | Linux integration | Desktop continues using mpv, MPRIS, browser import and desktop themes | MPRIS, system keyring, NetworkManager, Proton control, external cliamp and executable launch are intentionally desktop-only |
-| Distribution | Universal ARM64/x86-64 development APKs; main-only signed-build workflow with explicit versions and private owner credentials; signature/16 KiB checks | Disposable local signed build passes; the owner's stable identity and hosted signing environment still need setup, followed by device update acceptance |
+| Distribution | Separate ytui Preview debug package, universal ARM64/x86-64 APKs; main-only signed-build workflow with explicit versions and private owner credentials; signature/16 KiB checks | Disposable local signed build passes; the owner's stable identity and hosted signing environment still need setup, followed by device update acceptance |
 
 Before promoting this preview, finish outstanding mobile capability gaps, qualify
 all three target usage modes (phone, tablet, desktop), configure a stable release
