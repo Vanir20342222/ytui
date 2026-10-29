@@ -5,7 +5,20 @@
       "headers": {
         "Content-Type": "application/json"
       },
-      "body_file": "player.json"
+      "body_file": "player.json",
+      "request_headers": {
+        "X-Goog-Visitor-Id": "synthetic-visitor"
+      },
+      "request_body": [
+        "\"visitorData\":\"synthetic-visitor\""
+      ]
+    },
+    {
+      "url": "https://www.youtube.com/youtubei/v1/visitor_id?prettyPrint=false",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"responseContext\":{\"visitorData\":\"synthetic-visitor\"}}"
     }
   ]
 }

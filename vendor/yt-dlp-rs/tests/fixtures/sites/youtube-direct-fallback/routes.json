@@ -8,21 +8,37 @@
       "body_file": "player.json",
       "request_body": [
         "signatureTimestamp"
-      ]
+      ],
+      "request_headers": {
+        "X-Goog-Visitor-Id": "synthetic-visitor"
+      }
     },
     {
       "url": "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
       "headers": {
         "Content-Type": "application/json"
       },
-      "body": "{\"playabilityStatus\": {\"status\": \"LOGIN_REQUIRED\"}}"
+      "body": "{\"playabilityStatus\": {\"status\": \"LOGIN_REQUIRED\"}}",
+      "request_headers": {
+        "X-Goog-Visitor-Id": "synthetic-visitor"
+      },
+      "request_body": [
+        "\"visitorData\":\"synthetic-visitor\""
+      ]
     },
     {
       "url": "https://www.youtube.com/watch?v=BaW_jenozKc&bpctr=9999999999&has_verified=1",
       "headers": {
         "Content-Type": "text/html"
       },
-      "body": "<script>ytcfg.set({\"STS\":20522,\"PLAYER_JS_URL\":\"/s/player/12345678/player_ias.vflset/en_US/base.js\"});</script>"
+      "body": "<script>ytcfg.set({\"VISITOR_DATA\":\"synthetic-visitor\",\"STS\":20522,\"PLAYER_JS_URL\":\"/s/player/12345678/player_ias.vflset/en_US/base.js\"});</script>"
+    },
+    {
+      "url": "https://www.youtube.com/youtubei/v1/visitor_id?prettyPrint=false",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"responseContext\":{\"visitorData\":\"synthetic-visitor\"}}"
     }
   ]
 }

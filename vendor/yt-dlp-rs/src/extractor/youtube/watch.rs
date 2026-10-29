@@ -566,10 +566,43 @@ pub(super) fn acquire(
 
 /// A single direct player call on the existing account/proxy-scoped HTTP client.
 /// VisionOS does not need a watch page, signature timestamp or player JavaScript.
-pub(super) fn acquire_direct(client: &Client, video_id: &str) -> Result<Acquired> {
+pub(super) fn acquire_visitor(client: &Client, video_id: &str) -> Result<String> {
     let config = innertube::client("visionos").expect("visionos client");
-    let empty = Map::new();
-    let response = player_response(client, config, video_id, &empty, &empty, None, None)?;
+    let response = call_api(
+        client,
+        config,
+        "visitor_id",
+        "youtube",
+        video_id,
+        &Map::new(),
+        None,
+        Map::new(),
+        "Preparing playback visitor context",
+    )?;
+    visitor_from(&response)
+        .filter(|value| !value.is_empty() && value.len() <= 8192)
+        .ok_or_else(|| super::unsupported("playback visitor context unavailable"))
+}
+
+pub(super) fn acquire_direct(client: &Client, video_id: &str, visitor: &str) -> Result<Acquired> {
+    let config = innertube::client("visionos").expect("visionos client");
+    let mut context = default_ytcfg(config);
+    if let Some(client) = context
+        .get_mut("INNERTUBE_CONTEXT")
+        .and_then(|value| value.get_mut("client"))
+        .and_then(Value::as_object_mut)
+    {
+        client.insert("visitorData".into(), visitor.into());
+    }
+    let response = player_response(
+        client,
+        config,
+        video_id,
+        &context,
+        &context,
+        None,
+        Some(visitor),
+    )?;
     direct_response(video_id, response)
 }
 

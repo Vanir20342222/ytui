@@ -957,6 +957,11 @@ impl Engine {
                     );
                 }
                 let cookies = self.session.lock().expect("session").clone();
+                let visitor = self
+                    .browser
+                    .lock()
+                    .expect("browser")
+                    .playback_visitor(audio);
                 let pool = self.resolver.clone();
                 let background = if r["speculative"].as_bool().unwrap_or(false) {
                     Some(background_extractor_slots().try_acquire_owned()?)
@@ -973,6 +978,7 @@ impl Engine {
                             yt_dlp_rs::YoutubeOptions {
                                 no_playlist: true,
                                 playback_format: Some(mobile_format(audio, &quality)?),
+                                playback_visitor_data: visitor,
                                 js_runtime: if cfg!(target_os = "android") {
                                     Some("ytui-android-js".into())
                                 } else {
@@ -1332,7 +1338,7 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
         }
     }
     Ok(
-        json!({"url":url,"audio_url":audio_url,"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
+        json!({"url":url,"audio_url":audio_url,"resolution_route":data["ytui_playback_route"],"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
     )
 }
 pub(crate) fn runtime() -> &'static tokio::runtime::Runtime {

@@ -696,6 +696,7 @@ fn youtube_runtime_configuration_is_lazy_for_generic_extraction() {
         no_playlist: false,
         js_runtime: Some(runtime.clone()),
         playback_format: None,
+            playback_visitor_data: None,
     })
     .unwrap();
     for (path, extractor) in [("/clip.mp4", "generic"), ("/video.html", "html5")] {

@@ -73,9 +73,23 @@ or visible-frame benchmark and is not run by default tests.
 
 ### Evidence pending
 
-The five offline direct-player tests passed locally (paired 1080p, audio,
+The six offline direct-player tests passed locally (paired 1080p, audio,
 restricted-response fallback, no extra request after 429, unchanged default
 watch-first behavior). Android compilation, 16 JVM checks including end-to-end
 counter isolation/bounding, and lint passed. Full Rust checks, rebuilt-ABI hosted
 native runtime checks, release signing and physical Tab S9 measurements follow.
 The two-second live target remains open until measured on the device.
+
+### Visitor context follow-up
+
+A closer review of [NewPipe's request helper](https://github.com/TeamNewPipe/NewPipeExtractor/blob/6faf40681eff7da6c7a45fb92e3eb633a60a062b/extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/YoutubeStreamHelper.java)
+shows valid visitor context is required. ytui reuses its already-loaded, fresh
+account/network-scoped browse visitor without waiting for feed locks. If missing,
+the mobile extractor performs a small visitor_id bootstrap and retains it only
+inside the pooled client for 30 minutes. Visitor data is included in both request
+context and header; it is never copied into stream leases or timing reports.
+An extra offline test verifies cold bootstrap is made once and subsequent videos
+reuse it. A separate provider test covers busy locks, expiry and account isolation.
+The timing report includes only an allowlisted direct/full/offline route label.
+The fresh cloud probe with visitor bootstrap failed at the network transport
+stage (169 ms); no visible-frame performance claim follows from this failure.

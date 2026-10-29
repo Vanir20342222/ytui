@@ -9,6 +9,10 @@ public final class StartupTimingsTest {
   public void totalIncludesExtractionAndCannotCountAudioAsVideo() {
     long token = StartupTimings.begin(1000, true);
     StartupTimings.resolved(token, 2400, false);
+    StartupTimings.route(token, "https://should-not-be-reported.invalid");
+    assertFalse(StartupTimings.report().contains("should-not-be-reported"));
+    StartupTimings.route(token, "direct");
+    assertTrue(StartupTimings.report().contains("route=direct"));
     StartupTimings.output(token, 2450, true);
     assertEquals(-1, StartupTimings.total(token)); // no player handoff yet
     StartupTimings.handoff(token, 2500);

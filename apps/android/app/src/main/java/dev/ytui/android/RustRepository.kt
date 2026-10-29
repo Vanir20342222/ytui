@@ -639,6 +639,11 @@ internal class YtuiViewModel : ViewModel() {
                 android.os.SystemClock.elapsedRealtime(),
                 local != null || stream.optBoolean("resolution_cache_hit"),
             )
+            StartupTimings.route(
+                timing,
+                if (local != null) "offline"
+                else stream.optString("resolution_route", "direct-media"),
+            )
             val item = media.value.copyJson()
             PlaybackService.mergeMetadata(item, stream)
             val request =

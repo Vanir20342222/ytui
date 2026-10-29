@@ -36,6 +36,8 @@ pub struct YoutubeOptions {
     /// full watch-page/client acquisition. Validate the requested selector first.
     /// None preserves CLI/download acquisition and format discovery.
     pub playback_format: Option<String>,
+    /// Existing browse visitor context for this same account/network. Memory only.
+    pub playback_visitor_data: Option<String>,
 }
 
 struct ConfiguredYoutube {
@@ -43,6 +45,7 @@ struct ConfiguredYoutube {
     no_playlist: bool,
     runtime: Option<challenge::Runtime>,
     playback_format: Option<String>,
+    playback_visitor: std::sync::Mutex<Option<(String, std::time::Instant)>>,
 }
 
 impl Youtube {
@@ -53,6 +56,11 @@ impl Youtube {
             include_translated_subtitles: options.include_translated_subtitles,
             no_playlist: options.no_playlist,
             playback_format: options.playback_format,
+            playback_visitor: std::sync::Mutex::new(
+                options
+                    .playback_visitor_data
+                    .map(|visitor| (visitor, std::time::Instant::now())),
+            ),
             runtime: options.js_runtime.map(challenge::Runtime::new),
         }
     }
@@ -608,35 +616,60 @@ impl Extractor for ConfiguredYoutube {
         let page = Url::parse(&format!("https://www.youtube.com/watch?v={id}"))?;
         let _ = page;
         if let Some(format) = self.playback_format.as_deref() {
-            let fast = watch::acquire_direct(client, &id).and_then(|acquired| {
-                let info = extract_acquired(
-                    client,
-                    url,
-                    &id,
-                    self.runtime.as_ref(),
-                    self.include_translated_subtitles,
-                    acquired,
-                )?;
-                // Selection is repeated by the caller after normal processing;
-                // this copy only determines whether the fast response is usable.
-                let mut selected = info.clone();
-                selected.select_format(Some(format))?;
-                Ok(info)
-            });
+            // Do not hold a context lock across network I/O: a speculative
+            // visitor request must never block foreground extraction admission.
+            let visitor = self
+                .playback_visitor
+                .lock()
+                .expect("playback visitor")
+                .as_ref()
+                .filter(|(_, at)| at.elapsed() < std::time::Duration::from_secs(1800))
+                .map(|(value, _)| value.clone());
+            let fast = visitor
+                .map(Ok)
+                .unwrap_or_else(|| watch::acquire_visitor(client, &id))
+                .and_then(|visitor| {
+                    *self.playback_visitor.lock().expect("playback visitor") =
+                        Some((visitor.clone(), std::time::Instant::now()));
+                    watch::acquire_direct(client, &id, &visitor)
+                })
+                .and_then(|acquired| {
+                    let info = extract_acquired(
+                        client,
+                        url,
+                        &id,
+                        self.runtime.as_ref(),
+                        self.include_translated_subtitles,
+                        acquired,
+                    )?;
+                    // Selection is repeated by the caller after normal processing;
+                    // this copy only determines whether the fast response is usable.
+                    let mut selected = info.clone();
+                    selected.select_format(Some(format))?;
+                    Ok(info)
+                });
             match fast {
-                Ok(info) => return Ok(Some(info)),
+                Ok(mut info) => {
+                    info.extra
+                        .insert("ytui_playback_route".into(), "direct".into());
+                    return Ok(Some(info));
+                }
                 // A second request cannot fix a rate limit. Keep Retry-After.
                 Err(error) if watch::rate_limited(&error) => return Err(error),
                 Err(_) => {} // restricted/missing/challenged formats use full acquisition
             }
         }
-        let info = extract_clients(
+        let mut info = extract_clients(
             client,
             url,
             &id,
             self.runtime.as_ref(),
             self.include_translated_subtitles,
         )?;
+        if self.playback_format.is_some() {
+            info.extra
+                .insert("ytui_playback_route".into(), "full".into());
+        }
         Ok(Some(info))
     }
 }

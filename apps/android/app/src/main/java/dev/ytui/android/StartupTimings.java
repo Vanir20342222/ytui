@@ -11,6 +11,7 @@ final class StartupTimings {
   private static final class Sample {
     long id, tap, resolved = -1, handoff = -1, output = -1;
     boolean prepared, video;
+    String route = "unknown";
 
     Sample(long id, long tap, boolean video) {
       this.id = id;
@@ -37,6 +38,15 @@ final class StartupTimings {
       sample.resolved = now - sample.tap;
       sample.prepared = prepared;
     }
+  }
+
+  static synchronized void route(long id, String route) {
+    Sample sample = find(id);
+    if (sample != null)
+      sample.route =
+          java.util.Arrays.asList("direct", "full", "offline", "direct-media").contains(route)
+              ? route
+              : "unknown";
   }
 
   static synchronized void mediaType(long id, boolean video) {
@@ -74,6 +84,8 @@ final class StartupTimings {
     for (Sample sample : samples) {
       text.append(sample.video ? "Video" : "Audio")
           .append(sample.prepared ? " prepared" : " cold")
+          .append(" route=")
+          .append(sample.route)
           .append(": resolve=")
           .append(sample.resolved)
           .append(", handoff=")

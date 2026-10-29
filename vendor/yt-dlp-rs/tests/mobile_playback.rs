@@ -8,6 +8,7 @@ fn downloader(proxy: &site_proxy::SiteProxy, format: Option<&str>) -> YoutubeDl 
         YoutubeOptions {
             no_playlist: true,
             playback_format: format.map(str::to_owned),
+            playback_visitor_data: Some("synthetic-visitor".into()),
             ..Default::default()
         },
         HttpOptions {
@@ -29,6 +30,7 @@ fn mobile_paired_video_uses_one_player_request_and_keeps_requested_quality() {
         .extract_info_with_format(VIDEO, Some(FORMAT))
         .unwrap();
     assert_eq!(info.height, Some(1080));
+    assert_eq!(info.extra["ytui_playback_route"], "direct");
     assert_eq!(info.requested_formats.len(), 2);
     let requests = proxy.requests.lock().unwrap();
     assert_eq!(requests.len(), 1, "requests: {requests:?}");
@@ -52,6 +54,7 @@ fn restricted_direct_response_falls_back_to_watch_acquisition() {
         .extract_info_with_format(VIDEO, Some(FORMAT))
         .unwrap();
     assert_eq!(info.height, Some(1080));
+    assert_eq!(info.extra["ytui_playback_route"], "full");
     let requests = proxy.requests.lock().unwrap();
     assert_eq!(requests.len(), 3, "requests: {requests:?}");
     assert!(requests[0].contains("/youtubei/v1/player"));
@@ -74,4 +77,36 @@ fn default_download_acquisition_still_begins_with_watch_page() {
     let _ = downloader(&proxy, None).extract_info_with_format(VIDEO, Some(FORMAT));
     let requests = proxy.requests.lock().unwrap();
     assert!(requests[0].contains("/watch?"), "requests: {requests:?}");
+}
+
+#[test]
+fn missing_browse_context_bootstraps_once_and_reuses_visitor_without_watch_requests() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct");
+    let dl = YoutubeDl::with_options(
+        YoutubeOptions {
+            no_playlist: true,
+            playback_format: Some(FORMAT.into()),
+            ..Default::default()
+        },
+        HttpOptions {
+            proxy: Some(proxy.url.clone()),
+            no_check_certificates: true,
+            socket_timeout: Some(2.0),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    for _ in 0..2 {
+        dl.extract_info_with_format(VIDEO, Some(FORMAT)).unwrap();
+    }
+    let requests = proxy.requests.lock().unwrap();
+    assert_eq!(requests.len(), 3, "requests: {requests:?}");
+    assert_eq!(
+        requests
+            .iter()
+            .filter(|request| request.contains("/visitor_id?"))
+            .count(),
+        1
+    );
+    assert!(requests.iter().all(|request| !request.contains("/watch?")));
 }

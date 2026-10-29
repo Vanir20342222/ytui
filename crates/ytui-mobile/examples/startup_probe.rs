@@ -29,6 +29,9 @@ async fn main() -> Result<()> {
                 let text = format!("{error:#}").to_ascii_lowercase();
                 let category = if text.contains("429") { "rate_limited" }
                     else if text.contains("blocked") { "provider_ip_block" }
+                    else if text.contains("403") { "provider_forbidden" }
+                    else if text.contains("no eligible media") { "native_formats_unavailable" }
+                    else if text.contains("error sending request") { "network_transport" }
                     else if text.contains("timed out") || text.contains("timeout") { "network_timeout" }
                     else { "extraction_unavailable" };
                 println!("{label}: resolve_ms={}, failure={category}; visible frame NOT measured", start.elapsed().as_millis());

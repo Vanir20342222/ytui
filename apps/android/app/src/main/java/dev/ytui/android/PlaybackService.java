@@ -1271,6 +1271,13 @@ public final class PlaybackService extends MediaSessionService {
                 SystemClock.elapsedRealtime(),
                 request.optBoolean("offline")
                     || request.getJSONObject("stream").optBoolean("resolution_cache_hit"));
+            StartupTimings.route(
+                timing,
+                request.optBoolean("offline")
+                    ? "offline"
+                    : request
+                        .getJSONObject("stream")
+                        .optString("resolution_route", "direct-media"));
             request
                 .put("startup_token", timing)
                 .put("quality", quality)
