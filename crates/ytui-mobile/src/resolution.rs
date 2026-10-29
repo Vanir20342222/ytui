@@ -2,7 +2,7 @@
 use anyhow::{Result, ensure};
 use serde_json::Value;
 use std::{
-    collections::HashMap,
+    collections::{HashMap, VecDeque},
     sync::{
         Arc, Mutex, Weak,
         atomic::{AtomicU64, Ordering},
@@ -32,7 +32,7 @@ pub(crate) struct Resolver {
     epoch: AtomicU64,
     entries: Mutex<HashMap<Key, Entry>>,
     flights: Mutex<HashMap<Key, Weak<tokio::sync::Mutex<()>>>>,
-    client: Mutex<Option<(Key, Arc<yt_dlp_rs::YoutubeDl>)>>,
+    client: Mutex<VecDeque<(Key, Arc<yt_dlp_rs::YoutubeDl>)>>,
 }
 impl Resolver {
     pub fn epoch(&self) -> u64 {
@@ -43,7 +43,7 @@ impl Resolver {
         let mut entries = self.entries.lock().expect("resolution cache");
         self.epoch.fetch_add(1, Ordering::AcqRel);
         entries.clear();
-        *client = None;
+        client.clear();
     }
     pub fn client(
         &self,
@@ -51,23 +51,55 @@ impl Resolver {
         create: impl FnOnce() -> Result<yt_dlp_rs::YoutubeDl>,
     ) -> Result<Arc<yt_dlp_rs::YoutubeDl>> {
         let mut cache = self.client.lock().expect("extractor client");
-        if let Some((scope, client)) = cache.as_ref()
-            && scope.epoch == key.epoch
-            && scope.account == key.account
-            && scope.account_index == key.account_index
-            && scope.proxy == key.proxy
-            && scope.audio == key.audio
-            && scope.quality == key.quality
-        {
-            return Ok(client.clone());
+        if let Some(index) = cache.iter().position(|(scope, _)| {
+            scope.epoch == key.epoch
+                && scope.account == key.account
+                && scope.account_index == key.account_index
+                && scope.proxy == key.proxy
+                && scope.audio == key.audio
+                && scope.quality == key.quality
+        }) {
+            let cached = cache.remove(index).expect("client index");
+            let client = cached.1.clone();
+            cache.push_back(cached);
+            return Ok(client);
         }
         let client = Arc::new(create()?);
         ensure!(
             key.epoch == self.epoch(),
             "Session or network changed during playback preparation"
         );
-        *cache = Some((key.clone(), client.clone()));
+        cache.push_back((key.clone(), client.clone()));
+        while cache.len() > 4 {
+            cache.pop_front();
+        }
         Ok(client)
+    }
+    fn cached(&self, key: &Key, source: &str, wait_ms: u64) -> Result<Option<Value>> {
+        ensure!(
+            key.epoch == self.epoch(),
+            "Session or network changed during playback preparation"
+        );
+        let mut cache = self.entries.lock().expect("resolution cache");
+        ensure!(
+            key.epoch == self.epoch(),
+            "Session or network changed during playback preparation"
+        );
+        cache.retain(|_, entry| entry.until > Instant::now());
+        Ok(cache.get_mut(key).map(|entry| {
+            entry.touched = Instant::now();
+            let mut value = entry.value.clone();
+            value["resolution_cache_hit"] = true.into();
+            value["resolution_cache_state"] = source.into();
+            value["resolution_flight_wait_ms"] = wait_ms.into();
+            // These describe this request, not the earlier request that filled the cache.
+            for key in [
+                "slot", "worker", "client", "extract", "visitor", "player", "stream",
+            ] {
+                value[format!("resolution_{key}_ms")] = 0.into();
+            }
+            value
+        }))
     }
     pub async fn get_or_resolve(
         &self,
@@ -75,6 +107,9 @@ impl Resolver {
         fresh: bool,
         load: impl Future<Output = Result<Value>>,
     ) -> Result<Value> {
+        if !fresh && let Some(value) = self.cached(&key, "ready", 0)? {
+            return Ok(value);
+        }
         let flight = {
             let mut flights = self.flights.lock().expect("resolution flights");
             flights.retain(|_, lock| lock.strong_count() > 0);
@@ -86,7 +121,12 @@ impl Resolver {
                 lock
             }
         };
+        let waiting = Instant::now();
         let _guard = flight.lock().await;
+        let waited = waiting.elapsed().as_millis() as u64;
+        if !fresh && let Some(value) = self.cached(&key, "joined", waited)? {
+            return Ok(value);
+        }
         ensure!(
             key.epoch == self.epoch(),
             "Session or network changed during playback preparation"
@@ -97,18 +137,13 @@ impl Resolver {
                 key.epoch == self.epoch(),
                 "Session or network changed during playback preparation"
             );
-            cache.retain(|_, entry| entry.until > Instant::now());
-            if !fresh && let Some(entry) = cache.get_mut(&key) {
-                entry.touched = Instant::now();
-                let mut value = entry.value.clone();
-                value["resolution_cache_hit"] = true.into();
-                return Ok(value);
-            }
             if fresh {
                 cache.remove(&key);
             }
         }
-        let value = load.await?;
+        let mut value = load.await?;
+        value["resolution_cache_state"] = "miss".into();
+        value["resolution_flight_wait_ms"] = waited.into();
         ensure!(
             key.epoch == self.epoch(),
             "Session or network changed during playback preparation"
@@ -231,6 +266,8 @@ mod tests {
         let b = b.unwrap();
         assert_eq!(a["url"], b["url"]);
         assert_ne!(a["resolution_cache_hit"], b["resolution_cache_hit"]);
+        assert_eq!(a["resolution_cache_state"], "miss");
+        assert_eq!(b["resolution_cache_state"], "joined");
         assert_eq!(count.load(Ordering::SeqCst), 1);
         let mut other = key();
         other.account = 1;
@@ -255,5 +292,59 @@ mod tests {
             .await;
         assert!(result.is_err());
         assert!(cache.entries.lock().unwrap().is_empty());
+    }
+    #[tokio::test]
+    async fn completed_lease_never_waits_for_an_unrelated_flight_holder() {
+        let cache = Resolver::default();
+        cache
+            .get_or_resolve(key(), false, async {
+                Ok(json!({"url":"https://cdn.test/media", "resolution_extract_ms":12000}))
+            })
+            .await
+            .unwrap();
+        let flight = Arc::new(tokio::sync::Mutex::new(()));
+        cache
+            .flights
+            .lock()
+            .unwrap()
+            .insert(key(), Arc::downgrade(&flight));
+        let _held = flight.lock().await;
+        let result = tokio::time::timeout(
+            Duration::from_secs(1),
+            cache.get_or_resolve(key(), false, async {
+                anyhow::bail!("A ready stream must not resolve again")
+            }),
+        )
+        .await
+        .expect("ready cache lookup blocked")
+        .unwrap();
+        assert_eq!(result["resolution_cache_state"], "ready");
+        assert_eq!(result["resolution_extract_ms"], 0);
+        assert_eq!(result["resolution_flight_wait_ms"], 0);
+    }
+
+    #[test]
+    fn alternating_audio_and_video_clients_reuses_connections_with_bounded_scopes() {
+        let cache = Resolver::default();
+        let created = AtomicU64::new(0);
+        let create = || {
+            created.fetch_add(1, Ordering::Relaxed);
+            yt_dlp_rs::YoutubeDl::new().map_err(Into::into)
+        };
+        let audio = key();
+        let mut video = audio.clone();
+        video.audio = false;
+        let first = cache.client(&audio, create).unwrap();
+        cache.client(&video, create).unwrap();
+        assert!(Arc::ptr_eq(&first, &cache.client(&audio, create).unwrap()));
+        assert_eq!(created.load(Ordering::Relaxed), 2);
+        for n in 0..8 {
+            let mut scope = audio.clone();
+            scope.account_index = n;
+            cache.client(&scope, create).unwrap();
+        }
+        assert_eq!(cache.client.lock().unwrap().len(), 4);
+        cache.clear();
+        assert!(cache.client.lock().unwrap().is_empty());
     }
 }

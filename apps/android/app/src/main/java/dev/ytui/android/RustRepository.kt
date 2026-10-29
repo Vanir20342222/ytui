@@ -43,13 +43,26 @@ internal class RpcError(
 internal object RustRpc {
     private val ids = AtomicLong(10_000)
     private val workers = ThreadPoolExecutor(8, 8, 0L, TimeUnit.SECONDS, ArrayBlockingQueue(64))
+    private val playbackWorkers =
+        ThreadPoolExecutor(2, 2, 0L, TimeUnit.SECONDS, ArrayBlockingQueue(8))
 
     suspend fun call(request: JSONObject): Any? = suspendCancellableCoroutine { continuation ->
         val id = ids.incrementAndGet()
         val payload = request.copyJson().put("request_id", id).toString()
+        val queuedAt = android.os.SystemClock.elapsedRealtime()
+        val timing = request.optLong("startup_token")
+        val pool =
+            if (request.optString("op") == "resolve" && !request.optBoolean("speculative"))
+                playbackWorkers
+            else workers
         val future =
             try {
-                workers.submit {
+                pool.submit {
+                    StartupTimings.stage(
+                        timing,
+                        "rpc_queue",
+                        android.os.SystemClock.elapsedRealtime() - queuedAt,
+                    )
                     try {
                         val reply = JSONObject(NativeBridge.request(payload))
                         if (!reply.optBoolean("ok"))
@@ -64,7 +77,14 @@ internal object RustRpc {
                                 reply.opt("data").takeUnless { it == JSONObject.NULL }
                             )
                     } catch (error: Exception) {
-                        if (continuation.isActive) continuation.resumeWithException(error)
+                        if (continuation.isActive) {
+                            StartupTimings.ended(
+                                timing,
+                                "failed",
+                                android.os.SystemClock.elapsedRealtime(),
+                            )
+                            continuation.resumeWithException(error)
+                        }
                     }
                 }
             } catch (busy: RejectedExecutionException) {
@@ -74,6 +94,7 @@ internal object RustRpc {
                 return@suspendCancellableCoroutine
             }
         continuation.invokeOnCancellation {
+            StartupTimings.ended(timing, "cancelled", android.os.SystemClock.elapsedRealtime())
             NativeBridge.cancel(id)
             future.cancel(true)
         }
@@ -621,14 +642,21 @@ internal class YtuiViewModel : ViewModel() {
         val job = task {
             actionError.value = null
             status.value = if (download) "Preparing download…" else "Resolving playback…"
+            val offlineAt = android.os.SystemClock.elapsedRealtime()
             val local =
                 if (!download && !preview && mobile.value.optBoolean("prefer_offline", true))
                     withContext(Dispatchers.IO) { OfflineStore.find(media.value, audio, quality) }
                 else null
+            StartupTimings.stage(
+                timing,
+                "offline",
+                android.os.SystemClock.elapsedRealtime() - offlineAt,
+            )
             val stream =
                 local?.optJSONObject("stream")
                     ?: RustRpc.objectCall(
                         "resolve",
+                        "startup_token" to timing,
                         "media" to media.value,
                         "audio" to audio,
                         "quality" to quality,
@@ -639,6 +667,7 @@ internal class YtuiViewModel : ViewModel() {
                 android.os.SystemClock.elapsedRealtime(),
                 local != null || stream.optBoolean("resolution_cache_hit"),
             )
+            if (local == null) MediaBridge.recordResolutionTimings(timing, stream)
             StartupTimings.route(
                 timing,
                 if (local != null) "offline"

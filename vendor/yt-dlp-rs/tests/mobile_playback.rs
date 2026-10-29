@@ -148,3 +148,61 @@ fn direct_challenges_do_not_silently_downgrade_offered_1080p_to_a_muxed_360p_fal
     assert_eq!(info.extra["ytui_playback_route"], "full");
     assert_eq!(proxy.requests.lock().unwrap().len(), 3);
 }
+
+#[test]
+fn usable_direct_streams_do_not_fetch_optional_manifests_for_video_or_audio() {
+    for selector in [FORMAT, "bestaudio/best"] {
+        let proxy = site_proxy::SiteProxy::start("youtube-direct-optional-manifests");
+        let info = downloader(&proxy, Some(selector))
+            .extract_info_with_format(VIDEO, Some(selector))
+            .unwrap();
+        assert_eq!(info.extra["ytui_playback_route"], "direct");
+        if selector == FORMAT {
+            assert_eq!(info.height, Some(1080));
+        } else {
+            assert_eq!(info.vcodec.as_deref(), Some("none"));
+        }
+        let requests = proxy.requests.lock().unwrap();
+        assert_eq!(
+            requests.len(),
+            1,
+            "Optional manifests must not be on the first-frame path: {requests:?}"
+        );
+    }
+}
+
+#[test]
+fn manifest_only_direct_response_keeps_necessary_hls_without_watch_refetch() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-only");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap_or_else(|error| panic!("{error}; requests={:?}", proxy.requests.lock().unwrap()));
+    assert_eq!(info.extra["ytui_playback_route"], "direct");
+    assert_eq!(info.height, Some(720));
+    let requests = proxy.requests.lock().unwrap();
+    assert!(requests.len() <= 4, "{requests:?}");
+    assert!(requests.iter().all(|request| !request.contains("/watch?")));
+    assert!(requests[1].contains("manifest.test/hls/master.m3u8"));
+}
+
+#[test]
+fn optional_manifest_is_required_when_it_can_improve_a_lower_direct_resolution() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-quality");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap();
+    assert_eq!(info.extra["ytui_playback_route"], "direct");
+    assert_eq!(
+        info.height,
+        Some(720),
+        "Do not start the direct 360p fallback while HLS offers 720p"
+    );
+    assert!(
+        proxy
+            .requests
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|url| url.contains("manifest.test/hls/master.m3u8"))
+    );
+}

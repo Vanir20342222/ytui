@@ -301,7 +301,15 @@ fn extract_clients(
         crate::screen::extracting_url(&format!("https://www.youtube.com/watch?v={id}"))
     ));
     let acquired = watch::acquire(client, id, runtime)?;
-    extract_acquired(client, url, id, runtime, translated_manual, acquired)
+    extract_acquired(
+        client,
+        url,
+        id,
+        runtime,
+        translated_manual,
+        &acquired,
+        false,
+    )
 }
 
 fn extract_acquired(
@@ -310,7 +318,8 @@ fn extract_acquired(
     id: &str,
     runtime: Option<&challenge::Runtime>,
     translated_manual: bool,
-    acquired: watch::Acquired,
+    acquired: &watch::Acquired,
+    direct_streams_only: bool,
 ) -> Result<VideoInfo> {
     let first = |key: &str| {
         acquired
@@ -371,7 +380,13 @@ fn extract_acquired(
         dashy: false,
         missing_pot: false,
         skip_player_js: false,
-        skip_manifests: Default::default(),
+        // A usable direct playback response must not wait for optional HLS/DASH
+        // discovery. Only enumerate manifests when direct selection needs them.
+        skip_manifests: if direct_streams_only {
+            ["hls".into(), "dash".into()].into()
+        } else {
+            Default::default()
+        },
         premium: false,
     };
     let mut solver = JsSolver {
@@ -637,17 +652,7 @@ fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option
     if !format.starts_with("bestvideo") {
         return (None, false);
     }
-    let cap = format
-        .split("height<=")
-        .nth(1)
-        .and_then(|tail| {
-            tail.chars()
-                .take_while(char::is_ascii_digit)
-                .collect::<String>()
-                .parse::<u32>()
-                .ok()
-        })
-        .unwrap_or(u32::MAX);
+    let cap = playback_height_cap(format);
     let prefer_avc = format.contains("vcodec^=avc1");
     let height = |avc: bool| {
         formats
@@ -674,6 +679,62 @@ fn offered_playback_quality(acquired: &watch::Acquired, format: &str) -> (Option
     )
 }
 
+fn playback_height_cap(format: &str) -> u32 {
+    format
+        .split("height<=")
+        .nth(1)
+        .and_then(|tail| {
+            tail.chars()
+                .take_while(char::is_ascii_digit)
+                .collect::<String>()
+                .parse::<u32>()
+                .ok()
+        })
+        .unwrap_or(u32::MAX)
+}
+
+fn validate_playback(
+    info: VideoInfo,
+    format: &str,
+    offered: (Option<u32>, bool),
+    pending_manifests: bool,
+) -> Result<VideoInfo> {
+    // Repeat only selection on a clone; preserve the normal caller's processing.
+    let mut selected = info.clone();
+    crate::info::fill_format_fields(&mut selected.formats);
+    let fields: Vec<&str> = selected
+        .format_sort_fields
+        .iter()
+        .map(String::as_str)
+        .collect();
+    let sorter = crate::format_sort::FormatSorter::new(&[], &fields, false, false)
+        .map_err(|error| Error::FormatSelection(error.0))?;
+    crate::info::sort_formats(&mut selected.formats, &sorter);
+    selected.select_format(Some(format))?;
+    if offered
+        .0
+        .is_some_and(|height| selected.height.unwrap_or(0) < height)
+    {
+        return Err(unsupported(
+            "direct player needs full acquisition to preserve offered video quality",
+        ));
+    }
+    if offered.1 && selected.vcodec.as_deref() != Some("none") {
+        return Err(unsupported(
+            "direct player needs full acquisition for audio-only formats",
+        ));
+    }
+    if pending_manifests
+        && selected.vcodec.as_deref() != Some("none")
+        && selected.height.unwrap_or(0) < playback_height_cap(format)
+    {
+        return Err(unsupported(
+            "manifest discovery is needed before accepting a lower video resolution",
+        ));
+    }
+    Ok(info)
+}
+
 impl Extractor for ConfiguredYoutube {
     fn key(&self) -> &'static str {
         "Youtube"
@@ -695,43 +756,65 @@ impl Extractor for ConfiguredYoutube {
                 .as_ref()
                 .filter(|(_, at)| at.elapsed() < std::time::Duration::from_secs(1800))
                 .map(|(value, _)| value.clone());
+            let mut visitor_ms = 0;
+            let mut player_ms = 0;
             let fast = visitor
                 .map(Ok)
-                .unwrap_or_else(|| watch::acquire_visitor(client, &id))
+                .unwrap_or_else(|| {
+                    let at = std::time::Instant::now();
+                    let result = watch::acquire_visitor(client, &id);
+                    visitor_ms = at.elapsed().as_millis() as u64;
+                    result
+                })
                 .and_then(|visitor| {
                     *self.playback_visitor.lock().expect("playback visitor") =
                         Some((visitor.clone(), std::time::Instant::now()));
-                    watch::acquire_direct(client, &id, &visitor)
+                    let at = std::time::Instant::now();
+                    let result = watch::acquire_direct(client, &id, &visitor);
+                    player_ms = at.elapsed().as_millis() as u64;
+                    result
                 })
                 .and_then(|acquired| {
                     let offered = offered_playback_quality(&acquired, format);
-                    let info = extract_acquired(
-                        client,
-                        url,
-                        &id,
-                        self.runtime.as_ref(),
-                        self.include_translated_subtitles,
-                        acquired,
-                    )?;
-                    // Selection is repeated by the caller after normal processing;
-                    // this copy only determines whether the fast response is usable.
-                    let mut selected = info.clone();
-                    crate::info::fill_format_fields(&mut selected.formats);
-                    let extractor_fields: Vec<&str> = selected.format_sort_fields.iter().map(String::as_str).collect();
-                    let sorter = crate::format_sort::FormatSorter::new(&[], &extractor_fields, false, false)
-                        .map_err(|error| Error::FormatSelection(error.0))?;
-                    crate::info::sort_formats(&mut selected.formats, &sorter);
-                    selected.select_format(Some(format))?;
-                    if offered.0.is_some_and(|height| selected.height.unwrap_or(0) < height) {
-                        return Err(unsupported("direct player needs full acquisition to preserve offered video quality"));
-                    }
-                    if offered.1 && selected.vcodec.as_deref() != Some("none") {
-                        return Err(unsupported("direct player needs full acquisition for audio-only formats"));
-                    }
-                    Ok(info)
+                    let has_manifest = acquired.player_responses.iter().any(|response| {
+                        ["hlsManifestUrl", "dashManifestUrl"].iter().any(|key| {
+                            response
+                                .get("streamingData")
+                                .and_then(|data| data.get(key))
+                                .and_then(Value::as_str)
+                                .is_some_and(|url| !url.is_empty())
+                        })
+                    });
+                    let parse = |direct_streams_only| -> Result<VideoInfo> {
+                        let info = extract_acquired(
+                            client,
+                            url,
+                            &id,
+                            self.runtime.as_ref(),
+                            self.include_translated_subtitles,
+                            &acquired,
+                            direct_streams_only,
+                        )?;
+                        validate_playback(
+                            info,
+                            format,
+                            offered,
+                            direct_streams_only && has_manifest,
+                        )
+                    };
+                    parse(true).or_else(|error| {
+                        if has_manifest {
+                            parse(false)
+                        } else {
+                            Err(error)
+                        }
+                    })
                 });
             match fast {
                 Ok(mut info) => {
+                    info.extra
+                        .insert("ytui_visitor_ms".into(), visitor_ms.into());
+                    info.extra.insert("ytui_player_ms".into(), player_ms.into());
                     info.extra
                         .insert("ytui_playback_route".into(), "direct".into());
                     return Ok(Some(info));

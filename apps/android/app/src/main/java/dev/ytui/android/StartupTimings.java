@@ -5,18 +5,37 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Local, bounded, identifier-free tap-to-output measurements. All times are monotonic. */
 final class StartupTimings {
+  static final String[] PHASES = {
+    "selection",
+    "offline",
+    "rpc_queue",
+    "engine",
+    "flight_wait",
+    "slot",
+    "worker",
+    "client",
+    "extract",
+    "visitor",
+    "player",
+    "stream",
+    "decoder",
+    "ready"
+  };
   private static final AtomicLong ids = new AtomicLong();
   private static final ArrayDeque<Sample> samples = new ArrayDeque<>();
 
   private static final class Sample {
     long id, tap, resolved = -1, handoff = -1, output = -1;
     boolean prepared, video;
-    String route = "unknown";
+    String route = "unknown", cache = "unknown", disposition = "pending/cancelled";
+    long ended = -1;
+    long[] stages = new long[PHASES.length];
 
     Sample(long id, long tap, boolean video) {
       this.id = id;
       this.tap = tap;
       this.video = video;
+      java.util.Arrays.fill(stages, -1);
     }
   }
 
@@ -49,6 +68,37 @@ final class StartupTimings {
               : "unknown";
   }
 
+  static synchronized void stage(long id, String phase, long milliseconds) {
+    Sample sample = find(id);
+    int index = java.util.Arrays.asList(PHASES).indexOf(phase);
+    if (sample != null
+        && index >= 0
+        && sample.stages[index] < 0
+        && milliseconds >= 0
+        && milliseconds <= 3600000) sample.stages[index] = milliseconds;
+  }
+
+  static synchronized void cacheState(long id, String source) {
+    Sample sample = find(id);
+    if (sample == null || !java.util.Arrays.asList("ready", "joined", "miss").contains(source))
+      return;
+    sample.cache = source;
+    // Joining a still-running preload is not a stream prepared before the tap.
+    sample.prepared = "ready".equals(source);
+  }
+
+  static synchronized void ended(long id, String disposition, long now) {
+    Sample sample = find(id);
+    if (sample != null
+        && sample.output < 0
+        && sample.ended < 0
+        && now >= sample.tap
+        && java.util.Arrays.asList("failed", "cancelled").contains(disposition)) {
+      sample.disposition = disposition;
+      sample.ended = now - sample.tap;
+    }
+  }
+
   static synchronized void mediaType(long id, boolean video) {
     Sample sample = find(id);
     if (sample != null && sample.handoff < 0) sample.video = video;
@@ -65,6 +115,7 @@ final class StartupTimings {
     if (sample != null
         && sample.video == video
         && sample.handoff >= 0
+        && sample.ended < 0
         && now >= sample.tap
         && sample.output < 0) sample.output = now - sample.tap;
   }
@@ -99,9 +150,15 @@ final class StartupTimings {
           .append(sample.output)
           .append(
               sample.output < 0
-                  ? " pending/cancelled"
+                  ? " " + sample.disposition
                   : sample.video && sample.output > 2000 ? " OVER TARGET" : "")
-          .append('\n');
+          .append(" cache=")
+          .append(sample.cache);
+      if (sample.ended >= 0) text.append(" ended_ms=").append(sample.ended);
+      for (int i = 0; i < PHASES.length; i++)
+        if (sample.stages[i] >= 0)
+          text.append(" ").append(PHASES[i]).append("_ms=").append(sample.stages[i]);
+      text.append('\n');
     }
     return text.toString();
   }

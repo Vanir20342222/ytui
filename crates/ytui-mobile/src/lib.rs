@@ -924,6 +924,7 @@ impl Engine {
         atomic_write(&self.root.join("library.json"), &bytes)
     }
     async fn resolve(&self, r: &Value) -> Result<Value> {
+        let started = std::time::Instant::now();
         let media: Media = serde_json::from_value(r["media"].clone())?;
         let url = ytui_core::http_url(&media.url)?;
         if let Some(session) = self.session.lock().expect("session").as_ref() {
@@ -957,7 +958,8 @@ impl Engine {
             None
         };
         let client_key = key.clone();
-        self.resolver
+        let mut value = self
+            .resolver
             .get_or_resolve(key, r["fresh"].as_bool().unwrap_or(false), async {
                 if !ytui_core::youtube_host(url.host_str().unwrap_or_default()) {
                     let radio = self.radio.lock().expect("radio").clone();
@@ -973,41 +975,74 @@ impl Engine {
                     .expect("browser")
                     .playback_visitor(audio);
                 let pool = self.resolver.clone();
+                let slot_at = std::time::Instant::now();
                 let permit = extractor_slots().acquire_owned().await?;
-                let data = tokio::task::spawn_blocking(move || -> Result<Value> {
-                    let _permit = permit;
-                    let _background = background;
-                    let client = pool.client(&client_key, || {
-                        let jar = cookies.as_deref().map(account::native_jar).transpose()?;
-                        Ok(yt_dlp_rs::YoutubeDl::with_options(
-                            yt_dlp_rs::YoutubeOptions {
-                                no_playlist: true,
-                                playback_format: Some(mobile_format(audio, &quality)?),
-                                playback_visitor_data: visitor,
-                                js_runtime: if cfg!(target_os = "android") {
-                                    Some("ytui-android-js".into())
-                                } else {
-                                    None
+                let slot_ms = slot_at.elapsed().as_millis() as u64;
+                let worker_at = std::time::Instant::now();
+                let (data, client_ms, extract_ms, worker_ms) =
+                    tokio::task::spawn_blocking(move || -> Result<(Value, u64, u64, u64)> {
+                        let worker_ms = worker_at.elapsed().as_millis() as u64;
+                        let client_at = std::time::Instant::now();
+                        let _permit = permit;
+                        let _background = background;
+                        let client = pool.client(&client_key, || {
+                            let jar = cookies.as_deref().map(account::native_jar).transpose()?;
+                            Ok(yt_dlp_rs::YoutubeDl::with_options(
+                                yt_dlp_rs::YoutubeOptions {
+                                    no_playlist: true,
+                                    playback_format: Some(mobile_format(audio, &quality)?),
+                                    playback_visitor_data: visitor,
+                                    js_runtime: if cfg!(target_os = "android") {
+                                        Some("ytui-android-js".into())
+                                    } else {
+                                        None
+                                    },
+                                    ..Default::default()
                                 },
-                                ..Default::default()
-                            },
-                            yt_dlp_rs::HttpOptions {
-                                proxy: config.proxy,
-                                cookies: jar,
-                                socket_timeout: Some(12.0),
-                                ..Default::default()
-                            },
-                        )?)
-                    })?;
-                    Ok(serde_json::to_value(client.extract_info_with_format(
-                        &media.url,
-                        Some(&mobile_format(audio, &quality)?),
-                    )?)?)
-                })
-                .await??;
-                stream(&data, audio)
+                                yt_dlp_rs::HttpOptions {
+                                    proxy: config.proxy,
+                                    cookies: jar,
+                                    socket_timeout: Some(12.0),
+                                    ..Default::default()
+                                },
+                            )?)
+                        })?;
+                        let client_ms = client_at.elapsed().as_millis() as u64;
+                        let extract_at = std::time::Instant::now();
+                        let info = client.extract_info_with_format(
+                            &media.url,
+                            Some(&mobile_format(audio, &quality)?),
+                        )?;
+                        let extract_ms = extract_at.elapsed().as_millis() as u64;
+                        Ok((
+                            serde_json::to_value(info)?,
+                            client_ms,
+                            extract_ms,
+                            worker_ms,
+                        ))
+                    })
+                    .await??;
+                let stream_at = std::time::Instant::now();
+                let mut value = stream(&data, audio)?;
+                value["resolution_stream_ms"] = (stream_at.elapsed().as_millis() as u64).into();
+                for (name, ms) in [
+                    ("slot", slot_ms),
+                    ("worker", worker_ms),
+                    ("client", client_ms),
+                    ("extract", extract_ms),
+                ] {
+                    value[format!("resolution_{name}_ms")] = ms.into();
+                }
+                for phase in ["visitor", "player"] {
+                    if let Some(ms) = data[format!("ytui_{phase}_ms")].as_u64() {
+                        value[format!("resolution_{phase}_ms")] = ms.into();
+                    }
+                }
+                Ok(value)
             })
-            .await
+            .await?;
+        value["resolution_engine_ms"] = (started.elapsed().as_millis() as u64).into();
+        Ok(value)
     }
 }
 fn background_extractor_slots() -> Arc<tokio::sync::Semaphore> {

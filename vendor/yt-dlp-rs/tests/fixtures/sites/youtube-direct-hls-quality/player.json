@@ -1,0 +1,33 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "BaW_jenozKc",
+    "title": "Saved YouTube HLS fixture",
+    "lengthSeconds": "2",
+    "isLiveContent": false
+  },
+  "streamingData": {
+    "hlsManifestUrl": "https://manifest.test/hls/master.m3u8",
+    "formats": [
+      {
+        "itag": 18,
+        "url": "https://rr1.googlevideo.test/videoplayback?itag=18&client=visionos",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "bitrate": 100018,
+        "lastModified": "1",
+        "approxDurationMs": "10000",
+        "contentLength": "792",
+        "width": 640,
+        "height": 360,
+        "quality": "medium",
+        "qualityLabel": "360p",
+        "fps": 30,
+        "audioQuality": "AUDIO_QUALITY_LOW",
+        "audioSampleRate": "44100",
+        "audioChannels": 2
+      }
+    ]
+  }
+}
