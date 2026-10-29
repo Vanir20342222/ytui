@@ -16,6 +16,7 @@ public final class StartupTimingsTest {
     StartupTimings.output(token, 2450, true);
     assertEquals(-1, StartupTimings.total(token)); // no player handoff yet
     StartupTimings.handoff(token, 2500);
+    assertEquals(1700, StartupTimings.elapsed(token, 2700));
     StartupTimings.output(token, 2600, false);
     assertEquals(-1, StartupTimings.total(token));
     StartupTimings.output(token, 3200, true);

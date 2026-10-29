@@ -134,6 +134,20 @@ class StartupUiTest {
                             MediaRuntimeTest.status().optJSONObject("media") == null
                         }
                     }
+                    scenario.onActivity { vm.get().playerOpen.value = false }
+                    compose.onNodeWithTag("settings-button").performClick()
+                    compose.onNodeWithTag("settings-Performance").performClick()
+                    compose.onNodeWithTag("startup-timings").assertIsDisplayed()
+                    compose.onNodeWithTag("copy-startup-timings").performScrollTo().performClick()
+                    scenario.onActivity {
+                        val clipboard =
+                            it.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                        val text = clipboard.primaryClip?.getItemAt(0)?.coerceToText(it).toString()
+                        Assert.assertTrue(text.contains("Video prepared"))
+                        Assert.assertFalse(text.contains("http"))
+                    }
+                    MediaRuntimeTest.capture("startup-settings.png")
                 }
             }
         } finally {
