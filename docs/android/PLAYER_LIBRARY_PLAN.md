@@ -176,3 +176,15 @@ cover request to exercise recovery. Failure evidence includes the catalog state
 and decoder-versus-displayed-surface ownership. Local debug build, 14 JVM tests,
 lint and instrumentation compilation pass; hosted pixel and tablet checks are
 still required before this change is qualified.
+
+`a4df91f` passes visible inline and landscape video, the tablet catalog, first-503
+artwork recovery and all 13 themes (25 total cases: 23 pass, one failure and one
+public opt-in skip). The remaining fullscreen-exit assertion
+is intercepted by Android's delayed first-use tutorial: the retained hierarchy
+and screenshot show `android:id/immersive_cling_title` arriving after the initial
+three-second observation. Control acquisition now observes that specific system
+prompt throughout the touch interaction, then verifies both exit paths and
+visible video after returning. Music-only activity transitions respect reduced
+motion, video surfaces never animate between windows, and the covered catalog
+is removed from accessibility while the focused screen is open. These stronger
+checks need a new emulator pass before final publication.

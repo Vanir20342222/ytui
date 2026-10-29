@@ -121,6 +121,70 @@ public final class MediaRuntimeTest {
         device.wait(androidx.test.uiautomator.Until.gone(title), 3000));
   }
 
+  static androidx.test.uiautomator.UiObject2 fullscreenExit(
+      androidx.test.uiautomator.UiDevice device) throws Exception {
+    androidx.test.uiautomator.BySelector hint =
+        androidx.test.uiautomator.By.res("android:id/immersive_cling_title");
+    androidx.test.uiautomator.BySelector button =
+        androidx.test.uiautomator.By.res(
+            java.util.regex.Pattern.compile(".*:id/exo_(minimal_)?fullscreen"));
+    long deadline = android.os.SystemClock.elapsedRealtime() + 15000;
+    long lastTap = 0;
+    while (android.os.SystemClock.elapsedRealtime() < deadline) {
+      // Android can attach its first-use tutorial after the initial app focus
+      // check. Observe it throughout control acquisition, not only at entry.
+      if (device.hasObject(hint)) {
+        acknowledgeSystemFullscreenHint(device);
+        continue;
+      }
+      if (fullscreenHasInputFocus()) {
+        androidx.test.uiautomator.UiObject2 exit = device.findObject(button);
+        if (exit != null) return exit;
+        long now = android.os.SystemClock.elapsedRealtime();
+        if (now - lastTap >= 1000) {
+          device.click(device.getDisplayWidth() / 4, device.getDisplayHeight() / 3);
+          lastTap = now;
+        }
+      }
+      Thread.sleep(100);
+    }
+    capture("native-video-controls.png");
+    device.dumpWindowHierarchy(
+        new File(MediaBridge.context.getExternalFilesDir(null), "native-video-controls.xml"));
+    throw new AssertionError("The native fullscreen exit button must be reachable");
+  }
+
+  static boolean videoVisible(String filename, boolean landscape) throws IOException {
+    android.graphics.Bitmap frame =
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+    if (frame == null) return false;
+    try {
+      if (landscape && frame.getWidth() <= frame.getHeight()) return false;
+      int red = 0, green = 0, blue = 0;
+      for (int y = 0; y < frame.getHeight(); y += 3)
+        for (int x = 0; x < frame.getWidth(); x += 3) {
+          int pixel = frame.getPixel(x, y);
+          int r = android.graphics.Color.red(pixel);
+          int g = android.graphics.Color.green(pixel);
+          int b = android.graphics.Color.blue(pixel);
+          if (r > 180 && g < 90 && b < 90) red++;
+          if (g > 180 && r < 90 && b < 90) green++;
+          if (b > 180 && r < 90 && g < 90) blue++;
+        }
+      boolean visible = red > 100 && green > 100 && blue > 100;
+      if (visible) {
+        try (FileOutputStream out =
+            new FileOutputStream(
+                new File(MediaBridge.context.getExternalFilesDir(null), filename))) {
+          frame.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+        }
+      }
+      return visible;
+    } finally {
+      frame.recycle();
+    }
+  }
+
   static void surfaceEvidence() {
     if (android.os.Build.VERSION.SDK_INT < 29) return;
     java.util.concurrent.CountDownLatch recorded = new java.util.concurrent.CountDownLatch(1);
@@ -293,32 +357,7 @@ public final class MediaRuntimeTest {
       command("repeat");
       await(
           "Decoded video was not visible in the native Android surface",
-          () -> {
-            android.graphics.Bitmap screenshot =
-                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-            if (screenshot == null) return false;
-            try {
-              int red = 0, green = 0, blue = 0;
-              for (int y = 0; y < screenshot.getHeight(); y += 3)
-                for (int x = 0; x < screenshot.getWidth(); x += 3) {
-                  int pixel = screenshot.getPixel(x, y),
-                      r = android.graphics.Color.red(pixel),
-                      g = android.graphics.Color.green(pixel),
-                      b = android.graphics.Color.blue(pixel);
-                  if (r > 180 && g < 90 && b < 90) red++;
-                  if (g > 180 && r < 90 && b < 90) green++;
-                  if (b > 180 && r < 90 && g < 90) blue++;
-                }
-              try (FileOutputStream out =
-                  new FileOutputStream(
-                      new File(context.getExternalFilesDir(null), "video-player.png"))) {
-                screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
-              }
-              return red > 100 && green > 100 && blue > 100;
-            } finally {
-              screenshot.recycle();
-            }
-          });
+          () -> videoVisible("video-player.png", false));
       long fullscreenGeneration = PlaybackService.current.generation;
       long inlineFirstFrameMs = status().getLong("first_frame_ms");
       assertTrue("The decoder must report its first frame", inlineFirstFrameMs > 0);
@@ -343,55 +382,27 @@ public final class MediaRuntimeTest {
           "Fullscreen must reuse the prepared decoder",
           fullscreenGeneration,
           PlaybackService.current.generation);
+      fullscreenExit(device);
       await(
-          "Fullscreen must display the decoded RGB fixture, not the previous dialog",
-          () -> {
-            android.graphics.Bitmap frame =
-                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-            if (frame == null) return false;
-            try {
-              if (frame.getWidth() <= frame.getHeight()) return false;
-              int red = 0, green = 0, blue = 0;
-              for (int y = 0; y < frame.getHeight(); y += 8)
-                for (int x = 0; x < frame.getWidth(); x += 8) {
-                  int pixel = frame.getPixel(x, y);
-                  int r = android.graphics.Color.red(pixel);
-                  int g = android.graphics.Color.green(pixel);
-                  int b = android.graphics.Color.blue(pixel);
-                  if (r > 180 && g < 90 && b < 90) red++;
-                  if (g > 180 && r < 90 && b < 90) green++;
-                  if (b > 180 && r < 90 && g < 90) blue++;
-                }
-              if (red < 100 || green < 100 || blue < 100) return false;
-              try (FileOutputStream out =
-                  new FileOutputStream(
-                      new File(context.getExternalFilesDir(null), "native-video-fullscreen.png"))) {
-                frame.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
-              }
-              return true;
-            } finally {
-              frame.recycle();
-            }
-          });
-      androidx.test.uiautomator.UiObject2 exitFullscreen =
-          device.findObject(
-              androidx.test.uiautomator.By.res(
-                  java.util.regex.Pattern.compile(".*:id/exo_(minimal_)?fullscreen")));
-      if (exitFullscreen == null) {
-        device.click(device.getDisplayWidth() / 4, device.getDisplayHeight() / 3);
-        exitFullscreen =
-            device.wait(
-                androidx.test.uiautomator.Until.findObject(
-                    androidx.test.uiautomator.By.res(
-                        java.util.regex.Pattern.compile(".*:id/exo_(minimal_)?fullscreen"))),
-                5000);
-      }
+          "Fullscreen must display the decoded RGB fixture",
+          () -> videoVisible("native-video-fullscreen.png", true));
+      androidx.test.uiautomator.UiObject2 exitFullscreen = fullscreenExit(device);
       capture("native-video-controls.png");
       device.dumpWindowHierarchy(
           new File(context.getExternalFilesDir(null), "native-video-controls.xml"));
-      assertNotNull("The native fullscreen exit button must be reachable", exitFullscreen);
+      exitFullscreen = fullscreenExit(device);
       exitFullscreen.click();
-      await("Fullscreen did not return to the focused player", () -> !FullscreenActivity.visible);
+      await(
+          "Fullscreen did not return to the focused player",
+          () -> {
+            if (!FullscreenActivity.visible) return true;
+            if (device.hasObject(
+                androidx.test.uiautomator.By.res("android:id/immersive_cling_title"))) {
+              acknowledgeSystemFullscreenHint(device);
+              fullscreenExit(device).click();
+            }
+            return !FullscreenActivity.visible;
+          });
       assertEquals(fullscreenGeneration, PlaybackService.current.generation);
       assertEquals(
           "Surface switches must not overwrite startup latency",
@@ -411,6 +422,15 @@ public final class MediaRuntimeTest {
       device.pressBack();
       await("Android Back must exit fullscreen", () -> !FullscreenActivity.visible);
       assertEquals(fullscreenGeneration, PlaybackService.current.generation);
+      assertNotNull(
+          "Focused player must return after Android Back",
+          device.wait(
+              androidx.test.uiautomator.Until.findObject(
+                  androidx.test.uiautomator.By.desc("Fullscreen video")),
+              5000));
+      await(
+          "Returning from fullscreen must restore visible inline video",
+          () -> videoVisible("native-video-return.png", false));
       command("pause");
       await("Pause was not applied", () -> status().optBoolean("paused"));
       command("repeat");

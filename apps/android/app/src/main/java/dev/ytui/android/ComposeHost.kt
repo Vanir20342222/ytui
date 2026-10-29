@@ -3,9 +3,16 @@ package dev.ytui.android
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -42,6 +49,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -178,6 +186,8 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val account by vm.account.collectAsState()
     val playerOpen by vm.playerOpen.collectAsState()
     val fullscreen by ComposeHost.fullscreen.collectAsState()
+    val videoPlayer by
+        remember(vm) { vm.player.map { it.video }.distinctUntilChanged() }.collectAsState(false)
     val hasPlayer by
         remember(vm) { vm.player.map { it.media != null }.distinctUntilChanged() }
             .collectAsState(false)
@@ -261,6 +271,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                 Box(
                     Modifier.fillMaxSize()
                         .background(background)
+                        .then(if (playerOpen) Modifier.clearAndSetSemantics {} else Modifier)
                         .testTag("app-background")
                         .semantics { stateDescription = if (ready) "Ready" else "Loading settings" }
                         .safeDrawingPadding()
@@ -395,23 +406,37 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         }
                     }
                 }
-                if (playerOpen && !fullscreen)
-                    Panel(
-                        "Now playing",
-                        { vm.playerOpen.value = false },
-                        full = true,
-                        scroll = false,
+                if (!fullscreen) {
+                    val animate = !config.optBoolean("reduced_motion") && !videoPlayer
+                    AnimatedVisibility(
+                        visible = playerOpen,
+                        enter =
+                            if (animate)
+                                fadeIn(tween(160)) + slideInVertically(tween(220)) { it / 8 }
+                            else EnterTransition.None,
+                        exit =
+                            if (animate)
+                                fadeOut(tween(120)) + slideOutVertically(tween(160)) { it / 10 }
+                            else ExitTransition.None,
                     ) {
-                        FocusedPlayer(
-                            vm,
-                            minimize = { vm.playerOpen.value = false },
-                            onQueue = {
-                                dialog = "queue"
-                                vm.loadQueue()
-                            },
-                            onMore = { dialog = "player-options" },
-                        )
+                        Panel(
+                            "Now playing",
+                            { vm.playerOpen.value = false },
+                            full = true,
+                            scroll = false,
+                        ) {
+                            FocusedPlayer(
+                                vm,
+                                minimize = { vm.playerOpen.value = false },
+                                onQueue = {
+                                    dialog = "queue"
+                                    vm.loadQueue()
+                                },
+                                onMore = { dialog = "player-options" },
+                            )
+                        }
                     }
+                }
                 when (dialog) {
                     "player-options" ->
                         Panel("Playback options", { dialog = "" }) {
