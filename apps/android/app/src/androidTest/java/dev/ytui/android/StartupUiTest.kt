@@ -35,6 +35,7 @@ class StartupUiTest {
         }
         val original = MobileSettings.snapshot()
         MobileSettings.save(json("preload_next" to false, "autoplay_related" to false))
+        val confirmations = StringBuilder()
         try {
             MediaRuntimeTest.FixtureServer(file).use { server ->
                 RuntimeTest.launchOffline().use { scenario ->
@@ -103,27 +104,41 @@ class StartupUiTest {
                             "${if (prepared) "Prepared" else "Cold"} tap to visible frame was $elapsed ms\n${StartupTimings.report()}",
                             elapsed <= 2000,
                         )
+                        var rgb = false
+                        var observed = -1L
+                        do {
+                            observed =
+                                StartupTimings.elapsed(
+                                    PlaybackService.current.startupToken,
+                                    android.os.SystemClock.elapsedRealtime(),
+                                )
+                            if (observed < 0 || observed > 2000) break
+                            rgb =
+                                MediaRuntimeTest.videoVisible(
+                                    "startup-${if(prepared) "prepared" else "cold"}.png",
+                                    false,
+                                    true,
+                                )
+                            if (!rgb) Thread.sleep(16)
+                        } while (!rgb)
+                        confirmations.append(
+                            "${if(prepared) "prepared" else "cold"} screenshot_confirmation_ms=$observed\n"
+                        )
+                        if (!rgb) MediaRuntimeTest.capture("startup-missing-frame.png")
                         Assert.assertTrue(
-                            "Frame event must correspond to a visible RGB image",
-                            MediaRuntimeTest.videoVisible(
-                                "startup-${if(prepared) "prepared" else "cold"}.png",
-                                false,
-                                true,
-                            ),
+                            "RGB image was not presented within 2000 ms: $observed ms\n${StartupTimings.report()}",
+                            rgb && observed in 0..2000,
                         )
                         MediaRuntimeTest.command("stop")
                         compose.waitUntil(10000) {
                             MediaRuntimeTest.status().optJSONObject("media") == null
                         }
                     }
-                    File(
-                            instrumentation.targetContext.getExternalFilesDir(null),
-                            "startup-timings.txt",
-                        )
-                        .writeText(StartupTimings.report())
                 }
             }
         } finally {
+            File(instrumentation.targetContext.getExternalFilesDir(null), "startup-timings.txt")
+                .writeText(StartupTimings.report() + confirmations)
             MobileSettings.save(original)
         }
     }

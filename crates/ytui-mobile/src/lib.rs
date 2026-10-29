@@ -946,6 +946,16 @@ impl Engine {
             audio,
             quality: quality.clone(),
         };
+        // Wait for background capacity before taking a per-video flight lock.
+        // Foreground taps can use their reserved slot while cancelled blocking
+        // speculation finishes, and the final settled viewport still gets warmed.
+        let background = if r["speculative"].as_bool().unwrap_or(false)
+            && ytui_core::youtube_host(url.host_str().unwrap_or_default())
+        {
+            Some(background_extractor_slots().acquire_owned().await?)
+        } else {
+            None
+        };
         let client_key = key.clone();
         self.resolver
             .get_or_resolve(key, r["fresh"].as_bool().unwrap_or(false), async {
@@ -963,11 +973,6 @@ impl Engine {
                     .expect("browser")
                     .playback_visitor(audio);
                 let pool = self.resolver.clone();
-                let background = if r["speculative"].as_bool().unwrap_or(false) {
-                    Some(background_extractor_slots().try_acquire_owned()?)
-                } else {
-                    None
-                };
                 let permit = extractor_slots().acquire_owned().await?;
                 let data = tokio::task::spawn_blocking(move || -> Result<Value> {
                     let _permit = permit;

@@ -69,6 +69,11 @@ final class StartupTimings {
         && sample.output < 0) sample.output = now - sample.tap;
   }
 
+  static synchronized long elapsed(long id, long now) {
+    Sample sample = find(id);
+    return sample == null || now < sample.tap ? -1 : now - sample.tap;
+  }
+
   static synchronized long total(long id) {
     Sample sample = find(id);
     return sample == null ? -1 : sample.output;

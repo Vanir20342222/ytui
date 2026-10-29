@@ -25,12 +25,23 @@ final class VisibleFrameTracker implements Player.Listener {
   @Override
   public void onRenderedFirstFrame() {
     PlaybackService service = PlaybackService.current;
-    if (service != null
-        && player == service.controlsPlayer
-        && view.getPlayer() == player
-        && view.isShown()
-        && view.getWindowVisibility() == View.VISIBLE
-        && view.getWidth() > 0
-        && view.getHeight() > 0) service.visibleFrame();
+    if (service == null) return;
+    final long generation = service.generation, timing = service.startupToken;
+    // A codec's surface-release event precedes TextureView drawing. Allow a
+    // complete UI frame before recording view output, without blocking the UI.
+    view.postOnAnimation(
+        () ->
+            view.postOnAnimation(
+                () -> {
+                  if (PlaybackService.current == service
+                      && service.generation == generation
+                      && service.startupToken == timing
+                      && player == service.controlsPlayer
+                      && view.getPlayer() == player
+                      && view.isShown()
+                      && view.getWindowVisibility() == View.VISIBLE
+                      && view.getWidth() > 0
+                      && view.getHeight() > 0) service.visibleFrame();
+                }));
   }
 }

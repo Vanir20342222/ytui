@@ -1,6 +1,6 @@
 # M9: two-second tap-to-visible-video target
 
-Measure from the actual tap until the attached native view receives its first
+Measure from the actual tap until the attached native view presents its first
 decoded frame. Extraction, offline lookup, service initialization, source
 preparation and decoding all count. A poster, playing flag or decoder-only
 counter cannot satisfy this target. Report cold and prepared starts separately.
@@ -93,3 +93,19 @@ reuse it. A separate provider test covers busy locks, expiry and account isolati
 The timing report includes only an allowlisted direct/full/offline route label.
 The fresh cloud probe with visitor bootstrap failed at the network transport
 stage (169 ms); no visible-frame performance claim follows from this failure.
+
+### First hosted runtime finding
+
+Run 40864595426 executed 27 tests: 25 passed, one public test was explicitly
+skipped, and the new startup test failed RGB corroboration after a sub-2000 ms
+frame callback. This is not two-second acceptance. Codec surface release can
+precede TextureView presentation. The view counter now waits a full UI frame
+(two animation callbacks), scoped to the current request/generation. The benchmark
+polls actual screenshots only within 2000 ms of the recorded tap and retains its
+strict deadline, saving confirmation times and failure screenshots. Counters do
+not replace screenshot proof. All prior native renderer/control regressions
+passed on that run.
+
+Background admission now waits before acquiring a per-video flight. This keeps
+the final settled row eligible after older cancelled blocking work finishes,
+while a tap on a waiting candidate can use foreground capacity independently.
