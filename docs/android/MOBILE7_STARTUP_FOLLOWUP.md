@@ -47,6 +47,13 @@ first network response and first network byte stages, plus allowlisted quality
 and transport labels. Network stages are relative to handoff and include selected
 playlist requests; they are not claims of first segment data or audible output.
 
+The HLS preloader previously cached playlist text alone. It now warms a bounded
+first segment prefix (and a bounded initialization segment when present), using
+the same URI/byte-range cache identities as playback. Masters/live playlists are
+not recursively expanded or marked byte-ready. A native prepared-HLS check
+requires actual segment bytes in cache and no second first-segment HTTP request
+when playback starts; playlist-only warming cannot pass it.
+
 ## Qualification
 
 Fourteen offline TLS regressions cover direct request budgets, Best quality,

@@ -214,39 +214,87 @@ class StartupUiTest {
                 val url = "http://127.0.0.1:${socket.localPort}/hls/media.m3u8"
                 val master =
                     "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-STREAM-INF:BANDWIDTH=800000,CODECS=\"avc1.42c00d,mp4a.40.2\"\n$url\n"
-                val token = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true)
-                StartupTimings.resolved(token, android.os.SystemClock.elapsedRealtime(), false)
-                val request =
-                    json(
-                        "media" to
-                            json("url" to url, "title" to "HLS startup fixture", "kind" to "video"),
-                        "stream" to json("url" to url, "hls_master" to master),
-                        "audio" to false,
-                        "quality" to "best",
-                        "startup_token" to token,
+                for (prepared in listOf(false, true)) {
+                    if (prepared) {
+                        PlaybackCache.cancel()
+                        val base = "http://127.0.0.1:${socket.localPort}"
+                        bodies.keys.forEach { PlaybackCache.cache().removeResource(base + it) }
+                        paths.clear()
+                        MobileSettings.prefs()
+                            .edit()
+                            .putBoolean("preload_next", true)
+                            .putBoolean("preload_mobile", true)
+                            .commit()
+                        PlaybackCache.prefetch(json("url" to url, "kind" to "video"), false, "best")
+                        compose.waitUntil(10000) { PlaybackCache.ready }
+                        val first = "$base/hls/segment0.ts"
+                        Assert.assertTrue(
+                            "HLS preload must contain segment bytes, not only playlist text",
+                            PlaybackCache.cache()
+                                .getCachedBytes(
+                                    first,
+                                    0,
+                                    androidx.media3.common.C.LENGTH_UNSET.toLong(),
+                                ) > 0,
+                        )
+                        Assert.assertEquals(
+                            1,
+                            synchronized(paths) { paths.count { it == "/hls/segment0.ts" } },
+                        )
+                        MobileSettings.prefs().edit().putBoolean("preload_next", false).commit()
+                    }
+                    val token = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true)
+                    StartupTimings.resolved(token, android.os.SystemClock.elapsedRealtime(), false)
+                    val request =
+                        json(
+                            "media" to
+                                json(
+                                    "url" to url,
+                                    "title" to "HLS startup fixture",
+                                    "kind" to "video",
+                                ),
+                            "stream" to json("url" to url, "hls_master" to master),
+                            "audio" to false,
+                            "quality" to "best",
+                            "startup_token" to token,
+                        )
+                    MediaBridge.execute(json("op" to "play", "request" to request).toString())
+                    compose.waitUntil(10000) { StartupTimings.total(token) > 0 }
+                    Assert.assertTrue(
+                        "HLS first frame exceeded 2000 ms: ${StartupTimings.total(token)}",
+                        StartupTimings.total(token) <= 2000,
                     )
-                MediaBridge.execute(json("op" to "play", "request" to request).toString())
-                compose.waitUntil(10000) { StartupTimings.total(token) > 0 }
-                Assert.assertTrue(
-                    "HLS first frame exceeded 2000 ms: ${StartupTimings.total(token)}",
-                    StartupTimings.total(token) <= 2000,
-                )
-                Assert.assertTrue(MediaRuntimeTest.videoVisible("startup-hls.png", false))
-                Assert.assertTrue(
-                    StartupTimings.report().contains("quality=best transport=hls-chunkless")
-                )
-                val requested = synchronized(paths) { paths.toList() }
-                Assert.assertTrue(requested.contains("/hls/media.m3u8"))
-                Assert.assertTrue(requested.any { it.endsWith(".ts") })
-                Assert.assertTrue(
-                    "Only the selected media playlist and segments may be loaded: $requested",
-                    requested.all {
-                        it == "/hls/media.m3u8" || it.matches(Regex("/hls/segment[0-9]+\\.ts"))
-                    },
-                )
-                MediaRuntimeTest.command("stop")
+                    Assert.assertTrue(
+                        MediaRuntimeTest.videoVisible(
+                            if (prepared) "startup-hls-prepared.png" else "startup-hls.png",
+                            false,
+                        )
+                    )
+                    Assert.assertTrue(
+                        StartupTimings.report().contains("quality=best transport=hls-chunkless")
+                    )
+                    val requested = synchronized(paths) { paths.toList() }
+                    Assert.assertTrue(requested.contains("/hls/media.m3u8"))
+                    Assert.assertTrue(requested.any { it.endsWith(".ts") })
+                    Assert.assertTrue(
+                        "Only the selected media playlist and segments may be loaded: $requested",
+                        requested.all {
+                            it == "/hls/media.m3u8" || it.matches(Regex("/hls/segment[0-9]+\\.ts"))
+                        },
+                    )
+                    if (prepared)
+                        Assert.assertEquals(
+                            "Playback must reuse the warmed first segment",
+                            1,
+                            requested.count { it == "/hls/segment0.ts" },
+                        )
+                    MediaRuntimeTest.command("stop")
+                    compose.waitUntil(5000) { PlaybackService.current == null }
+                }
             }
         } finally {
+            File(instrumentation.targetContext.getExternalFilesDir(null), "startup-hls-timings.txt")
+                .writeText(StartupTimings.report())
             socket.close()
             server.join(2000)
             MobileSettings.save(original)
