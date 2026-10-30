@@ -329,6 +329,7 @@ class NativeUiTest {
                 listOf("Playback queue", "Recently played", "Lyrics", "Sleep timer", "About")) {
                 compose.onNodeWithTag("menu-button").performClick()
                 compose.onNodeWithText(label).performClick()
+                MediaRuntimeTest.capture("restyle-panel-${label.lowercase().replace(" ", "-")}.png")
                 compose.onNodeWithContentDescription("Close").assertIsDisplayed().performClick()
             }
             MediaRuntimeTest.capture("native-tablet.png")

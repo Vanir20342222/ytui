@@ -67,7 +67,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -298,7 +297,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Box(Modifier.size(28.dp), contentAlignment = Alignment.Center) {
-                                MediaIcon(Glyph.Play, Modifier.size(26.dp), accent)
+                                MediaIcon(Glyph.Play, Modifier.size(26.dp), mediaBrand(background))
                             }
                             Text(
                                 "ytui",
@@ -586,7 +585,10 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
         )
     if (vertical)
         NavigationRail(
-            Modifier.fillMaxHeight().width(88.dp).testTag("navigation-rail"),
+            Modifier.fillMaxHeight()
+                .width(if (LocalDensity.current.fontScale > 1.4f) 128.dp else 88.dp)
+                .verticalScroll(rememberScrollState())
+                .testTag("navigation-rail"),
             containerColor = MaterialTheme.colorScheme.background,
         ) {
             Spacer(Modifier.height(12.dp))
@@ -613,7 +615,7 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
         }
     else
         NavigationBar(
-            Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.4f) 112.dp else 80.dp)
+            Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.4f) 128.dp else 80.dp)
                 .testTag("bottom-navigation"),
             containerColor = MaterialTheme.colorScheme.background,
             tonalElevation = 0.dp,
@@ -716,18 +718,29 @@ internal fun Panel(
             Body(Modifier.fillMaxSize())
         }
     } else if (title == "About ytui") {
-        Dialog(close) {
-            Surface(
-                shape = MediaTokens.dialog,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ) {
-                Body(
-                    Modifier.fillMaxWidth()
-                        .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.9f)
-                        .padding(bottom = 16.dp)
+        AlertDialog(
+            onDismissRequest = close,
+            shape = MediaTokens.dialog,
+            title = { Text(title, Modifier.testTag("panel-header"), fontWeight = FontWeight.Bold) },
+            text = {
+                Column(
+                    Modifier.heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.65f)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    content = content,
                 )
-            }
-        }
+            },
+            confirmButton = {
+                TextButton(
+                    close,
+                    Modifier.heightIn(min = 48.dp).testTag("panel-close").semantics {
+                        contentDescription = "Close"
+                    },
+                ) {
+                    Text("CLOSE")
+                }
+            },
+        )
     } else {
         ModalBottomSheet(
             onDismissRequest = close,
@@ -862,7 +875,11 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                     .onFocusChanged { searchActive = it.isFocused }
                     .testTag("search-field"),
                 placeholder = {
-                    Text(if (tab == 3) "Search stations or genres" else "Search or paste a link")
+                    Text(
+                        if (tab == 3) "Search stations or genres" else "Search or paste a link",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 },
                 leadingIcon = { MediaIcon(Glyph.Search) },
                 trailingIcon = {
@@ -921,7 +938,9 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                     MediaChip(
                         category.optString("title"),
                         modifier = Modifier.testTag("category-${category.optString("title")}"),
-                        selected = category.opt("request")?.toString() == feed.request.toString(),
+                        selected =
+                            feed.request !in listOf("Home", "Playlists", "Liked") &&
+                                category.opt("request")?.toString() == feed.request.toString(),
                     ) {
                         vm.navigate(request = category.get("request"))
                     }
@@ -1115,7 +1134,9 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
         ) {
             Artwork(
                 media,
-                Modifier.fillMaxSize().clickable { vm.play(media) },
+                Modifier.fillMaxSize()
+                    .clickable { vm.play(media) }
+                    .semantics { contentDescription = "Play ${media.title}" },
                 config.optBoolean("thumbnails", true),
                 shape = if (square) MediaTokens.small else RoundedCornerShape(0.dp),
             )
@@ -1153,7 +1174,10 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
                 Spacer(Modifier.width(12.dp))
             }
             Column(
-                Modifier.weight(1f).clickable { vm.play(media) }.padding(top = 3.dp),
+                Modifier.weight(1f)
+                    .heightIn(min = 48.dp)
+                    .clickable { vm.play(media) }
+                    .padding(top = 3.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
@@ -1867,7 +1891,14 @@ private fun SettingsPanel(
             }
             Text(BuildConfig.VERSION_NAME, style = MaterialTheme.typography.labelSmall)
         } else
-            TextButton({ category = "" }, Modifier.testTag("settings-back")) {
+            TextButton(
+                { category = "" },
+                Modifier.heightIn(min = 48.dp).testTag("settings-back"),
+                colors =
+                    ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+            ) {
                 MediaIcon(Glyph.Back)
                 Spacer(Modifier.width(8.dp))
                 Text("All settings")
@@ -1942,18 +1973,11 @@ private fun SettingsPanel(
                             dismissButton = { TextButton({ themeMenu = false }) { Text("CANCEL") } },
                         )
                 }
-                TextButton(
-                    { vm.effect("pick", "kind" to "theme") },
-                    Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                ) {
-                    MediaIcon(Glyph.Palette)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Import a palette")
-                }
+                SheetAction(
+                    text = { Text("Import a palette") },
+                    leadingIcon = { MediaIcon(Glyph.Palette) },
+                    onClick = { vm.effect("pick", "kind" to "theme") },
+                )
                 SettingToggle(
                     "Thumbnails",
                     config.optBoolean("thumbnails", true),

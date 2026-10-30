@@ -85,3 +85,23 @@ empty/existing state; station networking/export parity are outside this pass.
 The missing original ZIP and lack of intermediate full-matrix runs mean those
 specific brief requirements cannot be claimed. The final matrix is comprehensive
 across the current implementation, rather than historical revisions.
+
+### First native run retained (not the final qualification)
+
+PR head `78835ec` / workflow merge source `27e6588`, Android run
+[41105556355](https://github.com/Vanir20342222/ytui/actions/runs/41105556355):
+**35 pass, one failure, one public-network skip**. The new wide-search geometry
+case measured its resized image before IO decode completed; the final test now
+waits for the actual image node before retaining the same quarter-width assertion.
+Existing media/strict-startup cases pass. No app ANR or Rust-panic markers appear.
+
+The run retained the full 156-image matrix. Visual inspection of all 12 contact
+sheets identified asynchronous capture problems: some Appearance captures still
+showed the preceding Settings frame. Review captures now await real UI idle;
+playback deadlines are untouched. Review also corrected duplicated selected pills
+for equivalent source/category requests, preserved a stable contrast-safe teal
+brand across themes, left-aligned palette import, filled navigation icon details,
+large-text navigation space and retained cover-play accessibility labels. A native
+play/pause icon still contained its original solid disc; original white glyph
+vectors replace that drawable inside the new translucent disc. These findings
+are kept with the initial artifact rather than represented as final passes.

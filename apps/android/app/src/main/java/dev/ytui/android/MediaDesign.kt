@@ -43,6 +43,9 @@ internal object MediaTokens {
     val pill = RoundedCornerShape(50)
     val sheet = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     val dialog = RoundedCornerShape(28.dp)
+    // Reuse the shared ytui dark/light accent values for a stable teal brand role.
+    val brandOnDark = Color(0xff6ddbc1)
+    val brandOnLight = Color(0xff006f62)
     val videoInk = Color.White
     val videoScrim = Color.Black.copy(alpha = 0.72f)
     val videoDisc = Color.Black.copy(alpha = 0.48f)
@@ -75,6 +78,17 @@ internal fun mediaReadableText(candidate: Color, background: Color): Color {
         if (mediaContrast(result, background) >= 4.5f) return result
     }
     return end
+}
+
+internal fun mediaBrand(background: Color): Color {
+    val candidate =
+        if (
+            mediaContrast(MediaTokens.brandOnDark, background) >=
+                mediaContrast(MediaTokens.brandOnLight, background)
+        )
+            MediaTokens.brandOnDark
+        else MediaTokens.brandOnLight
+    return mediaReadableText(candidate, background)
 }
 
 /** Pick the stronger black/white contrast, including imported and light palettes. */
@@ -128,6 +142,7 @@ internal fun MediaIcon(
     tint: Color = LocalContentColor.current,
     filled: Boolean = false,
 ) {
+    val cutout = MaterialTheme.colorScheme.background
     Canvas(modifier.size(24.dp)) {
         scale(size.width / 24f, size.height / 24f, Offset.Zero) {
             fun line(x: Float, y: Float, x2: Float, y2: Float) =
@@ -192,8 +207,22 @@ internal fun MediaIcon(
                 Glyph.Music -> {
                     outline(10f to 17f, 10f to 5f, 20f to 3f, 20f to 15f)
                     line(10f, 8f, 20f, 6f)
-                    drawOval(tint, Offset(3f, 15f), Size(7f, 5f))
-                    drawOval(tint, Offset(13f, 13f), Size(7f, 5f))
+                    drawOval(
+                        tint,
+                        Offset(3f, 15f),
+                        Size(7f, 5f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
+                    drawOval(
+                        tint,
+                        Offset(13f, 13f),
+                        Size(7f, 5f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
                 }
                 Glyph.Radio -> {
                     drawRoundRect(
@@ -205,13 +234,36 @@ internal fun MediaIcon(
                             else Stroke(1.8f),
                     )
                     line(5f, 8f, 18f, 3f)
-                    drawCircle(tint, 3f, Offset(8f, 15f), style = Stroke(1.8f))
-                    line(14f, 13f, 18f, 13f)
-                    line(14f, 17f, 18f, 17f)
+                    drawCircle(
+                        if (filled) cutout else tint,
+                        3f,
+                        Offset(8f, 15f),
+                        style = Stroke(1.8f),
+                    )
+                    for (y in listOf(13f, 17f)) drawLine(
+                        if (filled) cutout else tint,
+                        Offset(14f, y),
+                        Offset(18f, y),
+                        1.8f,
+                        StrokeCap.Round,
+                    )
                 }
                 Glyph.Download -> {
-                    outline(7f to 11f, 12f to 16f, 17f to 11f)
-                    line(12f, 3f, 12f, 16f)
+                    if (filled)
+                        outline(
+                            9f to 3f,
+                            15f to 3f,
+                            15f to 10f,
+                            19f to 10f,
+                            12f to 17f,
+                            5f to 10f,
+                            9f to 10f,
+                            closed = true,
+                        )
+                    else {
+                        outline(7f to 11f, 12f to 16f, 17f to 11f)
+                        line(12f, 3f, 12f, 16f)
+                    }
                     outline(4f to 16f, 4f to 21f, 20f to 21f, 20f to 16f)
                 }
                 Glyph.Search -> {
@@ -373,7 +425,12 @@ internal fun MediaChip(
 @Composable
 internal fun MediaIconButton(glyph: Glyph, label: String, tag: String = "", action: () -> Unit) {
     IconButton(action, Modifier.size(48.dp).testTag(tag).semantics { contentDescription = label }) {
-        MediaIcon(glyph)
+        val secondary = glyph == Glyph.Shuffle || glyph == Glyph.Repeat
+        MediaIcon(
+            glyph,
+            Modifier.size(if (secondary) 20.dp else 24.dp),
+            if (secondary) MaterialTheme.colorScheme.onSurfaceVariant else LocalContentColor.current,
+        )
     }
 }
 
@@ -386,7 +443,7 @@ internal fun SettingGroup(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 16.dp, start = 4.dp),
         )

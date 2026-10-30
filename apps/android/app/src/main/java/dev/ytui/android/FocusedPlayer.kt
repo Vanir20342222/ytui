@@ -197,7 +197,7 @@ internal fun FocusedPlayer(
         fun Art(modifier: Modifier) {
             BoxWithConstraints(
                 modifier.then(if (player.video) Modifier else dismiss),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.TopCenter,
             ) {
                 if (player.video && allowVideoSurface)
                     VideoSurface(

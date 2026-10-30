@@ -10,6 +10,7 @@ class MediaDesignTest {
     @Test
     fun secondaryInkStaysReadableOnRaisedImportedSurfaces() {
         for (surface in (0..255 step 8).map { Color(it, it, it) }) {
+            assertTrue(mediaContrast(mediaBrand(surface), surface) >= 4.5f)
             for (ink in listOf(Color.Black, Color.White, Color.Gray, Color.Cyan, Color.Magenta)) {
                 assertTrue(mediaContrast(mediaReadableText(ink, surface), surface) >= 4.5f)
             }

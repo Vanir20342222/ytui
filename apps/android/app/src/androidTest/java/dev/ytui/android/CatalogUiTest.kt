@@ -154,7 +154,7 @@ class CatalogUiTest {
                     .isNotEmpty()
             }
         } catch (error: Exception) {
-            MediaRuntimeTest.capture("native-catalog-error.png")
+            captureSettled("native-catalog-error.png")
             scenario.onActivity {
                 val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
                 android.util.Log.i(
@@ -206,13 +206,13 @@ class CatalogUiTest {
         val category = compose.onNodeWithTag("category-All").fetchSemanticsNode().boundsInRoot
         Assert.assertEquals(source.top, category.top, 2f)
         compose.onNodeWithTag("feed-filters").performScrollToNode(hasTestTag("source-Home"))
-        MediaRuntimeTest.capture("native-catalog.png")
+        captureSettled("native-catalog.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         for (label in
             listOf("Play now", "Preview", "Add to queue", "Save to library", "Download")) compose
             .onNodeWithText(label)
             .assertIsDisplayed()
-        MediaRuntimeTest.capture("native-card-menu.png")
+        captureSettled("native-card-menu.png")
         compose.onNodeWithText("Add to queue").performClick()
         compose.waitUntil(10_000) {
             var contains = false
@@ -267,7 +267,7 @@ class CatalogUiTest {
         Assert.assertEquals("Wide layout should show adjacent cards", first.top, second.top, 3f)
         Assert.assertTrue(second.left > first.left)
         compose.onNodeWithTag("settings-button").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-wide-catalog.png")
+        captureSettled("native-wide-catalog.png")
     }
 
     @Test
@@ -287,11 +287,11 @@ class CatalogUiTest {
                 .boundsInRoot
                 .left > 0,
         )
-        MediaRuntimeTest.capture("native-music.png")
+        captureSettled("native-music.png")
         compose.onNodeWithTag("settings-button").performClick()
         compose.onNodeWithTag("settings-Appearance").assertIsDisplayed().performClick()
         compose.onNodeWithTag("theme-selector").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-settings.png")
+        captureSettled("native-settings.png")
         compose.onNodeWithTag("settings-back").performClick()
         compose.onNodeWithTag("settings-Network").performClick()
         compose
@@ -369,7 +369,7 @@ class CatalogUiTest {
                     compose.onNodeWithTag("music-visualizer").isDisplayed()
                 }
             } finally {
-                MediaRuntimeTest.capture("native-player.png")
+                captureSettled("native-player.png")
                 android.util.Log.i(
                     "PlayerLayoutTest",
                     compose.onNodeWithTag("focused-player", useUnmergedTree = true).printToString(),
@@ -388,7 +388,20 @@ class CatalogUiTest {
                 return nodes.fetchSemanticsNodes().indices.any { nodes[it].isDisplayed() }
             }
             compose.waitUntil(10_000) { loadedCoverVisible() }
-            MediaRuntimeTest.capture("native-player.png")
+            captureSettled("native-player.png")
+            compose.onNodeWithTag("seek-slider").performTouchInput {
+                swipe(
+                    androidx.compose.ui.geometry.Offset(width * 0.2f, height / 2f),
+                    androidx.compose.ui.geometry.Offset(width * 0.5f, height / 2f),
+                    250,
+                )
+            }
+            MediaRuntimeTest.await(
+                "Restyled seek control must commit to the actual paused decoder"
+            ) {
+                val position = MediaRuntimeTest.status().optDouble("position")
+                position > 2.0 && position < 6.0
+            }
             for (style in listOf("vinyl", "vu", "orbit")) {
                 scenario.onActivity {
                     ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(false) { config ->
@@ -427,7 +440,7 @@ class CatalogUiTest {
                     )
                     Assert.assertEquals(record.left + record.width * 0.65f, label.center.x, 3f)
                 }
-                MediaRuntimeTest.capture("native-player-$style.png")
+                captureSettled("native-player-$style.png")
             }
             compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
@@ -543,13 +556,13 @@ class CatalogUiTest {
                 val prefix =
                     "restyle-${if (wide) "tablet" else "phone"}-${if (dark) "dark" else "light"}-$theme"
                 populate(1)
-                MediaRuntimeTest.capture("$prefix-feed.png")
+                captureSettled("$prefix-feed.png")
                 populate(2)
-                MediaRuntimeTest.capture("$prefix-music.png")
+                captureSettled("$prefix-music.png")
                 compose.onNodeWithTag("settings-button").performClick()
                 compose.onNodeWithTag("settings-Appearance").performClick()
                 compose.onNodeWithTag("theme-selector").assertIsDisplayed()
-                MediaRuntimeTest.capture("$prefix-settings.png")
+                captureSettled("$prefix-settings.png")
                 compose.onNodeWithContentDescription("Close").performClick()
             }
         }
@@ -575,6 +588,7 @@ class CatalogUiTest {
                     .isNotEmpty()
             }
             val cards = populate(1)
+            captureSettled("restyle-large-text-feed.png")
             compose
                 .onNodeWithTag("search-field")
                 .assertIsDisplayed()
@@ -584,15 +598,15 @@ class CatalogUiTest {
             device.pressBack()
             compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
             compose.onNodeWithText("Download").performScrollTo().assertIsDisplayed()
-            MediaRuntimeTest.capture("restyle-large-text-card-menu.png")
+            captureSettled("restyle-large-text-card-menu.png")
             compose.onNodeWithContentDescription("Close").performClick()
             compose.onNodeWithTag("settings-button").performClick()
             compose.onNodeWithTag("settings-Appearance").performClick()
             compose.onNodeWithTag("theme-selector").assertIsDisplayed().performClick()
             compose.onNodeWithTag("theme-ytui-light").performScrollTo().assertIsDisplayed()
-            MediaRuntimeTest.capture("restyle-large-text-theme-dialog.png")
+            captureSettled("restyle-large-text-theme-dialog.png")
             compose.onNodeWithText("CANCEL").performClick()
-            MediaRuntimeTest.capture("restyle-large-text-settings.png")
+            captureSettled("restyle-large-text-settings.png")
         } finally {
             device.executeShellCommand("settings put system font_scale 1.0")
         }
@@ -626,15 +640,31 @@ class CatalogUiTest {
         val second =
             compose.onNodeWithTag("media-card-${cards[1].key}").fetchSemanticsNode().boundsInRoot
         Assert.assertTrue("Search results must stack as wide rows", second.top >= first.bottom)
+        // Switching from grid to a quarter-width row changes the requested image size.
+        // Compose idleness does not await its IO decode; require the real image before measuring.
+        compose.waitUntil(10_000) {
+            compose
+                .onAllNodesWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
         val cover =
             compose
                 .onNodeWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
                 .fetchSemanticsNode()
                 .boundsInRoot
         Assert.assertEquals(0.25f, cover.width / (first.width - 32f * 2f), 0.03f)
-        MediaRuntimeTest.capture("restyle-tablet-search.png")
+        captureSettled("restyle-tablet-search.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         compose.onNodeWithText("Preview").assertIsDisplayed()
+    }
+
+    private fun captureSettled(filename: String) {
+        compose.waitForIdle()
+        // A semantics node can exist one transaction before its new window pixels.
+        // Wait for real UI idleness before taking review screenshots, not a playback deadline.
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+        MediaRuntimeTest.capture(filename)
     }
 
     private class CoverServer : AutoCloseable {
