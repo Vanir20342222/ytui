@@ -800,7 +800,12 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         TextField(
             query,
             { query = it },
-            Modifier.fillMaxWidth().testTag("search-field"),
+            // A single-line input should not stretch across a wide canvas;
+            // cap it and center it when the pane is wider than the cap.
+            Modifier.align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .widthIn(max = 720.dp)
+                .testTag("search-field"),
             placeholder = {
                 Text(if (tab == 3) "Search stations or genres" else "Search or paste a link")
             },
