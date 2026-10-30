@@ -22,6 +22,7 @@ final class PlaybackCache {
   private static Future<?> current;
   private static final AtomicLong requestIds = new AtomicLong(1_000_000_000L);
   private static volatile long activeRequest;
+  private static volatile boolean bytesPaused;
   private static String upcomingScope = "";
   private static final ConcurrentHashMap<Long, CacheWriter> writers = new ConcurrentHashMap<>();
   static volatile String upcomingUrl = "";
@@ -62,6 +63,14 @@ final class PlaybackCache {
     ready = false;
   }
 
+  // Preserve an extraction that the tapped item can join, but release speculative
+  // byte writers immediately, before foreground resolution (not several seconds
+  // later at the service handoff). Completed spans remain available.
+  static synchronized void pauseBytes() {
+    bytesPaused = true;
+    for (CacheWriter writer : writers.values()) writer.cancel();
+  }
+
   static boolean allowed(JSONObject media) {
     if (!MobileSettings.enabled("preload_next")
         || media.optBoolean("live")
@@ -96,6 +105,7 @@ final class PlaybackCache {
         && current != null
         && (!current.isDone() || ready)) return;
     cancel();
+    bytesPaused = false;
     long token = intent.get();
     long account = NativeBridge.accountIntent();
     long network = NetworkSettings.revision.get();
@@ -127,6 +137,7 @@ final class PlaybackCache {
                   if (!paired.isEmpty() && !paired.equals("null"))
                     warm(stream, paired, 192 * 1024, token);
                   if (token == intent.get()
+                      && !bytesPaused
                       && account == NativeBridge.accountIntent()
                       && network == NetworkSettings.revision.get()) {
                     ready = true;
@@ -156,7 +167,7 @@ final class PlaybackCache {
   }
 
   private static void warm(JSONObject stream, String url, int bytes, long token) throws Exception {
-    if (token != intent.get()) return;
+    if (token != intent.get() || bytesPaused) return;
     CacheWriter writer =
         new CacheWriter(
             source(stream).createDataSource(),
@@ -176,12 +187,12 @@ final class PlaybackCache {
                 .build(),
             new byte[32 * 1024],
             (length, cached, added) -> {
-              if (token != intent.get() || Thread.currentThread().isInterrupted())
+              if (token != intent.get() || bytesPaused || Thread.currentThread().isInterrupted())
                 throw new CancellationException();
             });
     writers.put(token, writer);
     try {
-      if (token != intent.get()) {
+      if (token != intent.get() || bytesPaused) {
         writer.cancel();
         return;
       }

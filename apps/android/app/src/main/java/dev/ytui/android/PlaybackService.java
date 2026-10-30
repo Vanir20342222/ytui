@@ -545,8 +545,42 @@ public final class PlaybackService extends MediaSessionService {
             : request.optBoolean("local") || media.optBoolean("live") || stream.optBoolean("live")
                 ? new androidx.media3.datasource.DefaultDataSource.Factory(this, http)
                 : PlaybackCache.source(stream);
+    long networkToken = startupToken, networkStart = startupAt;
+    java.util.concurrent.atomic.AtomicBoolean responseSeen =
+        new java.util.concurrent.atomic.AtomicBoolean();
+    java.util.concurrent.atomic.AtomicBoolean byteSeen =
+        new java.util.concurrent.atomic.AtomicBoolean();
+    DataSource.Factory traced =
+        () -> {
+          DataSource dataSource = upstream.createDataSource();
+          dataSource.addTransferListener(
+              new TransferListener() {
+                @Override
+                public void onTransferInitializing(
+                    DataSource source, DataSpec spec, boolean network) {}
+
+                @Override
+                public void onTransferStart(DataSource source, DataSpec spec, boolean network) {
+                  if (network && responseSeen.compareAndSet(false, true))
+                    StartupTimings.stage(
+                        networkToken, "net_response", SystemClock.elapsedRealtime() - networkStart);
+                }
+
+                @Override
+                public void onBytesTransferred(
+                    DataSource source, DataSpec spec, boolean network, int bytes) {
+                  if (network && bytes > 0 && byteSeen.compareAndSet(false, true))
+                    StartupTimings.stage(
+                        networkToken, "net_byte", SystemClock.elapsedRealtime() - networkStart);
+                }
+
+                @Override
+                public void onTransferEnd(DataSource source, DataSpec spec, boolean network) {}
+              });
+          return dataSource;
+        };
     DefaultMediaSourceFactory sources =
-        new DefaultMediaSourceFactory(upstream)
+        new DefaultMediaSourceFactory(traced)
             .setLoadErrorHandlingPolicy(
                 new androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy() {
                   @Override
@@ -579,10 +613,37 @@ public final class PlaybackService extends MediaSessionService {
                   .build());
       }
     }
+    String hlsMaster = request.optBoolean("offline") ? "" : stream.optString("hls_master");
+    // Rust preserves the chosen muxed HLS variant's CODECS in a small in-memory
+    // master. Media3 can prepare tracks without first sniffing a media segment.
+    // Downloads/offline reads retain their original URIs and cache identities.
+    boolean chunkless = !hlsMaster.isEmpty() && hlsMaster.length() <= 65536;
+    int contentType =
+        androidx.media3.common.util.Util.inferContentTypeForUriAndMimeType(
+            android.net.Uri.parse(stream.getString("url")), null);
+    StartupTimings.presentation(
+        startupToken,
+        playbackQuality,
+        request.optBoolean("offline")
+            ? "offline"
+            : chunkless
+                ? "hls-chunkless"
+                : contentType == C.CONTENT_TYPE_HLS
+                    ? "hls"
+                    : contentType == C.CONTENT_TYPE_DASH ? "dash" : "progressive");
+    String sourceUri =
+        chunkless
+            ? "data:application/vnd.apple.mpegurl;base64,"
+                + android.util.Base64.encodeToString(
+                    hlsMaster.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    android.util.Base64.NO_WRAP)
+            : stream.getString("url");
     MediaItem main =
         new MediaItem.Builder()
-            .setUri(stream.getString("url"))
-            .setCustomCacheKey(stream.isNull("cache_key") ? null : stream.optString("cache_key"))
+            .setUri(sourceUri)
+            .setMimeType(chunkless ? MimeTypes.APPLICATION_M3U8 : null)
+            .setCustomCacheKey(
+                chunkless || stream.isNull("cache_key") ? null : stream.optString("cache_key"))
             .setMediaId(media.optString("url"))
             .setSubtitleConfigurations(captions)
             .setMediaMetadata(metadata)

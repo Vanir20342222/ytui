@@ -341,6 +341,23 @@ pub(crate) fn extract_m3u8_optional(
     )
 }
 
+/// Mobile playback needs the master catalog, not every child's segment list.
+pub(crate) fn extract_m3u8_for_playback(
+    client: &Client,
+    manifest: &Url,
+    id: &str,
+) -> Option<crate::VideoInfo> {
+    extract_manifest_optional(
+        client,
+        manifest,
+        "youtube",
+        id,
+        true,
+        &|response| hls::from_response_for_playback(client, response, manifest),
+        ("m3u8 information", "HLS"),
+    )
+}
+
 /// Upstream `_extract_mpd_formats_and_subtitles(..., fatal=False)` (or
 /// `_extract_mpd_formats` without `keep_subtitles`), without an `mpd_id`.
 pub(crate) fn extract_mpd_optional(

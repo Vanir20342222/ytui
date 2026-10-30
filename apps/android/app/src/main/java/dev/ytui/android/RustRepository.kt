@@ -594,6 +594,7 @@ internal class YtuiViewModel : ViewModel() {
                     "quality" to quality,
                     "speculative" to true,
                 )
+                if (playbackJob?.isActive == true || playerOpen.value) return
                 if (index == 0) PlaybackCache.prefetch(media.value, media.audio, quality)
             } catch (cancel: CancellationException) {
                 throw cancel
@@ -639,6 +640,7 @@ internal class YtuiViewModel : ViewModel() {
         val epoch = accountEpoch
         val network = NetworkSettings.revision.get()
         if (!download) playbackJob?.cancel()
+        if (!download) PlaybackCache.pauseBytes()
         val job = task {
             actionError.value = null
             status.value = if (download) "Preparing download…" else "Resolving playback…"

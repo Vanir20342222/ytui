@@ -30,7 +30,7 @@ collect_evidence() {
     adb pull /sdcard/Android/data/$test_package/files/video-texture.png "$evidence/video-texture.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/$test_package/files/video-surface.png "$evidence/video-surface.png" > /dev/null 2>&1 || true
     adb pull /sdcard/Android/data/$test_package/files/startup-timings.txt "$evidence/startup-timings.txt" > /dev/null 2>&1 || true
-    for state in cold prepared missing-frame settings; do
+    for state in cold prepared missing-frame settings hls; do
         adb pull /sdcard/Android/data/$test_package/files/startup-$state.png "$evidence/startup-$state.png" > /dev/null 2>&1 || true
     done
     mkdir -p "$evidence/native-ui"

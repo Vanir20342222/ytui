@@ -94,7 +94,7 @@ impl Resolver {
             value["resolution_flight_wait_ms"] = wait_ms.into();
             // These describe this request, not the earlier request that filled the cache.
             for key in [
-                "slot", "worker", "client", "extract", "visitor", "player", "stream",
+                "slot", "worker", "client", "extract", "visitor", "player", "manifest", "stream",
             ] {
                 value[format!("resolution_{key}_ms")] = 0.into();
             }

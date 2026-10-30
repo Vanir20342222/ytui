@@ -235,6 +235,32 @@ pub(crate) fn from_response(
     force_hls: bool,
     m3u8_id: Option<&str>,
 ) -> Result<Option<VideoInfo>> {
+    from_response_inner(
+        client, response, original, referer, force_hls, m3u8_id, false,
+    )
+}
+
+/// Playback delegates media-playlist/segment loading to the player. A master
+/// already supplies the quality/codec/audio-group catalog; traversing every
+/// variant here adds serial requests and then the player fetches them again.
+pub(crate) fn from_response_for_playback(
+    client: &Client,
+    response: Response,
+    original: &Url,
+) -> Result<Option<VideoInfo>> {
+    from_response_inner(client, response, original, None, true, None, true)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn from_response_inner(
+    client: &Client,
+    response: Response,
+    original: &Url,
+    referer: Option<&Url>,
+    force_hls: bool,
+    m3u8_id: Option<&str>,
+    playback: bool,
+) -> Result<Option<VideoInfo>> {
     if !force_hls && !recognized(&response) {
         return Ok(None);
     }
@@ -407,17 +433,8 @@ pub(crate) fn from_response(
             // unnamed variants); playlists are still fetched variants first.
             let renditions = audio.len();
             for variant in variants {
-                let response = direct::probe(client, &variant.url, referer)?;
-                let (url, playlist) = read_playlist(response)?;
-                let Playlist::Media {
-                    fragments,
-                    discontinuity,
-                    discontinuities,
-                    ..
-                } = playlist
-                else {
-                    return Err(unsupported("nested HLS master playlists are not supported"));
-                };
+                let (url, fragments, discontinuity, discontinuities) =
+                    child_playlist(client, variant.url, referer, playback)?;
                 total_fragments = total_fragments
                     .checked_add(fragments.len())
                     .ok_or_else(|| unsupported("HLS master fragment count overflow"))?;
@@ -501,17 +518,8 @@ pub(crate) fn from_response(
             let mut alternates: Vec<bool> = Vec::new();
             for rendition in audio {
                 let alternate = rendition.alternate;
-                let response = direct::probe(client, &rendition.url, referer)?;
-                let (url, playlist) = read_playlist(response)?;
-                let Playlist::Media {
-                    fragments,
-                    discontinuity,
-                    discontinuities,
-                    ..
-                } = playlist
-                else {
-                    return Err(unsupported("nested HLS master playlists are not supported"));
-                };
+                let (url, fragments, discontinuity, discontinuities) =
+                    child_playlist(client, rendition.url, referer, playback)?;
                 total_fragments = total_fragments
                     .checked_add(fragments.len())
                     .ok_or_else(|| unsupported("HLS master fragment count overflow"))?;
@@ -615,6 +623,29 @@ pub(crate) fn from_response(
         }
     }
     Ok(Some(info))
+}
+
+fn child_playlist(
+    client: &Client,
+    url: Url,
+    referer: Option<&Url>,
+    playback: bool,
+) -> Result<(Url, Vec<crate::Fragment>, Vec<u32>, u32)> {
+    if playback {
+        return Ok((url, Vec::new(), Vec::new(), 0));
+    }
+    let response = direct::probe(client, &url, referer)?;
+    let (url, playlist) = read_playlist(response)?;
+    let Playlist::Media {
+        fragments,
+        discontinuity,
+        discontinuities,
+        ..
+    } = playlist
+    else {
+        return Err(unsupported("nested HLS master playlists are not supported"));
+    };
+    Ok((url, fragments, discontinuity, discontinuities))
 }
 
 #[cfg(test)]

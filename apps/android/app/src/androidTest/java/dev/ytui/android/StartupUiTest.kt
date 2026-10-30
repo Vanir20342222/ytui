@@ -164,6 +164,96 @@ class StartupUiTest {
     }
 
     @Test
+    fun selectedHlsCodecCatalogReachesTheVisiblePlayerWithoutAnotherMasterRequest() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val assets = instrumentation.context.assets
+        val bodies =
+            assets.list("hls")!!.associate { name ->
+                "/hls/$name" to assets.open("hls/$name").use { it.readBytes() }
+            }
+        val original = MobileSettings.snapshot()
+        MobileSettings.save(json("preload_next" to false, "autoplay_related" to false))
+        val socket = java.net.ServerSocket(0, 8, java.net.InetAddress.getByName("127.0.0.1"))
+        val paths = java.util.Collections.synchronizedList(mutableListOf<String>())
+        val server = Thread {
+            while (!socket.isClosed) {
+                try {
+                    socket.accept().use { client ->
+                        val reader = client.getInputStream().bufferedReader()
+                        val request = reader.readLine() ?: return@use
+                        val path = request.split(' ')[1].substringBefore('?')
+                        paths.add(path)
+                        while (!reader.readLine().isNullOrEmpty()) {}
+                        val body = bodies[path]
+                        val status = if (body == null) "404 Not Found" else "200 OK"
+                        val type =
+                            if (path.endsWith("m3u8")) "application/vnd.apple.mpegurl"
+                            else "video/mp2t"
+                        client.getOutputStream().apply {
+                            write(
+                                "HTTP/1.1 $status\r\nContent-Type: $type\r\nContent-Length: ${body?.size ?: 0}\r\nConnection: close\r\n\r\n"
+                                    .toByteArray()
+                            )
+                            if (body != null) write(body)
+                            flush()
+                        }
+                    }
+                } catch (_: java.io.IOException) {}
+            }
+        }
+        server.start()
+        try {
+            RuntimeTest.launchOffline().use { scenario ->
+                compose.waitUntil(10000) {
+                    compose.onAllNodesWithTag("app-background").fetchSemanticsNodes().isNotEmpty()
+                }
+                scenario.onActivity {
+                    ViewModelProvider(it)[YtuiViewModel::class.java].playerOpen.value = true
+                }
+                compose.waitForIdle()
+                val url = "http://127.0.0.1:${socket.localPort}/hls/media.m3u8"
+                val master =
+                    "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-STREAM-INF:BANDWIDTH=800000,CODECS=\"avc1.42c00d,mp4a.40.2\"\n$url\n"
+                val token = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true)
+                StartupTimings.resolved(token, android.os.SystemClock.elapsedRealtime(), false)
+                val request =
+                    json(
+                        "media" to
+                            json("url" to url, "title" to "HLS startup fixture", "kind" to "video"),
+                        "stream" to json("url" to url, "hls_master" to master),
+                        "audio" to false,
+                        "quality" to "best",
+                        "startup_token" to token,
+                    )
+                MediaBridge.execute(json("op" to "play", "request" to request).toString())
+                compose.waitUntil(10000) { StartupTimings.total(token) > 0 }
+                Assert.assertTrue(
+                    "HLS first frame exceeded 2000 ms: ${StartupTimings.total(token)}",
+                    StartupTimings.total(token) <= 2000,
+                )
+                Assert.assertTrue(MediaRuntimeTest.videoVisible("startup-hls.png", false))
+                Assert.assertTrue(
+                    StartupTimings.report().contains("quality=best transport=hls-chunkless")
+                )
+                val requested = synchronized(paths) { paths.toList() }
+                Assert.assertTrue(requested.contains("/hls/media.m3u8"))
+                Assert.assertTrue(requested.any { it.endsWith(".ts") })
+                Assert.assertTrue(
+                    "Only the selected media playlist and segments may be loaded: $requested",
+                    requested.all {
+                        it == "/hls/media.m3u8" || it.matches(Regex("/hls/segment[0-9]+\\.ts"))
+                    },
+                )
+                MediaRuntimeTest.command("stop")
+            }
+        } finally {
+            socket.close()
+            server.join(2000)
+            MobileSettings.save(original)
+        }
+    }
+
+    @Test
     fun foregroundResolutionBypassesSaturatedBackgroundRpcWorkers() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val file = File(instrumentation.targetContext.cacheDir, "rpc-priority-fixture.mp4")

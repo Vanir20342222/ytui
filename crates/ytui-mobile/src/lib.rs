@@ -1033,7 +1033,7 @@ impl Engine {
                 ] {
                     value[format!("resolution_{name}_ms")] = ms.into();
                 }
-                for phase in ["visitor", "player"] {
+                for phase in ["visitor", "player", "manifest"] {
                     if let Some(ms) = data[format!("ytui_{phase}_ms")].as_u64() {
                         value[format!("resolution_{phase}_ms")] = ms.into();
                     }
@@ -1377,9 +1377,91 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
             }
         }
     }
-    Ok(
-        json!({"url":url,"audio_url":audio_url,"resolution_route":data["ytui_playback_route"],"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)}),
-    )
+    let mut result = json!({"url":url,"audio_url":audio_url,"resolution_route":data["ytui_playback_route"],"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)});
+    if !audio
+        && audio_url.is_none()
+        && let Some(master) = playback_hls_master(primary)
+    {
+        result["hls_master"] = master.into();
+    }
+    Ok(result)
+}
+
+// Preserve the selected muxed variant's codec declaration for Media3 chunkless
+// preparation. Starting from its bare media playlist discards this information
+// and forces track discovery from segment bytes. All references stay absolute;
+// the in-memory one-variant master does not introduce another network request.
+fn playback_hls_master(primary: &Value) -> Option<String> {
+    if primary["protocol"] != "m3u8_native" || !primary["manifest_url"].is_string() {
+        return None;
+    }
+    let codec = |field: &str| {
+        primary[field].as_str().filter(|value| {
+            *value != "none"
+                && !value.is_empty()
+                && value.len() <= 128
+                && value
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || b"._-".contains(&byte))
+        })
+    };
+    let video = codec("vcodec")?;
+    let audio = codec("acodec")?;
+    let url = primary["url"].as_str()?;
+    if url.chars().any(char::is_control) {
+        return None;
+    }
+    ytui_core::http_url(url).ok()?;
+    let bandwidth = primary["tbr"]
+        .as_f64()
+        .filter(|b| b.is_finite() && *b > 0.0)
+        .map(|b| (b * 1000.0).clamp(1.0, 1_000_000_000.0) as u64)
+        .unwrap_or(1_000_000);
+    Some(format!(
+        "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-STREAM-INF:BANDWIDTH={bandwidth},CODECS=\"{video},{audio}\"\n{url}\n"
+    ))
+}
+
+#[cfg(test)]
+mod hls_playback_tests {
+    use super::*;
+
+    fn muxed() -> Value {
+        json!({"url":"https://media.test/selected.m3u8?x=1&y=2", "protocol":"m3u8_native",
+            "manifest_url":"https://media.test/master.m3u8", "vcodec":"avc1.640028",
+            "acodec":"mp4a.40.2", "tbr":2000, "height":1080, "format_id":"96"})
+    }
+
+    #[test]
+    fn selected_hls_codec_metadata_prepares_without_an_extra_master_fetch() {
+        let data = muxed();
+        let value = stream(&data, false).unwrap();
+        let master = value["hls_master"].as_str().unwrap();
+        assert!(master.contains("BANDWIDTH=2000000,CODECS=\"avc1.640028,mp4a.40.2\""));
+        assert!(master.ends_with("https://media.test/selected.m3u8?x=1&y=2\n"));
+        assert_eq!(value["url"], data["url"]);
+        assert!(stream(&data, true).unwrap()["hls_master"].is_null());
+    }
+
+    #[test]
+    fn progressive_paired_unknown_codecs_and_unsafe_attributes_keep_normal_source() {
+        for (field, value) in [
+            ("protocol", "https"),
+            ("vcodec", "none"),
+            ("acodec", "none"),
+            ("acodec", "mp4a\"\n#EXT-X-MEDIA:bad"),
+            ("url", "https://media.test/a\nother"),
+        ] {
+            let mut data = muxed();
+            data[field] = value.into();
+            assert!(playback_hls_master(&data).is_none(), "{field}");
+        }
+        let mut data = muxed();
+        data.as_object_mut().unwrap().remove("manifest_url");
+        assert!(playback_hls_master(&data).is_none());
+        let data = json!({"requested_formats":[muxed(), {"url":"https://media.test/audio.m3u8","vcodec":"none","acodec":"mp4a.40.2"}]});
+        assert!(stream(&data, false).unwrap()["hls_master"].is_null());
+    }
 }
 pub(crate) fn runtime() -> &'static tokio::runtime::Runtime {
     static R: OnceLock<tokio::runtime::Runtime> = OnceLock::new();

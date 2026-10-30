@@ -17,9 +17,12 @@ final class StartupTimings {
     "extract",
     "visitor",
     "player",
+    "manifest",
     "stream",
     "decoder",
-    "ready"
+    "ready",
+    "net_response",
+    "net_byte"
   };
   private static final AtomicLong ids = new AtomicLong();
   private static final ArrayDeque<Sample> samples = new ArrayDeque<>();
@@ -28,6 +31,7 @@ final class StartupTimings {
     long id, tap, resolved = -1, handoff = -1, output = -1;
     boolean prepared, video;
     String route = "unknown", cache = "unknown", disposition = "pending/cancelled";
+    String quality = "unknown", transport = "unknown";
     long ended = -1;
     long[] stages = new long[PHASES.length];
 
@@ -66,6 +70,20 @@ final class StartupTimings {
           java.util.Arrays.asList("direct", "full", "offline", "direct-media").contains(route)
               ? route
               : "unknown";
+  }
+
+  static synchronized void presentation(long id, String quality, String transport) {
+    Sample sample = find(id);
+    if (sample == null) return;
+    sample.quality =
+        java.util.Arrays.asList("360", "480", "720", "1080", "best").contains(quality)
+            ? quality
+            : "unknown";
+    sample.transport =
+        java.util.Arrays.asList("hls-chunkless", "hls", "dash", "progressive", "offline")
+                .contains(transport)
+            ? transport
+            : "unknown";
   }
 
   static synchronized void stage(long id, String phase, long milliseconds) {
@@ -158,6 +176,10 @@ final class StartupTimings {
       for (int i = 0; i < PHASES.length; i++)
         if (sample.stages[i] >= 0)
           text.append(" ").append(PHASES[i]).append("_ms=").append(sample.stages[i]);
+      text.append(" quality=")
+          .append(sample.quality)
+          .append(" transport=")
+          .append(sample.transport);
       text.append('\n');
     }
     return text.toString();
