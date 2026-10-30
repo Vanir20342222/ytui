@@ -618,6 +618,8 @@ class CatalogUiTest {
             compose.onNodeWithTag("settings-button").performClick()
             compose.onNodeWithTag("settings-Appearance").performClick()
             compose.onNodeWithTag("theme-selector").assertIsDisplayed().performClick()
+            // The fixture deliberately stores the legacy "dark" alias.
+            compose.onNodeWithTag("theme-ytui-dark").performScrollTo().assertIsSelected()
             compose.onNodeWithTag("theme-ytui-light").performScrollTo().assertIsDisplayed()
             captureSettled("restyle-large-text-theme-dialog.png")
             compose.onNodeWithText("CANCEL").performClick()

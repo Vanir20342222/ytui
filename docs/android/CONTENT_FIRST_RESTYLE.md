@@ -172,3 +172,7 @@ Advanced seek labels now show the existing configured interval instead of always
 saying ten seconds. The commands/intervals and Media3's native −5/+15 controls
 are unchanged. Creator initials retain full Unicode code points for emoji-leading
 names.
+
+The theme radio dialog matches legacy saved aliases (such as `dark`/`light`)
+to the applied built-in palette name, preserving stored values and the correct
+selected indicator. The large-text native case verifies the `dark` alias.

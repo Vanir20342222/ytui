@@ -1862,6 +1862,13 @@ private fun SettingsPanel(
     val mobile by vm.mobile.collectAsState()
     val config by vm.config.collectAsState()
     val themes by vm.themes.collectAsState()
+    val appliedPalette by vm.palette.collectAsState()
+    val selectedTheme =
+        when (val selected = config.optString("theme", "system")) {
+            "system",
+            "custom" -> selected
+            else -> appliedPalette.optString("name").ifBlank { selected }
+        }
     var themeMenu by remember { mutableStateOf(false) }
     var proxy by
         remember(config.optString("proxy")) {
@@ -1961,8 +1968,7 @@ private fun SettingsPanel(
                                                 .heightIn(min = 56.dp)
                                                 .testTag("theme-$name")
                                                 .selectable(
-                                                    selected =
-                                                        config.optString("theme", "system") == name,
+                                                    selected = selectedTheme == name,
                                                     role = Role.RadioButton,
                                                 ) {
                                                     themeMenu = false
@@ -1970,10 +1976,7 @@ private fun SettingsPanel(
                                                 },
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            RadioButton(
-                                                config.optString("theme", "system") == name,
-                                                null,
-                                            )
+                                            RadioButton(selectedTheme == name, null)
                                             Text(
                                                 name.replaceFirstChar(Char::titlecase),
                                                 Modifier.padding(start = 12.dp),
