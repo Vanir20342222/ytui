@@ -66,12 +66,11 @@ internal fun OfflineLibrary(vm: YtuiViewModel) {
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(listOf("Offline", "Playlists", "Transfers")) { title ->
-                FilterChip(
-                    section == title,
-                    { section = title },
-                    label = { Text(title) },
+                MediaChip(
+                    title,
+                    selected = section == title,
                     modifier = Modifier.testTag("library-$title"),
-                )
+                ) { section = title }
             }
         }
         if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)

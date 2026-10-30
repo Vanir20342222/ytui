@@ -284,6 +284,23 @@ internal fun MediaIcon(
 }
 
 @Composable
+internal fun MediaChip(
+    label: String,
+    selected: Boolean = false,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    // All filter chips share this composable so their height cannot drift;
+    // 48dp keeps the visible chip at Material's minimum touch-target size.
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp),
+        label = { Text(label) },
+    )
+}
+
+@Composable
 internal fun MediaIconButton(glyph: Glyph, label: String, tag: String = "", action: () -> Unit) {
     IconButton(action, Modifier.size(48.dp).testTag(tag).semantics { contentDescription = label }) {
         MediaIcon(glyph)
