@@ -307,21 +307,39 @@ class CatalogUiTest {
         compose.onNodeWithTag("tab-0").performClick()
         compose.onNodeWithTag("create-offline-playlist").performClick()
         val title = "UI fixture " + java.util.UUID.randomUUID().toString().take(8)
-        compose.onNodeWithTag("offline-playlist-name").performTextInput(title)
-        compose.onNodeWithText("Create").performClick()
+        compose
+            .onNodeWithTag("offline-playlist-name")
+            .performTextInput(title)
+            .assertTextContains(title)
+        settleUi()
+        compose.onNodeWithText("Create").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
         }
+        settleUi()
         compose.onNodeWithText(title).performClick()
-        compose.onNodeWithTag("offline-playlist-edit-name").performTextReplacement("$title renamed")
-        compose.onNodeWithText("Rename").performClick()
-        compose.waitUntil(10_000) {
-            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
-                it.optString("title") == "$title renamed"
+        compose
+            .onNodeWithTag("offline-playlist-edit-name")
+            .performTextReplacement("$title renamed")
+            .assertTextContains("$title renamed")
+        // Modal sheets move as the IME opens. Tap the settled real button;
+        // semantics becoming available does not imply its window position is final.
+        settleUi()
+        compose.onNodeWithText("Rename").assertIsDisplayed().performClick()
+        try {
+            compose.waitUntil(10_000) {
+                PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
+                    it.optString("title") == "$title renamed"
+                }
             }
+        } catch (error: Throwable) {
+            runCatching { captureSettled("restyle-offline-playlist-rename-error.png") }
+            throw error
         }
+        settleUi()
         compose.onNodeWithText("Delete playlist").performClick()
-        compose.onNodeWithText("Delete").performClick()
+        settleUi()
+        compose.onNodeWithText("Delete").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
             PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().none {
                 it.optString("title").startsWith(title)
@@ -686,11 +704,15 @@ class CatalogUiTest {
         }
     }
 
-    private fun captureSettled(filename: String) {
+    private fun settleUi() {
         compose.waitForIdle()
-        // A semantics node can exist one transaction before its new window pixels.
-        // Wait for real UI idleness before taking review screenshots, not a playback deadline.
+        // A semantics node can precede its final window pixels/IME position.
+        // This is UI-driver settling, never part of a playback deadline.
         InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+    }
+
+    private fun captureSettled(filename: String) {
+        settleUi()
         MediaRuntimeTest.capture(filename)
     }
 

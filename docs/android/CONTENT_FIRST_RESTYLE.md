@@ -148,3 +148,14 @@ follow-up changes only screenshot tests: wait for real UI idleness for native
 panels and actual decoded cover pixels before review captures. Application,
 networking, image cache and playback code remain identical to the qualified app.
 The PR's current checks/report identify final screenshot-harness qualification.
+
+
+The screenshot-only run at `e440db6` retains 35 passes, one offline-playlist rename
+acknowledgement timeout and one public skip. The decoded-cover/window capture
+checks themselves pass. The existing playlist UI driver typed and immediately
+tapped Rename while the new sheet/IME could still move. It now asserts the edited
+draft and waits for real UI idleness before touch actions; backend persistence
+assertions and their ten-second limit remain unchanged. A repeat failure captures
+the actual rename screen. This is not reported as a diagnosed production storage
+fix. A separate desktop fake-executable ETXTBSY fixture finding/fix is tracked in
+[PR #30](https://github.com/Vanir20342222/ytui/pull/30).
