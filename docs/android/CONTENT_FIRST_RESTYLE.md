@@ -125,5 +125,26 @@ No font, asset service, tracking endpoint or dependency was added. Stable signin
 identity, account/session files, library state and release assets are untouched.
 
 Review also bounds sheets to their content up to a 90% window limit, instead of
-forcing short menus/empty queues to occupy nearly the entire screen. Full-page
+forcing short menus to occupy nearly the entire screen. Full-page
 settings and the focused player retain their bounded full-screen layout.
+
+
+### Qualified app implementation and screenshot-harness follow-up
+
+Application implementation `debbbd1` / workflow merge `5fc2615` passes Android
+[41108974475](https://github.com/Vanir20342222/ytui/actions/runs/41108974475):
+**36 native passes, zero failures, one public skip**. Rust
+[41108974473](https://github.com/Vanir20342222/ytui/actions/runs/41108974473) passes
+**367 workspace/extractor/solver/media cases**, 31 explicit ignores; JVM 20,
+lint, both ABIs, APK inspection and secret scans pass. App ANR/Rust-panic markers:
+zero. Actual window-pixel confirmations stay within the unchanged 2000ms budget:
+progressive cold/prepared **849/1053ms**, indexed **1344ms**, HLS **941/794ms**.
+
+All 156 matrix images are present with exact phone/tablet dimensions. Review of
+all contact sheets confirms neutral chrome, teal brand, consistent selection and
+settings. A few supplemental native panel captures still precede their window
+transition, and a tablet-search capture catches resized artwork loading. The
+follow-up changes only screenshot tests: wait for real UI idleness for native
+panels and actual decoded cover pixels before review captures. Application,
+networking, image cache and playback code remain identical to the qualified app.
+The PR's current checks/report identify final screenshot-harness qualification.

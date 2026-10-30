@@ -842,7 +842,7 @@ The owner supplied a detailed YouTube-style visual brief and reference on
 2026-10-30, kept the YouTube label and explicitly chose a neutral dark default.
 The current Android app now has full-bleed video art, a compact brand bar,
 unified pill filters, quiet navigation, native player chrome, action sheets,
-full-page settings, radio theme selection and adaptive wide search rows. Existing
+full-page settings, theme selection in a radio dialog and adaptive wide search rows. Existing
 styles/actions/state, Rust extraction/networking and strict startup deadlines
 remain. Fresh mobile configuration defaults to ytui-dark without replacing saved
 choices; desktop palette rendering is unchanged.

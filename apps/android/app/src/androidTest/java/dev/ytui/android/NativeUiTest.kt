@@ -80,7 +80,7 @@ class NativeUiTest {
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input")
         compose.onNodeWithTag("search-field").performTextInput(" Grüße")
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input Grüße")
-        MediaRuntimeTest.capture("native-search.png")
+        captureSettled("native-search.png")
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("search-field").assertIsDisplayed()
         compose.onNodeWithTag("settings-button").performClick()
@@ -140,7 +140,7 @@ class NativeUiTest {
                 JSONObject(NativeBridge.request(json("op" to "settings").toString()))
                     .getJSONObject("data")
             Assert.assertEquals(theme, saved.getString("theme"))
-            MediaRuntimeTest.capture("native-theme-$index.png")
+            captureSettled("native-theme-$index.png")
         }
     }
 
@@ -160,7 +160,7 @@ class NativeUiTest {
         compose.onNodeWithText("Account needed").assertIsDisplayed()
         compose.onNodeWithTag("feed-account-action").performClick()
         compose.onNodeWithTag("account-import").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-account.png")
+        captureSettled("native-account.png")
         compose
             .onNodeWithTag("cookie-header-field")
             .performScrollTo()
@@ -318,7 +318,7 @@ class NativeUiTest {
             for (index in listOf(0, 1, 2, 3)) {
                 compose.onNodeWithTag("tab-$index").performClick()
                 if (index == 3 || index == 0)
-                    MediaRuntimeTest.capture(
+                    captureSettled(
                         if (index == 3) "restyle-radio-empty.png" else "restyle-downloads.png"
                     )
                 compose.onNodeWithTag("settings-button").assertIsDisplayed()
@@ -329,13 +329,19 @@ class NativeUiTest {
                 listOf("Playback queue", "Recently played", "Lyrics", "Sleep timer", "About")) {
                 compose.onNodeWithTag("menu-button").performClick()
                 compose.onNodeWithText(label).performClick()
-                MediaRuntimeTest.capture("restyle-panel-${label.lowercase().replace(" ", "-")}.png")
+                captureSettled("restyle-panel-${label.lowercase().replace(" ", "-")}.png")
                 compose.onNodeWithContentDescription("Close").assertIsDisplayed().performClick()
             }
-            MediaRuntimeTest.capture("native-tablet.png")
+            captureSettled("native-tablet.png")
         } finally {
             device.setOrientationNatural()
             device.unfreezeRotation()
         }
+    }
+
+    private fun captureSettled(filename: String) {
+        compose.waitForIdle()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+        MediaRuntimeTest.capture(filename)
     }
 }

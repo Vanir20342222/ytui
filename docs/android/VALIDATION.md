@@ -11,7 +11,7 @@ run has 35 passes, one new asynchronous geometry-test failure and one public
 skip; the corrected test preserves its original quarter-width assertion. The
 final PR report supplies actual native results and screenshot artifact links,
 including 13 theme entries × two system modes × phone/tablet × three screens.
-All existing 2000ms media deadlines remain. These deterministic results do not
+App implementation `debbbd1` passes 36 native tests (one public skip), 367 Rust/media checks (31 explicit ignores), 20 JVM tests and lint. A subsequent screenshot-only follow-up waits for native window transitions and actual decoded cover pixels. All existing 2000ms media deadlines remain. These deterministic results do not
 supersede the separate Tab S9/live-service acceptance boundaries below.
 
 ## Published UI release: mobile.9 (2026-10-30)
