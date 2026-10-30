@@ -490,14 +490,13 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                     "about" ->
                         Panel("About ytui", { dialog = "" }) {
                             Text(
-                                "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}\nDevelopment preview"
+                                "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}"
                             )
                             Text(
-                                "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media."
+                                "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media. Development preview. Device playback, network and update checks are tracked in the validation report."
                             )
-                            Text(
-                                "Development preview. Device playback, network and update checks are tracked in the validation report."
-                            )
+                            // Keep the actions clear of the scroll fold on short (landscape) windows.
+                            Spacer(Modifier.height(24.dp))
                             Action("Radio artwork credits") {
                                 vm.effect(
                                     "open",
