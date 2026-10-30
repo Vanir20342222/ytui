@@ -711,6 +711,16 @@ startup is shown as loading and is not disguised by these UI targets.
   playlists. Preserve existing SponsorBlock download settings in the parity review;
   new optional features must not delay basic reliability.
 
+### M8: deterministic fake-executable recovery fixtures
+
+The download-recovery integration fixtures serialize their temporary executable
+lifetimes after reproducing Linux ETXTBSY during parallel fixture creation/spawn.
+Worker/event/cancellation concurrency and all assertions/deadlines stay intact;
+production download/process behavior is unchanged. The actual corrected binary
+passes 1,000 full 11-case runs with eight test threads. See
+[reproduction and evidence](docs/DOWNLOAD_TEST_FIXTURE_RACE.md); this diagnostic
+follow-up is independent from the Android restyle and live-service gates.
+
 ## Research and attribution
 
 Primary sources inspected on 2026-10-21; verify upstream revisions before reuse.
