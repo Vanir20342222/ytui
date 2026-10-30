@@ -43,5 +43,7 @@ Merged as **`284ff617421e5bf596ef735791539b6eed7f71f0`** after qualifying head
 - [PR Rust](https://github.com/Vanir20342222/ytui/actions/runs/41071506757) and [push Rust](https://github.com/Vanir20342222/ytui/actions/runs/41071496143) pass: **366 workspace/extractor/media checks**, 31 explicit ignores, formatting and strict Clippy. Local **19 JVM tests**, instrumentation compilation and Android lint pass. Full-history scans and [PR secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41071506504) pass without new exemptions.
 
 GitHub's post-merge checks run separately; these are the qualified pre-merge
-results. This change does not publish a new stable APK. The mobile.8 download
-retains its independently qualified source and signature.
+results. The original merge did not publish an APK. The subsequent
+[mobile.9 release](MOBILE9_RELEASE.md) now packages these UI changes with the
+existing permanent identity; mobile.8 retains its independently qualified
+historical source and signature.

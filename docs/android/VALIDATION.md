@@ -1,5 +1,23 @@
 # Android validation record (M9)
 
+## Published UI release: mobile.9 (2026-10-30)
+
+[Download and complete qualification](MOBILE9_RELEASE.md). App source
+`553fe494b800d472de239285391c6643cc97e246` packages the merged UI refinements as
+version **0.2.0-alpha.12-mobile.9**, code **9**, using the supported release-version
+inputs. Exact-main Android/Rust/Secret scan pass: **33 native passes, one public
+skip, 366 Rust/media passes**, 31 explicit ignores, no app ANR/Rust-panic markers.
+Strict indexed/catalog/HLS window-pixel deadlines pass. The signed release
+passes **19 JVM tests**, lint, package/version/source/certificate, both ABIs,
+16 KiB alignment and notice inventory checks.
+
+[Publication](https://github.com/Vanir20342222/ytui/actions/runs/41079072261)
+passes. Independent public download verifies hash, size, certificate and code 9.
+The same identity updates mobile.4–8 without uninstalling. Temporary APK transfer
+and bearer inputs are deleted; permanent recovery/signing material remain private.
+The successful mobile.8 physical sample below is the existing device baseline;
+new mobile.9 hardware results and broader M9 gates remain separate.
+
 ## UI PR #27 integration (2026-10-30)
 
 [Review and qualification](UI_PR27_REVIEW.md) records the merged UI refinements,
@@ -7,7 +25,7 @@ the corrected search constraint order, narrow VU span guard and actual native
 geometry test. PR source passes **33 native tests**, one public skip, all Rust
 and secret checks, plus 19 local JVM tests and lint. Tablet/VU screenshots were
 inspected; strict indexed/catalog/HLS window pixels stay below 2000 ms. This is
-a source merge, not a replacement of the published mobile.8 APK.
+a source merge; the subsequent mobile.9 release above packages its UI changes.
 
 ## Physical mobile.8 result: observed two-second target passed
 

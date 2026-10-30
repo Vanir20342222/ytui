@@ -1,6 +1,6 @@
 # Android APK signing and updates
 
-The current [mobile.8 APK and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.8) use the permanent certificate below. Source `bd75363c0098edcdc54840c9cb7c7a65aebc09ef` passed exact-main checks; the public APK hash was independently verified. [Qualification and open live gate](MOBILE8_INDEXED_STARTUP.md).
+The current [mobile.9 APK and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.9) use the permanent certificate below. Source `553fe494b800d472de239285391c6643cc97e246` passed exact-main checks; the public APK hash was independently verified. [Qualification and release build metadata](MOBILE9_RELEASE.md).
 
 Development APKs from the Android workflow use debug identities. New debug
 builds use `dev.ytui.android.preview` and the launcher label **ytui Preview**.
@@ -50,10 +50,14 @@ install -d -m 700 "$HOME/.local/share/ytui-signing"
 umask 077
 age --decrypt -i "$HOME/.ssh/id_ed25519" ytui-android-signing-backup.age |
   tar -xf - -C "$HOME/.local/share/ytui-signing"
+export YTUI_ANDROID_VERSION_CODE=9
+export YTUI_ANDROID_VERSION_NAME=0.2.0-alpha.12-mobile.9
 python3 tools/android/sign-local.py "$HOME/.local/share/ytui-signing"
 ```
 
-The helper loads the recovered passwords privately into the build environment,
+The supported version inputs above reproduce the current release metadata;
+the source tag may have earlier default Preview metadata. Increase the version
+code for future public updates. The helper loads the recovered passwords privately into the build environment,
 refuses an identity inside Git or one readable by other users, and builds both
 Rust ABIs plus release unit/lint checks. It never prints the credentials. Do not
 run with shell tracing, dump the process environment or upload the recovery files.

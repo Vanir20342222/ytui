@@ -4,7 +4,9 @@ M9 UI review: [PR #27 integration](docs/android/UI_PR27_REVIEW.md) merges the
 artwork/VU/chip/About refinements with a corrected tablet search-width cap and
 portrait/landscape geometry regression. Pre-merge qualification passes 33 native
 tests plus one public skip and retains strict startup deadlines. Broader M9
-acceptance remains open; the stable APK is still the qualified mobile.8 build.
+acceptance remains open. [Published mobile.9](docs/android/MOBILE9_RELEASE.md)
+packages the reviewed UI from qualified source `553fe49` using release code 9
+and the permanent identity. Its public APK hash/certificate/version are verified.
 
 M9 physical startup result: the owner's mobile.8 report with Best passes all
 six supplied video attempts: five cold usable starts 1115–1752 ms, one prepared
