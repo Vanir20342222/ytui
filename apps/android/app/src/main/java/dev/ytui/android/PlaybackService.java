@@ -39,6 +39,9 @@ public final class PlaybackService extends MediaSessionService {
   long startupAt, firstFrameMs, startMs, startupToken;
 
   void visibleFrame() {
+    // A TextureView can still deliver the previous item's queued buffer after
+    // handoff. Only count visibility once this item's renderer produced a frame.
+    if (firstFrameMs == 0) return;
     StartupTimings.output(startupToken, SystemClock.elapsedRealtime(), true);
     publish();
   }
@@ -176,6 +179,25 @@ public final class PlaybackService extends MediaSessionService {
     player.addAnalyticsListener(
         new androidx.media3.exoplayer.analytics.AnalyticsListener() {
           @Override
+          public void onRenderedFirstFrame(EventTime time, Object output, long at) {
+            JSONObject media = currentRequest.optJSONObject("media");
+            if (firstFrameMs == 0
+                && at >= startupAt
+                && media != null
+                && time.windowIndex >= 0
+                && time.windowIndex < time.timeline.getWindowCount()
+                && time.timeline
+                    .getWindow(time.windowIndex, new Timeline.Window())
+                    .mediaItem
+                    .mediaId
+                    .equals(media.optString("url"))) {
+              firstFrameMs = Math.max(1, at - startupAt);
+              StartupTimings.stage(startupToken, "decoder", firstFrameMs);
+              publish();
+            }
+          }
+
+          @Override
           public void onVideoDecoderInitialized(
               EventTime time, String name, long at, long duration) {
             if (at >= startupAt && StartupTimings.total(startupToken) < 0)
@@ -289,15 +311,6 @@ public final class PlaybackService extends MediaSessionService {
           @Override
           public void onPositionDiscontinuity(
               Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
-            publish();
-          }
-
-          @Override
-          public void onRenderedFirstFrame() {
-            if (firstFrameMs == 0) {
-              firstFrameMs = Math.max(1, SystemClock.elapsedRealtime() - startupAt);
-              StartupTimings.stage(startupToken, "decoder", firstFrameMs);
-            }
             publish();
           }
 

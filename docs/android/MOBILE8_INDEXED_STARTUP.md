@@ -54,7 +54,10 @@ HLS source. Unknown-codec/unsupported sources retain ordinary preparation.
 
 The timing report adds actual `started` and `usable_start` values. Usable start
 requires **both** visible output and active playback; an early frame followed
-by buffering/failure cannot pass. Numeric codec-initialization events are
+by buffering/failure cannot pass. A queued TextureView update from the previous
+item is ignored until the current item's renderer has produced its first frame;
+renderer events are matched to their media ID and monotonic handoff time.
+Numeric codec-initialization events are
 recorded separately. Source failures and stop/replacement after handoff now
 record their terminal outcome rather than remaining pending indefinitely.
 Reports remain identifier/URL/header free and bounded.

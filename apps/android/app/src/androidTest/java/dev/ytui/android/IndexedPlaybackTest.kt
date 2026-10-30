@@ -279,6 +279,11 @@ class IndexedPlaybackTest {
                 StartupTimings.resolved(cancelled, android.os.SystemClock.elapsedRealtime(), false)
                 MediaBridge.execute(request(cdn.url(0), cancelled).toString())
                 compose.waitUntil(10000) { PlaybackService.current?.startupToken == cancelled }
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    Assert.assertEquals(0L, PlaybackService.current.firstFrameMs)
+                    PlaybackService.current.visibleFrame()
+                    Assert.assertEquals(-1L, StartupTimings.total(cancelled))
+                }
                 MediaRuntimeTest.command("stop")
                 compose.waitUntil(5000) {
                     StartupTimings.report()
