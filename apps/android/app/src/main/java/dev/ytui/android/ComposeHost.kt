@@ -1496,11 +1496,12 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
     val media = player.media?.let(::MediaCard) ?: return
+    val cornerRadius = 24.dp
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
             .aspectRatio(if (style == "classic") 1f else 1.35f)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(cornerRadius))
             .testTag("music-visualizer"),
         contentAlignment = Alignment.CenterStart,
     ) {
@@ -1549,26 +1550,38 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
                 config.optBoolean("thumbnails", true),
             )
         } else if (style.startsWith("vu")) {
-            Canvas(Modifier.fillMaxSize()) {
-                val packed = levels
-                val left = (packed and 65535) / 65535f
-                val right = ((packed ushr 16) and 65535) / 65535f
-                for (i in 0..23) {
-                    val level = if (i < 12) left else right
-                    val height =
-                        (0.03f + level * (0.12f + 0.08f * sin(phase / 30 + i))) * size.height
-                    drawRect(
-                        accent.copy(alpha = 0.5f + 0.5f * level),
-                        Offset(i * size.width / 24, size.height - height),
-                        androidx.compose.ui.geometry.Size(size.width / 30, height),
-                    )
+            Column(Modifier.fillMaxSize()) {
+                Artwork(
+                    media,
+                    Modifier.fillMaxWidth(0.45f)
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterHorizontally),
+                    config.optBoolean("thumbnails", true),
+                )
+                // Keep the meter in the artwork's visual group instead of
+                // stranding it at the bottom of the container.
+                Spacer(Modifier.height(32.dp))
+                Canvas(Modifier.weight(1f).fillMaxWidth()) {
+                    val packed = levels
+                    val left = (packed and 65535) / 65535f
+                    val right = ((packed ushr 16) and 65535) / 65535f
+                    // Inset the strip by the container's corner radius so the
+                    // rounded clip never cuts into the end segments.
+                    val inset = cornerRadius.toPx()
+                    val span = size.width - inset * 2
+                    for (i in 0..23) {
+                        val level = if (i < 12) left else right
+                        val height =
+                            ((0.03f + level * (0.12f + 0.08f * sin(phase / 30 + i))) * span)
+                                .coerceAtMost(size.height)
+                        drawRect(
+                            accent.copy(alpha = 0.5f + 0.5f * level),
+                            Offset(inset + i * span / 24, 0f),
+                            androidx.compose.ui.geometry.Size(span / 30, height),
+                        )
+                    }
                 }
             }
-            Artwork(
-                media,
-                Modifier.fillMaxWidth(0.45f).aspectRatio(1f).align(Alignment.TopCenter),
-                config.optBoolean("thumbnails", true),
-            )
         } else {
             Canvas(Modifier.fillMaxSize()) {
                 val packed = levels
