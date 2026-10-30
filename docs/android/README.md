@@ -2,13 +2,13 @@
 
 The app combines the shared Rust engine with a native Jetpack Compose phone/tablet UI. Media3 handles video, background playback, media controls and offline transfers. The explicit account sign-in page is its only WebView. No Python or mpv executable runs on Android.
 
-[Download mobile.7 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.7/ytui-0.2.0-alpha.12-mobile.7.apk) · [Release/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.7) · [Startup follow-up](MOBILE7_STARTUP_FOLLOWUP.md) · [Actual gallery](../screenshots/android/README.md)
+[Download mobile.8 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.8/ytui-0.2.0-alpha.12-mobile.8.apk) · [Release/checksum](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.8) · [Startup follow-up](MOBILE8_INDEXED_STARTUP.md) · [Actual gallery](../screenshots/android/README.md)
 
 ## Install an APK
 
-Open the downloaded APK in Android Files and allow installation from that source when prompted. Version **0.2.0-alpha.12-mobile.7**, code **7**, includes ARM64 for Galaxy Tab S9/Nothing Phone (3a) and x86-64 for emulators, requires Android 8/API 26+, and targets API 35. The public download hash and signing certificate were verified.
+Open the downloaded APK in Android Files and allow installation from that source when prompted. Version **0.2.0-alpha.12-mobile.8**, code **8**, includes ARM64 for Galaxy Tab S9/Nothing Phone (3a) and x86-64 for emulators, requires Android 8/API 26+, and targets API 35. The public download hash and signing certificate were verified.
 
-Open **ytui** (`dev.ytui.android.stable`). It installs alongside older Preview/original development apps, preserving their private data. Its account/settings/library are separate, so sign in and choose folders once. Future stable-channel updates use the same private identity. No GitHub signing-secret setup is needed; [recovery and updates](SIGNING.md) explain the encrypted owner backup. Debug Actions artifacts still install as **ytui Preview** and may have disposable identities.
+Open **ytui** (`dev.ytui.android.stable`). Install over mobile.4–7 to retain your account, settings and offline library; do not uninstall. Older Preview/original packages remain separate with their own private data. A first stable-channel installation needs sign-in/folder selection once. Future stable updates use the same private identity. No GitHub signing-secret setup is needed; [recovery and updates](SIGNING.md) explain the encrypted owner backup. Debug Actions artifacts install as **ytui Preview** and may have disposable identities.
 
 This is a development preview, with 28 passing runtime cases and one explicitly skipped public YouTube case. Real YouTube latency, audible output, physical-device updates and [parity/device gates](PARITY.md) remain open. [Device checklist](DEVICE_ACCEPTANCE.md).
 

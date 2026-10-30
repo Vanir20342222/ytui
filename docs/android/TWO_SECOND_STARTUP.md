@@ -1,14 +1,19 @@
 # M9: two-second tap-to-visible-video target
 
-Latest physical evidence: mobile.6 with Best quality **fails**, 6772–11048 ms
-for completed videos. [Best-quality HLS follow-up](MOBILE7_STARTUP_FOLLOWUP.md)
-records the serial child-playlist bottleneck, published APK and exact-main
-qualification. The live Tab S9 retest remains open.
+Latest physical evidence: mobile.7 with Best quality improves prepared frames
+to 74–828 ms but **fails** three cold starts at 2827–4117 ms. Extraction is now
+338–917 ms. [Published mobile.8 and indexed startup](MOBILE8_INDEXED_STARTUP.md)
+preserve the chosen quality and target source preparation with byte-range DASH.
+Its exact-main synthetic indexed check reaches usable video at 914 ms, with
+window pixels at 1585 ms. Live Tab S9 Best-quality acceptance remains open.
 
 Measure from the actual tap until the attached native view presents its first
 decoded frame. Extraction, offline lookup, service initialization, source
 preparation and decoding all count. A poster, playing flag or decoder-only
-counter cannot satisfy this target. Report cold and prepared starts separately.
+counter cannot satisfy this target. Require active playback too; `usable_start`
+is the later of genuine visible output and actual playback start. Ignore queued
+TextureView updates until the current item's renderer has produced a frame.
+Report cold and prepared starts separately.
 The user will run the performance APK on the Galaxy Tab S9; hosted YouTube
 requests were previously blocked, so fixtures cannot qualify live service speed.
 

@@ -119,5 +119,6 @@ Size: **56,009,238 bytes**. Certificate SHA256:
 
 The successful native run uses the documented offline emulator renderer profile.
 These generated-media results do not qualify live YouTube speed. The mobile.7
-Tab S9 timing report with Best quality is still required; live two-second
-acceptance and M9 remain open.
+Tab S9 timing report subsequently failed three cold starts as recorded above.
+The [published mobile.8 follow-up](MOBILE8_INDEXED_STARTUP.md) now needs the next
+Best-quality usable-start report; live two-second acceptance and M9 remain open.

@@ -1,6 +1,6 @@
 # Android validation record (M9)
 
-## Current indexed-startup follow-up: mobile.8 (in qualification)
+## Current indexed-startup follow-up: mobile.8 (2026-10-30)
 
 The real mobile.7 Tab S9 report passes prepared frames at 74–828 ms but three
 cold frames fail at 2827–4117 ms. One HLS frame arrives early while readiness
@@ -8,9 +8,30 @@ is late; usable playback requires both frame and active playback. Extraction
 is down to 338–917 ms. [Mobile.8 evidence and design](MOBILE8_INDEXED_STARTUP.md)
 retain all physical failures and add indexed stream loading at unchanged Best
 quality, safe finite CDN ranges and honest usable-start timing. No live target
-or M9 completion is claimed. Build/native/publication checks are pending.
+or M9 completion is claimed.
 
-## Current Best-quality startup follow-up: mobile.7 (2026-10-30)
+App source `bd75363c0098edcdc54840c9cb7c7a65aebc09ef` passes exact-main
+[Android](https://github.com/Vanir20342222/ytui/actions/runs/41067553848),
+[Rust](https://github.com/Vanir20342222/ytui/actions/runs/41067554096) and
+[Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41067553908).
+**32 native tests pass**, one public opt-in check skips, no failures or app
+ANR/Rust-panic markers. Indexed usable video is **914 ms**, corroborated by
+actual window pixels at **1585 ms**, with seeking and range/cache checks passing.
+Catalog-tap pixels are **1229/1105 ms** cold/prepared; HLS pixels **738/798 ms**.
+Rust passes **336 workspace + 15 extractor TLS + 15 solver/media checks**
+(366 total, 31 explicit ignores), formatting and strict Clippy. Both signed
+release ABIs, **19 JVM tests**, lint and signature/source/package/version/
+16 KiB alignment/notice inventory checks pass.
+
+[Public mobile.8 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.8/ytui-0.2.0-alpha.12-mobile.8.apk)
+matches the signed build after independent public download and certificate/hash/
+size/code verification. The [publisher](https://github.com/Vanir20342222/ytui/actions/runs/41069978120)
+receives only the finished APK; temporary transfer/input files are removed and
+the stable identity/recovery remain private. These synthetic-media results do
+not qualify live YouTube speed. The Tab S9 Best-quality usable-start retest is
+pending. [Checksum, retained failures and qualification](MOBILE8_INDEXED_STARTUP.md).
+
+## Earlier Best-quality startup follow-up: mobile.7 (2026-10-30)
 
 The real Tab S9 mobile.6 report with **Best** quality **failed**: completed
 videos took 6772–11048 ms to visible output, with 118–189 ms player API calls

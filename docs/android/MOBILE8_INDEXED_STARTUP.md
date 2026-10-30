@@ -72,8 +72,8 @@ The fixture deliberately delays unbounded whole-file reads beyond the target;
 bounded initialization/index/segment reads must be used. Existing catalog-tap,
 HLS/cache, Next, fullscreen, UI/account/themes and offline checks remain required.
 
-Build, emulator, signing and publication results will be recorded here after
-they run. These checks cannot establish live YouTube speed. The cloud's normal
+Qualification and signing results are recorded below. These checks cannot
+establish live YouTube speed. The cloud's normal
 YouTube CONNECT is denied with HTTP 403; no proxy/routing workaround is used.
 After APK qualification/publication, the owner must retest on the Tab S9 with
 Best, several new videos and Next and send the complete timing report including
@@ -87,3 +87,49 @@ byte-array source with hierarchical `ytui-memory://` URIs. No manifest network
 request is added; resources/subtitles keep the normal source and cache. Failed
 test playback is stopped in `finally` to avoid contaminating later cases. A fresh
 full native qualification is required; neither deadline nor pixel checks changed.
+
+## Qualified source and signed artifact
+
+App source: **`bd75363c0098edcdc54840c9cb7c7a65aebc09ef`**, merge of
+[PR #28](https://github.com/Vanir20342222/ytui/pull/28). Version code **8**,
+name **0.2.0-alpha.12-mobile.8**, package `dev.ytui.android.stable`, Android 8+,
+ARM64/x86-64. The signing certificate matches mobile.4–7; installation should
+update the existing stable app without uninstalling or deleting its state.
+
+[Download mobile.8 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.8/ytui-0.2.0-alpha.12-mobile.8.apk)
+· [Release and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.8).
+
+- [Final PR Android](https://github.com/Vanir20342222/ytui/actions/runs/41065115995): **32 pass, one public opt-in skip, zero failures**. Indexed usable video **1057 ms**, actual window pixels **1356 ms**, seeking passes. Exact query-range bytes, original cache identity, ignored/rejected/signed queries, source failures, stop cancellation and stale-frame rejection pass.
+- [Exact-main Android](https://github.com/Vanir20342222/ytui/actions/runs/41067553848): **32 pass, one public opt-in skip, zero failures**. Indexed usable video **914 ms**, window pixels **1585 ms**. Catalog-tap window pixels **1229/1105 ms** cold/prepared; HLS window pixels **738/798 ms**. All original native UI/themes, fullscreen, queue/Next and offline/export checks pass; no app ANR or Rust panic markers.
+- [Exact-main Rust](https://github.com/Vanir20342222/ytui/actions/runs/41067554096): **336 workspace + 15 extractor TLS + 15 solver/media checks** pass (366 total, 31 explicit ignores), formatting and strict Clippy pass.
+- [Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41067553908) passes. Full-history local scans pass without new exemptions. Both release ABIs, **19 release JVM tests**, lint, source/package/version/certificate, ZIP/16 KiB alignment and notice inventory checks pass.
+
+The initial push-only [Rust run](https://github.com/Vanir20342222/ytui/actions/runs/41062605617)
+failed the cancellation fixture's ready assertion. The parallel PR run, both
+final-head runs, exact main and 50 isolated local repetitions pass with the
+unchanged two-second cancellation deadline. Its cause was not reproduced; this
+is retained as an intermittent fixture failure, not a diagnosed production fix.
+
+Signed APK SHA256:
+`556bd3e8190022c2c8fb3002d9b9fbba42d298a158fa97e3029576bc9bdfc06e`.
+Size: **56,090,566 bytes**. Certificate SHA256:
+`b3e9f1a70dd6597884d1dbba09eafad3d4d73ea62c4074a9b8cec1ac1e034848`.
+
+The [publisher](https://github.com/Vanir20342222/ytui/actions/runs/41069978120)
+passes, transferring only the finished signed APK without receiving credentials,
+rebuilding or re-signing. The public APK was independently downloaded and its
+hash, size, certificate, package and code 8 verified. The temporary private APK
+transfer and local bearer inputs were deleted; the permanent identity and
+encrypted owner recovery remain private. The owner has been asked to retest
+Best, new videos and Next and send the complete usable-start report. Live
+two-second acceptance and M9 remain **open**.
+
+## Further checks
+
+The existing opt-in public instrumentation is a 720p smoke/budget check. It is
+not Best-quality acceptance; the Tab S9 must use Best and the new usable-start
+report. The live test is skipped here because normal YouTube CONNECT is denied.
+
+Inspection also finds that visible-frame callbacks still publish full player
+snapshots after the first frame. Throttling that post-start work deserves a
+separate measured change; no unmeasured performance benefit is claimed here.
