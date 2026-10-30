@@ -88,6 +88,8 @@ class CatalogUiTest {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
             executeShellCommand("wm size reset")
             executeShellCommand("wm density reset")
+            executeShellCommand("cmd uimode night auto")
+            executeShellCommand("settings put system font_scale 1.0")
             setOrientationNatural()
             unfreezeRotation()
         }
@@ -106,7 +108,7 @@ class CatalogUiTest {
                 )
             else
                 listOf(
-                    "A little further from ordinary",
+                    "A little further from ordinary: a long video title with enough words to exercise the full two-line feed layout",
                     "The art of slowing down",
                     "A city that never sleeps",
                     "Small worlds, big ideas",
@@ -123,6 +125,8 @@ class CatalogUiTest {
                         "kind" to if (tab == 2) "song" else "video",
                         "thumbnail" to covers.url(index),
                         "duration" to 221 + index * 47,
+                        "views_text" to "1.2K views",
+                        "published_text" to "2 days ago",
                         "section" to if (tab == 2) "Made for your day" else "Picked for you",
                     )
                 )
@@ -187,6 +191,21 @@ class CatalogUiTest {
             1,
             covers.failures.get(),
         )
+        val pane = compose.onNodeWithTag("browse-pane").fetchSemanticsNode().boundsInRoot
+        val cover =
+            compose
+                .onNodeWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .boundsInRoot
+        Assert.assertEquals("Video art must be full bleed", pane.left, cover.left, 2f)
+        Assert.assertEquals("Video art must fill the pane", pane.width, cover.width, 2f)
+        Assert.assertEquals("Video art remains 16:9", 16f / 9f, cover.width / cover.height, 0.01f)
+        val source = compose.onNodeWithTag("source-Home").fetchSemanticsNode().boundsInRoot
+        // Categories and source filters share one lazy row, not two independently styled strips.
+        compose.onNodeWithTag("feed-filters").performScrollToNode(hasTestTag("category-All"))
+        val category = compose.onNodeWithTag("category-All").fetchSemanticsNode().boundsInRoot
+        Assert.assertEquals(source.top, category.top, 2f)
+        compose.onNodeWithTag("feed-filters").performScrollToNode(hasTestTag("source-Home"))
         MediaRuntimeTest.capture("native-catalog.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         for (label in
@@ -451,6 +470,171 @@ class CatalogUiTest {
             MediaBridge.execute(json("op" to "stop").toString())
             fixture.delete()
         }
+    }
+
+    @Test
+    fun restyleThemeMatrixCoversPhoneTabletLightAndDark() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        val themes =
+            JSONObject(NativeBridge.request(json("op" to "themes").toString())).getJSONArray("data")
+        for (wide in listOf(false, true)) for (dark in listOf(false, true)) {
+            scenario.close()
+            device.setOrientationNatural()
+            device.executeShellCommand(if (wide) "wm size 2560x1600" else "wm size 1080x2400")
+            device.executeShellCommand(if (wide) "wm density 320" else "wm density 420")
+            device.executeShellCommand(if (dark) "cmd uimode night yes" else "cmd uimode night no")
+            scenario = RuntimeTest.launchOffline()
+            compose.waitUntil(10_000) {
+                compose
+                    .onAllNodes(
+                        hasTestTag("app-background") and
+                            SemanticsMatcher.expectValue(
+                                SemanticsProperties.StateDescription,
+                                "Ready",
+                            )
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            for (index in 0 until themes.length()) {
+                val theme = themes.getString(index)
+                scenario.onActivity {
+                    ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(dark) { config ->
+                        config.put("theme", theme)
+                    }
+                }
+                compose.waitUntil(10_000) {
+                    var applied = false
+                    scenario.onActivity {
+                        applied =
+                            ViewModelProvider(it)[YtuiViewModel::class.java]
+                                .config
+                                .value
+                                .optString("theme") == theme
+                    }
+                    applied
+                }
+                val palette =
+                    JSONObject(
+                            NativeBridge.request(json("op" to "theme", "dark" to dark).toString())
+                        )
+                        .getJSONObject("data")
+                val background =
+                    palette.color("background", androidx.compose.ui.graphics.Color.Black)
+                val surface = palette.color("surface", androidx.compose.ui.graphics.Color.Black)
+                val ink = palette.color("text", androidx.compose.ui.graphics.Color.White)
+                Assert.assertTrue(
+                    "$theme body/background contrast",
+                    mediaContrast(ink, background) >= 4.5f,
+                )
+                Assert.assertTrue(
+                    "$theme body/surface contrast",
+                    mediaContrast(ink, surface) >= 4.5f,
+                )
+                val secondary =
+                    mediaReadableText(
+                        androidx.compose.ui.graphics.lerp(background, ink, 0.7f),
+                        surface,
+                    )
+                Assert.assertTrue(
+                    "$theme secondary contrast",
+                    mediaContrast(secondary, surface) >= 4.5f,
+                )
+                val prefix =
+                    "restyle-${if (wide) "tablet" else "phone"}-${if (dark) "dark" else "light"}-$theme"
+                populate(1)
+                MediaRuntimeTest.capture("$prefix-feed.png")
+                populate(2)
+                MediaRuntimeTest.capture("$prefix-music.png")
+                compose.onNodeWithTag("settings-button").performClick()
+                compose.onNodeWithTag("settings-Appearance").performClick()
+                compose.onNodeWithTag("theme-selector").assertIsDisplayed()
+                MediaRuntimeTest.capture("$prefix-settings.png")
+                compose.onNodeWithContentDescription("Close").performClick()
+            }
+        }
+    }
+
+    @Test
+    fun largeTextKeepsSettingsSearchAndCardMenuReachable() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        scenario.close()
+        device.executeShellCommand("settings put system font_scale 2.0")
+        try {
+            scenario = RuntimeTest.launchOffline()
+            compose.waitUntil(10_000) {
+                compose
+                    .onAllNodes(
+                        hasTestTag("app-background") and
+                            SemanticsMatcher.expectValue(
+                                SemanticsProperties.StateDescription,
+                                "Ready",
+                            )
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            val cards = populate(1)
+            compose
+                .onNodeWithTag("search-field")
+                .assertIsDisplayed()
+                .performTextInput("large input")
+            compose.onNodeWithContentDescription("Clear search").performClick()
+            compose.onNodeWithTag("search-field").assertTextContains("Search or paste a link")
+            device.pressBack()
+            compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
+            compose.onNodeWithText("Download").performScrollTo().assertIsDisplayed()
+            MediaRuntimeTest.capture("restyle-large-text-card-menu.png")
+            compose.onNodeWithContentDescription("Close").performClick()
+            compose.onNodeWithTag("settings-button").performClick()
+            compose.onNodeWithTag("settings-Appearance").performClick()
+            compose.onNodeWithTag("theme-selector").assertIsDisplayed().performClick()
+            compose.onNodeWithTag("theme-ytui-light").performScrollTo().assertIsDisplayed()
+            MediaRuntimeTest.capture("restyle-large-text-theme-dialog.png")
+            compose.onNodeWithText("CANCEL").performClick()
+            MediaRuntimeTest.capture("restyle-large-text-settings.png")
+        } finally {
+            device.executeShellCommand("settings put system font_scale 1.0")
+        }
+    }
+
+    @Test
+    fun tabletSearchUsesRowsWithoutChangingCardActions() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        scenario.close()
+        device.executeShellCommand("wm size 2560x1600")
+        device.executeShellCommand("wm density 320")
+        scenario = RuntimeTest.launchOffline()
+        compose.waitUntil(10_000) {
+            compose
+                .onAllNodes(
+                    hasTestTag("app-background") and
+                        SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Ready")
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        val cards = populate(1)
+        scenario.onActivity {
+            val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
+            vm.feeds[1].value =
+                vm.feeds[1].value.copy(request = json("Search" to "synthetic"), generation = 200)
+        }
+        compose.waitForIdle()
+        val first =
+            compose.onNodeWithTag("media-card-${cards[0].key}").fetchSemanticsNode().boundsInRoot
+        val second =
+            compose.onNodeWithTag("media-card-${cards[1].key}").fetchSemanticsNode().boundsInRoot
+        Assert.assertTrue("Search results must stack as wide rows", second.top >= first.bottom)
+        val cover =
+            compose
+                .onNodeWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .boundsInRoot
+        Assert.assertEquals(0.25f, cover.width / (first.width - 32f * 2f), 0.03f)
+        MediaRuntimeTest.capture("restyle-tablet-search.png")
+        compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
+        compose.onNodeWithText("Preview").assertIsDisplayed()
     }
 
     private class CoverServer : AutoCloseable {

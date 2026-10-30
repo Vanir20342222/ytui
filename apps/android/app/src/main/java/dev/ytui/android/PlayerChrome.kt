@@ -18,6 +18,8 @@ internal object PlayerChrome {
 
     @JvmStatic
     fun apply(view: PlayerView) {
+        if (view.getTag(R.id.ytui_top_scrim) == accent) return
+        view.setTag(R.id.ytui_top_scrim, accent)
         val clear = MediaTokens.transparent.toArgb()
         val scrim = MediaTokens.videoScrim.toArgb()
         view.findViewById<View>(R.id.ytui_top_scrim)?.background =

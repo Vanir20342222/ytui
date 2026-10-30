@@ -50,6 +50,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -612,7 +613,8 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
         }
     else
         NavigationBar(
-            Modifier.testTag("bottom-navigation"),
+            Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.4f) 112.dp else 80.dp)
+                .testTag("bottom-navigation"),
             containerColor = MaterialTheme.colorScheme.background,
             tonalElevation = 0.dp,
             windowInsets = WindowInsets(0, 0, 0, 0),
@@ -744,6 +746,10 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
     val shared by vm.sharedQuery.collectAsState()
     val mobile by vm.mobile.collectAsState()
     val reduced = LocalReducedMotion.current
+    val wideSearch =
+        tab == 1 &&
+            LocalConfiguration.current.screenWidthDp >= 840 &&
+            (feed.request as? JSONObject)?.has("Search") == true
     val entry = remember { Animatable(1f) }
     LaunchedEffect(tab, feed.request, reduced) {
         if (reduced) entry.snapTo(1f)
@@ -784,6 +790,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
     val keyboard = LocalSoftwareKeyboardController.current
     var searchActive by remember { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     val grid = rememberLazyGridState(initialFirstVisibleItemIndex = feed.scrollIndex)
     LaunchedEffect(grid) {
         snapshotFlow { grid.firstVisibleItemIndex }
@@ -842,7 +849,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             if (searchActive)
                 MediaIconButton(Glyph.Back, "Leave search") {
                     keyboard?.hide()
-                    focus.freeFocus()
+                    focusManager.clearFocus()
                     searchActive = false
                 }
             TextField(
@@ -913,6 +920,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                 items(feed.categories) { category ->
                     MediaChip(
                         category.optString("title"),
+                        modifier = Modifier.testTag("category-${category.optString("title")}"),
                         selected = category.opt("request")?.toString() == feed.request.toString(),
                     ) {
                         vm.navigate(request = category.get("request"))
@@ -1000,8 +1008,13 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                         }
                     }
                 }
-            items(feed.cards, key = { it.key }, contentType = { "media-card" }) { media ->
-                MediaRow(vm, media, tab)
+            items(
+                feed.cards,
+                key = { it.key },
+                span = { GridItemSpan(if (wideSearch) maxLineSpan else 1) },
+                contentType = { "media-card" },
+            ) { media ->
+                if (wideSearch) WideMediaRow(vm, media) else MediaRow(vm, media, tab)
             }
             if (feed.loading)
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -1093,7 +1106,6 @@ internal fun Artwork(
 private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
     val config by vm.config.collectAsState()
     val mobile by vm.mobile.collectAsState()
-    var menu by remember(media.key) { mutableStateOf(false) }
     val square = tab in 2..3 || media.kind in setOf("album", "song", "station")
     Column(Modifier.fillMaxWidth().testTag("media-card-${media.key}")) {
         Box(
@@ -1190,92 +1202,135 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
                         )
                     }
             }
-            Box {
-                MediaIconButton(
-                    Glyph.More,
-                    "More options for ${media.title}",
-                    "media-menu-${media.key}",
-                ) {
-                    menu = true
-                }
-                if (menu)
-                    Panel("", { menu = false }) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Artwork(
-                                media,
-                                Modifier.width(88.dp).aspectRatio(if (square) 1f else 16f / 9f),
-                                config.optBoolean("thumbnails", true),
-                            )
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    media.title,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Text(
-                                    media.creator,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                        fun execute(action: () -> Unit) {
-                            menu = false
-                            action()
-                        }
-                        SheetAction(
-                            text = {
-                                Text(if (media.collection) "Open collection" else "Play now")
-                            },
-                            leadingIcon = { MediaIcon(Glyph.Play) },
-                            onClick = { execute { vm.play(media) } },
-                        )
-                        if (media.collection)
-                            SheetAction(
-                                text = { Text("Play all") },
-                                leadingIcon = { MediaIcon(Glyph.Queue) },
-                                onClick = { execute { vm.playCollection(media) } },
-                            )
-                        if (!media.collection && !media.live)
-                            SheetAction(
-                                text = { Text("Preview") },
-                                leadingIcon = { MediaIcon(Glyph.Preview) },
-                                onClick = { execute { vm.play(media, preview = true) } },
-                            )
-                        SheetAction(
-                            text = { Text("Add to queue") },
-                            leadingIcon = { MediaIcon(Glyph.Queue) },
-                            onClick = { execute { vm.enqueue(media) } },
-                        )
-                        SheetAction(
-                            text = { Text("Save to library") },
-                            leadingIcon = { MediaIcon(Glyph.Save) },
-                            onClick = { execute { vm.save(media) } },
-                        )
-                        if (!media.live)
-                            SheetAction(
-                                text = { Text("Download") },
-                                leadingIcon = { MediaIcon(Glyph.Download) },
-                                onClick = { execute { vm.play(media, download = true) } },
-                            )
-                        if (
-                            media.value.optString("tracks_url").let {
-                                it.isNotBlank() && it != "null"
-                            }
-                        )
-                            SheetAction(
-                                text = { Text("Browse tracks") },
-                                leadingIcon = { MediaIcon(Glyph.Music) },
-                                onClick = { execute { vm.tracks(media) } },
-                            )
-                    }
-            }
+            MediaCardActions(vm, media, square)
         }
+    }
+}
+
+@Composable
+private fun MediaCardActions(vm: YtuiViewModel, media: MediaCard, square: Boolean = false) {
+    val config by vm.config.collectAsState()
+    var menu by remember(media.key) { mutableStateOf(false) }
+    Box {
+        MediaIconButton(Glyph.More, "More options for ${media.title}", "media-menu-${media.key}") {
+            menu = true
+        }
+        if (menu)
+            Panel("", { menu = false }) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Artwork(
+                        media,
+                        Modifier.width(88.dp).aspectRatio(if (square) 1f else 16f / 9f),
+                        config.optBoolean("thumbnails", true),
+                    )
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            media.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            media.creator,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                fun execute(action: () -> Unit) {
+                    menu = false
+                    action()
+                }
+                SheetAction(
+                    text = { Text(if (media.collection) "Open collection" else "Play now") },
+                    leadingIcon = { MediaIcon(Glyph.Play) },
+                    onClick = { execute { vm.play(media) } },
+                )
+                if (media.collection)
+                    SheetAction(
+                        text = { Text("Play all") },
+                        leadingIcon = { MediaIcon(Glyph.Queue) },
+                        onClick = { execute { vm.playCollection(media) } },
+                    )
+                if (!media.collection && !media.live)
+                    SheetAction(
+                        text = { Text("Preview") },
+                        leadingIcon = { MediaIcon(Glyph.Preview) },
+                        onClick = { execute { vm.play(media, preview = true) } },
+                    )
+                SheetAction(
+                    text = { Text("Add to queue") },
+                    leadingIcon = { MediaIcon(Glyph.Queue) },
+                    onClick = { execute { vm.enqueue(media) } },
+                )
+                SheetAction(
+                    text = { Text("Save to library") },
+                    leadingIcon = { MediaIcon(Glyph.Save) },
+                    onClick = { execute { vm.save(media) } },
+                )
+                if (!media.live)
+                    SheetAction(
+                        text = { Text("Download") },
+                        leadingIcon = { MediaIcon(Glyph.Download) },
+                        onClick = { execute { vm.play(media, download = true) } },
+                    )
+                if (media.value.optString("tracks_url").let { it.isNotBlank() && it != "null" })
+                    SheetAction(
+                        text = { Text("Browse tracks") },
+                        leadingIcon = { MediaIcon(Glyph.Music) },
+                        onClick = { execute { vm.tracks(media) } },
+                    )
+            }
+    }
+}
+
+@Composable
+private fun WideMediaRow(vm: YtuiViewModel, media: MediaCard) {
+    val config by vm.config.collectAsState()
+    val mobile by vm.mobile.collectAsState()
+    Row(
+        Modifier.fillMaxWidth()
+            .testTag("media-card-${media.key}")
+            .padding(horizontal = MediaTokens.textInset),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Artwork(
+            media,
+            Modifier.fillMaxWidth(0.25f).aspectRatio(16f / 9f).clickable { vm.play(media) },
+            config.optBoolean("thumbnails", true),
+        )
+        Column(
+            Modifier.weight(1f).clickable { vm.play(media) },
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                media.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            MediaInformation(media.value, mobile)
+            if (mobile.optBoolean("show_channel", true))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ChannelAvatar(media.creator, 24.dp)
+                    Text(
+                        media.creator,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+        }
+        MediaCardActions(vm, media)
     }
 }
 

@@ -118,11 +118,12 @@ class NativeUiTest {
             val palette =
                 JSONObject(NativeBridge.request(json("op" to "theme", "dark" to dark).toString()))
                     .getJSONObject("data")
-            val expected = palette.getJSONArray("background")
+            val expectedColor =
+                palette.color("background", androidx.compose.ui.graphics.Color.Black)
             val actual = compose.onNodeWithTag("app-background").captureToImage().toPixelMap()[0, 0]
-            Assert.assertEquals(expected.getInt(0) / 255f, actual.red, 0.03f)
-            Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
-            Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
+            Assert.assertEquals(expectedColor.red, actual.red, 0.03f)
+            Assert.assertEquals(expectedColor.green, actual.green, 0.03f)
+            Assert.assertEquals(expectedColor.blue, actual.blue, 0.03f)
             val layouts = mutableListOf<TextLayoutResult>()
             compose.onNodeWithTag("feed-heading").performSemanticsAction(
                 SemanticsActions.GetTextLayoutResult
@@ -131,10 +132,10 @@ class NativeUiTest {
             }
             Assert.assertTrue("The feed heading should expose a text layout", layouts.isNotEmpty())
             val textColor = layouts.single().layoutInput.style.color
-            val ink = palette.getJSONArray("text")
-            Assert.assertEquals(ink.getInt(0) / 255f, textColor.red, 0.03f)
-            Assert.assertEquals(ink.getInt(1) / 255f, textColor.green, 0.03f)
-            Assert.assertEquals(ink.getInt(2) / 255f, textColor.blue, 0.03f)
+            val ink = palette.color("text", androidx.compose.ui.graphics.Color.White)
+            Assert.assertEquals(ink.red, textColor.red, 0.03f)
+            Assert.assertEquals(ink.green, textColor.green, 0.03f)
+            Assert.assertEquals(ink.blue, textColor.blue, 0.03f)
             val saved =
                 JSONObject(NativeBridge.request(json("op" to "settings").toString()))
                     .getJSONObject("data")
@@ -285,7 +286,7 @@ class NativeUiTest {
                 compose.onNodeWithTag("tab-1").performClick()
                 val pane = compose.onNodeWithTag("browse-pane").fetchSemanticsNode().boundsInRoot
                 val search = compose.onNodeWithTag("search-field").fetchSemanticsNode().boundsInRoot
-                val expected = kotlin.math.min(pane.width - 40f * density, 720f * density)
+                val expected = kotlin.math.min(pane.width - 32f * density, 720f * density)
                 Assert.assertEquals(
                     "Search must be capped on wide screens and fill narrow screens",
                     expected,
@@ -316,6 +317,10 @@ class NativeUiTest {
             compose.waitForIdle()
             for (index in listOf(0, 1, 2, 3)) {
                 compose.onNodeWithTag("tab-$index").performClick()
+                if (index == 3 || index == 0)
+                    MediaRuntimeTest.capture(
+                        if (index == 3) "restyle-radio-empty.png" else "restyle-downloads.png"
+                    )
                 compose.onNodeWithTag("settings-button").assertIsDisplayed()
                 if (index == 0) compose.onNodeWithTag("add-download").assertIsDisplayed()
                 else compose.onNodeWithTag("search-field").assertIsDisplayed()
