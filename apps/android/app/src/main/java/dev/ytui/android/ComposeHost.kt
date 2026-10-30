@@ -975,6 +975,10 @@ internal fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = tr
                     stateDescription = "Ready"
                 },
                 contentScale = ContentScale.Crop,
+                // Crop from the leading edge so captions composed near the left of
+                // wide artwork survive inside a squarer container instead of being
+                // centre-cropped off the left side.
+                alignment = Alignment.CenterStart,
             )
         else
             Box(
