@@ -34,7 +34,14 @@ results and preserves the earlier failures. This does not complete broader M9.
 
 ## Validation
 
-Local Android checks and fresh PR checks are in progress. Native screenshot and
-test results must be inspected before merge. This change does not publish a new
-stable APK; the existing mobile.8 release retains its independently qualified
-source and signature.
+Merged as **`284ff617421e5bf596ef735791539b6eed7f71f0`** after qualifying head
+`b35ac94848326ae85d6f709904ddef1117e8edab` against current main.
+
+- [Android qualification](https://github.com/Vanir20342222/ytui/actions/runs/41071506514): **33 pass, one explicit public-network skip, zero failures**. Portrait/landscape search width, centering and chip heights pass. Existing keyboard/account navigation, all themes, player styles, offline/export, queue, About/tablet navigation and fullscreen checks pass. No app ANR or Rust panic markers.
+- Strict actual window pixels: indexed **1645 ms**, catalog cold/prepared **979/780 ms**, HLS cold/prepared **935/711 ms**. No startup deadline changed.
+- The tablet catalog and VU screenshots were inspected: the search input is capped and centered, leading artwork captions are intact, and the VU strip ends are inset without corner clipping. Evidence is in artifact **12985888129** of that Android run.
+- [PR Rust](https://github.com/Vanir20342222/ytui/actions/runs/41071506757) and [push Rust](https://github.com/Vanir20342222/ytui/actions/runs/41071496143) pass: **366 workspace/extractor/media checks**, 31 explicit ignores, formatting and strict Clippy. Local **19 JVM tests**, instrumentation compilation and Android lint pass. Full-history scans and [PR secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41071506504) pass without new exemptions.
+
+GitHub's post-merge checks run separately; these are the qualified pre-merge
+results. This change does not publish a new stable APK. The mobile.8 download
+retains its independently qualified source and signature.

@@ -1,5 +1,14 @@
 # Android validation record (M9)
 
+## UI PR #27 integration (2026-10-30)
+
+[Review and qualification](UI_PR27_REVIEW.md) records the merged UI refinements,
+the corrected search constraint order, narrow VU span guard and actual native
+geometry test. PR source passes **33 native tests**, one public skip, all Rust
+and secret checks, plus 19 local JVM tests and lint. Tablet/VU screenshots were
+inspected; strict indexed/catalog/HLS window pixels stay below 2000 ms. This is
+a source merge, not a replacement of the published mobile.8 APK.
+
 ## Physical mobile.8 result: observed two-second target passed
 
 The owner supplied six completed **Best-quality** video attempts from the Tab S9,

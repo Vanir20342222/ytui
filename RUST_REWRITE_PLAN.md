@@ -1,5 +1,11 @@
 # ytui Rust rewrite plan
 
+M9 UI review: [PR #27 integration](docs/android/UI_PR27_REVIEW.md) merges the
+artwork/VU/chip/About refinements with a corrected tablet search-width cap and
+portrait/landscape geometry regression. Pre-merge qualification passes 33 native
+tests plus one public skip and retains strict startup deadlines. Broader M9
+acceptance remains open; the stable APK is still the qualified mobile.8 build.
+
 M9 physical startup result: the owner's mobile.8 report with Best passes all
 six supplied video attempts: five cold usable starts 1115–1752 ms, one prepared
 632 ms. [Physical evidence](docs/android/MOBILE8_INDEXED_STARTUP.md) qualifies

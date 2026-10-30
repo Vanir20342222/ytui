@@ -90,7 +90,8 @@ restricted-response fallback, no extra request after 429, unchanged default
 watch-first behavior). Android compilation, 16 JVM checks including end-to-end
 counter isolation/bounding, and lint passed. Full Rust checks, rebuilt-ABI hosted
 native runtime checks, release signing and physical Tab S9 measurements follow.
-The two-second live target remains open until measured on the device.
+At that checkpoint the live target remained open; the subsequent mobile.8
+physical sample at the top of this document passes the observed video target.
 
 ### Visitor context follow-up
 
