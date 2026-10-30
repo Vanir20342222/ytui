@@ -91,7 +91,8 @@ class IndexedPlaybackTest {
                                                     ?: bytes.lastIndex)
                                                 .coerceAtMost(bytes.lastIndex)
                                         requests.add(
-                                            if (query != null) "query:$raw"
+                                            if (raw != null && raw.endsWith('-')) "unbounded:$raw"
+                                            else if (query != null) "query:$raw"
                                             else if (header != null) "header:$raw" else "whole"
                                         )
                                         val status =
@@ -108,7 +109,8 @@ class IndexedPlaybackTest {
                                                 .toByteArray()
                                         )
                                         out.flush()
-                                        if (raw == null && !ignored) Thread.sleep(3000)
+                                        if ((raw == null || raw.endsWith('-')) && !ignored)
+                                            Thread.sleep(3000)
                                         out.write(bytes, start, end - start + 1)
                                         out.flush()
                                     } catch (_: Exception) {}
@@ -203,7 +205,7 @@ class IndexedPlaybackTest {
                     Assert.assertTrue(requests.isNotEmpty())
                     Assert.assertFalse(
                         "Unbounded reads defeat indexed startup: $requests",
-                        requests.contains("whole"),
+                        requests.any { it == "whole" || it.startsWith("unbounded:") },
                     )
                     Assert.assertTrue(StartupTimings.report().contains("transport=dash-indexed"))
                     evidence
