@@ -1,14 +1,24 @@
 # Android validation record (M9)
 
-## Current indexed-startup follow-up: mobile.8 (2026-10-30)
+## Physical mobile.8 result: observed two-second target passed
+
+The owner supplied six completed **Best-quality** video attempts from the Tab S9,
+source `bd75363c0098edcdc54840c9cb7c7a65aebc09ef`. All visible-frame and usable-start
+values pass 2000 ms. Five cold usable starts are **1115–1752 ms**; one prepared
+start is **632 ms**. Five use indexed DASH and one uses chunkless HLS. No failed
+or cancelled attempts appear in the supplied report. This qualifies this observed
+video sample; broader service/network/audio/device and M9 gates remain separate.
+[Full physical table and retained earlier failures](MOBILE8_INDEXED_STARTUP.md).
+
+## Indexed-startup implementation: mobile.8 (2026-10-30)
 
 The real mobile.7 Tab S9 report passes prepared frames at 74–828 ms but three
 cold frames fail at 2827–4117 ms. One HLS frame arrives early while readiness
 is late; usable playback requires both frame and active playback. Extraction
 is down to 338–917 ms. [Mobile.8 evidence and design](MOBILE8_INDEXED_STARTUP.md)
 retain all physical failures and add indexed stream loading at unchanged Best
-quality, safe finite CDN ranges and honest usable-start timing. No live target
-or M9 completion is claimed.
+quality, safe finite CDN ranges and honest usable-start timing. The subsequent
+physical result above passes the observed video target; M9 is not complete.
 
 App source `bd75363c0098edcdc54840c9cb7c7a65aebc09ef` passes exact-main
 [Android](https://github.com/Vanir20342222/ytui/actions/runs/41067553848),
@@ -28,8 +38,8 @@ matches the signed build after independent public download and certificate/hash/
 size/code verification. The [publisher](https://github.com/Vanir20342222/ytui/actions/runs/41069978120)
 receives only the finished APK; temporary transfer/input files are removed and
 the stable identity/recovery remain private. These synthetic-media results do
-not qualify live YouTube speed. The Tab S9 Best-quality usable-start retest is
-pending. [Checksum, retained failures and qualification](MOBILE8_INDEXED_STARTUP.md).
+not by themselves qualify live YouTube speed. The subsequent Tab S9 report
+above passes the observed Best-quality video target. [Checksum, retained failures and qualification](MOBILE8_INDEXED_STARTUP.md).
 
 ## Earlier Best-quality startup follow-up: mobile.7 (2026-10-30)
 

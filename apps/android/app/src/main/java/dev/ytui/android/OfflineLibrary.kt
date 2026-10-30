@@ -70,7 +70,9 @@ internal fun OfflineLibrary(vm: YtuiViewModel) {
                     title,
                     selected = section == title,
                     modifier = Modifier.testTag("library-$title"),
-                ) { section = title }
+                ) {
+                    section = title
+                }
             }
         }
         if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)

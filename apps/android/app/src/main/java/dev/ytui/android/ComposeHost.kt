@@ -495,7 +495,8 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                             Text(
                                 "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media. Development preview. Device playback, network and update checks are tracked in the validation report."
                             )
-                            // Keep the actions clear of the scroll fold on short (landscape) windows.
+                            // Keep the actions clear of the scroll fold on short (landscape)
+                            // windows.
                             Spacer(Modifier.height(24.dp))
                             Action("Radio artwork credits") {
                                 vm.effect(
@@ -764,7 +765,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             }
     }
     Column(
-        Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        Modifier.fillMaxSize().testTag("browse-pane").padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -793,7 +794,9 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                         label,
                         selected = feed.request == request,
                         modifier = Modifier.testTag("source-$request"),
-                    ) { vm.navigate(tab, request) }
+                    ) {
+                        vm.navigate(tab, request)
+                    }
                 }
             }
         TextField(
@@ -802,8 +805,8 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             // A single-line input should not stretch across a wide canvas;
             // cap it and center it when the pane is wider than the cap.
             Modifier.align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
                 .widthIn(max = 720.dp)
+                .fillMaxWidth()
                 .testTag("search-field"),
             placeholder = {
                 Text(if (tab == 3) "Search stations or genres" else "Search or paste a link")
@@ -1572,7 +1575,7 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
                     // Inset the strip by the container's corner radius so the
                     // rounded clip never cuts into the end segments.
                     val inset = cornerRadius.toPx()
-                    val span = size.width - inset * 2
+                    val span = (size.width - inset * 2).coerceAtLeast(0f)
                     for (i in 0..23) {
                         val level = if (i < 12) left else right
                         val height =

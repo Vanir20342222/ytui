@@ -1,5 +1,27 @@
 # M9: indexed stream startup, mobile.8
 
+## Physical Tab S9 acceptance: observed target passed
+
+The owner tested the published source
+`bd75363c0098edcdc54840c9cb7c7a65aebc09ef` with **Best** selected and reported
+that performance seems good. All six completed video attempts meet both the
+visible-frame and usable-start two-second bounds:
+
+| Attempt | Cache | Transport | Resolve ms | Visible frame ms | Usable start ms |
+| --- | --- | --- | ---: | ---: | ---: |
+| Cold | Joined | Indexed DASH | 467 | 1515 | 1734 |
+| Prepared | Ready | Indexed DASH | 8 | 343 | 632 |
+| Cold | Miss | Indexed DASH | 554 | 1619 | 1619 |
+| Cold | Miss | Indexed DASH | 363 | 1710 | 1752 |
+| Cold | Miss | Indexed DASH | 568 | 1094 | 1115 |
+| Cold | Miss | Chunkless HLS | 381 | 1287 | 1287 |
+
+Five cold usable starts range from **1115–1752 ms**; the prepared attempt is
+**632 ms**. No failures/cancellations appear in this supplied report. This
+qualifies the observed Best-quality video sample on the Tab S9. It is not a
+universal network guarantee, an audio acceptance run or evidence of broader M9
+feature parity. The earlier failures below remain retained.
+
 ## Actual mobile.7 device result
 
 The owner's Samsung Tab S9 ran `1a6f9682d5c573f58992ced44aa9b7c6d82788d6`
@@ -75,9 +97,9 @@ HLS/cache, Next, fullscreen, UI/account/themes and offline checks remain require
 Qualification and signing results are recorded below. These checks cannot
 establish live YouTube speed. The cloud's normal
 YouTube CONNECT is denied with HTTP 403; no proxy/routing workaround is used.
-After APK qualification/publication, the owner must retest on the Tab S9 with
-Best, several new videos and Next and send the complete timing report including
-`usable_start` and failed/cancelled attempts. M9 and live acceptance remain open.
+After qualification/publication, the owner supplied the Best-quality Tab S9
+report above, including `usable_start`. That observed sample passes the target.
+Broader device/service coverage and M9 remain open.
 
 The first [PR native run](https://github.com/Vanir20342222/ytui/actions/runs/41062613942)
 failed the indexed startup case and a subsequent existing video case. The indexed
@@ -120,9 +142,9 @@ passes, transferring only the finished signed APK without receiving credentials,
 rebuilding or re-signing. The public APK was independently downloaded and its
 hash, size, certificate, package and code 8 verified. The temporary private APK
 transfer and local bearer inputs were deleted; the permanent identity and
-encrypted owner recovery remain private. The owner has been asked to retest
-Best, new videos and Next and send the complete usable-start report. Live
-two-second acceptance and M9 remain **open**.
+encrypted owner recovery remain private. The subsequent owner report above
+passes the observed Best-quality video target. Broader device/service acceptance
+and M9 remain **open**.
 
 ## Further checks
 

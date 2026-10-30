@@ -250,6 +250,65 @@ class NativeUiTest {
     }
 
     @Test
+    fun searchAndFilterGeometryStaysUsableInPortraitAndLandscape() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        val density =
+            InstrumentationRegistry.getInstrumentation()
+                .targetContext
+                .resources
+                .displayMetrics
+                .density
+        fun chipBounds(tags: List<String>) {
+            val heights =
+                tags.map { tag ->
+                    val bounds =
+                        compose
+                            .onNodeWithTag(tag)
+                            .assertIsDisplayed()
+                            .fetchSemanticsNode()
+                            .boundsInRoot
+                    Assert.assertTrue(
+                        "$tag must have a 48dp visible/touch height: ${bounds.height / density}",
+                        bounds.height + 1f >= 48f * density,
+                    )
+                    bounds.height
+                }
+            Assert.assertTrue(
+                "Chips in one row must have the same height",
+                heights.max() - heights.min() <= 1f,
+            )
+        }
+        try {
+            for (wide in listOf(false, true)) {
+                if (wide) device.setOrientationLeft() else device.setOrientationNatural()
+                compose.waitForIdle()
+                compose.onNodeWithTag("tab-1").performClick()
+                val pane = compose.onNodeWithTag("browse-pane").fetchSemanticsNode().boundsInRoot
+                val search = compose.onNodeWithTag("search-field").fetchSemanticsNode().boundsInRoot
+                val expected = kotlin.math.min(pane.width - 40f * density, 720f * density)
+                Assert.assertEquals(
+                    "Search must be capped on wide screens and fill narrow screens",
+                    expected,
+                    search.width,
+                    2f,
+                )
+                Assert.assertEquals(
+                    "Search must stay centered in its pane",
+                    pane.center.x,
+                    search.center.x,
+                    2f,
+                )
+                chipBounds(listOf("source-Home", "source-Playlists", "source-Liked"))
+                compose.onNodeWithTag("tab-0").performClick()
+                chipBounds(listOf("library-Offline", "library-Playlists", "library-Transfers"))
+            }
+        } finally {
+            device.setOrientationNatural()
+            device.unfreezeRotation()
+        }
+    }
+
+    @Test
     fun wideLayoutKeepsTabsSettingsAndPlayerPanelsReachable() {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         try {

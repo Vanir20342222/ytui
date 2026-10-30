@@ -1,11 +1,13 @@
 # M9: two-second tap-to-visible-video target
 
-Latest physical evidence: mobile.7 with Best quality improves prepared frames
-to 74–828 ms but **fails** three cold starts at 2827–4117 ms. Extraction is now
-338–917 ms. [Published mobile.8 and indexed startup](MOBILE8_INDEXED_STARTUP.md)
-preserve the chosen quality and target source preparation with byte-range DASH.
-Its exact-main synthetic indexed check reaches usable video at 914 ms, with
-window pixels at 1585 ms. Live Tab S9 Best-quality acceptance remains open.
+Latest physical evidence: mobile.8 with **Best** on the Tab S9 passes all six
+supplied visible-frame/usable-start attempts. Five cold usable starts are
+**1115–1752 ms**, one prepared start **632 ms**; none fail or remain pending.
+[Published mobile.8 and full physical results](MOBILE8_INDEXED_STARTUP.md) preserve
+the earlier mobile.7 failures (three cold starts at 2827–4117 ms). This qualifies
+the observed Best-quality video sample, not every network/service or broader M9
+gate. The exact-main synthetic indexed check is usable at 914 ms, with actual
+window pixels at 1585 ms.
 
 Measure from the actual tap until the attached native view presents its first
 decoded frame. Extraction, offline lookup, service initialization, source
