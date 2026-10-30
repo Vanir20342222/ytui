@@ -19,6 +19,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
 class IndexedPlaybackTest {
+    @After
+    fun stopTestPlayback() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            PlaybackService.current?.stopAndClear()
+        }
+    }
+
     @get:Rule val compose = createEmptyComposeRule()
     @get:Rule
     val notifications =

@@ -75,3 +75,12 @@ YouTube CONNECT is denied with HTTP 403; no proxy/routing workaround is used.
 After APK qualification/publication, the owner must retest on the Tab S9 with
 Best, several new videos and Next and send the complete timing report including
 `usable_start` and failed/cancelled attempts. M9 and live acceptance remain open.
+
+The first [PR native run](https://github.com/Vanir20342222/ytui/actions/runs/41062613942)
+failed the indexed startup case and a subsequent existing video case. The indexed
+failure is a real integration bug: Media3's DASH CMCD handling calls hierarchical
+URI APIs on the opaque `data:` manifest URI. It now uses a bounded request-local
+byte-array source with hierarchical `ytui-memory://` URIs. No manifest network
+request is added; resources/subtitles keep the normal source and cache. Failed
+test playback is stopped in `finally` to avoid contaminating later cases. A fresh
+full native qualification is required; neither deadline nor pixel checks changed.

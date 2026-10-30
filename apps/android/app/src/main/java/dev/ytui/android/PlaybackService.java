@@ -651,7 +651,11 @@ public final class PlaybackService extends MediaSessionService {
           return dataSource;
         };
     DefaultMediaSourceFactory sources =
-        new DefaultMediaSourceFactory(traced)
+        new DefaultMediaSourceFactory(
+                PlaybackManifestDataSource.factory(
+                    traced,
+                    request.optBoolean("offline") ? "" : stream.optString("dash_manifest"),
+                    request.optBoolean("offline") ? "" : stream.optString("audio_dash_manifest")))
             .setLoadErrorHandlingPolicy(
                 new androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy() {
                   @Override
@@ -708,10 +712,7 @@ public final class PlaybackService extends MediaSessionService {
                         : contentType == C.CONTENT_TYPE_DASH ? "dash" : "progressive");
     String sourceUri =
         indexed
-            ? "data:application/dash+xml;base64,"
-                + android.util.Base64.encodeToString(
-                    dash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                    android.util.Base64.NO_WRAP)
+            ? PlaybackManifestDataSource.VIDEO
             : chunkless
                 ? "data:application/vnd.apple.mpegurl;base64,"
                     + android.util.Base64.encodeToString(
@@ -742,13 +743,7 @@ public final class PlaybackService extends MediaSessionService {
               source,
               sources.createMediaSource(
                   new MediaItem.Builder()
-                      .setUri(
-                          indexedAudio
-                              ? "data:application/dash+xml;base64,"
-                                  + android.util.Base64.encodeToString(
-                                      audioDash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                                      android.util.Base64.NO_WRAP)
-                              : audio)
+                      .setUri(indexedAudio ? PlaybackManifestDataSource.AUDIO : audio)
                       .setMimeType(indexedAudio ? MimeTypes.APPLICATION_MPD : null)
                       .setCustomCacheKey(
                           indexedAudio || stream.isNull("audio_cache_key")
