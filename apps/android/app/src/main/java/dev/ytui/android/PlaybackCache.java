@@ -198,9 +198,10 @@ final class PlaybackCache {
     // The extractor returns a selected media playlist. Never traverse a master
     // or prefetch an entire movie. The same cache factory serves Media3 later.
     byte[] playlistBytes;
+    DataSource playlistSource = source(stream).createDataSource();
+    Uri playlistUri = Uri.parse(url);
     try (DataSourceInputStream input =
-            new DataSourceInputStream(
-                source(stream).createDataSource(), new DataSpec.Builder().setUri(url).build());
+            new DataSourceInputStream(playlistSource, new DataSpec.Builder().setUri(url).build());
         java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
       byte[] buffer = new byte[16 * 1024];
       int read;
@@ -211,10 +212,11 @@ final class PlaybackCache {
         output.write(buffer, 0, read);
       }
       playlistBytes = output.toByteArray();
+      if (playlistSource.getUri() != null) playlistUri = playlistSource.getUri();
     }
     androidx.media3.exoplayer.hls.playlist.HlsPlaylist parsed =
         new androidx.media3.exoplayer.hls.playlist.HlsPlaylistParser()
-            .parse(Uri.parse(url), new java.io.ByteArrayInputStream(playlistBytes));
+            .parse(playlistUri, new java.io.ByteArrayInputStream(playlistBytes));
     if (!(parsed instanceof androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist)) return false;
     androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist playlist =
         (androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist) parsed;

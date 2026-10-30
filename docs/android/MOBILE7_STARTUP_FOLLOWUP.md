@@ -53,6 +53,8 @@ the same URI/byte-range cache identities as playback. Masters/live playlists are
 not recursively expanded or marked byte-ready. A native prepared-HLS check
 requires actual segment bytes in cache and no second first-segment HTTP request
 when playback starts; playlist-only warming cannot pass it.
+Relative init/segment references use the response's final playlist URI after
+redirects, including the redirect metadata retained by the cache.
 
 ## Qualification
 
@@ -79,3 +81,14 @@ is unchanged. The HLS test recorded a 334 ms view-frame event but its immediate
 full-display screenshot check failed. It now uses the same overlay-aware window
 pixel readback as the existing startup tests, still with a strict 2000 ms pixel
 deadline. Fresh native success, including prepared-segment reuse, is required.
+
+The second [PR native run](https://github.com/Vanir20342222/ytui/actions/runs/41029222182)
+confirms `requirements=1 unmet=1` before the loopback scope and passes the real
+downloads/exports. HLS passes at 718 ms cold / 689 ms prepared window pixels,
+including first-segment cache reuse. It still fails the existing initial-video
+case: the emulator logs 902 invalid zero color-buffer migrations and displays a
+black TextureView despite continued decoding. The offline Goldfish/Ranchu debug
+renderer now avoids placeholder/detached surfaces and requests Media3's surface
+recreation workaround. Physical devices and release builds retain the standard
+renderer. No pixel check or startup deadline is removed; another full native
+qualification is required before publication.
