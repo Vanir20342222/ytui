@@ -790,12 +790,11 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                 items(
                     listOf("For you" to "Home", "My playlists" to "Playlists", "Liked" to "Liked")
                 ) { (label, request) ->
-                    FilterChip(
+                    MediaChip(
+                        label,
                         selected = feed.request == request,
-                        onClick = { vm.navigate(tab, request) },
-                        label = { Text(label) },
                         modifier = Modifier.testTag("source-$request"),
-                    )
+                    ) { vm.navigate(tab, request) }
                 }
             }
         TextField(
@@ -834,12 +833,9 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         if (feed.categories.isNotEmpty())
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(feed.categories) { category ->
-                    SuggestionChip(
-                        onClick = { vm.navigate(request = category.get("request")) },
-                        label = { Text(category.optString("title")) },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.heightIn(min = 48.dp),
-                    )
+                    MediaChip(category.optString("title")) {
+                        vm.navigate(request = category.get("request"))
+                    }
                 }
             }
         LazyVerticalGrid(
