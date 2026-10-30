@@ -330,6 +330,7 @@ public final class PlaybackService extends MediaSessionService {
             if (isLive() && !rateLimited(e) && reconnectCount < 3) {
               reconnect();
             } else {
+              StartupTimings.ended(startupToken, "failed", SystemClock.elapsedRealtime());
               error =
                   rateLimited(e)
                       ? "Service rate limit; wait before retrying"
@@ -584,6 +585,8 @@ public final class PlaybackService extends MediaSessionService {
     generation++;
     startupAt = SystemClock.elapsedRealtime();
     firstFrameMs = startMs = 0;
+    if (startupToken != request.optLong("startup_token"))
+      StartupTimings.ended(startupToken, "cancelled", startupAt);
     currentRequest = request;
     startupToken = request.optLong("startup_token");
     StartupTimings.handoff(startupToken, startupAt);
@@ -1520,6 +1523,7 @@ public final class PlaybackService extends MediaSessionService {
     navigationPending = false;
     streamTitle = "";
     streamMetadataUpdates = 0;
+    StartupTimings.ended(startupToken, "cancelled", SystemClock.elapsedRealtime());
     player.stop();
     player.clearMediaItems();
     currentRequest = new JSONObject();

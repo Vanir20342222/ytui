@@ -55,7 +55,9 @@ HLS source. Unknown-codec/unsupported sources retain ordinary preparation.
 The timing report adds actual `started` and `usable_start` values. Usable start
 requires **both** visible output and active playback; an early frame followed
 by buffering/failure cannot pass. Numeric codec-initialization events are
-recorded separately. Reports remain identifier/URL/header free and bounded.
+recorded separately. Source failures and stop/replacement after handoff now
+record their terminal outcome rather than remaining pending indefinitely.
+Reports remain identifier/URL/header free and bounded.
 
 ## Qualification and remaining gate
 

@@ -61,8 +61,12 @@ class IndexedPlaybackTest {
                                                         .removePrefix("bytes=")
                                         }
                                         val bytes =
-                                            files[
-                                                uri.getQueryParameter("track")?.toIntOrNull() ?: 0]
+                                            if (uri.getQueryParameter("invalid_media") == "1")
+                                                "not media".toByteArray()
+                                            else
+                                                files[
+                                                    uri.getQueryParameter("track")?.toIntOrNull()
+                                                        ?: 0]
                                         val ignored = uri.getQueryParameter("ignore_query") == "1"
                                         if (
                                             uri.getQueryParameter("reject_query") == "1" &&
@@ -223,6 +227,58 @@ class IndexedPlaybackTest {
                 )
                 .writeText(evidence.toString())
             MobileSettings.save(original)
+        }
+    }
+
+    @Test
+    fun sourceFailureAndStopAreRecordedInsteadOfRemainingPending() {
+        Cdn().use { cdn ->
+            RuntimeTest.launchOffline().use {
+                fun request(url: String, token: Long) =
+                    json(
+                        "op" to "play",
+                        "request" to
+                            json(
+                                "media" to
+                                    json(
+                                        "url" to url,
+                                        "kind" to "video",
+                                        "title" to "Failure fixture",
+                                    ),
+                                "stream" to json("url" to url),
+                                "audio" to false,
+                                "startup_token" to token,
+                            ),
+                    )
+                val failed = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true)
+                StartupTimings.resolved(failed, android.os.SystemClock.elapsedRealtime(), false)
+                MediaBridge.execute(
+                    request(cdn.url(0) + "&ignore_query=1&invalid_media=1", failed).toString()
+                )
+                compose.waitUntil(10000) {
+                    PlaybackService.current?.startupToken == failed &&
+                        !MediaRuntimeTest.status().isNull("error")
+                }
+                Assert.assertTrue(
+                    StartupTimings.report()
+                        .lineSequence()
+                        .last { it.startsWith("Video") }
+                        .contains("failed")
+                )
+                Assert.assertEquals(-1L, StartupTimings.usable(failed))
+                val cancelled = StartupTimings.begin(android.os.SystemClock.elapsedRealtime(), true)
+                StartupTimings.resolved(cancelled, android.os.SystemClock.elapsedRealtime(), false)
+                MediaBridge.execute(request(cdn.url(0), cancelled).toString())
+                compose.waitUntil(10000) { PlaybackService.current?.startupToken == cancelled }
+                MediaRuntimeTest.command("stop")
+                compose.waitUntil(5000) {
+                    StartupTimings.report()
+                        .lineSequence()
+                        .last { it.startsWith("Video") }
+                        .contains(" cancelled cache=")
+                }
+                Assert.assertEquals(-1L, StartupTimings.usable(cancelled))
+            }
         }
     }
 
