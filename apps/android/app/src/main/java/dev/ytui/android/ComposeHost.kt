@@ -490,14 +490,14 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                     "about" ->
                         Panel("About ytui", { dialog = "" }) {
                             Text(
-                                "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}\nDevelopment preview"
+                                "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\nRust engine · native Android UI\nSource ${BuildConfig.SOURCE_REVISION}"
                             )
                             Text(
-                                "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media."
+                                "All provider, extraction, account and library operations use the shared Rust engine. Android supplies touch, keyboard, video and background media. Development preview. Device playback, network and update checks are tracked in the validation report."
                             )
-                            Text(
-                                "Development preview. Device playback, network and update checks are tracked in the validation report."
-                            )
+                            // Keep the actions clear of the scroll fold on short (landscape)
+                            // windows.
+                            Spacer(Modifier.height(24.dp))
                             Action("Radio artwork credits") {
                                 vm.effect(
                                     "open",
@@ -765,7 +765,7 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             }
     }
     Column(
-        Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        Modifier.fillMaxSize().testTag("browse-pane").padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -790,18 +790,24 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                 items(
                     listOf("For you" to "Home", "My playlists" to "Playlists", "Liked" to "Liked")
                 ) { (label, request) ->
-                    FilterChip(
+                    MediaChip(
+                        label,
                         selected = feed.request == request,
-                        onClick = { vm.navigate(tab, request) },
-                        label = { Text(label) },
                         modifier = Modifier.testTag("source-$request"),
-                    )
+                    ) {
+                        vm.navigate(tab, request)
+                    }
                 }
             }
         TextField(
             query,
             { query = it },
-            Modifier.fillMaxWidth().testTag("search-field"),
+            // A single-line input should not stretch across a wide canvas;
+            // cap it and center it when the pane is wider than the cap.
+            Modifier.align(Alignment.CenterHorizontally)
+                .widthIn(max = 720.dp)
+                .fillMaxWidth()
+                .testTag("search-field"),
             placeholder = {
                 Text(if (tab == 3) "Search stations or genres" else "Search or paste a link")
             },
@@ -834,12 +840,9 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         if (feed.categories.isNotEmpty())
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(feed.categories) { category ->
-                    SuggestionChip(
-                        onClick = { vm.navigate(request = category.get("request")) },
-                        label = { Text(category.optString("title")) },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.heightIn(min = 48.dp),
-                    )
+                    MediaChip(category.optString("title")) {
+                        vm.navigate(request = category.get("request"))
+                    }
                 }
             }
         LazyVerticalGrid(
@@ -975,6 +978,10 @@ internal fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = tr
                     stateDescription = "Ready"
                 },
                 contentScale = ContentScale.Crop,
+                // Crop from the leading edge so captions composed near the left of
+                // wide artwork survive inside a squarer container instead of being
+                // centre-cropped off the left side.
+                alignment = Alignment.CenterStart,
             )
         else
             Box(
@@ -1496,11 +1503,12 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
     val media = player.media?.let(::MediaCard) ?: return
+    val cornerRadius = 24.dp
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
             .aspectRatio(if (style == "classic") 1f else 1.35f)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(cornerRadius))
             .testTag("music-visualizer"),
         contentAlignment = Alignment.CenterStart,
     ) {
@@ -1549,26 +1557,38 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
                 config.optBoolean("thumbnails", true),
             )
         } else if (style.startsWith("vu")) {
-            Canvas(Modifier.fillMaxSize()) {
-                val packed = levels
-                val left = (packed and 65535) / 65535f
-                val right = ((packed ushr 16) and 65535) / 65535f
-                for (i in 0..23) {
-                    val level = if (i < 12) left else right
-                    val height =
-                        (0.03f + level * (0.12f + 0.08f * sin(phase / 30 + i))) * size.height
-                    drawRect(
-                        accent.copy(alpha = 0.5f + 0.5f * level),
-                        Offset(i * size.width / 24, size.height - height),
-                        androidx.compose.ui.geometry.Size(size.width / 30, height),
-                    )
+            Column(Modifier.fillMaxSize()) {
+                Artwork(
+                    media,
+                    Modifier.fillMaxWidth(0.45f)
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterHorizontally),
+                    config.optBoolean("thumbnails", true),
+                )
+                // Keep the meter in the artwork's visual group instead of
+                // stranding it at the bottom of the container.
+                Spacer(Modifier.height(32.dp))
+                Canvas(Modifier.weight(1f).fillMaxWidth()) {
+                    val packed = levels
+                    val left = (packed and 65535) / 65535f
+                    val right = ((packed ushr 16) and 65535) / 65535f
+                    // Inset the strip by the container's corner radius so the
+                    // rounded clip never cuts into the end segments.
+                    val inset = cornerRadius.toPx()
+                    val span = (size.width - inset * 2).coerceAtLeast(0f)
+                    for (i in 0..23) {
+                        val level = if (i < 12) left else right
+                        val height =
+                            ((0.03f + level * (0.12f + 0.08f * sin(phase / 30 + i))) * span)
+                                .coerceAtMost(size.height)
+                        drawRect(
+                            accent.copy(alpha = 0.5f + 0.5f * level),
+                            Offset(inset + i * span / 24, 0f),
+                            androidx.compose.ui.geometry.Size(span / 30, height),
+                        )
+                    }
                 }
             }
-            Artwork(
-                media,
-                Modifier.fillMaxWidth(0.45f).aspectRatio(1f).align(Alignment.TopCenter),
-                config.optBoolean("thumbnails", true),
-            )
         } else {
             Canvas(Modifier.fillMaxSize()) {
                 val packed = levels
