@@ -174,10 +174,7 @@ class CatalogUiTest {
             val color = bitmap.toPixelMap()[bitmap.width / 2, bitmap.height / 4]
             color.red > color.green * 1.15f
         }
-        var widthDp = 0
-        scenario.onActivity { widthDp = it.resources.configuration.screenWidthDp }
-        val visible = if (widthDp >= 840) cards.size else if (tab == 2) 4 else 1
-        awaitDecodedCovers(cards.take(visible))
+        awaitDecodedCovers(cards)
         InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(150, 3000)
         return cards
     }
@@ -667,18 +664,25 @@ class CatalogUiTest {
 
     private fun awaitDecodedCovers(cards: List<MediaCard>) {
         compose.waitUntil(15_000) {
-            cards.all { media ->
-                runCatching {
-                        val node =
-                            compose.onNodeWithTag("artwork-${media.key}", useUnmergedTree = true)
-                        val frame = node.captureToImage()
-                        // All original fixture covers have saturated warm/cool artwork;
-                        // a neutral placeholder cannot satisfy this actual-pixel check.
-                        val c = frame.toPixelMap()[frame.width / 2, frame.height / 4]
-                        maxOf(c.red, c.green, c.blue) - minOf(c.red, c.green, c.blue) > 0.12f
-                    }
-                    .getOrDefault(false)
-            }
+            // Virtualized rows beyond the viewport are intentionally not loaded.
+            val visible =
+                cards.filter { compose.onNodeWithTag("media-card-${it.key}").isDisplayed() }
+            visible.isNotEmpty() &&
+                visible.all { media ->
+                    runCatching {
+                            val node =
+                                compose.onNodeWithTag(
+                                    "artwork-${media.key}",
+                                    useUnmergedTree = true,
+                                )
+                            val frame = node.captureToImage()
+                            // All original fixture covers have saturated warm/cool artwork;
+                            // a neutral placeholder cannot satisfy this actual-pixel check.
+                            val c = frame.toPixelMap()[frame.width / 2, frame.height / 4]
+                            maxOf(c.red, c.green, c.blue) - minOf(c.red, c.green, c.blue) > 0.12f
+                        }
+                        .getOrDefault(false)
+                }
         }
     }
 
