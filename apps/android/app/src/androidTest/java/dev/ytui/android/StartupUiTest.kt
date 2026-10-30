@@ -172,6 +172,7 @@ class StartupUiTest {
                 "/hls/$name" to assets.open("hls/$name").use { it.readBytes() }
             }
         val original = MobileSettings.snapshot()
+        val confirmations = StringBuilder()
         MobileSettings.save(json("preload_next" to false, "autoplay_related" to false))
         val socket = java.net.ServerSocket(0, 8, java.net.InetAddress.getByName("127.0.0.1"))
         val paths = java.util.Collections.synchronizedList(mutableListOf<String>())
@@ -264,11 +265,32 @@ class StartupUiTest {
                         "HLS first frame exceeded 2000 ms: ${StartupTimings.total(token)}",
                         StartupTimings.total(token) <= 2000,
                     )
-                    Assert.assertTrue(
-                        MediaRuntimeTest.videoVisible(
-                            if (prepared) "startup-hls-prepared.png" else "startup-hls.png",
-                            false,
+                    var rgb = false
+                    var observed = -1L
+                    do {
+                        if (
+                            StartupTimings.elapsed(
+                                token,
+                                android.os.SystemClock.elapsedRealtime(),
+                            ) > 2000
                         )
+                            break
+                        val frame =
+                            VisibleVideoProbe.capture(
+                                scenario,
+                                token,
+                                if (prepared) "startup-hls-prepared.png" else "startup-hls.png",
+                            )
+                        rgb = frame.rgb
+                        observed = StartupTimings.elapsed(token, frame.capturedAt)
+                        if (!rgb) Thread.sleep(16)
+                    } while (!rgb)
+                    Assert.assertTrue(
+                        "HLS pixels were not present within 2000 ms: $observed",
+                        rgb && observed in 0..2000,
+                    )
+                    confirmations.append(
+                        "${if(prepared) "prepared" else "cold"} hls_screenshot_confirmation_ms=$observed\n"
                     )
                     Assert.assertTrue(
                         StartupTimings.report().contains("quality=best transport=hls-chunkless")
@@ -294,7 +316,7 @@ class StartupUiTest {
             }
         } finally {
             File(instrumentation.targetContext.getExternalFilesDir(null), "startup-hls-timings.txt")
-                .writeText(StartupTimings.report())
+                .writeText(StartupTimings.report() + confirmations)
             socket.close()
             server.join(2000)
             MobileSettings.save(original)

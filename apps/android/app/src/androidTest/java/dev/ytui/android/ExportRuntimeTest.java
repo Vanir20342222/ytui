@@ -53,6 +53,7 @@ public final class ExportRuntimeTest {
     cancelled.delete();
     String videoId = null, audioId = null;
     try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline();
+        LoopbackDownloads loopback = LoopbackDownloads.open();
         MediaRuntimeTest.FixtureServer videos = new MediaRuntimeTest.FixtureServer(video);
         MediaRuntimeTest.FixtureServer audios = new MediaRuntimeTest.FixtureServer(audio)) {
       JSONObject paired =

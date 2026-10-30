@@ -69,3 +69,13 @@ These generated-media checks cannot qualify live YouTube speed. The owner must
 install the resulting APK over the stable app, keep Best selected, play new
 videos and Next, and send Settings → Performance → Copy timing report. Include
 slow/failed/cancelled attempts. M9 and live two-second acceptance stay open.
+
+The first [PR native run](https://github.com/Vanir20342222/ytui/actions/runs/41026984712)
+failed four cases and is retained as failed evidence. Three loopback-download
+fixtures depended on the emulator's public-Internet validation despite serving
+real files on localhost. They now temporarily remove that scheduler requirement
+inside the disposable test install and restore it afterward; production policy
+is unchanged. The HLS test recorded a 334 ms view-frame event but its immediate
+full-display screenshot check failed. It now uses the same overlay-aware window
+pixel readback as the existing startup tests, still with a strict 2000 ms pixel
+deadline. Fresh native success, including prepared-segment reuse, is required.
