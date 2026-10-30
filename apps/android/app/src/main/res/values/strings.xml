@@ -1,3 +1,4 @@
 <resources>
     <string name="downloads_channel_name">Offline downloads</string>
+    <string name="ytui_player_collapse">Minimize player</string>
 </resources>

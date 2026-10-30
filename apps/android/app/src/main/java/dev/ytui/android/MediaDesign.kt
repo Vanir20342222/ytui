@@ -1,7 +1,9 @@
 package dev.ytui.android
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,16 +23,19 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.foundation.BorderStroke
 
 internal val LocalReducedMotion = staticCompositionLocalOf { false }
 
 /** Shared visual roles. Palette colours remain owned by the shared Rust theme. */
 internal object MediaTokens {
+    // Android-only neutral rendering of ytui-dark; shared/desktop palettes stay unchanged.
+    val neutralBackground = Color.Black.copy(red = 0.06f, green = 0.06f, blue = 0.06f)
+    val neutralSurface = Color.Black.copy(red = 0.14f, green = 0.14f, blue = 0.14f)
+    val neutralText = Color.White.copy(red = 0.94f, green = 0.94f, blue = 0.94f)
     val grid = 4.dp
     val textInset = 16.dp
     val small = RoundedCornerShape(4.dp)
@@ -42,20 +47,25 @@ internal object MediaTokens {
     val videoScrim = Color.Black.copy(alpha = 0.72f)
     val videoDisc = Color.Black.copy(alpha = 0.48f)
     val transparent = Color.Transparent
-    val typography = Typography(
-        titleLarge = TextStyle(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Medium),
-        titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
-        titleSmall = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
-        bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
-        labelLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-        labelMedium = TextStyle(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium),
-    )
+    val typography =
+        Typography(
+            titleLarge =
+                TextStyle(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Medium),
+            titleMedium =
+                TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+            titleSmall =
+                TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+            bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
+            labelLarge =
+                TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+            labelMedium =
+                TextStyle(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium),
+        )
 }
 
 /** Ensure secondary text remains AA-readable on raised surfaces, including imports. */
 internal fun mediaContrast(a: Color, b: Color): Float =
-    (maxOf(a.luminance(), b.luminance()) + 0.05f) /
-        (minOf(a.luminance(), b.luminance()) + 0.05f)
+    (maxOf(a.luminance(), b.luminance()) + 0.05f) / (minOf(a.luminance(), b.luminance()) + 0.05f)
 
 internal fun mediaReadableText(candidate: Color, background: Color): Color {
     if (mediaContrast(candidate, background) >= 4.5f) return candidate
@@ -186,7 +196,14 @@ internal fun MediaIcon(
                     drawOval(tint, Offset(13f, 13f), Size(7f, 5f))
                 }
                 Glyph.Radio -> {
-                    drawRoundRect(tint, Offset(3f, 8f), Size(18f, 13f), style = if (filled) androidx.compose.ui.graphics.drawscope.Fill else Stroke(1.8f))
+                    drawRoundRect(
+                        tint,
+                        Offset(3f, 8f),
+                        Size(18f, 13f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
                     line(5f, 8f, 18f, 3f)
                     drawCircle(tint, 3f, Offset(8f, 15f), style = Stroke(1.8f))
                     line(14f, 13f, 18f, 13f)
@@ -343,12 +360,13 @@ internal fun MediaChip(
         label = { Text(label, style = MaterialTheme.typography.labelLarge) },
         shape = MediaTokens.pill,
         border = BorderStroke(0.dp, MediaTokens.transparent),
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            selectedContainerColor = MaterialTheme.colorScheme.onBackground,
-            selectedLabelColor = MaterialTheme.colorScheme.background,
-        ),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                labelColor = MaterialTheme.colorScheme.onSurface,
+                selectedContainerColor = MaterialTheme.colorScheme.onBackground,
+                selectedLabelColor = MaterialTheme.colorScheme.background,
+            ),
     )
 }
 
@@ -414,10 +432,33 @@ internal fun EmptyMediaState(
 
 @Composable
 internal fun ChannelAvatar(creator: String, size: androidx.compose.ui.unit.Dp) {
-    Box(Modifier.size(size).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
-        contentAlignment = Alignment.Center) {
-        Text(creator.trim().firstOrNull()?.uppercase() ?: "·",
+    Box(
+        Modifier.size(size).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            creator.trim().firstOrNull()?.uppercase() ?: "·",
             color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.labelLarge)
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
+}
+
+@Composable
+internal fun SheetAction(
+    text: @Composable () -> Unit,
+    onClick: () -> Unit,
+    leadingIcon: @Composable (() -> Unit)? = null,
+) {
+    Row(
+        Modifier.fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        leadingIcon?.invoke()
+        Box(Modifier.weight(1f)) { text() }
     }
 }

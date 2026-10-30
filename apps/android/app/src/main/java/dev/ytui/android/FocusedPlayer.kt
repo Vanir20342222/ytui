@@ -1,14 +1,20 @@
 package dev.ytui.android
 
 import android.content.Intent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -23,7 +29,9 @@ import androidx.media3.ui.PlayerView
 
 @androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
 @Composable
-internal fun VideoSurface(modifier: Modifier = Modifier) {
+internal fun VideoSurface(modifier: Modifier = Modifier, onCollapse: (() -> Unit)? = null) {
+    val collapse by rememberUpdatedState(onCollapse)
+    val accent = MaterialTheme.colorScheme.primary.toArgb()
     val reduced by rememberUpdatedState(LocalReducedMotion.current)
     AndroidView(
         factory = { context ->
@@ -52,6 +60,13 @@ internal fun VideoSurface(modifier: Modifier = Modifier) {
             view.setControllerAnimationEnabled(
                 !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
             )
+            PlayerChrome.rememberAccent(accent)
+            PlayerChrome.apply(view)
+            view.findViewById<android.view.View>(R.id.ytui_collapse)?.apply {
+                visibility =
+                    if (collapse == null) android.view.View.GONE else android.view.View.VISIBLE
+                setOnClickListener { collapse?.invoke() }
+            }
             val actual = PlaybackService.current?.controlsPlayer
             (view.tag as VisibleFrameTracker).bind(actual)
             view.keepScreenOn = actual?.playWhenReady == true
@@ -96,14 +111,20 @@ internal fun FocusedPlayer(
         @Composable
         fun Controls(modifier: Modifier) {
             Column(
-                modifier,
+                modifier
+                    .padding(horizontal = MediaTokens.textInset)
+                    .then(
+                        if (LocalDensity.current.fontScale > 1.3f)
+                            Modifier.verticalScroll(rememberScrollState())
+                        else Modifier
+                    ),
                 verticalArrangement = Arrangement.spacedBy(if (landscape) 4.dp else 8.dp),
             ) {
                 Text(
                     player.title,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (
@@ -124,31 +145,6 @@ internal fun FocusedPlayer(
                     .optString("error")
                     .takeUnless { it.isBlank() || it == "null" }
                     ?.let { Text(it, color = MaterialTheme.colorScheme.error, maxLines = 2) }
-                if (!player.video) PlayerSeek(vm, player)
-                if (!player.video)
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-                        MediaIconButton(Glyph.Shuffle, "Shuffle") { vm.command("shuffle") }
-                        MediaIconButton(Glyph.Previous, "Previous track") { vm.command("previous") }
-                        FilledIconButton(
-                            { vm.command("pause") },
-                            Modifier.size(64.dp).testTag("player-pause").semantics {
-                                contentDescription = if (player.playing) "Pause" else "Play"
-                            },
-                        ) {
-                            MediaIcon(
-                                if (player.playing) Glyph.Pause else Glyph.Play,
-                                Modifier.size(32.dp),
-                            )
-                        }
-                        MediaIconButton(Glyph.Next, "Next track", "player-next") {
-                            vm.command("next")
-                        }
-                        MediaIconButton(Glyph.Repeat, "Repeat one") { vm.command("repeat") }
-                    }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     MediaIconButton(Glyph.Queue, "Playback queue", action = onQueue)
                     if (player.video)
@@ -165,6 +161,36 @@ internal fun FocusedPlayer(
                         action = onMore,
                     )
                 }
+                if (!player.video) PlayerSeek(vm, player)
+                if (!player.video)
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        MediaIconButton(Glyph.Shuffle, "Shuffle") { vm.command("shuffle") }
+                        MediaIconButton(Glyph.Previous, "Previous track") { vm.command("previous") }
+                        FilledIconButton(
+                            { vm.command("pause") },
+                            Modifier.size(64.dp).testTag("player-pause").semantics {
+                                contentDescription = if (player.playing) "Pause" else "Play"
+                            },
+                            colors =
+                                IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.onBackground,
+                                    contentColor = MaterialTheme.colorScheme.background,
+                                ),
+                        ) {
+                            MediaIcon(
+                                if (player.playing) Glyph.Pause else Glyph.Play,
+                                Modifier.size(32.dp),
+                            )
+                        }
+                        MediaIconButton(Glyph.Next, "Next track", "player-next") {
+                            vm.command("next")
+                        }
+                        MediaIconButton(Glyph.Repeat, "Repeat one") { vm.command("repeat") }
+                    }
             }
         }
         @Composable
@@ -176,7 +202,8 @@ internal fun FocusedPlayer(
                 if (player.video && allowVideoSurface)
                     VideoSurface(
                         Modifier.width(minOf(maxWidth, maxHeight * (16f / 9f)))
-                            .aspectRatio(16f / 9f)
+                            .aspectRatio(16f / 9f),
+                        onCollapse = minimize,
                     )
                 else if (player.video) {
                     // The root's distinct mode flow can lag the player snapshot
@@ -220,7 +247,7 @@ internal fun PlayerSeek(vm: YtuiViewModel, player: PlayerState) {
         )
     } else {
         Column {
-            Slider(
+            MediaSeekSlider(
                 (drag ?: player.position).coerceIn(0f, player.duration),
                 { drag = it },
                 valueRange = 0f..player.duration,
@@ -236,4 +263,47 @@ internal fun PlayerSeek(vm: YtuiViewModel, player: PlayerState) {
             }
         }
     }
+}
+
+/** Keep Material's seek semantics/drag handling; draw a slim line and persistent round playhead. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun MediaSeekSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChangeFinished: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    val track = MaterialTheme.colorScheme.outlineVariant
+    Slider(
+        value,
+        onValueChange,
+        modifier.heightIn(min = 48.dp),
+        valueRange = valueRange,
+        onValueChangeFinished = onValueChangeFinished,
+        thumb = { Box(Modifier.size(12.dp).clip(CircleShape).background(accent)) },
+        track = { state ->
+            Canvas(Modifier.fillMaxWidth().height(3.dp)) {
+                val fraction =
+                    mediaProgress(
+                        state.value - state.valueRange.start,
+                        state.valueRange.endInclusive - state.valueRange.start,
+                    )
+                drawLine(
+                    track,
+                    androidx.compose.ui.geometry.Offset(0f, size.height / 2),
+                    androidx.compose.ui.geometry.Offset(size.width, size.height / 2),
+                    size.height,
+                )
+                drawLine(
+                    accent,
+                    androidx.compose.ui.geometry.Offset(0f, size.height / 2),
+                    androidx.compose.ui.geometry.Offset(size.width * fraction, size.height / 2),
+                    size.height,
+                )
+            }
+        },
+    )
 }

@@ -8,6 +8,19 @@ import org.junit.Test
 
 class MediaDesignTest {
     @Test
+    fun secondaryInkStaysReadableOnRaisedImportedSurfaces() {
+        for (surface in (0..255 step 8).map { Color(it, it, it) }) {
+            for (ink in listOf(Color.Black, Color.White, Color.Gray, Color.Cyan, Color.Magenta)) {
+                assertTrue(mediaContrast(mediaReadableText(ink, surface), surface) >= 4.5f)
+            }
+        }
+        assertTrue(mediaContrast(MediaTokens.neutralText, MediaTokens.neutralBackground) >= 4.5f)
+        assertTrue(mediaContrast(MediaTokens.neutralText, MediaTokens.neutralSurface) >= 4.5f)
+        assertEquals(MediaTokens.neutralBackground.red, MediaTokens.neutralBackground.green)
+        assertEquals(MediaTokens.neutralBackground.green, MediaTokens.neutralBackground.blue)
+    }
+
+    @Test
     fun progressSurvivesStopUnknownDurationAndInvalidTelemetry() {
         for ((position, duration) in
             listOf(
