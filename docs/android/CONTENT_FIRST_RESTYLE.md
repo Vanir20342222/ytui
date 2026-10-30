@@ -77,10 +77,14 @@ include System, so repeated palette renders are expected.
 
 ## Validation
 
-Pending final native results. Baseline captures are retained before/; after/
-will hold instrumented outputs. Local JVM/build/lint and native emulator outcomes
-are tracked separately; fixture imagery does not qualify live YouTube or physical
-hardware. Radio/Downloads only receive shared component styling, with captured
+Local debug APK, instrumentation APK and lint pass; **20 JVM tests** and
+**337 workspace tests** pass (31 explicit workspace ignores). The owner-approved
+default/theme-preservation test passes. Final native outcomes, artifact downloads
+and the screenshot review are published in [PR #29](https://github.com/Vanir20342222/ytui/pull/29);
+its checks identify the current qualified revision. Baseline captures are retained
+in before/, with native instrumented outputs in after/ in the review workspace.
+Local checks, native emulation and device/live acceptance stay separate: fixture
+imagery does not qualify live YouTube or physical hardware. Radio/Downloads only receive shared component styling, with captured
 empty/existing state; station networking/export parity are outside this pass.
 The missing original ZIP and lack of intermediate full-matrix runs mean those
 specific brief requirements cannot be claimed. The final matrix is comprehensive
@@ -105,3 +109,17 @@ large-text navigation space and retained cover-play accessibility labels. A nati
 play/pause icon still contained its original solid disc; original white glyph
 vectors replace that drawable inside the new translucent disc. These findings
 are kept with the initial artifact rather than represented as final passes.
+
+## Changed-file map
+
+| Group | Files |
+| --- | --- |
+| Tokens/P0 | `MediaDesign.kt`, browsing/app-bar/search/cards/navigation/mini-player portions of `ComposeHost.kt` |
+| P1 | `FocusedPlayer.kt`, `PlayerChrome.kt`, `FullscreenActivity.java` (presentation bindings only), panel/settings/account portions of `ComposeHost.kt`, `ytui_controller.xml`, `ytui_player.xml`, original glyph vectors `ytui_{collapse,play,pause}.xml`, collapse accessibility string |
+| P2 | Wide search and accessibility geometry in `ComposeHost.kt`; `CatalogUiTest.kt`, `NativeUiTest.kt`, `MediaDesignTest.kt`, screenshot collection in `tools/android/run-device-tests.sh` |
+| Explicit owner exception | Fresh-config theme default and preservation test in `crates/ytui-mobile/src/lib.rs`; no extraction/network/cache/media behavior changes |
+
+`ytui_controller.xml` adapts the existing Apache-licensed Media3 control layout;
+its copyright/license header is retained. Glyphs are original simple vectors.
+No font, asset service, tracking endpoint or dependency was added. Stable signing
+identity, account/session files, library state and release assets are untouched.
