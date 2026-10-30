@@ -145,6 +145,52 @@ class NativeUiTest {
     }
 
     @Test
+    fun importedPaletteWithBuiltInNameKeepsItsOwnPaint() {
+        val file =
+            java.io.File(
+                InstrumentationRegistry.getInstrumentation().targetContext.filesDir,
+                "palette.json",
+            )
+        val previous = if (file.isFile) file.readBytes() else null
+        try {
+            val document =
+                JSONObject(NativeBridge.request(json("op" to "theme", "dark" to true).toString()))
+                    .getJSONObject("data")
+                    .put("name", "ytui-dark")
+                    .put("source", "synthetic imported palette")
+                    .put("background", org.json.JSONArray(listOf(12, 20, 50)))
+                    .put("surface", org.json.JSONArray(listOf(20, 32, 60)))
+                    .put("text", org.json.JSONArray(listOf(230, 240, 250)))
+                    .put("light", false)
+            val imported =
+                JSONObject(
+                    NativeBridge.request(
+                        json("op" to "import_theme", "text" to document.toString()).toString()
+                    )
+                )
+            Assert.assertTrue("Synthetic palette import must succeed", imported.optBoolean("ok"))
+            scenario.onActivity {
+                androidx.lifecycle.ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(
+                    false
+                ) { config ->
+                    config.put("theme", "custom")
+                }
+            }
+            compose.waitUntil(10_000) {
+                val color =
+                    compose.onNodeWithTag("app-background").captureToImage().toPixelMap()[0, 0]
+                kotlin.math.abs(color.blue - 50f / 255f) < 0.02f &&
+                    kotlin.math.abs(color.red - 12f / 255f) < 0.02f
+            }
+            captureSettled("restyle-imported-dark-name.png")
+        } finally {
+            NativeBridge.request(json("op" to "save_settings", "config" to original).toString())
+            if (previous != null) file.writeBytes(previous)
+            else if (file.isFile) Assert.assertTrue(file.delete())
+        }
+    }
+
+    @Test
     fun accountRequiredFeedOffersReachableSignInAndCookieImport() {
         Assume.assumeFalse(
             "Uses a disposable disconnected app",

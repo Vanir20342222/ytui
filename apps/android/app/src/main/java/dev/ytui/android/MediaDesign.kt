@@ -493,8 +493,14 @@ internal fun ChannelAvatar(creator: String, size: androidx.compose.ui.unit.Dp) {
         Modifier.size(size).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
+        // Keep a complete code point for emoji-leading channel names.
+        val initial =
+            creator.trim().let { name ->
+                if (name.isEmpty()) "·"
+                else name.substring(0, name.offsetByCodePoints(0, 1)).uppercase()
+            }
         Text(
-            creator.trim().firstOrNull()?.uppercase() ?: "·",
+            initial,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelLarge,
         )

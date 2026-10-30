@@ -307,10 +307,8 @@ class CatalogUiTest {
         compose.onNodeWithTag("tab-0").performClick()
         compose.onNodeWithTag("create-offline-playlist").performClick()
         val title = "UI fixture " + java.util.UUID.randomUUID().toString().take(8)
-        compose
-            .onNodeWithTag("offline-playlist-name")
-            .performTextInput(title)
-            .assertTextContains(title)
+        compose.onNodeWithTag("offline-playlist-name").performTextInput(title)
+        compose.onNodeWithTag("offline-playlist-name").assertTextContains(title)
         settleUi()
         compose.onNodeWithText("Create").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
@@ -318,10 +316,8 @@ class CatalogUiTest {
         }
         settleUi()
         compose.onNodeWithText(title).performClick()
-        compose
-            .onNodeWithTag("offline-playlist-edit-name")
-            .performTextReplacement("$title renamed")
-            .assertTextContains("$title renamed")
+        compose.onNodeWithTag("offline-playlist-edit-name").performTextReplacement("$title renamed")
+        compose.onNodeWithTag("offline-playlist-edit-name").assertTextContains("$title renamed")
         // Modal sheets move as the IME opens. Tap the settled real button;
         // semantics becoming available does not imply its window position is final.
         settleUi()

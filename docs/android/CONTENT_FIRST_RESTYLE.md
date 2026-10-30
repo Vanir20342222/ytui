@@ -159,3 +159,16 @@ assertions and their ten-second limit remain unchanged. A repeat failure capture
 the actual rename screen. This is not reported as a diagnosed production storage
 fix. A separate desktop fake-executable ETXTBSY fixture finding/fix is tracked in
 [PR #30](https://github.com/Vanir20342222/ytui/pull/30).
+
+
+A final palette-import review found that a custom document named `ytui-dark` could
+collide with the neutral built-in presentation. The override now checks that the
+selected theme is not `custom`; imported background/surface/text values remain
+exactly their document's values. An actual native synthetic import regression
+checks the painted background and restores its prior palette/configuration. This
+is a presentation fix, with no importer/model/backend changes.
+
+Advanced seek labels now show the existing configured interval instead of always
+saying ten seconds. The commands/intervals and Media3's native −5/+15 controls
+are unchanged. Creator initials retain full Unicode code points for emoji-leading
+names.

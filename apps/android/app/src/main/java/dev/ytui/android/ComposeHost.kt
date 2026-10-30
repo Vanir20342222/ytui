@@ -171,8 +171,8 @@ object ComposeHost {
     }
 }
 
-internal fun JSONObject.color(key: String, fallback: Color): Color {
-    if (optString("name") == "ytui-dark")
+internal fun JSONObject.color(key: String, fallback: Color, neutralPreset: Boolean = true): Color {
+    if (neutralPreset && optString("name") == "ytui-dark")
         when (key) {
             "background" -> return MediaTokens.neutralBackground
             "surface" -> return MediaTokens.neutralSurface
@@ -209,10 +209,13 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var dialog by rememberSaveable { mutableStateOf("") }
     var menu by remember { mutableStateOf(false) }
-    val background = palette.color("background", Color(0xff101418))
-    val surface = palette.color("surface", Color(0xff202830))
-    val foreground = palette.color("text", Color(0xffd5dee6))
-    val accent = palette.color("accent", Color(0xff80cbc4))
+    // Imported documents can legitimately reuse a built-in name. Their paint
+    // roles must remain exactly the imported values rather than the default preset.
+    val neutralPreset = config.optString("theme", "system") != "custom"
+    val background = palette.color("background", Color(0xff101418), neutralPreset)
+    val surface = palette.color("surface", Color(0xff202830), neutralPreset)
+    val foreground = palette.color("text", Color(0xffd5dee6), neutralPreset)
+    val accent = palette.color("accent", Color(0xff80cbc4), neutralPreset)
     val light = palette.optBoolean("light")
     val base = if (light) lightColorScheme() else darkColorScheme()
     val colors =
@@ -1177,7 +1180,10 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
             verticalAlignment = Alignment.Top,
         ) {
             if (!square) {
-                ChannelAvatar(media.creator, 36.dp)
+                ChannelAvatar(
+                    if (mobile.optBoolean("show_channel", true)) media.creator else "",
+                    36.dp,
+                )
                 Spacer(Modifier.width(12.dp))
             }
             Column(
@@ -1589,7 +1595,7 @@ private fun PlayerPane(
                     { vm.command("back") },
                     Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
                 ) {
-                    Text("−10", fontWeight = FontWeight.SemiBold)
+                    Text("−${mobile.optInt("seek_seconds", 10)}", fontWeight = FontWeight.SemiBold)
                 }
                 FilledIconButton(
                     { vm.command("pause") },
@@ -1608,7 +1614,7 @@ private fun PlayerPane(
                     { vm.command("forward") },
                     Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
                 ) {
-                    Text("+10", fontWeight = FontWeight.SemiBold)
+                    Text("+${mobile.optInt("seek_seconds", 10)}", fontWeight = FontWeight.SemiBold)
                 }
                 MediaIconButton(Glyph.Next, "Next track") { vm.command("next") }
             }
