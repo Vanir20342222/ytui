@@ -123,3 +123,7 @@ are kept with the initial artifact rather than represented as final passes.
 its copyright/license header is retained. Glyphs are original simple vectors.
 No font, asset service, tracking endpoint or dependency was added. Stable signing
 identity, account/session files, library state and release assets are untouched.
+
+Review also bounds sheets to their content up to a 90% window limit, instead of
+forcing short menus/empty queues to occupy nearly the entire screen. Full-page
+settings and the focused player retain their bounded full-screen layout.

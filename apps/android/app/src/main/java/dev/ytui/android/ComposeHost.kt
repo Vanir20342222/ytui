@@ -695,14 +695,17 @@ internal fun Panel(
                     MediaIconButton(Glyph.Close, "Close", "panel-close", action = close)
             }
             Column(
-                Modifier.weight(1f)
+                Modifier.weight(1f, fill = full || page)
                     .fillMaxWidth()
                     .then(if (scroll) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                     .padding(
                         horizontal = if (full) 0.dp else MediaTokens.textInset,
                         vertical = 8.dp,
                     ),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        if (full || page) 16.dp else if (title.isBlank()) 0.dp else 8.dp
+                    ),
                 content = content,
             )
         }
@@ -748,7 +751,11 @@ internal fun Panel(
             shape = MediaTokens.sheet,
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ) {
-            Body(Modifier.fillMaxWidth().fillMaxHeight(0.9f).imePadding())
+            Body(
+                Modifier.fillMaxWidth()
+                    .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.9f)
+                    .imePadding()
+            )
         }
     }
 }
