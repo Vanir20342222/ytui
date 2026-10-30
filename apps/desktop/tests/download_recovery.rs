@@ -9,13 +9,22 @@ use tokio_util::sync::CancellationToken;
 use ytui_core::{Config, DownloadQueue, Job, JobEvent, JobState, JobUpdate, Media};
 use ytui_services::{download, paths::Paths};
 
+// Fresh executable scripts can be ETXTBSY when another fixture spawns while
+// a writable script descriptor is still inherited. Keep each fixture's file/
+// subprocess lifetime isolated; its worker and event stream still run concurrently.
+static FIXTURE_PROCESSES: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 struct Fixture {
     temp: tempfile::TempDir,
     config: Config,
     paths: Paths,
+    _lifecycle: std::sync::MutexGuard<'static, ()>,
 }
 impl Fixture {
     fn new(script: &str) -> Self {
+        let lifecycle = FIXTURE_PROCESSES
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let temp = tempfile::Builder::new()
             .prefix("ytui 日本語 tests-")
             .tempdir()
@@ -44,6 +53,7 @@ impl Fixture {
             temp,
             config,
             paths,
+            _lifecycle: lifecycle,
         };
         fixture.config.yt_dlp = fixture.tool("extractor", script).display().to_string();
         fixture
@@ -258,7 +268,13 @@ printf 'YTUI_OUTPUT:"%s/second.media"\n' "$PWD"
     fixture.config.max_retries = 1;
     let source = fixture.job().media.url;
     let (job, events) = fixture.run(fixture.job()).await;
-    assert_eq!(job.state, JobState::Done);
+    assert_eq!(
+        job.state,
+        JobState::Done,
+        "fixture failed: {:?}; events: {:?}",
+        job.error,
+        events
+    );
     assert_eq!(job.media.url, source);
     assert_eq!(job.outputs.len(), 2);
     assert_eq!(
@@ -324,7 +340,12 @@ printf 'YTUI_OUTPUT:"%s/second.media"\n' "$PWD"
     let mut restored: Job = serde_json::from_str(&serde_json::to_string(&first).unwrap()).unwrap();
     restored.invalidate(JobState::Resolving);
     let (retried, _) = fixture.run(restored).await;
-    assert_eq!(retried.state, JobState::Done);
+    assert_eq!(
+        retried.state,
+        JobState::Done,
+        "retry fixture failed: {:?}",
+        retried.error
+    );
     assert_eq!(retried.media.url, source);
     assert_eq!(retried.outputs.len(), 2);
     assert_eq!(
