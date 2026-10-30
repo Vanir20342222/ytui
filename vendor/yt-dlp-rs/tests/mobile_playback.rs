@@ -24,6 +24,22 @@ const VIDEO: &str = "https://www.youtube.com/watch?v=BaW_jenozKc";
 const FORMAT: &str = "bestvideo[height<=1080]+bestaudio/best";
 
 #[test]
+fn indexed_playback_retains_initialization_index_and_duration_without_media_probes() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-indexed");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap();
+    assert_eq!(info.height, Some(1080));
+    assert_eq!(info.requested_formats.len(), 2);
+    for format in &info.requested_formats {
+        assert_eq!(format.extra["ytui_init_range"]["end"], "99");
+        assert_eq!(format.extra["ytui_index_range"]["start"], "100");
+        assert_eq!(format.extra["ytui_duration_ms"], "10000");
+    }
+    assert_eq!(proxy.requests.lock().unwrap().len(), 1);
+}
+
+#[test]
 fn mobile_paired_video_uses_one_player_request_and_keeps_requested_quality() {
     let proxy = site_proxy::SiteProxy::start("youtube-direct");
     let info = downloader(&proxy, Some(FORMAT))

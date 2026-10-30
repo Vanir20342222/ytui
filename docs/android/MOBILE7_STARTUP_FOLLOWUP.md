@@ -1,5 +1,10 @@
 # M9: Best-quality HLS startup follow-up, mobile.7
 
+**Subsequent physical result:** the owner tested this APK on the Tab S9 with
+Best. Prepared frames pass at 74–828 ms, but three cold starts still fail at
+2827–4117 ms. [Full result and mobile.8 follow-up](MOBILE8_INDEXED_STARTUP.md).
+The historical qualification below does not supersede that live failure.
+
 ## Physical failure retained
 
 The owner's Tab S9 ran mobile.6 (`97e0b7`) with **Best** quality. Five completed
@@ -66,7 +71,7 @@ Android HLS service test requires a visible frame within 2000 ms, pixel
 corroboration and requests limited to the selected playlist/segments. Existing
 tap-to-pixel, fullscreen, queue, offline, input and theme checks remain required.
 
-Build/native/signing/publication evidence will be recorded after the checks run.
+Build/native/signing/publication evidence is recorded below.
 These generated-media checks cannot qualify live YouTube speed. The owner must
 install the resulting APK over the stable app, keep Best selected, play new
 videos and Next, and send Settings → Performance → Copy timing report. Include
@@ -80,7 +85,8 @@ inside the disposable test install and restore it afterward; production policy
 is unchanged. The HLS test recorded a 334 ms view-frame event but its immediate
 full-display screenshot check failed. It now uses the same overlay-aware window
 pixel readback as the existing startup tests, still with a strict 2000 ms pixel
-deadline. Fresh native success, including prepared-segment reuse, is required.
+deadline. A fresh native pass, including prepared-segment reuse, was required and is
+recorded in the qualified artifact section below.
 
 The second [PR native run](https://github.com/Vanir20342222/ytui/actions/runs/41029222182)
 confirms `requirements=1 unmet=1` before the loopback scope and passes the real
@@ -91,4 +97,28 @@ black TextureView despite continued decoding. The offline Goldfish/Ranchu debug
 renderer now avoids placeholder/detached surfaces and requests Media3's surface
 recreation workaround. Physical devices and release builds retain the standard
 renderer. No pixel check or startup deadline is removed; another full native
-qualification is required before publication.
+qualification was required and passed before publication, as recorded below.
+
+## Published and qualified artifact
+
+[Download mobile.7 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.7/ytui-0.2.0-alpha.12-mobile.7.apk)
+· [Release and public inspection](https://github.com/Vanir20342222/ytui/releases/tag/android-0.2.0-alpha.12-mobile.7).
+Qualified source `1a6f9682d5c573f58992ced44aa9b7c6d82788d6`, version code 7,
+package `dev.ytui.android.stable`, Android 8+, ARM64/x86-64. Its permanent
+certificate matches mobile.4–6; install over the stable app without uninstalling.
+
+- [PR #26 native qualification](https://github.com/Vanir20342222/ytui/actions/runs/41031614148): 28 pass, one explicit public skip, zero failures. Window pixels 1223/1203 ms; HLS pixels 1350/837 ms; no app ANR/Rust panic markers.
+- [Exact-main Android](https://github.com/Vanir20342222/ytui/actions/runs/41033508507): 28 pass, one public skip. Cold/prepared catalog-tap window pixels 848/996 ms (view events 567/691 ms); HLS service window pixels 704/626 ms (view events 501/379 ms). Actual segment-cache reuse, foreground JNI admission, native controls/fullscreen, offline folders/exports, all themes and keyboard/account navigation pass. No app ANR/Rust panic markers.
+- [Exact-main Rust](https://github.com/Vanir20342222/ytui/actions/runs/41033507062): 333 workspace, fourteen extractor TLS and fifteen solver/media checks pass (362 total, 31 explicit ignores); formatting and strict Clippy pass.
+- [Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41033507060) passes. Both release ABIs, 18 release JVM tests and lint pass. Signature, source/version/package, ZIP/16 KiB alignment and notices checks pass.
+- [Publisher](https://github.com/Vanir20342222/ytui/actions/runs/41035226126) transfers the signed APK without rebuilding/resigning or receiving credentials. The public APK was downloaded independently and its hash, size, certificate and code 7 verified. The temporary private APK transfer and local bearer input are deleted; the permanent identity and encrypted owner recovery remain private.
+
+APK SHA256: `0cfee4793404377a045bf9f0b78b63e060e1fc89dabac17bf2f39d29bf4fdf51`.
+Size: **56,009,238 bytes**. Certificate SHA256:
+`b3e9f1a70dd6597884d1dbba09eafad3d4d73ea62c4074a9b8cec1ac1e034848`.
+
+The successful native run uses the documented offline emulator renderer profile.
+These generated-media results do not qualify live YouTube speed. The mobile.7
+Tab S9 timing report subsequently failed three cold starts as recorded above.
+The [published mobile.8 follow-up](MOBILE8_INDEXED_STARTUP.md) now needs the next
+Best-quality usable-start report; live two-second acceptance and M9 remain open.

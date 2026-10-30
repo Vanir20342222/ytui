@@ -13,6 +13,7 @@ use ytui_providers::{
     auth::Session, browse::Browser, images::ImageCache, paths::atomic_write, radio::Radio,
 };
 mod account;
+mod indexed_playback;
 mod lyrics;
 mod resolution;
 
@@ -1378,8 +1379,23 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
         }
     }
     let mut result = json!({"url":url,"audio_url":audio_url,"resolution_route":data["ytui_playback_route"],"format_id":primary["format_id"],"audio_format_id":formats.and_then(|fs|fs.iter().find(|f|f["vcodec"]=="none")).map(|f|f["format_id"].clone()),"headers":headers,"live":data["is_live"].as_bool().unwrap_or(false)||data["live_status"]=="is_live","title":data["title"],"creator":data["uploader"].as_str().or_else(||data["channel"].as_str()).unwrap_or(""),"thumbnail":data["thumbnail"],"view_count":data["view_count"],"upload_date":data["upload_date"],"like_count":data["like_count"],"channel_follower_count":data["channel_follower_count"],"description":data["description"].as_str().map(|text|text.chars().take(8192).collect::<String>()).unwrap_or_default(),"duration":data["duration"],"catalog":ytui_providers::formats::Catalog::parse(data)});
+    let duration = data["duration"].as_f64();
+    let secondary = formats.and_then(|fs| fs.iter().find(|f| f["vcodec"] == "none"));
+    let tracks = if !audio && let Some(second) = secondary {
+        vec![primary, second]
+    } else {
+        vec![primary]
+    };
+    if let Some(manifest) = indexed_playback::manifest(&tracks, duration) {
+        result["dash_manifest"] = manifest.into();
+    } else if !audio
+        && let Some(second) = secondary
+        && let Some(manifest) = indexed_playback::manifest(&[second], duration)
+    {
+        result["audio_dash_manifest"] = manifest.into();
+    }
     if !audio
-        && audio_url.is_none()
+        && (audio_url.is_none() || primary["acodec"] == "none")
         && let Some(master) = playback_hls_master(primary)
     {
         result["hls_master"] = master.into();
@@ -1387,7 +1403,7 @@ fn stream(data: &Value, audio: bool) -> Result<Value> {
     Ok(result)
 }
 
-// Preserve the selected muxed variant's codec declaration for Media3 chunkless
+// Preserve the selected variant's codec declaration for Media3 chunkless
 // preparation. Starting from its bare media playlist discards this information
 // and forces track discovery from segment bytes. All references stay absolute;
 // the in-memory one-variant master does not introduce another network request.
@@ -1406,7 +1422,11 @@ fn playback_hls_master(primary: &Value) -> Option<String> {
         })
     };
     let video = codec("vcodec")?;
-    let audio = codec("acodec")?;
+    let codecs = if primary["acodec"] == "none" {
+        video.to_owned()
+    } else {
+        format!("{video},{}", codec("acodec")?)
+    };
     let url = primary["url"].as_str()?;
     if url.chars().any(char::is_control) {
         return None;
@@ -1418,7 +1438,7 @@ fn playback_hls_master(primary: &Value) -> Option<String> {
         .map(|b| (b * 1000.0).clamp(1.0, 1_000_000_000.0) as u64)
         .unwrap_or(1_000_000);
     Some(format!(
-        "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-STREAM-INF:BANDWIDTH={bandwidth},CODECS=\"{video},{audio}\"\n{url}\n"
+        "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-STREAM-INF:BANDWIDTH={bandwidth},CODECS=\"{codecs}\"\n{url}\n"
     ))
 }
 
@@ -1444,11 +1464,37 @@ mod hls_playback_tests {
     }
 
     #[test]
+    fn video_only_hls_retains_codec_preparation_and_separate_indexed_audio() {
+        let mut video = muxed();
+        video["acodec"] = "none".into();
+        let audio = json!({"url":"https://media.test/audio.m4a", "protocol":"https",
+            "vcodec":"none","acodec":"mp4a.40.2","ext":"m4a","filesize":5000,
+            "ytui_init_range":{"start":0,"end":500},
+            "ytui_index_range":{"start":501,"end":700},"ytui_duration_ms":"10000"});
+        let data = json!({"requested_formats":[video,audio]});
+        let value = stream(&data, false).unwrap();
+        assert!(value["dash_manifest"].is_null());
+        assert!(
+            value["hls_master"]
+                .as_str()
+                .unwrap()
+                .contains("CODECS=\"avc1.640028\"")
+        );
+        assert!(!value["hls_master"].as_str().unwrap().contains("mp4a"));
+        assert!(
+            value["audio_dash_manifest"]
+                .as_str()
+                .unwrap()
+                .contains("audio/mp4")
+        );
+        assert_eq!(value["audio_url"], "https://media.test/audio.m4a");
+    }
+
+    #[test]
     fn progressive_paired_unknown_codecs_and_unsafe_attributes_keep_normal_source() {
         for (field, value) in [
             ("protocol", "https"),
             ("vcodec", "none"),
-            ("acodec", "none"),
             ("acodec", "mp4a\"\n#EXT-X-MEDIA:bad"),
             ("url", "https://media.test/a\nother"),
         ] {
