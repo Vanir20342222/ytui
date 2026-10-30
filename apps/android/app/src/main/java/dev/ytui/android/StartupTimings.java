@@ -22,13 +22,15 @@ final class StartupTimings {
     "decoder",
     "ready",
     "net_response",
-    "net_byte"
+    "net_byte",
+    "codec",
+    "audio_codec"
   };
   private static final AtomicLong ids = new AtomicLong();
   private static final ArrayDeque<Sample> samples = new ArrayDeque<>();
 
   private static final class Sample {
-    long id, tap, resolved = -1, handoff = -1, output = -1;
+    long id, tap, resolved = -1, handoff = -1, output = -1, playing = -1;
     boolean prepared, video;
     String route = "unknown", cache = "unknown", disposition = "pending/cancelled";
     String quality = "unknown", transport = "unknown";
@@ -80,7 +82,8 @@ final class StartupTimings {
             ? quality
             : "unknown";
     sample.transport =
-        java.util.Arrays.asList("hls-chunkless", "hls", "dash", "progressive", "offline")
+        java.util.Arrays.asList(
+                    "hls-chunkless", "hls", "dash", "dash-indexed", "progressive", "offline")
                 .contains(transport)
             ? transport
             : "unknown";
@@ -108,7 +111,7 @@ final class StartupTimings {
   static synchronized void ended(long id, String disposition, long now) {
     Sample sample = find(id);
     if (sample != null
-        && sample.output < 0
+        && (sample.output < 0 || (sample.video && sample.playing < 0))
         && sample.ended < 0
         && now >= sample.tap
         && java.util.Arrays.asList("failed", "cancelled").contains(disposition)) {
@@ -135,7 +138,26 @@ final class StartupTimings {
         && sample.handoff >= 0
         && sample.ended < 0
         && now >= sample.tap
-        && sample.output < 0) sample.output = now - sample.tap;
+        && sample.output < 0) {
+      sample.output = now - sample.tap;
+      if (!video) sample.playing = sample.output;
+    }
+  }
+
+  static synchronized void started(long id, long now) {
+    Sample sample = find(id);
+    if (sample != null
+        && sample.ended < 0
+        && sample.playing < 0
+        && sample.handoff >= 0
+        && now >= sample.tap) sample.playing = now - sample.tap;
+  }
+
+  static synchronized long usable(long id) {
+    Sample sample = find(id);
+    return sample == null || sample.output < 0 || sample.playing < 0
+        ? -1
+        : Math.max(sample.output, sample.playing);
   }
 
   static synchronized long elapsed(long id, long now) {
@@ -152,6 +174,7 @@ final class StartupTimings {
     StringBuilder text =
         new StringBuilder("ytui startup timings (milliseconds)\n")
             .append("Target: video tap to visible frame <= 2000 ms\n")
+            .append("Usable start requires both visible output and active playback <= 2000 ms.\n")
             .append(
                 "Resolve includes offline lookup and queue selection. Pending attempts are"
                     + " included.\n");
@@ -180,6 +203,13 @@ final class StartupTimings {
           .append(sample.quality)
           .append(" transport=")
           .append(sample.transport);
+      text.append(" started=")
+          .append(sample.playing)
+          .append(" usable_start=")
+          .append(usable(sample.id));
+      if (sample.video && usable(sample.id) > 2000) text.append(" USABLE OVER TARGET");
+      else if (sample.video && sample.output >= 0 && sample.playing < 0)
+        text.append(" ").append(sample.ended >= 0 ? sample.disposition : "waiting_for_playback");
       text.append('\n');
     }
     return text.toString();

@@ -173,6 +173,22 @@ public final class PlaybackService extends MediaSessionService {
             MediaBridge.videoFrames.incrementAndGet());
     player.setVolume(prefs.getFloat("volume", 0.7f));
     player.setPlaybackSpeed(prefs.getFloat("speed", 1f));
+    player.addAnalyticsListener(
+        new androidx.media3.exoplayer.analytics.AnalyticsListener() {
+          @Override
+          public void onVideoDecoderInitialized(
+              EventTime time, String name, long at, long duration) {
+            if (at >= startupAt && StartupTimings.total(startupToken) < 0)
+              StartupTimings.stage(startupToken, "codec", at - startupAt);
+          }
+
+          @Override
+          public void onAudioDecoderInitialized(
+              EventTime time, String name, long at, long duration) {
+            if (at >= startupAt && StartupTimings.total(startupToken) < 0)
+              StartupTimings.stage(startupToken, "audio_codec", at - startupAt);
+          }
+        });
     controlsPlayer = new ControlsPlayer(player);
     session =
         new MediaSession.Builder(
@@ -666,10 +682,12 @@ public final class PlaybackService extends MediaSessionService {
       }
     }
     String hlsMaster = request.optBoolean("offline") ? "" : stream.optString("hls_master");
+    String dash = request.optBoolean("offline") ? "" : stream.optString("dash_manifest");
+    boolean indexed = !dash.isEmpty() && dash.length() <= 65536;
     // Rust preserves the chosen muxed HLS variant's CODECS in a small in-memory
     // master. Media3 can prepare tracks without first sniffing a media segment.
     // Downloads/offline reads retain their original URIs and cache identities.
-    boolean chunkless = !hlsMaster.isEmpty() && hlsMaster.length() <= 65536;
+    boolean chunkless = !indexed && !hlsMaster.isEmpty() && hlsMaster.length() <= 65536;
     int contentType =
         androidx.media3.common.util.Util.inferContentTypeForUriAndMimeType(
             android.net.Uri.parse(stream.getString("url")), null);
@@ -678,40 +696,59 @@ public final class PlaybackService extends MediaSessionService {
         playbackQuality,
         request.optBoolean("offline")
             ? "offline"
-            : chunkless
-                ? "hls-chunkless"
-                : contentType == C.CONTENT_TYPE_HLS
-                    ? "hls"
-                    : contentType == C.CONTENT_TYPE_DASH ? "dash" : "progressive");
+            : indexed
+                ? "dash-indexed"
+                : chunkless
+                    ? "hls-chunkless"
+                    : contentType == C.CONTENT_TYPE_HLS
+                        ? "hls"
+                        : contentType == C.CONTENT_TYPE_DASH ? "dash" : "progressive");
     String sourceUri =
-        chunkless
-            ? "data:application/vnd.apple.mpegurl;base64,"
+        indexed
+            ? "data:application/dash+xml;base64,"
                 + android.util.Base64.encodeToString(
-                    hlsMaster.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    dash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
                     android.util.Base64.NO_WRAP)
-            : stream.getString("url");
+            : chunkless
+                ? "data:application/vnd.apple.mpegurl;base64,"
+                    + android.util.Base64.encodeToString(
+                        hlsMaster.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        android.util.Base64.NO_WRAP)
+                : stream.getString("url");
     MediaItem main =
         new MediaItem.Builder()
             .setUri(sourceUri)
-            .setMimeType(chunkless ? MimeTypes.APPLICATION_M3U8 : null)
+            .setMimeType(
+                indexed ? MimeTypes.APPLICATION_MPD : chunkless ? MimeTypes.APPLICATION_M3U8 : null)
             .setCustomCacheKey(
-                chunkless || stream.isNull("cache_key") ? null : stream.optString("cache_key"))
+                indexed || chunkless || stream.isNull("cache_key")
+                    ? null
+                    : stream.optString("cache_key"))
             .setMediaId(media.optString("url"))
             .setSubtitleConfigurations(captions)
             .setMediaMetadata(metadata)
             .build();
     MediaSource source = sources.createMediaSource(main);
     String audio = stream.optString("audio_url", "");
-    if (!audio.isEmpty() && !audio.equals("null"))
+    String audioDash = request.optBoolean("offline") ? "" : stream.optString("audio_dash_manifest");
+    boolean indexedAudio = !audioDash.isEmpty() && audioDash.length() <= 65536;
+    if (!indexed && !audio.isEmpty() && !audio.equals("null"))
       source =
           new MergingMediaSource(
               true,
               source,
               sources.createMediaSource(
                   new MediaItem.Builder()
-                      .setUri(audio)
+                      .setUri(
+                          indexedAudio
+                              ? "data:application/dash+xml;base64,"
+                                  + android.util.Base64.encodeToString(
+                                      audioDash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                                      android.util.Base64.NO_WRAP)
+                              : audio)
+                      .setMimeType(indexedAudio ? MimeTypes.APPLICATION_MPD : null)
                       .setCustomCacheKey(
-                          stream.isNull("audio_cache_key")
+                          indexedAudio || stream.isNull("audio_cache_key")
                               ? null
                               : stream.optString("audio_cache_key"))
                       .build()));
@@ -757,6 +794,7 @@ public final class PlaybackService extends MediaSessionService {
     if (!pendingStart || !player.isPlaying() || currentRequest.optBoolean("preview")) return;
     pendingStart = false;
     startMs = SystemClock.elapsedRealtime() - startupAt;
+    StartupTimings.started(startupToken, SystemClock.elapsedRealtime());
     if (currentRequest.optBoolean("audio"))
       StartupTimings.output(startupToken, SystemClock.elapsedRealtime(), false);
     try {

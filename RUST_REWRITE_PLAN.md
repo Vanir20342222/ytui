@@ -1,9 +1,11 @@
 # ytui Rust rewrite plan
 
-M9 startup follow-up: the real Tab S9 mobile.6 report with Best quality fails
-the two-second target (6772–11048 ms). [Published mobile.7](docs/android/MOBILE7_STARTUP_FOLLOWUP.md)
-removes mobile HLS child traversal, retains codec metadata for chunkless
-preparation and adds manifest/transport timings. Live acceptance remains open.
+M9 startup follow-up: the Tab S9 mobile.7 report improves prepared frames to
+74–828 ms but three cold starts still fail at 2827–4117 ms. Extraction is now
+338–917 ms. [Mobile.8 indexed preparation](docs/android/MOBILE8_INDEXED_STARTUP.md)
+preserves selected quality and adds byte-range DASH preparation plus honest
+active-playback/usable-start timings. Qualification and live acceptance remain
+open; an early frame alone does not establish usable playback.
 
 M9 player/library follow-up (2026-10-29): **mobile.4** is published with private stable signing. Scoped prefetch, direct native video/frame controls, non-scrolling music styles, gestures/settings and offline playlists/folders pass 24 emulator cases (one opt-in public skip), 328 offline Rust tests and 14 release JVM tests. Main release/signature/alignment checks pass; [qualification and source](docs/android/PLAYER_LIBRARY_VALIDATION_2026-10-29.md) record live YouTube/device limits. M9 remains a preview; physical/live acceptance is distinct from source implementation.
 

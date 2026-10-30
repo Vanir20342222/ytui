@@ -1,5 +1,10 @@
 # M9: Best-quality HLS startup follow-up, mobile.7
 
+**Subsequent physical result:** the owner tested this APK on the Tab S9 with
+Best. Prepared frames pass at 74–828 ms, but three cold starts still fail at
+2827–4117 ms. [Full result and mobile.8 follow-up](MOBILE8_INDEXED_STARTUP.md).
+The historical qualification below does not supersede that live failure.
+
 ## Physical failure retained
 
 The owner's Tab S9 ran mobile.6 (`97e0b7`) with **Best** quality. Five completed

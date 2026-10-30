@@ -1,5 +1,15 @@
 # Android validation record (M9)
 
+## Current indexed-startup follow-up: mobile.8 (in qualification)
+
+The real mobile.7 Tab S9 report passes prepared frames at 74–828 ms but three
+cold frames fail at 2827–4117 ms. One HLS frame arrives early while readiness
+is late; usable playback requires both frame and active playback. Extraction
+is down to 338–917 ms. [Mobile.8 evidence and design](MOBILE8_INDEXED_STARTUP.md)
+retain all physical failures and add indexed stream loading at unchanged Best
+quality, safe finite CDN ranges and honest usable-start timing. No live target
+or M9 completion is claimed. Build/native/publication checks are pending.
+
 ## Current Best-quality startup follow-up: mobile.7 (2026-10-30)
 
 The real Tab S9 mobile.6 report with **Best** quality **failed**: completed
@@ -35,10 +45,9 @@ local artifact. The [publisher](https://github.com/Vanir20342222/ytui/actions/ru
 receives only the finished APK. Temporary transfer/input files were removed;
 the private signing identity and encrypted recovery are retained.
 
-The cloud still denies YouTube CONNECT (HTTP 403). The owner must test mobile.7
-on the Tab S9 with Best, new videos and Next, then copy the local performance
-report including slow/failed/cancelled attempts. Live two-second acceptance and
-M9 remain **open**.
+The cloud still denies YouTube CONNECT (HTTP 403). The subsequent mobile.7
+physical report is recorded in the mobile.8 follow-up above; three cold starts
+fail. Live two-second acceptance and M9 remain **open**.
 
 ## Earlier startup follow-up: mobile.6 (2026-10-29)
 

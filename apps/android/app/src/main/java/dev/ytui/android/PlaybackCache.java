@@ -49,7 +49,9 @@ final class PlaybackCache {
     return new CacheDataSource.Factory()
         .setCache(cache())
         .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-        .setUpstreamDataSourceFactory(new DefaultDataSource.Factory(MediaBridge.context, http));
+        .setUpstreamDataSourceFactory(
+            new DefaultDataSource.Factory(
+                MediaBridge.context, IndexedRangeDataSource.factory(http)));
   }
 
   static synchronized void cancel() {

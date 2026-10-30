@@ -6,6 +6,27 @@ import org.junit.Test;
 
 public final class StartupTimingsTest {
   @Test
+  public void aVisibleFrameCannotHideBufferingBeforeActualPlayback() {
+    long token = StartupTimings.begin(1000, true);
+    StartupTimings.handoff(token, 1100);
+    StartupTimings.output(token, 1200, true);
+    assertEquals(200, StartupTimings.total(token));
+    assertEquals(-1, StartupTimings.usable(token));
+    assertTrue(StartupTimings.report().contains("waiting_for_playback"));
+    StartupTimings.started(token, 4000);
+    assertEquals(3000, StartupTimings.usable(token));
+    assertTrue(StartupTimings.report().contains("USABLE OVER TARGET"));
+    StartupTimings.started(token, 5000);
+    assertEquals(3000, StartupTimings.usable(token));
+    long failed = StartupTimings.begin(5000, true);
+    StartupTimings.handoff(failed, 5010);
+    StartupTimings.output(failed, 5020, true);
+    StartupTimings.ended(failed, "failed", 5100);
+    StartupTimings.started(failed, 5200);
+    assertEquals(-1, StartupTimings.usable(failed));
+  }
+
+  @Test
   public void totalIncludesExtractionAndCannotCountAudioAsVideo() {
     long token = StartupTimings.begin(1000, true);
     StartupTimings.resolved(token, 2400, false);

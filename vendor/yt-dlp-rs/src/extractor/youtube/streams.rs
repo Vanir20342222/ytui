@@ -393,6 +393,19 @@ fn process_format_stream(
         int_or_none(stream.get("contentLength")).into(),
     );
     format.insert("format_id".into(), format_id.into());
+    if context.playback {
+        // Native players can use these indexes directly instead of probing a
+        // whole adaptive file. Keep normal CLI/download output unchanged.
+        for (source, target) in [
+            ("initRange", "ytui_init_range"),
+            ("indexRange", "ytui_index_range"),
+            ("approxDurationMs", "ytui_duration_ms"),
+        ] {
+            if let Some(value) = stream.get(source) {
+                format.insert(target.into(), value.clone());
+            }
+        }
+    }
     format.insert("format_note".into(), format_note.into());
     format.insert("source_preference".into(), source_preference.into());
     format.insert("fps".into(), (fps > 1).then_some(fps).into());
