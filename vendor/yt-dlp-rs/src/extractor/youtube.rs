@@ -295,6 +295,7 @@ fn extract_clients(
     id: &str,
     runtime: Option<&challenge::Runtime>,
     translated_manual: bool,
+    playback: bool,
 ) -> Result<VideoInfo> {
     crate::screen::screen(&format!(
         "[youtube] Extracting URL: {}",
@@ -309,6 +310,7 @@ fn extract_clients(
         translated_manual,
         &acquired,
         false,
+        playback,
     )
 }
 
@@ -320,6 +322,7 @@ fn extract_acquired(
     translated_manual: bool,
     acquired: &watch::Acquired,
     direct_streams_only: bool,
+    playback: bool,
 ) -> Result<VideoInfo> {
     let first = |key: &str| {
         acquired
@@ -388,6 +391,7 @@ fn extract_acquired(
             Default::default()
         },
         premium: false,
+        playback,
     };
     let mut solver = JsSolver {
         client,
@@ -396,6 +400,7 @@ fn extract_acquired(
         video_id: id,
     };
     let streams = streams::extract(&context, &acquired.responses, &mut solver)?;
+    let manifest_ms = streams.manifest_ms;
     let mut formats = Vec::new();
     let mut manifest_formats = streams
         .manifest_formats
@@ -572,6 +577,10 @@ fn extract_acquired(
     .map(str::to_owned)
     .to_vec();
     info.formats = formats;
+    if playback {
+        info.extra
+            .insert("ytui_manifest_ms".into(), manifest_ms.into());
+    }
     let mut keys: Vec<String> = Vec::new();
     for (key, value) in dict {
         keys.push(key.clone());
@@ -614,7 +623,7 @@ impl Extractor for Youtube {
         crate::screen::set_extractor("youtube");
         let page = Url::parse(&format!("https://www.youtube.com/watch?v={id}"))?;
         let _ = page;
-        let info = extract_clients(client, url, &id, None, false)?;
+        let info = extract_clients(client, url, &id, None, false, false)?;
         Ok(Some(info))
     }
 }
@@ -794,6 +803,7 @@ impl Extractor for ConfiguredYoutube {
                             self.include_translated_subtitles,
                             &acquired,
                             direct_streams_only,
+                            true,
                         )?;
                         validate_playback(
                             info,
@@ -830,6 +840,7 @@ impl Extractor for ConfiguredYoutube {
             &id,
             self.runtime.as_ref(),
             self.include_translated_subtitles,
+            self.playback_format.is_some(),
         )?;
         if self.playback_format.is_some() {
             info.extra

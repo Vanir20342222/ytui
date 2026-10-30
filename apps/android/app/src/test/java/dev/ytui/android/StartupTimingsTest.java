@@ -49,11 +49,18 @@ public final class StartupTimingsTest {
     StartupTimings.stage(token, "flight_wait", 9900);
     StartupTimings.stage(token, "https://private.invalid", 1);
     StartupTimings.stage(token, "extract", -10);
+    StartupTimings.stage(token, "manifest", 120);
+    StartupTimings.presentation(token, "best", "hls-chunkless");
     String report = StartupTimings.report();
     assertTrue(report.contains("Video cold route=unknown: resolve=10000"));
     assertTrue(report.contains("cache=joined flight_wait_ms=9900"));
     assertFalse(report.contains("private.invalid"));
     assertFalse(report.contains("extract_ms=-10"));
+    assertTrue(report.contains("manifest_ms=120"));
+    assertTrue(report.contains("quality=best transport=hls-chunkless"));
+    StartupTimings.presentation(token, "https://private.invalid", "secret-token");
+    assertFalse(StartupTimings.report().contains("private.invalid"));
+    assertFalse(StartupTimings.report().contains("secret-token"));
   }
 
   @Test

@@ -335,7 +335,8 @@ public final class MediaRuntimeTest {
     }
     long firstGeneration;
     long cleanShutdowns = RustActivity.shutdowns.get();
-    try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline()) {
+    try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline();
+        LoopbackDownloads loopback = LoopbackDownloads.open()) {
       JSONObject request =
           new JSONObject()
               .put(

@@ -170,6 +170,7 @@ pub(super) struct Streams {
     /// Indices into the combined order (`true` for manifest formats).
     pub order: Vec<(bool, usize)>,
     pub subtitles: crate::Subtitles,
+    pub manifest_ms: u64,
 }
 
 struct Language {
@@ -225,6 +226,7 @@ pub(super) struct Context<'a> {
     pub missing_pot: bool,
     pub skip_player_js: bool,
     pub skip_manifests: BTreeSet<String>,
+    pub playback: bool,
     pub premium: bool,
 }
 
@@ -508,6 +510,7 @@ pub(super) fn extract(
     let mut itag_qualities: HashMap<String, String> = HashMap::new();
     let mut res_qualities: Vec<(i64, Option<String>)> = vec![(0, None)];
     let mut subtitles = crate::Subtitles::default();
+    let mut manifest_ms = 0;
 
     // First pass: every n and signature challenge, solved at once later.
     let mut n_challenges: BTreeSet<String> = BTreeSet::new();
@@ -852,7 +855,14 @@ pub(super) fn extract(
             }
             let mut manifest_url = parsed.clone();
             manifest_url.set_path(&format!("{path}{suffix}"));
-            let stream = if proto == "hls" {
+            let manifest_at = std::time::Instant::now();
+            let stream = if proto == "hls" && context.playback {
+                super::super::extract_m3u8_for_playback(
+                    context.client,
+                    &manifest_url,
+                    context.video_id,
+                )
+            } else if proto == "hls" {
                 super::super::extract_m3u8_optional(
                     context.client,
                     &manifest_url,
@@ -870,6 +880,7 @@ pub(super) fn extract(
                     true,
                 )
             };
+            manifest_ms += manifest_at.elapsed().as_millis() as u64;
             let Some(stream) = stream else {
                 continue;
             };
@@ -977,6 +988,7 @@ pub(super) fn extract(
         }
     }
     Ok(Streams {
+        manifest_ms,
         formats,
         manifest_formats,
         order,

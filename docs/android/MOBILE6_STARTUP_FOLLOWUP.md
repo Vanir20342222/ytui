@@ -1,5 +1,10 @@
 # M9: device startup follow-up, mobile.6
 
+**Subsequent physical result:** mobile.6 also failed on the Tab S9 with Best
+quality: completed videos took 6772–11048 ms. [The mobile.7 follow-up](MOBILE7_STARTUP_FOLLOWUP.md)
+records these failures and the remaining HLS traversal/preparation work. The
+earlier request for a mobile.6 retest below is historical.
+
 The Galaxy Tab S9 report from mobile.5 (`7d5267a`) **fails** the live two-second
 objective. Completed video attempts took 11249/14617 ms to visible output;
 resolution accounted for 10407/12193 ms. Completed audio attempts took 3049/5011 ms.

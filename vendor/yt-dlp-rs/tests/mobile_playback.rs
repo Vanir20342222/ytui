@@ -180,7 +180,11 @@ fn manifest_only_direct_response_keeps_necessary_hls_without_watch_refetch() {
     assert_eq!(info.extra["ytui_playback_route"], "direct");
     assert_eq!(info.height, Some(720));
     let requests = proxy.requests.lock().unwrap();
-    assert!(requests.len() <= 4, "{requests:?}");
+    assert_eq!(
+        requests.len(),
+        2,
+        "Only the player API and master: {requests:?}"
+    );
     assert!(requests.iter().all(|request| !request.contains("/watch?")));
     assert!(requests[1].contains("manifest.test/hls/master.m3u8"));
 }
@@ -197,12 +201,72 @@ fn optional_manifest_is_required_when_it_can_improve_a_lower_direct_resolution()
         Some(720),
         "Do not start the direct 360p fallback while HLS offers 720p"
     );
-    assert!(
-        proxy
-            .requests
-            .lock()
-            .unwrap()
-            .iter()
-            .any(|url| url.contains("manifest.test/hls/master.m3u8"))
+    let requests = proxy.requests.lock().unwrap();
+    assert_eq!(
+        requests.len(),
+        2,
+        "Child playlists belong to Media3: {requests:?}"
     );
+    assert!(requests[1].contains("manifest.test/hls/master.m3u8"));
+    assert!(info.fragments.is_empty());
+}
+
+#[test]
+fn best_quality_uses_master_catalog_without_traversing_every_variant() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-quality");
+    let selector = "bestvideo+bestaudio/best";
+    let info = downloader(&proxy, Some(selector))
+        .extract_info_with_format(VIDEO, Some(selector))
+        .unwrap();
+    assert_eq!(info.height, Some(720));
+    assert_eq!(info.extra["ytui_playback_route"], "direct");
+    assert!(info.extra["ytui_manifest_ms"].is_u64());
+    assert_eq!(info.vcodec.as_deref(), Some("avc1.64001f"));
+    assert_eq!(info.acodec.as_deref(), Some("mp4a.40.2"));
+    assert_eq!(
+        info.extra["manifest_url"],
+        "https://manifest.test/hls/master.m3u8"
+    );
+    assert_eq!(proxy.requests.lock().unwrap().len(), 2);
+    assert!(
+        info.formats
+            .iter()
+            .all(|format| format.fragments.is_empty())
+    );
+}
+
+#[test]
+fn playback_keeps_external_audio_groups_without_reading_child_playlists() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-audio");
+    let info = downloader(&proxy, Some(FORMAT))
+        .extract_info_with_format(VIDEO, Some(FORMAT))
+        .unwrap();
+    assert_eq!(info.height, Some(720));
+    assert_eq!(info.requested_formats.len(), 2);
+    assert_eq!(info.requested_formats[1].vcodec.as_deref(), Some("none"));
+    assert_eq!(info.requested_formats[1].language.as_deref(), Some("en"));
+    assert!(
+        info.requested_formats
+            .iter()
+            .all(|format| format.fragments.is_empty())
+    );
+    assert_eq!(proxy.requests.lock().unwrap().len(), 2);
+}
+
+#[test]
+fn normal_hls_download_extraction_still_traverses_children_and_keeps_fragments() {
+    let proxy = site_proxy::SiteProxy::start("youtube-direct-hls-quality");
+    let info = downloader(&proxy, None)
+        .extract_info_with_format("https://manifest.test/hls/master.m3u8", Some("best"))
+        .unwrap();
+    assert_eq!(info.height, Some(720));
+    assert!(!info.fragments.is_empty());
+    let requests = proxy.requests.lock().unwrap();
+    assert_eq!(
+        requests.len(),
+        4,
+        "Normal acquisition including VOD check: {requests:?}"
+    );
+    assert!(requests.iter().any(|url| url.contains("/itag/95/")));
+    assert!(requests.iter().any(|url| url.contains("/itag/96/")));
 }

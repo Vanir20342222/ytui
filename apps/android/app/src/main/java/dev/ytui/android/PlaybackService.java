@@ -15,6 +15,13 @@ import org.json.*;
 
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public final class PlaybackService extends MediaSessionService {
+  private static boolean emulatorFixture() {
+    return BuildConfig.DEBUG
+        && MediaBridge.offlineUi
+        && (android.os.Build.HARDWARE.equals("ranchu")
+            || android.os.Build.HARDWARE.equals("goldfish"));
+  }
+
   static volatile PlaybackService current;
   ExoPlayer player;
   Player controlsPlayer;
@@ -68,6 +75,55 @@ public final class PlaybackService extends MediaSessionService {
                 this,
                 new DefaultRenderersFactory(this) {
                   @Override
+                  protected void buildVideoRenderers(
+                      android.content.Context ctx,
+                      int extensionMode,
+                      androidx.media3.exoplayer.mediacodec.MediaCodecSelector selector,
+                      boolean fallback,
+                      Handler events,
+                      androidx.media3.exoplayer.video.VideoRendererEventListener listener,
+                      long joiningMs,
+                      java.util.ArrayList<Renderer> renderers) {
+                    if (!emulatorFixture()) {
+                      super.buildVideoRenderers(
+                          ctx,
+                          extensionMode,
+                          selector,
+                          fallback,
+                          events,
+                          listener,
+                          joiningMs,
+                          renderers);
+                      return;
+                    }
+                    // Goldfish can migrate zero host color-buffer IDs from a
+                    // placeholder to a TextureView even with the C2 software
+                    // codec. Its offline fixture must initialize against the
+                    // actual surface and recreate on surface changes. Physical
+                    // devices/release builds keep Media3's standard renderer.
+                    renderers.add(
+                        new androidx.media3.exoplayer.video.MediaCodecVideoRenderer(
+                            ctx, selector, joiningMs, fallback, events, listener, 50) {
+                          @Override
+                          protected boolean shouldUsePlaceholderSurface(
+                              androidx.media3.exoplayer.mediacodec.MediaCodecInfo codec) {
+                            return false;
+                          }
+
+                          @Override
+                          protected boolean shouldUseDetachedSurface(
+                              androidx.media3.exoplayer.mediacodec.MediaCodecInfo codec) {
+                            return false;
+                          }
+
+                          @Override
+                          protected boolean codecNeedsSetOutputSurfaceWorkaround(String name) {
+                            return true;
+                          }
+                        });
+                  }
+
+                  @Override
                   protected androidx.media3.exoplayer.audio.AudioSink buildAudioSink(
                       android.content.Context ctx, boolean floating, boolean playbackParams) {
                     return new androidx.media3.exoplayer.audio.DefaultAudioSink.Builder(ctx)
@@ -88,11 +144,7 @@ public final class PlaybackService extends MediaSessionService {
                           // backed by invalid color-buffer IDs under software GPUs.
                           // Offline fixtures use Android's real software codec instead;
                           // normal apps/devices keep the default hardware selection.
-                          if (BuildConfig.DEBUG
-                              && MediaBridge.offlineUi
-                              && mime.startsWith("video/")
-                              && (android.os.Build.HARDWARE.equals("ranchu")
-                                  || android.os.Build.HARDWARE.equals("goldfish"))) {
+                          if (emulatorFixture() && mime.startsWith("video/")) {
                             java.util.List<androidx.media3.exoplayer.mediacodec.MediaCodecInfo>
                                 software = new java.util.ArrayList<>();
                             for (androidx.media3.exoplayer.mediacodec.MediaCodecInfo decoder :
@@ -545,8 +597,42 @@ public final class PlaybackService extends MediaSessionService {
             : request.optBoolean("local") || media.optBoolean("live") || stream.optBoolean("live")
                 ? new androidx.media3.datasource.DefaultDataSource.Factory(this, http)
                 : PlaybackCache.source(stream);
+    long networkToken = startupToken, networkStart = startupAt;
+    java.util.concurrent.atomic.AtomicBoolean responseSeen =
+        new java.util.concurrent.atomic.AtomicBoolean();
+    java.util.concurrent.atomic.AtomicBoolean byteSeen =
+        new java.util.concurrent.atomic.AtomicBoolean();
+    DataSource.Factory traced =
+        () -> {
+          DataSource dataSource = upstream.createDataSource();
+          dataSource.addTransferListener(
+              new TransferListener() {
+                @Override
+                public void onTransferInitializing(
+                    DataSource source, DataSpec spec, boolean network) {}
+
+                @Override
+                public void onTransferStart(DataSource source, DataSpec spec, boolean network) {
+                  if (network && responseSeen.compareAndSet(false, true))
+                    StartupTimings.stage(
+                        networkToken, "net_response", SystemClock.elapsedRealtime() - networkStart);
+                }
+
+                @Override
+                public void onBytesTransferred(
+                    DataSource source, DataSpec spec, boolean network, int bytes) {
+                  if (network && bytes > 0 && byteSeen.compareAndSet(false, true))
+                    StartupTimings.stage(
+                        networkToken, "net_byte", SystemClock.elapsedRealtime() - networkStart);
+                }
+
+                @Override
+                public void onTransferEnd(DataSource source, DataSpec spec, boolean network) {}
+              });
+          return dataSource;
+        };
     DefaultMediaSourceFactory sources =
-        new DefaultMediaSourceFactory(upstream)
+        new DefaultMediaSourceFactory(traced)
             .setLoadErrorHandlingPolicy(
                 new androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy() {
                   @Override
@@ -579,10 +665,37 @@ public final class PlaybackService extends MediaSessionService {
                   .build());
       }
     }
+    String hlsMaster = request.optBoolean("offline") ? "" : stream.optString("hls_master");
+    // Rust preserves the chosen muxed HLS variant's CODECS in a small in-memory
+    // master. Media3 can prepare tracks without first sniffing a media segment.
+    // Downloads/offline reads retain their original URIs and cache identities.
+    boolean chunkless = !hlsMaster.isEmpty() && hlsMaster.length() <= 65536;
+    int contentType =
+        androidx.media3.common.util.Util.inferContentTypeForUriAndMimeType(
+            android.net.Uri.parse(stream.getString("url")), null);
+    StartupTimings.presentation(
+        startupToken,
+        playbackQuality,
+        request.optBoolean("offline")
+            ? "offline"
+            : chunkless
+                ? "hls-chunkless"
+                : contentType == C.CONTENT_TYPE_HLS
+                    ? "hls"
+                    : contentType == C.CONTENT_TYPE_DASH ? "dash" : "progressive");
+    String sourceUri =
+        chunkless
+            ? "data:application/vnd.apple.mpegurl;base64,"
+                + android.util.Base64.encodeToString(
+                    hlsMaster.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    android.util.Base64.NO_WRAP)
+            : stream.getString("url");
     MediaItem main =
         new MediaItem.Builder()
-            .setUri(stream.getString("url"))
-            .setCustomCacheKey(stream.isNull("cache_key") ? null : stream.optString("cache_key"))
+            .setUri(sourceUri)
+            .setMimeType(chunkless ? MimeTypes.APPLICATION_M3U8 : null)
+            .setCustomCacheKey(
+                chunkless || stream.isNull("cache_key") ? null : stream.optString("cache_key"))
             .setMediaId(media.optString("url"))
             .setSubtitleConfigurations(captions)
             .setMediaMetadata(metadata)

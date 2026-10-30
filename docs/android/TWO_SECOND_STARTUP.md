@@ -1,5 +1,9 @@
 # M9: two-second tap-to-visible-video target
 
+Latest physical evidence: mobile.6 with Best quality **fails**, 6772–11048 ms
+for completed videos. [Best-quality HLS follow-up](MOBILE7_STARTUP_FOLLOWUP.md)
+records the serial child-playlist bottleneck and qualification in progress.
+
 Measure from the actual tap until the attached native view presents its first
 decoded frame. Extraction, offline lookup, service initialization, source
 preparation and decoding all count. A poster, playing flag or decoder-only

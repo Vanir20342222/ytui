@@ -22,6 +22,7 @@ final class PlaybackCache {
   private static Future<?> current;
   private static final AtomicLong requestIds = new AtomicLong(1_000_000_000L);
   private static volatile long activeRequest;
+  private static volatile boolean bytesPaused;
   private static String upcomingScope = "";
   private static final ConcurrentHashMap<Long, CacheWriter> writers = new ConcurrentHashMap<>();
   static volatile String upcomingUrl = "";
@@ -62,6 +63,14 @@ final class PlaybackCache {
     ready = false;
   }
 
+  // Preserve an extraction that the tapped item can join, but release speculative
+  // byte writers immediately, before foreground resolution (not several seconds
+  // later at the service handoff). Completed spans remain available.
+  static synchronized void pauseBytes() {
+    bytesPaused = true;
+    for (CacheWriter writer : writers.values()) writer.cancel();
+  }
+
   static boolean allowed(JSONObject media) {
     if (!MobileSettings.enabled("preload_next")
         || media.optBoolean("live")
@@ -96,6 +105,7 @@ final class PlaybackCache {
         && current != null
         && (!current.isDone() || ready)) return;
     cancel();
+    bytesPaused = false;
     long token = intent.get();
     long account = NativeBridge.accountIntent();
     long network = NetworkSettings.revision.get();
@@ -122,11 +132,15 @@ final class PlaybackCache {
                   if (token != intent.get()
                       || account != NativeBridge.accountIntent()
                       || network != NetworkSettings.revision.get()) return;
-                  warm(stream, stream.getString("url"), audio ? 384 * 1024 : 1024 * 1024, token);
+                  boolean warmed =
+                      warm(
+                          stream, stream.getString("url"), audio ? 384 * 1024 : 1024 * 1024, token);
                   String paired = stream.optString("audio_url");
                   if (!paired.isEmpty() && !paired.equals("null"))
-                    warm(stream, paired, 192 * 1024, token);
+                    warmed = warm(stream, paired, 192 * 1024, token) && warmed;
                   if (token == intent.get()
+                      && !bytesPaused
+                      && warmed
                       && account == NativeBridge.accountIntent()
                       && network == NetworkSettings.revision.get()) {
                     ready = true;
@@ -155,35 +169,107 @@ final class PlaybackCache {
     return false;
   }
 
-  private static void warm(JSONObject stream, String url, int bytes, long token) throws Exception {
-    if (token != intent.get()) return;
+  private static boolean warm(JSONObject stream, String url, int bytes, long token)
+      throws Exception {
+    if (token != intent.get() || bytesPaused) return false;
+    if (androidx.media3.common.util.Util.inferContentTypeForUriAndMimeType(Uri.parse(url), null)
+        == androidx.media3.common.C.CONTENT_TYPE_HLS) {
+      return warmHls(stream, url, bytes, token);
+    }
+    return warmSpec(
+        stream,
+        new DataSpec.Builder()
+            .setUri(url)
+            .setKey(
+                stream.isNull(
+                        url.equals(stream.optString("audio_url")) ? "audio_cache_key" : "cache_key")
+                    ? null
+                    : stream.optString(
+                        url.equals(stream.optString("audio_url"))
+                            ? "audio_cache_key"
+                            : "cache_key"))
+            .setLength(bytes)
+            .build(),
+        token);
+  }
+
+  private static boolean warmHls(JSONObject stream, String url, int bytes, long token)
+      throws Exception {
+    // The extractor returns a selected media playlist. Never traverse a master
+    // or prefetch an entire movie. The same cache factory serves Media3 later.
+    byte[] playlistBytes;
+    DataSource playlistSource = source(stream).createDataSource();
+    Uri playlistUri = Uri.parse(url);
+    try (DataSourceInputStream input =
+            new DataSourceInputStream(playlistSource, new DataSpec.Builder().setUri(url).build());
+        java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+      byte[] buffer = new byte[16 * 1024];
+      int read;
+      while ((read = input.read(buffer)) != -1) {
+        if (token != intent.get() || bytesPaused || Thread.currentThread().isInterrupted())
+          return false;
+        if (output.size() + read > 2 * 1024 * 1024) return false;
+        output.write(buffer, 0, read);
+      }
+      playlistBytes = output.toByteArray();
+      if (playlistSource.getUri() != null) playlistUri = playlistSource.getUri();
+    }
+    androidx.media3.exoplayer.hls.playlist.HlsPlaylist parsed =
+        new androidx.media3.exoplayer.hls.playlist.HlsPlaylistParser()
+            .parse(playlistUri, new java.io.ByteArrayInputStream(playlistBytes));
+    if (!(parsed instanceof androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist)) return false;
+    androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist playlist =
+        (androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist) parsed;
+    if (!playlist.hasEndTag || playlist.segments.isEmpty()) return false;
+    androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist.Segment first =
+        playlist.segments.get(0);
+    if (first.initializationSegment != null
+        && !warmSegment(stream, playlist.baseUri, first.initializationSegment, 256 * 1024, token))
+      return false;
+    return warmSegment(stream, playlist.baseUri, first, bytes, token);
+  }
+
+  private static boolean warmSegment(
+      JSONObject stream,
+      String base,
+      androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist.Segment segment,
+      int budget,
+      long token)
+      throws Exception {
+    if (token != intent.get() || bytesPaused) return false;
+    long length =
+        segment.byteRangeLength == androidx.media3.common.C.LENGTH_UNSET
+            ? budget
+            : Math.min(budget, segment.byteRangeLength);
+    if (length <= 0) return false;
+    Uri uri = androidx.media3.common.util.UriUtil.resolveToUri(base, segment.url);
+    if (!"https".equals(uri.getScheme()) && !"http".equals(uri.getScheme())) return false;
+    return warmSpec(
+        stream,
+        new DataSpec.Builder()
+            .setUri(uri)
+            .setPosition(segment.byteRangeOffset)
+            .setLength(length)
+            .build(),
+        token);
+  }
+
+  private static boolean warmSpec(JSONObject stream, DataSpec spec, long token) throws Exception {
+    if (token != intent.get() || bytesPaused) return false;
     CacheWriter writer =
         new CacheWriter(
             source(stream).createDataSource(),
-            new DataSpec.Builder()
-                .setUri(url)
-                .setKey(
-                    stream.isNull(
-                            url.equals(stream.optString("audio_url"))
-                                ? "audio_cache_key"
-                                : "cache_key")
-                        ? null
-                        : stream.optString(
-                            url.equals(stream.optString("audio_url"))
-                                ? "audio_cache_key"
-                                : "cache_key"))
-                .setLength(bytes)
-                .build(),
+            spec,
             new byte[32 * 1024],
             (length, cached, added) -> {
-              if (token != intent.get() || Thread.currentThread().isInterrupted())
+              if (token != intent.get() || bytesPaused || Thread.currentThread().isInterrupted())
                 throw new CancellationException();
             });
     writers.put(token, writer);
     try {
-      if (token != intent.get()) {
+      if (token != intent.get() || bytesPaused) {
         writer.cancel();
-        return;
+        return false;
       }
       writer.cache();
     } catch (java.io.EOFException shortMedia) {
@@ -191,6 +277,7 @@ final class PlaybackCache {
     } finally {
       writers.remove(token, writer);
     }
+    return token == intent.get() && !bytesPaused;
   }
 
   private PlaybackCache() {}

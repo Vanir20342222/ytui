@@ -43,6 +43,7 @@ public final class OfflineLibraryRuntimeTest {
     JSONObject config = PlaybackService.rpc(new JSONObject().put("op", "settings"));
     String firstId = null, secondId = null;
     try (ActivityScenario<RustActivity> scenario = RuntimeTest.launchOffline();
+        LoopbackDownloads loopback = LoopbackDownloads.open();
         MediaRuntimeTest.FixtureServer server =
             new MediaRuntimeTest.FixtureServer(ExportRuntimeTest.asset(ctx, "fixture-audio.m4a"))) {
       MobileSettings.prefs().edit().putBoolean("auto_save_folders", false).commit();
