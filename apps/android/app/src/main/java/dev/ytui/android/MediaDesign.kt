@@ -23,8 +23,49 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.foundation.BorderStroke
 
 internal val LocalReducedMotion = staticCompositionLocalOf { false }
+
+/** Shared visual roles. Palette colours remain owned by the shared Rust theme. */
+internal object MediaTokens {
+    val grid = 4.dp
+    val textInset = 16.dp
+    val small = RoundedCornerShape(4.dp)
+    val medium = RoundedCornerShape(8.dp)
+    val pill = RoundedCornerShape(50)
+    val sheet = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    val dialog = RoundedCornerShape(28.dp)
+    val videoInk = Color.White
+    val videoScrim = Color.Black.copy(alpha = 0.72f)
+    val videoDisc = Color.Black.copy(alpha = 0.48f)
+    val transparent = Color.Transparent
+    val typography = Typography(
+        titleLarge = TextStyle(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Medium),
+        titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+        titleSmall = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+        bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
+        labelLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+        labelMedium = TextStyle(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium),
+    )
+}
+
+/** Ensure secondary text remains AA-readable on raised surfaces, including imports. */
+internal fun mediaContrast(a: Color, b: Color): Float =
+    (maxOf(a.luminance(), b.luminance()) + 0.05f) /
+        (minOf(a.luminance(), b.luminance()) + 0.05f)
+
+internal fun mediaReadableText(candidate: Color, background: Color): Color {
+    if (mediaContrast(candidate, background) >= 4.5f) return candidate
+    val end = mediaOnAccent(background)
+    for (step in 1..20) {
+        val result = androidx.compose.ui.graphics.lerp(candidate, end, step / 20f)
+        if (mediaContrast(result, background) >= 4.5f) return result
+    }
+    return end
+}
 
 /** Pick the stronger black/white contrast, including imported and light palettes. */
 internal fun mediaOnAccent(accent: Color): Color =
@@ -75,6 +116,7 @@ internal fun MediaIcon(
     glyph: Glyph,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
+    filled: Boolean = false,
 ) {
     Canvas(modifier.size(24.dp)) {
         scale(size.width / 24f, size.height / 24f, Offset.Zero) {
@@ -88,7 +130,8 @@ internal fun MediaIcon(
                         }
                         if (closed) close()
                     }
-                drawPath(path, tint, style = Stroke(1.8f, cap = StrokeCap.Round))
+                if (filled && closed) drawPath(path, tint)
+                else drawPath(path, tint, style = Stroke(1.8f, cap = StrokeCap.Round))
             }
             fun play(x: Float = 8f) =
                 drawPath(
@@ -133,6 +176,7 @@ internal fun MediaIcon(
                         14f to 21f,
                         19f to 21f,
                         19f to 9f,
+                        closed = filled,
                     )
                 }
                 Glyph.Music -> {
@@ -142,7 +186,7 @@ internal fun MediaIcon(
                     drawOval(tint, Offset(13f, 13f), Size(7f, 5f))
                 }
                 Glyph.Radio -> {
-                    drawRoundRect(tint, Offset(3f, 8f), Size(18f, 13f), style = Stroke(1.8f))
+                    drawRoundRect(tint, Offset(3f, 8f), Size(18f, 13f), style = if (filled) androidx.compose.ui.graphics.drawscope.Fill else Stroke(1.8f))
                     line(5f, 8f, 18f, 3f)
                     drawCircle(tint, 3f, Offset(8f, 15f), style = Stroke(1.8f))
                     line(14f, 13f, 18f, 13f)
@@ -296,7 +340,15 @@ internal fun MediaChip(
         selected = selected,
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
-        label = { Text(label) },
+        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+        shape = MediaTokens.pill,
+        border = BorderStroke(0.dp, MediaTokens.transparent),
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            labelColor = MaterialTheme.colorScheme.onSurface,
+            selectedContainerColor = MaterialTheme.colorScheme.onBackground,
+            selectedLabelColor = MaterialTheme.colorScheme.background,
+        ),
     )
 }
 
@@ -327,16 +379,11 @@ internal fun SettingGroup(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(20.dp),
-        ) {
-            Column(
-                Modifier.fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                content = content,
-            )
-        }
+        Column(
+            Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            content = content,
+        )
     }
 }
 
@@ -353,13 +400,7 @@ internal fun EmptyMediaState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(
-            Modifier.size(72.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            MediaIcon(icon, Modifier.size(30.dp), MaterialTheme.colorScheme.onPrimaryContainer)
-        }
+        MediaIcon(icon, Modifier.size(56.dp), MaterialTheme.colorScheme.onSurfaceVariant)
         Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(
             detail,
@@ -368,5 +409,15 @@ internal fun EmptyMediaState(
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
         content()
+    }
+}
+
+@Composable
+internal fun ChannelAvatar(creator: String, size: androidx.compose.ui.unit.Dp) {
+    Box(Modifier.size(size).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+        contentAlignment = Alignment.Center) {
+        Text(creator.trim().firstOrNull()?.uppercase() ?: "·",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge)
     }
 }
