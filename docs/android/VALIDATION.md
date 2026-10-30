@@ -1,6 +1,46 @@
 # Android validation record (M9)
 
-## Current startup follow-up: mobile.6 (2026-10-29)
+## Current Best-quality startup follow-up: mobile.7 (2026-10-30)
+
+The real Tab S9 mobile.6 report with **Best** quality **failed**: completed
+videos took 6772–11048 ms to visible output, with 118–189 ms player API calls
+but several seconds of extraction/flight waits. Mobile.7 removes serial HLS
+child-playlist enumeration, preserves muxed codec declarations for chunkless
+preparation and preloads a bounded first media/init segment. Quality remains
+Best. [Findings, failed runs and release evidence](MOBILE7_STARTUP_FOLLOWUP.md).
+
+Qualified app source `1a6f9682d5c573f58992ced44aa9b7c6d82788d6` passes exact-main
+[Android](https://github.com/Vanir20342222/ytui/actions/runs/41033508507),
+[Rust](https://github.com/Vanir20342222/ytui/actions/runs/41033507062) and
+[Secret scan](https://github.com/Vanir20342222/ytui/actions/runs/41033507060).
+28 native cases pass, one public opt-in case skips, with no app ANR/Rust panic
+markers. Native HLS checks require segment bytes in cache and no repeated first
+segment HTTP request, alongside cold/prepared pixels, native controls/fullscreen,
+offline folders/exports, keyboard/account navigation and all themes.
+
+Generated-media catalog-tap window pixels: **848 ms cold / 996 ms prepared**
+(view-frame events 567/691 ms). HLS service window pixels: **704 / 626 ms**
+(view events 501/379 ms). All pixel deadlines remain 2000 ms. The documented
+Goldfish/Ranchu offline debug renderer avoids invalid host buffer migrations;
+physical devices and release APKs retain Media3's standard renderer. These are
+loopback measurements, **not live YouTube or physical-device speed**.
+
+The signed release passes both ABI builds, 18 JVM tests, lint, stable-certificate,
+package/version/source, ZIP/16 KiB ELF alignment and notices checks. Rust CI
+passes 333 workspace + 14 extractor + 15 solver/media checks (362 total, 31
+explicit ignores), formatting and strict Clippy. The
+[public mobile.7 APK](https://github.com/Vanir20342222/ytui/releases/download/android-0.2.0-alpha.12-mobile.7/ytui-0.2.0-alpha.12-mobile.7.apk)
+was independently downloaded: its size/hash/certificate/version match the signed
+local artifact. The [publisher](https://github.com/Vanir20342222/ytui/actions/runs/41035226126)
+receives only the finished APK. Temporary transfer/input files were removed;
+the private signing identity and encrypted recovery are retained.
+
+The cloud still denies YouTube CONNECT (HTTP 403). The owner must test mobile.7
+on the Tab S9 with Best, new videos and Next, then copy the local performance
+report including slow/failed/cancelled attempts. Live two-second acceptance and
+M9 remain **open**.
+
+## Earlier startup follow-up: mobile.6 (2026-10-29)
 
 The real Tab S9 mobile.5 report **failed** the two-second live target (completed videos 11249/14617 ms). Mobile.6 fixes optional manifest I/O, HTTP pool churn, foreground request contention and inaccurate joined-preload labels. The live target remains open until the owner retests.
 

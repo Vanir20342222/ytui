@@ -2,7 +2,8 @@
 
 Latest physical evidence: mobile.6 with Best quality **fails**, 6772–11048 ms
 for completed videos. [Best-quality HLS follow-up](MOBILE7_STARTUP_FOLLOWUP.md)
-records the serial child-playlist bottleneck and qualification in progress.
+records the serial child-playlist bottleneck, published APK and exact-main
+qualification. The live Tab S9 retest remains open.
 
 Measure from the actual tap until the attached native view presents its first
 decoded frame. Extraction, offline lookup, service initialization, source

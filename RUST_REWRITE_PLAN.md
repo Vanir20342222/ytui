@@ -1,7 +1,7 @@
 # ytui Rust rewrite plan
 
 M9 startup follow-up: the real Tab S9 mobile.6 report with Best quality fails
-the two-second target (6772–11048 ms). [Mobile.7 work](docs/android/MOBILE7_STARTUP_FOLLOWUP.md)
+the two-second target (6772–11048 ms). [Published mobile.7](docs/android/MOBILE7_STARTUP_FOLLOWUP.md)
 removes mobile HLS child traversal, retains codec metadata for chunkless
 preparation and adds manifest/transport timings. Live acceptance remains open.
 
