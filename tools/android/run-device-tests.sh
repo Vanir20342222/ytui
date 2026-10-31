@@ -39,6 +39,11 @@ collect_evidence() {
     for screenshot in native-search native-account native-tablet native-catalog native-catalog-error native-music native-wide-catalog native-player native-player-{vinyl,vu,orbit} native-settings native-card-menu native-video-fullscreen native-video-return native-video-controls native-theme-{0..12}; do
         adb pull "/sdcard/Android/data/$test_package/files/$screenshot.png" "$evidence/native-ui/$screenshot.png" > /dev/null 2>&1 || true
     done
+    while IFS= read -r screenshot; do
+        screenshot="${screenshot//$'\r'/}"
+        [[ "$screenshot" =~ ^restyle-[A-Za-z0-9._-]+\.png$ ]] || continue
+        adb pull "/sdcard/Android/data/$test_package/files/$screenshot" "$evidence/native-ui/$screenshot" > /dev/null 2>&1 || true
+    done < <(adb shell "ls /sdcard/Android/data/$test_package/files/restyle-*.png" 2>/dev/null | sed 's|.*/||')
     adb pull "/sdcard/Android/data/$test_package/files/native-video-controls.xml" "$evidence/native-ui/native-video-controls.xml" > /dev/null 2>&1 || true
 }
 trap collect_evidence EXIT

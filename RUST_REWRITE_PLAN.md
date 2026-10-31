@@ -844,3 +844,23 @@ retains requested download quality through retry/preparation, removes unused
 catalogs from download records, and prevents uncached external captions breaking
 offline playback. Deterministic device regressions exercise the actual stream and
 cache paths; their latest results remain in the Android validation record.
+
+
+### M9: content-first Android restyle
+
+The owner supplied a detailed YouTube-style visual brief and reference on
+2026-10-30, kept the YouTube label and explicitly chose a neutral dark default.
+The current Android app now has full-bleed video art, a compact brand bar,
+unified pill filters, quiet navigation, native player chrome, action sheets,
+full-page settings, theme selection in a radio dialog and adaptive wide search rows. Existing
+styles/actions/state, Rust extraction/networking and strict startup deadlines
+remain. Fresh mobile configuration defaults to ytui-dark without replacing saved
+choices; desktop palette rendering is unchanged.
+
+[Implementation/report](docs/android/CONTENT_FIRST_RESTYLE.md) and
+[PR #29 qualification/artifacts](https://github.com/Vanir20342222/ytui/pull/29)
+record 20 passing local JVM tests, APK/lint and 337 workspace passes (31 ignores),
+new native theme/geometry/large-text/touch-seek coverage, retained initial failures
+and final native results. The named old screenshot ZIP was not attached; retained
+mobile.9 native captures provide the baseline. This visual work does not close
+M9's physical/live and feature-parity gates.

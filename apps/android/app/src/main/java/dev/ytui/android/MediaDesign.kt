@@ -1,7 +1,9 @@
 package dev.ytui.android
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,10 +23,73 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 internal val LocalReducedMotion = staticCompositionLocalOf { false }
+
+/** Shared visual roles. Palette colours remain owned by the shared Rust theme. */
+internal object MediaTokens {
+    // Android-only neutral rendering of ytui-dark; shared/desktop palettes stay unchanged.
+    val neutralBackground = Color.Black.copy(red = 0.06f, green = 0.06f, blue = 0.06f)
+    val neutralSurface = Color.Black.copy(red = 0.14f, green = 0.14f, blue = 0.14f)
+    val neutralText = Color.White.copy(red = 0.94f, green = 0.94f, blue = 0.94f)
+    val grid = 4.dp
+    val textInset = 16.dp
+    val small = RoundedCornerShape(4.dp)
+    val medium = RoundedCornerShape(8.dp)
+    val pill = RoundedCornerShape(50)
+    val sheet = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    val dialog = RoundedCornerShape(28.dp)
+    // Reuse the shared ytui dark/light accent values for a stable teal brand role.
+    val brandOnDark = Color(0xff6ddbc1)
+    val brandOnLight = Color(0xff006f62)
+    val videoInk = Color.White
+    val videoScrim = Color.Black.copy(alpha = 0.72f)
+    val videoDisc = Color.Black.copy(alpha = 0.48f)
+    val transparent = Color.Transparent
+    val typography =
+        Typography(
+            titleLarge =
+                TextStyle(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Medium),
+            titleMedium =
+                TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+            titleSmall =
+                TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+            bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
+            labelLarge =
+                TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+            labelMedium =
+                TextStyle(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium),
+        )
+}
+
+/** Ensure secondary text remains AA-readable on raised surfaces, including imports. */
+internal fun mediaContrast(a: Color, b: Color): Float =
+    (maxOf(a.luminance(), b.luminance()) + 0.05f) / (minOf(a.luminance(), b.luminance()) + 0.05f)
+
+internal fun mediaReadableText(candidate: Color, background: Color): Color {
+    if (mediaContrast(candidate, background) >= 4.5f) return candidate
+    val end = mediaOnAccent(background)
+    for (step in 1..20) {
+        val result = androidx.compose.ui.graphics.lerp(candidate, end, step / 20f)
+        if (mediaContrast(result, background) >= 4.5f) return result
+    }
+    return end
+}
+
+internal fun mediaBrand(background: Color): Color {
+    val candidate =
+        if (
+            mediaContrast(MediaTokens.brandOnDark, background) >=
+                mediaContrast(MediaTokens.brandOnLight, background)
+        )
+            MediaTokens.brandOnDark
+        else MediaTokens.brandOnLight
+    return mediaReadableText(candidate, background)
+}
 
 /** Pick the stronger black/white contrast, including imported and light palettes. */
 internal fun mediaOnAccent(accent: Color): Color =
@@ -75,7 +140,9 @@ internal fun MediaIcon(
     glyph: Glyph,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
+    filled: Boolean = false,
 ) {
+    val cutout = MaterialTheme.colorScheme.background
     Canvas(modifier.size(24.dp)) {
         scale(size.width / 24f, size.height / 24f, Offset.Zero) {
             fun line(x: Float, y: Float, x2: Float, y2: Float) =
@@ -88,7 +155,8 @@ internal fun MediaIcon(
                         }
                         if (closed) close()
                     }
-                drawPath(path, tint, style = Stroke(1.8f, cap = StrokeCap.Round))
+                if (filled && closed) drawPath(path, tint)
+                else drawPath(path, tint, style = Stroke(1.8f, cap = StrokeCap.Round))
             }
             fun play(x: Float = 8f) =
                 drawPath(
@@ -133,24 +201,69 @@ internal fun MediaIcon(
                         14f to 21f,
                         19f to 21f,
                         19f to 9f,
+                        closed = filled,
                     )
                 }
                 Glyph.Music -> {
                     outline(10f to 17f, 10f to 5f, 20f to 3f, 20f to 15f)
                     line(10f, 8f, 20f, 6f)
-                    drawOval(tint, Offset(3f, 15f), Size(7f, 5f))
-                    drawOval(tint, Offset(13f, 13f), Size(7f, 5f))
+                    drawOval(
+                        tint,
+                        Offset(3f, 15f),
+                        Size(7f, 5f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
+                    drawOval(
+                        tint,
+                        Offset(13f, 13f),
+                        Size(7f, 5f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
                 }
                 Glyph.Radio -> {
-                    drawRoundRect(tint, Offset(3f, 8f), Size(18f, 13f), style = Stroke(1.8f))
+                    drawRoundRect(
+                        tint,
+                        Offset(3f, 8f),
+                        Size(18f, 13f),
+                        style =
+                            if (filled) androidx.compose.ui.graphics.drawscope.Fill
+                            else Stroke(1.8f),
+                    )
                     line(5f, 8f, 18f, 3f)
-                    drawCircle(tint, 3f, Offset(8f, 15f), style = Stroke(1.8f))
-                    line(14f, 13f, 18f, 13f)
-                    line(14f, 17f, 18f, 17f)
+                    drawCircle(
+                        if (filled) cutout else tint,
+                        3f,
+                        Offset(8f, 15f),
+                        style = Stroke(1.8f),
+                    )
+                    for (y in listOf(13f, 17f)) drawLine(
+                        if (filled) cutout else tint,
+                        Offset(14f, y),
+                        Offset(18f, y),
+                        1.8f,
+                        StrokeCap.Round,
+                    )
                 }
                 Glyph.Download -> {
-                    outline(7f to 11f, 12f to 16f, 17f to 11f)
-                    line(12f, 3f, 12f, 16f)
+                    if (filled)
+                        outline(
+                            9f to 3f,
+                            15f to 3f,
+                            15f to 10f,
+                            19f to 10f,
+                            12f to 17f,
+                            5f to 10f,
+                            9f to 10f,
+                            closed = true,
+                        )
+                    else {
+                        outline(7f to 11f, 12f to 16f, 17f to 11f)
+                        line(12f, 3f, 12f, 16f)
+                    }
                     outline(4f to 16f, 4f to 21f, 20f to 21f, 20f to 16f)
                 }
                 Glyph.Search -> {
@@ -296,14 +409,28 @@ internal fun MediaChip(
         selected = selected,
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
-        label = { Text(label) },
+        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+        shape = MediaTokens.pill,
+        border = BorderStroke(0.dp, MediaTokens.transparent),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                labelColor = MaterialTheme.colorScheme.onSurface,
+                selectedContainerColor = MaterialTheme.colorScheme.onBackground,
+                selectedLabelColor = MaterialTheme.colorScheme.background,
+            ),
     )
 }
 
 @Composable
 internal fun MediaIconButton(glyph: Glyph, label: String, tag: String = "", action: () -> Unit) {
     IconButton(action, Modifier.size(48.dp).testTag(tag).semantics { contentDescription = label }) {
-        MediaIcon(glyph)
+        val secondary = glyph == Glyph.Shuffle || glyph == Glyph.Repeat
+        MediaIcon(
+            glyph,
+            Modifier.size(if (secondary) 20.dp else 24.dp),
+            if (secondary) MaterialTheme.colorScheme.onSurfaceVariant else LocalContentColor.current,
+        )
     }
 }
 
@@ -316,7 +443,7 @@ internal fun SettingGroup(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 16.dp, start = 4.dp),
         )
@@ -327,16 +454,11 @@ internal fun SettingGroup(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(20.dp),
-        ) {
-            Column(
-                Modifier.fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                content = content,
-            )
-        }
+        Column(
+            Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            content = content,
+        )
     }
 }
 
@@ -353,13 +475,7 @@ internal fun EmptyMediaState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(
-            Modifier.size(72.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            MediaIcon(icon, Modifier.size(30.dp), MaterialTheme.colorScheme.onPrimaryContainer)
-        }
+        MediaIcon(icon, Modifier.size(56.dp), MaterialTheme.colorScheme.onSurfaceVariant)
         Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(
             detail,
@@ -368,5 +484,44 @@ internal fun EmptyMediaState(
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
         content()
+    }
+}
+
+@Composable
+internal fun ChannelAvatar(creator: String, size: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier.size(size).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        // Keep a complete code point for emoji-leading channel names.
+        val initial =
+            creator.trim().let { name ->
+                if (name.isEmpty()) "·"
+                else name.substring(0, name.offsetByCodePoints(0, 1)).uppercase()
+            }
+        Text(
+            initial,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
+}
+
+@Composable
+internal fun SheetAction(
+    text: @Composable () -> Unit,
+    onClick: () -> Unit,
+    leadingIcon: @Composable (() -> Unit)? = null,
+) {
+    Row(
+        Modifier.fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        leadingIcon?.invoke()
+        Box(Modifier.weight(1f)) { text() }
     }
 }

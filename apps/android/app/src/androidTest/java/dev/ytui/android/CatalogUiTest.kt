@@ -88,6 +88,8 @@ class CatalogUiTest {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
             executeShellCommand("wm size reset")
             executeShellCommand("wm density reset")
+            executeShellCommand("cmd uimode night auto")
+            executeShellCommand("settings put system font_scale 1.0")
             setOrientationNatural()
             unfreezeRotation()
         }
@@ -106,7 +108,7 @@ class CatalogUiTest {
                 )
             else
                 listOf(
-                    "A little further from ordinary",
+                    "A little further from ordinary: a long video title with enough words to exercise the full two-line feed layout",
                     "The art of slowing down",
                     "A city that never sleeps",
                     "Small worlds, big ideas",
@@ -123,6 +125,8 @@ class CatalogUiTest {
                         "kind" to if (tab == 2) "song" else "video",
                         "thumbnail" to covers.url(index),
                         "duration" to 221 + index * 47,
+                        "views_text" to "1.2K views",
+                        "published_text" to "2 days ago",
                         "section" to if (tab == 2) "Made for your day" else "Picked for you",
                     )
                 )
@@ -150,7 +154,7 @@ class CatalogUiTest {
                     .isNotEmpty()
             }
         } catch (error: Exception) {
-            MediaRuntimeTest.capture("native-catalog-error.png")
+            captureSettled("native-catalog-error.png")
             scenario.onActivity {
                 val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
                 android.util.Log.i(
@@ -170,6 +174,7 @@ class CatalogUiTest {
             val color = bitmap.toPixelMap()[bitmap.width / 2, bitmap.height / 4]
             color.red > color.green * 1.15f
         }
+        awaitDecodedCovers(cards)
         InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(150, 3000)
         return cards
     }
@@ -187,13 +192,28 @@ class CatalogUiTest {
             1,
             covers.failures.get(),
         )
-        MediaRuntimeTest.capture("native-catalog.png")
+        val pane = compose.onNodeWithTag("browse-pane").fetchSemanticsNode().boundsInRoot
+        val cover =
+            compose
+                .onNodeWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .boundsInRoot
+        Assert.assertEquals("Video art must be full bleed", pane.left, cover.left, 2f)
+        Assert.assertEquals("Video art must fill the pane", pane.width, cover.width, 2f)
+        Assert.assertEquals("Video art remains 16:9", 16f / 9f, cover.width / cover.height, 0.01f)
+        val source = compose.onNodeWithTag("source-Home").fetchSemanticsNode().boundsInRoot
+        // Categories and source filters share one lazy row, not two independently styled strips.
+        compose.onNodeWithTag("feed-filters").performScrollToNode(hasTestTag("category-All"))
+        val category = compose.onNodeWithTag("category-All").fetchSemanticsNode().boundsInRoot
+        Assert.assertEquals(source.top, category.top, 2f)
+        compose.onNodeWithTag("feed-filters").performScrollToNode(hasTestTag("source-Home"))
+        captureSettled("native-catalog.png")
         compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
         for (label in
             listOf("Play now", "Preview", "Add to queue", "Save to library", "Download")) compose
             .onNodeWithText(label)
             .assertIsDisplayed()
-        MediaRuntimeTest.capture("native-card-menu.png")
+        captureSettled("native-card-menu.png")
         compose.onNodeWithText("Add to queue").performClick()
         compose.waitUntil(10_000) {
             var contains = false
@@ -248,7 +268,7 @@ class CatalogUiTest {
         Assert.assertEquals("Wide layout should show adjacent cards", first.top, second.top, 3f)
         Assert.assertTrue(second.left > first.left)
         compose.onNodeWithTag("settings-button").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-wide-catalog.png")
+        captureSettled("native-wide-catalog.png")
     }
 
     @Test
@@ -268,11 +288,11 @@ class CatalogUiTest {
                 .boundsInRoot
                 .left > 0,
         )
-        MediaRuntimeTest.capture("native-music.png")
+        captureSettled("native-music.png")
         compose.onNodeWithTag("settings-button").performClick()
         compose.onNodeWithTag("settings-Appearance").assertIsDisplayed().performClick()
         compose.onNodeWithTag("theme-selector").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-settings.png")
+        captureSettled("native-settings.png")
         compose.onNodeWithTag("settings-back").performClick()
         compose.onNodeWithTag("settings-Network").performClick()
         compose
@@ -288,20 +308,34 @@ class CatalogUiTest {
         compose.onNodeWithTag("create-offline-playlist").performClick()
         val title = "UI fixture " + java.util.UUID.randomUUID().toString().take(8)
         compose.onNodeWithTag("offline-playlist-name").performTextInput(title)
-        compose.onNodeWithText("Create").performClick()
+        compose.onNodeWithTag("offline-playlist-name").assertTextContains(title)
+        settleUi()
+        compose.onNodeWithText("Create").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
         }
+        settleUi()
         compose.onNodeWithText(title).performClick()
         compose.onNodeWithTag("offline-playlist-edit-name").performTextReplacement("$title renamed")
-        compose.onNodeWithText("Rename").performClick()
-        compose.waitUntil(10_000) {
-            PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
-                it.optString("title") == "$title renamed"
+        compose.onNodeWithTag("offline-playlist-edit-name").assertTextContains("$title renamed")
+        // Modal sheets move as the IME opens. Tap the settled real button;
+        // semantics becoming available does not imply its window position is final.
+        settleUi()
+        compose.onNodeWithText("Rename").assertIsDisplayed().performClick()
+        try {
+            compose.waitUntil(10_000) {
+                PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().any {
+                    it.optString("title") == "$title renamed"
+                }
             }
+        } catch (error: Throwable) {
+            runCatching { captureSettled("restyle-offline-playlist-rename-error.png") }
+            throw error
         }
+        settleUi()
         compose.onNodeWithText("Delete playlist").performClick()
-        compose.onNodeWithText("Delete").performClick()
+        settleUi()
+        compose.onNodeWithText("Delete").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) {
             PlaybackService.rpcArray(json("op" to "offline_playlists")).objects().none {
                 it.optString("title").startsWith(title)
@@ -350,7 +384,7 @@ class CatalogUiTest {
                     compose.onNodeWithTag("music-visualizer").isDisplayed()
                 }
             } finally {
-                MediaRuntimeTest.capture("native-player.png")
+                captureSettled("native-player.png")
                 android.util.Log.i(
                     "PlayerLayoutTest",
                     compose.onNodeWithTag("focused-player", useUnmergedTree = true).printToString(),
@@ -369,7 +403,20 @@ class CatalogUiTest {
                 return nodes.fetchSemanticsNodes().indices.any { nodes[it].isDisplayed() }
             }
             compose.waitUntil(10_000) { loadedCoverVisible() }
-            MediaRuntimeTest.capture("native-player.png")
+            captureSettled("native-player.png")
+            compose.onNodeWithTag("seek-slider").performTouchInput {
+                swipe(
+                    androidx.compose.ui.geometry.Offset(width * 0.2f, height / 2f),
+                    androidx.compose.ui.geometry.Offset(width * 0.5f, height / 2f),
+                    250,
+                )
+            }
+            MediaRuntimeTest.await(
+                "Restyled seek control must commit to the actual paused decoder"
+            ) {
+                val position = MediaRuntimeTest.status().optDouble("position")
+                position > 2.0 && position < 6.0
+            }
             for (style in listOf("vinyl", "vu", "orbit")) {
                 scenario.onActivity {
                     ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(false) { config ->
@@ -408,7 +455,7 @@ class CatalogUiTest {
                     )
                     Assert.assertEquals(record.left + record.width * 0.65f, label.center.x, 3f)
                 }
-                MediaRuntimeTest.capture("native-player-$style.png")
+                captureSettled("native-player-$style.png")
             }
             compose.onNodeWithTag("player-pause").assertIsDisplayed().performClick()
             MediaRuntimeTest.await("Large transport must resume Media3") {
@@ -451,6 +498,220 @@ class CatalogUiTest {
             MediaBridge.execute(json("op" to "stop").toString())
             fixture.delete()
         }
+    }
+
+    @Test
+    fun restyleThemeMatrixCoversPhoneTabletLightAndDark() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        val themes =
+            JSONObject(NativeBridge.request(json("op" to "themes").toString())).getJSONArray("data")
+        for (wide in listOf(false, true)) for (dark in listOf(false, true)) {
+            scenario.close()
+            device.setOrientationNatural()
+            device.executeShellCommand(if (wide) "wm size 2560x1600" else "wm size 1080x2400")
+            device.executeShellCommand(if (wide) "wm density 320" else "wm density 420")
+            device.executeShellCommand(if (dark) "cmd uimode night yes" else "cmd uimode night no")
+            scenario = RuntimeTest.launchOffline()
+            compose.waitUntil(10_000) {
+                compose
+                    .onAllNodes(
+                        hasTestTag("app-background") and
+                            SemanticsMatcher.expectValue(
+                                SemanticsProperties.StateDescription,
+                                "Ready",
+                            )
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            for (index in 0 until themes.length()) {
+                val theme = themes.getString(index)
+                scenario.onActivity {
+                    ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(dark) { config ->
+                        config.put("theme", theme)
+                    }
+                }
+                compose.waitUntil(10_000) {
+                    var applied = false
+                    scenario.onActivity {
+                        applied =
+                            ViewModelProvider(it)[YtuiViewModel::class.java]
+                                .config
+                                .value
+                                .optString("theme") == theme
+                    }
+                    applied
+                }
+                val palette =
+                    JSONObject(
+                            NativeBridge.request(json("op" to "theme", "dark" to dark).toString())
+                        )
+                        .getJSONObject("data")
+                val background =
+                    palette.color("background", androidx.compose.ui.graphics.Color.Black)
+                val surface = palette.color("surface", androidx.compose.ui.graphics.Color.Black)
+                val ink = palette.color("text", androidx.compose.ui.graphics.Color.White)
+                Assert.assertTrue(
+                    "$theme body/background contrast",
+                    mediaContrast(ink, background) >= 4.5f,
+                )
+                Assert.assertTrue(
+                    "$theme body/surface contrast",
+                    mediaContrast(ink, surface) >= 4.5f,
+                )
+                val secondary =
+                    mediaReadableText(
+                        androidx.compose.ui.graphics.lerp(background, ink, 0.7f),
+                        surface,
+                    )
+                Assert.assertTrue(
+                    "$theme secondary contrast",
+                    mediaContrast(secondary, surface) >= 4.5f,
+                )
+                val prefix =
+                    "restyle-${if (wide) "tablet" else "phone"}-${if (dark) "dark" else "light"}-$theme"
+                populate(1)
+                captureSettled("$prefix-feed.png")
+                populate(2)
+                captureSettled("$prefix-music.png")
+                compose.onNodeWithTag("settings-button").performClick()
+                compose.onNodeWithTag("settings-Appearance").performClick()
+                compose.onNodeWithTag("theme-selector").assertIsDisplayed()
+                captureSettled("$prefix-settings.png")
+                compose.onNodeWithContentDescription("Close").performClick()
+            }
+        }
+    }
+
+    @Test
+    fun largeTextKeepsSettingsSearchAndCardMenuReachable() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        scenario.close()
+        device.executeShellCommand("settings put system font_scale 2.0")
+        try {
+            scenario = RuntimeTest.launchOffline()
+            compose.waitUntil(10_000) {
+                compose
+                    .onAllNodes(
+                        hasTestTag("app-background") and
+                            SemanticsMatcher.expectValue(
+                                SemanticsProperties.StateDescription,
+                                "Ready",
+                            )
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            val cards = populate(1)
+            captureSettled("restyle-large-text-feed.png")
+            compose
+                .onNodeWithTag("search-field")
+                .assertIsDisplayed()
+                .performTextInput("large input")
+            compose.onNodeWithContentDescription("Clear search").performClick()
+            compose.onNodeWithTag("search-field").assertTextContains("Search or paste a link")
+            device.pressBack()
+            compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
+            compose.onNodeWithText("Download").performScrollTo().assertIsDisplayed()
+            captureSettled("restyle-large-text-card-menu.png")
+            compose.onNodeWithContentDescription("Close").performClick()
+            compose.onNodeWithTag("settings-button").performClick()
+            compose.onNodeWithTag("settings-Appearance").performClick()
+            compose.onNodeWithTag("theme-selector").assertIsDisplayed().performClick()
+            // The fixture deliberately stores the legacy "dark" alias.
+            compose.onNodeWithTag("theme-ytui-dark").performScrollTo().assertIsSelected()
+            compose.onNodeWithTag("theme-ytui-light").performScrollTo().assertIsDisplayed()
+            captureSettled("restyle-large-text-theme-dialog.png")
+            compose.onNodeWithText("CANCEL").performClick()
+            captureSettled("restyle-large-text-settings.png")
+        } finally {
+            device.executeShellCommand("settings put system font_scale 1.0")
+        }
+    }
+
+    @Test
+    fun tabletSearchUsesRowsWithoutChangingCardActions() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        scenario.close()
+        device.executeShellCommand("wm size 2560x1600")
+        device.executeShellCommand("wm density 320")
+        scenario = RuntimeTest.launchOffline()
+        compose.waitUntil(10_000) {
+            compose
+                .onAllNodes(
+                    hasTestTag("app-background") and
+                        SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Ready")
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        val cards = populate(1)
+        scenario.onActivity {
+            val vm = ViewModelProvider(it)[YtuiViewModel::class.java]
+            vm.feeds[1].value =
+                vm.feeds[1].value.copy(request = json("Search" to "synthetic"), generation = 200)
+        }
+        compose.waitForIdle()
+        val first =
+            compose.onNodeWithTag("media-card-${cards[0].key}").fetchSemanticsNode().boundsInRoot
+        val second =
+            compose.onNodeWithTag("media-card-${cards[1].key}").fetchSemanticsNode().boundsInRoot
+        Assert.assertTrue("Search results must stack as wide rows", second.top >= first.bottom)
+        // Switching from grid to a quarter-width row changes the requested image size.
+        // Compose idleness does not await its IO decode; require the real image before measuring.
+        compose.waitUntil(10_000) {
+            compose
+                .onAllNodesWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        val cover =
+            compose
+                .onNodeWithTag("artwork-${cards[0].key}", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .boundsInRoot
+        Assert.assertEquals(0.25f, cover.width / (first.width - 32f * 2f), 0.03f)
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+        awaitDecodedCovers(cards)
+        captureSettled("restyle-tablet-search.png")
+        compose.onNodeWithTag("media-menu-${cards[0].key}").performClick()
+        compose.onNodeWithText("Preview").assertIsDisplayed()
+    }
+
+    private fun awaitDecodedCovers(cards: List<MediaCard>) {
+        compose.waitUntil(15_000) {
+            // Virtualized rows beyond the viewport are intentionally not loaded.
+            val visible =
+                cards.filter { compose.onNodeWithTag("media-card-${it.key}").isDisplayed() }
+            visible.isNotEmpty() &&
+                visible.all { media ->
+                    runCatching {
+                            val node =
+                                compose.onNodeWithTag(
+                                    "artwork-${media.key}",
+                                    useUnmergedTree = true,
+                                )
+                            val frame = node.captureToImage()
+                            // All original fixture covers have saturated warm/cool artwork;
+                            // a neutral placeholder cannot satisfy this actual-pixel check.
+                            val c = frame.toPixelMap()[frame.width / 2, frame.height / 4]
+                            maxOf(c.red, c.green, c.blue) - minOf(c.red, c.green, c.blue) > 0.12f
+                        }
+                        .getOrDefault(false)
+                }
+        }
+    }
+
+    private fun settleUi() {
+        compose.waitForIdle()
+        // A semantics node can precede its final window pixels/IME position.
+        // This is UI-driver settling, never part of a playback deadline.
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+    }
+
+    private fun captureSettled(filename: String) {
+        settleUi()
+        MediaRuntimeTest.capture(filename)
     }
 
     private class CoverServer : AutoCloseable {

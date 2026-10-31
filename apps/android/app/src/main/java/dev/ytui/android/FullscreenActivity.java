@@ -42,6 +42,8 @@ public final class FullscreenActivity extends ComponentActivity {
     view = (PlayerView) getLayoutInflater().inflate(R.layout.ytui_player, null);
     view.setBackgroundColor(android.graphics.Color.BLACK);
     view.setUseController(true);
+    PlayerChrome.apply(view);
+    view.findViewById(R.id.ytui_collapse).setOnClickListener(button -> finish());
     view.setControllerAnimationEnabled(
         !getIntent().getBooleanExtra("reduced_motion", false)
             && android.animation.ValueAnimator.areAnimatorsEnabled());

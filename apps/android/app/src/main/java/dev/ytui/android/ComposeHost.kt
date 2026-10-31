@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -46,6 +50,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -62,8 +67,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -168,7 +171,13 @@ object ComposeHost {
     }
 }
 
-private fun JSONObject.color(key: String, fallback: Color): Color {
+internal fun JSONObject.color(key: String, fallback: Color, neutralPreset: Boolean = true): Color {
+    if (neutralPreset && optString("name") == "ytui-dark")
+        when (key) {
+            "background" -> return MediaTokens.neutralBackground
+            "surface" -> return MediaTokens.neutralSurface
+            "text" -> return MediaTokens.neutralText
+        }
     val rgb = optJSONArray(key) ?: return fallback
     return Color(android.graphics.Color.rgb(rgb.optInt(0), rgb.optInt(1), rgb.optInt(2)))
 }
@@ -200,10 +209,13 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var dialog by rememberSaveable { mutableStateOf("") }
     var menu by remember { mutableStateOf(false) }
-    val background = palette.color("background", Color(0xff101418))
-    val surface = palette.color("surface", Color(0xff202830))
-    val foreground = palette.color("text", Color(0xffd5dee6))
-    val accent = palette.color("accent", Color(0xff80cbc4))
+    // Imported documents can legitimately reuse a built-in name. Their paint
+    // roles must remain exactly the imported values rather than the default preset.
+    val neutralPreset = config.optString("theme", "system") != "custom"
+    val background = palette.color("background", Color(0xff101418), neutralPreset)
+    val surface = palette.color("surface", Color(0xff202830), neutralPreset)
+    val foreground = palette.color("text", Color(0xffd5dee6), neutralPreset)
+    val accent = palette.color("accent", Color(0xff80cbc4), neutralPreset)
     val light = palette.optBoolean("light")
     val base = if (light) lightColorScheme() else darkColorScheme()
     val colors =
@@ -219,7 +231,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
             onBackground = foreground,
             surface = surface,
             onSurface = foreground,
-            onSurfaceVariant = lerp(background, foreground, 0.7f),
+            onSurfaceVariant = mediaReadableText(lerp(background, foreground, 0.7f), surface),
             surfaceVariant = lerp(background, surface, 0.65f),
             surfaceContainer = lerp(background, surface, 0.72f),
             surfaceContainerLow = lerp(background, surface, 0.4f),
@@ -258,12 +270,12 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
     }
     MaterialTheme(
         colorScheme = colors,
-        typography = Typography(),
+        typography = MediaTokens.typography,
         shapes =
             Shapes(
-                small = RoundedCornerShape(12.dp),
-                medium = RoundedCornerShape(20.dp),
-                large = RoundedCornerShape(28.dp),
+                small = MediaTokens.small,
+                medium = MediaTokens.medium,
+                large = MediaTokens.dialog,
             ),
     ) {
         CompositionLocalProvider(
@@ -283,25 +295,30 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                     Column(Modifier.fillMaxSize()) {
                         Row(
                             Modifier.fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .padding(horizontal = 16.dp),
+                                .heightIn(min = 56.dp)
+                                .padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Box(
-                                Modifier.size(32.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(accent),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                MediaIcon(Glyph.Play, Modifier.size(22.dp), colors.onPrimary)
+                            Box(Modifier.size(28.dp), contentAlignment = Alignment.Center) {
+                                MediaIcon(Glyph.Play, Modifier.size(26.dp), mediaBrand(background))
                             }
                             Text(
                                 "ytui",
-                                Modifier.padding(start = 9.dp).weight(1f),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.ExtraBold,
+                                Modifier.padding(start = 4.dp).weight(1f).testTag("feed-heading"),
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = (-1).sp,
                             )
+                            if (tab > 0)
+                                MediaIconButton(
+                                    if (tab == 3) Glyph.Radio else Glyph.Queue,
+                                    "Browse",
+                                    "feeds-button",
+                                ) {
+                                    dialog = "feeds"
+                                }
                             MediaIconButton(
                                 Glyph.Account,
                                 if (account.optBoolean("connected")) "Your account" else "Sign in",
@@ -543,12 +560,17 @@ private fun ActionError(vm: YtuiViewModel) {
 
 @Composable
 internal fun Action(label: String, tag: String = "", enabled: Boolean = true, action: () -> Unit) {
-    FilledTonalButton(
+    Button(
         action,
         Modifier.heightIn(min = 48.dp)
             .then(if (tag.isNotEmpty()) Modifier.testTag(tag) else Modifier),
         enabled = enabled,
-        shape = RoundedCornerShape(14.dp),
+        shape = MediaTokens.pill,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.onBackground,
+                contentColor = MaterialTheme.colorScheme.background,
+            ),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
     ) {
         Text(label)
@@ -566,7 +588,10 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
         )
     if (vertical)
         NavigationRail(
-            Modifier.fillMaxHeight().width(88.dp).testTag("navigation-rail"),
+            Modifier.fillMaxHeight()
+                .width(if (LocalDensity.current.fontScale > 1.4f) 128.dp else 88.dp)
+                .verticalScroll(rememberScrollState())
+                .testTag("navigation-rail"),
             containerColor = MaterialTheme.colorScheme.background,
         ) {
             Spacer(Modifier.height(12.dp))
@@ -574,15 +599,27 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
                 NavigationRailItem(
                     tab == index,
                     { choose(index) },
-                    icon = { MediaIcon(icon) },
-                    label = { Text(title, maxLines = 1) },
+                    icon = { MediaIcon(icon, filled = tab == index) },
+                    label = {
+                        Text(
+                            title,
+                            fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    colors =
+                        NavigationRailItemDefaults.colors(
+                            indicatorColor = MediaTokens.transparent,
+                            selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                            selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                        ),
                     modifier = Modifier.padding(vertical = 8.dp).testTag("tab-$index"),
                 )
             }
         }
     else
         NavigationBar(
-            Modifier.testTag("bottom-navigation"),
+            Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.4f) 128.dp else 80.dp)
+                .testTag("bottom-navigation"),
             containerColor = MaterialTheme.colorScheme.background,
             tonalElevation = 0.dp,
             windowInsets = WindowInsets(0, 0, 0, 0),
@@ -591,14 +628,26 @@ private fun AppNavigation(tab: Int, choose: (Int) -> Unit, vertical: Boolean = f
                 NavigationBarItem(
                     tab == index,
                     { choose(index) },
-                    icon = { MediaIcon(icon) },
-                    label = { Text(title, maxLines = 1) },
+                    icon = { MediaIcon(icon, filled = tab == index) },
+                    label = {
+                        Text(
+                            title,
+                            fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    colors =
+                        NavigationBarItemDefaults.colors(
+                            indicatorColor = MediaTokens.transparent,
+                            selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                            selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                        ),
                     modifier = Modifier.testTag("tab-$index"),
                 )
             }
         }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun Panel(
     title: String,
@@ -606,29 +655,18 @@ internal fun Panel(
     full: Boolean = false,
     scroll: Boolean = true,
     swipeToClose: Boolean = true,
+    page: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // A player is a screen in the activity, not a second Android window.
-    // Keeping its video view in that window avoids decoder/surface handoffs
-    // through a dialog while the same activity continues to own playback.
     @Composable
-    fun Body() {
-        Surface(
-            Modifier.widthIn(max = if (full) 1600.dp else 680.dp)
-                .fillMaxWidth(if (full) 1f else 0.96f)
-                .fillMaxHeight(if (full) 1f else 0.94f)
-                .safeDrawingPadding()
-                .imePadding()
-                .semantics { if (full) paneTitle = title },
-            shape = RoundedCornerShape(if (full) 0.dp else 28.dp),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            Column(Modifier.padding(if (full) 16.dp else 24.dp)) {
-                Row(
-                    Modifier.fillMaxWidth().testTag("panel-header").pointerInput(
-                        full,
-                        swipeToClose,
-                    ) {
+    fun Body(modifier: Modifier = Modifier) {
+        Column(modifier) {
+            Row(
+                Modifier.fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .padding(horizontal = 8.dp)
+                    .testTag("panel-header")
+                    .pointerInput(full, swipeToClose) {
                         if (full && swipeToClose) {
                             var distance = 0f
                             detectVerticalDragGestures(
@@ -641,38 +679,87 @@ internal fun Panel(
                             )
                         }
                     },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        title,
-                        Modifier.weight(1f),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (full || page)
                     MediaIconButton(
-                        if (full) Glyph.Down else Glyph.Close,
+                        if (full) Glyph.Down else Glyph.Back,
                         if (full) "Minimize player" else "Close",
                         "panel-close",
                         action = close,
                     )
-                }
-                Spacer(Modifier.height(16.dp))
+                Text(
+                    title,
+                    Modifier.weight(1f).padding(horizontal = 8.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium,
+                )
+                if (!full && !page)
+                    MediaIconButton(Glyph.Close, "Close", "panel-close", action = close)
+            }
+            Column(
+                Modifier.weight(1f, fill = full || page)
+                    .fillMaxWidth()
+                    .then(if (scroll) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .padding(
+                        horizontal = if (full) 0.dp else MediaTokens.textInset,
+                        vertical = 8.dp,
+                    ),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        if (full || page) 16.dp else if (title.isBlank()) 0.dp else 8.dp
+                    ),
+                content = content,
+            )
+        }
+    }
+    if (full || page) {
+        // Keep native video in the activity window; no new dialog surface/decoder handoff.
+        Surface(
+            Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics {
+                paneTitle = title
+            },
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            Body(Modifier.fillMaxSize())
+        }
+    } else if (title == "About ytui") {
+        AlertDialog(
+            onDismissRequest = close,
+            shape = MediaTokens.dialog,
+            title = { Text(title, Modifier.testTag("panel-header"), fontWeight = FontWeight.Bold) },
+            text = {
                 Column(
-                    Modifier.weight(1f)
-                        .fillMaxWidth()
-                        .then(
-                            if (scroll) Modifier.verticalScroll(rememberScrollState()) else Modifier
-                        ),
+                    Modifier.heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.65f)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     content = content,
                 )
-            }
-        }
-    }
-    if (full) {
-        Body()
+            },
+            confirmButton = {
+                TextButton(
+                    close,
+                    Modifier.heightIn(min = 48.dp).testTag("panel-close").semantics {
+                        contentDescription = "Close"
+                    },
+                ) {
+                    Text("CLOSE")
+                }
+            },
+        )
     } else {
-        Dialog(close, DialogProperties(usePlatformDefaultWidth = false)) { Body() }
+        ModalBottomSheet(
+            onDismissRequest = close,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            shape = MediaTokens.sheet,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            Body(
+                Modifier.fillMaxWidth()
+                    .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.9f)
+                    .imePadding()
+            )
+        }
     }
 }
 
@@ -682,6 +769,10 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
     val shared by vm.sharedQuery.collectAsState()
     val mobile by vm.mobile.collectAsState()
     val reduced = LocalReducedMotion.current
+    val wideSearch =
+        tab == 1 &&
+            LocalConfiguration.current.screenWidthDp >= 840 &&
+            (feed.request as? JSONObject)?.has("Search") == true
     val entry = remember { Animatable(1f) }
     LaunchedEffect(tab, feed.request, reduced) {
         if (reduced) entry.snapTo(1f)
@@ -720,6 +811,9 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
         }
     var query by rememberSaveable(tab) { mutableStateOf("") }
     val keyboard = LocalSoftwareKeyboardController.current
+    var searchActive by remember { mutableStateOf(false) }
+    val focus = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     val grid = rememberLazyGridState(initialFirstVisibleItemIndex = feed.scrollIndex)
     LaunchedEffect(grid) {
         snapshotFlow { grid.firstVisibleItemIndex }
@@ -765,88 +859,107 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
             }
     }
     Column(
-        Modifier.fillMaxSize().testTag("browse-pane").padding(horizontal = 20.dp),
+        Modifier.fillMaxSize().testTag("browse-pane"),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    feed.title,
-                    Modifier.testTag("feed-heading"),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            TextButton(onFeeds, Modifier.heightIn(min = 48.dp).testTag("feeds-button")) {
-                MediaIcon(if (tab == 3) Glyph.Radio else Glyph.Queue, Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Browse")
-            }
-        }
-        if (tab in 1..2)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(
-                    listOf("For you" to "Home", "My playlists" to "Playlists", "Liked" to "Liked")
-                ) { (label, request) ->
-                    MediaChip(
-                        label,
-                        selected = feed.request == request,
-                        modifier = Modifier.testTag("source-$request"),
-                    ) {
-                        vm.navigate(tab, request)
-                    }
-                }
-            }
-        TextField(
-            query,
-            { query = it },
-            // A single-line input should not stretch across a wide canvas;
-            // cap it and center it when the pane is wider than the cap.
+        Row(
             Modifier.align(Alignment.CenterHorizontally)
+                .padding(horizontal = MediaTokens.textInset)
                 .widthIn(max = 720.dp)
-                .fillMaxWidth()
-                .testTag("search-field"),
-            placeholder = {
-                Text(if (tab == 3) "Search stations or genres" else "Search or paste a link")
-            },
-            leadingIcon = { MediaIcon(Glyph.Search) },
-            trailingIcon = {
-                MediaIconButton(Glyph.ArrowRight, "Search", "search-button") {
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (searchActive)
+                MediaIconButton(Glyph.Back, "Leave search") {
                     keyboard?.hide()
-                    vm.search(query)
+                    focusManager.clearFocus()
+                    searchActive = false
                 }
-            },
-            shape = RoundedCornerShape(28.dp),
-            singleLine = true,
-            colors =
-                TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions =
-                KeyboardActions(
-                    onSearch = {
-                        keyboard?.hide()
-                        vm.search(query)
+            TextField(
+                query,
+                { query = it },
+                // A single-line input should not stretch across a wide canvas;
+                // cap it and center it when the pane is wider than the cap.
+                Modifier.weight(1f)
+                    .focusRequester(focus)
+                    .onFocusChanged { searchActive = it.isFocused }
+                    .testTag("search-field"),
+                placeholder = {
+                    Text(
+                        if (tab == 3) "Search stations or genres" else "Search or paste a link",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                leadingIcon = { MediaIcon(Glyph.Search) },
+                trailingIcon = {
+                    Row {
+                        if (searchActive && query.isNotEmpty())
+                            MediaIconButton(Glyph.Close, "Clear search") { query = "" }
+                        MediaIconButton(Glyph.ArrowRight, "Search", "search-button") {
+                            keyboard?.hide()
+                            vm.search(query)
+                        }
                     }
-                ),
-        )
+                },
+                shape = MediaTokens.pill,
+                singleLine = true,
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions =
+                    KeyboardActions(
+                        onSearch = {
+                            keyboard?.hide()
+                            vm.search(query)
+                        }
+                    ),
+            )
+        }
         ActionError(vm)
-        if (feed.categories.isNotEmpty())
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (tab in 1..2 || feed.categories.isNotEmpty())
+            LazyRow(
+                Modifier.fillMaxWidth().testTag("feed-filters"),
+                contentPadding = PaddingValues(horizontal = MediaTokens.textInset),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (tab in 1..2)
+                    items(
+                        listOf(
+                            "For you" to "Home",
+                            "My playlists" to "Playlists",
+                            "Liked" to "Liked",
+                        )
+                    ) { (label, request) ->
+                        MediaChip(
+                            label,
+                            selected = feed.request == request,
+                            modifier = Modifier.testTag("source-$request"),
+                        ) {
+                            vm.navigate(tab, request)
+                        }
+                    }
                 items(feed.categories) { category ->
-                    MediaChip(category.optString("title")) {
+                    MediaChip(
+                        category.optString("title"),
+                        modifier = Modifier.testTag("category-${category.optString("title")}"),
+                        selected =
+                            feed.request !in listOf("Home", "Playlists", "Liked") &&
+                                category.opt("request")?.toString() == feed.request.toString(),
+                    ) {
                         vm.navigate(request = category.get("request"))
                     }
                 }
             }
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(if (tab in 2..3) 164.dp else 280.dp),
+            columns =
+                if (tab == 2 && LocalConfiguration.current.screenWidthDp < 600) GridCells.Fixed(2)
+                else GridCells.Adaptive(if (tab in 2..3) 164.dp else 280.dp),
             modifier =
                 Modifier.weight(1f)
                     .fillMaxWidth()
@@ -857,8 +970,13 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                     }
                     .testTag("feed-list"),
             state = grid,
-            contentPadding = PaddingValues(bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding =
+                PaddingValues(
+                    start = if (tab in 2..3) 16.dp else 0.dp,
+                    end = if (tab in 2..3) 16.dp else 0.dp,
+                    bottom = 24.dp,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             if (feed.request != "Home" && feed.request != "Cliamp")
@@ -919,8 +1037,13 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
                         }
                     }
                 }
-            items(feed.cards, key = { it.key }, contentType = { "media-card" }) { media ->
-                MediaRow(vm, media, tab)
+            items(
+                feed.cards,
+                key = { it.key },
+                span = { GridItemSpan(if (wideSearch) maxLineSpan else 1) },
+                contentType = { "media-card" },
+            ) { media ->
+                if (wideSearch) WideMediaRow(vm, media) else MediaRow(vm, media, tab)
             }
             if (feed.loading)
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -956,11 +1079,14 @@ private fun BrowsePane(vm: YtuiViewModel, tab: Int, onAccount: () -> Unit, onFee
 }
 
 @Composable
-internal fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = true) {
+internal fun Artwork(
+    media: MediaCard,
+    modifier: Modifier,
+    enabled: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = MediaTokens.small,
+) {
     BoxWithConstraints(
-        modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+        modifier.clip(shape).background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         val pixels = with(LocalDensity.current) { maxWidth.roundToPx().coerceIn(32, 768) }
         val source =
@@ -1009,18 +1135,20 @@ internal fun Artwork(media: MediaCard, modifier: Modifier, enabled: Boolean = tr
 private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
     val config by vm.config.collectAsState()
     val mobile by vm.mobile.collectAsState()
-    var menu by remember(media.key) { mutableStateOf(false) }
     val square = tab in 2..3 || media.kind in setOf("album", "song", "station")
     Column(Modifier.fillMaxWidth().testTag("media-card-${media.key}")) {
         Box(
             Modifier.fillMaxWidth()
                 .aspectRatio(if (square) 1f else 16f / 9f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(if (square) MediaTokens.small else RoundedCornerShape(0.dp))
         ) {
             Artwork(
                 media,
-                Modifier.fillMaxSize().clickable { vm.play(media) },
+                Modifier.fillMaxSize()
+                    .clickable { vm.play(media) }
+                    .semantics { contentDescription = "Play ${media.title}" },
                 config.optBoolean("thumbnails", true),
+                shape = if (square) MediaTokens.small else RoundedCornerShape(0.dp),
             )
             if (
                 media.live ||
@@ -1030,30 +1158,39 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
             )
                 Surface(
                     Modifier.align(if (media.live) Alignment.TopStart else Alignment.BottomEnd)
-                        .padding(10.dp),
-                    color = Color.Black.copy(alpha = 0.8f),
-                    shape = RoundedCornerShape(6.dp),
+                        .padding(4.dp),
+                    color = MediaTokens.videoScrim,
+                    shape = MediaTokens.small,
                 ) {
                     Text(
                         if (media.live) "LIVE" else time(media.value.optLong("duration").toFloat()),
-                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = Color.White,
+                        Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        color = MediaTokens.videoInk,
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
-            if (square)
-                FilledIconButton(
-                    { vm.play(media) },
-                    Modifier.align(Alignment.BottomEnd).padding(12.dp).size(48.dp).semantics {
-                        contentDescription = "Play ${media.title}"
-                    },
-                ) {
-                    MediaIcon(Glyph.Play)
-                }
         }
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.Top) {
+        Row(
+            Modifier.fillMaxWidth()
+                .padding(
+                    start = if (square) 0.dp else 16.dp,
+                    end = if (square) 0.dp else 4.dp,
+                    top = 8.dp,
+                ),
+            verticalAlignment = Alignment.Top,
+        ) {
+            if (!square) {
+                ChannelAvatar(
+                    if (mobile.optBoolean("show_channel", true)) media.creator else "",
+                    36.dp,
+                )
+                Spacer(Modifier.width(12.dp))
+            }
             Column(
-                Modifier.weight(1f).clickable { vm.play(media) }.padding(top = 3.dp),
+                Modifier.weight(1f)
+                    .heightIn(min = 48.dp)
+                    .clickable { vm.play(media) }
+                    .padding(top = 3.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
@@ -1063,18 +1200,32 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (mobile.optBoolean("show_channel", true))
+                val metadata =
+                    listOfNotNull(
+                            if (mobile.optBoolean("show_channel", true))
+                                media.creator.ifBlank {
+                                    if (media.collection)
+                                        media.kind.replaceFirstChar(Char::titlecase)
+                                    else if (tab == 3) "Radio station" else "YouTube"
+                                }
+                            else null,
+                            if (tab == 1) mediaInformation(media.value, mobile).ifBlank { null }
+                            else null,
+                        )
+                        .joinToString(" · ")
+                if (metadata.isNotBlank())
                     Text(
-                        media.creator.ifBlank {
-                            if (media.collection) media.kind.replaceFirstChar(Char::titlecase)
-                            else if (tab == 3) "Radio station" else "YouTube"
-                        },
+                        metadata,
+                        Modifier.then(
+                            if (tab == 1 && mediaInformation(media.value, mobile).isNotBlank())
+                                Modifier.testTag("video-information")
+                            else Modifier
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                if (tab == 1) MediaInformation(media.value, mobile)
                 media.value
                     .optString("section")
                     .takeIf { it.isNotBlank() && mobile.optBoolean("show_section") }
@@ -1082,67 +1233,141 @@ private fun MediaRow(vm: YtuiViewModel, media: MediaCard, tab: Int) {
                         Text(
                             it,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
             }
-            Box {
-                MediaIconButton(
-                    Glyph.More,
-                    "More options for ${media.title}",
-                    "media-menu-${media.key}",
-                ) {
-                    menu = true
-                }
-                DropdownMenu(menu, { menu = false }) {
-                    fun execute(action: () -> Unit) {
-                        menu = false
-                        action()
-                    }
-                    DropdownMenuItem(
-                        text = { Text(if (media.collection) "Open collection" else "Play now") },
-                        leadingIcon = { MediaIcon(Glyph.Play) },
-                        onClick = { execute { vm.play(media) } },
-                    )
-                    if (media.collection)
-                        DropdownMenuItem(
-                            text = { Text("Play all") },
-                            leadingIcon = { MediaIcon(Glyph.Queue) },
-                            onClick = { execute { vm.playCollection(media) } },
-                        )
-                    if (!media.collection && !media.live)
-                        DropdownMenuItem(
-                            text = { Text("Preview") },
-                            leadingIcon = { MediaIcon(Glyph.Preview) },
-                            onClick = { execute { vm.play(media, preview = true) } },
-                        )
-                    DropdownMenuItem(
-                        text = { Text("Add to queue") },
-                        leadingIcon = { MediaIcon(Glyph.Queue) },
-                        onClick = { execute { vm.enqueue(media) } },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Save to library") },
-                        leadingIcon = { MediaIcon(Glyph.Save) },
-                        onClick = { execute { vm.save(media) } },
-                    )
-                    if (!media.live)
-                        DropdownMenuItem(
-                            text = { Text("Download") },
-                            leadingIcon = { MediaIcon(Glyph.Download) },
-                            onClick = { execute { vm.play(media, download = true) } },
-                        )
-                    if (media.value.optString("tracks_url").let { it.isNotBlank() && it != "null" })
-                        DropdownMenuItem(
-                            text = { Text("Browse tracks") },
-                            leadingIcon = { MediaIcon(Glyph.Music) },
-                            onClick = { execute { vm.tracks(media) } },
-                        )
-                }
-            }
+            MediaCardActions(vm, media, square)
         }
+    }
+}
+
+@Composable
+private fun MediaCardActions(vm: YtuiViewModel, media: MediaCard, square: Boolean = false) {
+    val config by vm.config.collectAsState()
+    var menu by remember(media.key) { mutableStateOf(false) }
+    Box {
+        MediaIconButton(Glyph.More, "More options for ${media.title}", "media-menu-${media.key}") {
+            menu = true
+        }
+        if (menu)
+            Panel("", { menu = false }) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Artwork(
+                        media,
+                        Modifier.width(88.dp).aspectRatio(if (square) 1f else 16f / 9f),
+                        config.optBoolean("thumbnails", true),
+                    )
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            media.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            media.creator,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                fun execute(action: () -> Unit) {
+                    menu = false
+                    action()
+                }
+                SheetAction(
+                    text = { Text(if (media.collection) "Open collection" else "Play now") },
+                    leadingIcon = { MediaIcon(Glyph.Play) },
+                    onClick = { execute { vm.play(media) } },
+                )
+                if (media.collection)
+                    SheetAction(
+                        text = { Text("Play all") },
+                        leadingIcon = { MediaIcon(Glyph.Queue) },
+                        onClick = { execute { vm.playCollection(media) } },
+                    )
+                if (!media.collection && !media.live)
+                    SheetAction(
+                        text = { Text("Preview") },
+                        leadingIcon = { MediaIcon(Glyph.Preview) },
+                        onClick = { execute { vm.play(media, preview = true) } },
+                    )
+                SheetAction(
+                    text = { Text("Add to queue") },
+                    leadingIcon = { MediaIcon(Glyph.Queue) },
+                    onClick = { execute { vm.enqueue(media) } },
+                )
+                SheetAction(
+                    text = { Text("Save to library") },
+                    leadingIcon = { MediaIcon(Glyph.Save) },
+                    onClick = { execute { vm.save(media) } },
+                )
+                if (!media.live)
+                    SheetAction(
+                        text = { Text("Download") },
+                        leadingIcon = { MediaIcon(Glyph.Download) },
+                        onClick = { execute { vm.play(media, download = true) } },
+                    )
+                if (media.value.optString("tracks_url").let { it.isNotBlank() && it != "null" })
+                    SheetAction(
+                        text = { Text("Browse tracks") },
+                        leadingIcon = { MediaIcon(Glyph.Music) },
+                        onClick = { execute { vm.tracks(media) } },
+                    )
+            }
+    }
+}
+
+@Composable
+private fun WideMediaRow(vm: YtuiViewModel, media: MediaCard) {
+    val config by vm.config.collectAsState()
+    val mobile by vm.mobile.collectAsState()
+    Row(
+        Modifier.fillMaxWidth()
+            .testTag("media-card-${media.key}")
+            .padding(horizontal = MediaTokens.textInset),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Artwork(
+            media,
+            Modifier.fillMaxWidth(0.25f).aspectRatio(16f / 9f).clickable { vm.play(media) },
+            config.optBoolean("thumbnails", true),
+        )
+        Column(
+            Modifier.weight(1f).clickable { vm.play(media) },
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                media.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            MediaInformation(media.value, mobile)
+            if (mobile.optBoolean("show_channel", true))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ChannelAvatar(media.creator, 24.dp)
+                    Text(
+                        media.creator,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+        }
+        MediaCardActions(vm, media)
     }
 }
 
@@ -1157,7 +1382,7 @@ private fun PlayerDock(vm: YtuiViewModel) {
             Modifier.fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp)
                 .testTag("mini-player"),
-        shape = RoundedCornerShape(20.dp),
+        shape = MediaTokens.pill,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 2.dp,
     ) {
@@ -1297,7 +1522,7 @@ private fun PlayerPane(
             if (player.duration > 0 && player.media?.optBoolean("live") != true) {
                 var seek by
                     remember(player.media?.optString("url")) { mutableStateOf<Float?>(null) }
-                Slider(
+                MediaSeekSlider(
                     (seek ?: player.position).coerceIn(0f, player.duration),
                     { seek = it },
                     valueRange = 0f..player.duration,
@@ -1370,13 +1595,18 @@ private fun PlayerPane(
                     { vm.command("back") },
                     Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
                 ) {
-                    Text("−10", fontWeight = FontWeight.SemiBold)
+                    Text("−${mobile.optInt("seek_seconds", 10)}", fontWeight = FontWeight.SemiBold)
                 }
                 FilledIconButton(
                     { vm.command("pause") },
                     Modifier.size(72.dp).testTag("player-pause").semantics {
                         contentDescription = if (player.playing) "Pause" else "Play"
                     },
+                    colors =
+                        IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.onBackground,
+                            contentColor = MaterialTheme.colorScheme.background,
+                        ),
                 ) {
                     MediaIcon(if (player.playing) Glyph.Pause else Glyph.Play, Modifier.size(32.dp))
                 }
@@ -1384,7 +1614,7 @@ private fun PlayerPane(
                     { vm.command("forward") },
                     Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
                 ) {
-                    Text("+10", fontWeight = FontWeight.SemiBold)
+                    Text("+${mobile.optInt("seek_seconds", 10)}", fontWeight = FontWeight.SemiBold)
                 }
                 MediaIconButton(Glyph.Next, "Next track") { vm.command("next") }
             }
@@ -1425,16 +1655,17 @@ private fun PlayerPane(
                             Action("${player.value.optDouble("speed", 1.0)}× speed") {
                                 speedMenu = true
                             }
-                            DropdownMenu(speedMenu, { speedMenu = false }) {
-                                for (speed in
-                                    listOf(0.5, 0.75, 1.0, 1.25, 1.5, 2.0)) DropdownMenuItem(
-                                    text = { Text("$speed×") },
-                                    onClick = {
-                                        speedMenu = false
-                                        vm.command("speed", "value" to speed)
-                                    },
-                                )
-                            }
+                            if (speedMenu)
+                                Panel("Playback speed", { speedMenu = false }) {
+                                    for (speed in
+                                        listOf(0.5, 0.75, 1.0, 1.25, 1.5, 2.0)) SheetAction(
+                                        text = { Text("$speed×") },
+                                        onClick = {
+                                            speedMenu = false
+                                            vm.command("speed", "value" to speed)
+                                        },
+                                    )
+                                }
                         }
                         Action("Audio & subtitles") { tracks = !tracks }
                     }
@@ -1503,7 +1734,7 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
     val media = player.media?.let(::MediaCard) ?: return
-    val cornerRadius = 24.dp
+    val cornerRadius = if (style == "classic") 0.dp else 4.dp
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
@@ -1517,6 +1748,7 @@ internal fun Visualizer(player: PlayerState, config: JSONObject, modifier: Modif
                 media,
                 Modifier.fillMaxSize().align(Alignment.Center),
                 config.optBoolean("thumbnails", true),
+                shape = RoundedCornerShape(0.dp),
             )
         else if (style.startsWith("vinyl")) {
             Canvas(Modifier.fillMaxSize()) {
@@ -1630,12 +1862,19 @@ private fun SettingsPanel(
     val mobile by vm.mobile.collectAsState()
     val config by vm.config.collectAsState()
     val themes by vm.themes.collectAsState()
+    val appliedPalette by vm.palette.collectAsState()
+    val selectedTheme =
+        when (val selected = config.optString("theme", "system")) {
+            "system",
+            "custom" -> selected
+            else -> appliedPalette.optString("name").ifBlank { selected }
+        }
     var themeMenu by remember { mutableStateOf(false) }
     var proxy by
         remember(config.optString("proxy")) {
             mutableStateOf(config.optString("proxy").takeUnless { it == "null" } ?: "")
         }
-    Panel(category.ifBlank { "Settings" }, close) {
+    Panel(category.ifBlank { "Settings" }, close, page = true) {
         BackHandler(category.isNotBlank()) { category = "" }
         if (category.isBlank()) {
             for ((label, icon) in
@@ -1653,14 +1892,14 @@ private fun SettingsPanel(
                     onClick = { if (label == "Account") onAccount() else category = label },
                     modifier = Modifier.fillMaxWidth().testTag("settings-$label"),
                     shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = MediaTokens.transparent,
                 ) {
                     Row(
-                        Modifier.padding(16.dp),
+                        Modifier.heightIn(min = 64.dp).padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        MediaIcon(icon, tint = MaterialTheme.colorScheme.primary)
+                        MediaIcon(icon, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(
                             label,
                             Modifier.weight(1f),
@@ -1672,7 +1911,14 @@ private fun SettingsPanel(
             }
             Text(BuildConfig.VERSION_NAME, style = MaterialTheme.typography.labelSmall)
         } else
-            TextButton({ category = "" }, Modifier.testTag("settings-back")) {
+            TextButton(
+                { category = "" },
+                Modifier.heightIn(min = 48.dp).testTag("settings-back"),
+                colors =
+                    ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+            ) {
                 MediaIcon(Glyph.Back)
                 Spacer(Modifier.width(8.dp))
                 Text("All settings")
@@ -1683,7 +1929,7 @@ private fun SettingsPanel(
                     Surface(
                         onClick = { themeMenu = true },
                         shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        color = MediaTokens.transparent,
                         modifier = Modifier.fillMaxWidth().testTag("theme-selector"),
                     ) {
                         Row(
@@ -1691,7 +1937,10 @@ private fun SettingsPanel(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            MediaIcon(Glyph.Palette, tint = MaterialTheme.colorScheme.primary)
+                            MediaIcon(
+                                Glyph.Palette,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     "Theme: ${config.optString("theme", "system")}",
@@ -1706,27 +1955,45 @@ private fun SettingsPanel(
                             MediaIcon(Glyph.Down)
                         }
                     }
-                    DropdownMenu(themeMenu, { themeMenu = false }) {
-                        themes.forEach { name ->
-                            DropdownMenuItem(
-                                text = { Text(name.replaceFirstChar(Char::titlecase)) },
-                                modifier = Modifier.testTag("theme-$name"),
-                                onClick = {
-                                    themeMenu = false
-                                    vm.updateConfig(dark) { it.put("theme", name) }
-                                },
-                            )
-                        }
-                    }
+                    if (themeMenu)
+                        AlertDialog(
+                            onDismissRequest = { themeMenu = false },
+                            shape = MediaTokens.dialog,
+                            title = { Text("Theme", fontWeight = FontWeight.Bold) },
+                            text = {
+                                Column(Modifier.verticalScroll(rememberScrollState())) {
+                                    themes.forEach { name ->
+                                        Row(
+                                            Modifier.fillMaxWidth()
+                                                .heightIn(min = 56.dp)
+                                                .testTag("theme-$name")
+                                                .selectable(
+                                                    selected = selectedTheme == name,
+                                                    role = Role.RadioButton,
+                                                ) {
+                                                    themeMenu = false
+                                                    vm.updateConfig(dark) { it.put("theme", name) }
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            RadioButton(selectedTheme == name, null)
+                                            Text(
+                                                name.replaceFirstChar(Char::titlecase),
+                                                Modifier.padding(start = 12.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {},
+                            dismissButton = { TextButton({ themeMenu = false }) { Text("CANCEL") } },
+                        )
                 }
-                TextButton(
-                    { vm.effect("pick", "kind" to "theme") },
-                    Modifier.heightIn(min = 48.dp),
-                ) {
-                    MediaIcon(Glyph.Palette)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Import a palette")
-                }
+                SheetAction(
+                    text = { Text("Import a palette") },
+                    leadingIcon = { MediaIcon(Glyph.Palette) },
+                    onClick = { vm.effect("pick", "kind" to "theme") },
+                )
                 SettingToggle(
                     "Thumbnails",
                     config.optBoolean("thumbnails", true),
@@ -2003,29 +2270,34 @@ private fun Choice(title: String, value: String, values: List<String>, changed: 
                             .replace("-fullscreen", " · Full screen")
                             .replaceFirstChar(Char::titlecase),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 MediaIcon(Glyph.Down)
             }
         }
-        DropdownMenu(open, { open = false }) {
-            values.forEach { item ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            item
-                                .replace("-fullscreen", " · Full screen")
-                                .replaceFirstChar(Char::titlecase)
-                        )
-                    },
-                    onClick = {
-                        open = false
-                        changed(item)
-                    },
-                )
+        if (open)
+            Panel(title, { open = false }) {
+                values.forEach { item ->
+                    SheetAction(
+                        text = {
+                            Text(
+                                item
+                                    .replace("-fullscreen", " · Full screen")
+                                    .replaceFirstChar(Char::titlecase)
+                            )
+                        },
+                        leadingIcon = {
+                            if (item == value) MediaIcon(Glyph.Check)
+                            else Spacer(Modifier.size(24.dp))
+                        },
+                        onClick = {
+                            open = false
+                            changed(item)
+                        },
+                    )
+                }
             }
-        }
     }
 }
 
@@ -2035,19 +2307,17 @@ private fun AccountPanel(vm: YtuiViewModel, close: () -> Unit) {
     var header by remember { mutableStateOf("") }
     val status by vm.status.collectAsState()
     Panel("Your account", close) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.primaryContainer,
-        ) {
-            Column(
-                Modifier.fillMaxWidth().padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                MediaIcon(Glyph.Account, Modifier.size(40.dp), MaterialTheme.colorScheme.primary)
+        Surface(shape = RoundedCornerShape(24.dp), color = MediaTokens.transparent) {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                MediaIcon(
+                    Glyph.Account,
+                    Modifier.size(40.dp),
+                    MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Text(
                     if (account.optBoolean("connected")) "You're connected"
                     else "A feed that feels like you",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
@@ -2058,6 +2328,12 @@ private fun AccountPanel(vm: YtuiViewModel, close: () -> Unit) {
                 Button(
                     { vm.effect("login") },
                     Modifier.heightIn(min = 48.dp).testTag("account-sign-in"),
+                    shape = MediaTokens.pill,
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onBackground,
+                            contentColor = MaterialTheme.colorScheme.background,
+                        ),
                 ) {
                     Text("Sign in to YouTube")
                 }
@@ -2072,15 +2348,19 @@ private fun AccountPanel(vm: YtuiViewModel, close: () -> Unit) {
             "Import a session",
             "Android cannot read another browser's private data. Import only a session you own.",
         ) {
-            Action("Choose cookie file", "account-import") {
-                vm.effect("pick", "kind" to "cookies")
+            OutlinedButton(
+                onClick = { vm.effect("pick", "kind" to "cookies") },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("account-import"),
+                shape = MediaTokens.pill,
+            ) {
+                Text("Choose cookie file")
             }
             Text(
                 "Netscape cookie format",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            OutlinedTextField(
+            TextField(
                 header,
                 { header = it },
                 Modifier.fillMaxWidth().testTag("cookie-header-field"),
@@ -2088,7 +2368,12 @@ private fun AccountPanel(vm: YtuiViewModel, close: () -> Unit) {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 minLines = 2,
-                shape = RoundedCornerShape(14.dp),
+                shape = MediaTokens.pill,
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedIndicatorColor = MediaTokens.transparent,
+                        unfocusedIndicatorColor = MediaTokens.transparent,
+                    ),
             )
             Action("Import header", enabled = header.isNotBlank()) {
                 vm.changeAccount("import_cookies", "header" to header)

@@ -80,7 +80,7 @@ class NativeUiTest {
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input")
         compose.onNodeWithTag("search-field").performTextInput(" Grüße")
         compose.onNodeWithTag("search-field").assertTextContains("tablet-input Grüße")
-        MediaRuntimeTest.capture("native-search.png")
+        captureSettled("native-search.png")
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
         compose.onNodeWithTag("search-field").assertIsDisplayed()
         compose.onNodeWithTag("settings-button").performClick()
@@ -118,11 +118,12 @@ class NativeUiTest {
             val palette =
                 JSONObject(NativeBridge.request(json("op" to "theme", "dark" to dark).toString()))
                     .getJSONObject("data")
-            val expected = palette.getJSONArray("background")
+            val expectedColor =
+                palette.color("background", androidx.compose.ui.graphics.Color.Black)
             val actual = compose.onNodeWithTag("app-background").captureToImage().toPixelMap()[0, 0]
-            Assert.assertEquals(expected.getInt(0) / 255f, actual.red, 0.03f)
-            Assert.assertEquals(expected.getInt(1) / 255f, actual.green, 0.03f)
-            Assert.assertEquals(expected.getInt(2) / 255f, actual.blue, 0.03f)
+            Assert.assertEquals(expectedColor.red, actual.red, 0.03f)
+            Assert.assertEquals(expectedColor.green, actual.green, 0.03f)
+            Assert.assertEquals(expectedColor.blue, actual.blue, 0.03f)
             val layouts = mutableListOf<TextLayoutResult>()
             compose.onNodeWithTag("feed-heading").performSemanticsAction(
                 SemanticsActions.GetTextLayoutResult
@@ -131,15 +132,61 @@ class NativeUiTest {
             }
             Assert.assertTrue("The feed heading should expose a text layout", layouts.isNotEmpty())
             val textColor = layouts.single().layoutInput.style.color
-            val ink = palette.getJSONArray("text")
-            Assert.assertEquals(ink.getInt(0) / 255f, textColor.red, 0.03f)
-            Assert.assertEquals(ink.getInt(1) / 255f, textColor.green, 0.03f)
-            Assert.assertEquals(ink.getInt(2) / 255f, textColor.blue, 0.03f)
+            val ink = palette.color("text", androidx.compose.ui.graphics.Color.White)
+            Assert.assertEquals(ink.red, textColor.red, 0.03f)
+            Assert.assertEquals(ink.green, textColor.green, 0.03f)
+            Assert.assertEquals(ink.blue, textColor.blue, 0.03f)
             val saved =
                 JSONObject(NativeBridge.request(json("op" to "settings").toString()))
                     .getJSONObject("data")
             Assert.assertEquals(theme, saved.getString("theme"))
-            MediaRuntimeTest.capture("native-theme-$index.png")
+            captureSettled("native-theme-$index.png")
+        }
+    }
+
+    @Test
+    fun importedPaletteWithBuiltInNameKeepsItsOwnPaint() {
+        val file =
+            java.io.File(
+                InstrumentationRegistry.getInstrumentation().targetContext.filesDir,
+                "palette.json",
+            )
+        val previous = if (file.isFile) file.readBytes() else null
+        try {
+            val document =
+                JSONObject(NativeBridge.request(json("op" to "theme", "dark" to true).toString()))
+                    .getJSONObject("data")
+                    .put("name", "ytui-dark")
+                    .put("source", "synthetic imported palette")
+                    .put("background", org.json.JSONArray(listOf(12, 20, 50)))
+                    .put("surface", org.json.JSONArray(listOf(20, 32, 60)))
+                    .put("text", org.json.JSONArray(listOf(230, 240, 250)))
+                    .put("light", false)
+            val imported =
+                JSONObject(
+                    NativeBridge.request(
+                        json("op" to "import_theme", "text" to document.toString()).toString()
+                    )
+                )
+            Assert.assertTrue("Synthetic palette import must succeed", imported.optBoolean("ok"))
+            scenario.onActivity {
+                androidx.lifecycle.ViewModelProvider(it)[YtuiViewModel::class.java].updateConfig(
+                    false
+                ) { config ->
+                    config.put("theme", "custom")
+                }
+            }
+            compose.waitUntil(10_000) {
+                val color =
+                    compose.onNodeWithTag("app-background").captureToImage().toPixelMap()[0, 0]
+                kotlin.math.abs(color.blue - 50f / 255f) < 0.02f &&
+                    kotlin.math.abs(color.red - 12f / 255f) < 0.02f
+            }
+            captureSettled("restyle-imported-dark-name.png")
+        } finally {
+            NativeBridge.request(json("op" to "save_settings", "config" to original).toString())
+            if (previous != null) file.writeBytes(previous)
+            else if (file.isFile) Assert.assertTrue(file.delete())
         }
     }
 
@@ -159,7 +206,7 @@ class NativeUiTest {
         compose.onNodeWithText("Account needed").assertIsDisplayed()
         compose.onNodeWithTag("feed-account-action").performClick()
         compose.onNodeWithTag("account-import").assertIsDisplayed()
-        MediaRuntimeTest.capture("native-account.png")
+        captureSettled("native-account.png")
         compose
             .onNodeWithTag("cookie-header-field")
             .performScrollTo()
@@ -285,7 +332,7 @@ class NativeUiTest {
                 compose.onNodeWithTag("tab-1").performClick()
                 val pane = compose.onNodeWithTag("browse-pane").fetchSemanticsNode().boundsInRoot
                 val search = compose.onNodeWithTag("search-field").fetchSemanticsNode().boundsInRoot
-                val expected = kotlin.math.min(pane.width - 40f * density, 720f * density)
+                val expected = kotlin.math.min(pane.width - 32f * density, 720f * density)
                 Assert.assertEquals(
                     "Search must be capped on wide screens and fill narrow screens",
                     expected,
@@ -316,6 +363,10 @@ class NativeUiTest {
             compose.waitForIdle()
             for (index in listOf(0, 1, 2, 3)) {
                 compose.onNodeWithTag("tab-$index").performClick()
+                if (index == 3 || index == 0)
+                    captureSettled(
+                        if (index == 3) "restyle-radio-empty.png" else "restyle-downloads.png"
+                    )
                 compose.onNodeWithTag("settings-button").assertIsDisplayed()
                 if (index == 0) compose.onNodeWithTag("add-download").assertIsDisplayed()
                 else compose.onNodeWithTag("search-field").assertIsDisplayed()
@@ -324,12 +375,19 @@ class NativeUiTest {
                 listOf("Playback queue", "Recently played", "Lyrics", "Sleep timer", "About")) {
                 compose.onNodeWithTag("menu-button").performClick()
                 compose.onNodeWithText(label).performClick()
+                captureSettled("restyle-panel-${label.lowercase().replace(" ", "-")}.png")
                 compose.onNodeWithContentDescription("Close").assertIsDisplayed().performClick()
             }
-            MediaRuntimeTest.capture("native-tablet.png")
+            captureSettled("native-tablet.png")
         } finally {
             device.setOrientationNatural()
             device.unfreezeRotation()
         }
+    }
+
+    private fun captureSettled(filename: String) {
+        compose.waitForIdle()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(300, 3000)
+        MediaRuntimeTest.capture(filename)
     }
 }

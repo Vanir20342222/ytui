@@ -1,5 +1,19 @@
 # Android validation record (M9)
 
+## Content-first Android restyle (2026-10-30)
+
+[Scope, decisions and retained failures](CONTENT_FIRST_RESTYLE.md), implementation
+and current qualification in [PR #29](https://github.com/Vanir20342222/ytui/pull/29).
+The report separates application, test and documentation changes; current PR
+checks identify the final qualified source. Local debug/instrumentation APK build and lint pass,
+20 JVM tests and 337 workspace tests pass (31 explicit ignores). The first native
+run has 35 passes, one new asynchronous geometry-test failure and one public
+skip; the corrected test preserves its original quarter-width assertion. The
+final PR report supplies actual native results and screenshot artifact links,
+including 13 theme entries × two system modes × phone/tablet × three screens.
+App implementation `debbbd1` passes 36 native tests (one public skip), 367 Rust/media checks (31 explicit ignores), 20 JVM tests and lint. A subsequent screenshot-only follow-up waits for native window transitions and actual decoded cover pixels. All existing 2000ms media deadlines remain. These deterministic results do not
+supersede the separate Tab S9/live-service acceptance boundaries below.
+
 ## Published UI release: mobile.9 (2026-10-30)
 
 [Download and complete qualification](MOBILE9_RELEASE.md). App source

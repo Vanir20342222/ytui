@@ -55,6 +55,7 @@ impl Engine {
         std::fs::create_dir_all(root)?;
         std::fs::create_dir_all(cache)?;
         let config: Config = read_json(&root.join("config.json"))?.unwrap_or_else(|| Config {
+            theme: "ytui-dark".into(), // Owner-approved mobile default; existing config wins.
             auth_store: "file".into(),
             notifications: true,
             download: ytui_core::DownloadOptions {
@@ -1124,6 +1125,24 @@ mod format_tests {
             );
         }
     }
+    #[test]
+    fn mobile_dark_default_does_not_replace_an_explicit_saved_theme() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        assert_eq!(engine.config.lock().unwrap().theme, "ytui-dark");
+        let saved = Config {
+            theme: "catppuccin-latte".into(),
+            ..Config::default()
+        };
+        std::fs::write(
+            temp.path().join("config.json"),
+            serde_json::to_vec(&saved).unwrap(),
+        )
+        .unwrap();
+        let restored = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        assert_eq!(restored.config.lock().unwrap().theme, "catppuccin-latte");
+    }
+
     #[tokio::test]
     async fn playlist_seed_is_available_before_the_full_collection_and_commits_only_on_start() {
         let temp = tempfile::tempdir().unwrap();

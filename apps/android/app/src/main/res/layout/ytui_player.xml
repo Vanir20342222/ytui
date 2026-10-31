@@ -4,4 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:surface_type="texture_view"
+    app:controller_layout_id="@layout/ytui_controller"
+    app:play_icon="@drawable/ytui_play"
+    app:pause_icon="@drawable/ytui_pause"
     app:use_controller="false" />
