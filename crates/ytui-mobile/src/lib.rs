@@ -31,6 +31,8 @@ struct PlaybackContext {
     id: String,
     items: std::collections::VecDeque<Media>,
     prepared: bool,
+    /// Recommendations for the source video rather than a finite collection's tail.
+    related: bool,
     consumed: std::collections::HashSet<String>,
 }
 pub struct Engine {
@@ -108,6 +110,7 @@ impl Engine {
             id,
             items: Default::default(),
             prepared: false,
+            related: false,
             consumed: Default::default(),
         });
     }
@@ -410,6 +413,23 @@ impl Engine {
                 }
                 Ok(json!({}))
             }
+            "up_next" => {
+                // Read-only view of what Next/autoplay will choose: the explicit queue,
+                // then the active playback context (playlist tail or related videos).
+                let queue = self.state.lock().expect("state").queue.clone();
+                let limit = r["limit"].as_u64().unwrap_or(25).clamp(1, 100) as usize;
+                let context = self.playback_context.lock().expect("playback context");
+                let context = context.as_ref().map(|c| {
+                    json!({
+                        "id": c.id,
+                        "related": c.related,
+                        "prepared": c.prepared,
+                        "count": c.items.len(),
+                        "items": c.items.iter().take(limit).collect::<Vec<_>>(),
+                    })
+                });
+                Ok(json!({"queue":queue.iter().take(100).collect::<Vec<_>>(),"context":context}))
+            }
             "queue_commit" => {
                 if r["context_entry"].as_bool().unwrap_or(false) {
                     let mut context = self.playback_context.lock().expect("playback context");
@@ -422,7 +442,16 @@ impl Engine {
                             .iter()
                             .position(|m| Some(m.url.as_str()) == r["url"].as_str())
                         {
-                            if let Some(media) = context.items.remove(index) {
+                            // Choosing a later playlist entry skips the ones before it.
+                            let skipped = if r["skip_before"].as_bool().unwrap_or(false) {
+                                index
+                            } else {
+                                0
+                            };
+                            for media in context.items.drain(..skipped) {
+                                context.consumed.insert(media.url);
+                            }
+                            if let Some(media) = context.items.remove(index - skipped) {
                                 context.consumed.insert(media.url);
                             }
                             true
@@ -848,6 +877,7 @@ impl Engine {
                 let mut active = self.playback_context.lock().expect("playback context");
                 if let Some(context) = active.as_mut().filter(|c| c.id == id) {
                     if !context.prepared {
+                        context.related = related;
                         context.items = tail
                             .into_iter()
                             .filter(|m| !context.consumed.contains(&m.url))
@@ -1187,6 +1217,49 @@ mod format_tests {
                 .await
                 .unwrap()["prepared"],
             false
+        );
+    }
+
+    #[tokio::test]
+    async fn up_next_lists_queue_then_context_and_skips_to_a_chosen_entry() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = Engine::new(temp.path(), &temp.path().join("cache")).unwrap();
+        let empty = engine.request(json!({"op":"up_next"})).await.unwrap();
+        assert_eq!(empty["context"], Value::Null);
+        assert_eq!(empty["queue"], json!([]));
+        engine.activate_context(Some("collection".into()));
+        engine.request(json!({"op":"seed_context","context_id":"collection","source_url":"https://media.test/a","items":[
+            {"url":"https://media.test/a","kind":"video"}, {"url":"https://media.test/b","kind":"video"},
+            {"url":"https://media.test/c","kind":"video"}, {"url":"https://media.test/d","kind":"video"}]})).await.unwrap();
+        engine
+            .request(json!({"op":"enqueue","media":{"url":"https://media.test/q","kind":"video"}}))
+            .await
+            .unwrap();
+        let view = engine.request(json!({"op":"up_next"})).await.unwrap();
+        assert_eq!(view["queue"][0]["url"], "https://media.test/q");
+        assert_eq!(view["context"]["id"], "collection");
+        assert_eq!(view["context"]["related"], false);
+        assert_eq!(view["context"]["count"], 3);
+        assert_eq!(view["context"]["items"][0]["url"], "https://media.test/b");
+        let committed = engine
+            .request(
+                json!({"op":"queue_commit","context_id":"collection","context_entry":true,
+            "skip_before":true,"url":"https://media.test/c"}),
+            )
+            .await
+            .unwrap();
+        assert_eq!(committed["committed"], true);
+        let view = engine
+            .request(json!({"op":"up_next","limit":1}))
+            .await
+            .unwrap();
+        assert_eq!(view["context"]["count"], 1);
+        assert_eq!(view["context"]["items"].as_array().unwrap().len(), 1);
+        assert_eq!(view["context"]["items"][0]["url"], "https://media.test/d");
+        let context = engine.playback_context.lock().unwrap();
+        let consumed = &context.as_ref().unwrap().consumed;
+        assert!(
+            consumed.contains("https://media.test/b") && consumed.contains("https://media.test/c")
         );
     }
 

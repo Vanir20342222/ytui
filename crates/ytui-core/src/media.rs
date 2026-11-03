@@ -87,6 +87,41 @@ impl Media {
             MediaKind::Playlist | MediaKind::Album | MediaKind::Artist | MediaKind::Channel
         )
     }
+    /// Optional row details in display order: duration (or LIVE/kind), views,
+    /// upload date and likes, as enabled in `info`. Channel and section are
+    /// placed by the caller.
+    pub fn details(&self, info: &crate::CardInfo) -> Vec<String> {
+        let mut parts = Vec::new();
+        if info.duration || self.live {
+            parts.push(self.label());
+        }
+        if info.views {
+            if !self.views_text.is_empty() {
+                parts.push(self.views_text.clone());
+            } else if let Some(views) = self.view_count {
+                parts.push(format!("{} views", compact_count(views)));
+            }
+        }
+        if info.upload_date {
+            if !self.published_text.is_empty() {
+                parts.push(self.published_text.clone());
+            } else if let Some(date) = self.upload_date.as_deref() {
+                parts.push(
+                    if date.len() == 8 && date.bytes().all(|b| b.is_ascii_digit()) {
+                        format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..])
+                    } else {
+                        date.to_string()
+                    },
+                );
+            }
+        }
+        if info.likes
+            && let Some(likes) = self.like_count
+        {
+            parts.push(format!("{} likes", compact_count(likes)));
+        }
+        parts
+    }
     pub fn label(&self) -> String {
         if self.live {
             "LIVE".into()
@@ -99,6 +134,20 @@ impl Media {
         } else {
             format!("{:?}", self.kind)
         }
+    }
+}
+/// 950, 12K, 3.4M, 1.2B.
+pub fn compact_count(value: u64) -> String {
+    let (scaled, suffix) = match value {
+        0..1_000 => return value.to_string(),
+        1_000..1_000_000 => (value as f64 / 1e3, "K"),
+        1_000_000..1_000_000_000 => (value as f64 / 1e6, "M"),
+        _ => (value as f64 / 1e9, "B"),
+    };
+    if scaled < 10.0 {
+        format!("{:.1}{suffix}", (scaled * 10.0).floor() / 10.0).replace(".0", "")
+    } else {
+        format!("{}{suffix}", scaled.floor())
     }
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -297,6 +346,49 @@ impl PlaybackQueue {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn row_details_follow_card_info_and_format_counts() {
+        let media = Media {
+            duration: Some(185),
+            view_count: Some(1_234_567),
+            upload_date: Some("20261102".into()),
+            like_count: Some(950),
+            ..Default::default()
+        };
+        assert_eq!(media.details(&crate::CardInfo::default()), ["3:05"]);
+        let all = crate::CardInfo {
+            views: true,
+            upload_date: true,
+            likes: true,
+            ..Default::default()
+        };
+        assert_eq!(
+            media.details(&all),
+            ["3:05", "1.2M views", "2026-11-02", "950 likes"]
+        );
+        let texts = Media {
+            views_text: "12K views".into(),
+            published_text: "3 days ago".into(),
+            live: true,
+            ..Default::default()
+        };
+        let none = crate::CardInfo {
+            duration: false,
+            ..all
+        };
+        assert_eq!(texts.details(&none), ["LIVE", "12K views", "3 days ago"]);
+        for (value, text) in [
+            (0, "0"),
+            (999, "999"),
+            (1_000, "1K"),
+            (1_550, "1.5K"),
+            (12_345, "12K"),
+            (3_400_000, "3.4M"),
+            (2_000_000_000, "2B"),
+        ] {
+            assert_eq!(compact_count(value), text);
+        }
+    }
     #[test]
     fn url_queries_survive_mix_removal() {
         let u =

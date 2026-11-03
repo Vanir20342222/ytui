@@ -19,6 +19,8 @@ pub struct Snapshot {
     pub favorites: Vec<Media>,
     pub positions: ytui_core::playback_history::PlaybackHistory,
     pub watches: Vec<ytui_core::watch::CollectionWatch>,
+    /// Version of the first-run setup the user finished or skipped (0 = never shown).
+    pub setup_version: u32,
 }
 enum Request {
     Load(oneshot::Sender<Result<Snapshot>>),

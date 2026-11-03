@@ -23,6 +23,8 @@ public final class PlaybackService extends MediaSessionService {
   }
 
   static volatile PlaybackService current;
+  /** Matches desktop resume: positions under 5 s start from the beginning. */
+  static final long AUTO_RESUME_MIN_MS = 5000;
   ExoPlayer player;
   private volatile boolean initialized;
   private int lastStartId;
@@ -115,22 +117,14 @@ public final class PlaybackService extends MediaSessionService {
                       long joiningMs,
                       java.util.ArrayList<Renderer> renderers) {
                     if (!emulatorFixture()) {
-                      super.buildVideoRenderers(
-                          ctx,
-                          extensionMode,
-                          selector,
-                          fallback,
-                          events,
-                          listener,
-                          joiningMs,
-                          renderers);
+                      super.buildVideoRenderers(ctx, extensionMode, selector, fallback,
+                          events, listener, joiningMs, renderers);
                       return;
                     }
-                    // Goldfish can migrate zero host color-buffer IDs from a
-                    // placeholder to a TextureView even with the C2 software
-                    // codec. Its offline fixture must initialize against the
-                    // actual surface and recreate on surface changes. Physical
-                    // devices/release builds keep Media3's standard renderer.
+                    // Goldfish's software codec can hand a black placeholder buffer
+                    // to a real surface. Initialize against the early attached view,
+                    // but allow Media3 to reuse the codec across SurfaceView changes.
+                    // The old TextureView workaround forced recreation on every bind.
                     renderers.add(
                         new androidx.media3.exoplayer.video.MediaCodecVideoRenderer(
                             ctx, selector, joiningMs, fallback, events, listener, 50) {
@@ -144,11 +138,6 @@ public final class PlaybackService extends MediaSessionService {
                           protected boolean shouldUseDetachedSurface(
                               androidx.media3.exoplayer.mediacodec.MediaCodecInfo codec) {
                             return false;
-                          }
-
-                          @Override
-                          protected boolean codecNeedsSetOutputSurfaceWorkaround(String name) {
-                            return true;
                           }
                         });
                   }
@@ -846,10 +835,13 @@ public final class PlaybackService extends MediaSessionService {
               JSONObject value =
                   rpc(new JSONObject().put("op", "position").put("url", media.optString("url")));
               long ms = value.optLong("milliseconds");
-              handler.post(
-                  () -> {
-                    if (version == generation) player.seekTo(ms);
-                  });
+              // Automatic resume (desktop parity) ignores positions near the start;
+              // finished items were reset to 0 at their end.
+              if (!request.optBoolean("auto_resume") || ms >= AUTO_RESUME_MIN_MS)
+                handler.post(
+                    () -> {
+                      if (version == generation) player.seekTo(ms);
+                    });
             }
             if (request.optBoolean("offline") || request.optBoolean("local")) return;
             JSONArray marks = rpcArray(new JSONObject().put("op", "sponsor").put("media", media));
@@ -886,7 +878,8 @@ public final class PlaybackService extends MediaSessionService {
                         .put("op", "queue_commit")
                         .put("url", queuedUrl)
                         .put("context_id", contextId)
-                        .put("context_entry", started.optBoolean("context_entry")));
+                        .put("context_entry", started.optBoolean("context_entry"))
+                        .put("skip_before", started.optBoolean("context_skip")));
               rpc(
                   new JSONObject()
                       .put("op", "history_record")
@@ -974,6 +967,7 @@ public final class PlaybackService extends MediaSessionService {
 
   void contextAvailable(String id, boolean complete) {
     if (current != this || !id.equals(activeContext)) return;
+    MediaBridge.event("up_next_changed", "");
     if (complete) {
       contextReady = true;
       contextPreparing = false;
@@ -1516,8 +1510,12 @@ public final class PlaybackService extends MediaSessionService {
                     : request
                         .getJSONObject("stream")
                         .optString("resolution_route", "direct-media"));
+            boolean autoResume =
+                !audio && !media.optBoolean("live") && MobileSettings.enabled("resume_on_play");
             request
                 .put("startup_token", timing)
+                .put("resume", autoResume)
+                .put("auto_resume", autoResume)
                 .put("quality", quality)
                 .put("queued", queued)
                 .put("history_index", historyIndex)

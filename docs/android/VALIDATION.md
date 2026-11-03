@@ -1,5 +1,59 @@
 # Android validation record (M9)
 
+## Sign-in card and first-run setup (2026-11-02, M9)
+
+Added in commit `7f566e5` and these test files:
+
+- A native sign-in card (`AuthScreen.kt`, `AuthActivity.java`): a two-column account
+  card inside in-app-browser chrome, with a close button, a live address pill with
+  lock and load progress, and a "you'll come back here" strip. A detected signed-in
+  cookie name highlights "Use this session", but import still needs an explicit tap.
+  Help, Privacy and Terms open in the external browser.
+- A five-step skippable first-run setup (`Onboarding.kt`) with Skip, Back, swipe and
+  reduced-motion handling. Completion is stored in app-private preferences, and
+  Settings > Setup guide replays it. Instrumented offline launches show it only with
+  the `ytui.onboarding` extra.
+- `src/test/.../AuthUiTest.kt` (JVM, pure logic only; `AuthUi.host` is excluded because
+  it needs `android.net.Uri`) and `src/androidTest/.../OnboardingUiTest.kt`
+  (instrumentation: Skip, Next to finish, Back).
+
+Checks actually run on 2026-11-02 (`apps/android`, debug variant):
+
+- `:app:testDebugUnitTest --tests 'dev.ytui.android.AuthUiTest'`: passed, 11 tests,
+  0 failures: `missingOrEmptyCookieHeadersDoNotLookSignedIn`,
+  `unrelatedCookiesDoNotLookSignedIn`, `signedInCookieNamesAreDetectedWhereverTheyAppear`,
+  `namesThatMerelyContainASignedInNameAreNotDetected`, `onlyCookieNamesAreInspectedNotValues`,
+  `secureMeansAnHttpsAddress`, `resetRestoresTheIntroductionState`,
+  `resetCanOpenTheWebStageDirectly`, `showWebTogglesOnlyTheStage`,
+  `progressIsClampedToAPercentage`, `pageAcceptsANullAddressAsEmpty`.
+- `:app:compileDebugAndroidTestKotlin`: passed. This compiles `OnboardingUiTest`
+  but does not run it.
+
+Follow-up from code review and Robolectric/Roborazzi renders (phone and tablet,
+throwaway rig outside the repository; renders are visual previews, not device
+acceptance):
+
+- Onboarding no longer composes the app beneath it, so keyboard/D-pad focus,
+  TalkBack and a notification-opened player cannot reach hidden content.
+- Theme and Reduce-motion controls stay disabled until the user's settings have
+  loaded, and remain disabled if loading failed. `save_settings` replaces the whole
+  document, so an early tap could otherwise reset existing settings.
+- The sign-in web stage reloads if nothing was restored after rotation or process
+  death. Reduced motion is read from settings when the sign-in activity is recreated
+  alone. Size changes snap under reduced motion. The pulse no longer recomposes every
+  frame. Stale sign-in messages clear on Continue and when a session is detected.
+- Replaying setup from Settings keeps the saved completion flag. The onboarding
+  Account step offers cookie-file import and shows sign-in errors. Pages have
+  headings, the overlay has a pane title and step changes are announced.
+- Checks re-run: `compileDebugKotlin`, `compileDebugJavaWithJavac`, full
+  `testDebugUnitTest` (including `ThemeLabelTest`) and `compileDebugAndroidTestKotlin`
+  all pass.
+
+Not run and not claimed: no emulator or instrumentation run (including
+`OnboardingUiTest` and the existing `NativeUiTest`), no physical Galaxy Tab S9 run,
+no TalkBack check, and no live Google sign-in. The JVM result is logic-only and does
+not establish sign-in success, cookie capture, or any accessibility behaviour.
+
 ## Category preloading (2026-11-02)
 
 Android's native ViewModel now caches network first pages for 60 seconds, with
@@ -798,6 +852,38 @@ The observer scheduling and cache-eviction follow-up require a fresh native run.
 ## CI layout change, 2026-11-02 (M9)
 
 The Android workflow now builds once (`apk` job: both ABIs, JVM tests, lint, instrumentation APK) and runs the emulator suite as four parallel AndroidJUnitRunner shards (`device` job) against those exact uploaded APKs via `adb`/`am instrument`, instead of a Gradle connected run. Each shard uploads its own evidence and raw instrumentation output. Local runs without `YTUI_ANDROID_TEST_APKS` still use the Gradle connected path. This is a CI speed change only; it adds no new device or live acceptance evidence.
+
+## Watch-page Up next follow-up, 2026-11-02 (M9)
+
+The video watch page's **Up next** now shows what Next/autoplay will actually
+take, in the same order: the manual queue, then the active playback context —
+the rest of the playlist the video was started from ("From this playlist") or
+the related videos YouTube returned for it ("Recommended"). The first entry
+that will play is labelled "Plays next" (omitted while shuffle is on). Tapping
+a playlist entry continues that playlist from it; tapping a recommendation
+starts it with its own related list. When "Related media autoplay" is off,
+recommendations are still listed (display-only fetch) but not marked to play.
+
+The Rust engine gains a read-only `up_next` op and a `skip_before` option on
+context `queue_commit`; `PlaybackService` emits `up_next_changed` when a context
+becomes available. Checks run: `cargo test -p ytui-mobile --lib` (40 passed,
+including `up_next_lists_queue_then_context_and_skips_to_a_chosen_entry`),
+`cargo clippy -p ytui-mobile --all-targets -D warnings` and `cargo fmt --check`.
+The Kotlin/Java changes were **not compiled or run** in the authoring container
+(no Android SDK); APK build, emulator and live related/playlist acceptance are
+pending. The landscape watch layout still shows no inline list.
+
+## Resume where you left off (desktop parity), 2026-11-03 (M9)
+
+New `resume_on_play` mobile setting (default on). Ordinary video plays and
+service Next/auto-advance seek to the saved position (≥ 5 s); music, live,
+previews and downloads start at 0; History resume is unchanged. The authoring
+container had no Android SDK (its download was not permitted), so Kotlin
+compile, JVM tests, lint and emulator checks were **not run**. `javac` without
+the Android classpath reported no Java syntax errors. Existing instrumentation
+position assertions are lower bounds or relative checks, which a resume would not
+break. Requests sent straight to `PlaybackService` never set `auto_resume`. CI
+remains the check. See [../PR_PARITY_2026-11-03.md](../PR_PARITY_2026-11-03.md).
 
 ## Local re-verification of main b6a76a2, 2026-11-02 (M9)
 

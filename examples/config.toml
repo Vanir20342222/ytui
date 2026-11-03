@@ -13,6 +13,10 @@ music_player_style = "classic" # classic, vinyl, vu, orbit; append -fullscreen f
 reduced_motion = false
 playback_history = true
 resume_on_play = true # continue partly watched videos where you left off (needs playback_history)
+seek_seconds = 5 # seek-forward/back step (1-600)
+prefer_offline = true # play a completed download instead of streaming the same item
+preload_next = true # resolve the next queued item shortly before the current one ends
+autoplay_related = true # when the queue ends, continue with related videos (Android: Related media autoplay)
 show_hints = true
 playback_sponsorblock = "skip"
 playback_sponsor_categories = ["sponsor"]
@@ -66,3 +70,13 @@ skip_duplicates = true
 window_bandwidth_kib = 0
 
 [keybindings]
+
+# Details on catalog rows (Android: Settings → Video information).
+[card_info]
+channel = true
+views = false
+upload_date = false
+duration = true
+section = true
+likes = false
+description = true # in the selected item's details panel

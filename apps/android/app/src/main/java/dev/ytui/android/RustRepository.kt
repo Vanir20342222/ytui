@@ -110,6 +110,18 @@ internal object RustRpc {
         call(json("op" to op, *fields)) as? JSONArray ?: JSONArray()
 }
 
+/** What plays after the current item: queue, then the active playback context. */
+internal data class UpNextState(
+    val context: List<MediaCard> = emptyList(),
+    val contextId: String = "",
+    /** Related videos for the current one, rather than the rest of a playlist. */
+    val related: Boolean = false,
+    /** False for recommendations shown while related autoplay is off. */
+    val autoplay: Boolean = true,
+    val more: Boolean = false,
+    val loading: Boolean = false,
+)
+
 /** Treated as immutable: media JSON is copied (`copyJson`) before any change. */
 @androidx.compose.runtime.Immutable
 internal data class MediaCard(val value: JSONObject) {
@@ -310,6 +322,9 @@ internal class YtuiViewModel : ViewModel() {
     val downloads = MutableStateFlow<List<JSONObject>>(emptyList())
     val offlinePlaylists = MutableStateFlow<List<JSONObject>>(emptyList())
     val queue = MutableStateFlow<List<MediaCard>>(emptyList())
+    val upNext = MutableStateFlow(UpNextState())
+    private var upNextJob: Job? = null
+    private var shownRelated: Pair<String, List<MediaCard>>? = null
     val recent = MutableStateFlow<List<MediaCard>>(emptyList())
     val status = MutableStateFlow("Ready")
     val actionError = MutableStateFlow<String?>(null)
@@ -444,7 +459,11 @@ internal class YtuiViewModel : ViewModel() {
                         }
                         "cookies" -> changeAccount("import_cookies", "header" to text)
                         "account_updated" -> refreshAccount()
-                        "history_updated",
+                        "history_updated" -> {
+                            loadHistory()
+                            loadUpNext()
+                        }
+                        "up_next_changed" -> loadUpNext()
                         "history_cleared" -> loadHistory()
                         "lyrics_file" ->
                             if (event.optString("request_token") == lyricToken)
@@ -749,20 +768,24 @@ internal class YtuiViewModel : ViewModel() {
             ?.let { navigate(request = json("CliampTracks" to it)) }
     }
 
-    private fun context(media: MediaCard): JSONObject? {
+    private fun videoId(media: MediaCard): String? =
+        media.value.optString("id").takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
+            ?: Uri.parse(media.url)
+                .let { uri ->
+                    uri.getQueryParameter("v")
+                        ?: if (uri.host == "youtu.be") uri.lastPathSegment else null
+                }
+                ?.takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
+
+    private fun context(media: MediaCard, forceRelated: Boolean = false): JSONObject? {
         if (media.live || media.collection) return null
         val feed = feeds[tab.value].value
         val request = feed.request as? JSONObject
         val finite =
-            request != null && listOf("Collection", "Details", "CliampTracks").any(request::has)
-        val id =
-            media.value.optString("id").takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
-                ?: Uri.parse(media.url)
-                    .let { uri ->
-                        uri.getQueryParameter("v")
-                            ?: if (uri.host == "youtu.be") uri.lastPathSegment else null
-                    }
-                    ?.takeIf { it.matches(Regex("[A-Za-z0-9_-]{11}")) }
+            !forceRelated &&
+                request != null &&
+                listOf("Collection", "Details", "CliampTracks").any(request::has)
+        val id = videoId(media)
         if (!finite && (!mobile.value.optBoolean("autoplay_related", true) || id == null))
             return null
         return json(
@@ -847,6 +870,8 @@ internal class YtuiViewModel : ViewModel() {
         download: Boolean = false,
         resume: Boolean = false,
         queued: Boolean = false,
+        related: Boolean = false,
+        continueContext: String? = null,
     ) {
         val quality = config.value.optJSONObject("download")?.optString("quality", "1080") ?: "1080"
         val audio =
@@ -880,7 +905,19 @@ internal class YtuiViewModel : ViewModel() {
         if (timing != 0L) StartupTimings.playerCache(timing, PlaybackService.warmReady())
         if (timing != 0L)
             StartupTimings.byteCache(timing, PlaybackCache.readyFor(media.value, audio, quality))
-        val context = if (!preview && !download && !queued) context(media) else null
+        val context =
+            if (!preview && !download && !queued && continueContext == null)
+                context(media, related)
+            else null
+        // Desktop parity (`resume_on_play`): ordinary video plays continue from the
+        // saved position; music, live media, previews and downloads start at 0.
+        val autoResume =
+            !resume &&
+                !preview &&
+                !download &&
+                !audio &&
+                !media.live &&
+                mobile.value.optBoolean("resume_on_play", true)
         val epoch = accountEpoch
         val network = NetworkSettings.revision.get()
         val prepareSurface = !download && !preview && !audio
@@ -944,10 +981,15 @@ internal class YtuiViewModel : ViewModel() {
                             put("audio", audio)
                             put("quality", quality)
                             put("preview", preview)
-                            put("resume", resume)
+                            put("resume", resume || autoResume)
+                            put("auto_resume", autoResume)
                             put("queued", queued)
-                            put("context_id", context?.optString("context_id"))
+                            put("context_id", continueContext ?: context?.optString("context_id"))
                             put("context", context)
+                            if (continueContext != null) {
+                                put("context_entry", true)
+                                put("context_skip", true)
+                            }
                         }
                 /* request retains the cache-only source marker when saved offline. */
                 effect(if (download) "download" else "play", "request" to request)
@@ -1126,6 +1168,76 @@ internal class YtuiViewModel : ViewModel() {
             "context" to context,
         )
         if (!PlaybackPolicy.audioOnly(selected.optString("kind"))) playerOpen.value = true
+    }
+
+    /** Mirrors Next: the manual queue first, then the playlist tail or related videos. */
+    fun loadUpNext() {
+        upNextJob?.cancel()
+        upNextJob =
+            viewModelScope.launch {
+                val media = player.value.media?.let(::MediaCard)
+                val view =
+                    runCatching { RustRpc.objectCall("up_next") }.getOrNull() ?: return@launch
+                queue.value = view.optJSONArray("queue")?.objects()?.map(::MediaCard) ?: emptyList()
+                val context = view.optJSONObject("context")
+                val items =
+                    context?.optJSONArray("items")?.objects()?.map(::MediaCard) ?: emptyList()
+                val id = context?.optString("id").orEmpty()
+                upNext.value =
+                    if (items.isNotEmpty())
+                        UpNextState(
+                            items,
+                            contextId = id,
+                            related = context?.optBoolean("related") == true,
+                            more = (context?.optInt("count") ?: 0) > items.size,
+                        )
+                    else
+                        UpNextState(
+                            loading = context != null && !context.optBoolean("prepared"),
+                        )
+                if (items.isNotEmpty() || media == null) return@launch
+                // Related autoplay is off (or unavailable here): still show recommendations.
+                if (
+                    mobile.value.optBoolean("autoplay_related", true) ||
+                        media.live ||
+                        MediaBridge.offlineUi ||
+                        player.value.value.optBoolean("offline")
+                )
+                    return@launch
+                val videoId = videoId(media) ?: return@launch
+                val cached = shownRelated?.takeIf { it.first == media.url }?.second
+                val related =
+                    cached
+                        ?: runCatching {
+                                RustRpc.objectCall(
+                                        "browse",
+                                        "tab" to if (media.audio) 2 else 1,
+                                        "request" to json("Related" to videoId),
+                                    )
+                                    .optJSONArray("items")
+                                    ?.objects()
+                                    ?.map(::MediaCard)
+                                    ?.filter { !it.collection && !it.live && it.url != media.url }
+                                    ?.take(25)
+                            }
+                            .getOrNull()
+                        ?: return@launch
+                shownRelated = media.url to related
+                if (player.value.media?.optString("url") == media.url)
+                    upNext.value = UpNextState(related, related = true, autoplay = false)
+            }
+    }
+
+    /** Plays an Up next row the way Next would have reached it. */
+    fun playUpNext(media: MediaCard, fromQueue: Boolean) {
+        val state = upNext.value
+        when {
+            fromQueue -> play(media, queued = true)
+            state.related -> play(media, related = true)
+            state.contextId.isNotBlank() ->
+                play(media, queued = true, continueContext = state.contextId)
+            else -> play(media)
+        }
     }
 
     fun loadQueue() = task { queue.value = RustRpc.arrayCall("queue").objects().map(::MediaCard) }

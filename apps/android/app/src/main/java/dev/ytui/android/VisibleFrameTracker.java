@@ -35,8 +35,8 @@ final class VisibleFrameTracker implements Player.Listener {
     PlaybackService service = PlaybackService.current;
     if (service == null || !presentable) return;
     final long generation = service.generation, timing = service.startupToken;
-    // A codec's surface-release event precedes TextureView drawing. Allow a
-    // complete UI frame before recording view output, without blocking the UI.
+    // A codec's release event can precede presentation. Keep the conservative
+    // UI-frame guard for both surface types without blocking the UI.
     view.postOnAnimation(
         () ->
             view.postOnAnimation(

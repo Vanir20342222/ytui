@@ -612,6 +612,32 @@ The installer integration test verifies build failure retains the old launcher,
 both installed names report the current Rust version, the compatibility installer
 works, and replacing a symlink never overwrites its legacy virtualenv target.
 
+### Open-PR platform parity follow-up, 2026-11-03 (M5/M9)
+
+Environment: Linux container, no display, Android SDK unavailable (its download
+was not permitted), rustc 1.99.1. Desktop counterparts for Android PRs #36 and
+#34: related-video continuation with a Recommended queue section
+(`autoplay_related`, default on) and a skippable first-run setup recorded in the
+state snapshot (`setup_version`). Details and the per-PR matrix are in
+[PR_PARITY_2026-11-03.md](PR_PARITY_2026-11-03.md).
+
+- `cargo fmt --all --check` and `cargo clippy --workspace --all-targets -- -D warnings`: clean.
+- `cargo test --workspace`: 361 passed, 0 failed, 31 explicit ignores. New:
+  `tests/related_autoplay.rs` (6), `tests/first_run_setup.rs` (5), and unit tests
+  in `related.rs` (4) and `setup.rs` (3). Fixtures route HTTP to a closed local
+  proxy; no public service is contacted.
+- Not run: live related-video responses, continued mpv playback in Ghostty, or a
+  real first launch on the target PC.
+
+Follow-up, same day: the gaps on main were fixed. Desktop gained `prefer_offline`
+(`PlayerCommand::PlayLocal`), `preload_next` (`PlayerCommand::Prepare` into the
+existing stream cache), `seek_seconds` and `[card_info]`; Android gained
+`resume_on_play`. `cargo test --workspace`: 369 passed, 0 failed, 31 ignores;
+fmt and clippy clean. New: `tests/android_parity.rs` (6), a fake-mpv player test
+for saved copies, and a `media.rs` unit test. The Android change was **not
+compiled**: the SDK could not be installed here. `javac` reported no Java syntax
+errors; Kotlin, JVM tests, lint and emulator runs are left to Android CI.
+
 ### Remaining release acceptance
 
 The user explicitly authorized Rust replacing the repository app/installer after
@@ -634,3 +660,23 @@ the gap inventory. Before declaring the Rust edition stable:
 
 These are release gates, not completed tests. The branch is reviewable and runnable,
 but this record does not claim that all upstream/API/platform bugs are fixed.
+
+
+## Native playback/startup follow-up — 26 October 2026 (M4/M5/M8)
+
+[The startup report](PLAYBACK_STARTUP_2026-10-26.md) records the exact screenshot
+recording, native extractor pin, bounded candidate validation and memory-only
+selection/queue preparation. Actual imported-session playback reaches full EOF;
+first progress is 9.13 s cold, 0.49 s on replay, and 0.88 s after a separate 12 s
+preparation wait. The public ten-second corpus is 3/3 including decoded 1080p,
+and a native authenticated audio download produces one fully decoded file.
+Anonymous playback of the exact album track still requires sign-in.
+
+The full workspace checkpoint is 282 passed / 30 ignored; later canonical-URL
+and Node-engine changes have focused updated service/runtime checks. Six final
+mpv/FFmpeg service checks, two actual Node vectors, isolated-bus MPRIS, formatting
+and strict all-target Clippy pass. The report preserves the initial MPRIS setup
+failure and solver-shim failure separately from corrected runs. Previous twelve
+local-media checks and three other screenshot-song startup cases remain dated
+supporting evidence. No audible/device, active VPN-loss or 99% reliability claim
+is inferred from these checks.

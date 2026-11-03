@@ -12,6 +12,34 @@ pub const MUSIC_PLAYER_STYLES: &[&str] = &[
     "orbit-fullscreen",
 ];
 
+/// Details shown on catalog rows. Defaults keep the established desktop rows
+/// (channel, duration and section); Android exposes the same choices.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(default)]
+pub struct CardInfo {
+    pub channel: bool,
+    pub views: bool,
+    pub upload_date: bool,
+    pub duration: bool,
+    pub section: bool,
+    pub likes: bool,
+    /// Description in the selected item's details panel.
+    pub description: bool,
+}
+impl Default for CardInfo {
+    fn default() -> Self {
+        Self {
+            channel: true,
+            views: false,
+            upload_date: false,
+            duration: true,
+            section: true,
+            likes: false,
+            description: true,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
@@ -28,6 +56,16 @@ pub struct Config {
     pub playback_history: bool,
     /// Start normal playback of a partly watched video from its saved local position.
     pub resume_on_play: bool,
+    /// When the queue runs out, continue with the finished video's related videos.
+    pub autoplay_related: bool,
+    /// Seconds moved by the seek-forward/back keys (Android: "seek_seconds").
+    pub seek_seconds: u32,
+    /// Play a completed download instead of streaming the same video or song.
+    pub prefer_offline: bool,
+    /// Resolve the next item's streams shortly before the current one ends.
+    pub preload_next: bool,
+    /// Which details catalog rows show (Android: Settings → Video information).
+    pub card_info: CardInfo,
     pub show_hints: bool,
     pub playback_sponsorblock: String,
     pub playback_sponsor_categories: Vec<String>,
@@ -72,6 +110,11 @@ impl Default for Config {
             reduced_motion: false,
             playback_history: true,
             resume_on_play: true,
+            autoplay_related: true,
+            seek_seconds: 5,
+            prefer_offline: true,
+            preload_next: true,
+            card_info: CardInfo::default(),
             show_hints: true,
             playback_sponsorblock: "skip".into(),
             playback_sponsor_categories: vec!["sponsor".into()],
@@ -124,6 +167,10 @@ impl Config {
             "concurrency must be between 1 and 16"
         );
         ensure!(self.max_retries <= 10, "max_retries must be at most 10");
+        ensure!(
+            (1..=600).contains(&self.seek_seconds),
+            "seek_seconds must be between 1 and 600"
+        );
         ensure!(
             self.retry_delay_seconds <= 300,
             "retry_delay_seconds must be at most 300"

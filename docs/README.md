@@ -15,6 +15,7 @@
 | [Remaining work](REMAINING_WORK.md) | Unsupported features and release acceptance |
 | [App audit and implementation backlog](APP_AUDIT_2026-10-22.md) | Alpha.11 bugs, executable repros, priorities and feature acceptance |
 | [Parity](PARITY.md) | Rust implementation compared with the former Python app |
+| [Open-PR platform parity, 3 November](PR_PARITY_2026-11-03.md) | Which open PRs cover desktop and Android, desktop counterparts added, remaining gaps |
 | [Themes and screenshots](UI_THEMES.md) | Theme gallery and capture instructions |
 
 ## Validation and troubleshooting

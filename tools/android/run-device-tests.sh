@@ -35,7 +35,7 @@ collect_evidence() {
     for name in public-startup-timings startup-subsecond-timings startup-indexed-prefetched-timings; do
         adb pull "/sdcard/Android/data/$test_package/files/$name.txt" "$evidence/$name.txt" > /dev/null 2>&1 || true
     done
-    for state in cold prepared missing-frame settings hls hls-prepared indexed indexed-prefetched indexed-prefetched-failed subsecond subsecond-cold subsecond-failed; do
+    for state in cold prepared missing-frame settings hls hls-prepared indexed indexed-prefetched indexed-prefetched-failed subsecond subsecond-cold subsecond-failed compositor-clear compositor-covered compositor-restored; do
         adb pull /sdcard/Android/data/$test_package/files/startup-$state.png "$evidence/startup-$state.png" > /dev/null 2>&1 || true
     done
     mkdir -p "$evidence/native-ui"

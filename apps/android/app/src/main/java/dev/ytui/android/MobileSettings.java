@@ -16,6 +16,7 @@ final class MobileSettings {
         new String[] {
           "preload_next",
           "autoplay_related",
+          "resume_on_play",
           "prefer_offline",
           "gestures",
           "background_playback",

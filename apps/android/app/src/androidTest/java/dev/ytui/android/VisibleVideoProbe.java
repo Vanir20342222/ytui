@@ -18,6 +18,7 @@ final class VisibleVideoProbe {
     final boolean rgb;
     final long requestedAt;
     final long capturedAt;
+    String method = "window-pixelcopy";
 
     Result(boolean rgb, long capturedAt) {
       this(rgb, -1, capturedAt);
@@ -27,6 +28,7 @@ final class VisibleVideoProbe {
       this.rgb = rgb;
       this.requestedAt = requestedAt;
       this.capturedAt = capturedAt;
+      this.method = requestedAt < 0 ? "none" : "window-pixelcopy";
     }
   }
 
@@ -35,6 +37,7 @@ final class VisibleVideoProbe {
     final long requestedAt;
     final long at;
     final int status;
+    String method = "window-pixelcopy";
 
     Frame(Bitmap bitmap, long at, int status) {
       this(bitmap, -1, at, status);
@@ -113,6 +116,76 @@ final class VisibleVideoProbe {
    */
   private static final long READBACK_ALLOWANCE_MS = 2000;
 
+  private static final ExecutorService COMPOSITOR =
+      new ThreadPoolExecutor(
+          1,
+          1,
+          0,
+          TimeUnit.MILLISECONDS,
+          new ArrayBlockingQueue<>(1),
+          runnable -> {
+            Thread thread = new Thread(runnable, "compositor-evidence");
+            thread.setDaemon(true);
+            return thread;
+          });
+
+  /** Include the separate SurfaceView layer AND all app-window overlays. */
+  private static void compositor(
+      android.app.Activity activity, PlayerView view, CompletableFuture<Frame> future) {
+    int[] point = new int[2];
+    if (Build.VERSION.SDK_INT >= 34) view.getLocationInWindow(point);
+    else view.getLocationOnScreen(point);
+    Rect region =
+        new Rect(point[0], point[1], point[0] + view.getWidth(), point[1] + view.getHeight());
+    try {
+      COMPOSITOR.execute(
+          () -> {
+            if (future.isDone()) return;
+            Bitmap whole = null, software = null, target = null;
+            long requestedAt = SystemClock.elapsedRealtime();
+            try {
+              android.app.UiAutomation automation =
+                  androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+                      .getUiAutomation();
+              whole =
+                  Build.VERSION.SDK_INT >= 34
+                      ? automation.takeScreenshot(activity.getWindow())
+                      : automation.takeScreenshot();
+              if (whole == null) throw new IllegalStateException("Compositor unavailable");
+              software =
+                  whole.getConfig() == Bitmap.Config.HARDWARE
+                      ? whole.copy(Bitmap.Config.ARGB_8888, false)
+                      : whole;
+              if (software == null
+                  || !region.intersect(0, 0, software.getWidth(), software.getHeight()))
+                throw new IllegalStateException("Player outside compositor capture");
+              target = Bitmap.createBitmap(320, 180, Bitmap.Config.ARGB_8888);
+              new Canvas(target)
+                  .drawBitmap(
+                      software,
+                      region,
+                      new Rect(0, 0, 320, 180),
+                      new Paint(Paint.FILTER_BITMAP_FLAG));
+              Frame frame =
+                  new Frame(target, requestedAt, SystemClock.elapsedRealtime(), PixelCopy.SUCCESS);
+              frame.method = "window-compositor";
+              if (!future.complete(frame)) target.recycle();
+              target = null;
+            } catch (RuntimeException unavailable) {
+              if (target != null) target.recycle();
+              future.complete(
+                  new Frame(null, SystemClock.elapsedRealtime(), PixelCopy.ERROR_SOURCE_NO_DATA));
+            } finally {
+              if (software != null && software != whole) software.recycle();
+              if (whole != null) whole.recycle();
+            }
+          });
+    } catch (RejectedExecutionException busy) {
+      future.complete(
+          new Frame(null, SystemClock.elapsedRealtime(), PixelCopy.ERROR_SOURCE_NO_DATA));
+    }
+  }
+
   private static Result capture(Scheduler scheduler, long timing, String filename, long budgetMs)
       throws Exception {
     CompletableFuture<Frame> future = new CompletableFuture<>();
@@ -128,6 +201,22 @@ final class VisibleVideoProbe {
               || view.getHeight() < 1) {
             future.complete(
                 new Frame(null, SystemClock.elapsedRealtime(), PixelCopy.ERROR_SOURCE_NO_DATA));
+            submitted.countDown();
+            return;
+          }
+          if (view.getVideoSurfaceView() instanceof SurfaceView) {
+            // Avoid perturbing decoder startup with repeated full compositor
+            // reads. Observe a current decoded/playing source independently of
+            // the later view-frame guard; deadlines still require both clocks.
+            PlaybackService service = PlaybackService.current;
+            if (service == null
+                || service.startupToken != timing
+                || view.getPlayer() != service.controlsPlayer
+                || service.firstFrameMs <= 0
+                || (StartupTimings.usable(timing) <= 0 && !service.player.isPlaying()))
+              future.complete(
+                  new Frame(null, SystemClock.elapsedRealtime(), PixelCopy.ERROR_SOURCE_NO_DATA));
+            else compositor(activity, view, future);
             submitted.countDown();
             return;
           }
@@ -187,7 +276,10 @@ final class VisibleVideoProbe {
           new FileOutputStream(new File(MediaBridge.context.getExternalFilesDir(null), filename))) {
         frame.bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
       }
-      return new Result(red > 100 && green > 100 && blue > 100, frame.requestedAt, frame.at);
+      Result result =
+          new Result(red > 100 && green > 100 && blue > 100, frame.requestedAt, frame.at);
+      result.method = frame.method;
+      return result;
     } finally {
       frame.bitmap.recycle();
     }

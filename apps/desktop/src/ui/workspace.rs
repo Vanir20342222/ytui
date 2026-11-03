@@ -984,16 +984,23 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
             Rect::new(row.x, row.y, 1, row.height),
         );
         let favorite = app.snapshot.favorites.iter().any(|m| m.url == item.url);
-        let meta = format!(
-            "{}{}{}",
-            item.label(),
-            if item.tracks_url.is_some() {
-                " · track library"
-            } else {
-                ""
-            },
-            if favorite { " · saved" } else { "" }
-        );
+        let info = &app.config.card_info;
+        let mut details = item.details(info);
+        if item.tracks_url.is_some() {
+            details.push("track library".into());
+        }
+        if favorite {
+            details.push("saved".into());
+        }
+        if info.section && !item.section.is_empty() {
+            details.push(item.section.clone());
+        }
+        let meta = details.join(" · ");
+        let creator = if info.channel && !item.creator.is_empty() {
+            Some(item.creator.clone())
+        } else {
+            None
+        };
         let text_x = if cards
             && app.config.thumbnails
             && app.config.image_protocol != "none"
@@ -1030,12 +1037,6 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
         } else {
             row.x + 2
         };
-        let section = if item.section.is_empty() {
-            String::new()
-        } else {
-            format!(" · {}", item.section)
-        };
-        let meta = format!("{meta}{section}");
         let lines = if height <= 3 {
             vec![
                 Line::styled(
@@ -1043,7 +1044,11 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                     style(app, app.palette.text).add_modifier(Modifier::BOLD),
                 ),
                 Line::styled(
-                    format!("{} · {meta}", item.creator),
+                    creator
+                        .into_iter()
+                        .chain((!meta.is_empty()).then_some(meta))
+                        .collect::<Vec<_>>()
+                        .join(" · "),
                     style(app, app.palette.muted),
                 ),
             ]
@@ -1053,7 +1058,7 @@ fn browse(f: &mut Frame, app: &mut App, area: Rect) {
                     item.title.clone(),
                     style(app, app.palette.text).add_modifier(Modifier::BOLD),
                 ),
-                Line::styled(item.creator.clone(), style(app, app.palette.muted)),
+                Line::styled(creator.unwrap_or_default(), style(app, app.palette.muted)),
                 Line::styled(
                     meta,
                     style(
@@ -1146,24 +1151,36 @@ fn selected_details(f: &mut Frame, app: &mut App, area: Rect) {
             media.title.clone(),
             style(app, app.palette.text).add_modifier(Modifier::BOLD),
         ),
-        Line::styled(media.creator.clone(), style(app, app.palette.accent)),
+        Line::styled(
+            if app.config.card_info.channel {
+                media.creator.clone()
+            } else {
+                String::new()
+            },
+            style(app, app.palette.accent),
+        ),
         Line::from(""),
-        Line::styled(media.label(), style(app, app.palette.muted)),
+        Line::styled(
+            media.details(&app.config.card_info).join(" · "),
+            style(app, app.palette.muted),
+        ),
         Line::from(""),
     ];
-    lines.push(Line::from(if media.description.is_empty() {
-        if media.collection() {
-            "Open this collection to explore its videos or tracks.".into()
-        } else if app.tab == 3 {
-            "Play this station or save it to your favorites.".into()
-        } else if media.kind == ytui_core::MediaKind::Song || app.tab == 2 {
-            "Play this track or add it to your queue.".into()
+    lines.push(Line::from(
+        if media.description.is_empty() || !app.config.card_info.description {
+            if media.collection() {
+                "Open this collection to explore its videos or tracks.".into()
+            } else if app.tab == 3 {
+                "Play this station or save it to your favorites.".into()
+            } else if media.kind == ytui_core::MediaKind::Song || app.tab == 2 {
+                "Play this track or add it to your queue.".into()
+            } else {
+                "Preview this video, play it now, or add it to your downloads.".into()
+            }
         } else {
-            "Preview this video, play it now, or add it to your downloads.".into()
-        }
-    } else {
-        media.description.clone()
-    }));
+            media.description.clone()
+        },
+    ));
     f.render_widget(Paragraph::new(lines).wrap(Wrap { trim: true }), regions[0]);
     let actions = if media.kind == ytui_core::MediaKind::Station {
         vec![

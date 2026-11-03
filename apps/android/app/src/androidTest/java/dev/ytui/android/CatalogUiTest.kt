@@ -308,7 +308,13 @@ class CatalogUiTest {
             .onNodeWithTag("proxy-field")
             .performScrollTo()
             .performTextInput("editable-native-field")
-        compose.onNodeWithTag("proxy-field").assertTextContains("editable-native-field")
+        try {
+            compose.onNodeWithTag("proxy-field").assertTextContains("editable-native-field")
+        } catch (failure: AssertionError) {
+            compose.onRoot(useUnmergedTree = true).printToLog("ytui-settings-ui")
+            MediaRuntimeTest.capture("native-catalog-error.png")
+            throw failure
+        }
     }
 
     @Test
@@ -1491,13 +1497,17 @@ class CatalogUiTest {
                 for (media in cards) {
                     if (!compose.onNodeWithTag("media-card-${media.key}").isDisplayed()) continue
                     runCatching {
-                            val node =
-                                compose.onNode(
-                                    hasTestTag("artwork-${media.key}") and
-                                        hasAnyAncestor(hasTestTag("media-card-${media.key}")),
-                                    useUnmergedTree = true,
-                                )
-                            val bounds = node.getUnclippedBoundsInRoot()
+                            // Judge visibility by the artwork frame, which exists before the
+                            // cover loads: a still-loading cover in a partially visible row is
+                            // not a full cover either.
+                            val bounds =
+                                compose
+                                    .onNode(
+                                        hasTestTag("artwork-frame-${media.key}") and
+                                            hasAnyAncestor(hasTestTag("media-card-${media.key}")),
+                                        useUnmergedTree = true,
+                                    )
+                                    .getUnclippedBoundsInRoot()
                             // A partially visible virtualized row is not a full cover.
                             // captureToImage clips it, changing the sample's coordinates.
                             if (
@@ -1510,6 +1520,12 @@ class CatalogUiTest {
                                 return@runCatching
                             }
                             inspected++
+                            val node =
+                                compose.onNode(
+                                    hasTestTag("artwork-${media.key}") and
+                                        hasAnyAncestor(hasTestTag("media-card-${media.key}")),
+                                    useUnmergedTree = true,
+                                )
                             val frame = node.captureToImage()
                             val color = frame.toPixelMap()[frame.width / 2, frame.height / 4]
                             val saturated =

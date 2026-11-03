@@ -1,5 +1,7 @@
 # ytui Rust rewrite plan
 
+M9 all-PR integration (2026-11-03): [combined features, fixes and release checks](docs/android/PR_INTEGRATION_2026-11-03.md).
+
 M9 subsecond-startup candidate: [scope, research and measurement](docs/android/SUBSECOND_STARTUP.md)
 track the new <1000 ms visible-and-playing target, separately from the earlier
 Tab S9 <2000 ms acceptance. This is an unmerged performance branch; native and
@@ -829,6 +831,17 @@ and mpv resume/preview checks. Tests reproduced and fixed per-file hook metadata
 duplicate invocation and missing output records on hook failure (M3/M8). Final
 counts and reproducible commands are in docs/VALIDATION.md.
 
+
+### M4/M5/M8 follow-up: native playback startup (26 October 2026)
+
+The screenshot's exact M83 album recording exposed a stale authenticated native
+extractor and slow repeated resolution. The new pin preserves native-only
+playback, bounds stream-format probing, prepares a settled selection/next queue
+item, shares in-flight resolution and expires signed streams in memory. Runtime
+shim discovery, account expiry, cancellation and cooldown retention have focused
+regressions. See [the startup repair report](docs/PLAYBACK_STARTUP_2026-10-26.md)
+for final measured evidence and the separate remaining release gates.
+
 ### M9: Android and monorepo (in progress)
 
 **Current Android UI decision (2026-10-28):** the user's Tab S9 acceptance found
@@ -884,6 +897,21 @@ catalogs from download records, and prevents uncached external captions breaking
 offline playback. Deterministic device regressions exercise the actual stream and
 cache paths; their latest results remain in the Android validation record.
 
+
+### M5/M9: open-PR platform parity (2026-11-03)
+
+The owner asked for the same features on Android and desktop, checking every
+open PR. Android PRs #36 (Up next recommendations) and #34 (onboarding) had no
+desktop counterpart. The desktop now continues with related videos when the
+queue ends (`autoplay_related`, default on like Android), lists them as
+Recommended in the queue popup, and has a skippable first-run setup shown once
+per version (never in demo/offline). #45, #32 and #17 need no counterpart.
+A same-day follow-up closed the gaps on main: Android `resume_on_play`
+(uncompiled here; Android CI is its first build) and desktop `prefer_offline`,
+`preload_next`, `seek_seconds` and `[card_info]` row details. Draft #17 remains
+broader startup work. Evidence:
+[PR_PARITY_2026-11-03.md](docs/PR_PARITY_2026-11-03.md). Live related responses
+and a real first launch remain unverified.
 
 ### M9: content-first Android restyle
 

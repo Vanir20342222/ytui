@@ -71,6 +71,7 @@ fn panel(title: impl Into<Line<'static>>, app: &App) -> Block<'static> {
 mod lyrics;
 mod menus;
 mod settings;
+mod setup;
 pub mod vinyl;
 mod visualizer;
 mod workspace;
@@ -112,6 +113,10 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
         Modal::Queue(_) => (
             85,
             (app.snapshot.playback.items.len() as u16)
+                .saturating_add(
+                    app.up_next_related()
+                        .map_or(0, |r| r.items.len().max(1) as u16 + 1),
+                )
                 .saturating_add(4)
                 .clamp(6, 25),
         ),
@@ -165,6 +170,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 .clamp(12, 30),
         ),
         Modal::Text { .. } => (90, 28),
+        Modal::Setup(_) => (84, 24),
     };
     let rect = centered(area, size.0, size.1);
     f.render_widget(Clear, rect);
@@ -177,6 +183,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
             );
         }
         Modal::Lyrics(view) => lyrics::render(f, app, view, rect),
+        Modal::Setup(view) => setup::render(f, app, view, rect),
         Modal::Actions { selected, query } => {
             let hits = menus::actions(f, app, *selected, query, rect);
             app.hit_targets.extend(hits);
@@ -609,25 +616,59 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
             }
         }
         Modal::Queue(selected) => {
-            let items = app
-                .snapshot
-                .playback
+            let queue = &app.snapshot.playback;
+            let related = app.up_next_related();
+            let next = crate::related::plays_next(
+                queue,
+                related.map_or(0, |r| r.items.len()),
+                app.config.autoplay_related,
+            );
+            let marker = |i: usize| {
+                if queue.current == Some(i) {
+                    "▶"
+                } else if next == Some(i) {
+                    "»"
+                } else {
+                    " "
+                }
+            };
+            let mut items = queue
                 .items
                 .iter()
                 .enumerate()
-                .map(|(i, m)| {
+                .map(|(i, m)| ListItem::new(format!("{} {} · {}", marker(i), m.title, m.creator)))
+                .collect::<Vec<_>>();
+            // Recommendations follow the queue (Android's "Recommended" Up next rows).
+            if let Some(related) = related {
+                let heading = if related.loading {
+                    app.tr("Recommended · loading…")
+                } else if let Some(error) = &related.error {
+                    error.as_str()
+                } else if app.config.autoplay_related {
+                    app.tr("Recommended · plays when the queue ends")
+                } else {
+                    app.tr("Recommended · related autoplay is off")
+                };
+                items.push(
+                    ListItem::new(format!("── {heading} ──"))
+                        .style(Style::default().fg(themed(app, app.palette.muted))),
+                );
+                let offset = queue.items.len();
+                items.extend(related.items.iter().enumerate().map(|(i, m)| {
                     ListItem::new(format!(
                         "{} {} · {}",
-                        if app.snapshot.playback.current == Some(i) {
-                            "▶"
-                        } else {
-                            " "
-                        },
+                        marker(offset + i),
                         m.title,
                         m.creator
                     ))
-                })
-                .collect::<Vec<_>>();
+                }));
+            }
+            // The heading row is not selectable; shift recommendations past it.
+            let shown = if related.is_some() && *selected >= queue.items.len() {
+                *selected + 1
+            } else {
+                *selected
+            };
             let list = List::new(items)
                 .block(panel(
                     " Playback queue · Enter plays · Del removes · Esc closes ",
@@ -635,7 +676,7 @@ fn modal(f: &mut Frame, app: &mut App, area: Rect) {
                 ))
                 .highlight_style(Style::default().bg(themed(app, app.palette.selection)))
                 .highlight_symbol("▸ ");
-            let mut state = ListState::default().with_selected(Some(*selected));
+            let mut state = ListState::default().with_selected(Some(shown));
             f.render_stateful_widget(list, rect, &mut state);
         }
         Modal::Form(form) => {

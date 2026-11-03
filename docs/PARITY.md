@@ -17,7 +17,9 @@ YouTube extraction has the explicit upstream limitations documented in RUST.md.
 | Local conversion | Separate FFmpeg output; input preserved | Broad real-codec checks |
 | Search and personalized YouTube feeds | Rust internal-API adapter; current and legacy renderer parsing | Live signed-in home/subscriptions/Watch Later validation |
 | Music home/search/library/album/artist/playlist | Dedicated WEB_REMIX requests; category commands | Live signed-in response/continuation validation |
-| Playback queue, shuffle/repeat/seek/volume | Implemented with mpv IPC | Real audio/video device acceptance |
+| Playback queue, shuffle/repeat/seek/volume | Implemented with mpv IPC; related-video continuation after the queue (`autoplay_related`), a Recommended section in the queue popup, `seek_seconds`, saved-copy playback (`prefer_offline`) and next-item preparation (`preload_next`) (2026-11-03, Android parity) | Real audio/video device acceptance; live related responses; real preloaded starts |
+| Catalog row details | `[card_info]` toggles for channel, views, upload date, duration, section, likes and description (2026-11-03, Android parity) | Ghostty inspection |
+| First-run setup | Skippable five-step setup once per version, replay via F2 or `:setup`; never in demo/offline (2026-11-03, Android parity) | Real first launch on the target PC |
 | Muted preview and restoration | Implemented; synthetic IPC plus real headless control/preview checks | Broader displayed-window behavior and rapid switching in Ghostty/Hyprland |
 | Cookie/profile import | Native rookie, Origin directory discovery, scoped session validation | Actual Brave Origin keyring/decryption on CachyOS |
 | Keyring/file storage, disconnect, account index | Implemented; synthetic auth tests | Live account/channel switching and portal/keyring errors |

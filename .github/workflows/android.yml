@@ -156,8 +156,19 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_7
+          avd-name: ytui-ci
           cores: 4
           ram-size: 4096M
+          # Preserve Pixel 7's logical geometry while bounding SwiftShader and
+          # full-window screenshot readback work on a 4-core hosted runner.
+          # This is emulator qualification, not physical-device latency evidence.
+          pre-emulator-launch-script: |
+            sed -i -E \
+              -e 's/^hw.lcd.width[[:space:]]*=.*/hw.lcd.width=720/' \
+              -e 's/^hw.lcd.height[[:space:]]*=.*/hw.lcd.height=1600/' \
+              -e 's/^hw.lcd.density[[:space:]]*=.*/hw.lcd.density=280/' \
+              "$ANDROID_AVD_HOME/ytui-ci.avd/config.ini"
+            grep -E '^hw.lcd.(width|height|density)=' "$ANDROID_AVD_HOME/ytui-ci.avd/config.ini"
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader -noaudio -no-boot-anim -no-snapshot -camera-back none -camera-front none
           script: tools/android/run-device-tests.sh

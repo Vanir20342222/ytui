@@ -33,8 +33,8 @@ impl Field {
     }
 }
 pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
-    ("General", &[54, 15, 16, 17, 34, 56, 38, 50]),
-    ("Appearance", &[0, 1, 2, 3, 55]),
+    ("General", &[54, 15, 16, 17, 34, 56, 57, 38, 50]),
+    ("Appearance", &[0, 1, 2, 3, 55, 61, 62, 63, 64, 65, 66, 67]),
     (
         "Downloads",
         &[39, 40, 41, 42, 37, 43, 44, 4, 5, 6, 45, 21, 32, 33, 30],
@@ -44,7 +44,7 @@ pub const SETTINGS_SECTIONS: &[(&str, &[usize])] = &[
     ("Schedule", &[18, 19, 20]),
     ("Tools", &[13, 14, 7, 8, 9, 35, 46, 47, 31]),
     ("Radio", &[48, 49]),
-    ("Playback", &[53, 51, 52]),
+    ("Playback", &[53, 51, 52, 58, 59, 60]),
 ];
 pub enum FormKind {
     Download(Media, DownloadOptions),
@@ -315,6 +315,20 @@ impl Form {
                 ytui_core::MUSIC_PLAYER_STYLES,
             ),
             Field::flag("Resume videos where you left off", c.resume_on_play),
+            Field::flag(
+                "Autoplay related videos when the queue ends",
+                c.autoplay_related,
+            ),
+            Field::text("Seek step seconds", c.seek_seconds),
+            Field::flag("Prefer saved offline copies", c.prefer_offline),
+            Field::flag("Preload the next item", c.preload_next),
+            Field::flag("Show channel", c.card_info.channel),
+            Field::flag("Show view count", c.card_info.views),
+            Field::flag("Show upload date", c.card_info.upload_date),
+            Field::flag("Show duration", c.card_info.duration),
+            Field::flag("Show section", c.card_info.section),
+            Field::flag("Show likes", c.card_info.likes),
+            Field::flag("Show description in details", c.card_info.description),
         ];
         Self {
             kind: FormKind::Settings(config),
@@ -618,6 +632,19 @@ impl Form {
             .collect();
         c.music_player_style = self.value(55).into();
         c.resume_on_play = self.value(56) == "yes";
+        c.autoplay_related = self.value(57) == "yes";
+        c.seek_seconds = self.value(58).parse()?;
+        c.prefer_offline = self.value(59) == "yes";
+        c.preload_next = self.value(60) == "yes";
+        c.card_info = ytui_core::CardInfo {
+            channel: self.value(61) == "yes",
+            views: self.value(62) == "yes",
+            upload_date: self.value(63) == "yes",
+            duration: self.value(64) == "yes",
+            section: self.value(65) == "yes",
+            likes: self.value(66) == "yes",
+            description: self.value(67) == "yes",
+        };
         c.validate()?;
         Ok(c)
     }

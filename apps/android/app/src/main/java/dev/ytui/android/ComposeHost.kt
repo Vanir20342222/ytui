@@ -11,6 +11,7 @@ import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -132,56 +133,11 @@ object ComposeHost {
         activity.setContent {
             val busy by authWorking.collectAsState()
             val message by authStatus.collectAsState()
-            BackHandler { if (!busy) activity.cancelSession() }
             val dark = isSystemInDarkTheme()
             val scheme = colorScheme ?: if (dark) darkColorScheme() else lightColorScheme()
             MaterialTheme(colorScheme = scheme, typography = MediaTokens.typography) {
                 CompositionLocalProvider(LocalContentColor provides scheme.onBackground) {
-                    Column(
-                        Modifier.fillMaxSize()
-                            .background(scheme.background)
-                            .safeDrawingPadding()
-                            .imePadding()
-                    ) {
-                        Row(
-                            Modifier.fillMaxWidth()
-                                .heightIn(min = 56.dp)
-                                .padding(horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            MediaIconButton(Glyph.Close, "Cancel sign-in", "sign-in-cancel") {
-                                if (!busy) activity.cancelSession()
-                            }
-                            Text(
-                                "Sign in to YouTube",
-                                Modifier.weight(1f).padding(horizontal = 8.dp),
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Action("Use this session", "sign-in-complete", !busy) {
-                                activity.useSession()
-                            }
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        Text(
-                            "Tap Use this session after you finish signing in. If Google rejects this embedded page, cancel and import a cookie file or header from Account.",
-                            Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-                        if (message.isNotBlank())
-                            Text(
-                                message,
-                                Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        AndroidView(
-                            factory = { web },
-                            modifier = Modifier.padding(top = 8.dp).weight(1f).fillMaxWidth(),
-                        )
-                    }
+                    AuthScreen(activity, web, busy, message)
                 }
             }
         }
@@ -276,6 +232,15 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
         key(tab) { searchRequestState.first.collectAsState(searchRequestState.second).value }
     val searchMode = searchFocused || searchResults
     var dialog by rememberSaveable { mutableStateOf("") }
+    // First-run setup. Instrumented offline launches opt in explicitly so existing
+    // UI tests keep starting on the feed.
+    var onboarding by rememberSaveable {
+        mutableStateOf(
+            OnboardingStore.shouldShow(activity) &&
+                (!MediaBridge.offlineUi ||
+                    activity.intent.getBooleanExtra("ytui.onboarding", false))
+        )
+    }
     var menu by remember { mutableStateOf(false) }
     // Imported documents can legitimately reuse a built-in name. Their paint
     // roles must remain exactly the imported values rather than the default preset.
@@ -307,7 +272,10 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
             outline = lerp(background, foreground, 0.35f),
             outlineVariant = lerp(background, foreground, 0.12f),
         )
-    SideEffect { ComposeHost.colorScheme = colors }
+    SideEffect {
+        ComposeHost.colorScheme = colors
+        AuthUi.motion(config.optBoolean("reduced_motion"))
+    }
     LaunchedEffect(Unit) { vm.initialize(dark) }
     LaunchedEffect(dark) { vm.systemTheme(dark) }
     LaunchedEffect(lifecycle) {
@@ -365,7 +333,10 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
             LocalMotion provides motion,
         ) {
             Box(Modifier.fillMaxSize()) {
-                BoxWithConstraints(
+                // While setup is shown the app beneath is not composed at all, so neither
+                // touch, keyboard focus, TalkBack nor a notification-opened player can reach
+                // it. Feeds and settings keep loading in the view model.
+                if (!onboarding) BoxWithConstraints(
                     Modifier.fillMaxSize()
                         .background(background)
                         // The video panel is opaque. Keep browse state/artwork
@@ -559,7 +530,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         }
                     }
                 }
-                if (!fullscreen) {
+                if (!fullscreen && !onboarding) {
                     @Composable
                     fun PlaybackPanel(allowVideoSurface: Boolean) {
                         Panel(
@@ -613,7 +584,7 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                         }
                     }
                 }
-                when (dialog) {
+                if (!onboarding) when (dialog) {
                     "player-options" ->
                         Panel("Playback options", { dialog = "" }) {
                             PlayerPane(
@@ -629,7 +600,19 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                             )
                         }
                     "settings" ->
-                        SettingsPanel(vm, dark, onAccount = { dialog = "account" }) { dialog = "" }
+                        SettingsPanel(
+                            vm,
+                            dark,
+                            onAccount = { dialog = "account" },
+                            onSetup = {
+                                // Replay keeps the saved completion, so a process death
+                                // mid-replay does not turn it into a first run again.
+                                dialog = ""
+                                onboarding = true
+                            },
+                        ) {
+                            dialog = ""
+                        }
                     "account" -> AccountPanel(vm) { dialog = "" }
                     "feeds" -> FeedPanel(vm) { dialog = "" }
                     "queue" -> QueuePanel(vm) { dialog = "" }
@@ -664,6 +647,19 @@ private fun YtuiApp(activity: RustActivity, vm: YtuiViewModel = viewModel()) {
                                 )
                             }
                         }
+                }
+                val reducedMotion = config.optBoolean("reduced_motion")
+                AnimatedVisibility(
+                    visible = onboarding,
+                    enter = EnterTransition.None,
+                    exit =
+                        if (reducedMotion) ExitTransition.None
+                        else fadeOut(tween(280)) + scaleOut(tween(320), targetScale = 1.04f),
+                ) {
+                    Onboarding(vm, dark) {
+                        OnboardingStore.complete(activity)
+                        onboarding = false
+                    }
                 }
             }
         }
@@ -1460,7 +1456,10 @@ internal fun Artwork(
     // Size from constraints, not onSizeChanged: lazy lists reuse layout nodes,
     // and a reused node of unchanged size never reports its size again.
     BoxWithConstraints(
-        modifier.clip(shape).background(MaterialTheme.colorScheme.surfaceContainer)
+        modifier
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .testTag("artwork-frame-${media.key}")
     ) {
         // A shared decode size: a one-pixel width difference between grid columns must not
         // restart the load or fetch and cache the same cover again.
@@ -2501,6 +2500,7 @@ private fun SettingsPanel(
     vm: YtuiViewModel,
     dark: Boolean,
     onAccount: () -> Unit,
+    onSetup: () -> Unit,
     close: () -> Unit,
 ) {
     var category by rememberSaveable { mutableStateOf("") }
@@ -2516,7 +2516,7 @@ private fun SettingsPanel(
         }
     var themeMenu by remember { mutableStateOf(false) }
     var proxy by
-        remember(config.optString("proxy")) {
+        rememberSaveable(config.optString("proxy")) {
             mutableStateOf(config.optString("proxy").takeUnless { it == "null" } ?: "")
         }
     Panel(
@@ -2538,6 +2538,7 @@ private fun SettingsPanel(
                     Triple("Performance", Glyph.Speed, "Startup timing report"),
                     Triple("Privacy", Glyph.History, "History and resume"),
                     Triple("Account", Glyph.Account, "Sign in or import a session"),
+                    Triple("Setup guide", Glyph.Play, "Replay the welcome and setup steps"),
                 )) {
                 ValueRow(
                     label,
@@ -2545,7 +2546,11 @@ private fun SettingsPanel(
                     subtitle = detail,
                     modifier = Modifier.testTag("settings-$label"),
                 ) {
-                    if (label == "Account") onAccount() else category = label
+                    when (label) {
+                        "Account" -> onAccount()
+                        "Setup guide" -> onSetup()
+                        else -> category = label
+                    }
                 }
             }
             Text(
@@ -2818,6 +2823,7 @@ private fun SettingsPanel(
                         "preload_next" to "Preload visible and next items",
                         "preload_mobile" to "Preload on mobile data",
                         "autoplay_related" to "Related media autoplay",
+                        "resume_on_play" to "Resume videos where you left off",
                         "prefer_offline" to "Prefer saved offline media",
                         "background_playback" to "Background playback",
                     )) {

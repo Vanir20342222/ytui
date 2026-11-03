@@ -58,6 +58,9 @@ internal fun VideoSurface(
                     )
                 }
                 .apply {
+                    // Media3's workaround keeps SurfaceView geometry synchronized
+                    // inside Compose's AndroidView on Android 14+.
+                    setEnableComposeSurfaceSyncWorkaround(true)
                     useController = true
                     setControllerAnimationEnabled(
                         !reduced && android.animation.ValueAnimator.areAnimatorsEnabled()
@@ -125,10 +128,11 @@ internal fun FocusedPlayer(
     val config by vm.config.collectAsState()
     val mobile by vm.mobile.collectAsState()
     val queue by vm.queue.collectAsState()
+    val upNext by vm.upNext.collectAsState()
     val context = LocalContext.current
     val mediaUrl = player.media?.optString("url")
     // Keep the inline Up next list current as playback advances.
-    LaunchedEffect(mediaUrl) { vm.loadQueue() }
+    LaunchedEffect(mediaUrl) { vm.loadUpNext() }
     val threshold = with(LocalDensity.current) { 72.dp.toPx() }
     val motion = LocalMotion.current
     val panelDrag = LocalPanelDrag.current
@@ -440,14 +444,15 @@ internal fun FocusedPlayer(
                     Controls(Modifier.fillMaxWidth())
                     UpNext(
                         queue,
+                        upNext,
                         mediaUrl,
+                        player.value.optBoolean("shuffle"),
                         config.optBoolean("thumbnails", true),
                         mobile.optBoolean("show_channel", true),
                         Modifier.weight(1f),
                         onQueue,
-                    ) {
-                        vm.play(it, queued = true)
-                    }
+                        play = vm::playUpNext,
+                    )
                 }
             }
         } else if (landscape)
@@ -464,20 +469,30 @@ internal fun FocusedPlayer(
 }
 
 /**
- * Inline queue under the video and in the fullscreen options panel; full management stays in the
- * queue sheet (`onManage == null` hides that entry).
+ * Inline Up next under the video and in the fullscreen options panel, in the order Next takes
+ * them: the manual queue, then the rest of the playlist or related videos. Full queue management
+ * stays in the queue sheet (`onManage == null` hides that entry).
  */
 @Composable
 internal fun UpNext(
     queue: List<MediaCard>,
+    state: UpNextState,
     playingUrl: String?,
+    shuffle: Boolean,
     thumbnails: Boolean,
     showCreator: Boolean,
     modifier: Modifier,
     onManage: (() -> Unit)?,
     showHeader: Boolean = true,
-    play: (MediaCard) -> Unit,
+    play: (MediaCard, Boolean) -> Unit,
 ) {
+    val upcoming = queue.filter { it.url.isBlank() || it.url != playingUrl }
+    // The item Next/autoplay starts, unless shuffle makes the choice random.
+    val next =
+        if (shuffle) null
+        else
+            upcoming.firstOrNull()
+                ?: state.context.firstOrNull { it.url != playingUrl }.takeIf { state.autoplay }
     Column(modifier.fillMaxWidth().testTag("up-next")) {
         if (showHeader) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         if (showHeader)
@@ -503,9 +518,10 @@ internal fun UpNext(
                         Text("Edit queue")
                     }
             }
-        if (queue.isEmpty())
+        if (queue.isEmpty() && state.context.isEmpty())
             Text(
-                "Nothing queued. Add videos with Add to queue in any ⋮ menu.",
+                if (state.loading) "Finding what plays next…"
+                else "Nothing queued. Add videos with Add to queue in any ⋮ menu.",
                 Modifier.padding(horizontal = MediaTokens.textInset, vertical = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -516,18 +532,46 @@ internal fun UpNext(
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                items(queue.size, key = { "${queue[it].key}#$it" }) { index ->
-                    val media = queue[index]
+                @Composable
+                fun Entry(media: MediaCard, fromQueue: Boolean) {
                     val current = media.url.isNotBlank() && media.url == playingUrl
+                    val label =
+                        when {
+                            current -> "Playing"
+                            media === next -> "Plays next"
+                            else -> ""
+                        }
+                    val creator = if (showCreator) media.creator else ""
                     MediaListRow(
                         media.title,
-                        if (current) "Playing" else if (showCreator) media.creator else "",
+                        listOf(label, creator).filter { it.isNotBlank() }.joinToString(" · "),
                         Modifier.padding(horizontal = 8.dp),
                         artwork = { Artwork(media, it, thumbnails) },
                         square = media.audio,
                         highlighted = current,
-                        onClick = { play(media) },
+                        onClick = { play(media, fromQueue) },
                     )
+                }
+                items(queue.size, key = { "${queue[it].key}#$it" }) { Entry(queue[it], true) }
+                if (state.context.isNotEmpty()) {
+                    item(key = "context-header") {
+                        SectionHeader(
+                            if (state.related) "Recommended" else "From this playlist",
+                            Modifier.padding(horizontal = 8.dp).testTag("up-next-context"),
+                        )
+                    }
+                    items(state.context.size, key = { "context:${state.context[it].key}#$it" }) {
+                        Entry(state.context[it], false)
+                    }
+                    if (state.more)
+                        item(key = "context-more") {
+                            Text(
+                                "More after these",
+                                Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                 }
             }
     }

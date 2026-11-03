@@ -77,6 +77,12 @@ fn settings_sections_cover_every_field_and_new_defaults_roundtrip() {
         (48, "de,us"),
         (49, "https://radio.test"),
         (56, "no"),
+        (57, "no"),
+        (58, "15"),
+        (59, "no"),
+        (60, "no"),
+        (62, "yes"),
+        (65, "no"),
     ] {
         form.fields[index].value = Editor::new(value);
     }
@@ -91,6 +97,11 @@ fn settings_sections_cover_every_field_and_new_defaults_roundtrip() {
     assert_eq!(saved.cliamp, "my-cliamp");
     assert_eq!(saved.nmcli, "my-nmcli");
     assert!(config.resume_on_play && !saved.resume_on_play);
+    assert!(config.autoplay_related && !saved.autoplay_related);
+    assert_eq!((config.seek_seconds, saved.seek_seconds), (5, 15));
+    assert!(config.prefer_offline && !saved.prefer_offline);
+    assert!(config.preload_next && !saved.preload_next);
+    assert!(saved.card_info.views && !saved.card_info.section && saved.card_info.channel);
     form.fields[49].value = Editor::new("file:///invalid");
     assert!(form.config_values().is_err());
 }

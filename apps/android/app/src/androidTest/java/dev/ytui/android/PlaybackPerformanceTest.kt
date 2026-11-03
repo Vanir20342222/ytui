@@ -83,7 +83,11 @@ class PlaybackPerformanceTest {
                 Assert.assertFalse(view.isAttachedToWindow)
                 Assert.assertFalse(
                     "Detached preparation must not create a decoder surface",
-                    (view.videoSurfaceView as android.view.TextureView).isAvailable,
+                    when (val surface = view.videoSurfaceView) {
+                        is android.view.TextureView -> surface.isAvailable
+                        is android.view.SurfaceView -> surface.holder.surface.isValid
+                        else -> true
+                    },
                 )
                 val service = PlaybackService.current!!
                 Assert.assertNull(service.currentRequest.optJSONObject("media"))

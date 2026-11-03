@@ -1,4 +1,8 @@
-# Native playback — alpha.9 (M3/M5/M8)
+# Native playback (M3/M4/M5/M8)
+
+Current startup/client/cache changes and target-PC evidence are in
+[the October 26 playback report](PLAYBACK_STARTUP_2026-10-26.md).
+The alpha.9 results below retain their original scope.
 
 The native watching request exposed three concrete integration defects: the
 extractor revision was outdated, installed challenge runtimes were not detected,
@@ -7,7 +11,8 @@ manifest. Native request headers were also discarded before mpv opened the strea
 
 ## Changes
 
-- Pin aagedal/yt-dlp-rs at `f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab`.
+- Original alpha.9 pin: aagedal/yt-dlp-rs `f67d96bdf98c5b821d0c9bf6175d328a0fa8ceab`.
+  Current pin: `93d561be519b2e46189ede4a8441a143892fd35b`.
 - Detect installed Node.js 22+ or Deno 2.9.7. Explicit runtime paths are validated,
   not silently replaced. No runtime is downloaded. Version probes are bounded and
   cancellable. The pinned dependency solves saved YouTube JavaScript locally.

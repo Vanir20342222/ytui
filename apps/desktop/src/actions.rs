@@ -31,6 +31,7 @@ pub const ENTRIES: &[Entry] = &[
         "music-player-style"
     ),
     entry!("Settings", "General settings", "settings"),
+    entry!("Settings", "Replay first-run setup", "setup"),
     entry!("Settings", "Setup & tool capabilities", "capabilities"),
     entry!("Settings", "Inspect thumbnail cache", "thumbnail-cache"),
     entry!("Settings", "Clear thumbnail cache", "thumbnail-cache-clear"),

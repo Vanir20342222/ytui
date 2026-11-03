@@ -1,0 +1,59 @@
+name: Release verified Android Preview
+on:
+  push:
+    tags: ['android-preview-*']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: android-preview-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Vanir20342222/ytui'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require successful checks for the tagged main revision
+        id: checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const sha = require('child_process').execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
+            const main = await github.rest.repos.getBranch({owner, repo, branch: 'main'});
+            if (main.data.commit.sha !== sha) throw new Error('Tag must identify the current main revision');
+            let android;
+            for (const workflow_id of ['android.yml', 'rust.yml', 'security.yml']) {
+              const {data} = await github.rest.actions.listWorkflowRuns({owner, repo, workflow_id, branch: 'main', event: 'push', head_sha: sha, per_page: 100});
+              const latest = data.workflow_runs.filter(r => r.head_sha === sha).sort((a, b) => b.id - a.id)[0];
+              if (!latest || latest.status !== 'completed' || latest.conclusion !== 'success') throw new Error(`Missing successful exact-main check: ${workflow_id}`);
+              if (workflow_id === 'android.yml') android = latest;
+            }
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {owner, repo, run_id: android.id, per_page: 100});
+            const artifact = artifacts.find(a => a.name === `ytui-android-${sha}` && !a.expired);
+            if (!artifact) throw new Error('Tested APK artifact unavailable');
+            core.setOutput('source', sha);
+            core.setOutput('run', android.id);
+            core.setOutput('artifact', artifact.id);
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.checks.outputs.run }}
+          artifact-ids: ${{ steps.checks.outputs.artifact }}
+          path: tested
+          merge-multiple: true
+      - name: Verify and prepare the exact tested APK
+        env:
+          YTUI_PREVIEW_SOURCE: ${{ steps.checks.outputs.source }}
+          YTUI_PREVIEW_RUN: ${{ steps.checks.outputs.run }}
+        run: python3 tools/android/prepare-preview-release.py
+      - name: Publish the Preview APK without rebuilding or re-signing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" publish/*.apk publish/SHA256SUMS.txt publish/APK-inspection.txt --repo "$GITHUB_REPOSITORY" --verify-tag --title "ytui Android Preview — all PR features" --notes-file publish/notes.md --prerelease --latest=false
