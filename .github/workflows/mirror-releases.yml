@@ -1,0 +1,21 @@
+name: Mirror releases from vidcue
+
+# Mirrors every non-draft release of Vanir20342222/vidcue into this repository
+# so old installs and links keep working. Idempotent: existing releases are
+# skipped; their notes are updated when the source notes change.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync releases from vidcue
+        run: bash mirror-releases.sh
