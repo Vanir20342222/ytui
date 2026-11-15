@@ -1,0 +1,20 @@
+name: Devbox runner check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: [self-hosted, Linux, X64, devbox]
+    timeout-minutes: 15
+    steps:
+      - name: Verify dedicated build LXC
+        run: |
+          test "$(nproc)" -eq 4
+          test -f /run/systemd/container
+          test "$(cat /run/systemd/container)" = lxc
+          git --version
+          docker info --format '{{.ServerVersion}}'
+          python3 --version
+          java -version
+          df -h /
