@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   mirror:
-    runs-on: ${{ fromJSON((github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group') && '["ubuntu-24.04"]' || '["self-hosted","Linux","X64","devbox"]') }}
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Sync releases from vidcue
